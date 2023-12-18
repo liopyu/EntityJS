@@ -9,9 +9,6 @@ import net.liopyu.root.EntityJsEvent;
 public class EntityJsPlugin extends KubeJSPlugin {
     @Override
     public void registerEvents() {
-        // Register the 'entityjs' event group
-        EventGroup.of("entityjs").register();
-        // Register the EntityJsEvent within the 'entityjs' event group
         EntityJsEvent.registerEvents();
     }
 

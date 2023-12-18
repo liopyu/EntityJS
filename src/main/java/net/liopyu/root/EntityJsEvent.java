@@ -4,16 +4,18 @@ import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.kubejs.script.ScriptTypePredicate;
+import dev.latvian.mods.kubejs.event.EventHandler;
 
 public class EntityJsEvent {
     // Define your custom event and registration logic here
 
     public static void registerEvents() {
         // Register the EntityJs event within the 'entityjs' event group during STARTUP
-        EventGroup.of("entityjs").add("EntityJs", (ScriptTypePredicate) ScriptType.STARTUP::test, () -> {
+        EventGroup.of("EntityJS").add("EntityJS", (ScriptTypePredicate) ScriptType.STARTUP, () -> {
             BindingsEvent event = new BindingsEvent(ScriptType.STARTUP.manager.get(), ScriptType.STARTUP.manager.get().topLevelScope);
             // Add any necessary bindings for EntityJs
-            event.add("EntityJs", new EntityJsBindings(event));
+            event.add("EntityJS", new EntityJsBindings(event));
+
             // Add additional registrations if needed
             return null;
         });
