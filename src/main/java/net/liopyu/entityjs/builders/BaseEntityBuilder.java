@@ -1,8 +1,8 @@
 package net.liopyu.entityjs.builders;
 
+import dev.latvian.mods.kubejs.registry.BuilderBase;
+import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import dev.latvian.mods.kubejs.BuilderBase;
-import dev.latvian.mods.kubejs.RegistryObjectBuilderTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -42,7 +42,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJS> extend
 
     public BaseEntityBuilder<T> sized(float width, float height) {
         this.width = width;
-        this.height= height;
+        this.height = height;
         return this;
     }
 
@@ -92,9 +92,10 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJS> extend
         return this;
     }
 
+
     @Override
-    public RegistryObjectBuilderTypes<EntityType<?>> getRegistryType() {
-        return RegistryObjectBuilderTypes.ENTITY_TYPE;
+    public RegistryInfo getRegistryType() {
+        return RegistryInfo.ENTITY_TYPE;
     }
 
     @Override
@@ -103,4 +104,6 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJS> extend
     }
 
     abstract public EntityTypeBuilderJS.Factory<T> factory();
+
+
 }

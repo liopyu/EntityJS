@@ -4,9 +4,12 @@ import com.mojang.logging.LogUtils;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.EntityTypeBuilderJS;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.RegisterEvent;
 import org.slf4j.Logger;
 
 // Named this way to not interfere with Kube's EntityJS class
@@ -26,12 +29,7 @@ public class EntityJSMod {
     @SubscribeEvent
     public static void onEntityRegistry(RegisterEvent event) {
         if (event.getRegistryKey() == Registry.ENTITY_TYPE_REGISTRY) {
-            EntityJSMod.ENTITYREGISTRY.post(new BaseEntityBuilder<>() {
-                @Override
-                public EntityTypeBuilderJS.Factory<T> factory() {
-                    return null;
-                }
-            });
+            EntityJSEvent.ENTITYREGISTRY.post(new EntityModificationEventJS());
         }
     }
 
@@ -40,5 +38,4 @@ public class EntityJSMod {
         // Call the appropriate function from your mod to register the entities
         EntityJSEvent.GROUP.register();
     }
-
 }

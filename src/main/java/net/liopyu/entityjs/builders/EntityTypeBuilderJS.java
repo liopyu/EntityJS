@@ -18,9 +18,9 @@ public class EntityTypeBuilderJS<B extends Entity & IAnimatableJS> {
         var js = this.builder;
         var builder = EntityType.Builder.of((type, level) -> js.factory().get(js, type, level), js.mobCategory);
         builder
-            .sized(js.width, js.height)
-            .clientTrackingRange(js.clientTrackingRange)
-            .updateInterval(js.updateInterval);
+                .sized(js.width, js.height)
+                .clientTrackingRange(js.clientTrackingRange)
+                .updateInterval(js.updateInterval);
         if (js.spawnFarFromPlayer) {
             builder.canSpawnFarFromPlayer();
         }
@@ -36,7 +36,7 @@ public class EntityTypeBuilderJS<B extends Entity & IAnimatableJS> {
         if (!js.summonable) {
             builder.noSummon();
         }
-        return UtilsJS.cast(builder.build(js.id.toString())); // If this fails, uh... do better?
+        return UtilsJS.cast(builder.build(js.toString())); // If this fails, uh... do better?
     }
 
     @FunctionalInterface
