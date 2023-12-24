@@ -1,4 +1,4 @@
-package net.liopyu.entityjs;
+package net.liopyu.entityjs.kube;
 
 import dev.latvian.mods.kubejs.event.EventJS;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
