@@ -2,7 +2,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.minecraftforge.gradle' version '[6.0,7.0)'
     id 'org.spongepowered.mixin' version '0.7.+'
 }
 
@@ -134,6 +134,7 @@ repositories {
             includeGroup "dev.latvian.mods"
         }
     }
+    maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
     // flatDir {
     //     dir 'libs'
@@ -153,7 +154,7 @@ dependencies {
 // these two are unfortunately needed since fg.deobf doesn't respect transitive dependencies yet
     implementation fg.deobf("dev.latvian.mods:rhino-forge:1902.2.3-build.284")
     implementation fg.deobf("dev.architectury:architectury-forge:6.5.85")
-    implementation 'software.bernie.geckolib:geckolib-forge-1.19:3.1.40'
+    implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.19:3.1.40')
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
     // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
@@ -235,10 +236,7 @@ publishing {
         }
     }
 }
-repositories {
 
-    maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
-}
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
