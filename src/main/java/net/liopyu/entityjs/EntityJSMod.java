@@ -28,10 +28,4 @@ public class EntityJSMod {
             EntityJSEvent.ENTITYREGISTRY.post(new EntityModificationEventJS());
         }
     }
-
-    public static void register() {
-        // Register your entities here
-        // Call the appropriate function from your mod to register the entities
-        EntityJSEvent.GROUP.register();
-    }
 }

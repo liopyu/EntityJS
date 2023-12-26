@@ -13,8 +13,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJS> extends BuilderBase<EntityType<T>> {
-
+public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJS> extends BuilderBase<EntityType<T>> implements IBaseEntityBuilder<T> {
     public transient float width;
     public transient float height;
     public transient boolean summonable;
@@ -106,4 +105,58 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJS> extend
     abstract public EntityTypeBuilderJS.Factory<T> factory();
 
 
+    @Override
+    public float getWidth() {
+        return width;
+    }
+
+    @Override
+    public float getHeight() {
+        return height;
+    }
+
+    @Override
+    public boolean isSummonable() {
+        return summonable;
+    }
+
+    @Override
+    public boolean shouldSave() {
+        return save;
+    }
+
+    @Override
+    public boolean isFireImmune() {
+        return fireImmune;
+    }
+
+    @Override
+    public Block[] getImmuneTo() {
+        return immuneTo;
+    }
+
+    @Override
+    public boolean canSpawnFarFromPlayer() {
+        return spawnFarFromPlayer;
+    }
+
+    @Override
+    public int getClientTrackingRange() {
+        return clientTrackingRange;
+    }
+
+    @Override
+    public int getUpdateInterval() {
+        return updateInterval;
+    }
+
+    @Override
+    public MobCategory getMobCategory() {
+        return mobCategory;
+    }
+
+    @Override
+    public BaseEntityBuilder<T> getBaseEntityBuilder() {
+        return this;
+    }
 }

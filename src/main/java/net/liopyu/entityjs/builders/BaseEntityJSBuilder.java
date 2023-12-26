@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders;
 
+
 import net.liopyu.entityjs.entities.BaseEntityJS;
 import net.minecraft.resources.ResourceLocation;
 

@@ -21,6 +21,7 @@ public class EntityTypeBuilderJS<B extends Entity & IAnimatableJS> {
                 .sized(js.width, js.height)
                 .clientTrackingRange(js.clientTrackingRange)
                 .updateInterval(js.updateInterval);
+
         if (js.spawnFarFromPlayer) {
             builder.canSpawnFarFromPlayer();
         }
