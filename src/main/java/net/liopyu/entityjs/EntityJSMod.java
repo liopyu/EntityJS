@@ -1,7 +1,11 @@
 package net.liopyu.entityjs;
 
 import com.mojang.logging.LogUtils;
+import net.liopyu.entityjs.client.ClientEventHandlers;
+import net.liopyu.entityjs.util.EventHandlers;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
 
@@ -11,7 +15,13 @@ public class EntityJSMod {
     public static final String MOD_ID = "entityjs";
 
     public EntityJSMod() {
-        LOGGER.info("Loading EntityJS-Liopyu");
+        LOGGER.info("Loading EntityJS");
+
+        EventHandlers.init();
+
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            ClientEventHandlers.init();
+        }
     }
 
 

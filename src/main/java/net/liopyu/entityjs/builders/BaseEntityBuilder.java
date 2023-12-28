@@ -7,13 +7,21 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJS> extends BuilderBase<EntityType<T>> {
+
+    public static final List<BaseEntityBuilder<?>> thisList = new ArrayList<>();
+
     public transient float width;
     public transient float height;
     public transient boolean summonable;
@@ -24,9 +32,13 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJS> extend
     public transient int clientTrackingRange;
     public transient int updateInterval;
     public transient MobCategory mobCategory;
+    public transient Function<T, ResourceLocation> modelResource;
+    public transient Function<T, ResourceLocation> textureResource;
+    public transient Function<T, ResourceLocation> animationResource;
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
+        thisList.add(this);
         width = 1;
         height = 1;
         summonable = true;
@@ -37,6 +49,9 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJS> extend
         clientTrackingRange = 5;
         updateInterval = 3;
         mobCategory = MobCategory.MISC;
+        modelResource = t -> newID("geo/", ".geo.json");
+        textureResource = t -> newID("textures/model/entity/", ".png");
+        animationResource = t -> newID("animations/", ".animation.json");
     }
 
     public BaseEntityBuilder<T> sized(float width, float height) {
@@ -91,7 +106,6 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJS> extend
         return this;
     }
 
-
     @Override
     public RegistryInfo getRegistryType() {
         return RegistryInfo.ENTITY_TYPE;
@@ -102,6 +116,5 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJS> extend
         return new EntityTypeBuilderJS<>(this).get();
     }
 
-    abstract public EntityTypeBuilderJS.Factory<T> factory();
-
+    abstract public EntityType.EntityFactory<T> factory();
 }
