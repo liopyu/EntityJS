@@ -1,42 +1,45 @@
 package net.liopyu.entityjs.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.client.model.EntityModelJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 import software.bernie.geckolib3.model.provider.GeoModelProvider;
+import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 import software.bernie.geckolib3.renderers.geo.IGeoRenderer;
 
-public class KubeJSEntityRenderer<T extends Entity & IAnimatableJS> extends EntityRenderer<T> implements IGeoRenderer<T> {
+public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extends GeoEntityRenderer<T> {
 
-    private final AnimatedGeoModel<T> modelProvider;
+    private final BaseEntityBuilder<T> builder;
 
-    public static <E extends Entity & IAnimatableJS> KubeJSEntityRenderer<?> create(EntityRendererProvider.Context renderManager, BaseEntityBuilder<?> builder) {
-        return new KubeJSEntityRenderer<>(renderManager, new EntityModelJS<>(builder));
-    }
-
-    public KubeJSEntityRenderer(EntityRendererProvider.Context renderManager, AnimatedGeoModel<T> modelProvider) {
-        super(renderManager);
-        this.modelProvider = modelProvider;
+    public KubeJSEntityRenderer(EntityRendererProvider.Context renderManager, BaseEntityBuilder<T> builder) {
+        super(renderManager, new EntityModelJS<>(builder));
+        this.builder = builder;
     }
 
     @Override
-    public MultiBufferSource getCurrentRTB() {
-        return null;
-    }
-
-    @Override
-    public GeoModelProvider getGeoModelProvider() {
-        return modelProvider;
+    public boolean shouldRender(T p_114491_, Frustum p_114492_, double p_114493_, double p_114494_, double p_114495_) {
+        return true; // just to make sure it actually works
     }
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
-        return entity.getTextureLocation();
+        return builder.textureResource.apply(entity);
+    }
+
+    @Override
+    public RenderType getRenderType(T animatable, float partialTick, PoseStack poseStack, @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, int packedLight, ResourceLocation texture) {
+        return RenderType.entitySolid(texture);
     }
 }

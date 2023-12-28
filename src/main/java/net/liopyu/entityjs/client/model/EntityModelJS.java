@@ -4,9 +4,10 @@ import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
-public class EntityModelJS<T extends Entity & IAnimatableJS> extends AnimatedGeoModel<T> {
+public class EntityModelJS<T extends LivingEntity & IAnimatableJS> extends AnimatedGeoModel<T> {
 
     private final BaseEntityBuilder<T> builder;
 

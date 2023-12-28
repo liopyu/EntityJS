@@ -14,8 +14,8 @@ public class EventHandlers {
     }
 
     private static void attributeCreation(EntityAttributeCreationEvent event) {
-        // BaseEntityBuilder.attributeSuppliers.forEach((type, attribute) -> {
-        //     event.put(type.get(), attribute.build()); // Doesn't work, needs to be a living entity builder
-        // });
+        for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
+            event.put(builder.get(), builder.getAttributeBuilder().build());
+        }
     }
 }

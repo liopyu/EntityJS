@@ -15,7 +15,7 @@ public class EntityJSMod {
     public static final String MOD_ID = "entityjs";
 
     public EntityJSMod() {
-        LOGGER.info("Loading EntityJS");
+        LOGGER.info("Loading EntityJS-Liopyu");
 
         EventHandlers.init();
 

@@ -18,4 +18,11 @@ public class BaseEntityJSBuilder extends BaseEntityBuilder<BaseEntityJS> {
     public EntityType.EntityFactory<BaseEntityJS> factory() {
         return (type, level) -> new BaseEntityJS(this, type, level);
     }
+
+    @Override
+    public AttributeSupplier.Builder getAttributeBuilder() {
+        final AttributeSupplier.Builder builder = BaseEntityJS.createLivingAttributes();
+        attributes.accept(builder);
+        return builder;
+    }
 }

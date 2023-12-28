@@ -16,7 +16,7 @@ public class ClientEventHandlers {
 
     private static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
         for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
-            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> KubeJSEntityRenderer.create(renderManager, builder));
+            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSEntityRenderer<>(renderManager, builder));
         }
     }
 }
