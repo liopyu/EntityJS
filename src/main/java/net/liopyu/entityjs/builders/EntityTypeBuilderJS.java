@@ -2,6 +2,7 @@ package net.liopyu.entityjs.builders;
 
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
@@ -13,6 +14,7 @@ public class EntityTypeBuilderJS<B extends Entity & IAnimatableJS> {
     public <T extends BaseEntityBuilder<B>> EntityTypeBuilderJS(T builder) {
         this.builder = builder;
     }
+
 
     public <E extends Entity & IAnimatableJS> EntityType<E> get() {
         var js = this.builder;
