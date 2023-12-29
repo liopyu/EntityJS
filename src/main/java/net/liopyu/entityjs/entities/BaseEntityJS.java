@@ -136,7 +136,13 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     protected SoundEvent getSwimSound() {
         return builder.getSwimSound;
     }
-
+// hey mail, this is a lio moment where i cant figure out how to return int Xd
+//    @Override
+//    protected int calculateFallDamage(float fallDamage, float fallDistance) {
+//        builder.fallDamage = fallDamage;
+//        builder.fallDistance = fallDistance;
+//        return this.calculateFallDamage(fallDamage, fallDistance);
+//    }
 
     @Override
     public boolean isPushable() {

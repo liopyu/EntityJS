@@ -61,6 +61,8 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient float getWaterSlowDown;
     public transient SoundEvent getDeathSound;
     public transient SoundEvent getSwimSound;
+    public transient float fallDamage;
+    public transient float fallDistance;
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
@@ -97,6 +99,8 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         getWaterSlowDown = 0.0f;
         getDeathSound = SoundEvents.BUCKET_EMPTY;
         getSwimSound = SoundEvents.MOOSHROOM_SHEAR;
+        //calculateFallDamage(1.0f, 0.0f);
+
     }
 
     public BaseEntityBuilder<T> sized(float width, float height) {
@@ -106,6 +110,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     }
 
     public Predicate<Entity> passengerPredicate;
+    public Predicate<LivingEntity> livingpassengerPredicate;
 
     public BaseEntityBuilder<T> setCanAddPassenger(Predicate<Entity> predicate) {
         passengerPredicate = predicate;
@@ -126,6 +131,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         canRide = b;
         return this;
     }
+
 
     public BaseEntityBuilder<T> isAffectedByFluids(boolean b) {
         isAffectedByFluids = b;
@@ -152,6 +158,13 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
+//    public BaseEntityBuilder<T> calculateFallDamage(float fallDamage, float fallDistance) {
+//        this.fallDamage = fallDamage;
+//        this.fallDistance = fallDistance;
+//        return this;
+//    }
+
+    // TODO: Make this accept sound resource locations
     public BaseEntityBuilder<T> getDeathSound(SoundEvent sound) {
         getDeathSound = sound;
         return this;
