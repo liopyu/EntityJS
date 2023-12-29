@@ -2,20 +2,27 @@ package net.liopyu.entityjs.entities;
 
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
     protected final BaseEntityJSBuilder builder;
+
 
     public BaseEntityJS(BaseEntityJSBuilder builder, EntityType<? extends LivingEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -31,6 +38,7 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     public void readAdditionalSaveData(CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
     }
+
 
     @Override
     public Iterable<ItemStack> getArmorSlots() {
@@ -57,7 +65,80 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         return builder;
     }
 
+    //Start of the method adding madness - liopyu
+    @Override
+    protected boolean canAddPassenger(Entity entity) {
+        return builder.passengerPredicate.test(entity);
+    }
 
+    @Override
+    protected boolean shouldDropLoot() {
+        return builder.shouldDropLoot;
+    }
+
+    @Override
+    protected boolean canRide(Entity entity) {
+        return builder.passengerPredicate.test(entity);
+    }
+
+    @Override
+    protected boolean isAffectedByFluids() {
+        return builder.isAffectedByFluids;
+    }
+
+    @Override
+    protected boolean isAlwaysExperienceDropper() {
+        return builder.isAlwaysExperienceDropper;
+    }
+
+    @Override
+    protected boolean isImmobile() {
+        return builder.isImmobile;
+    }
+
+    @Override
+    protected boolean onSoulSpeedBlock() {
+        return builder.onSoulSpeedBlock;
+    }
+
+    @Override
+    protected float getBlockJumpFactor() {
+        return builder.getBlockJumpFactor;
+    }
+
+    @Override
+    protected float getBlockSpeedFactor() {
+        return builder.getBlockSpeedFactor;
+    }
+
+    @Override
+    protected float getJumpPower() {
+        return builder.getJumpPower;
+    }
+
+    @Override
+    protected float getSoundVolume() {
+        return builder.getSoundVolume;
+    }
+
+    @Override
+    protected float getWaterSlowDown() {
+        return builder.getWaterSlowDown;
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getDeathSound() {
+        return builder.getDeathSound;
+    }
+
+    @Override
+    protected SoundEvent getSwimSound() {
+        return builder.getSwimSound;
+    }
+
+
+    @Override
     public boolean isPushable() {
         return getBuilder().canBePushed;
     }
