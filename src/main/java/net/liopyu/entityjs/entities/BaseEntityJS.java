@@ -129,8 +129,9 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected float getBlockSpeedFactor() {
-        return builder.getBlockSpeedFactor;
+        return builder.blockSpeedFactor == null ? super.getBlockSpeedFactor() : builder.blockSpeedFactor.apply(this);
     }
+
 
     @Override
     protected float getJumpPower() {
@@ -150,16 +151,23 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     @Nullable
     @Override
     protected SoundEvent getDeathSound() {
-        return builder.getDeathSound;
+        return builder.setDeathSound;
     }
 
     @Override
     protected SoundEvent getSwimSound() {
-        return builder.getSwimSound;
+        return builder.setSwimSound;
     }
 
     @Override
-    public int calculateFallDamage(float fallDamage, float fallDistance) {
-        return builder.fallDamageFunction.apply(fallDamage, fallDistance);
+    protected boolean isFlapping() {
+        return builder.isFlapping;
     }
+
+    @Override
+    public int calculateFallDamage(float fallDistance, float fallHeight) {
+        return builder.fallDamageFunction == null ? super.calculateFallDamage(fallDistance, fallHeight) : builder.fallDamageFunction.apply(fallDistance, fallHeight);
+    }
+
+
 }

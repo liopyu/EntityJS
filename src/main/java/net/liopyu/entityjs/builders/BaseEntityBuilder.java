@@ -61,12 +61,13 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient boolean isImmobile;
     public transient boolean onSoulSpeedBlock;
     public transient float getBlockJumpFactor;
-    public transient float getBlockSpeedFactor;
+    public transient Function<T, Integer> blockSpeedFactor;
     public transient float getJumpPower;
     public transient float getSoundVolume;
     public transient float getWaterSlowDown;
-    public transient SoundEvent getDeathSound;
-    public transient SoundEvent getSwimSound;
+    public transient SoundEvent setDeathSound;
+    public transient SoundEvent setSwimSound;
+    public transient boolean isFlapping;
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
@@ -85,24 +86,27 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         textureResource = t -> newID("textures/model/entity/", ".png");
         animationResource = t -> newID("animations/", ".animation.json");
         canBePushed = false;
-        canBeCollidedWith= false;
+        canBeCollidedWith = false;
         isAttackable = true;
-        attributes = builder -> {};
+        attributes = builder -> {
+        };
         animationSuppliers = new ArrayList<>();
         shouldDropLoot = true;
-        setCanAddPassenger(entity -> true);
-        canRide(entity -> true);
+        setCanAddPassenger(entity -> false);
+        canRide(entity -> false);
         isAffectedByFluids = false;
         isAlwaysExperienceDropper = false;
         isImmobile = false;
         onSoulSpeedBlock = false;
         getBlockJumpFactor = 0.5f;
-        getBlockSpeedFactor = 0.5f;
+        blockSpeedFactor = t -> 1;
         getJumpPower = 0.5f;
         getSoundVolume = 1.0f;
         getWaterSlowDown = 0.0f;
-        getDeathSound = SoundEvents.BUCKET_EMPTY;
-        getSwimSound = SoundEvents.MOOSHROOM_SHEAR;
+        setDeathSound = SoundEvents.BUCKET_EMPTY;
+        setSwimSound = SoundEvents.MOOSHROOM_SHEAR;
+        fallDamageFunction = null;
+        isFlapping = false;
     }
 
     public BaseEntityBuilder<T> sized(float width, float height) {
@@ -110,7 +114,6 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         this.height = height;
         return this;
     }
-
 
 
     public BaseEntityBuilder<T> saves(boolean b) {
@@ -194,6 +197,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         attributes.andThen(builder -> builder.add(attribute, amount));
         return this;
     }
+
     public Predicate<Entity> passengerPredicate;
     public Predicate<LivingEntity> livingpassengerPredicate;
 
@@ -252,14 +256,30 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
 
     // TODO: Make this accept sound resource locations
     public BaseEntityBuilder<T> getDeathSound(SoundEvent sound) {
-        getDeathSound = sound;
+        setDeathSound = sound;
         return this;
     }
 
     public BaseEntityBuilder<T> getSwimSound(SoundEvent sound) {
-        getSwimSound = sound;
+        setSwimSound = sound;
         return this;
     }
+
+    public BaseEntityBuilder<T> blockSpeedFactor(int i) {
+        blockSpeedFactor = t -> i;
+        return this;
+    }
+
+    public BaseEntityBuilder<T> blockSpeedFactor(Function<T, Integer> function) {
+        blockSpeedFactor = function;
+        return this;
+    }
+
+    public BaseEntityBuilder<T> isFlapping(boolean b) {
+        isFlapping = b;
+        return this;
+    }
+
     @Info(value = "Adds a new AnimationController to the entity", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
@@ -288,12 +308,15 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
      * create a {@link AttributeSupplier.Builder} from a static method in the base class
      * (i.e. {@link BaseEntityJS#createLivingAttributes()}) and then apply the {@code attributes}
      * consumer to that before returning it
+     *
      * @return The {@link AttributeSupplier.Builder} that will be built during Forge's EntityAttributeCreationEvent
      */
     @HideFromJS
     abstract public AttributeSupplier.Builder getAttributeBuilder();
 
-    public record AnimationControllerSupplier<E extends LivingEntity & IAnimatableJS>(String name, int translationTicksLength, IAnimationPredicateJS<E> predicate) {
+    public record AnimationControllerSupplier<E extends LivingEntity & IAnimatableJS>(String name,
+                                                                                      int translationTicksLength,
+                                                                                      IAnimationPredicateJS<E> predicate) {
         public AnimationController<E> get(E entity) {
             return new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
         }
@@ -365,7 +388,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
 
         @Info(value = """
                 Returns any extra data that the event may have
-                
+                                
                 Usually used by armor animations to know what item is worn
                 """)
         public List<Object> getExtraData() {
