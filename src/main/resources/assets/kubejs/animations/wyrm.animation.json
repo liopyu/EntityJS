@@ -541,6 +541,7 @@
 		},
 		"idle": {
 			"animation_length": 5.41667,
+			"loop": true,
 			"bones": {
 				"Tail": {
 					"rotation": {

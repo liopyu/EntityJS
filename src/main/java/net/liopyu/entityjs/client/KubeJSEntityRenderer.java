@@ -29,15 +29,11 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     }
 
     @Override
-    public boolean shouldRender(T p_114491_, Frustum p_114492_, double p_114493_, double p_114494_, double p_114495_) {
-        return true; // just to make sure it actually works
-    }
-
-    @Override
     public ResourceLocation getTextureLocation(T entity) {
         return builder.textureResource.apply(entity);
     }
 
+    // TODO: Allow customization, probably as a function similar to textureResource
     @Override
     public RenderType getRenderType(T animatable, float partialTick, PoseStack poseStack, @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, int packedLight, ResourceLocation texture) {
         return RenderType.entitySolid(texture);
