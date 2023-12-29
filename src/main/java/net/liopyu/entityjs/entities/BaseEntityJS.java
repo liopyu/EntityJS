@@ -16,6 +16,43 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
+/**
+ * The 'basic' implementation of a custom entity, implements most methods through the builder with some
+ * conditionally delegating to the {@code super} implementation if the function is null. Other implementations
+ * are <strong>not</strong> required to override every method in a class.<br><br>
+ *
+ * Further, the only real requirements for a custom entity class is that the class signature respects the contract
+ * <pre>{@code public class YourEntityClass extends <? extends LivingEntity> implements <? extends IAnimatableJS>}</pre>
+ * A basic implementation for a custom {@link net.minecraft.world.entity.animal.Animal Animal} entity could be as simple as
+ * <pre>{@code public class AnimalEntityJS extends Animal implements IAnimatableJS {
+ *
+ *     private final AnimalBuilder builder;
+ *     private final AnimationFactory animationFactory;
+ *
+ *     public AnimalEntityJS(AnimalBuilder builder, EntityType<? extends Animal> type, Level level) {
+ *         super(type, level);
+ *         this.builder = builder;
+ *         animationFactory = GeckoLibUtil.createFactory(this);
+ *     }
+ *
+ *     @Override
+ *     public BaseEntityBuilder<?> getBuilder() {
+ *         return builder;
+ *     }
+ *
+ *     @Override
+ *     public AnimationFactory getFactory() {
+ *         return animationFactory;
+ *     }
+ *
+ *     @Override
+ *     @Nullable
+ *     public AnimalEntityJS getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
+ *         return null;
+ *     }
+ * }}</pre>
+ * Of course this does not implement any possible networking/synced entity data stuff. figure that out yourself, it scares me
+ */
 public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
     private final AnimationFactory animationFactory;

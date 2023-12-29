@@ -8,17 +8,19 @@ import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
 import net.liopyu.entityjs.builders.EntityTypeBuilderJS;
 import net.liopyu.entityjs.util.Wrappers;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 
 public class EntityJSPlugin extends KubeJSPlugin {
 
     @Override
     public void init() {
-        RegistryInfo.ENTITY_TYPE.addType("monster", BaseEntityJSBuilder.class, BaseEntityJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("entitjs:living", BaseEntityJSBuilder.class, BaseEntityJSBuilder::new);
     }
 
     @Override
     public void registerTypeWrappers(ScriptType type, TypeWrappers typeWrappers) {
         typeWrappers.registerSimple(Attribute.class, Wrappers::attribute);
+        typeWrappers.registerSimple(SoundEvent.class, Wrappers::soundEvent);
     }
 }

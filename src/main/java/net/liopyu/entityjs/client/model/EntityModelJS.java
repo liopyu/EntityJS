@@ -7,6 +7,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
+/**
+ * The default implementation of GeckoLib's {@link AnimatedGeoModel} which delegates model, texture,
+ * and animation handling to {@code Function<T, ResourceLocation>}s in the entity type's builder
+ */
 public class EntityModelJS<T extends LivingEntity & IAnimatableJS> extends AnimatedGeoModel<T> {
 
     private final BaseEntityBuilder<T> builder;

@@ -8,6 +8,7 @@ import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.entities.BaseEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
+import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -17,11 +18,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.easing.EasingType;
+import software.bernie.geckolib3.core.event.CustomInstructionKeyframeEvent;
+import software.bernie.geckolib3.core.event.KeyframeEvent;
+import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
+import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 
 import java.util.ArrayList;
@@ -31,6 +36,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * The base builder for all entity types that EntityJS can handle, has methods to allow overriding
+ * nearly every method available in {@link LivingEntity}. Implementors are free to use as many or few
+ * of these as they wish
+ *
+ * @param <T> The entity class that the built entity type is for, this should be a custom class
+ *           that extends {@link LivingEntity} or a subclass and {@link IAnimatableJS}
+ */
+@SuppressWarnings("unused")
 public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> extends BuilderBase<EntityType<T>> {
 
     public static final List<BaseEntityBuilder<?>> thisList = new ArrayList<>();
@@ -40,7 +54,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient boolean summonable;
     public transient boolean save;
     public transient boolean fireImmune;
-    public transient Block[] immuneTo;
+    public transient ResourceLocation[] immuneTo;
     public transient boolean spawnFarFromPlayer;
     public transient int clientTrackingRange;
     public transient int updateInterval;
@@ -51,7 +65,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient boolean canBePushed;
     public transient boolean canBeCollidedWith;
     public transient boolean isAttackable;
-    public transient final Consumer<AttributeSupplier.Builder> attributes;
+    public transient Consumer<AttributeSupplier.Builder> attributes;
     public transient final List<AnimationControllerSupplier<T>> animationSuppliers;
     public transient boolean shouldDropLoot;
     public transient boolean setCanAddPassenger;
@@ -68,6 +82,9 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient SoundEvent setDeathSound;
     public transient SoundEvent setSwimSound;
     public transient boolean isFlapping;
+    public transient SoundEvent getDeathSound;
+    public transient SoundEvent getSwimSound;
+    public transient RenderType renderType;
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
@@ -77,14 +94,14 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         summonable = true;
         save = true;
         fireImmune = false;
-        immuneTo = new Block[0];
+        immuneTo = new ResourceLocation[0];
         spawnFarFromPlayer = false;
         clientTrackingRange = 5;
         updateInterval = 3;
         mobCategory = MobCategory.MISC;
-        modelResource = t -> newID("geo/", ".geo.json");
-        textureResource = t -> newID("textures/model/entity/", ".png");
-        animationResource = t -> newID("animations/", ".animation.json");
+        modelResource = t -> t.getBuilder().newID("geo/", ".geo.json");
+        textureResource = t -> t.getBuilder().newID("textures/model/entity/", ".png");
+        animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");
         canBePushed = false;
         canBeCollidedWith = false;
         isAttackable = true;
@@ -107,67 +124,91 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         setSwimSound = SoundEvents.MOOSHROOM_SHEAR;
         fallDamageFunction = null;
         isFlapping = false;
+        getDeathSound = SoundEvents.BUCKET_EMPTY;
+        getSwimSound = SoundEvents.MOOSHROOM_SHEAR;
+        renderType = RenderType.CUTOUT;
     }
 
+    @Info(value = "Sets the hit box of the entity type", params = {
+            @Param(name = "width", value = "The width of the entity, defaults to 1"),
+            @Param(name = "height", value = "The height if the entity, defaults to 1")
+    })
     public BaseEntityBuilder<T> sized(float width, float height) {
         this.width = width;
         this.height = height;
         return this;
     }
 
-
+    @Info(value = "Determines if the entity should serialize its data, defaults to true")
     public BaseEntityBuilder<T> saves(boolean b) {
         save = b;
         return this;
     }
 
+    @Info(value = "Determines if the entity is immune to fire, defaults to false")
     public BaseEntityBuilder<T> fireImmune(boolean b) {
         fireImmune = b;
         return this;
     }
 
-    // TODO: Defer block getting to builder
+    @Info(value = "Determines the blocks the entity is 'immune' to")
     public BaseEntityBuilder<T> immuneTo(ResourceLocation... blocks) {
-        List<Block> immuneTo = new ArrayList<>();
-        for (ResourceLocation block : blocks) {
-            if (ForgeRegistries.BLOCKS.containsKey(block)) {
-                immuneTo.add(ForgeRegistries.BLOCKS.getValue(block));
-            }
-        }
-        this.immuneTo = immuneTo.toArray(this.immuneTo);
+        this.immuneTo = blocks;
         return this;
     }
 
+    @Info(value = "Determines if the entity can spawn far from players")
     public BaseEntityBuilder<T> canSpawnFarFromPlayer(boolean b) {
         spawnFarFromPlayer = b;
         return this;
     }
 
+    @Info(value = "Sets the client tracking range, defaults to 5")
     public BaseEntityBuilder<T> clientTrackingRange(int i) {
         clientTrackingRange = i;
         return this;
     }
 
+    @Info(value = "Sets the update interval in ticks of the entity, defaults to 3")
     public BaseEntityBuilder<T> updateInterval(int i) {
         updateInterval = i;
         return this;
     }
 
+    @Info(value = "Sets the mob category, defaults to 'misc'")
     public BaseEntityBuilder<T> mobCategory(MobCategory category) {
         mobCategory = category;
         return this;
     }
 
+    @Info(value = """
+            Sets how the model of the entity is determined, has access to the entity
+            to allow changing the model based on info about the entity
+            
+            Defaults to returning <namespace>:geo/<path>.geo.json
+            """)
     public BaseEntityBuilder<T> modelResourceFunction(Function<T, ResourceLocation> function) {
         modelResource = function;
         return this;
     }
 
+    @Info(value = """
+            Sets how the texture of the entity is determined, has access to the entity
+            to allow changing the texture based on info about the entity
+            
+            Defaults to returning <namespace>:textures/model/entity/<path>.png
+            """)
     public BaseEntityBuilder<T> textureResourceFunction(Function<T, ResourceLocation> function) {
         textureResource = function;
         return this;
     }
 
+    @Info(value = """
+            Sets how the animations of the entity is determined, has access to the entity
+            to allow changing the animations based on info about the entity
+            
+            Defaults to returning <namespace>:animations/<path>.animation.json
+            """)
     public BaseEntityBuilder<T> animationResourceFunction(Function<T, ResourceLocation> function) {
         animationResource = function;
         return this;
@@ -188,13 +229,18 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
+    @Info(value = "Adds the provided attribute to the entity type")
     public BaseEntityBuilder<T> addAttribute(Attribute attribute) {
-        attributes.andThen(builder -> builder.add(attribute));
+        attributes = attributes.andThen(builder -> builder.add(attribute));
         return this;
     }
 
-    public BaseEntityBuilder<T> addAttribute(Attribute attribute, double amount) {
-        attributes.andThen(builder -> builder.add(attribute, amount));
+    @Info(value = "Adds the provided attribute to the entity type with the provided base value", params = {
+            @Param(name = "attribute", value = "The attribute"),
+            @Param(name = "value", value = "The default value of the attribute")
+    })
+    public BaseEntityBuilder<T> addAttribute(Attribute attribute, double value) {
+        attributes = attributes.andThen(builder -> builder.add(attribute, value));
         return this;
     }
 
@@ -249,12 +295,11 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
 
     public BiFunction<Float, Float, Integer> fallDamageFunction;
 
-    public BaseEntityBuilder<T> calaculateFallDamage(BiFunction<Float, Float, Integer> calculation) {
+    public BaseEntityBuilder<T> calculateFallDamage(BiFunction<Float, Float, Integer> calculation) {
         fallDamageFunction = calculation;
         return this;
     }
 
-    // TODO: Make this accept sound resource locations
     public BaseEntityBuilder<T> getDeathSound(SoundEvent sound) {
         setDeathSound = sound;
         return this;
@@ -283,10 +328,36 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     @Info(value = "Adds a new AnimationController to the entity", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
-            @Param(name = "predicate", value = "")
+            @Param(name = "predicate", value = "The predicate for the controller, determines if an animation should continue or not")
     })
     public BaseEntityBuilder<T> addAnimationController(String name, int translationTicksLength, IAnimationPredicateJS<T> predicate) {
-        animationSuppliers.add(new AnimationControllerSupplier<>(name, translationTicksLength, predicate));
+        return addAnimationController(name, translationTicksLength, EasingType.CUSTOM, predicate, null, null, null);
+    }
+
+    @Info(value = "Adds a new AnimationController to the entity, with the ability to specify the easing type and add event listeners", params = {
+            @Param(name = "name", value = "The name of the controller"),
+            @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
+            @Param(name = "easingType", value = "The easing type used by the animation controller"),
+            @Param(name = "predicate", value = "The predicate for the controller, determines if an animation should continue or not"),
+            @Param(name = "soundListener", value = "A sound listener, used to execute actions when the json requests a sound to play. May be null"),
+            @Param(name = "particleListener", value = "A particle listener, used to execute actions when the json requests a particle. May be null"),
+            @Param(name = "instructionListener", value = "A custom instruction listener, used to execute actions based on arbitrary instructions provided by the json. May be null")
+    })
+    public BaseEntityBuilder<T> addAnimationController(
+            String name,
+            int translationTicksLength,
+            EasingType easingType,
+            IAnimationPredicateJS<T> predicate,
+            @Nullable ISoundListenerJS<T> soundListener,
+            @Nullable IParticleListenerJS<T> particleListener,
+            @Nullable ICustomInstructionListenerJS<T> instructionListener
+    ) {
+        animationSuppliers.add(new AnimationControllerSupplier<>(name,translationTicksLength, easingType, predicate, soundListener, particleListener, instructionListener));
+        return this;
+    }
+
+    public BaseEntityBuilder<T> setRenderType(RenderType type) {
+        renderType = type;
         return this;
     }
 
@@ -295,11 +366,25 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return RegistryInfo.ENTITY_TYPE;
     }
 
+    /**
+     * <strong>Do not</strong> override unless you are creating a custom entity type builder<br><br>
+     *
+     * See: {@link #factory()}
+     */
     @Override
     public EntityType<T> createObject() {
         return new EntityTypeBuilderJS<>(this).get();
     }
 
+    /**
+     * This is the method which should be overrriden to create new type, a typical implementation looks like
+     * {@code (type, level) -> new <CustomEntityClass>(this, type, level)}. See {@link BaseEntityJSBuilder#factory()}
+     * and {@link BaseEntityJS} for examples.<br><br>
+     *
+     * Unlike most builder types, there is little need to override {@link #createObject()} due to entity types being
+     * essentially a supplier for the class.
+     * @return The {@link EntityType.EntityFactory} that is used by the {@link EntityType} this builder creates
+     */
     @HideFromJS
     abstract public EntityType.EntityFactory<T> factory();
 
@@ -314,14 +399,43 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     @HideFromJS
     abstract public AttributeSupplier.Builder getAttributeBuilder();
 
-    public record AnimationControllerSupplier<E extends LivingEntity & IAnimatableJS>(String name,
-                                                                                      int translationTicksLength,
-                                                                                      IAnimationPredicateJS<E> predicate) {
+    /**
+     * A 'supplier' for an {@link AnimationController} that does not require a reference to the entity being animated
+     * @param name The name of the AnimationController that this builds
+     * @param translationTicksLength The number of ticks it takes to transition between animations
+     * @param predicate The {@link IAnimationPredicateJS script-friendly} animation predicate
+     */
+    public record AnimationControllerSupplier<E extends LivingEntity & IAnimatableJS>(
+            String name,
+            int translationTicksLength,
+            EasingType easingType,
+            IAnimationPredicateJS<E> predicate,
+            @Nullable ISoundListenerJS<E> soundListener,
+
+            @Nullable IParticleListenerJS<E> particleListener,
+            @Nullable ICustomInstructionListenerJS<E> instructionListener
+    ) {
         public AnimationController<E> get(E entity) {
-            return new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
+            final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, easingType, predicate.toGecko());
+            if (soundListener != null) {
+                controller.registerSoundListener(event -> soundListener.playSound(new SoundKeyFrameEventJS<>(event)));
+            }
+            if (particleListener != null) {
+                controller.registerParticleListener(event -> particleListener.summonParticle(new ParticleKeyFrameEventJS<>(event)));
+            }
+            if (instructionListener != null) {
+                controller.registerCustomInstructionListener(event -> instructionListener.executeInstruction(new CustomInstructionKeyframeEventJS<>(event)));
+            }
+            return controller;
         }
     }
 
+    // Wrappers around geckolib things that allow script writers to know what they're doing
+
+    /**
+     * A wrapper around {@link software.bernie.geckolib3.core.controller.AnimationController.IAnimationPredicate IAnimationPredicate}
+     * that is easier to work with in js
+     */
     @FunctionalInterface
     public interface IAnimationPredicateJS<E extends LivingEntity & IAnimatableJS> {
 
@@ -335,6 +449,11 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         }
     }
 
+    /**
+     * A simple wrapper around a {@link AnimationEvent} that restricts access to certain things
+     * and adds {@link @Info} annotations for script writers
+     * @param <E> The entity being animated in the event
+     */
     public static class AnimationEventJS<E extends LivingEntity & IAnimatableJS> {
 
         private final AnimationEvent<E> parent;
@@ -399,5 +518,76 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         public <D> List<D> getExtraDataOfType(Class<D> type) {
             return parent.getExtraDataOfType(type);
         }
+    }
+
+    public static class KeyFrameEventJS<E extends LivingEntity & IAnimatableJS> {
+
+        @Info(value = "The amount of ticks that have passed in either the current transition or animation, depending on the controller's AnimationState")
+        public final double animationTick;
+        @Info(value = "The entity being animated")
+        public final E entity;
+
+        protected KeyFrameEventJS(KeyframeEvent<E> parent) {
+            animationTick = parent.getAnimationTick();
+            entity = parent.getEntity();
+        }
+    }
+
+    @FunctionalInterface
+    public interface ISoundListenerJS<E extends LivingEntity & IAnimatableJS> {
+        void playSound(SoundKeyFrameEventJS<E> event);
+    }
+
+    public static class SoundKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> extends KeyFrameEventJS<E>{
+
+        @Info(value = "The name of the sound to play")
+        public final String sound;
+
+        public SoundKeyFrameEventJS(SoundKeyframeEvent<E> parent) {
+            super(parent);
+            sound = parent.sound;
+        }
+    }
+
+    @FunctionalInterface
+    public interface IParticleListenerJS<E extends LivingEntity & IAnimatableJS> {
+        void summonParticle(ParticleKeyFrameEventJS<E> event);
+    }
+
+    public static class ParticleKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> extends KeyFrameEventJS<E> {
+
+        // These aren't documented in geckolib, so I have no idea what they are
+        public final String effect;
+        public final String locator;
+        public final String script;
+
+        public ParticleKeyFrameEventJS(ParticleKeyFrameEvent<E> parent) {
+            super(parent);
+            effect = parent.effect;
+            locator = parent.locator;
+            script = parent.script;
+        }
+    }
+
+    @FunctionalInterface
+    public interface ICustomInstructionListenerJS<E extends LivingEntity & IAnimatableJS> {
+        void executeInstruction(CustomInstructionKeyframeEventJS<E> event);
+    }
+
+    public static class CustomInstructionKeyframeEventJS<E extends LivingEntity & IAnimatableJS> extends KeyFrameEventJS<E> {
+
+        @Info(value = "A list of all the custom instructions. In blockbench, each line in the custom instruction box is a separate instruction.")
+        public final String instructions;
+
+        public CustomInstructionKeyframeEventJS(CustomInstructionKeyframeEvent<E> parent) {
+            super(parent);
+            instructions = parent.instructions;
+        }
+    }
+
+    public enum RenderType {
+        SOLID,
+        CUTOUT,
+        TRANSLUCENT
     }
 }
