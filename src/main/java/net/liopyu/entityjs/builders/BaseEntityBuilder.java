@@ -6,6 +6,7 @@ import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import it.unimi.dsi.fastutil.floats.FloatConsumer;
@@ -21,6 +22,9 @@ import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.liopyu.entityjs.util.ai.BrainBuilder;
+import net.liopyu.entityjs.util.ai.BrainProviderBuilder;
+import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -171,6 +175,10 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Predicate<BaseEntityJS> customShouldDropExperience;
 
     public transient Function<BaseEntityJS, Integer> customExperienceReward;
+    public transient BrainProviderBuilder brainProviderBuilder;
+    public transient HumanoidArm mainArm;
+    public transient boolean hasInventory;
+    public transient Consumer<BrainBuilder> brainBuilder;
 
     public transient Function<BaseEntityJS, RandomSource> customRandom;
 
@@ -277,7 +285,14 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         getSwimSound = SoundEvents.MOOSHROOM_SHEAR;
         renderType = RenderType.CUTOUT;
         getSwimHighSpeedSplashSound = SoundEvents.MOOSHROOM_SHEAR;
- }
+        mainArm = HumanoidArm.RIGHT;
+    }
+
+    @Info(value = "Sets the main arm of the entity, defaults to 'right'")
+    public BaseEntityBuilder<T> mainArm(HumanoidArm arm) {
+        mainArm = arm;
+        return this;
+    }
 
     @Info(value = "Sets the hit box of the entity type", params = {
             @Param(name = "width", value = "The width of the entity, defaults to 1"),
@@ -1108,6 +1123,18 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     }
 
     //STUFF
+    public BaseEntityBuilder<T> brainProvider(Consumer<BrainProviderBuilder> brainProvider) {
+        brainProviderBuilder = new BrainProviderBuilder(id);
+        brainProvider.accept(brainProviderBuilder);
+        // ConsoleJS.STARTUP.error(brainProviderBuilder);
+        return this;
+    }
+
+    public BaseEntityBuilder<T> brainBuilder(Consumer<BrainBuilder> brainBuilder) {
+        this.brainBuilder = brainBuilder;
+        return this;
+    }
+
     @Info(value = "Adds a new AnimationController to the entity", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),

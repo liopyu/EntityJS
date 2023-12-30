@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.entities;
 
+import com.mojang.serialization.Dynamic;
+import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
 import net.liopyu.entityjs.util.ExitPortalInfo;
@@ -16,6 +18,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.liopyu.entityjs.util.ai.BrainBuilder;
+import net.minecraft.core.NonNullList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -34,8 +38,10 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
@@ -87,6 +93,8 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     private final AnimationFactory animationFactory;
 
     protected final BaseEntityJSBuilder builder;
+    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
     public BaseEntityJS(BaseEntityJSBuilder builder, EntityType<? extends LivingEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -95,33 +103,65 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
+    protected Brain.Provider<?> brainProvider() {
+        return builder.brainProviderBuilder == null ? super.brainProvider() : builder.brainProviderBuilder.build();
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag pCompound) {
-        super.readAdditionalSaveData(pCompound);
+    protected Brain<BaseEntityJS> makeBrain(Dynamic<?> p_21069_) {
+        final Brain<BaseEntityJS> brain = UtilsJS.cast(super.makeBrain(p_21069_)); // This has become a crutch
+        if (builder.brainBuilder != null) {
+            final BrainBuilder brainBuilder = new BrainBuilder(builder.id);
+            builder.brainBuilder.accept(brainBuilder);
+            return brainBuilder.build(brain);
+        }
+        return brain;
     }
+
+    // Synced entity data is basically impossible, it is class dependent and mostly static
+    // @Override
+    // protected void defineSynchedData() {
+    //     super.defineSynchedData();
+    // }
+    //
+    // Do we actually want to let users touch this, kube's persistent data works well enough
+    // @Override
+    // public void readAdditionalSaveData(CompoundTag pCompound) {
+    //     super.readAdditionalSaveData(pCompound);
+    // }
+    //
+    // @Override
+    // public void addAdditionalSaveData(CompoundTag pCompound) {
+    //     super.addAdditionalSaveData(pCompound);
+    // }
 
     @Override
     public Iterable<ItemStack> getArmorSlots() {
-        return NonNullList.withSize(0, ItemStack.EMPTY);
+        return armorItems;
     }
 
     @Override
-    public ItemStack getItemBySlot(EquipmentSlot p_21127_) {
-        return ItemStack.EMPTY;
+    public Iterable<ItemStack> getHandSlots() {
+        return handItems;
     }
 
+    // Mirrors the implementation in Mob
     @Override
-    public void setItemSlot(EquipmentSlot p_21036_, ItemStack p_21037_) {
-
+    public ItemStack getItemBySlot(EquipmentSlot slot) {
+        return switch (slot.getType()) {
+            case HAND -> handItems.get(slot.getIndex());
+            case ARMOR -> armorItems.get(slot.getIndex());
+        };
     }
 
+    // Mirrors the implementation in Mob
     @Override
-    public void addAdditionalSaveData(CompoundTag pCompound) {
-        super.addAdditionalSaveData(pCompound);
+    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
+        verifyEquippedItem(stack);
+        switch (slot.getType()) {
+            case HAND -> onEquipItem(slot, handItems.set(slot.getIndex(), stack), stack);
+            case ARMOR -> onEquipItem(slot, armorItems.set(slot.getIndex(), stack), stack);
+        }
     }
 
     @Override
@@ -136,20 +176,20 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
 
     public boolean isPushable() {
-        return getBuilder().canBePushed;
+        return builder.canBePushed;
     }
 
     @Override
     public HumanoidArm getMainArm() {
-        return null;
+        return builder.mainArm;
     }
 
     public boolean canBeCollidedWith() {
-        return getBuilder().canBeCollidedWith;
+        return builder.canBeCollidedWith;
     }
 
     public boolean isAttackable() {
-        return getBuilder().isAttackable;
+        return builder.isAttackable;
     }
 
     //Start of the method adding madness - liopyu
