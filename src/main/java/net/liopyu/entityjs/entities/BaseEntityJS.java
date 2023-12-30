@@ -1,26 +1,64 @@
 package net.liopyu.entityjs.entities;
 
+import com.mojang.serialization.Dynamic;
+import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
+import net.liopyu.entityjs.util.ai.BrainBuilder;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
+/**
+ * The 'basic' implementation of a custom entity, implements most methods through the builder with some
+ * conditionally delegating to the {@code super} implementation if the function is null. Other implementations
+ * are <strong>not</strong> required to override every method in a class.<br><br>
+ *
+ * Further, the only real requirements for a custom entity class is that the class signature respects the contract
+ * <pre>{@code public class YourEntityClass extends <? extends LivingEntity> implements <? extends IAnimatableJS>}</pre>
+ * A basic implementation for a custom {@link net.minecraft.world.entity.animal.Animal Animal} entity could be as simple as
+ * <pre>{@code public class AnimalEntityJS extends Animal implements IAnimatableJS {
+ *
+ *     private final AnimalBuilder builder;
+ *     private final AnimationFactory animationFactory;
+ *
+ *     public AnimalEntityJS(AnimalBuilder builder, EntityType<? extends Animal> type, Level level) {
+ *         super(type, level);
+ *         this.builder = builder;
+ *         animationFactory = GeckoLibUtil.createFactory(this);
+ *     }
+ *
+ *     @Override
+ *     public BaseEntityBuilder<?> getBuilder() {
+ *         return builder;
+ *     }
+ *
+ *     @Override
+ *     public AnimationFactory getFactory() {
+ *         return animationFactory;
+ *     }
+ *
+ *     @Override
+ *     @Nullable
+ *     public AnimalEntityJS getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
+ *         return null;
+ *     }
+ * }}</pre>
+ * Of course this does not implement any possible networking/synced entity data stuff. figure that out yourself, it scares me
+ */
 public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
     private final AnimationFactory animationFactory;
 
     protected final BaseEntityJSBuilder builder;
+    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
     public BaseEntityJS(BaseEntityJSBuilder builder, EntityType<? extends LivingEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -29,33 +67,65 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
+    protected Brain.Provider<?> brainProvider() {
+        return builder.brainProviderBuilder == null ? super.brainProvider() : builder.brainProviderBuilder.build();
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag pCompound) {
-        super.readAdditionalSaveData(pCompound);
+    protected Brain<BaseEntityJS> makeBrain(Dynamic<?> p_21069_) {
+        final Brain<BaseEntityJS> brain = UtilsJS.cast(super.makeBrain(p_21069_)); // This has become a crutch
+        if (builder.brainBuilder != null) {
+            final BrainBuilder brainBuilder = new BrainBuilder(builder.id);
+            builder.brainBuilder.accept(brainBuilder);
+            return brainBuilder.build(brain);
+        }
+        return brain;
     }
+
+    // Synced entity data is basically impossible, it is class dependent and mostly static
+    // @Override
+    // protected void defineSynchedData() {
+    //     super.defineSynchedData();
+    // }
+    //
+    // Do we actually want to let users touch this, kube's persistent data works well enough
+    // @Override
+    // public void readAdditionalSaveData(CompoundTag pCompound) {
+    //     super.readAdditionalSaveData(pCompound);
+    // }
+    //
+    // @Override
+    // public void addAdditionalSaveData(CompoundTag pCompound) {
+    //     super.addAdditionalSaveData(pCompound);
+    // }
 
     @Override
     public Iterable<ItemStack> getArmorSlots() {
-        return NonNullList.withSize(0, ItemStack.EMPTY);
+        return armorItems;
     }
 
     @Override
-    public ItemStack getItemBySlot(EquipmentSlot p_21127_) {
-        return ItemStack.EMPTY;
+    public Iterable<ItemStack> getHandSlots() {
+        return handItems;
     }
 
+    // Mirrors the implementation in Mob
     @Override
-    public void setItemSlot(EquipmentSlot p_21036_, ItemStack p_21037_) {
-
+    public ItemStack getItemBySlot(EquipmentSlot slot) {
+        return switch (slot.getType()) {
+            case HAND -> handItems.get(slot.getIndex());
+            case ARMOR -> armorItems.get(slot.getIndex());
+        };
     }
 
+    // Mirrors the implementation in Mob
     @Override
-    public void addAdditionalSaveData(CompoundTag pCompound) {
-        super.addAdditionalSaveData(pCompound);
+    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
+        verifyEquippedItem(stack);
+        switch (slot.getType()) {
+            case HAND -> onEquipItem(slot, handItems.set(slot.getIndex(), stack), stack);
+            case ARMOR -> onEquipItem(slot, armorItems.set(slot.getIndex(), stack), stack);
+        }
     }
 
     @Override
@@ -70,20 +140,20 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
 
     public boolean isPushable() {
-        return getBuilder().canBePushed;
+        return builder.canBePushed;
     }
 
     @Override
     public HumanoidArm getMainArm() {
-        return null;
+        return builder.mainArm;
     }
 
     public boolean canBeCollidedWith() {
-        return getBuilder().canBeCollidedWith;
+        return builder.canBeCollidedWith;
     }
 
     public boolean isAttackable() {
-        return getBuilder().isAttackable;
+        return builder.isAttackable;
     }
 
     //Start of the method adding madness - liopyu
