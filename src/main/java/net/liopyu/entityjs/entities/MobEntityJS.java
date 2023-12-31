@@ -2,6 +2,7 @@ package net.liopyu.entityjs.entities;
 
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
+import net.liopyu.entityjs.util.ai.GoalSelectorBuilder;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -32,7 +33,9 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
-        super.registerGoals();
+        final GoalSelectorBuilder<MobEntityJS> goalBuilder = new GoalSelectorBuilder<>();
+        builder.goalBuilder.accept(goalBuilder);
+        goalBuilder.apply(this.goalSelector, this);
     }
 
     @Override
