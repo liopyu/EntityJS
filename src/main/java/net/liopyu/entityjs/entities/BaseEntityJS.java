@@ -4,7 +4,7 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
-import net.liopyu.entityjs.util.ai.BrainBuilder;
+import net.liopyu.entityjs.util.ai.brain.BrainBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.*;

@@ -3,6 +3,7 @@ package net.liopyu.entityjs.item;
 import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
 import dev.latvian.mods.kubejs.typings.Info;
+import net.liopyu.entityjs.builders.MobBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -13,9 +14,9 @@ public class SpawnEggItemBuilder extends ItemBuilder {
 
     public transient int backgroundColor;
     public transient int highlightColor;
-    public transient final MobEntityJSBuilder parent;
+    public transient final MobBuilder<?> parent;
 
-    public SpawnEggItemBuilder(ResourceLocation i, MobEntityJSBuilder parent) {
+    public SpawnEggItemBuilder(ResourceLocation i, MobBuilder<?> parent) {
         super(i);
         backgroundColor = 0xFFFFFFFF;
         highlightColor = 0XFFFFFFFF;

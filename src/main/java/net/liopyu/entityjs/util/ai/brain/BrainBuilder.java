@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.util.ai;
+package net.liopyu.entityjs.util.ai.brain;
 
 import com.google.common.collect.ImmutableList;
 import dev.latvian.mods.rhino.util.HideFromJS;
