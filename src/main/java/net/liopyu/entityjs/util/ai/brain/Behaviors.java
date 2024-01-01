@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.util.ai;
+package net.liopyu.entityjs.util.ai.brain;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.BecomePassiveIfMemoryPresent;

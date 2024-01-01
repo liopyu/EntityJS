@@ -19,6 +19,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.liopyu.entityjs.util.ai.BrainBuilder;
+import net.liopyu.entityjs.util.ai.brain.BrainBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;

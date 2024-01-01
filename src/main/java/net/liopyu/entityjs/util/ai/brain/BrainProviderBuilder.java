@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.util.ai;
+package net.liopyu.entityjs.util.ai.brain;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
