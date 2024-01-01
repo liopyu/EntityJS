@@ -20,6 +20,9 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         super(p_21368_, p_21369_);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createFactory(this);
+        if (p_21369_ != null && !p_21369_.isClientSide) {
+            this.registerGoals(); // Call again so that the builder isn't null
+        }
     }
 
     @Override
@@ -34,6 +37,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
+        if (builder == null) return; // When called in the super method, the builder is null, thus we call it again when we do have a builder
         // Goal selectors
         final GoalSelectorBuilder<MobEntityJS> goalSelectorBuilder = new GoalSelectorBuilder<>();
         builder.goalSelectorBuilder.accept(goalSelectorBuilder);

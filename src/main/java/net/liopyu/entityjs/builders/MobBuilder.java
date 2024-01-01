@@ -31,18 +31,22 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseEnti
     }
 
     @Info(value = "Creates a spawn egg item for this entity type")
-    @Generics(value = SpawnEggItemBuilder.class)
+    @Generics(value = {Mob.class, SpawnEggItemBuilder.class})
     public MobBuilder<T> eggItem(Consumer<SpawnEggItemBuilder> eggItem) {
         this.eggItem = new SpawnEggItemBuilder(id, this);
         eggItem.accept(this.eggItem);
         return this;
     }
 
+    @Info(value = "Sets the entity's goalSelectors")
+    @Generics(value = {Mob.class, GoalSelectorBuilder.class, Mob.class})
     public MobBuilder<T> goals(Consumer<GoalSelectorBuilder<T>> goals) {
         goalSelectorBuilder = goals;
         return this;
     }
 
+    @Info(value = "Sets the entity's targetSelectors")
+    @Generics(value = {Mob.class, GoalTargetBuilder.class, Mob.class})
     public MobBuilder<T> goalTargets(Consumer<GoalTargetBuilder<T>> targets) {
         goalTargetBuilder = targets;
         return this;
