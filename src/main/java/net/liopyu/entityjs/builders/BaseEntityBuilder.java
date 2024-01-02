@@ -304,6 +304,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     @Info(value = "Determines the blocks the entity is 'immune' to")
     public BaseEntityBuilder<T> immuneTo(ResourceLocation... blocks) {
         this.immuneTo = blocks;
+        return this;
     }
 
     @Info(value = "Determines if the entity can spawn far from players")
