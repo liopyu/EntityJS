@@ -107,6 +107,10 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient EntityType<?> getType;
     public transient AABB customBoundingBox;
     public transient List<BlockState> shouldRemoveSoulSpeed;
+    public transient BrainProviderBuilder brainProviderBuilder;
+    public transient HumanoidArm mainArm;
+    public transient boolean hasInventory;
+    public transient Consumer<BrainBuilder> brainBuilder;
 
     public transient Consumer<BaseEntityJS> dropExperienceHandler;
     public transient boolean onSoulSpeedBlock;
@@ -169,10 +173,6 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Predicate<BaseEntityJS> customShouldDropExperience;
 
     public transient Function<BaseEntityJS, Integer> customExperienceReward;
-    public transient BrainProviderBuilder brainProviderBuilder;
-    public transient HumanoidArm mainArm;
-    public transient boolean hasInventory;
-    public transient Consumer<BrainBuilder> brainBuilder;
 
     public transient Function<BaseEntityJS, RandomSource> customRandom;
 
