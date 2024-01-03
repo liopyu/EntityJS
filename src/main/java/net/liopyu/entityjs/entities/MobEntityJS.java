@@ -37,15 +37,15 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
-        if (builder == null) return; // When called in the super method, the builder is null, thus we call it again when we do have a builder
+        if (builder == null) return; // When called in the super constructor, the builder is null, thus we call it again when we do have a builder
         // Goal selectors
-        final GoalSelectorBuilder<MobEntityJS> goalSelectorBuilder = new GoalSelectorBuilder<>();
+        final GoalSelectorBuilder<MobEntityJS> goalSelectorBuilder = new GoalSelectorBuilder<>(this);
         builder.goalSelectorBuilder.accept(goalSelectorBuilder);
-        goalSelectorBuilder.apply(this.goalSelector, this);
+        goalSelectorBuilder.apply(this.goalSelector);
         // Goal targets
-        final GoalTargetBuilder<MobEntityJS> goalTargetBuilder = new GoalTargetBuilder<>();
+        final GoalTargetBuilder<MobEntityJS> goalTargetBuilder = new GoalTargetBuilder<>(this);
         builder.goalTargetBuilder.accept(goalTargetBuilder);
-        goalTargetBuilder.apply(this.targetSelector, this);
+        goalTargetBuilder.apply(this.targetSelector);
     }
 
     @Override

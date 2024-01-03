@@ -21,12 +21,10 @@ import java.util.function.Predicate;
  *
  * If you wish to add more goal types see the comment in {@link GoalSelectorBuilder}
  */
-public class GoalTargetBuilder<T extends Mob> {
+public class GoalTargetBuilder<T extends Mob> extends GoalBuilder<T> {
 
-    private final List<Pair<Integer, Function<T, Goal>>> targetSuppliers;
-
-    public GoalTargetBuilder() {
-        targetSuppliers = new ArrayList<>();
+    public GoalTargetBuilder(T entity) {
+        super(entity);
     }
 
     @Info(value = """
@@ -46,7 +44,7 @@ public class GoalTargetBuilder<T extends Mob> {
             @Param(name = "goalSupplier", value = "The goal supplier, a function that takes a Mob and returns a Goal")
     })
     public GoalTargetBuilder<T> arbitraryTargetGoal(int priority, Function<T, Goal> goalSupplier) {
-        targetSuppliers.add(new Pair<>(priority, goalSupplier));
+        suppliers.add(new Pair<>(priority, goalSupplier));
         return this;
     }
 
@@ -59,7 +57,7 @@ public class GoalTargetBuilder<T extends Mob> {
             @Param(name = "targetConditions", value = "The conditions under which the targeted entity will be targeted, may be null")
     })
     public <E extends LivingEntity> GoalTargetBuilder<T> nearestAttackableTarget(int priority, Class<E> targetClass, int randomInterval, boolean mustSee, boolean mustReach, @Nullable Predicate<LivingEntity> targetConditions) {
-        targetSuppliers.add(new Pair<>(priority, t -> new NearestAttackableTargetGoal<>(t, targetClass, randomInterval, mustSee, mustReach, targetConditions)));
+        suppliers.add(new Pair<>(priority, t -> new NearestAttackableTargetGoal<>(t, targetClass, randomInterval, mustSee, mustReach, targetConditions)));
         return this;
     }
 
@@ -70,13 +68,15 @@ public class GoalTargetBuilder<T extends Mob> {
             @Param(name = "toIgnoreAlert", value = "The entity classes that should not be alerted")
     })
     public GoalTargetBuilder<T> hurtByTarget(int priority, List<Class<?>> toIgnoreDamage, boolean alertOthers, List<Class<?>> toIgnoreAlert) {
-        targetSuppliers.add(new Pair<>(priority, t -> {
-            var goal = new HurtByTargetGoal((PathfinderMob) t, toIgnoreDamage.toArray(new Class<?>[0]));
-            if (alertOthers) {
-                goal.setAlertOthers(toIgnoreAlert.toArray(new Class<?>[0]));
-            }
-            return goal;
-        }));
+        if (isPathFinder) {
+            suppliers.add(new Pair<>(priority, t -> {
+                var goal = new HurtByTargetGoal((PathfinderMob) t, toIgnoreDamage.toArray(new Class<?>[0]));
+                if (alertOthers) {
+                    goal.setAlertOthers(toIgnoreAlert.toArray(new Class<?>[0]));
+                }
+                return goal;
+            }));
+        }
         return this;
     }
 
@@ -87,7 +87,9 @@ public class GoalTargetBuilder<T extends Mob> {
             @Param(name = "targetConditions", value = "The conditions under which the targeted entity will be targeted, may be null")
     })
     public <E extends LivingEntity> GoalTargetBuilder<T> nonTameRandomTarget(int priority, Class<E> targetClass, boolean mustSee, @Nullable Predicate<LivingEntity> targetCondition) {
-        targetSuppliers.add(new Pair<>(priority, t -> new NonTameRandomTargetGoal<>((TamableAnimal) t, targetClass, mustSee, targetCondition)));
+        if (isTamable) {
+            suppliers.add(new Pair<>(priority, t -> new NonTameRandomTargetGoal<>((TamableAnimal) t, targetClass, mustSee, targetCondition)));
+        }
         return this;
     }
 
@@ -95,7 +97,9 @@ public class GoalTargetBuilder<T extends Mob> {
             @Param(name = "priority", value = "The priority of the goal")
     })
     public GoalTargetBuilder<T> ownerHurtByTarget(int priority) {
-        targetSuppliers.add(new Pair<>(priority, t -> new OwnerHurtByTargetGoal((TamableAnimal) t)));
+        if (isTamable) {
+            suppliers.add(new Pair<>(priority, t -> new OwnerHurtByTargetGoal((TamableAnimal) t)));
+        }
         return this;
     }
 
@@ -104,14 +108,9 @@ public class GoalTargetBuilder<T extends Mob> {
             @Param(name = "alertOthersOfSameType", value = "If other mobs of the same type should be alerted")
     })
     public <E extends Mob & NeutralMob> GoalTargetBuilder<T> resetUniversalAngerTarget(int priority, boolean alertOthersOfSameType) {
-        targetSuppliers.add(new Pair<>(priority, t -> new ResetUniversalAngerTargetGoal<>((E) t, alertOthersOfSameType)));
-        return this;
-    }
-
-    @HideFromJS
-    public void apply(GoalSelector targetSelector, T entity) {
-        for (Pair<Integer, Function<T, Goal>> targetSupplier : targetSuppliers) {
-            targetSelector.addGoal(targetSupplier.getFirst(), targetSupplier.getSecond().apply(entity));
+        if (isNeutral) {
+            suppliers.add(new Pair<>(priority, t -> new ResetUniversalAngerTargetGoal<>((E) t, alertOthersOfSameType)));
         }
+        return this;
     }
 }

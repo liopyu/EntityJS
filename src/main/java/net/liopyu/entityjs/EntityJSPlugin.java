@@ -11,7 +11,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.SensorType;
-import net.minecraft.world.entity.schedule.Activity;
 
 public class EntityJSPlugin extends KubeJSPlugin {
 

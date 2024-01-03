@@ -6,7 +6,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.SensorType;
-import net.minecraft.world.entity.schedule.Activity;
 
 // Move usages of Registry#<registry>#get() to RegistryInfo#<registry>#getValue() in 1.20+
 public class Wrappers {

@@ -4,7 +4,6 @@ import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.MobBuilder;
-import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeSpawnEggItem;
