@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.entities;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
@@ -11,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
@@ -90,17 +92,19 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         super(pEntityType, pLevel);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createFactory(this);
+        NbtOps nbtops = NbtOps.INSTANCE; // Recreate to let builder apply
+        this.brain = this.makeBrain(new Dynamic<>(nbtops, nbtops.createMap(ImmutableMap.of(nbtops.createString("memories"), nbtops.emptyMap()))));
     }
 
     @Override
     protected Brain.Provider<?> brainProvider() {
-        return builder.brainProviderBuilder == null ? super.brainProvider() : builder.brainProviderBuilder.build();
+        return (builder == null || builder.brainProviderBuilder == null) ? super.brainProvider() : builder.brainProviderBuilder.build();
     }
 
     @Override
     protected Brain<BaseEntityJS> makeBrain(Dynamic<?> p_21069_) {
         final Brain<BaseEntityJS> brain = UtilsJS.cast(super.makeBrain(p_21069_)); // This has become a crutch
-        if (builder.brainBuilder != null) {
+        if (builder != null && builder.brainBuilder != null) {
             final BrainBuilder brainBuilder = new BrainBuilder(builder.id);
             builder.brainBuilder.accept(brainBuilder);
             return brainBuilder.build(brain);
