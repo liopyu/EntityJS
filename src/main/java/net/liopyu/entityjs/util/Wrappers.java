@@ -2,18 +2,52 @@ package net.liopyu.entityjs.util;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.schedule.Activity;
 
+// Move usages of Registry#<registry>#get() to RegistryInfo#<registry>#getValue() in 1.20+
 public class Wrappers {
 
-    // Move usages of Registry#Attribute#get() to RegistryInfo#ATTRIBUTE#getValue() in 1.20+
     public static Attribute attribute(Object unknown) {
-        if (unknown instanceof ResourceLocation rs) {
-            return Registry.ATTRIBUTE.get(rs);
-        } else if (unknown instanceof CharSequence cs) {
-            return Registry.ATTRIBUTE.get(new ResourceLocation(cs.toString()));
+        if (unknown instanceof ResourceLocation || unknown instanceof CharSequence) {
+            return Registry.ATTRIBUTE.get(new ResourceLocation(unknown.toString()));
         } else if (unknown instanceof Attribute attribute) {
             return attribute;
+        }
+
+        return null;
+    }
+
+    public static SoundEvent soundEvent(Object unknown) {
+        if (unknown instanceof ResourceLocation || unknown instanceof CharSequence) {
+            return Registry.SOUND_EVENT.get(new ResourceLocation(unknown.toString()));
+        } else if (unknown instanceof SoundEvent event) {
+            return event;
+        }
+
+        return null;
+    }
+
+    // Hopefully it works...
+    // Probably won't work for non-vanilla types in the current implementation
+    public static MemoryModuleType<?> memoryModuleType(Object unknown) {
+        if (unknown instanceof ResourceLocation || unknown instanceof CharSequence) {
+            return Registry.MEMORY_MODULE_TYPE.get(new ResourceLocation(unknown.toString()));
+        } else if (unknown instanceof MemoryModuleType<?> memory) {
+            return memory;
+        }
+
+        return null;
+    }
+
+    public static SensorType<?> sensorType(Object unknown) {
+        if (unknown instanceof ResourceLocation || unknown instanceof CharSequence) {
+            return Registry.SENSOR_TYPE.get(new ResourceLocation(unknown.toString()));
+        } else if (unknown instanceof SensorType<?> sensor) {
+            return sensor;
         }
 
         return null;

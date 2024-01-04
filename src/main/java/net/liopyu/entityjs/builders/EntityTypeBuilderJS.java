@@ -7,6 +7,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class EntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
 
@@ -17,7 +19,7 @@ public class EntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
     }
 
 
-    public <E extends Entity & IAnimatableJS> EntityType<E> get() {
+    public EntityType<B> get() {
         var js = this.builder;
         var builder = EntityType.Builder.of(js.factory(), js.mobCategory);
         builder
@@ -35,11 +37,16 @@ public class EntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
             builder.noSave();
         }
         if (js.immuneTo.length > 0) {
-            builder.immuneTo(js.immuneTo);
+            final Block[] blocks  = new Block[js.immuneTo.length];
+            for (int i = 0 ; i < js.immuneTo.length ; i++) {
+                blocks[i] = ForgeRegistries.BLOCKS.getValue(js.immuneTo[i]);
+            }
+            builder.immuneTo(blocks);
         }
         if (!js.summonable) {
             builder.noSummon();
         }
-        return UtilsJS.cast(builder.build(js.toString())); // If this fails, uh... do better?
+
+        return UtilsJS.cast(builder.build(js.id.toString())); // If this fails, uh... do better?
     }
 }

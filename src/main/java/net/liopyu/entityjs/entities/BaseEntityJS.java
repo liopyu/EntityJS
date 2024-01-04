@@ -1,21 +1,22 @@
 package net.liopyu.entityjs.entities;
 
+import com.mojang.serialization.Dynamic;
+import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
 import net.liopyu.entityjs.util.ExitPortalInfo;
+import net.liopyu.entityjs.util.ai.brain.BrainBuilder;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.data.models.blockstates.PropertyDispatch;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.liopyu.entityjs.util.ai.brain.BrainBuilder;
+import net.minecraft.core.NonNullList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -33,23 +34,62 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
+/**
+ * The 'basic' implementation of a custom entity, implements most methods through the builder with some
+ * conditionally delegating to the {@code super} implementation if the function is null. Other implementations
+ * are <strong>not</strong> required to override every method in a class.<br><br>
+ * <p>
+ * Further, the only real requirements for a custom entity class is that the class signature respects the contract
+ * <pre>{@code public class YourEntityClass extends <? extends LivingEntity> implements <? extends IAnimatableJS>}</pre>
+ * A basic implementation for a custom {@link net.minecraft.world.entity.animal.Animal Animal} entity could be as simple as
+ * <pre>{@code public class AnimalEntityJS extends Animal implements IAnimatableJS {
+ *
+ *     private final AnimalBuilder builder;
+ *     private final AnimationFactory animationFactory;
+ *
+ *     public AnimalEntityJS(AnimalBuilder builder, EntityType<? extends Animal> type, Level level) {
+ *         super(type, level);
+ *         this.builder = builder;
+ *         animationFactory = GeckoLibUtil.createFactory(this);
+ *     }
+ *
+ *     @Override
+ *     public BaseEntityBuilder<?> getBuilder() {
+ *         return builder;
+ *     }
+ *
+ *     @Override
+ *     public AnimationFactory getFactory() {
+ *         return animationFactory;
+ *     }
+ *
+ *     @Override
+ *     @Nullable
+ *     public AnimalEntityJS getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
+ *         return null;
+ *     }
+ * }}</pre>
+ * Of course this does not implement any possible networking/synced entity data stuff. figure that out yourself, it scares me
+ */
 public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
     private final AnimationFactory animationFactory;
 
     protected final BaseEntityJSBuilder builder;
+    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
     public BaseEntityJS(BaseEntityJSBuilder builder, EntityType<? extends LivingEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -58,33 +98,65 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
+    protected Brain.Provider<?> brainProvider() {
+        return builder.brainProviderBuilder == null ? super.brainProvider() : builder.brainProviderBuilder.build();
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag pCompound) {
-        super.readAdditionalSaveData(pCompound);
+    protected Brain<BaseEntityJS> makeBrain(Dynamic<?> p_21069_) {
+        final Brain<BaseEntityJS> brain = UtilsJS.cast(super.makeBrain(p_21069_)); // This has become a crutch
+        if (builder.brainBuilder != null) {
+            final BrainBuilder brainBuilder = new BrainBuilder(builder.id);
+            builder.brainBuilder.accept(brainBuilder);
+            return brainBuilder.build(brain);
+        }
+        return brain;
     }
+
+    // Synced entity data is basically impossible, it is class dependent and mostly static
+    // @Override
+    // protected void defineSynchedData() {
+    //     super.defineSynchedData();
+    // }
+    //
+    // Do we actually want to let users touch this, kube's persistent data works well enough
+    // @Override
+    // public void readAdditionalSaveData(CompoundTag pCompound) {
+    //     super.readAdditionalSaveData(pCompound);
+    // }
+    //
+    // @Override
+    // public void addAdditionalSaveData(CompoundTag pCompound) {
+    //     super.addAdditionalSaveData(pCompound);
+    // }
 
     @Override
     public Iterable<ItemStack> getArmorSlots() {
-        return NonNullList.withSize(0, ItemStack.EMPTY);
+        return armorItems;
     }
 
     @Override
-    public ItemStack getItemBySlot(EquipmentSlot p_21127_) {
-        return ItemStack.EMPTY;
+    public Iterable<ItemStack> getHandSlots() {
+        return handItems;
     }
 
+    // Mirrors the implementation in Mob
     @Override
-    public void setItemSlot(EquipmentSlot p_21036_, ItemStack p_21037_) {
-
+    public ItemStack getItemBySlot(EquipmentSlot slot) {
+        return switch (slot.getType()) {
+            case HAND -> handItems.get(slot.getIndex());
+            case ARMOR -> armorItems.get(slot.getIndex());
+        };
     }
 
+    // Mirrors the implementation in Mob
     @Override
-    public void addAdditionalSaveData(CompoundTag pCompound) {
-        super.addAdditionalSaveData(pCompound);
+    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
+        verifyEquippedItem(stack);
+        switch (slot.getType()) {
+            case HAND -> onEquipItem(slot, handItems.set(slot.getIndex(), stack), stack);
+            case ARMOR -> onEquipItem(slot, armorItems.set(slot.getIndex(), stack), stack);
+        }
     }
 
     @Override
@@ -99,20 +171,20 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
 
     public boolean isPushable() {
-        return getBuilder().canBePushed;
+        return builder.canBePushed;
     }
 
     @Override
     public HumanoidArm getMainArm() {
-        return null;
+        return builder.mainArm;
     }
 
     public boolean canBeCollidedWith() {
-        return getBuilder().canBeCollidedWith;
+        return builder.canBeCollidedWith;
     }
 
     public boolean isAttackable() {
-        return getBuilder().isAttackable;
+        return builder.isAttackable;
     }
 
     //Start of the method adding madness - liopyu
@@ -254,13 +326,13 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         return this.shouldRemoveSoulSpeed(p_21140_);
     }
 
-    @Override
+    /*@Override
     protected AABB makeBoundingBox() {
         if (builder.customBoundingBox != null) {
             return builder.customBoundingBox;
         }
         return this.makeBoundingBox();
-    }
+    }*/
 
     @Override
     protected LootContext.Builder createLootContext(boolean p_21105_, DamageSource p_21106_) {
@@ -592,12 +664,6 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    @FunctionalInterface
-    interface CustomFallDamageCheck {
-        boolean apply(double distance, boolean onGround, BlockState blockState, BlockPos blockPos);
-    }
-
-
     @Override
     protected void checkFallDamage(double p_20990_, boolean p_20991_, BlockState p_20992_, BlockPos p_20993_) {
         if (builder.customCheckFallDamage != null) {
@@ -627,13 +693,13 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         return super.getSwimAmount(p_20999_);
     }
 
-    @Override
+    /*@Override
     public void baseTick() {
         if (builder.customBaseTick != null) {
             builder.customBaseTick.run();
         }
         super.baseTick();
-    }
+    }*/
 
     @Override
     public boolean canSpawnSoulSpeedParticle() {
@@ -697,14 +763,14 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    @Override
+    /*@Override
     public boolean isBaby() {
         if (builder.isBaby != null) {
             return builder.isBaby;
         } else {
             return super.isBaby();
         }
-    }
+    }*/
 
     @Override
     public float getScale() {
@@ -751,16 +817,16 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    @Override
+    /*@Override
     public RandomSource getRandom() {
         if (builder.customRandom != null) {
             return builder.customRandom.apply(this);
         } else {
             return super.getRandom();
         }
-    }
+    }*/
 
-    @Nullable
+    /*@Nullable
     @Override
     public LivingEntity getLastHurtByMob() {
         if (builder.customLastHurtByMob != null) {
@@ -768,124 +834,198 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         } else {
             return super.getLastHurtByMob();
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public int getLastHurtByMobTimestamp() {
         if (builder.customGetLastHurtMobTimestamp != null) {
             return builder.customGetLastHurtMobTimestamp.apply(this);
         } else {
             return super.getLastHurtByMobTimestamp();
         }
-    }
+    }*/
 
-    @Override
+   /* @Override
     public void setLastHurtByPlayer(@Nullable Player p_21248_) {
-        super.setLastHurtByPlayer(p_21248_);
-    }
+        if (builder.customSetLastHurtByPlayer != null) {
+            builder.customSetLastHurtByPlayer.accept(p_21248_);
+        } else {
+            super.setLastHurtByPlayer(p_21248_);
+        }
+    }*/
 
-    @Override
+
+    /*@Override
     public void setLastHurtByMob(@Nullable LivingEntity p_21039_) {
         super.setLastHurtByMob(p_21039_);
-    }
+    }*/
 
-    @Nullable
+    /*@Nullable
     @Override
     public LivingEntity getLastHurtMob() {
         return super.getLastHurtMob();
-    }
+    }*/
 
-    @Override
+    /*@Override
     public int getLastHurtMobTimestamp() {
         return super.getLastHurtMobTimestamp();
-    }
+    }*/
 
-    @Override
+   /* @Override
     public void setLastHurtMob(Entity p_21336_) {
         super.setLastHurtMob(p_21336_);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public int getNoActionTime() {
         return super.getNoActionTime();
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void setNoActionTime(int p_21311_) {
         super.setNoActionTime(p_21311_);
-    }
+    }*/
 
     @Override
     public boolean shouldDiscardFriction() {
-        return super.shouldDiscardFriction();
+        if (builder.customShouldDiscardFriction != null) {
+            return builder.customShouldDiscardFriction.get();
+        } else {
+            return super.shouldDiscardFriction();
+        }
     }
+
 
     @Override
     public void setDiscardFriction(boolean p_147245_) {
-        super.setDiscardFriction(p_147245_);
+        if (builder.customSetDiscardFriction != null) {
+            builder.customSetDiscardFriction.accept(p_147245_);
+        } else {
+            super.setDiscardFriction(p_147245_);
+        }
+    }
+
+    //EquipmentSlot, Old Itemstack, New Itemstack
+    @Override
+    public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
+        if (builder.customOnEquipItem != null) {
+            builder.customOnEquipItem.accept(slot, previous, current);
+        } else {
+            super.onEquipItem(slot, previous, current);
+        }
     }
 
     @Override
-    public void onEquipItem(EquipmentSlot p_238393_, ItemStack p_238394_, ItemStack p_238395_) {
-        super.onEquipItem(p_238393_, p_238394_, p_238395_);
+    protected void playEquipSound(ItemStack itemStack) {
+        if (builder.customPlayEquipSound != null) {
+            builder.customPlayEquipSound.accept(itemStack);
+        } else {
+            super.playEquipSound(itemStack);
+        }
     }
 
-    @Override
-    protected void playEquipSound(ItemStack p_217042_) {
-        super.playEquipSound(p_217042_);
-    }
 
     @Override
     protected void tickEffects() {
-        super.tickEffects();
+        if (builder.customTickEffects != null) {
+            builder.customTickEffects.run();
+        } else {
+            super.tickEffects();
+        }
     }
+
 
     @Override
     protected void updateInvisibilityStatus() {
-        super.updateInvisibilityStatus();
+        if (builder.customUpdateInvisibilityStatus != null) {
+            builder.customUpdateInvisibilityStatus.run();
+        } else {
+            super.updateInvisibilityStatus();
+        }
     }
+
 
     @Override
     public double getVisibilityPercent(@Nullable Entity p_20969_) {
-        return super.getVisibilityPercent(p_20969_);
+        if (builder.customGetVisibilityPercent != null) {
+            return builder.customGetVisibilityPercent.apply(p_20969_);
+        } else {
+            return super.getVisibilityPercent(p_20969_);
+        }
     }
+
 
     @Override
     public boolean canAttack(LivingEntity p_21171_) {
-        return super.canAttack(p_21171_);
+        if (builder.customCanAttack != null) {
+            return builder.customCanAttack.test(p_21171_);
+        } else {
+            return super.canAttack(p_21171_);
+        }
     }
+
 
     @Override
     public boolean canAttack(LivingEntity p_21041_, TargetingConditions p_21042_) {
-        return super.canAttack(p_21041_, p_21042_);
+        if (builder.customCanAttackWithConditions != null) {
+            return builder.customCanAttackWithConditions.test(p_21041_, p_21042_);
+        } else {
+            return super.canAttack(p_21041_, p_21042_);
+        }
     }
+
 
     @Override
     public boolean canBeSeenAsEnemy() {
-        return super.canBeSeenAsEnemy();
+        if (builder.customCanBeSeenAsEnemy != null) {
+            return builder.customCanBeSeenAsEnemy.getAsBoolean();
+        } else {
+            return super.canBeSeenAsEnemy();
+        }
     }
+
 
     @Override
     public boolean canBeSeenByAnyone() {
-        return super.canBeSeenByAnyone();
+        if (builder.customCanBeSeenByAnyone != null) {
+            return builder.customCanBeSeenByAnyone.getAsBoolean();
+        } else {
+            return super.canBeSeenByAnyone();
+        }
     }
+
 
     @Override
     protected void removeEffectParticles() {
-        super.removeEffectParticles();
+        if (builder.customRemoveEffectParticles != null) {
+            builder.customRemoveEffectParticles.run();
+        } else {
+            super.removeEffectParticles();
+        }
     }
+
 
     @Override
     public boolean removeAllEffects() {
-        return super.removeAllEffects();
+        if (builder.customRemoveAllEffects != null) {
+            return builder.customRemoveAllEffects.test(super.removeAllEffects());
+        } else {
+            return super.removeAllEffects();
+        }
     }
 
-    @Override
+
+    /*@Override
     public Collection<MobEffectInstance> getActiveEffects() {
-        return super.getActiveEffects();
-    }
+        if (builder.customGetActiveEffects != null) {
+            return builder.customGetActiveEffects.apply(super.getActiveEffects());
+        } else {
+            return super.getActiveEffects();
+        }
+    }*/
 
-    @Override
+
+    /*@Override
     public Map<MobEffect, MobEffectInstance> getActiveEffectsMap() {
         return super.getActiveEffectsMap();
     }
@@ -899,154 +1039,285 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public MobEffectInstance getEffect(MobEffect p_21125_) {
         return super.getEffect(p_21125_);
-    }
+    }*/
 
     @Override
     public boolean addEffect(MobEffectInstance p_147208_, @Nullable Entity p_147209_) {
-        return super.addEffect(p_147208_, p_147209_);
+        if (builder.customAddEffect != null) {
+            return builder.customAddEffect.test(p_147208_, p_147209_);
+        } else {
+            return super.addEffect(p_147208_, p_147209_);
+        }
     }
 
-    @Override
-    public boolean canBeAffected(MobEffectInstance p_21197_) {
-        return super.canBeAffected(p_21197_);
-    }
 
     @Override
-    public void forceAddEffect(MobEffectInstance p_147216_, @Nullable Entity p_147217_) {
-        super.forceAddEffect(p_147216_, p_147217_);
+    public boolean canBeAffected(MobEffectInstance effectInstance) {
+        if (builder.canBeAffectedPredicate != null) {
+            return builder.canBeAffectedPredicate.test(effectInstance);
+        }
+        return super.canBeAffected(effectInstance);
     }
+
+
+    @Override
+    public void forceAddEffect(MobEffectInstance effectInstance, @Nullable Entity entity) {
+        if (builder.forceAddEffectConsumer != null) {
+            builder.forceAddEffectConsumer.accept(effectInstance, entity);
+        } else {
+            super.forceAddEffect(effectInstance, entity);
+        }
+    }
+
 
     @Override
     public boolean isInvertedHealAndHarm() {
-        return super.isInvertedHealAndHarm();
+        return builder.invertedHealAndHarm || super.isInvertedHealAndHarm();
     }
+
 
     @Nullable
     @Override
-    public MobEffectInstance removeEffectNoUpdate(@Nullable MobEffect p_21164_) {
-        return super.removeEffectNoUpdate(p_21164_);
+    public MobEffectInstance removeEffectNoUpdate(@Nullable MobEffect effect) {
+        if (builder.removeEffectNoUpdateFunction != null) {
+            return builder.removeEffectNoUpdateFunction.apply(effect);
+        } else {
+            return super.removeEffectNoUpdate(effect);
+        }
     }
 
-    @Override
-    public boolean removeEffect(MobEffect p_21196_) {
-        return super.removeEffect(p_21196_);
-    }
 
     @Override
-    protected void onEffectAdded(MobEffectInstance p_147190_, @Nullable Entity p_147191_) {
-        super.onEffectAdded(p_147190_, p_147191_);
+    public boolean removeEffect(MobEffect effect) {
+        if (builder.removeEffect != null) {
+            return builder.removeEffect.test(effect, false);
+        } else {
+            return super.removeEffect(effect);
+        }
     }
 
-    @Override
-    protected void onEffectUpdated(MobEffectInstance p_147192_, boolean p_147193_, @Nullable Entity p_147194_) {
-        super.onEffectUpdated(p_147192_, p_147193_, p_147194_);
-    }
 
     @Override
-    protected void onEffectRemoved(MobEffectInstance p_21126_) {
-        super.onEffectRemoved(p_21126_);
+    protected void onEffectAdded(MobEffectInstance effectInstance, @Nullable Entity entity) {
+        if (builder.onEffectAdded != null) {
+            builder.onEffectAdded.accept(effectInstance, entity);
+        } else {
+            super.onEffectAdded(effectInstance, entity);
+        }
     }
 
-    @Override
-    public void heal(float p_21116_) {
-        super.heal(p_21116_);
-    }
 
     @Override
+    protected void onEffectUpdated(MobEffectInstance effectInstance, boolean isReapplied, @Nullable Entity entity) {
+        if (builder.onEffectUpdated != null) {
+            builder.onEffectUpdated.accept(effectInstance, isReapplied, entity);
+        } else {
+            super.onEffectUpdated(effectInstance, isReapplied, entity);
+        }
+    }
+
+
+    @Override
+    protected void onEffectRemoved(MobEffectInstance effectInstance) {
+        if (builder.onEffectRemoved != null) {
+            builder.onEffectRemoved.accept(effectInstance);
+        } else {
+            super.onEffectRemoved(effectInstance);
+        }
+    }
+
+
+    @Override
+    public void heal(float amount) {
+        if (builder.healAmount != null) {
+            builder.healAmount.accept(amount, this);
+        } else {
+            super.heal(amount);
+        }
+    }
+
+
+    /*@Override
     public float getHealth() {
         return super.getHealth();
-    }
+    }*/
 
     @Override
-    public void setHealth(float p_21154_) {
-        super.setHealth(p_21154_);
+    public void setHealth(float health) {
+        if (builder.setHealthAmount != null) {
+            builder.setHealthAmount.accept(health, this);
+        } else {
+            super.setHealth(health);
+        }
     }
+
 
     @Override
     public boolean isDeadOrDying() {
-        return super.isDeadOrDying();
+        if (builder.isDeadOrDying != null) {
+            return builder.isDeadOrDying.test(this);
+        } else {
+            return super.isDeadOrDying();
+        }
     }
 
+
     @Override
-    public boolean hurt(DamageSource p_21016_, float p_21017_) {
-        return super.hurt(p_21016_, p_21017_);
+    public boolean hurt(DamageSource damageSource, float amount) {
+        if (builder.hurtPredicate != null) {
+            return builder.hurtPredicate.test(damageSource, amount);
+        } else {
+            return super.hurt(damageSource, amount);
+        }
     }
+
 
     @Nullable
     @Override
     public DamageSource getLastDamageSource() {
-        return super.getLastDamageSource();
+        if (builder.lastDamageSourceSupplier != null) {
+            return builder.lastDamageSourceSupplier.get();
+        } else {
+            return super.getLastDamageSource();
+        }
     }
 
-    @Override
-    protected void playHurtSound(DamageSource p_21160_) {
-        super.playHurtSound(p_21160_);
-    }
+//Not needed since we have getHurtSound
+   /* @Override
+    protected void playHurtSound(DamageSource damageSource) {
+        if (builder.playHurtSound != null) {
+            builder.playHurtSound.accept(damageSource);
+        } else {
+            super.playHurtSound(damageSource);
+        }
+    }*/
+
 
     @Override
-    public boolean isDamageSourceBlocked(DamageSource p_21276_) {
-        return super.isDamageSourceBlocked(p_21276_);
+    public boolean isDamageSourceBlocked(DamageSource damageSource) {
+        if (builder.isDamageSourceBlocked != null) {
+            return builder.isDamageSourceBlocked.test(damageSource);
+        } else {
+            return super.isDamageSourceBlocked(damageSource);
+        }
     }
 
-    @Override
-    public void die(DamageSource p_21014_) {
-        super.die(p_21014_);
-    }
 
     @Override
-    protected void createWitherRose(@Nullable LivingEntity p_21269_) {
-        super.createWitherRose(p_21269_);
+    public void die(DamageSource damageSource) {
+        if (builder.die != null) {
+            builder.die.accept(damageSource, this);
+        } else {
+            super.die(damageSource);
+        }
     }
 
+
     @Override
-    protected void dropAllDeathLoot(DamageSource p_21192_) {
-        super.dropAllDeathLoot(p_21192_);
+    protected void createWitherRose(@Nullable LivingEntity entity) {
+        if (builder.createWitherRose != null) {
+            builder.createWitherRose.accept(entity, this);
+        } else {
+            super.createWitherRose(entity);
+        }
     }
+
+
+    @Override
+    protected void dropAllDeathLoot(DamageSource damageSource) {
+        if (builder.dropAllDeathLoot != null) {
+            builder.dropAllDeathLoot.accept(damageSource);
+        } else {
+            super.dropAllDeathLoot(damageSource);
+        }
+    }
+
 
     @Override
     protected void dropEquipment() {
-        super.dropEquipment();
+        if (builder.dropEquipment != null) {
+            builder.dropEquipment.accept(null);
+        } else {
+            super.dropEquipment();
+        }
     }
 
+
     @Override
-    protected void dropCustomDeathLoot(DamageSource p_21018_, int p_21019_, boolean p_21020_) {
-        super.dropCustomDeathLoot(p_21018_, p_21019_, p_21020_);
+    protected void dropCustomDeathLoot(DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
+        if (builder.dropCustomDeathLoot != null) {
+            builder.dropCustomDeathLoot.accept(damageSource, lootingMultiplier, allowDrops);
+        } else {
+            super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
+        }
     }
+
 
     @Override
     public ResourceLocation getLootTable() {
-        return super.getLootTable();
+        return (builder.lootTable != null) ? builder.lootTable.get() : super.getLootTable();
     }
 
-    @Override
-    protected void dropFromLootTable(DamageSource p_21021_, boolean p_21022_) {
-        super.dropFromLootTable(p_21021_, p_21022_);
-    }
 
     @Override
-    public void knockback(double p_147241_, double p_147242_, double p_147243_) {
-        super.knockback(p_147241_, p_147242_, p_147243_);
+    protected void dropFromLootTable(DamageSource source, boolean flag) {
+        if (builder.dropFromLootTable != null) {
+            builder.dropFromLootTable.accept(source, flag);
+        } else {
+            super.dropFromLootTable(source, flag);
+        }
     }
+
+
+    @Override
+    public void knockback(double x, double y, double z) {
+        if (builder.knockback != null) {
+            builder.knockback.accept(x, y, z);
+        } else {
+            super.knockback(x, y, z);
+        }
+    }
+
 
     @Override
     public void skipDropExperience() {
-        super.skipDropExperience();
+        if (builder.skipDropExperience != null) {
+            builder.skipDropExperience.run();
+        } else {
+            super.skipDropExperience();
+        }
     }
+
 
     @Override
     public boolean wasExperienceConsumed() {
-        return super.wasExperienceConsumed();
+        if (builder.wasExperienceConsumed != null) {
+            return builder.wasExperienceConsumed.get();
+        } else {
+            return super.wasExperienceConsumed();
+        }
     }
+
 
     @Override
     public Fallsounds getFallSounds() {
-        return super.getFallSounds();
+        if (builder.fallSoundsFunction != null) {
+            return builder.fallSoundsFunction.apply(super.getFallSounds());
+        } else {
+            return super.getFallSounds();
+        }
     }
 
+
     @Override
-    public SoundEvent getEatingSound(ItemStack p_21202_) {
-        return super.getEatingSound(p_21202_);
+    public SoundEvent getEatingSound(ItemStack itemStack) {
+        if (builder.eatingSound != null) {
+            return builder.eatingSound.apply(itemStack);
+        } else {
+            return super.getEatingSound(itemStack);
+        }
     }
+
 
     @Override
     public void setOnGround(boolean p_21182_) {
@@ -1067,4 +1338,5 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     public boolean isAlive() {
         return super.isAlive();
     }
+
 }
