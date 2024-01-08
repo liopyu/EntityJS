@@ -141,7 +141,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient BiFunction<DamageSource, Float, Float> customGetDamageAfterMagicAbsorb;
     public transient Function<Float, Float> customNextStep;
     public transient Function<HoverEvent, HoverEvent> customCreateHoverEvent;
-    public transient Function<Integer, Integer> customGetFireImmuneTicks;
+    /* public transient Function<Integer, Integer> customGetFireImmuneTicks;*/
     public transient Function<Integer, Integer> customGetPermissionLevel;
     public transient Function<Integer, Integer> customIncreaseAirSupply;
     public transient Function<double[], ListTag> customNewDoubleList;
@@ -243,7 +243,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
 
 
     /*public transient FloatSupplier customGetHealth;*/
-    public transient BiConsumer<Float, LivingEntity> setHealthAmount;
+    /*public transient float setHealth;*/
 
     public transient Predicate<LivingEntity> isDeadOrDying;
 
@@ -284,7 +284,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     /*public transient Supplier<Optional<BlockPos>> customGetLastClimbablePos;*/
     public transient Predicate<LivingEntity> onClimbable;
     /*public transient BooleanSupplier customIsAlive;*/
-    public transient Predicate<LivingEntity> canBreatheUnderwater;
+    public transient boolean canBreatheUnderwater;
 
     public transient BiPredicate<Float, DamageSource> causeFallDamage;
 
@@ -314,11 +314,11 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Consumer<LivingEntity> rideTick;
 
     @FunctionalInterface
-    public interface HeptConsumer<A, B, C, D, E, F, G> {
-        void accept(A arg1, B arg2, C arg3, D arg4, E arg5, F arg6, G arg7);
+    public interface HeptConsumer {
+        void accept(double arg1, double arg2, double arg3, float arg4, float arg5, int arg6, boolean arg7);
     }
 
-    public transient HeptConsumer<Double, Double, Double, Float, Float, Integer, Boolean> lerpToConsumer;
+    public transient HeptConsumer lerpTo;
     public transient BiConsumer<Float, Integer> lerpHeadTo;
     public transient Consumer<Boolean> setJumping;
     public transient Consumer<ItemEntity> onItemPickup;
@@ -392,8 +392,8 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         };
         animationSuppliers = new ArrayList<>();
         shouldDropLoot = true;
-        setCanAddPassenger(entity -> false);
-        canRide(entity -> false);
+        setCanAddPassenger = false;
+        canRide = false;
         isAffectedByFluids = false;
         isAlwaysExperienceDropper = false;
         isImmobile = false;
@@ -411,6 +411,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         renderType = RenderType.CUTOUT;
         getSwimHighSpeedSplashSound = SoundEvents.MOOSHROOM_SHEAR;
         mainArm = HumanoidArm.RIGHT;
+        canBreatheUnderwater = false;
     }
 
     @Info(value = "Sets the main arm of the entity, defaults to 'right'")
@@ -766,10 +767,10 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
-    public BaseEntityBuilder<T> getFireImmuneTicks(Function<Integer, Integer> customGetFireImmuneTicks) {
+    /*public BaseEntityBuilder<T> getFireImmuneTicks(Function<Integer, Integer> customGetFireImmuneTicks) {
         this.customGetFireImmuneTicks = customGetFireImmuneTicks;
         return this;
-    }
+    }*/
 
     public BaseEntityBuilder<T> getPermissionLevel(Function<Integer, Integer> customGetPermissionLevel) {
         this.customGetPermissionLevel = customGetPermissionLevel;
@@ -1168,11 +1169,11 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }*/
 
-    @Info(value = "Sets the custom logic for setting the entity's health")
-    public BaseEntityBuilder<T> setHealthAmount(BiConsumer<Float, LivingEntity> callback) {
-        setHealthAmount = callback;
+    /*@Info(value = "Sets the custom logic for setting the entity's health")
+    public BaseEntityBuilder<T> setHealth(float f) {
+        setHealth = f;
         return this;
-    }
+    }*/
 
 
     @Info(value = "Sets the custom logic for determining if the entity is dead or dying")
@@ -1315,8 +1316,8 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }*/
     @Info(value = "Sets the custom logic for determining if the entity can breathe underwater")
-    public BaseEntityBuilder<T> canBreatheUnderwater(Predicate<LivingEntity> predicate) {
-        canBreatheUnderwater = predicate;
+    public BaseEntityBuilder<T> canBreatheUnderwater(boolean b) {
+        canBreatheUnderwater = b;
         return this;
     }
 
@@ -1465,8 +1466,8 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     }
 
     @Info(value = "Sets the custom logic for lerping the entity's position and rotation.")
-    public BaseEntityBuilder<T> lerpTo(HeptConsumer<Double, Double, Double, Float, Float, Integer, Boolean> consumer) {
-        lerpToConsumer = consumer;
+    public BaseEntityBuilder<T> lerpTo(HeptConsumer consumer) {
+        lerpTo = consumer;
         return this;
     }
 

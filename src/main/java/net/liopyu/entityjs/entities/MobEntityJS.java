@@ -37,7 +37,8 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
-        if (builder == null) return; // When called in the super method, the builder is null, thus we call it again when we do have a builder
+        if (builder == null)
+            return; // When called in the super method, the builder is null, thus we call it again when we do have a builder
         // Goal selectors
         final GoalSelectorBuilder<MobEntityJS> goalSelectorBuilder = new GoalSelectorBuilder<>();
         builder.goalSelectorBuilder.accept(goalSelectorBuilder);
@@ -51,5 +52,10 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     protected PathNavigation createNavigation(Level p_21480_) {
         return super.createNavigation(p_21480_);
+    }
+
+    @Override
+    public boolean canBreatheUnderwater() {
+        return builder.canBreatheUnderwater;
     }
 }

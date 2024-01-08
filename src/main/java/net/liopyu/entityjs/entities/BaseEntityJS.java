@@ -33,10 +33,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.entity.EntityInLevelCallback;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraft.world.entity.ai.Brain;
@@ -224,42 +227,42 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
 
-    @Override
+    /*@Override
     protected float getBlockJumpFactor() {
         return builder.getBlockJumpFactor;
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected float getBlockSpeedFactor() {
         return builder.blockSpeedFactor == null ? super.getBlockSpeedFactor() : builder.blockSpeedFactor.apply(this);
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     protected float getJumpPower() {
         return builder.getJumpPower;
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected float getSoundVolume() {
         return builder.getSoundVolume;
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected float getWaterSlowDown() {
         return builder.getWaterSlowDown;
-    }
+    }*/
 
-    @Nullable
+    /*@Nullable
     @Override
     protected SoundEvent getDeathSound() {
         return builder.setDeathSound;
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected SoundEvent getSwimSound() {
         return builder.setSwimSound;
-    }
+    }*/
 
     @Override
     protected boolean isFlapping() {
@@ -278,15 +281,15 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         builder.postTick.accept(this);
     }
 
-    @Override
+   /* @Override
     protected SoundEvent getSwimHighSpeedSplashSound() {
         return builder.getSwimHighSpeedSplashSound;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public EntityType<?> getType() {
         return builder.getType;
-    }
+    }*/
 
     private BlockState[] shouldRemoveSoulSpeed;
 
@@ -358,21 +361,21 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         builder.applyCustomDoAutoAttackOnTouch(target);
     }
 
-    @Override
+    /*@Override
     protected float getStandingEyeHeight(Pose poseIn, EntityDimensions sizeIn) {
         if (builder.customGetStandingEyeHeight != null) {
             return builder.customGetStandingEyeHeight.apply(poseIn);
         }
         return super.getStandingEyeHeight(poseIn, sizeIn);
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected BlockPos getBlockPosBelowThatAffectsMyMovement() {
         if (builder.customGetBlockPosBelow != null) {
             return builder.customGetBlockPosBelow.apply(this.blockPosition());
         }
         return super.getBlockPosBelowThatAffectsMyMovement();
-    }
+    }*/
 
     @Override
     protected int decreaseAirSupply(int p_21303_) {
@@ -409,14 +412,14 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    @Override
+    /*@Override
     protected AABB getBoundingBoxForPose(Pose p_20218_) {
         if (builder.customGetBoundingBoxForPose != null) {
             return builder.customGetBoundingBoxForPose.apply(p_20218_);
         } else {
             return super.getBoundingBoxForPose(p_20218_);
         }
-    }
+    }*/
 
     @Override
     protected boolean canEnterPose(Pose p_20176_) {
@@ -427,14 +430,14 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    @Override
+   /* @Override
     protected boolean getSharedFlag(int p_20292_) {
         if (builder.customGetSharedFlag != null) {
             return builder.customGetSharedFlag.apply(p_20292_);
         } else {
             return super.getSharedFlag(p_20292_);
         }
-    }
+    }*/
 
     @Override
     protected boolean isHorizontalCollisionMinor(Vec3 p_196625_) {
@@ -463,32 +466,32 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    @Override
+    /*@Override
     protected Component getTypeName() {
         if (builder.customGetTypeName != null) {
             return builder.customGetTypeName.apply(this);
         } else {
             return super.getTypeName();
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected float getDamageAfterArmorAbsorb(DamageSource p_21162_, float p_21163_) {
         if (builder.customGetDamageAfterArmorAbsorb != null) {
             return builder.customGetDamageAfterArmorAbsorb.apply(p_21162_, p_21163_);
         } else {
             return super.getDamageAfterArmorAbsorb(p_21162_, p_21163_);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected float getDamageAfterMagicAbsorb(DamageSource p_21193_, float p_21194_) {
         if (builder.customGetDamageAfterMagicAbsorb != null) {
             return builder.customGetDamageAfterMagicAbsorb.apply(p_21193_, p_21194_);
         } else {
             return super.getDamageAfterMagicAbsorb(p_21193_, p_21194_);
         }
-    }
+    }*/
 
     @Override
     protected float nextStep() {
@@ -509,7 +512,7 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    @Override
+    /*@Override
     protected int getFireImmuneTicks() {
         int originalFireImmuneTicks = super.getFireImmuneTicks();
         if (builder.customGetFireImmuneTicks != null) {
@@ -518,8 +521,8 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
             return originalFireImmuneTicks;
         }
     }
-
-    @Override
+*/
+    /*@Override
     protected int getPermissionLevel() {
         int originalPermissionLevel = super.getPermissionLevel();
         if (builder.customGetPermissionLevel != null) {
@@ -527,7 +530,7 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         } else {
             return originalPermissionLevel;
         }
-    }
+    }*/
 
     @Override
     protected int increaseAirSupply(int p_21307_) {
@@ -1147,14 +1150,10 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         return super.getHealth();
     }*/
 
-    @Override
+   /* @Override
     public void setHealth(float health) {
-        if (builder.setHealthAmount != null) {
-            builder.setHealthAmount.accept(health, this);
-        } else {
-            super.setHealth(health);
-        }
-    }
+        builder.setHealth(health);
+    }*/
 
 
     @Override
@@ -1351,11 +1350,7 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean canBreatheUnderwater() {
-        if (builder.canBreatheUnderwater != null) {
-            return builder.canBreatheUnderwater.test(this);
-        } else {
-            return super.canBreatheUnderwater();
-        }
+        return builder.canBreatheUnderwater;
     }
 
 
@@ -1601,8 +1596,8 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public void lerpTo(double x, double y, double z, float yRot, float xRot, int interpolationSteps, boolean interpolate) {
-        if (builder.lerpToConsumer != null) {
-            builder.lerpToConsumer.accept(x, y, z, yRot, xRot, interpolationSteps, interpolate);
+        if (builder.lerpTo != null) {
+            builder.lerpTo.accept(x, y, z, yRot, xRot, interpolationSteps, interpolate);
         } else {
             super.lerpTo(x, y, z, yRot, xRot, interpolationSteps, interpolate);
         }
@@ -2017,4 +2012,388 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
+    @Override
+    public boolean isColliding(BlockPos p_20040_, BlockState p_20041_) {
+        return super.isColliding(p_20040_, p_20041_);
+    }
+
+    @Override
+    public boolean addTag(String p_20050_) {
+        return super.addTag(p_20050_);
+    }
+
+    @Override
+    public boolean removeTag(String p_20138_) {
+        return super.removeTag(p_20138_);
+    }
+
+    @Override
+    public boolean equals(Object p_20245_) {
+        return super.equals(p_20245_);
+    }
+
+    @Override
+    public void remove(RemovalReason p_146834_) {
+        super.remove(p_146834_);
+    }
+
+    @Override
+    public void onClientRemoval() {
+        super.onClientRemoval();
+    }
+
+    @Override
+    public void setPose(Pose p_20125_) {
+        super.setPose(p_20125_);
+    }
+
+    @Override
+    public boolean hasPose(Pose p_217004_) {
+        return super.hasPose(p_217004_);
+    }
+
+    @Override
+    public boolean closerThan(Entity p_19951_, double p_19952_) {
+        return super.closerThan(p_19951_, p_19952_);
+    }
+
+    @Override
+    public boolean closerThan(Entity p_216993_, double p_216994_, double p_216995_) {
+        return super.closerThan(p_216993_, p_216994_, p_216995_);
+    }
+
+    @Override
+    protected void setRot(float p_19916_, float p_19917_) {
+        super.setRot(p_19916_, p_19917_);
+    }
+
+    @Override
+    public void setPos(double p_20210_, double p_20211_, double p_20212_) {
+        super.setPos(p_20210_, p_20211_, p_20212_);
+    }
+
+    @Override
+    public void turn(double p_19885_, double p_19886_) {
+        super.turn(p_19885_, p_19886_);
+    }
+
+    @Override
+    public void setPortalCooldown() {
+        super.setPortalCooldown();
+    }
+
+    @Override
+    public void lavaHurt() {
+        super.lavaHurt();
+    }
+
+    @Override
+    public void setSecondsOnFire(int p_20255_) {
+        super.setSecondsOnFire(p_20255_);
+    }
+
+    @Override
+    public void setRemainingFireTicks(int p_20269_) {
+        super.setRemainingFireTicks(p_20269_);
+    }
+
+    @Override
+    public void clearFire() {
+        super.clearFire();
+    }
+
+    @Override
+    public boolean isFree(double p_20230_, double p_20231_, double p_20232_) {
+        return super.isFree(p_20230_, p_20231_, p_20232_);
+    }
+
+    @Override
+    public void move(MoverType p_19973_, Vec3 p_19974_) {
+        super.move(p_19973_, p_19974_);
+    }
+
+    @Override
+    public void gameEvent(GameEvent p_146853_, @Nullable Entity p_146854_) {
+        super.gameEvent(p_146853_, p_146854_);
+    }
+
+    @Override
+    public void gameEvent(GameEvent p_146851_) {
+        super.gameEvent(p_146851_);
+    }
+
+    @Override
+    protected void onFlap() {
+        super.onFlap();
+    }
+
+    @Override
+    public void playSound(SoundEvent p_19938_, float p_19939_, float p_19940_) {
+        super.playSound(p_19938_, p_19939_, p_19940_);
+    }
+
+    @Override
+    public void playSound(SoundEvent p_216991_) {
+        super.playSound(p_216991_);
+    }
+
+    @Override
+    public boolean isSilent() {
+        return super.isSilent();
+    }
+
+    @Override
+    public void setSilent(boolean p_20226_) {
+        super.setSilent(p_20226_);
+    }
+
+    @Override
+    public boolean isNoGravity() {
+        return super.isNoGravity();
+    }
+
+    @Override
+    public void setNoGravity(boolean p_20243_) {
+        super.setNoGravity(p_20243_);
+    }
+
+    @Override
+    public boolean dampensVibrations() {
+        return super.dampensVibrations();
+    }
+
+    @Override
+    public boolean fireImmune() {
+        return super.fireImmune();
+    }
+
+    @Override
+    public boolean isInWater() {
+        return super.isInWater();
+    }
+
+    @Override
+    public boolean isInWaterOrRain() {
+        return super.isInWaterOrRain();
+    }
+
+    @Override
+    public boolean isInWaterRainOrBubble() {
+        return super.isInWaterRainOrBubble();
+    }
+
+    @Override
+    public boolean isInWaterOrBubble() {
+        return super.isInWaterOrBubble();
+    }
+
+    @Override
+    public boolean isUnderWater() {
+        return super.isUnderWater();
+    }
+
+    @Override
+    public boolean canSpawnSprintParticle() {
+        return super.canSpawnSprintParticle();
+    }
+
+    @Override
+    public boolean isInLava() {
+        return super.isInLava();
+    }
+
+    @Override
+    public void moveRelative(float p_19921_, Vec3 p_19922_) {
+        super.moveRelative(p_19921_, p_19922_);
+    }
+
+    @Override
+    public void absMoveTo(double p_19891_, double p_19892_, double p_19893_, float p_19894_, float p_19895_) {
+        super.absMoveTo(p_19891_, p_19892_, p_19893_, p_19894_, p_19895_);
+    }
+
+    @Override
+    public void absMoveTo(double p_20249_, double p_20250_, double p_20251_) {
+        super.absMoveTo(p_20249_, p_20250_, p_20251_);
+    }
+
+    @Override
+    public void moveTo(Vec3 p_20220_) {
+        super.moveTo(p_20220_);
+    }
+
+    @Override
+    public void moveTo(double p_20105_, double p_20106_, double p_20107_) {
+        super.moveTo(p_20105_, p_20106_, p_20107_);
+    }
+
+    @Override
+    public void moveTo(BlockPos p_20036_, float p_20037_, float p_20038_) {
+        super.moveTo(p_20036_, p_20037_, p_20038_);
+    }
+
+    @Override
+    public void moveTo(double p_20108_, double p_20109_, double p_20110_, float p_20111_, float p_20112_) {
+        super.moveTo(p_20108_, p_20109_, p_20110_, p_20111_, p_20112_);
+    }
+
+    @Override
+    public void playerTouch(Player p_20081_) {
+        super.playerTouch(p_20081_);
+    }
+
+    @Override
+    public void push(double p_20286_, double p_20287_, double p_20288_) {
+        super.push(p_20286_, p_20287_, p_20288_);
+    }
+
+    @Override
+    public HitResult pick(double p_19908_, float p_19909_, boolean p_19910_) {
+        return super.pick(p_19908_, p_19909_, p_19910_);
+    }
+
+    @Override
+    public void awardKillScore(Entity p_19953_, int p_19954_, DamageSource p_19955_) {
+        super.awardKillScore(p_19953_, p_19954_, p_19955_);
+    }
+
+    @Override
+    public boolean shouldRender(double p_20296_, double p_20297_, double p_20298_) {
+        return super.shouldRender(p_20296_, p_20297_, p_20298_);
+    }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double p_19883_) {
+        return super.shouldRenderAtSqrDistance(p_19883_);
+    }
+
+    @Override
+    public boolean canCollideWith(Entity p_20303_) {
+        return super.canCollideWith(p_20303_);
+    }
+
+    @Override
+    public boolean showVehicleHealth() {
+        return super.showVehicleHealth();
+    }
+
+    @Override
+    public void handleInsidePortal(BlockPos p_20222_) {
+        super.handleInsidePortal(p_20222_);
+    }
+
+    @Override
+    public void lerpMotion(double p_20306_, double p_20307_, double p_20308_) {
+        super.lerpMotion(p_20306_, p_20307_, p_20308_);
+    }
+
+    @Override
+    public void setInvisible(boolean p_20304_) {
+        super.setInvisible(p_20304_);
+    }
+
+    @Override
+    public void setAirSupply(int p_20302_) {
+        super.setAirSupply(p_20302_);
+    }
+
+    @Override
+    public void setTicksFrozen(int p_146918_) {
+        super.setTicksFrozen(p_146918_);
+    }
+
+    @Override
+    public boolean isFullyFrozen() {
+        return super.isFullyFrozen();
+    }
+
+    @Override
+    public void thunderHit(ServerLevel p_19927_, LightningBolt p_19928_) {
+        super.thunderHit(p_19927_, p_19928_);
+    }
+
+    @Override
+    public void makeStuckInBlock(BlockState p_20006_, Vec3 p_20007_) {
+        super.makeStuckInBlock(p_20006_, p_20007_);
+    }
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource p_20122_) {
+        return super.isInvulnerableTo(p_20122_);
+    }
+
+    @Override
+    public boolean isInvulnerable() {
+        return super.isInvulnerable();
+    }
+
+    @Override
+    public void setInvulnerable(boolean p_20332_) {
+        super.setInvulnerable(p_20332_);
+    }
+
+    @Override
+    public boolean canChangeDimensions() {
+        return super.canChangeDimensions();
+    }
+
+    @Override
+    public boolean displayFireAnimation() {
+        return super.displayFireAnimation();
+    }
+
+    @Override
+    public void setCustomName(@Nullable Component p_20053_) {
+        super.setCustomName(p_20053_);
+    }
+
+    @Override
+    public void setCustomNameVisible(boolean p_20341_) {
+        super.setCustomNameVisible(p_20341_);
+    }
+
+    @Override
+    public boolean isCustomNameVisible() {
+        return super.isCustomNameVisible();
+    }
+
+    @Override
+    public void setLevelCallback(EntityInLevelCallback p_146849_) {
+        super.setLevelCallback(p_146849_);
+    }
+
+    @Override
+    public boolean isAlwaysTicking() {
+        return super.isAlwaysTicking();
+    }
+
+    @Override
+    public boolean mayInteract(Level p_146843_, BlockPos p_146844_) {
+        return super.mayInteract(p_146843_, p_146844_);
+    }
+
+    @Override
+    public boolean canUpdate() {
+        return super.canUpdate();
+    }
+
+    @Override
+    public boolean canTrample(BlockState state, BlockPos pos, float fallDistance) {
+        return super.canTrample(state, pos, fallDistance);
+    }
+
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+    }
+
+    @Override
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
+    }
+
+    @Override
+    public Level getLevel() {
+        return super.getLevel();
+    }
 }
