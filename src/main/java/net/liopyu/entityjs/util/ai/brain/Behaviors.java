@@ -23,14 +23,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-// These are all so awful to work with and expect things to exist,
-//   something which is not guaranteed in modded due to deferred
-//                         registration!
-//
-//        I hate every part of this system with a passion
-//
-//                   Brains were a mistake
-
+import java.util.function.Predicate;
 
 // I am not wrapping all of those supplier arguments with ResourceLocation backed getters
 @SuppressWarnings("unused")

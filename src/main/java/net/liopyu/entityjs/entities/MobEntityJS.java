@@ -52,4 +52,9 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     protected PathNavigation createNavigation(Level p_21480_) {
         return super.createNavigation(p_21480_);
     }
+
+    @Override
+    public boolean canBreatheUnderwater() {
+        return builder.canBreatheUnderwater;
+    }
 }

@@ -8,10 +8,7 @@ import dev.latvian.mods.rhino.util.HideFromJS;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -483,7 +480,6 @@ public class GoalSelectorBuilder<T extends Mob> extends GoalBuilder<T> {
     })
     public GoalSelectorBuilder<T> useItem(int priority, ItemStack itemToUse, @Nullable ResourceLocation soundEvent, Predicate<T> canUseSelector) {
         suppliers.add(new Pair<>(priority, t -> new UseItemGoal<>(t, itemToUse, soundEvent == null ? null : Registry.SOUND_EVENT.get(soundEvent), canUseSelector))); // I like this one, interesting function and not stupidly restricted, mojang please more of these :)
-        return this;
     }
 
     @Info(value = "Adds a `WaterAvoidingRandomFlyingGoal` to the entity, only applicable to **pathfinder** mobs", params = {

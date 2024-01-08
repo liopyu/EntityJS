@@ -37,7 +37,7 @@ public class GoalTargetBuilder<T extends Mob> extends GoalBuilder<T> {
             =====================================
             builder.arbitraryTargetGoal(3, entity -> new $DefendVillageTargetGoal(entity))
             =====================================
-            
+           
             Note in the example the entity must be an instance of IronGolem
             """, params = {
             @Param(name = "priority", value = "The priority of the goal"),

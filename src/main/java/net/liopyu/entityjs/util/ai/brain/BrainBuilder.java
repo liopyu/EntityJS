@@ -33,8 +33,8 @@ public class BrainBuilder {
         behaviorNames = new ArrayList<>();
     }
 
-    public BrainBuilder coreActivity(int i, List<Supplier<Behavior<? super LivingEntity>>> behaviors) {
-        suppliers.add(new ActivitySupplier(Activity.CORE, null, i, behaviors));
+    public BrainBuilder coreActivity(int i, List<Behavior<? super LivingEntity>> behaviors) {
+        suppliers.add(new BrainBuilderSupplier(Activity.CORE, null, i, behaviors));
         behaviorNames.add("minecraft:core");
         return this;
     }
