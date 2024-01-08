@@ -7,6 +7,7 @@ import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
 import net.liopyu.entityjs.util.ExitPortalInfo;
 import net.liopyu.entityjs.util.ai.brain.BrainBuilder;
 import net.minecraft.BlockUtil;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -19,16 +20,20 @@ import net.liopyu.entityjs.util.ai.brain.BrainBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
@@ -1319,24 +1324,697 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
 
-    @Override
+    /*@Override
     public void setOnGround(boolean p_21182_) {
         super.setOnGround(p_21182_);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public Optional<BlockPos> getLastClimbablePos() {
         return super.getLastClimbablePos();
-    }
+    }*/
 
     @Override
     public boolean onClimbable() {
-        return super.onClimbable();
+        if (builder.onClimbable != null) {
+            return builder.onClimbable.test(this);
+        } else {
+            return super.onClimbable();
+        }
+    }
+
+
+    /*@Override
+    public boolean isAlive() {
+        return super.isAlive();
+    }*/
+
+    @Override
+    public boolean canBreatheUnderwater() {
+        if (builder.canBreatheUnderwater != null) {
+            return builder.canBreatheUnderwater.test(this);
+        } else {
+            return super.canBreatheUnderwater();
+        }
+    }
+
+
+    @Override
+    public boolean causeFallDamage(float distance, float damageMultiplier, DamageSource damageSource) {
+        if (builder.causeFallDamage != null) {
+            return builder.causeFallDamage.test(distance, damageSource);
+        } else {
+            return super.causeFallDamage(distance, damageMultiplier, damageSource);
+        }
+    }
+
+
+    @Override
+    protected void playBlockFallSound() {
+        if (builder.playBlockFallSound != null) {
+            builder.playBlockFallSound.accept(null);
+        } else {
+            super.playBlockFallSound();
+        }
+    }
+
+
+    @Override
+    protected void hurtArmor(DamageSource source, float amount) {
+        if (builder.hurtArmor != null) {
+            builder.hurtArmor.accept(source, amount);
+        } else {
+            super.hurtArmor(source, amount);
+        }
+    }
+
+
+    @Override
+    protected void hurtHelmet(DamageSource source, float amount) {
+        if (builder.hurtHelmet != null) {
+            builder.hurtHelmet.accept(source, amount);
+        } else {
+            super.hurtHelmet(source, amount);
+        }
+    }
+
+
+    @Override
+    protected void hurtCurrentlyUsedShield(float amount) {
+        if (builder.hurtCurrentlyUsedShield != null) {
+            builder.hurtCurrentlyUsedShield.accept(amount);
+        } else {
+            super.hurtCurrentlyUsedShield(amount);
+        }
+    }
+
+
+    @Override
+    public CombatTracker getCombatTracker() {
+        if (builder.combatTracker != null) {
+            return builder.combatTracker.apply(super.getCombatTracker());
+        } else {
+            return super.getCombatTracker();
+        }
+    }
+
+
+    @Nullable
+    @Override
+    public LivingEntity getKillCredit() {
+        if (builder.killCredit != null) {
+            return builder.killCredit.apply(super.getKillCredit());
+        } else {
+            return super.getKillCredit();
+        }
+    }
+
+
+    @Override
+    public void swing(InteractionHand hand) {
+        if (builder.swingHand != null) {
+            builder.swingHand.accept(hand);
+        } else {
+            super.swing(hand);
+        }
+    }
+
+
+    @Override
+    public void swing(InteractionHand hand, boolean extended) {
+        if (builder.swingHandExtended != null) {
+            builder.swingHandExtended.accept(hand, extended);
+        } else {
+            super.swing(hand, extended);
+        }
+    }
+
+
+    @Override
+    public void handleEntityEvent(byte event) {
+        if (builder.handleEntityEvent != null) {
+            builder.handleEntityEvent.accept(event);
+        } else {
+            super.handleEntityEvent(event);
+        }
+    }
+
+
+    @Override
+    public void setItemInHand(InteractionHand hand, ItemStack stack) {
+        if (builder.setItemInHand != null) {
+            builder.setItemInHand.accept(hand, stack);
+        } else {
+            super.setItemInHand(hand, stack);
+        }
+    }
+
+
+    @Override
+    public void setSprinting(boolean sprinting) {
+        if (builder.setSprinting != null) {
+            builder.setSprinting.accept(sprinting);
+        } else {
+            super.setSprinting(sprinting);
+        }
+    }
+
+
+    @Override
+    public void push(Entity entity) {
+        if (builder.pushEntity != null) {
+            builder.pushEntity.accept(entity);
+        } else {
+            super.push(entity);
+        }
+    }
+
+
+    @Override
+    public boolean shouldShowName() {
+        if (builder.shouldShowName != null) {
+            return builder.shouldShowName.test(this);
+        } else {
+            return super.shouldShowName();
+        }
+    }
+
+
+    @Override
+    public double getJumpBoostPower() {
+        if (builder.jumpBoostPower != null) {
+            return builder.jumpBoostPower.getAsDouble();
+        } else {
+            return super.getJumpBoostPower();
+        }
     }
 
     @Override
-    public boolean isAlive() {
-        return super.isAlive();
+    public boolean canStandOnFluid(FluidState fluidState) {
+        if (builder.canStandOnFluid != null) {
+            return builder.canStandOnFluid.test(fluidState);
+        } else {
+            return super.canStandOnFluid(fluidState);
+        }
+    }
+
+
+    @Override
+    public void travel(Vec3 travelVector) {
+        if (builder.travel != null) {
+            builder.travel.accept(travelVector);
+        } else {
+            super.travel(travelVector);
+        }
+    }
+
+
+    @Override
+    public Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 movementVector, float friction) {
+        if (builder.handleRelativeFrictionAndCalculateMovement != null) {
+            return builder.handleRelativeFrictionAndCalculateMovement.apply(movementVector, friction);
+        } else {
+            return super.handleRelativeFrictionAndCalculateMovement(movementVector, friction);
+        }
+    }
+
+
+    @Override
+    public void setSpeed(float speed) {
+        if (builder.setSpeedConsumer != null) {
+            builder.setSpeedConsumer.accept(speed);
+        } else {
+            super.setSpeed(speed);
+        }
+    }
+
+
+    @Override
+    public boolean doHurtTarget(Entity targetEntity) {
+        if (builder.doHurtTarget != null) {
+            return builder.doHurtTarget.test(targetEntity, false);
+        } else {
+            return super.doHurtTarget(targetEntity);
+        }
+    }
+
+
+    @Override
+    public boolean isSensitiveToWater() {
+        if (builder.isSensitiveToWater != null) {
+            return builder.isSensitiveToWater.test(false);
+        } else {
+            return super.isSensitiveToWater();
+        }
+    }
+
+
+    @Override
+    public boolean isAutoSpinAttack() {
+        if (builder.isAutoSpinAttack != null) {
+            return builder.isAutoSpinAttack.test(false);
+        } else {
+            return super.isAutoSpinAttack();
+        }
+    }
+
+
+    @Override
+    public void stopRiding() {
+        if (builder.stopRidingCallback != null) {
+            builder.stopRidingCallback.run();
+        } else {
+            super.stopRiding();
+        }
+    }
+
+
+    @Override
+    public void rideTick() {
+        if (builder.rideTick != null) {
+            builder.rideTick.accept(this);
+        } else {
+            super.rideTick();
+        }
+    }
+
+
+    @Override
+    public void lerpTo(double x, double y, double z, float yRot, float xRot, int interpolationSteps, boolean interpolate) {
+        if (builder.lerpToConsumer != null) {
+            builder.lerpToConsumer.accept(x, y, z, yRot, xRot, interpolationSteps, interpolate);
+        } else {
+            super.lerpTo(x, y, z, yRot, xRot, interpolationSteps, interpolate);
+        }
+    }
+
+    @Override
+    public void lerpHeadTo(float lyHeadRot, int lerpHeadSteps) {
+        if (builder.lerpHeadTo != null) {
+            builder.lerpHeadTo.accept(lyHeadRot, lerpHeadSteps);
+        } else {
+            super.lerpHeadTo(lyHeadRot, lerpHeadSteps);
+        }
+    }
+
+
+    @Override
+    public void setJumping(boolean p_21314_) {
+        if (builder.setJumping != null) {
+            builder.setJumping.accept(p_21314_);
+        } else {
+            super.setJumping(p_21314_);
+        }
+    }
+
+
+    @Override
+    public void onItemPickup(ItemEntity p_21054_) {
+        if (builder.onItemPickup != null) {
+            builder.onItemPickup.accept(p_21054_);
+        } else {
+            super.onItemPickup(p_21054_);
+        }
+    }
+
+    @Override
+    public void take(Entity p_21030_, int p_21031_) {
+        if (builder.take != null) {
+            builder.take.accept(p_21030_, p_21031_);
+        } else {
+            super.take(p_21030_, p_21031_);
+        }
+    }
+
+
+    @Override
+    public boolean hasLineOfSight(Entity p_147185_) {
+        if (builder.hasLineOfSight != null) {
+            return builder.hasLineOfSight.test(p_147185_);
+        } else {
+            return super.hasLineOfSight(p_147185_);
+        }
+    }
+
+
+    @Override
+    public boolean isEffectiveAi() {
+        if (builder.isEffectiveAi != null) {
+            return builder.isEffectiveAi.test(null);
+        } else {
+            return super.isEffectiveAi();
+        }
+    }
+
+
+    @Override
+    public boolean isPickable() {
+        if (builder.isPickable != null) {
+            return builder.isPickable.test(null);
+        } else {
+            return super.isPickable();
+        }
+    }
+
+
+    @Override
+    public void setYHeadRot(float value) {
+        if (builder.setYHeadRot != null) {
+            builder.setYHeadRot.accept(value);
+        } else {
+            super.setYHeadRot(value);
+        }
+    }
+
+
+    @Override
+    public void setYBodyRot(float value) {
+        if (builder.setYBodyRot != null) {
+            builder.setYBodyRot.accept(value);
+        } else {
+            super.setYBodyRot(value);
+        }
+    }
+
+
+    @Override
+    public void setAbsorptionAmount(float value) {
+        if (builder.setAbsorptionAmount != null) {
+            builder.setAbsorptionAmount.accept(value);
+        } else {
+            super.setAbsorptionAmount(value);
+        }
+    }
+
+
+    @Override
+    public void onEnterCombat() {
+        if (builder.onEnterCombat != null) {
+            builder.onEnterCombat.run();
+        } else {
+            super.onEnterCombat();
+        }
+    }
+
+
+    @Override
+    public void onLeaveCombat() {
+        if (builder.onLeaveCombat != null) {
+            builder.onLeaveCombat.run();
+        } else {
+            super.onLeaveCombat();
+        }
+    }
+
+
+    @Override
+    public boolean isUsingItem() {
+        if (builder.isUsingItem != null) {
+            return builder.isUsingItem.test(this);
+        } else {
+            return super.isUsingItem();
+        }
+    }
+
+
+    @Override
+    protected void setLivingEntityFlag(int flag, boolean value) {
+        if (builder.setLivingEntityFlag != null) {
+            builder.setLivingEntityFlag.accept(flag, value);
+        } else {
+            super.setLivingEntityFlag(flag, value);
+        }
+    }
+
+    @Override
+    public void startUsingItem(InteractionHand hand) {
+        if (builder.startUsingItem != null) {
+            builder.startUsingItem.accept(hand);
+        } else {
+            super.startUsingItem(hand);
+        }
+    }
+
+
+    @Override
+    public void lookAt(EntityAnchorArgument.Anchor anchor, Vec3 target) {
+        if (builder.lookAt != null) {
+            builder.lookAt.accept(anchor, target);
+        } else {
+            super.lookAt(anchor, target);
+        }
+    }
+
+
+    @Override
+    public void releaseUsingItem() {
+        if (builder.releaseUsingItem != null) {
+            builder.releaseUsingItem.run();
+        } else {
+            super.releaseUsingItem();
+        }
+    }
+
+
+    @Override
+    public void stopUsingItem() {
+        if (builder.stopUsingItem != null) {
+            builder.stopUsingItem.run();
+        } else {
+            super.stopUsingItem();
+        }
+    }
+
+
+    @Override
+    public boolean isBlocking() {
+        if (builder.isBlocking != null) {
+            return builder.isBlocking.test(this);
+        } else {
+            return super.isBlocking();
+        }
+    }
+
+    @Override
+    public boolean isSuppressingSlidingDownLadder() {
+        if (builder.isSuppressingSlidingDownLadder != null) {
+            return builder.isSuppressingSlidingDownLadder.test(this);
+        } else {
+            return super.isSuppressingSlidingDownLadder();
+        }
+    }
+
+
+    @Override
+    public boolean isFallFlying() {
+        if (builder.isFallFlying != null) {
+            return builder.isFallFlying.test(this);
+        } else {
+            return super.isFallFlying();
+        }
+    }
+
+    @Override
+    public boolean isVisuallySwimming() {
+        if (builder.isVisuallySwimming != null) {
+            return builder.isVisuallySwimming.test(this);
+        } else {
+            return super.isVisuallySwimming();
+        }
+    }
+
+
+    @Override
+    public boolean randomTeleport(double p_20985_, double p_20986_, double p_20987_, boolean p_20988_) {
+        if (builder.randomTeleportX != null && builder.randomTeleportY != null && builder.randomTeleportZ != null && builder.randomTeleportFlag != null) {
+            double newX = builder.randomTeleportX.apply(p_20985_, p_20986_);
+            double newY = builder.randomTeleportY.apply(p_20986_, p_20987_);
+            double newZ = builder.randomTeleportZ.apply(p_20985_, p_20987_);
+            boolean shouldTeleport = builder.randomTeleportFlag.test(p_20988_);
+
+            if (shouldTeleport) {
+                this.teleportTo(newX, newY, newZ);
+                return true;
+            }
+        }
+        return super.randomTeleport(p_20985_, p_20986_, p_20987_, p_20988_);
+    }
+
+    @Override
+    public boolean isAffectedByPotions() {
+        if (builder.isAffectedByPotions != null) {
+            return builder.isAffectedByPotions.test(this);
+        } else {
+            return super.isAffectedByPotions();
+        }
+    }
+
+    @Override
+    public boolean attackable() {
+        if (builder.attackable != null) {
+            return builder.attackable.test(super.attackable());
+        }
+        return super.attackable();
+    }
+
+    @Override
+    public void setRecordPlayingNearby(BlockPos p_21082_, boolean p_21083_) {
+        if (builder.setRecordPlayingNearby != null) {
+            builder.setRecordPlayingNearby.accept(p_21082_, p_21083_);
+        } else {
+            super.setRecordPlayingNearby(p_21082_, p_21083_);
+        }
+    }
+
+    @Override
+    public boolean canTakeItem(ItemStack itemStack) {
+        if (builder.canTakeItem != null) {
+            return builder.canTakeItem.test(itemStack);
+        } else {
+            return super.canTakeItem(itemStack);
+        }
+    }
+
+    @Override
+    public void setSleepingPos(BlockPos blockPos) {
+        if (builder.setSleepingPos != null) {
+            builder.setSleepingPos.accept(blockPos);
+        } else {
+            super.setSleepingPos(blockPos);
+        }
+    }
+
+
+    @Override
+    public boolean isSleeping() {
+        if (builder.isSleeping != null) {
+            return builder.isSleeping.get();
+        } else {
+            return super.isSleeping();
+        }
+    }
+
+    @Override
+    public void startSleeping(BlockPos blockPos) {
+        if (builder.startSleeping != null) {
+            builder.startSleeping.accept(blockPos);
+        } else {
+            super.startSleeping(blockPos);
+        }
+    }
+
+
+    @Override
+    public void stopSleeping() {
+        if (builder.stopSleeping != null) {
+            builder.stopSleeping.run();
+        } else {
+            super.stopSleeping();
+        }
+    }
+
+    @Override
+    public boolean isInWall() {
+        if (builder.isInWall != null) {
+            return builder.isInWall.get();
+        } else {
+            return super.isInWall();
+        }
+    }
+
+
+    @Override
+    public ItemStack eat(Level level, ItemStack itemStack) {
+        if (builder.eat != null) {
+            return builder.eat.apply(level, itemStack);
+        } else {
+            return super.eat(level, itemStack);
+        }
+    }
+
+    @Override
+    public void broadcastBreakEvent(EquipmentSlot equipmentSlot) {
+        if (builder.broadcastBreakEvent != null) {
+            builder.broadcastBreakEvent.accept(equipmentSlot);
+        } else {
+            super.broadcastBreakEvent(equipmentSlot);
+        }
+    }
+
+
+    @Override
+    public void broadcastBreakEvent(InteractionHand interactionHand) {
+        if (builder.broadcastBreakEventHand != null) {
+            builder.broadcastBreakEventHand.accept(interactionHand);
+        } else {
+            super.broadcastBreakEvent(interactionHand);
+        }
+    }
+
+    @Override
+    public boolean curePotionEffects(ItemStack curativeItem) {
+        if (builder.curePotionEffects != null) {
+            return builder.curePotionEffects.test(curativeItem, false);
+        } else {
+            return super.curePotionEffects(curativeItem);
+        }
+    }
+
+
+    @Override
+    public boolean shouldRiderFaceForward(Player player) {
+        if (builder.shouldRiderFaceForward != null) {
+            return builder.shouldRiderFaceForward.test(player);
+        } else {
+            return super.shouldRiderFaceForward(player);
+        }
+    }
+
+    @Override
+    public void invalidateCaps() {
+        if (builder.invalidateCaps != null) {
+            builder.invalidateCaps.run();
+        } else {
+            super.invalidateCaps();
+        }
+    }
+
+
+    @Override
+    public void reviveCaps() {
+        if (builder.reviveCaps != null) {
+            builder.reviveCaps.run();
+        } else {
+            super.reviveCaps();
+        }
+    }
+
+    @Override
+    public boolean canFreeze() {
+        if (builder.canFreeze != null) {
+            return builder.canFreeze.test(this);
+        } else {
+            return super.canFreeze();
+        }
+    }
+
+
+    @Override
+    public boolean isCurrentlyGlowing() {
+        if (builder.isCurrentlyGlowing != null) {
+            return builder.isCurrentlyGlowing.test(this);
+        } else {
+            return super.isCurrentlyGlowing();
+        }
+    }
+
+    @Override
+    public boolean canDisableShield() {
+        if (builder.canDisableShield != null) {
+            return builder.canDisableShield.test(this);
+        } else {
+            return super.canDisableShield();
+        }
     }
 
 }

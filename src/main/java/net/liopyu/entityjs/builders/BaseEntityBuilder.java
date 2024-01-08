@@ -13,6 +13,7 @@ import net.liopyu.entityjs.entities.BaseEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.ExitPortalInfo;
 import net.minecraft.BlockUtil;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.ListTag;
@@ -25,12 +26,17 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
@@ -274,10 +280,93 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
 
     public transient Function<ItemStack, SoundEvent> eatingSound;
 
-    public transient BooleanConsumer customSetOnGround;
-    public transient Supplier<Optional<BlockPos>> customGetLastClimbablePos;
-    public transient BooleanSupplier customOnClimbable;
-    public transient BooleanSupplier customIsAlive;
+    /* public transient BooleanConsumer customSetOnGround;*/
+    /*public transient Supplier<Optional<BlockPos>> customGetLastClimbablePos;*/
+    public transient Predicate<LivingEntity> onClimbable;
+    /*public transient BooleanSupplier customIsAlive;*/
+    public transient Predicate<LivingEntity> canBreatheUnderwater;
+
+    public transient BiPredicate<Float, DamageSource> causeFallDamage;
+
+    public transient Consumer<Void> playBlockFallSound;
+    public transient BiConsumer<DamageSource, Float> hurtArmor;
+
+    public transient BiConsumer<DamageSource, Float> hurtHelmet;
+    public transient Consumer<Float> hurtCurrentlyUsedShield;
+    public transient Function<CombatTracker, CombatTracker> combatTracker;
+    public transient Function<LivingEntity, LivingEntity> killCredit;
+    public transient Consumer<InteractionHand> swingHand;
+    public transient BiConsumer<InteractionHand, Boolean> swingHandExtended;
+    public transient Consumer<Byte> handleEntityEvent;
+    public transient BiConsumer<InteractionHand, ItemStack> setItemInHand;
+    public transient Consumer<Boolean> setSprinting;
+    public transient Consumer<Entity> pushEntity;
+    public transient Predicate<LivingEntity> shouldShowName;
+    public transient DoubleSupplier jumpBoostPower;
+    public transient Predicate<FluidState> canStandOnFluid;
+    public transient Consumer<Vec3> travel;
+    public transient BiFunction<Vec3, Float, Vec3> handleRelativeFrictionAndCalculateMovement;
+    public transient Consumer<Float> setSpeedConsumer;
+    public transient BiPredicate<Entity, Boolean> doHurtTarget;
+    public transient Predicate<Boolean> isSensitiveToWater;
+    public transient Predicate<Boolean> isAutoSpinAttack;
+    public transient Runnable stopRidingCallback;
+    public transient Consumer<LivingEntity> rideTick;
+
+    @FunctionalInterface
+    public interface HeptConsumer<A, B, C, D, E, F, G> {
+        void accept(A arg1, B arg2, C arg3, D arg4, E arg5, F arg6, G arg7);
+    }
+
+    public transient HeptConsumer<Double, Double, Double, Float, Float, Integer, Boolean> lerpToConsumer;
+    public transient BiConsumer<Float, Integer> lerpHeadTo;
+    public transient Consumer<Boolean> setJumping;
+    public transient Consumer<ItemEntity> onItemPickup;
+    public transient BiConsumer<Entity, Integer> take;
+    public transient Predicate<Entity> hasLineOfSight;
+    public transient Predicate<Void> isEffectiveAi;
+    public transient Predicate<Void> isPickable;
+    public transient Consumer<Float> setYHeadRot;
+    public transient Consumer<Float> setYBodyRot;
+    public transient Consumer<Float> setAbsorptionAmount;
+    public transient Runnable onEnterCombat;
+    public transient Runnable onLeaveCombat;
+    public transient Predicate<LivingEntity> isUsingItem;
+
+    public transient BiConsumer<Integer, Boolean> setLivingEntityFlag;
+    public transient Consumer<InteractionHand> startUsingItem;
+    public transient BiConsumer<EntityAnchorArgument.Anchor, Vec3> lookAt;
+    public transient Runnable releaseUsingItem;
+    public transient Runnable stopUsingItem;
+    public transient Predicate<LivingEntity> isBlocking;
+    public transient Predicate<LivingEntity> isSuppressingSlidingDownLadder;
+    public transient Predicate<LivingEntity> isFallFlying;
+    public transient Predicate<LivingEntity> isVisuallySwimming;
+    public transient BiFunction<Double, Double, Double> randomTeleportX;
+    public transient BiFunction<Double, Double, Double> randomTeleportY;
+    public transient BiFunction<Double, Double, Double> randomTeleportZ;
+    public transient Predicate<Boolean> randomTeleportFlag;
+    public transient Predicate<LivingEntity> isAffectedByPotions;
+
+    public transient Predicate<Boolean> attackable;
+    public transient BiConsumer<BlockPos, Boolean> setRecordPlayingNearby;
+    public transient Predicate<ItemStack> canTakeItem;
+    public transient Consumer<BlockPos> setSleepingPos;
+    public transient Supplier<Boolean> isSleeping;
+    public transient Consumer<BlockPos> startSleeping;
+    public transient Runnable stopSleeping;
+    public transient Supplier<Boolean> isInWall;
+    public transient BiFunction<Level, ItemStack, ItemStack> eat;
+    public transient Consumer<EquipmentSlot> broadcastBreakEvent;
+    public transient Consumer<InteractionHand> broadcastBreakEventHand;
+    public transient BiPredicate<ItemStack, Boolean> curePotionEffects;
+    public transient Predicate<Player> shouldRiderFaceForward;
+    public transient Runnable invalidateCaps;
+
+    public transient Runnable reviveCaps;
+    public transient Predicate<LivingEntity> canFreeze;
+    public transient Predicate<LivingEntity> isCurrentlyGlowing;
+    public transient Predicate<LivingEntity> canDisableShield;
 
     //STUFF
     public BaseEntityBuilder(ResourceLocation i) {
@@ -1204,23 +1293,439 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     }
 
 
-    public BaseEntityBuilder<T> setOnGround(BooleanConsumer customSetOnGround) {
+    /*public BaseEntityBuilder<T> setOnGround(BooleanConsumer customSetOnGround) {
         this.customSetOnGround = customSetOnGround;
         return this;
-    }
+    }*/
 
-    public BaseEntityBuilder<T> getLastClimbablePos(Supplier<Optional<BlockPos>> customGetLastClimbablePos) {
+   /* public BaseEntityBuilder<T> getLastClimbablePos(Supplier<Optional<BlockPos>> customGetLastClimbablePos) {
         this.customGetLastClimbablePos = customGetLastClimbablePos;
         return this;
-    }
+    }*/
 
-    public BaseEntityBuilder<T> onClimbable(BooleanSupplier customOnClimbable) {
-        this.customOnClimbable = customOnClimbable;
+    @Info(value = "Sets the custom logic for determining if the entity is on a climbable surface")
+    public BaseEntityBuilder<T> onClimbable(Predicate<LivingEntity> predicate) {
+        onClimbable = predicate;
         return this;
     }
 
-    public BaseEntityBuilder<T> isAlive(BooleanSupplier customIsAlive) {
+
+    /*public BaseEntityBuilder<T> isAlive(BooleanSupplier customIsAlive) {
         this.customIsAlive = customIsAlive;
+        return this;
+    }*/
+    @Info(value = "Sets the custom logic for determining if the entity can breathe underwater")
+    public BaseEntityBuilder<T> canBreatheUnderwater(Predicate<LivingEntity> predicate) {
+        canBreatheUnderwater = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for causing fall damage")
+    public BaseEntityBuilder<T> causeFallDamage(BiPredicate<Float, DamageSource> predicate) {
+        causeFallDamage = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for playing block fall sound")
+    public BaseEntityBuilder<T> playBlockFallSound(Consumer<Void> consumer) {
+        playBlockFallSound = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for hurting armor")
+    public BaseEntityBuilder<T> hurtArmor(BiConsumer<DamageSource, Float> consumer) {
+        hurtArmor = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for hurting the helmet")
+    public BaseEntityBuilder<T> hurtHelmet(BiConsumer<DamageSource, Float> consumer) {
+        hurtHelmet = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for hurting the currently used shield")
+    public BaseEntityBuilder<T> hurtCurrentlyUsedShield(Consumer<Float> consumer) {
+        hurtCurrentlyUsedShield = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for getting the combat tracker")
+    public BaseEntityBuilder<T> combatTracker(Function<CombatTracker, CombatTracker> function) {
+        combatTracker = function;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for getting the kill credit entity")
+    public BaseEntityBuilder<T> killCredit(Function<LivingEntity, LivingEntity> function) {
+        killCredit = function;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for swinging the entity's hand")
+    public BaseEntityBuilder<T> swingHand(Consumer<InteractionHand> consumer) {
+        swingHand = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for swinging the entity's hand with extended parameters")
+    public BaseEntityBuilder<T> swingHandExtended(BiConsumer<InteractionHand, Boolean> consumer) {
+        swingHandExtended = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for handling entity events")
+    public BaseEntityBuilder<T> handleEntityEvent(Consumer<Byte> consumer) {
+        handleEntityEvent = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for setting the item in the entity's hand")
+    public BaseEntityBuilder<T> setItemInHand(BiConsumer<InteractionHand, ItemStack> consumer) {
+        setItemInHand = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for setting the entity's sprinting state")
+    public BaseEntityBuilder<T> setSprinting(Consumer<Boolean> consumer) {
+        setSprinting = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for pushing another entity")
+    public BaseEntityBuilder<T> pushEntity(Consumer<Entity> consumer) {
+        pushEntity = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity's name should be shown")
+    public BaseEntityBuilder<T> shouldShowName(Predicate<LivingEntity> predicate) {
+        shouldShowName = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining the entity's jump boost power")
+    public BaseEntityBuilder<T> jumpBoostPower(DoubleSupplier supplier) {
+        jumpBoostPower = supplier;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity can stand on a specific fluid")
+    public BaseEntityBuilder<T> canStandOnFluid(Predicate<FluidState> predicate) {
+        canStandOnFluid = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for entity movement")
+    public BaseEntityBuilder<T> travel(Consumer<Vec3> consumer) {
+        travel = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for handling relative friction and calculating movement")
+    public BaseEntityBuilder<T> handleRelativeFrictionAndCalculateMovement(BiFunction<Vec3, Float, Vec3> function) {
+        handleRelativeFrictionAndCalculateMovement = function;
+        return this;
+    }
+
+    @Info(value = "Sets the custom speed for the entity")
+    public BaseEntityBuilder<T> setSpeed(Consumer<Float> consumer) {
+        setSpeedConsumer = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for hurting a target entity")
+    public BaseEntityBuilder<T> doHurtTarget(BiPredicate<Entity, Boolean> predicate) {
+        doHurtTarget = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is sensitive to water")
+    public BaseEntityBuilder<T> isSensitiveToWater(Predicate<Boolean> predicate) {
+        isSensitiveToWater = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity performs auto spin attack")
+    public BaseEntityBuilder<T> isAutoSpinAttack(Predicate<Boolean> predicate) {
+        isAutoSpinAttack = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for when the entity stops riding")
+    public BaseEntityBuilder<T> stopRidingCallback(Runnable callback) {
+        stopRidingCallback = callback;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for when the entity is updated while riding")
+    public BaseEntityBuilder<T> rideTick(Consumer<LivingEntity> callback) {
+        rideTick = callback;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for lerping the entity's position and rotation.")
+    public BaseEntityBuilder<T> lerpTo(HeptConsumer<Double, Double, Double, Float, Float, Integer, Boolean> consumer) {
+        lerpToConsumer = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for lerping the head position")
+    public BaseEntityBuilder<T> lerpHeadTo(BiConsumer<Float, Integer> consumer) {
+        lerpHeadTo = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for setting the jumping state")
+    public BaseEntityBuilder<T> setJumping(Consumer<Boolean> consumer) {
+        setJumping = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for when the entity picks up an item")
+    public BaseEntityBuilder<T> onItemPickup(Consumer<ItemEntity> consumer) {
+        onItemPickup = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for when the entity takes an action with another entity")
+    public BaseEntityBuilder<T> take(BiConsumer<Entity, Integer> consumer) {
+        take = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity has line of sight to another entity")
+    public BaseEntityBuilder<T> hasLineOfSight(Predicate<Entity> predicate) {
+        hasLineOfSight = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity has effective AI")
+    public BaseEntityBuilder<T> isEffectiveAi(Predicate<Void> predicate) {
+        isEffectiveAi = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is pickable")
+    public BaseEntityBuilder<T> isPickable(Predicate<Void> predicate) {
+        isPickable = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for setting the entity's head rotation on the Y-axis")
+    public BaseEntityBuilder<T> setYHeadRot(Consumer<Float> consumer) {
+        setYHeadRot = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for setting the entity's body rotation on the Y-axis")
+    public BaseEntityBuilder<T> setYBodyRot(Consumer<Float> consumer) {
+        setYBodyRot = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for setting the entity's absorption amount")
+    public BaseEntityBuilder<T> setAbsorptionAmount(Consumer<Float> consumer) {
+        setAbsorptionAmount = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for when the entity enters combat")
+    public BaseEntityBuilder<T> onEnterCombat(Runnable runnable) {
+        onEnterCombat = runnable;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for when the entity leaves combat")
+    public BaseEntityBuilder<T> onLeaveCombat(Runnable runnable) {
+        onLeaveCombat = runnable;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is using an item")
+    public BaseEntityBuilder<T> isUsingItem(Predicate<LivingEntity> predicate) {
+        isUsingItem = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for living entity flags")
+    public BaseEntityBuilder<T> setLivingEntityFlag(BiConsumer<Integer, Boolean> consumer) {
+        setLivingEntityFlag = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for starting to use an item")
+    public BaseEntityBuilder<T> startUsingItem(Consumer<InteractionHand> consumer) {
+        startUsingItem = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for making the entity look at a specific position using an anchor point")
+    public BaseEntityBuilder<T> lookAt(BiConsumer<EntityAnchorArgument.Anchor, Vec3> consumer) {
+        lookAt = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for releasing the item in use by the entity")
+    public BaseEntityBuilder<T> releaseUsingItem(Runnable runnable) {
+        releaseUsingItem = runnable;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for stopping the use of an item by the entity")
+    public BaseEntityBuilder<T> stopUsingItem(Runnable runnable) {
+        stopUsingItem = runnable;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is blocking")
+    public BaseEntityBuilder<T> isBlocking(Predicate<LivingEntity> predicate) {
+        isBlocking = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is suppressing sliding down a ladder")
+    public BaseEntityBuilder<T> isSuppressingSlidingDownLadder(Predicate<LivingEntity> predicate) {
+        isSuppressingSlidingDownLadder = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is fall flying")
+    public BaseEntityBuilder<T> isFallFlying(Predicate<LivingEntity> predicate) {
+        isFallFlying = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is visually swimming")
+    public BaseEntityBuilder<T> isVisuallySwimming(Predicate<LivingEntity> predicate) {
+        isVisuallySwimming = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for random teleportation of the entity")
+    public BaseEntityBuilder<T> randomTeleport(
+            BiFunction<Double, Double, Double> teleportX,
+            BiFunction<Double, Double, Double> teleportY,
+            BiFunction<Double, Double, Double> teleportZ,
+            Predicate<Boolean> teleportFlag) {
+        randomTeleportX = teleportX;
+        randomTeleportY = teleportY;
+        randomTeleportZ = teleportZ;
+        randomTeleportFlag = teleportFlag;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is affected by potions")
+    public BaseEntityBuilder<T> isAffectedByPotions(Predicate<LivingEntity> predicate) {
+        isAffectedByPotions = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is attackable")
+    public BaseEntityBuilder<T> attackable(Predicate<Boolean> predicate) {
+        attackable = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for playing records nearby")
+    public BaseEntityBuilder<T> setRecordPlayingNearby(BiConsumer<BlockPos, Boolean> consumer) {
+        setRecordPlayingNearby = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity can take a specific item")
+    public BaseEntityBuilder<T> canTakeItem(Predicate<ItemStack> predicate) {
+        canTakeItem = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for setting the sleeping position")
+    public BaseEntityBuilder<T> setSleepingPos(Consumer<BlockPos> consumer) {
+        setSleepingPos = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is sleeping")
+    public BaseEntityBuilder<T> isSleeping(Supplier<Boolean> supplier) {
+        isSleeping = supplier;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for starting sleeping at a specific position")
+    public BaseEntityBuilder<T> startSleeping(Consumer<BlockPos> consumer) {
+        startSleeping = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for stopping sleeping")
+    public BaseEntityBuilder<T> stopSleeping(Runnable runnable) {
+        stopSleeping = runnable;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is in a wall")
+    public BaseEntityBuilder<T> isInWall(Supplier<Boolean> supplier) {
+        isInWall = supplier;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for eating an item in a level")
+    public BaseEntityBuilder<T> eat(BiFunction<Level, ItemStack, ItemStack> function) {
+        eat = function;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for broadcasting a break event for an equipment slot")
+    public BaseEntityBuilder<T> broadcastBreakEvent(Consumer<EquipmentSlot> consumer) {
+        broadcastBreakEvent = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for broadcasting a break event for an interaction hand")
+    public BaseEntityBuilder<T> broadcastBreakEventHand(Consumer<InteractionHand> consumer) {
+        broadcastBreakEventHand = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for curing potion effects with a curative item")
+    public BaseEntityBuilder<T> curePotionEffects(BiPredicate<ItemStack, Boolean> predicate) {
+        curePotionEffects = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the rider should face forward")
+    public BaseEntityBuilder<T> shouldRiderFaceForward(Predicate<Player> predicate) {
+        shouldRiderFaceForward = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom callback for invalidating capabilities")
+    public BaseEntityBuilder<T> invalidateCapsCallback(Runnable callback) {
+        invalidateCaps = callback;
+        return this;
+    }
+
+    @Info(value = "Sets the custom callback for reviving capabilities")
+    public BaseEntityBuilder<T> reviveCapsCallback(Runnable callback) {
+        reviveCaps = callback;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity can freeze")
+    public BaseEntityBuilder<T> canFreezePredicate(Predicate<LivingEntity> predicate) {
+        canFreeze = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity is currently glowing")
+    public BaseEntityBuilder<T> isCurrentlyGlowing(Predicate<LivingEntity> predicate) {
+        isCurrentlyGlowing = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom logic for determining if the entity can disable a shield")
+    public BaseEntityBuilder<T> canDisableShield(Predicate<LivingEntity> predicate) {
+        canDisableShield = predicate;
         return this;
     }
 
