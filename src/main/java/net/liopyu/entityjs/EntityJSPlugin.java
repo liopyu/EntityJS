@@ -2,6 +2,7 @@ package net.liopyu.entityjs;
 
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
+import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
 import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
@@ -21,6 +22,11 @@ public class EntityJSPlugin extends KubeJSPlugin {
     public void init() {
         RegistryInfo.ENTITY_TYPE.addType("entityjs:living", BaseEntityJSBuilder.class, BaseEntityJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:mob", MobEntityJSBuilder.class, MobEntityJSBuilder::new);
+    }
+
+    @Override
+    public void registerBindings(BindingsEvent event) {
+        event.add("InteractionResult", InteractionResult.class);
     }
 
     @Override
