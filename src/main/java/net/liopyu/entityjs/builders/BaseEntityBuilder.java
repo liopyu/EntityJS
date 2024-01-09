@@ -1,19 +1,14 @@
 package net.liopyu.entityjs.builders;
 
-import dev.architectury.utils.value.FloatSupplier;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
-import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import net.liopyu.entityjs.entities.BaseEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.ExitPortalInfo;
-import net.liopyu.entityjs.util.ai.brain.BrainBuilder;
-import net.liopyu.entityjs.util.ai.brain.BrainProviderBuilder;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -21,13 +16,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.liopyu.entityjs.util.ai.brain.BrainBuilder;
-import net.liopyu.entityjs.util.ai.brain.BrainProviderBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
@@ -36,14 +28,13 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.FluidState;
-import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
@@ -61,7 +52,9 @@ import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.*;
 
 /**
@@ -116,12 +109,9 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient EntityType<?> getType;
     public transient AABB customBoundingBox;
     public transient List<BlockState> shouldRemoveSoulSpeed;
-    public transient BrainProviderBuilder brainProviderBuilder;
     public transient HumanoidArm mainArm;
     public transient boolean hasInventory;
-    public transient Consumer<BrainBuilder> brainBuilder;
-
-    public transient Consumer<BaseEntityJS> dropExperienceHandler;
+    public transient Consumer<T> dropExperienceHandler;
     public transient boolean onSoulSpeedBlock;
 
     public transient Function<LootContext.Builder, LootContext.Builder> customLootContextBuilder;
@@ -642,7 +632,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
 
 
     // Add this method to set the dropExperienceHandler in BaseEntityBuilder
-    public BaseEntityBuilder<T> dropExperienceHandler(Consumer<BaseEntityJS> handler) {
+    public BaseEntityBuilder<T> dropExperienceHandler(Consumer<T> handler) {
         dropExperienceHandler = handler;
         return this;
     }
@@ -1733,17 +1723,6 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     }
 
     //STUFF
-    public BaseEntityBuilder<T> brainProvider(Consumer<BrainProviderBuilder> brainProvider) {
-        brainProviderBuilder = new BrainProviderBuilder(id);
-        brainProvider.accept(brainProviderBuilder);
-        // ConsoleJS.STARTUP.error(brainProviderBuilder);
-        return this;
-    }
-
-    public BaseEntityBuilder<T> brainBuilder(Consumer<BrainBuilder> brainBuilder) {
-        this.brainBuilder = brainBuilder;
-        return this;
-    }
 
     @Info(value = "Adds a new AnimationController to the entity", params = {
             @Param(name = "name", value = "The name of the controller"),

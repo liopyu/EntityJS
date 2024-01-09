@@ -1,30 +1,21 @@
-package net.liopyu.entityjs.util.ai.goal;
+package net.liopyu.entityjs.events;
 
-import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
-import dev.latvian.mods.rhino.util.HideFromJS;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.target.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-/**
- * This is how {@link TargetGoal}s are added to a mob's {@code targetSelector}.
- * Some basic goals are provided as well as the ability to use arbitrary goals.<br><br>
- *
- * If you wish to add more goal types see the comment in {@link GoalSelectorBuilder}
- */
-public class GoalTargetBuilder<T extends Mob> extends GoalBuilder<T> {
+public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
 
-    public GoalTargetBuilder(T entity) {
-        super(entity);
+    public AddGoalTargetsEventJS(T mob, GoalSelector selector) {
+        super(mob, selector);
     }
 
     @Info(value = """
@@ -43,9 +34,8 @@ public class GoalTargetBuilder<T extends Mob> extends GoalBuilder<T> {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "goalSupplier", value = "The goal supplier, a function that takes a Mob and returns a Goal")
     })
-    public GoalTargetBuilder<T> arbitraryTargetGoal(int priority, Function<T, Goal> goalSupplier) {
-        suppliers.add(new Pair<>(priority, goalSupplier));
-        return this;
+    public void arbitraryTargetGoal(int priority, Function<T, Goal> goalSuppler) {
+        selector.addGoal(priority, goalSuppler.apply(mob));
     }
 
     @Info(value = "Adds a `NearestAttackableTargetGoal` to the entity", params = {
@@ -56,9 +46,8 @@ public class GoalTargetBuilder<T extends Mob> extends GoalBuilder<T> {
             @Param(name = "mustReach", value = "If the mob must be able to reach the target to attack"),
             @Param(name = "targetConditions", value = "The conditions under which the targeted entity will be targeted, may be null")
     })
-    public <E extends LivingEntity> GoalTargetBuilder<T> nearestAttackableTarget(int priority, Class<E> targetClass, int randomInterval, boolean mustSee, boolean mustReach, @Nullable Predicate<LivingEntity> targetConditions) {
-        suppliers.add(new Pair<>(priority, t -> new NearestAttackableTargetGoal<>(t, targetClass, randomInterval, mustSee, mustReach, targetConditions)));
-        return this;
+    public <E extends LivingEntity> void nearestAttackableTarget(int priority, Class<E> targetClass, int randomInterval, boolean mustSee, boolean mustReach, @Nullable Predicate<LivingEntity> targetConditions) {
+        selector.addGoal(priority, new NearestAttackableTargetGoal<>(mob, targetClass, randomInterval, mustSee, mustReach, targetConditions));
     }
 
     @Info(value = "Adds s `HurtByTargetGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -67,17 +56,14 @@ public class GoalTargetBuilder<T extends Mob> extends GoalBuilder<T> {
             @Param(name = "alertOthers", value = "If other mobs should be alerted when this mob is damaged"),
             @Param(name = "toIgnoreAlert", value = "The entity classes that should not be alerted")
     })
-    public GoalTargetBuilder<T> hurtByTarget(int priority, List<Class<?>> toIgnoreDamage, boolean alertOthers, List<Class<?>> toIgnoreAlert) {
+    public void hurtByTarget(int priority, List<Class<?>> toIgnoreDamage, boolean alertOthers, List<Class<?>> toIgnoreAlert) {
         if (isPathFinder) {
-            suppliers.add(new Pair<>(priority, t -> {
-                var goal = new HurtByTargetGoal((PathfinderMob) t, toIgnoreDamage.toArray(new Class<?>[0]));
-                if (alertOthers) {
-                    goal.setAlertOthers(toIgnoreAlert.toArray(new Class<?>[0]));
-                }
-                return goal;
-            }));
+            var goal = new HurtByTargetGoal((PathfinderMob) mob, toIgnoreDamage.toArray(new Class<?>[0]));
+            if (alertOthers) {
+                goal.setAlertOthers(toIgnoreAlert.toArray(new Class<?>[0]));
+            }
+            selector.addGoal(priority, goal);
         }
-        return this;
     }
 
     @Info(value = "Adds a `NonTameRandomTargetGoal` to the entity, only applicable to **tamable** mobs", params = {
@@ -86,31 +72,28 @@ public class GoalTargetBuilder<T extends Mob> extends GoalBuilder<T> {
             @Param(name = "mustSee", value = "If the mob must have line of sight at all times"),
             @Param(name = "targetConditions", value = "The conditions under which the targeted entity will be targeted, may be null")
     })
-    public <E extends LivingEntity> GoalTargetBuilder<T> nonTameRandomTarget(int priority, Class<E> targetClass, boolean mustSee, @Nullable Predicate<LivingEntity> targetCondition) {
+    public <E extends LivingEntity> void nonTameRandomTarget(int priority, Class<E> targetClass, boolean mustSee, @Nullable Predicate<LivingEntity> targetCondition) {
         if (isTamable) {
-            suppliers.add(new Pair<>(priority, t -> new NonTameRandomTargetGoal<>((TamableAnimal) t, targetClass, mustSee, targetCondition)));
+            selector.addGoal(priority, new NonTameRandomTargetGoal<>((TamableAnimal) mob, targetClass, mustSee, targetCondition));
         }
-        return this;
     }
 
     @Info(value = "Adds a `OwnerHurtByTargetGoal` to the entity, only applicable to **tamable** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal")
     })
-    public GoalTargetBuilder<T> ownerHurtByTarget(int priority) {
+    public void ownerHurtByTarget(int priority) {
         if (isTamable) {
-            suppliers.add(new Pair<>(priority, t -> new OwnerHurtByTargetGoal((TamableAnimal) t)));
+            selector.addGoal(priority, new OwnerHurtByTargetGoal((TamableAnimal) mob));
         }
-        return this;
     }
 
     @Info(value = "Adds a `ResetUniversalAngerTargetGoal` to the entity, only applicable to **neutral** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "alertOthersOfSameType", value = "If other mobs of the same type should be alerted")
     })
-    public <E extends Mob & NeutralMob> GoalTargetBuilder<T> resetUniversalAngerTarget(int priority, boolean alertOthersOfSameType) {
+    public <E extends Mob & NeutralMob> void resetUniversalAngerTarget(int priority, boolean alertOthersOfSameType) {
         if (isNeutral) {
-            suppliers.add(new Pair<>(priority, t -> new ResetUniversalAngerTargetGoal<>((E) t, alertOthersOfSameType)));
+            selector.addGoal(priority, new ResetUniversalAngerTargetGoal<>((E) mob, alertOthersOfSameType));
         }
-        return this;
     }
 }

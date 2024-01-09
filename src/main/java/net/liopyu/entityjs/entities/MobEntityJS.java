@@ -2,8 +2,9 @@ package net.liopyu.entityjs.entities;
 
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
-import net.liopyu.entityjs.util.ai.goal.GoalSelectorBuilder;
-import net.liopyu.entityjs.util.ai.goal.GoalTargetBuilder;
+import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
+import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
+import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -20,9 +21,6 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         super(p_21368_, p_21369_);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createFactory(this);
-        if (p_21369_ != null && !p_21369_.isClientSide) {
-            this.registerGoals(); // Call again so that the builder isn't null
-        }
     }
 
     @Override
@@ -37,15 +35,12 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
-        if (builder == null) return; // When called in the super constructor, the builder is null, thus we call it again when we do have a builder
-        // Goal selectors
-        final GoalSelectorBuilder<MobEntityJS> goalSelectorBuilder = new GoalSelectorBuilder<>(this);
-        builder.goalSelectorBuilder.accept(goalSelectorBuilder);
-        goalSelectorBuilder.apply(this.goalSelector);
-        // Goal targets
-        final GoalTargetBuilder<MobEntityJS> goalTargetBuilder = new GoalTargetBuilder<>(this);
-        builder.goalTargetBuilder.accept(goalTargetBuilder);
-        goalTargetBuilder.apply(this.targetSelector);
+        if (EventHandlers.addGoalTargets.hasListeners(getTypeId())) {
+            EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
+        }
+        if (EventHandlers.addGoalSelectors.hasListeners(getTypeId())) {
+            EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
+        }
     }
 
     @Override

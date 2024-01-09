@@ -4,7 +4,6 @@ import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 

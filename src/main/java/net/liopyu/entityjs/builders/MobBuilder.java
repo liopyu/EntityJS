@@ -5,8 +5,6 @@ import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
-import net.liopyu.entityjs.util.ai.goal.GoalSelectorBuilder;
-import net.liopyu.entityjs.util.ai.goal.GoalTargetBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Mob;
 
@@ -21,13 +19,9 @@ import java.util.function.Consumer;
 public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseEntityBuilder<T> {
 
     public transient SpawnEggItemBuilder eggItem;
-    public transient Consumer<GoalSelectorBuilder<T>> goalSelectorBuilder;
-    public transient Consumer<GoalTargetBuilder<T>> goalTargetBuilder;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
-        goalSelectorBuilder = b -> {};
-        goalTargetBuilder = b -> {};
     }
 
     @Info(value = "Creates a spawn egg item for this entity type")
@@ -35,20 +29,6 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseEnti
     public MobBuilder<T> eggItem(Consumer<SpawnEggItemBuilder> eggItem) {
         this.eggItem = new SpawnEggItemBuilder(id, this);
         eggItem.accept(this.eggItem);
-        return this;
-    }
-
-    @Info(value = "Sets the entity's goalSelectors")
-    @Generics(value = {Mob.class, GoalSelectorBuilder.class, Mob.class})
-    public MobBuilder<T> goals(Consumer<GoalSelectorBuilder<T>> goals) {
-        goalSelectorBuilder = goals;
-        return this;
-    }
-
-    @Info(value = "Sets the entity's targetSelectors")
-    @Generics(value = {Mob.class, GoalTargetBuilder.class, Mob.class})
-    public MobBuilder<T> goalTargets(Consumer<GoalTargetBuilder<T>> targets) {
-        goalTargetBuilder = targets;
         return this;
     }
 
