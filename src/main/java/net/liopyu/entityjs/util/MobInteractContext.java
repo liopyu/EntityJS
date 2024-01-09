@@ -10,12 +10,10 @@ public class MobInteractContext {
     public final MobEntityJS entity;
     public final Player player;
     public final InteractionHand hand;
-    public final InteractionResult interactionResult;
 
-    public MobInteractContext(MobEntityJS entity, Player player, InteractionHand hand, InteractionResult interactionResult) {
+    public MobInteractContext(MobEntityJS entity, Player player, InteractionHand hand) {
         this.entity = entity;
         this.player = player;
         this.hand = hand;
-        this.interactionResult = interactionResult;
     }
 }

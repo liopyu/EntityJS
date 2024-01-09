@@ -180,7 +180,7 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean isPushable() {
-        return builder.canBePushed;
+        return builder.isPushable;
     }
 
     @Override

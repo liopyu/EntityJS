@@ -126,7 +126,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     public boolean isPushable() {
-        return builder.canBePushed;
+        return builder.isPushable;
     }
 
     @Override
@@ -189,9 +189,10 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     public void tick() {
+        super.tick();
         if (builder.tick != null) {
             builder.tick.accept(this);
-        } else super.tick();
+        }
     }
 
     @Override
@@ -203,10 +204,8 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (builder.mobInteract != null) {
-            InteractionResult interactionResult = InteractionResult.SUCCESS;
-            MobInteractContext context = new MobInteractContext(this, player, hand, interactionResult);
+            MobInteractContext context = new MobInteractContext(this, player, hand);
             builder.mobInteract.accept(context);
-            return context.interactionResult;
         }
         return super.mobInteract(player, hand);
     }

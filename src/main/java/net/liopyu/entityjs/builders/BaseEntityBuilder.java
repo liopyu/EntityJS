@@ -91,7 +91,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Function<T, ResourceLocation> modelResource;
     public transient Function<T, ResourceLocation> textureResource;
     public transient Function<T, ResourceLocation> animationResource;
-    public transient boolean canBePushed;
+    public transient boolean isPushable;
     public transient boolean canBeCollidedWith;
     public transient boolean isAttackable;
     public transient Consumer<AttributeSupplier.Builder> attributes;
@@ -395,7 +395,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         modelResource = t -> t.getBuilder().newID("geo/", ".geo.json");
         textureResource = t -> t.getBuilder().newID("textures/model/entity/", ".png");
         animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");
-        canBePushed = false;
+        isPushable = false;
         canBeCollidedWith = false;
         isAttackable = true;
         attributes = builder -> {
@@ -517,8 +517,8 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
-    public BaseEntityBuilder<T> canBePushed(boolean b) {
-        canBePushed = b;
+    public BaseEntityBuilder<T> isPushable(boolean b) {
+        isPushable = b;
         return this;
     }
 
