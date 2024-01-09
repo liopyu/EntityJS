@@ -1,17 +1,13 @@
 package net.liopyu.entityjs.builders;
 
-import dev.architectury.utils.value.FloatSupplier;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
-import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import net.liopyu.entityjs.entities.BaseEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.entities.MobEntityJS;
 import net.liopyu.entityjs.util.ExitPortalInfo;
 import net.liopyu.entityjs.util.MobInteractContext;
 import net.minecraft.BlockUtil;
@@ -27,7 +23,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.CombatTracker;
@@ -40,17 +35,14 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FluidState;
-import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.util.TriConsumer;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -92,13 +84,12 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Function<T, ResourceLocation> textureResource;
     public transient Function<T, ResourceLocation> animationResource;
     public transient boolean isPushable;
-    public transient boolean canBeCollidedWith;
+
     public transient boolean isAttackable;
     public transient Consumer<AttributeSupplier.Builder> attributes;
     public transient final List<AnimationControllerSupplier<T>> animationSuppliers;
     public transient boolean shouldDropLoot;
     public transient Predicate<Entity> setCanAddPassenger;
-    public transient boolean canRide;
     public transient boolean isAffectedByFluids;
     public transient boolean isAlwaysExperienceDropper;
     public transient boolean isImmobile;
@@ -169,7 +160,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Function<Float, Float> customGetSwimAmount;
 
     public transient Runnable customBaseTick;
-    public transient Boolean canSpawnSoulSpeedParticle;
+    public transient BooleanSupplier canSpawnSoulSpeedParticle;
     public transient Runnable customSpawnSoulSpeedParticle;
     public transient Runnable customRemoveSoulSpeed;
     public transient Runnable customTryAddSoulSpeed;
@@ -178,7 +169,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Consumer<BlockPos> customOnChangedBlock;
     public transient Boolean isBaby;
     public transient Float customScale;
-    public transient Boolean rideableUnderWater;
+    public transient BooleanSupplier rideableUnderWater;
     public transient Consumer<T> customTickDeath;
     public transient boolean shouldDropExperience;
 
@@ -371,11 +362,11 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Predicate<LivingEntity> canFreeze;
     public transient Predicate<LivingEntity> isCurrentlyGlowing;
     public transient Predicate<LivingEntity> canDisableShield;
-    public transient boolean isVehicle;
+
     /*Right now Mob Interaction result is only functioning for MobEntityJS so we will probably have to add
     More public transients as we add more extensions or figure out some other logic*/
     //public transient TriFunction<MobEntityJS, Player, InteractionHand, InteractionResult> mobInteract;
-    public transient Consumer<MobInteractContext> mobInteract;
+    public transient Function<MobInteractContext, @Nullable InteractionResult> mobInteract;
 
 
     //STUFF
@@ -395,14 +386,12 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         modelResource = t -> t.getBuilder().newID("geo/", ".geo.json");
         textureResource = t -> t.getBuilder().newID("textures/model/entity/", ".png");
         animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");
-        isPushable = false;
-        canBeCollidedWith = false;
+        isPushable = true;
         isAttackable = true;
         attributes = builder -> {
         };
         animationSuppliers = new ArrayList<>();
         shouldDropLoot = true;
-        canRide = false;
         isAffectedByFluids = false;
         isAlwaysExperienceDropper = false;
         isImmobile = false;
@@ -421,9 +410,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         getSwimHighSpeedSplashSound = SoundEvents.MOOSHROOM_SHEAR;
         mainArm = HumanoidArm.RIGHT;
         canBreatheUnderwater = false;
-        isVehicle = false;
         passengerPredicate = entity -> true;
-        canRide = true;
     }
 
     @Info(value = "Sets the main arm of the entity, defaults to 'right'")
@@ -522,10 +509,6 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
-    public BaseEntityBuilder<T> canBeCollidedWith(boolean b) {
-        canBeCollidedWith = b;
-        return this;
-    }
 
     public BaseEntityBuilder<T> isAttackable(boolean b) {
         isAttackable = b;
@@ -552,17 +535,6 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
 
     public BaseEntityBuilder<T> setCanAddPassenger(Predicate<Entity> predicate) {
         passengerPredicate = predicate;
-        return this;
-    }
-
-
-    public BaseEntityBuilder<T> canRide(Predicate<Entity> predicate) {
-        passengerPredicate = predicate;
-        return this;
-    }
-
-    public BaseEntityBuilder<T> canRide(boolean b) {
-        canRide = b;
         return this;
     }
 
@@ -872,7 +844,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }*/
 
-    public BaseEntityBuilder<T> canSpawnSoulSpeedParticle(boolean canSpawn) {
+    public BaseEntityBuilder<T> canSpawnSoulSpeedParticle(BooleanSupplier canSpawn) {
         this.canSpawnSoulSpeedParticle = canSpawn;
         return this;
     }
@@ -907,17 +879,13 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
-    public BaseEntityBuilder<T> isBaby(boolean isBaby) {
-        this.isBaby = isBaby;
-        return this;
-    }
 
     public BaseEntityBuilder<T> scale(float customScale) {
         this.customScale = customScale;
         return this;
     }
 
-    public BaseEntityBuilder<T> rideableUnderWater(boolean rideableUnderWater) {
+    public BaseEntityBuilder<T> rideableUnderWater(BooleanSupplier rideableUnderWater) {
         this.rideableUnderWater = rideableUnderWater;
         return this;
     }
@@ -1719,15 +1687,9 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
-    @Info(value = "Sets the custom logic for determining if the entity is rideable")
-    public BaseEntityBuilder<T> isVehicle(boolean b) {
-        isVehicle = b;
-        return this;
-    }
-
     @Info(value = "Sets the custom logic for mob interaction")
-    public BaseEntityBuilder<T> mobInteract(Consumer<MobInteractContext> consumer) {
-        mobInteract = consumer;
+    public BaseEntityBuilder<T> mobInteract(Function<MobInteractContext, @Nullable InteractionResult> f) {
+        mobInteract = f;
         return this;
     }
 
