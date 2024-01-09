@@ -12,18 +12,17 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.behavior.warden.ForceUnmount;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
-// I am not wrapping all of those supplier arguments with ResourceLocation backed getters
 @SuppressWarnings("unused")
 public enum Behaviors {
     INSTANCE;
@@ -158,5 +157,136 @@ public enum Behaviors {
 
     public PlayTagWithOtherKids playTagWithOtherKids() {
         return new PlayTagWithOtherKids();
+    }
+
+    public <E extends PathfinderMob> PrepareRamNearestTarget<E> prepareRamNearestTarget(
+            ToIntFunction<E> cooldownOnFall,
+            int minRamDistance,
+            int maxRamDistance,
+            float walkSpeed,
+            TargetingConditions targetingConditions,
+            int ramPrepareTime,
+            Function<E, SoundEvent> getPrepareRamSound
+    ) {
+        return new PrepareRamNearestTarget<>(
+                cooldownOnFall,
+                minRamDistance,
+                maxRamDistance,
+                walkSpeed,
+                targetingConditions,
+                ramPrepareTime,
+                getPrepareRamSound
+        );
+    }
+
+    public RandomStroll randomStroll(float speedModifier, int maxHorizontalDistance, int maxVerticalDistance, boolean mayStrollFromWater) {
+        return new RandomStroll(speedModifier, maxHorizontalDistance, maxVerticalDistance, mayStrollFromWater);
+    }
+
+    public RandomSwim randomSwim(float speedModifier) {
+        return new RandomSwim(speedModifier);
+    }
+
+    public ReactToBell reactToBell() {
+        return new ReactToBell();
+    }
+
+    public ResetRaidStatus resetRaidStatus() {
+        return new ResetRaidStatus();
+    }
+
+    public RingBell ringBell() {
+        return new RingBell();
+    }
+
+    public <E extends LivingEntity> RunIf<E> runIf(Predicate<E> predicate, Behavior<? super E> wrappedbehavior, boolean checkWhileRunningAlso) {
+        return new RunIf<>(predicate, wrappedbehavior, checkWhileRunningAlso);
+    }
+
+    // RunOne impl, requires a List<Pair<Behavior<? super LivingEntity>, Integer>>
+
+    public <E extends LivingEntity> RunSometimes<E> runSometimes(Behavior<? super E> wrappedBehavior, boolean keepTicks, int minInterval, int maxInterval) {
+        return new RunSometimes<>(wrappedBehavior, keepTicks, UniformInt.of(minInterval, maxInterval));
+    }
+
+    // These may cause problems with B E A N S but its a simple fix if so
+    public SetClosestHomeAsWalkTarget setClosestHomeAsWalkTarget(float speedModifier) {
+        return new SetClosestHomeAsWalkTarget(speedModifier);
+    }
+
+    public SetEntityLookTarget setEntityLookTarget(Predicate<LivingEntity> predicate, float maxDist) {
+        return new SetEntityLookTarget(predicate, maxDist);
+    }
+
+    public SetHiddenState setHiddenState(int stayHiddenSeconds, int closeEnoughDist) {
+        return new SetHiddenState(stayHiddenSeconds, closeEnoughDist);
+    }
+
+    public SetLookAndInteract setLookAndInteract(EntityType<?> type, int interactionRange, Predicate<LivingEntity> selfFilter, Predicate<LivingEntity> targetFilter) {
+        return new SetLookAndInteract(type, interactionRange, selfFilter, targetFilter);
+    }
+
+    public SetRaidStatus setRaidStatus() {
+        return new SetRaidStatus();
+    }
+
+    public <T> SetWalkTargetAwayFrom<T> setWalkTargetAwayFrom(MemoryModuleType<T> walkTargetAwayFromMemory, float speedModifier, int desiredDist, boolean hasTarget, Function<T, Vec3> toPosition) {
+        return new SetWalkTargetAwayFrom<>(walkTargetAwayFromMemory, speedModifier, desiredDist, hasTarget, toPosition);
+    }
+
+    public SetWalkTargetFromAttackTargetIfTargetOutOfReach setWalkTargetFromAttackTargetIfTargetOutOfReach(Function<LivingEntity, Float> speedModifier) {
+        return new SetWalkTargetFromAttackTargetIfTargetOutOfReach(speedModifier); // One hell of a name
+    }
+
+    public SetWalkTargetFromBlockMemory setWalkTargetFromBlockMemory(MemoryModuleType<GlobalPos> memoryType, float speedModifier, int closeEnoughDist, int tooFarDistance, int tooLongUnreachableDuration) {
+        return new SetWalkTargetFromBlockMemory(memoryType, speedModifier, closeEnoughDist, tooFarDistance, tooLongUnreachableDuration);
+    }
+
+    public SetWalkTargetFromLookTarget setWalkTargetFromLookTarget(Predicate<LivingEntity> predicate, Function<LivingEntity, Float> speedModifier, int closeEnoughDistance) {
+        return new SetWalkTargetFromLookTarget(predicate, speedModifier, closeEnoughDistance);
+    }
+
+    public SleepInBed sleepInBed() {
+        return new SleepInBed();
+    }
+
+    public SocializeAtBell socializeAtBell() {
+        return new SocializeAtBell();
+    }
+
+    public <E extends Mob> StartAttacking<E> startAttacking(Predicate<E> canAttackPredicate, Function<E, @Nullable LivingEntity> targetFinder, int duration) {
+        return new StartAttacking<>(canAttackPredicate, e -> Optional.ofNullable(targetFinder.apply(e)), duration);
+    }
+
+    public StartCelebratingIfTargetDead startCelebratingIfTargetDead(int celebrationDuration, BiPredicate<LivingEntity, LivingEntity> dancePredicate) {
+        return new StartCelebratingIfTargetDead(celebrationDuration, dancePredicate);
+    }
+
+    public <E extends LivingEntity> StayCloseToTarget<E> stayCloseToTarget(Function<LivingEntity, @Nullable PositionTracker> targetPositionGetter, int closeEnough, int tooFar, float speedModifier) {
+        return new StayCloseToTarget<>(e -> Optional.ofNullable(targetPositionGetter.apply(e)), closeEnough, tooFar, speedModifier);
+    }
+
+    public <E extends Mob> StopAttackingIfTargetInvalid<E> stopAttackingIfTargetInvalid(Predicate<LivingEntity> stopAttackingWhen, BiConsumer<E, LivingEntity> onTargetErased, boolean canGetTiredOfTryingToReachTarget) {
+        return new StopAttackingIfTargetInvalid<>(stopAttackingWhen, onTargetErased, canGetTiredOfTryingToReachTarget);
+    }
+
+    public <E extends Mob> StopBeingAngryIfTargetDead<E> stopBeingAngryIfTargetDead() {
+        return new StopBeingAngryIfTargetDead<>();
+    }
+
+    public StrollAroundPoi strollAroundPoi(MemoryModuleType<GlobalPos> memoryType, float speedModifier, int maxDistanceFromPoi) {
+        return new StrollAroundPoi(memoryType, speedModifier, maxDistanceFromPoi);
+    }
+
+    public StrollToPoi strollToPoi(MemoryModuleType<GlobalPos> memoryType, float speedModifier, int closeEnoughDist, int maxDistanceFromPoi) {
+        return new StrollToPoi(memoryType, speedModifier, closeEnoughDist, maxDistanceFromPoi);
+    }
+
+    public StrollToPoiList strollToPoiList(MemoryModuleType<List<GlobalPos>> strollMemoryType, float speedModifier, int closeEnoughDist, int maxDistanceFromPoi, MemoryModuleType<GlobalPos> mustBeCloseToMemoryType) {
+        return new StrollToPoiList(strollMemoryType, speedModifier, closeEnoughDist, maxDistanceFromPoi, mustBeCloseToMemoryType);
+    }
+
+    public Swim swim(float chance) {
+        return new Swim(chance);
     }
 }
