@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.entities;
 
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
@@ -110,10 +111,6 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         return builder.mainArm;
     }
 
-    @Override
-    public boolean canBeCollidedWith() {
-        return builder.canBeCollidedWith;
-    }
 
     @Override
     public boolean isAttackable() {
@@ -131,11 +128,6 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         return builder.shouldDropLoot;
     }
 
-    @Override
-    protected boolean canRide(Entity entity) {
-        return builder.passengerPredicate.test(entity);
-
-    }
 
     @Override
     protected boolean isAffectedByFluids() {
@@ -167,21 +159,19 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            builder.tick.accept(this);
+            if (this != null) {
+                builder.tick.accept(MobEntityJS.this);
+            }
         }
-    }
-
-    @Override
-    public boolean isVehicle() {
-        return builder.isVehicle;
     }
 
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (builder.mobInteract != null) {
-            MobInteractContext context = new MobInteractContext(this, player, hand);
-            builder.mobInteract.accept(context);
+            final MobInteractContext context = new MobInteractContext(MobEntityJS.this, player, hand);
+            final InteractionResult result = builder.mobInteract.apply(context);
+            return result == null ? super.mobInteract(player, hand) : result;
         }
         return super.mobInteract(player, hand);
     }
@@ -191,8 +181,8 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     protected LootContext.Builder createLootContext(boolean p_21105_, DamageSource p_21106_) {
         LootContext.Builder originalBuilder = super.createLootContext(p_21105_, p_21106_);
 
-        if (this.builder.customLootContextBuilder != null) {
-            return this.builder.customLootContextBuilder.apply(originalBuilder);
+        if (builder.customLootContextBuilder != null) {
+            return builder.customLootContextBuilder.apply(originalBuilder);
         }
 
         return originalBuilder;
@@ -441,8 +431,8 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     public void kill() {
-        if (builder.customKill != null) {
-            builder.customKill.accept(this);
+        if (builder.kill != null) {
+            builder.kill.accept(MobEntityJS.this);
         }
         super.kill();
     }
@@ -542,10 +532,11 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         }
     }
 
+
     @Override
     protected void tickDeath() {
-        if (builder.customTickDeath != null) {
-            builder.customTickDeath.accept(this);
+        if (builder.tickDeath != null) {
+            builder.tickDeath.accept((MobEntityJS) this);
         } else {
             super.tickDeath();
         }
@@ -1179,7 +1170,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public void rideTick() {
         if (builder.rideTick != null) {
-            builder.rideTick.accept(this);
+            builder.rideTick.accept(MobEntityJS.this);
         } else {
             super.rideTick();
         }
@@ -1430,7 +1421,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isAffectedByPotions() {
         if (builder.isAffectedByPotions != null) {
-            return builder.isAffectedByPotions.test(this);
+            return builder.isAffectedByPotions.test(MobEntityJS.this);
         } else {
             return super.isAffectedByPotions();
         }
@@ -1589,7 +1580,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isCurrentlyGlowing() {
         if (builder.isCurrentlyGlowing != null) {
-            return builder.isCurrentlyGlowing.test(this);
+            return builder.isCurrentlyGlowing.test(MobEntityJS.this);
         } else {
             return super.isCurrentlyGlowing();
         }
@@ -1758,6 +1749,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     public boolean fireImmune() {
         return super.fireImmune();
     }
+
 
     @Override
     public boolean isInWater() {

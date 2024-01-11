@@ -191,10 +191,6 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         return builder.mainArm;
     }
 
-    @Override
-    public boolean canBeCollidedWith() {
-        return builder.canBeCollidedWith;
-    }
 
     @Override
     public boolean isAttackable() {
