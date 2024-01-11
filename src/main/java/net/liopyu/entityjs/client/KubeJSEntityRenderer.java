@@ -40,3 +40,4 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         };
     }
 }
+

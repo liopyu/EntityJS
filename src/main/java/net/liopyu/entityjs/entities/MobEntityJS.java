@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.entities;
 
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.liopyu.entityjs.util.ExitPortalInfo;
@@ -126,9 +127,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     public boolean isPushable() {
-
         return builder.isPushable;
-
     }
 
     @Override
@@ -184,7 +183,9 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            builder.tick.accept(MobEntityJS.this);
+            if (this != null && this instanceof MobEntityJS) {
+                builder.tick.accept((MobEntityJS) this);
+            }
         }
     }
 
@@ -192,7 +193,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (builder.mobInteract != null) {
-            final MobInteractContext context = new MobInteractContext(MobEntityJS.this, player, hand);
+            final MobInteractContext context = new MobInteractContext((MobEntityJS) this, player, hand);
             final InteractionResult result = builder.mobInteract.apply(context);
             return result == null ? super.mobInteract(player, hand) : result;
         }
@@ -454,8 +455,8 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     public void kill() {
-        if (builder.customKill != null) {
-            builder.customKill.accept(MobEntityJS.this);
+        if (this instanceof MobEntityJS && builder.kill != null) {
+            builder.kill.accept((MobEntityJS) this);
         }
         super.kill();
     }
@@ -477,7 +478,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean canSpawnSoulSpeedParticle() {
         if (builder.canSpawnSoulSpeedParticle != null) {
-            return builder.canSpawnSoulSpeedParticle.getAsBoolean();
+            return builder.canSpawnSoulSpeedParticle;
         }
         return super.canSpawnSoulSpeedParticle();
     }
@@ -549,16 +550,17 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean rideableUnderWater() {
         if (builder.rideableUnderWater != null) {
-            return builder.rideableUnderWater.getAsBoolean();
+            return builder.rideableUnderWater;
         } else {
             return super.rideableUnderWater();
         }
     }
 
+
     @Override
     protected void tickDeath() {
-        if (builder.customTickDeath != null) {
-            builder.customTickDeath.accept(MobEntityJS.this);
+        if (this instanceof MobEntityJS && builder.tickDeath != null) {
+            builder.tickDeath.accept((MobEntityJS) this);
         } else {
             super.tickDeath();
         }
@@ -796,7 +798,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isDeadOrDying() {
         if (builder.isDeadOrDying != null) {
-            return builder.isDeadOrDying.test(MobEntityJS.this);
+            return builder.isDeadOrDying.test((LivingEntity) this);
         } else {
             return super.isDeadOrDying();
         }
@@ -946,7 +948,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean onClimbable() {
         if (builder.onClimbable != null) {
-            return builder.onClimbable.test(MobEntityJS.this);
+            return builder.onClimbable.test((LivingEntity) this);
         } else {
             return super.onClimbable();
         }
@@ -1093,7 +1095,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean shouldShowName() {
         if (builder.shouldShowName != null) {
-            return builder.shouldShowName.test(MobEntityJS.this);
+            return builder.shouldShowName.test((LivingEntity) this);
         } else {
             return super.shouldShowName();
         }
@@ -1192,7 +1194,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public void rideTick() {
         if (builder.rideTick != null) {
-            builder.rideTick.accept(MobEntityJS.this);
+            builder.rideTick.accept((LivingEntity) this);
         } else {
             super.rideTick();
         }
@@ -1330,7 +1332,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isUsingItem() {
         if (builder.isUsingItem != null) {
-            return builder.isUsingItem.test(MobEntityJS.this);
+            return builder.isUsingItem.test((LivingEntity) this);
         } else {
             return super.isUsingItem();
         }
@@ -1389,7 +1391,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isBlocking() {
         if (builder.isBlocking != null) {
-            return builder.isBlocking.test(MobEntityJS.this);
+            return builder.isBlocking.test((LivingEntity) this);
         } else {
             return super.isBlocking();
         }
@@ -1398,7 +1400,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isSuppressingSlidingDownLadder() {
         if (builder.isSuppressingSlidingDownLadder != null) {
-            return builder.isSuppressingSlidingDownLadder.test(MobEntityJS.this);
+            return builder.isSuppressingSlidingDownLadder.test((LivingEntity) this);
         } else {
             return super.isSuppressingSlidingDownLadder();
         }
@@ -1408,7 +1410,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isFallFlying() {
         if (builder.isFallFlying != null) {
-            return builder.isFallFlying.test(MobEntityJS.this);
+            return builder.isFallFlying.test((LivingEntity) this);
         } else {
             return super.isFallFlying();
         }
@@ -1417,7 +1419,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isVisuallySwimming() {
         if (builder.isVisuallySwimming != null) {
-            return builder.isVisuallySwimming.test(MobEntityJS.this);
+            return builder.isVisuallySwimming.test((LivingEntity) this);
         } else {
             return super.isVisuallySwimming();
         }
@@ -1443,7 +1445,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isAffectedByPotions() {
         if (builder.isAffectedByPotions != null) {
-            return builder.isAffectedByPotions.test(MobEntityJS.this);
+            return builder.isAffectedByPotions.test((LivingEntity) this);
         } else {
             return super.isAffectedByPotions();
         }
@@ -1592,7 +1594,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean canFreeze() {
         if (builder.canFreeze != null) {
-            return builder.canFreeze.test(MobEntityJS.this);
+            return builder.canFreeze.test((LivingEntity) this);
         } else {
             return super.canFreeze();
         }
@@ -1602,7 +1604,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isCurrentlyGlowing() {
         if (builder.isCurrentlyGlowing != null) {
-            return builder.isCurrentlyGlowing.test(MobEntityJS.this);
+            return builder.isCurrentlyGlowing.test((LivingEntity) this);
         } else {
             return super.isCurrentlyGlowing();
         }
@@ -1611,7 +1613,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean canDisableShield() {
         if (builder.canDisableShield != null) {
-            return builder.canDisableShield.test(MobEntityJS.this);
+            return builder.canDisableShield.test((LivingEntity) this);
         } else {
             return super.canDisableShield();
         }
@@ -1771,6 +1773,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     public boolean fireImmune() {
         return super.fireImmune();
     }
+
 
     @Override
     public boolean isInWater() {

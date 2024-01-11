@@ -136,7 +136,6 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient BiFunction<DamageSource, Float, Float> customGetDamageAfterMagicAbsorb;
     public transient Function<Float, Float> customNextStep;
     public transient Function<HoverEvent, HoverEvent> customCreateHoverEvent;
-    /* public transient Function<Integer, Integer> customGetFireImmuneTicks;*/
     public transient Function<Integer, Integer> customGetPermissionLevel;
     public transient Function<Integer, Integer> customIncreaseAirSupply;
     public transient Function<double[], ListTag> customNewDoubleList;
@@ -154,13 +153,13 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Consumer<LivingEntity> customBlockUsingShield;
     public transient BiConsumer<AABB, AABB> customCheckAutoSpinAttack;
     public transient BiConsumer<Double, ResourceLocation> customCheckFallDamage;
-    public transient Consumer<T> customKill;
+    public transient Consumer<T> kill;
     public transient Function<EntityType<?>, Boolean> customCanAttackType;
 
     public transient Function<Float, Float> customGetSwimAmount;
 
     public transient Runnable customBaseTick;
-    public transient BooleanSupplier canSpawnSoulSpeedParticle;
+    public transient Boolean canSpawnSoulSpeedParticle;
     public transient Runnable customSpawnSoulSpeedParticle;
     public transient Runnable customRemoveSoulSpeed;
     public transient Runnable customTryAddSoulSpeed;
@@ -169,25 +168,11 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Consumer<BlockPos> customOnChangedBlock;
     public transient Boolean isBaby;
     public transient Float customScale;
-    public transient BooleanSupplier rideableUnderWater;
-    public transient Consumer<T> customTickDeath;
+    public transient Boolean rideableUnderWater;
+    public transient Consumer<T> tickDeath;
     public transient boolean shouldDropExperience;
 
     public transient Function<BaseEntityJS, Integer> customExperienceReward;
-
-    //public transient Function<BaseEntityJS, RandomSource> customRandom;
-
-    //public transient Function<BaseEntityJS, LivingEntity> customLastHurtByMob;
-
-    //public transient IntSupplier customGetLastHurtByMobTimestamp;
-    //public transient Consumer<@Nullable Player> customSetLastHurtByPlayer;
-
-    //public transient Consumer<LivingEntity> customSetLastHurtByMob;
-    //public transient Supplier<LivingEntity> customGetLastHurtMob;
-    //public transient Function<BaseEntityJS, Integer> customGetLastHurtMobTimestamp;
-    //public transient Consumer<Entity> customSetLastHurtMob;
-    //public transient IntSupplier customGetNoActionTime;
-    //public transient IntConsumer customSetNoActionTime;
     public transient Supplier<Boolean> customShouldDiscardFriction;
     public transient Consumer<Boolean> customSetDiscardFriction;
 
@@ -209,11 +194,6 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Runnable customRemoveEffectParticles;
 
     public transient Predicate<Boolean> customRemoveAllEffects;
-    //No point in overriding get methods
-    /*public transient Function<Collection<MobEffectInstance>, Collection<MobEffectInstance>> customGetActiveEffects;
-    public transient Supplier<Map<MobEffect, MobEffectInstance>> customGetActiveEffectsMap;
-    public transient Predicate<MobEffect> customHasEffect;
-    public transient Function<MobEffect, MobEffectInstance> customGetEffect;*/
     public transient BiPredicate<MobEffectInstance, Entity> customAddEffect;
     public transient Predicate<MobEffectInstance> canBeAffectedPredicate;
 
@@ -237,16 +217,11 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient BiConsumer<Float, LivingEntity> healAmount;
 
 
-    /*public transient FloatSupplier customGetHealth;*/
-    /*public transient float setHealth;*/
-
     public transient Predicate<LivingEntity> isDeadOrDying;
 
     public transient BiPredicate<DamageSource, Float> hurtPredicate;
 
     public transient Supplier<DamageSource> lastDamageSourceSupplier;
-
-    /* public transient Consumer<DamageSource> playHurtSound;*/
 
     public transient Predicate<DamageSource> isDamageSourceBlocked;
 
@@ -275,10 +250,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
 
     public transient Function<ItemStack, SoundEvent> eatingSound;
 
-    /* public transient BooleanConsumer customSetOnGround;*/
-    /*public transient Supplier<Optional<BlockPos>> customGetLastClimbablePos;*/
     public transient Predicate<LivingEntity> onClimbable;
-    /*public transient BooleanSupplier customIsAlive;*/
     public transient boolean canBreatheUnderwater;
 
     public transient BiPredicate<Float, DamageSource> causeFallDamage;
@@ -411,6 +383,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         mainArm = HumanoidArm.RIGHT;
         canBreatheUnderwater = false;
         passengerPredicate = entity -> true;
+
     }
 
     @Info(value = "Sets the main arm of the entity, defaults to 'right'")
@@ -728,11 +701,6 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
-    /*public BaseEntityBuilder<T> getFireImmuneTicks(Function<Integer, Integer> customGetFireImmuneTicks) {
-        this.customGetFireImmuneTicks = customGetFireImmuneTicks;
-        return this;
-    }*/
-
     public BaseEntityBuilder<T> getPermissionLevel(Function<Integer, Integer> customGetPermissionLevel) {
         this.customGetPermissionLevel = customGetPermissionLevel;
         return this;
@@ -824,8 +792,8 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         }
     }
 
-    public BaseEntityBuilder<T> kill(Consumer<T> customKill) {
-        this.customKill = customKill;
+    public BaseEntityBuilder<T> kill(Consumer<T> kill) {
+        this.kill = kill;
         return this;
     }
 
@@ -844,7 +812,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }*/
 
-    public BaseEntityBuilder<T> canSpawnSoulSpeedParticle(BooleanSupplier canSpawn) {
+    public BaseEntityBuilder<T> canSpawnSoulSpeedParticle(Boolean canSpawn) {
         this.canSpawnSoulSpeedParticle = canSpawn;
         return this;
     }
@@ -885,13 +853,13 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
-    public BaseEntityBuilder<T> rideableUnderWater(BooleanSupplier rideableUnderWater) {
+    public BaseEntityBuilder<T> rideableUnderWater(Boolean rideableUnderWater) {
         this.rideableUnderWater = rideableUnderWater;
         return this;
     }
 
-    public BaseEntityBuilder<T> tickDeath(Consumer<T> customTickDeath) {
-        this.customTickDeath = customTickDeath;
+    public BaseEntityBuilder<T> tickDeath(Consumer<T> tickDeath) {
+        this.tickDeath = tickDeath;
         return this;
     }
 
@@ -1030,27 +998,6 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
-
-    /*public BaseEntityBuilder<T> getActiveEffects(Function<Collection<MobEffectInstance>, Collection<MobEffectInstance>> customGetActiveEffects) {
-        this.customGetActiveEffects = customGetActiveEffects;
-        return this;
-    }*/
-
-
-    /*public BaseEntityBuilder<T> getActiveEffectsMap(Supplier<Map<MobEffect, MobEffectInstance>> customGetActiveEffectsMap) {
-        this.customGetActiveEffectsMap = customGetActiveEffectsMap;
-        return this;
-    }*/
-
-    /*public BaseEntityBuilder<T> hasEffect(Predicate<MobEffect> customHasEffect) {
-        this.customHasEffect = customHasEffect;
-        return this;
-    }*/
-
-    /*public BaseEntityBuilder<T> getEffect(Function<MobEffect, MobEffectInstance> customGetEffect) {
-        this.customGetEffect = customGetEffect;
-        return this;
-    }*/
 
     public BaseEntityBuilder<T> addEffect(BiPredicate<MobEffectInstance, Entity> customAddEffect) {
         this.customAddEffect = customAddEffect;
@@ -1829,7 +1776,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         boolean test(AnimationEventJS<E> event);
 
         default AnimationController.IAnimationPredicate<E> toGecko() {
-            return event -> test(new AnimationEventJS<>(event)) ? PlayState.CONTINUE : PlayState.STOP;
+            return event -> test(new AnimationEventJS<>(event)) ? PlayState.CONTINUE : PlayState.STOP; //line 1779
         }
     }
 
