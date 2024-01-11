@@ -5,6 +5,7 @@ import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.entities.BaseEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
@@ -1776,9 +1777,18 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         boolean test(AnimationEventJS<E> event);
 
         default AnimationController.IAnimationPredicate<E> toGecko() {
-            return event -> test(new AnimationEventJS<>(event)) ? PlayState.CONTINUE : PlayState.STOP; //line 1779
+            return event -> {
+                if (event != null) {
+                    AnimationEventJS<E> animationEventJS = new AnimationEventJS<>(event);
+                    return test(animationEventJS) ? PlayState.CONTINUE : PlayState.STOP;
+                } else {
+                    ConsoleJS.STARTUP.error("AnimationEventJS was null in IAnimationPredicateJS.toGecko()");
+                    return PlayState.STOP;
+                }
+            };
         }
     }
+
 
     /**
      * A simple wrapper around a {@link AnimationEvent} that restricts access to certain things
