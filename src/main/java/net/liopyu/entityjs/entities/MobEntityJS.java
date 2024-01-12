@@ -194,9 +194,13 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (builder.mobInteract != null) {
             final MobInteractContext context = new MobInteractContext(MobEntityJS.this, player, hand);
+            if (context == null) {
+                ConsoleJS.STARTUP.info("MobInteractContext is null");
+            }
             final InteractionResult result = builder.mobInteract.apply(context);
             return result == null ? super.mobInteract(player, hand) : result;
         }
+
         return super.mobInteract(player, hand);
     }
 

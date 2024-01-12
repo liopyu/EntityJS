@@ -1780,7 +1780,13 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
             return event -> {
                 if (event != null) {
                     AnimationEventJS<E> animationEventJS = new AnimationEventJS<>(event);
+                    try {
+                        if (animationEventJS == null) return PlayState.STOP;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                     return test(animationEventJS) ? PlayState.CONTINUE : PlayState.STOP;
+
                 } else {
                     ConsoleJS.STARTUP.error("AnimationEventJS was null in IAnimationPredicateJS.toGecko()");
                     return PlayState.STOP;
