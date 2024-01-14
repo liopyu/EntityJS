@@ -193,5 +193,5 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     public boolean isAttackable() {
         return builder.isAttackable;
     }
-//Removed for now - liopyu
+    //Below methods are removed for now - liopyu
 }

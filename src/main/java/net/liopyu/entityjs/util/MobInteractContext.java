@@ -3,7 +3,6 @@ package net.liopyu.entityjs.util;
 
 import net.liopyu.entityjs.entities.MobEntityJS;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 
 public class MobInteractContext {
