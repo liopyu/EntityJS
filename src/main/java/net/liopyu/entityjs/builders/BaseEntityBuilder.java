@@ -9,9 +9,7 @@ import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.entities.BaseEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.util.ExitPortalInfo;
-import net.liopyu.entityjs.util.MobInteractContext;
-import net.liopyu.entityjs.util.OnEffectContext;
+import net.liopyu.entityjs.util.*;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -38,6 +36,9 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.HitResult;
+import net.minecraftforge.common.util.TriPredicate;
+import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
@@ -346,7 +347,27 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Predicate<String> addTag;
     public transient Consumer<T> onClientRemoval;
     public transient Consumer<T> onAddedToWorld;
+    /*public transient BiPredicate<Entity, Double> closerThan;*/
+    public transient Consumer<T> lavaHurt;
+    public transient Consumer<T> onFlap;
+    public transient BooleanSupplier dampensVibrations;
 
+    public transient Consumer<PlayerEntityContext> playerTouch;
+    public transient TriFunction<Double, Float, Boolean, HitResult> pick;
+    public transient BooleanSupplier showVehicleHealth;
+    public transient Consumer<Boolean> setInvisible;
+    public transient IntConsumer setAirSupply;
+    public transient IntConsumer setTicksFrozen;
+    public transient Consumer<ThunderHitContext> thunderHit;
+    public transient Consumer<StuckInBlockContext> makeStuckInBlock;
+    public transient Predicate<DamageSource> isInvulnerableTo;
+    public transient Consumer<Boolean> setInvulnerable;
+    public transient Supplier<Boolean> canChangeDimensions;
+    public transient Consumer<Optional<Component>> setCustomName;
+
+    public transient BiPredicate<Level, BlockPos> mayInteract;
+    public transient TriPredicate<BlockState, BlockPos, Float> canTrample;
+    public transient Consumer<T> onRemovedFromWorld;
 
     //STUFF
     public BaseEntityBuilder(ResourceLocation i) {
@@ -366,7 +387,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         textureResource = t -> t.getBuilder().newID("textures/model/entity/", ".png");
         animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");
         isPushable = true;
-        isAttackable = false;
+        isAttackable = true;
         attributes = builder -> {
         };
         animationSuppliers = new ArrayList<>();
@@ -1673,6 +1694,119 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     @Info(value = "Sets the custom onClientRemoval behavior")
     public BaseEntityBuilder<T> onClientRemoval(Consumer<T> consumer) {
         onClientRemoval = consumer;
+        return this;
+    }
+
+    /*@Info(value = "Sets the custom closerThan behavior")
+    public BaseEntityBuilder<T> closerThan(BiPredicate<Entity, Double> predicate) {
+        closerThan = predicate;
+        return this;
+    }*/
+    @Info(value = "Sets the custom lavaHurt behavior")
+    public BaseEntityBuilder<T> lavaHurt(Consumer<T> consumer) {
+        lavaHurt = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for entity flapping actions")
+    public BaseEntityBuilder<T> onFlap(Consumer<T> consumer) {
+        onFlap = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for determining if the entity dampens vibrations")
+    public BaseEntityBuilder<T> dampensVibrations(BooleanSupplier supplier) {
+        dampensVibrations = supplier;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for handling player touch events")
+    public BaseEntityBuilder<T> playerTouch(Consumer<PlayerEntityContext> consumer) {
+        playerTouch = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for picking entity hit results")
+    public BaseEntityBuilder<T> pick(TriFunction<Double, Float, Boolean, HitResult> function) {
+        pick = function;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for determining if the vehicle health should be shown")
+    public BaseEntityBuilder<T> showVehicleHealth(BooleanSupplier supplier) {
+        showVehicleHealth = supplier;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for making the entity invisible or visible")
+    public BaseEntityBuilder<T> setInvisible(Consumer<Boolean> consumer) {
+        setInvisible = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for setting the entity's air supply")
+    public BaseEntityBuilder<T> setAirSupply(IntConsumer consumer) {
+        setAirSupply = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for setting the number of ticks the entity is frozen")
+    public BaseEntityBuilder<T> setTicksFrozen(IntConsumer consumer) {
+        setTicksFrozen = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for when the entity is hit by lightning")
+    public BaseEntityBuilder<T> thunderHit(Consumer<ThunderHitContext> consumer) {
+        thunderHit = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior when the entity gets stuck in a block")
+    public BaseEntityBuilder<T> makeStuckInBlock(Consumer<StuckInBlockContext> consumer) {
+        makeStuckInBlock = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom condition for whether the entity is invulnerable to a specific damage source")
+    public BaseEntityBuilder<T> isInvulnerableTo(Predicate<DamageSource> predicate) {
+        isInvulnerableTo = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets whether the entity is invulnerable or not")
+    public BaseEntityBuilder<T> setInvulnerable(Consumer<Boolean> consumer) {
+        setInvulnerable = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets whether the entity can change dimensions")
+    public BaseEntityBuilder<T> canChangeDimensions(Supplier<Boolean> supplier) {
+        canChangeDimensions = supplier;
+        return this;
+    }
+
+    @Info(value = "Sets the custom name of the entity")
+    public BaseEntityBuilder<T> setCustomName(Consumer<Optional<Component>> consumer) {
+        setCustomName = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom condition for whether the entity may interact with the specified block position")
+    public BaseEntityBuilder<T> mayInteract(BiPredicate<Level, BlockPos> predicate) {
+        mayInteract = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom condition for whether the entity can trample the specified block state at the given position with the given fall distance")
+    public BaseEntityBuilder<T> canTrample(TriPredicate<BlockState, BlockPos, Float> predicate) {
+        canTrample = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for when the entity is removed from the world")
+    public BaseEntityBuilder<T> onRemovedFromWorld(Consumer<T> consumer) {
+        onRemovedFromWorld = consumer;
         return this;
     }
 
