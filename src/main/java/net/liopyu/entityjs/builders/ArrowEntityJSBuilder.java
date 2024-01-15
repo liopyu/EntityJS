@@ -4,7 +4,7 @@ import net.liopyu.entityjs.entities.ArrowEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 
-public abstract class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
+public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
     public ArrowEntityJSBuilder(ResourceLocation i) {
         super(i);
     }

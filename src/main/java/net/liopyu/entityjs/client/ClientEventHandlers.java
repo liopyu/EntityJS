@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.client;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.builders.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -17,6 +18,9 @@ public class ClientEventHandlers {
     private static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
         for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
             event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSEntityRenderer<>(renderManager, builder));
+        }
+        for (ArrowEntityBuilder<?> builder : ArrowEntityBuilder.thisList) {
+            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSArrowEntityRenderer<>(renderManager, builder));
         }
     }
 }

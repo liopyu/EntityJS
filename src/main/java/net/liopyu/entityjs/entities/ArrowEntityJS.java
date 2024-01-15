@@ -1,17 +1,12 @@
 package net.liopyu.entityjs.entities;
 
-import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
-import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
-import net.minecraft.core.NonNullList;
+import net.liopyu.entityjs.builders.*;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
 
-public class ArrowEntityJS extends AbstractArrow {
+public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
 
     protected final ArrowEntityJSBuilder builder;
@@ -19,6 +14,11 @@ public class ArrowEntityJS extends AbstractArrow {
     public ArrowEntityJS(ArrowEntityJSBuilder builder, EntityType<? extends AbstractArrow> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
+    }
+
+    @Override
+    public ArrowEntityBuilder<?> getBuilder() {
+        return builder;
     }
 
     @Override

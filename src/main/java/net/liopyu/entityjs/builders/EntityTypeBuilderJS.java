@@ -2,11 +2,8 @@ package net.liopyu.entityjs.builders;
 
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -37,8 +34,8 @@ public class EntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
             builder.noSave();
         }
         if (js.immuneTo.length > 0) {
-            final Block[] blocks  = new Block[js.immuneTo.length];
-            for (int i = 0 ; i < js.immuneTo.length ; i++) {
+            final Block[] blocks = new Block[js.immuneTo.length];
+            for (int i = 0; i < js.immuneTo.length; i++) {
                 blocks[i] = ForgeRegistries.BLOCKS.getValue(js.immuneTo[i]);
             }
             builder.immuneTo(blocks);
