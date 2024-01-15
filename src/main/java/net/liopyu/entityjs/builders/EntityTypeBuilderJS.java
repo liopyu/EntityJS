@@ -34,8 +34,8 @@ public class EntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
             builder.noSave();
         }
         if (js.immuneTo.length > 0) {
-            final Block[] blocks  = new Block[js.immuneTo.length];
-            for (int i = 0 ; i < js.immuneTo.length ; i++) {
+            final Block[] blocks = new Block[js.immuneTo.length];
+            for (int i = 0; i < js.immuneTo.length; i++) {
                 blocks[i] = ForgeRegistries.BLOCKS.getValue(js.immuneTo[i]);
             }
             builder.immuneTo(blocks);

@@ -1,6 +1,6 @@
 package net.liopyu.entityjs.entities;
 
-import dev.latvian.mods.kubejs.util.ConsoleJS;
+
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
@@ -8,6 +8,26 @@ import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.liopyu.entityjs.util.*;
+import net.liopyu.entityjs.util.ai.goal.GoalSelectorBuilder;
+import net.liopyu.entityjs.util.ai.goal.GoalTargetBuilder;
+import net.minecraft.BlockUtil;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.CombatTracker;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -25,10 +45,12 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class MobEntityJS extends Mob implements IAnimatableJS {
@@ -66,24 +88,24 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
     @Override
-    protected PathNavigation createNavigation(Level p_21480_) {
+    protected @NotNull PathNavigation createNavigation(@NotNull Level p_21480_) {
         return super.createNavigation(p_21480_);
     }
 
     //Beginning of Base Overrides
     @Override
-    public Iterable<ItemStack> getArmorSlots() {
+    public @NotNull Iterable<ItemStack> getArmorSlots() {
         return armorItems;
     }
 
     @Override
-    public Iterable<ItemStack> getHandSlots() {
+    public @NotNull Iterable<ItemStack> getHandSlots() {
         return handItems;
     }
 
     // Mirrors the implementation in Mob
     @Override
-    public ItemStack getItemBySlot(EquipmentSlot slot) {
+    public @NotNull ItemStack getItemBySlot(EquipmentSlot slot) {
         return switch (slot.getType()) {
             case HAND -> handItems.get(slot.getIndex());
             case ARMOR -> armorItems.get(slot.getIndex());
@@ -92,7 +114,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     // Mirrors the implementation in Mob
     @Override
-    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
+    public void setItemSlot(EquipmentSlot slot, @NotNull ItemStack stack) {
         verifyEquippedItem(stack);
         switch (slot.getType()) {
             case HAND -> onEquipItem(slot, handItems.set(slot.getIndex(), stack), stack);
@@ -107,7 +129,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public HumanoidArm getMainArm() {
+    public @NotNull HumanoidArm getMainArm() {
         return builder.mainArm;
     }
 
@@ -119,7 +141,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     //Start of the method adding madness - liopyu
     @Override
-    protected boolean canAddPassenger(Entity entity) {
+    protected boolean canAddPassenger(@NotNull Entity entity) {
         return builder.passengerPredicate.test(entity);
     }
 
@@ -159,26 +181,34 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            if (this != null) {
-                builder.tick.accept(MobEntityJS.this);
-            }
+            builder.tick.accept(this);
         }
     }
 
+    @Override
+    public void onAddedToWorld() {
+        if (builder.onAddedToWorld != null) {
+            builder.onAddedToWorld.accept(this);
+            super.onAddedToWorld();
+        } else {
+            super.onAddedToWorld();
+        }
+    }
 
     @Override
-    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+    public @NotNull InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand) {
         if (builder.mobInteract != null) {
-            final MobInteractContext context = new MobInteractContext(MobEntityJS.this, player, hand);
+            final MobInteractContext context = new MobInteractContext(this, player, hand);
             final InteractionResult result = builder.mobInteract.apply(context);
             return result == null ? super.mobInteract(player, hand) : result;
         }
+
         return super.mobInteract(player, hand);
     }
 
 
     @Override
-    protected LootContext.Builder createLootContext(boolean p_21105_, DamageSource p_21106_) {
+    protected LootContext.@NotNull Builder createLootContext(boolean p_21105_, @NotNull DamageSource p_21106_) {
         LootContext.Builder originalBuilder = super.createLootContext(p_21105_, p_21106_);
 
         if (builder.customLootContextBuilder != null) {
@@ -189,7 +219,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected void doAutoAttackOnTouch(LivingEntity target) {
+    protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {
         if (builder.customDoAutoAttack != null) {
             builder.customDoAutoAttack.accept(target);
         }
@@ -206,7 +236,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected void blockedByShield(LivingEntity p_21246_) {
+    protected void blockedByShield(@NotNull LivingEntity p_21246_) {
         if (builder.customBlockedByShield != null) {
             builder.customBlockedByShield.accept(p_21246_);
         } else {
@@ -224,7 +254,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected boolean doesEmitEquipEvent(EquipmentSlot p_217035_) {
+    protected boolean doesEmitEquipEvent(@NotNull EquipmentSlot p_217035_) {
         if (builder.customDoesEmitEquipEvent != null) {
             return builder.customDoesEmitEquipEvent.test(p_217035_);
         } else {
@@ -233,7 +263,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected boolean canEnterPose(Pose p_20176_) {
+    protected boolean canEnterPose(@NotNull Pose p_20176_) {
         if (builder.customCanEnterPose != null) {
             return builder.customCanEnterPose.test(p_20176_);
         } else {
@@ -243,7 +273,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    protected boolean isHorizontalCollisionMinor(Vec3 p_196625_) {
+    protected boolean isHorizontalCollisionMinor(@NotNull Vec3 p_196625_) {
         if (builder.customIsHorizontalCollisionMinor != null) {
             return builder.customIsHorizontalCollisionMinor.test(p_196625_);
         } else {
@@ -280,7 +310,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected HoverEvent createHoverEvent() {
+    protected @NotNull HoverEvent createHoverEvent() {
         HoverEvent originalHoverEvent = super.createHoverEvent();
         if (builder.customCreateHoverEvent != null) {
             return builder.customCreateHoverEvent.apply(originalHoverEvent);
@@ -301,7 +331,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected ListTag newDoubleList(double... p_20064_) {
+    protected @NotNull ListTag newDoubleList(double @NotNull ... p_20064_) {
         if (builder.customNewDoubleList != null) {
             return builder.customNewDoubleList.apply(p_20064_);
         } else {
@@ -310,7 +340,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected ListTag newFloatList(float... p_20066_) {
+    protected @NotNull ListTag newFloatList(float @NotNull ... p_20066_) {
         if (builder.customNewFloatList != null) {
             return builder.customNewFloatList.apply(p_20066_);
         } else {
@@ -319,7 +349,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected Optional<BlockUtil.FoundRectangle> getExitPortal(ServerLevel p_185935_, BlockPos p_185936_, boolean p_185937_, WorldBorder p_185938_) {
+    protected @NotNull Optional<BlockUtil.FoundRectangle> getExitPortal(@NotNull ServerLevel p_185935_, @NotNull BlockPos p_185936_, boolean p_185937_, @NotNull WorldBorder p_185938_) {
         ExitPortalInfo exitPortalInfo = new ExitPortalInfo(p_185935_, p_185936_, p_185937_, p_185938_);
         if (builder.customGetExitPortal != null) {
             return builder.customGetExitPortal.apply(exitPortalInfo);
@@ -329,7 +359,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected SoundEvent getDrinkingSound(ItemStack p_21174_) {
+    protected @NotNull SoundEvent getDrinkingSound(@NotNull ItemStack p_21174_) {
         if (builder.customGetDrinkingSound != null) {
             return builder.customGetDrinkingSound.apply(p_21174_);
         } else {
@@ -339,7 +369,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Nullable
     @Override
-    protected SoundEvent getHurtSound(DamageSource p_21239_) {
+    protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
         if (builder.customGetHurtSound != null) {
             return builder.customGetHurtSound.apply(p_21239_);
         } else {
@@ -349,7 +379,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Nullable
     @Override
-    protected PortalInfo findDimensionEntryPoint(ServerLevel p_19923_) {
+    protected PortalInfo findDimensionEntryPoint(@NotNull ServerLevel p_19923_) {
         if (builder.customFindDimensionEntryPoint != null) {
             return builder.customFindDimensionEntryPoint.apply(p_19923_);
         } else {
@@ -358,7 +388,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected SoundEvent getSwimSplashSound() {
+    protected @NotNull SoundEvent getSwimSplashSound() {
         if (builder.customGetSwimSplashSound != null) {
             return builder.customGetSwimSplashSound.apply(super.getSwimSplashSound());
         } else {
@@ -367,7 +397,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected Vec3 getRelativePortalPosition(Direction.Axis p_21085_, BlockUtil.FoundRectangle p_21086_) {
+    protected @NotNull Vec3 getRelativePortalPosition(Direction.@NotNull Axis p_21085_, BlockUtil.@NotNull FoundRectangle p_21086_) {
         if (builder.customGetRelativePortalPosition != null) {
             return builder.customGetRelativePortalPosition.apply(p_21085_, p_21086_);
         } else {
@@ -376,7 +406,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected Vec3 limitPistonMovement(Vec3 p_20134_) {
+    protected @NotNull Vec3 limitPistonMovement(@NotNull Vec3 p_20134_) {
         if (builder.customLimitPistonMovement != null) {
             return builder.customLimitPistonMovement.apply(p_20134_);
         } else {
@@ -385,7 +415,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected Vec3 maybeBackOffFromEdge(Vec3 p_20019_, MoverType p_20020_) {
+    protected @NotNull Vec3 maybeBackOffFromEdge(@NotNull Vec3 p_20019_, @NotNull MoverType p_20020_) {
         if (builder.customMaybeBackOffFromEdge != null) {
             return builder.customMaybeBackOffFromEdge.apply(p_20019_, p_20020_);
         } else {
@@ -394,7 +424,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected void actuallyHurt(DamageSource p_21240_, float p_21241_) {
+    protected void actuallyHurt(@NotNull DamageSource p_21240_, float p_21241_) {
         if (builder.customActuallyHurt != null) {
             builder.customActuallyHurt.accept(p_21240_, p_21241_);
         } else {
@@ -403,7 +433,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected void blockUsingShield(LivingEntity p_21200_) {
+    protected void blockUsingShield(@NotNull LivingEntity p_21200_) {
         if (builder.customBlockUsingShield != null) {
             builder.customBlockUsingShield.accept(p_21200_);
         } else {
@@ -413,7 +443,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    protected void checkAutoSpinAttack(AABB p_21072_, AABB p_21073_) {
+    protected void checkAutoSpinAttack(@NotNull AABB p_21072_, @NotNull AABB p_21073_) {
         if (builder.customCheckAutoSpinAttack != null) {
             builder.customCheckAutoSpinAttack.accept(p_21072_, p_21073_);
         } else {
@@ -422,7 +452,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected void checkFallDamage(double p_20990_, boolean p_20991_, BlockState p_20992_, BlockPos p_20993_) {
+    protected void checkFallDamage(double p_20990_, boolean p_20991_, @NotNull BlockState p_20992_, @NotNull BlockPos p_20993_) {
         if (builder.customCheckFallDamage != null) {
             builder.customCheckFallDamage.accept(p_20990_, ForgeRegistries.BLOCKS.getKey(p_20992_.getBlock()));
         }
@@ -432,13 +462,13 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public void kill() {
         if (builder.kill != null) {
-            builder.kill.accept(MobEntityJS.this);
+            builder.kill.accept(this);
         }
         super.kill();
     }
 
     @Override
-    public boolean canAttackType(EntityType<?> entityType) {
+    public boolean canAttackType(@NotNull EntityType<?> entityType) {
         return (builder.customCanAttackType != null && builder.customCanAttackType.apply(entityType)) || super.canAttackType(entityType);
     }
 
@@ -453,10 +483,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     public boolean canSpawnSoulSpeedParticle() {
-        if (builder.canSpawnSoulSpeedParticle != null) {
-            return builder.canSpawnSoulSpeedParticle;
-        }
-        return super.canSpawnSoulSpeedParticle();
+        return Objects.requireNonNullElseGet(builder.canSpawnSoulSpeedParticle, super::canSpawnSoulSpeedParticle);
     }
 
     @Override
@@ -505,7 +532,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected void onChangedBlock(BlockPos p_21175_) {
+    protected void onChangedBlock(@NotNull BlockPos p_21175_) {
         if (builder.customOnChangedBlock != null) {
             builder.customOnChangedBlock.accept(p_21175_);
         } else {
@@ -516,27 +543,19 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     public float getScale() {
-        if (builder.customScale != null) {
-            return builder.customScale;
-        } else {
-            return super.getScale();
-        }
+        return Objects.requireNonNullElseGet(builder.customScale, super::getScale);
     }
 
     @Override
     public boolean rideableUnderWater() {
-        if (builder.rideableUnderWater != null) {
-            return builder.rideableUnderWater;
-        } else {
-            return super.rideableUnderWater();
-        }
+        return Objects.requireNonNullElseGet(builder.rideableUnderWater, super::rideableUnderWater);
     }
 
 
     @Override
     protected void tickDeath() {
         if (builder.tickDeath != null) {
-            builder.tickDeath.accept((MobEntityJS) this);
+            builder.tickDeath.accept(this);
         } else {
             super.tickDeath();
         }
@@ -568,7 +587,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     //EquipmentSlot, Old Itemstack, New Itemstack
     @Override
-    public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
+    public void onEquipItem(@NotNull EquipmentSlot slot, @NotNull ItemStack previous, @NotNull ItemStack current) {
         if (builder.customOnEquipItem != null) {
             builder.customOnEquipItem.accept(slot, previous, current);
         } else {
@@ -577,7 +596,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected void playEquipSound(ItemStack itemStack) {
+    protected void playEquipSound(@NotNull ItemStack itemStack) {
         if (builder.customPlayEquipSound != null) {
             builder.customPlayEquipSound.accept(itemStack);
         } else {
@@ -617,7 +636,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public boolean canAttack(LivingEntity p_21171_) {
+    public boolean canAttack(@NotNull LivingEntity p_21171_) {
         if (builder.customCanAttack != null) {
             return builder.customCanAttack.test(p_21171_);
         } else {
@@ -627,7 +646,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public boolean canAttack(LivingEntity p_21041_, TargetingConditions p_21042_) {
+    public boolean canAttack(@NotNull LivingEntity p_21041_, @NotNull TargetingConditions p_21042_) {
         if (builder.customCanAttackWithConditions != null) {
             return builder.customCanAttackWithConditions.test(p_21041_, p_21042_);
         } else {
@@ -676,7 +695,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public boolean addEffect(MobEffectInstance p_147208_, @Nullable Entity p_147209_) {
+    public boolean addEffect(@NotNull MobEffectInstance p_147208_, @Nullable Entity p_147209_) {
         if (builder.customAddEffect != null) {
             return builder.customAddEffect.test(p_147208_, p_147209_);
         } else {
@@ -686,7 +705,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public boolean canBeAffected(MobEffectInstance effectInstance) {
+    public boolean canBeAffected(@NotNull MobEffectInstance effectInstance) {
         if (builder.canBeAffectedPredicate != null) {
             return builder.canBeAffectedPredicate.test(effectInstance);
         }
@@ -695,7 +714,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public void forceAddEffect(MobEffectInstance effectInstance, @Nullable Entity entity) {
+    public void forceAddEffect(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
         if (builder.forceAddEffectConsumer != null) {
             builder.forceAddEffectConsumer.accept(effectInstance, entity);
         } else {
@@ -710,7 +729,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
 
-    @Nullable
+   /* @Nullable
     @Override
     public MobEffectInstance removeEffectNoUpdate(@Nullable MobEffect effect) {
         if (builder.removeEffectNoUpdateFunction != null) {
@@ -718,43 +737,46 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         } else {
             return super.removeEffectNoUpdate(effect);
         }
-    }
+    }*/
 
 
-    @Override
-    public boolean removeEffect(MobEffect effect) {
+   /* @Override
+    public boolean removeEffect(@NotNull MobEffect effect) {
         if (builder.removeEffect != null) {
             return builder.removeEffect.test(effect, false);
         } else {
             return super.removeEffect(effect);
         }
-    }
+    }*/
 
 
     @Override
-    protected void onEffectAdded(MobEffectInstance effectInstance, @Nullable Entity entity) {
+    public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
         if (builder.onEffectAdded != null) {
-            builder.onEffectAdded.accept(effectInstance, entity);
+            final OnEffectContext context = new OnEffectContext(effectInstance, this);
+            builder.onEffectAdded.accept(context);
         } else {
             super.onEffectAdded(effectInstance, entity);
         }
     }
 
 
-    @Override
-    protected void onEffectUpdated(MobEffectInstance effectInstance, boolean isReapplied, @Nullable Entity entity) {
+    /*@Override
+    protected void onEffectUpdated(@NotNull MobEffectInstance effectInstance, boolean isReapplied, @Nullable Entity entity) {
         if (builder.onEffectUpdated != null) {
             builder.onEffectUpdated.accept(effectInstance, isReapplied, entity);
         } else {
             super.onEffectUpdated(effectInstance, isReapplied, entity);
         }
-    }
+    }*/
 
 
     @Override
-    protected void onEffectRemoved(MobEffectInstance effectInstance) {
+    protected void onEffectRemoved(@NotNull MobEffectInstance effectInstance) {
+
         if (builder.onEffectRemoved != null) {
-            builder.onEffectRemoved.accept(effectInstance);
+            final OnEffectContext context = new OnEffectContext(effectInstance, this);
+            builder.onEffectRemoved.accept(context);
         } else {
             super.onEffectRemoved(effectInstance);
         }
@@ -782,7 +804,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public boolean hurt(DamageSource damageSource, float amount) {
+    public boolean hurt(@NotNull DamageSource damageSource, float amount) {
         if (builder.hurtPredicate != null) {
             return builder.hurtPredicate.test(damageSource, amount);
         } else {
@@ -803,7 +825,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public boolean isDamageSourceBlocked(DamageSource damageSource) {
+    public boolean isDamageSourceBlocked(@NotNull DamageSource damageSource) {
         if (builder.isDamageSourceBlocked != null) {
             return builder.isDamageSourceBlocked.test(damageSource);
         } else {
@@ -813,7 +835,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public void die(DamageSource damageSource) {
+    public void die(@NotNull DamageSource damageSource) {
         if (builder.die != null) {
             builder.die.accept(damageSource);
         } else {
@@ -822,18 +844,18 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
 
-    @Override
+    /*@Override
     protected void createWitherRose(@Nullable LivingEntity entity) {
         if (builder.createWitherRose != null) {
             builder.createWitherRose.accept(entity);
         } else {
             super.createWitherRose(entity);
         }
-    }
+    }*/
 
 
     @Override
-    protected void dropAllDeathLoot(DamageSource damageSource) {
+    protected void dropAllDeathLoot(@NotNull DamageSource damageSource) {
         if (builder.dropAllDeathLoot != null) {
             builder.dropAllDeathLoot.accept(damageSource);
         } else {
@@ -853,7 +875,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    protected void dropCustomDeathLoot(DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
+    protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
         if (builder.dropCustomDeathLoot != null) {
             builder.dropCustomDeathLoot.accept(damageSource, lootingMultiplier, allowDrops);
         } else {
@@ -862,7 +884,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    protected void dropFromLootTable(DamageSource source, boolean flag) {
+    protected void dropFromLootTable(@NotNull DamageSource source, boolean flag) {
         if (builder.dropFromLootTable != null) {
             builder.dropFromLootTable.accept(source, flag);
         } else {
@@ -902,7 +924,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public Fallsounds getFallSounds() {
+    public @NotNull Fallsounds getFallSounds() {
         if (builder.fallSoundsFunction != null) {
             return builder.fallSoundsFunction.apply(super.getFallSounds());
         } else {
@@ -912,7 +934,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public SoundEvent getEatingSound(ItemStack itemStack) {
+    public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null) {
             return builder.eatingSound.apply(itemStack);
         } else {
@@ -930,7 +952,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         }
     }
 
-
+    //Deprecated but still works for 1.20.4 :shrug:
     @Override
     public boolean canBreatheUnderwater() {
         return builder.canBreatheUnderwater;
@@ -938,7 +960,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public boolean causeFallDamage(float distance, float damageMultiplier, DamageSource damageSource) {
+    public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
         if (builder.causeFallDamage != null) {
             return builder.causeFallDamage.test(distance, damageSource);
         } else {
@@ -958,7 +980,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    protected void hurtArmor(DamageSource source, float amount) {
+    protected void hurtArmor(@NotNull DamageSource source, float amount) {
         if (builder.hurtArmor != null) {
             builder.hurtArmor.accept(source, amount);
         } else {
@@ -968,7 +990,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    protected void hurtHelmet(DamageSource source, float amount) {
+    protected void hurtHelmet(@NotNull DamageSource source, float amount) {
         if (builder.hurtHelmet != null) {
             builder.hurtHelmet.accept(source, amount);
         } else {
@@ -988,7 +1010,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public CombatTracker getCombatTracker() {
+    public @NotNull CombatTracker getCombatTracker() {
         if (builder.combatTracker != null) {
             return builder.combatTracker.apply(super.getCombatTracker());
         } else {
@@ -1009,7 +1031,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public void swing(InteractionHand hand) {
+    public void swing(@NotNull InteractionHand hand) {
         if (builder.swingHand != null) {
             builder.swingHand.accept(hand);
         } else {
@@ -1019,7 +1041,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public void swing(InteractionHand hand, boolean extended) {
+    public void swing(@NotNull InteractionHand hand, boolean extended) {
         if (builder.swingHandExtended != null) {
             builder.swingHandExtended.accept(hand, extended);
         } else {
@@ -1039,7 +1061,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public void setItemInHand(InteractionHand hand, ItemStack stack) {
+    public void setItemInHand(@NotNull InteractionHand hand, @NotNull ItemStack stack) {
         if (builder.setItemInHand != null) {
             builder.setItemInHand.accept(hand, stack);
         } else {
@@ -1059,7 +1081,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public void push(Entity entity) {
+    public void push(@NotNull Entity entity) {
         if (builder.pushEntity != null) {
             builder.pushEntity.accept(entity);
         } else {
@@ -1088,7 +1110,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public boolean canStandOnFluid(FluidState fluidState) {
+    public boolean canStandOnFluid(@NotNull FluidState fluidState) {
         if (builder.canStandOnFluid != null) {
             return builder.canStandOnFluid.test(fluidState);
         } else {
@@ -1098,7 +1120,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public void travel(Vec3 travelVector) {
+    public void travel(@NotNull Vec3 travelVector) {
         if (builder.travel != null) {
             builder.travel.accept(travelVector);
         } else {
@@ -1108,7 +1130,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 movementVector, float friction) {
+    public @NotNull Vec3 handleRelativeFrictionAndCalculateMovement(@NotNull Vec3 movementVector, float friction) {
         if (builder.handleRelativeFrictionAndCalculateMovement != null) {
             return builder.handleRelativeFrictionAndCalculateMovement.apply(movementVector, friction);
         } else {
@@ -1128,7 +1150,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public boolean doHurtTarget(Entity targetEntity) {
+    public boolean doHurtTarget(@NotNull Entity targetEntity) {
         if (builder.doHurtTarget != null) {
             return builder.doHurtTarget.test(targetEntity, false);
         } else {
@@ -1170,7 +1192,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public void rideTick() {
         if (builder.rideTick != null) {
-            builder.rideTick.accept(MobEntityJS.this);
+            builder.rideTick.accept(this);
         } else {
             super.rideTick();
         }
@@ -1207,7 +1229,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public void onItemPickup(ItemEntity p_21054_) {
+    public void onItemPickup(@NotNull ItemEntity p_21054_) {
         if (builder.onItemPickup != null) {
             builder.onItemPickup.accept(p_21054_);
         } else {
@@ -1215,18 +1237,18 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         }
     }
 
-    @Override
-    public void take(Entity p_21030_, int p_21031_) {
+   /* @Override
+    public void take(@NotNull Entity p_21030_, int p_21031_) {
         if (builder.take != null) {
             builder.take.accept(p_21030_, p_21031_);
         } else {
             super.take(p_21030_, p_21031_);
         }
-    }
+    }*/
 
 
     @Override
-    public boolean hasLineOfSight(Entity p_147185_) {
+    public boolean hasLineOfSight(@NotNull Entity p_147185_) {
         if (builder.hasLineOfSight != null) {
             return builder.hasLineOfSight.test(p_147185_);
         } else {
@@ -1325,7 +1347,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public void startUsingItem(InteractionHand hand) {
+    public void startUsingItem(@NotNull InteractionHand hand) {
         if (builder.startUsingItem != null) {
             builder.startUsingItem.accept(hand);
         } else {
@@ -1335,7 +1357,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public void lookAt(EntityAnchorArgument.Anchor anchor, Vec3 target) {
+    public void lookAt(EntityAnchorArgument.@NotNull Anchor anchor, @NotNull Vec3 target) {
         if (builder.lookAt != null) {
             builder.lookAt.accept(anchor, target);
         } else {
@@ -1421,7 +1443,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isAffectedByPotions() {
         if (builder.isAffectedByPotions != null) {
-            return builder.isAffectedByPotions.test(MobEntityJS.this);
+            return builder.isAffectedByPotions.test(this);
         } else {
             return super.isAffectedByPotions();
         }
@@ -1436,7 +1458,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public void setRecordPlayingNearby(BlockPos p_21082_, boolean p_21083_) {
+    public void setRecordPlayingNearby(@NotNull BlockPos p_21082_, boolean p_21083_) {
         if (builder.setRecordPlayingNearby != null) {
             builder.setRecordPlayingNearby.accept(p_21082_, p_21083_);
         } else {
@@ -1445,7 +1467,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public boolean canTakeItem(ItemStack itemStack) {
+    public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
             return builder.canTakeItem.test(itemStack);
         } else {
@@ -1454,7 +1476,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public void setSleepingPos(BlockPos blockPos) {
+    public void setSleepingPos(@NotNull BlockPos blockPos) {
         if (builder.setSleepingPos != null) {
             builder.setSleepingPos.accept(blockPos);
         } else {
@@ -1473,7 +1495,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public void startSleeping(BlockPos blockPos) {
+    public void startSleeping(@NotNull BlockPos blockPos) {
         if (builder.startSleeping != null) {
             builder.startSleeping.accept(blockPos);
         } else {
@@ -1502,7 +1524,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public ItemStack eat(Level level, ItemStack itemStack) {
+    public @NotNull ItemStack eat(@NotNull Level level, @NotNull ItemStack itemStack) {
         if (builder.eat != null) {
             return builder.eat.apply(level, itemStack);
         } else {
@@ -1511,7 +1533,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public void broadcastBreakEvent(EquipmentSlot equipmentSlot) {
+    public void broadcastBreakEvent(@NotNull EquipmentSlot equipmentSlot) {
         if (builder.broadcastBreakEvent != null) {
             builder.broadcastBreakEvent.accept(equipmentSlot);
         } else {
@@ -1521,7 +1543,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public void broadcastBreakEvent(InteractionHand interactionHand) {
+    public void broadcastBreakEvent(@NotNull InteractionHand interactionHand) {
         if (builder.broadcastBreakEventHand != null) {
             builder.broadcastBreakEventHand.accept(interactionHand);
         } else {
@@ -1530,7 +1552,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public boolean curePotionEffects(ItemStack curativeItem) {
+    public boolean curePotionEffects(@NotNull ItemStack curativeItem) {
         if (builder.curePotionEffects != null) {
             return builder.curePotionEffects.test(curativeItem, false);
         } else {
@@ -1540,7 +1562,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
 
     @Override
-    public boolean shouldRiderFaceForward(Player player) {
+    public boolean shouldRiderFaceForward(@NotNull Player player) {
         if (builder.shouldRiderFaceForward != null) {
             return builder.shouldRiderFaceForward.test(player);
         } else {
@@ -1580,7 +1602,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public boolean isCurrentlyGlowing() {
         if (builder.isCurrentlyGlowing != null) {
-            return builder.isCurrentlyGlowing.test(MobEntityJS.this);
+            return builder.isCurrentlyGlowing.test(this);
         } else {
             return super.isCurrentlyGlowing();
         }
@@ -1596,52 +1618,47 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public boolean isColliding(BlockPos p_20040_, BlockState p_20041_) {
-        return super.isColliding(p_20040_, p_20041_);
+    public boolean isColliding(BlockPos pos, BlockState state) {
+        if (builder.isColliding != null) {
+            return builder.isColliding.test(pos, state);
+        } else {
+            return super.isColliding(pos, state);
+        }
     }
 
-    @Override
-    public boolean addTag(String p_20050_) {
-        return super.addTag(p_20050_);
-    }
 
     @Override
-    public boolean removeTag(String p_20138_) {
-        return super.removeTag(p_20138_);
+    public boolean addTag(String tag) {
+        if (builder.addTag != null) {
+            return builder.addTag.test(tag);
+        } else {
+            return super.addTag(tag);
+        }
     }
 
-    @Override
-    public boolean equals(Object p_20245_) {
-        return super.equals(p_20245_);
-    }
-
-    @Override
-    public void remove(RemovalReason p_146834_) {
-        super.remove(p_146834_);
-    }
 
     @Override
     public void onClientRemoval() {
-        super.onClientRemoval();
+        if (builder.onClientRemoval != null) {
+            builder.onClientRemoval.accept(this);
+        } else {
+            super.onClientRemoval();
+        }
     }
 
-    @Override
-    public void setPose(Pose p_20125_) {
-        super.setPose(p_20125_);
-    }
 
-    @Override
-    public boolean hasPose(Pose p_217004_) {
-        return super.hasPose(p_217004_);
-    }
+   /* @Override
+    public boolean closerThan(Entity entity, double distance) {
+        if (builder.closerThan != null) {
+            return builder.closerThan.test(entity, distance);
+        } else {
+            return super.closerThan(entity, distance);
+        }
+    }*/
 
-    @Override
-    public boolean closerThan(Entity p_19951_, double p_19952_) {
-        return super.closerThan(p_19951_, p_19952_);
-    }
 
-    @Override
-    public boolean closerThan(Entity p_216993_, double p_216994_, double p_216995_) {
+   /* @Override
+    public boolean closerThan(@NotNull Entity p_216993_, double p_216994_, double p_216995_) {
         return super.closerThan(p_216993_, p_216994_, p_216995_);
     }
 
@@ -1658,326 +1675,193 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     public void turn(double p_19885_, double p_19886_) {
         super.turn(p_19885_, p_19886_);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void setPortalCooldown() {
         super.setPortalCooldown();
-    }
+    }*/
 
     @Override
     public void lavaHurt() {
-        super.lavaHurt();
+        if (builder.lavaHurt != null) {
+            builder.lavaHurt.accept(this);
+        } else {
+            super.lavaHurt();
+        }
     }
 
-    @Override
-    public void setSecondsOnFire(int p_20255_) {
-        super.setSecondsOnFire(p_20255_);
-    }
-
-    @Override
-    public void setRemainingFireTicks(int p_20269_) {
-        super.setRemainingFireTicks(p_20269_);
-    }
-
-    @Override
-    public void clearFire() {
-        super.clearFire();
-    }
-
-    @Override
-    public boolean isFree(double p_20230_, double p_20231_, double p_20232_) {
-        return super.isFree(p_20230_, p_20231_, p_20232_);
-    }
-
-    @Override
-    public void move(MoverType p_19973_, Vec3 p_19974_) {
-        super.move(p_19973_, p_19974_);
-    }
-
-    @Override
-    public void gameEvent(GameEvent p_146853_, @Nullable Entity p_146854_) {
-        super.gameEvent(p_146853_, p_146854_);
-    }
-
-    @Override
-    public void gameEvent(GameEvent p_146851_) {
-        super.gameEvent(p_146851_);
-    }
 
     @Override
     protected void onFlap() {
-        super.onFlap();
+        if (builder.onFlap != null) {
+            builder.onFlap.accept(this);
+        } else {
+            super.onFlap();
+        }
     }
 
-    @Override
-    public void playSound(SoundEvent p_19938_, float p_19939_, float p_19940_) {
-        super.playSound(p_19938_, p_19939_, p_19940_);
-    }
-
-    @Override
-    public void playSound(SoundEvent p_216991_) {
-        super.playSound(p_216991_);
-    }
-
-    @Override
-    public boolean isSilent() {
-        return super.isSilent();
-    }
-
-    @Override
-    public void setSilent(boolean p_20226_) {
-        super.setSilent(p_20226_);
-    }
-
-    @Override
-    public boolean isNoGravity() {
-        return super.isNoGravity();
-    }
-
-    @Override
-    public void setNoGravity(boolean p_20243_) {
-        super.setNoGravity(p_20243_);
-    }
 
     @Override
     public boolean dampensVibrations() {
-        return super.dampensVibrations();
+        return (builder.dampensVibrations != null) ? builder.dampensVibrations.getAsBoolean() : super.dampensVibrations();
     }
+
 
     @Override
     public boolean fireImmune() {
-        return super.fireImmune();
+        return builder.fireImmune;
     }
 
-
-    @Override
-    public boolean isInWater() {
-        return super.isInWater();
-    }
-
-    @Override
-    public boolean isInWaterOrRain() {
-        return super.isInWaterOrRain();
-    }
-
-    @Override
-    public boolean isInWaterRainOrBubble() {
-        return super.isInWaterRainOrBubble();
-    }
-
-    @Override
-    public boolean isInWaterOrBubble() {
-        return super.isInWaterOrBubble();
-    }
-
-    @Override
-    public boolean isUnderWater() {
-        return super.isUnderWater();
-    }
-
-    @Override
-    public boolean canSpawnSprintParticle() {
-        return super.canSpawnSprintParticle();
-    }
-
-    @Override
-    public boolean isInLava() {
-        return super.isInLava();
-    }
-
-    @Override
-    public void moveRelative(float p_19921_, Vec3 p_19922_) {
-        super.moveRelative(p_19921_, p_19922_);
-    }
-
-    @Override
-    public void absMoveTo(double p_19891_, double p_19892_, double p_19893_, float p_19894_, float p_19895_) {
-        super.absMoveTo(p_19891_, p_19892_, p_19893_, p_19894_, p_19895_);
-    }
-
-    @Override
-    public void absMoveTo(double p_20249_, double p_20250_, double p_20251_) {
-        super.absMoveTo(p_20249_, p_20250_, p_20251_);
-    }
-
-    @Override
-    public void moveTo(Vec3 p_20220_) {
-        super.moveTo(p_20220_);
-    }
-
-    @Override
-    public void moveTo(double p_20105_, double p_20106_, double p_20107_) {
-        super.moveTo(p_20105_, p_20106_, p_20107_);
-    }
-
-    @Override
-    public void moveTo(BlockPos p_20036_, float p_20037_, float p_20038_) {
-        super.moveTo(p_20036_, p_20037_, p_20038_);
-    }
-
-    @Override
-    public void moveTo(double p_20108_, double p_20109_, double p_20110_, float p_20111_, float p_20112_) {
-        super.moveTo(p_20108_, p_20109_, p_20110_, p_20111_, p_20112_);
-    }
 
     @Override
     public void playerTouch(Player p_20081_) {
-        super.playerTouch(p_20081_);
+        if (builder.playerTouch != null) {
+            final PlayerEntityContext context = new PlayerEntityContext(p_20081_, this);
+            builder.playerTouch.accept(context);
+        } else {
+            super.playerTouch(p_20081_);
+        }
     }
 
-    @Override
-    public void push(double p_20286_, double p_20287_, double p_20288_) {
-        super.push(p_20286_, p_20287_, p_20288_);
-    }
 
     @Override
     public HitResult pick(double p_19908_, float p_19909_, boolean p_19910_) {
-        return super.pick(p_19908_, p_19909_, p_19910_);
+        return (builder.pick != null) ? builder.pick.apply(p_19908_, p_19909_, p_19910_) : super.pick(p_19908_, p_19909_, p_19910_);
     }
 
-    @Override
-    public void awardKillScore(Entity p_19953_, int p_19954_, DamageSource p_19955_) {
-        super.awardKillScore(p_19953_, p_19954_, p_19955_);
-    }
-
-    @Override
-    public boolean shouldRender(double p_20296_, double p_20297_, double p_20298_) {
-        return super.shouldRender(p_20296_, p_20297_, p_20298_);
-    }
-
-    @Override
-    public boolean shouldRenderAtSqrDistance(double p_19883_) {
-        return super.shouldRenderAtSqrDistance(p_19883_);
-    }
-
-    @Override
-    public boolean canCollideWith(Entity p_20303_) {
-        return super.canCollideWith(p_20303_);
-    }
 
     @Override
     public boolean showVehicleHealth() {
-        return super.showVehicleHealth();
+        return (builder.showVehicleHealth != null) ? builder.showVehicleHealth.getAsBoolean() : super.showVehicleHealth();
     }
 
-    @Override
-    public void handleInsidePortal(BlockPos p_20222_) {
-        super.handleInsidePortal(p_20222_);
-    }
-
-    @Override
-    public void lerpMotion(double p_20306_, double p_20307_, double p_20308_) {
-        super.lerpMotion(p_20306_, p_20307_, p_20308_);
-    }
 
     @Override
     public void setInvisible(boolean p_20304_) {
-        super.setInvisible(p_20304_);
+        if (builder.setInvisible != null) {
+            builder.setInvisible.accept(p_20304_);
+        } else {
+            super.setInvisible(p_20304_);
+        }
     }
+
 
     @Override
     public void setAirSupply(int p_20302_) {
-        super.setAirSupply(p_20302_);
+        if (builder.setAirSupply != null) {
+            builder.setAirSupply.accept(p_20302_);
+        } else {
+            super.setAirSupply(p_20302_);
+        }
     }
+
 
     @Override
     public void setTicksFrozen(int p_146918_) {
-        super.setTicksFrozen(p_146918_);
+        if (builder.setTicksFrozen != null) {
+            builder.setTicksFrozen.accept(p_146918_);
+        } else {
+            super.setTicksFrozen(p_146918_);
+        }
     }
 
-    @Override
-    public boolean isFullyFrozen() {
-        return super.isFullyFrozen();
-    }
 
     @Override
     public void thunderHit(ServerLevel p_19927_, LightningBolt p_19928_) {
-        super.thunderHit(p_19927_, p_19928_);
+        if (builder.thunderHit != null) {
+            final ThunderHitContext context = new ThunderHitContext(p_19927_, p_19928_, this);
+            builder.thunderHit.accept(context);
+        } else {
+            super.thunderHit(p_19927_, p_19928_);
+        }
     }
 
+
     @Override
-    public void makeStuckInBlock(BlockState p_20006_, Vec3 p_20007_) {
-        super.makeStuckInBlock(p_20006_, p_20007_);
+    public void makeStuckInBlock(@NotNull BlockState p_20006_, @NotNull Vec3 p_20007_) {
+        if (builder.makeStuckInBlock != null) {
+            final StuckInBlockContext context = new StuckInBlockContext(p_20006_, p_20007_, this);
+            builder.makeStuckInBlock.accept(context);
+        } else {
+            super.makeStuckInBlock(p_20006_, p_20007_);
+        }
     }
 
     @Override
     public boolean isInvulnerableTo(DamageSource p_20122_) {
-        return super.isInvulnerableTo(p_20122_);
+        if (builder.isInvulnerableTo != null) {
+            return builder.isInvulnerableTo.test(p_20122_);
+        } else {
+            return super.isInvulnerableTo(p_20122_);
+        }
     }
 
-    @Override
-    public boolean isInvulnerable() {
-        return super.isInvulnerable();
-    }
 
     @Override
     public void setInvulnerable(boolean p_20332_) {
-        super.setInvulnerable(p_20332_);
+        if (builder.setInvulnerable != null) {
+            builder.setInvulnerable.accept(p_20332_);
+        } else {
+            super.setInvulnerable(p_20332_);
+        }
     }
+
 
     @Override
     public boolean canChangeDimensions() {
-        return super.canChangeDimensions();
+        if (builder.canChangeDimensions != null) {
+            return builder.canChangeDimensions.get();
+        } else {
+            return super.canChangeDimensions();
+        }
     }
 
-    @Override
-    public boolean displayFireAnimation() {
-        return super.displayFireAnimation();
-    }
 
     @Override
     public void setCustomName(@Nullable Component p_20053_) {
-        super.setCustomName(p_20053_);
+        if (builder.setCustomName != null) {
+            builder.setCustomName.accept(Optional.ofNullable(p_20053_));
+        } else {
+            super.setCustomName(p_20053_);
+        }
     }
 
-    @Override
-    public void setCustomNameVisible(boolean p_20341_) {
-        super.setCustomNameVisible(p_20341_);
-    }
 
     @Override
-    public boolean isCustomNameVisible() {
-        return super.isCustomNameVisible();
+    public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
+        if (builder.mayInteract != null) {
+            return builder.mayInteract.test(p_146843_, p_146844_);
+        } else {
+            return super.mayInteract(p_146843_, p_146844_);
+        }
     }
 
-    @Override
-    public void setLevelCallback(EntityInLevelCallback p_146849_) {
-        super.setLevelCallback(p_146849_);
-    }
 
     @Override
-    public boolean isAlwaysTicking() {
-        return super.isAlwaysTicking();
+    public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
+        if (builder.canTrample != null) {
+            return builder.canTrample.test(state, pos, fallDistance);
+        } else {
+            return super.canTrample(state, pos, fallDistance);
+        }
     }
 
-    @Override
-    public boolean mayInteract(Level p_146843_, BlockPos p_146844_) {
-        return super.mayInteract(p_146843_, p_146844_);
-    }
-
-    @Override
-    public boolean canUpdate() {
-        return super.canUpdate();
-    }
-
-    @Override
-    public boolean canTrample(BlockState state, BlockPos pos, float fallDistance) {
-        return super.canTrample(state, pos, fallDistance);
-    }
-
-    @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
-    }
 
     @Override
     public void onRemovedFromWorld() {
         super.onRemovedFromWorld();
+        if (builder.onRemovedFromWorld != null) {
+            builder.onRemovedFromWorld.accept(this);
+        }
     }
 
+
     @Override
-    public Level getLevel() {
-        return super.getLevel();
+    public int getMaxFallDistance() {
+        if (builder.getMaxFallDistance != null) {
+            return builder.getMaxFallDistance.getAsInt();
+        }
+        return super.getMaxFallDistance();
     }
 }

@@ -5,11 +5,11 @@ import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.entities.BaseEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.util.ExitPortalInfo;
-import net.liopyu.entityjs.util.MobInteractContext;
+import net.liopyu.entityjs.util.*;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -32,7 +32,11 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.HitResult;
+import net.minecraftforge.common.util.TriPredicate;
+import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -204,18 +208,18 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient boolean invertedHealAndHarm;
 
 
-    public transient Function<MobEffect, MobEffectInstance> removeEffectNoUpdateFunction;
+    /* public transient Function<MobEffect, MobEffectInstance> removeEffectNoUpdateFunction;*/
 
-    public transient BiPredicate<MobEffect, Boolean> removeEffect;
+    /*public transient BiPredicate<MobEffect, Boolean> removeEffect;*/
 
 
-    public transient BiConsumer<MobEffectInstance, Entity> onEffectAdded;
+    public transient Consumer<OnEffectContext> onEffectAdded;
 
-    public transient TriConsumer<MobEffectInstance, Boolean, Entity> onEffectUpdated;
+    /* public transient TriConsumer<MobEffectInstance, Boolean, Entity> onEffectUpdated;*/
 
-    public transient Consumer<MobEffectInstance> onEffectRemoved;
+    public transient Consumer<OnEffectContext> onEffectRemoved;
 
-    public transient BiConsumer<Float, LivingEntity> healAmount;
+    public transient BiConsumer<Float, T> healAmount;
 
 
     public transient Predicate<LivingEntity> isDeadOrDying;
@@ -228,7 +232,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
 
     public transient Consumer<DamageSource> die;
 
-    public transient Consumer<LivingEntity> createWitherRose;
+    /*public transient Consumer<LivingEntity> createWitherRose;*/
 
     public transient Consumer<DamageSource> dropAllDeathLoot;
 
@@ -279,7 +283,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Predicate<Boolean> isSensitiveToWater;
     public transient Predicate<Boolean> isAutoSpinAttack;
     public transient Runnable stopRidingCallback;
-    public transient Consumer<LivingEntity> rideTick;
+    public transient Consumer<T> rideTick;
 
     @FunctionalInterface
     public interface HeptConsumer {
@@ -290,7 +294,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient BiConsumer<Float, Integer> lerpHeadTo;
     public transient Consumer<Boolean> setJumping;
     public transient Consumer<ItemEntity> onItemPickup;
-    public transient BiConsumer<Entity, Integer> take;
+    /*public transient BiConsumer<Entity, Integer> take;*/
     public transient Predicate<Entity> hasLineOfSight;
     public transient Predicate<Void> isEffectiveAi;
     public transient Predicate<Void> isPickable;
@@ -335,12 +339,36 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient Predicate<LivingEntity> canFreeze;
     public transient Predicate<LivingEntity> isCurrentlyGlowing;
     public transient Predicate<LivingEntity> canDisableShield;
-
+    public transient IntSupplier getMaxFallDistance;
     /*Right now Mob Interaction result is only functioning for MobEntityJS so we will probably have to add
     More public transients as we add more extensions or figure out some other logic*/
-    //public transient TriFunction<MobEntityJS, Player, InteractionHand, InteractionResult> mobInteract;
     public transient Function<MobInteractContext, @Nullable InteractionResult> mobInteract;
+    public transient BiPredicate<BlockPos, BlockState> isColliding;
 
+    public transient Predicate<String> addTag;
+    public transient Consumer<T> onClientRemoval;
+    public transient Consumer<T> onAddedToWorld;
+    /*public transient BiPredicate<Entity, Double> closerThan;*/
+    public transient Consumer<T> lavaHurt;
+    public transient Consumer<T> onFlap;
+    public transient BooleanSupplier dampensVibrations;
+
+    public transient Consumer<PlayerEntityContext> playerTouch;
+    public transient TriFunction<Double, Float, Boolean, HitResult> pick;
+    public transient BooleanSupplier showVehicleHealth;
+    public transient Consumer<Boolean> setInvisible;
+    public transient IntConsumer setAirSupply;
+    public transient IntConsumer setTicksFrozen;
+    public transient Consumer<ThunderHitContext> thunderHit;
+    public transient Consumer<StuckInBlockContext> makeStuckInBlock;
+    public transient Predicate<DamageSource> isInvulnerableTo;
+    public transient Consumer<Boolean> setInvulnerable;
+    public transient Supplier<Boolean> canChangeDimensions;
+    public transient Consumer<Optional<Component>> setCustomName;
+
+    public transient BiPredicate<Level, BlockPos> mayInteract;
+    public transient TriPredicate<BlockState, BlockPos, Float> canTrample;
+    public transient Consumer<T> onRemovedFromWorld;
 
     //STUFF
     public BaseEntityBuilder(ResourceLocation i) {
@@ -581,6 +609,11 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
+    @Info(value = "Sets the custom onAddedToWorld behavior")
+    public BaseEntityBuilder<T> onAddedToWorld(Consumer<T> onAddedToWorldCallback) {
+        onAddedToWorld = onAddedToWorldCallback;
+        return this;
+    }
 
     public BaseEntityBuilder<T> getType(EntityType<T> type) {
         getType = type;
@@ -1027,43 +1060,43 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     }
 
 
-    @Info(value = "Sets the custom logic for removing a potion effect without updating the entity state.")
+    /*@Info(value = "Sets the custom logic for removing a potion effect without updating the entity state.")
     public BaseEntityBuilder<T> customRemoveEffectNoUpdate(Function<MobEffect, MobEffectInstance> function) {
         removeEffectNoUpdateFunction = function;
         return this;
-    }
+    }*/
 
 
-    @Info(value = "Sets the custom logic for removing a potion effect from the entity.")
+    /*@Info(value = "Sets the custom logic for removing a potion effect from the entity.")
     public BaseEntityBuilder<T> customRemoveEffect(BiPredicate<MobEffect, Boolean> predicate) {
         removeEffect = predicate;
         return this;
-    }
+    }*/
 
 
     @Info(value = "Sets the custom logic for when a potion effect is added to the entity.")
-    public BaseEntityBuilder<T> onEffectAdded(BiConsumer<MobEffectInstance, Entity> consumer) {
+    public BaseEntityBuilder<T> onEffectAdded(Consumer<OnEffectContext> consumer) {
         onEffectAdded = consumer;
         return this;
     }
 
 
     @Info(value = "Sets the custom logic for healing the entity")
-    public BaseEntityBuilder<T> customHeal(BiConsumer<Float, LivingEntity> callback) {
+    public BaseEntityBuilder<T> customHeal(BiConsumer<Float, T> callback) {
         healAmount = callback;
         return this;
     }
 
 
     @Info(value = "Sets the custom logic for when a potion effect is removed from the entity.")
-    public BaseEntityBuilder<T> onEffectRemoved(Consumer<MobEffectInstance> consumer) {
+    public BaseEntityBuilder<T> onEffectRemoved(Consumer<OnEffectContext> consumer) {
         onEffectRemoved = consumer;
         return this;
     }
 
 
     @Info(value = "Sets the custom logic for healing the entity")
-    public BaseEntityBuilder<T> healAmount(BiConsumer<Float, LivingEntity> callback) {
+    public BaseEntityBuilder<T> healAmount(BiConsumer<Float, T> callback) {
         healAmount = callback;
         return this;
     }
@@ -1123,11 +1156,11 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     }
 
 
-    @Info(value = "Sets the custom logic for creating a wither rose when the entity dies")
+    /*@Info(value = "Sets the custom logic for creating a wither rose when the entity dies")
     public BaseEntityBuilder<T> createWitherRose(Consumer<LivingEntity> consumer) {
         createWitherRose = consumer;
         return this;
-    }
+    }*/
 
 
     @Info(value = "Sets the custom logic for dropping all death loot when the entity dies")
@@ -1365,7 +1398,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     }
 
     @Info(value = "Sets the custom logic for when the entity is updated while riding")
-    public BaseEntityBuilder<T> rideTick(Consumer<LivingEntity> callback) {
+    public BaseEntityBuilder<T> rideTick(Consumer<T> callback) {
         rideTick = callback;
         return this;
     }
@@ -1394,11 +1427,11 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
-    @Info(value = "Sets the custom logic for when the entity takes an action with another entity")
+    /*@Info(value = "Sets the custom logic for when the entity takes an action with another entity")
     public BaseEntityBuilder<T> take(BiConsumer<Entity, Integer> consumer) {
         take = consumer;
         return this;
-    }
+    }*/
 
     @Info(value = "Sets the custom logic for determining if the entity has line of sight to another entity")
     public BaseEntityBuilder<T> hasLineOfSight(Predicate<Entity> predicate) {
@@ -1641,6 +1674,142 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
+    @Info(value = "Sets the custom logic for how far a mob falls before taking damage")
+    public BaseEntityBuilder<T> getMaxFallDistance(IntSupplier i) {
+        getMaxFallDistance = i;
+        return this;
+    }
+
+    @Info(value = "Sets the custom isColliding behavior")
+    public BaseEntityBuilder<T> isColliding(BiPredicate<BlockPos, BlockState> predicate) {
+        isColliding = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom addTag behavior")
+    public BaseEntityBuilder<T> addTag(Predicate<String> predicate) {
+        addTag = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom onClientRemoval behavior")
+    public BaseEntityBuilder<T> onClientRemoval(Consumer<T> consumer) {
+        onClientRemoval = consumer;
+        return this;
+    }
+
+    /*@Info(value = "Sets the custom closerThan behavior")
+    public BaseEntityBuilder<T> closerThan(BiPredicate<Entity, Double> predicate) {
+        closerThan = predicate;
+        return this;
+    }*/
+    @Info(value = "Sets the custom lavaHurt behavior")
+    public BaseEntityBuilder<T> lavaHurt(Consumer<T> consumer) {
+        lavaHurt = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for entity flapping actions")
+    public BaseEntityBuilder<T> onFlap(Consumer<T> consumer) {
+        onFlap = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for determining if the entity dampens vibrations")
+    public BaseEntityBuilder<T> dampensVibrations(BooleanSupplier supplier) {
+        dampensVibrations = supplier;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for handling player touch events")
+    public BaseEntityBuilder<T> playerTouch(Consumer<PlayerEntityContext> consumer) {
+        playerTouch = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for picking entity hit results")
+    public BaseEntityBuilder<T> pick(TriFunction<Double, Float, Boolean, HitResult> function) {
+        pick = function;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for determining if the vehicle health should be shown")
+    public BaseEntityBuilder<T> showVehicleHealth(BooleanSupplier supplier) {
+        showVehicleHealth = supplier;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for making the entity invisible or visible")
+    public BaseEntityBuilder<T> setInvisible(Consumer<Boolean> consumer) {
+        setInvisible = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for setting the entity's air supply")
+    public BaseEntityBuilder<T> setAirSupply(IntConsumer consumer) {
+        setAirSupply = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for setting the number of ticks the entity is frozen")
+    public BaseEntityBuilder<T> setTicksFrozen(IntConsumer consumer) {
+        setTicksFrozen = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for when the entity is hit by lightning")
+    public BaseEntityBuilder<T> thunderHit(Consumer<ThunderHitContext> consumer) {
+        thunderHit = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior when the entity gets stuck in a block")
+    public BaseEntityBuilder<T> makeStuckInBlock(Consumer<StuckInBlockContext> consumer) {
+        makeStuckInBlock = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom condition for whether the entity is invulnerable to a specific damage source")
+    public BaseEntityBuilder<T> isInvulnerableTo(Predicate<DamageSource> predicate) {
+        isInvulnerableTo = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets whether the entity is invulnerable or not")
+    public BaseEntityBuilder<T> setInvulnerable(Consumer<Boolean> consumer) {
+        setInvulnerable = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets whether the entity can change dimensions")
+    public BaseEntityBuilder<T> canChangeDimensions(Supplier<Boolean> supplier) {
+        canChangeDimensions = supplier;
+        return this;
+    }
+
+    @Info(value = "Sets the custom name of the entity")
+    public BaseEntityBuilder<T> setCustomName(Consumer<Optional<Component>> consumer) {
+        setCustomName = consumer;
+        return this;
+    }
+
+    @Info(value = "Sets the custom condition for whether the entity may interact with the specified block position")
+    public BaseEntityBuilder<T> mayInteract(BiPredicate<Level, BlockPos> predicate) {
+        mayInteract = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom condition for whether the entity can trample the specified block state at the given position with the given fall distance")
+    public BaseEntityBuilder<T> canTrample(TriPredicate<BlockState, BlockPos, Float> predicate) {
+        canTrample = predicate;
+        return this;
+    }
+
+    @Info(value = "Sets the custom behavior for when the entity is removed from the world")
+    public BaseEntityBuilder<T> onRemovedFromWorld(Consumer<T> consumer) {
+        onRemovedFromWorld = consumer;
+        return this;
+    }
 
     //STUFF
 
@@ -1765,9 +1934,25 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         boolean test(AnimationEventJS<E> event);
 
         default AnimationController.IAnimationPredicate<E> toGecko() {
-            return event -> test(new AnimationEventJS<>(event)) ? PlayState.CONTINUE : PlayState.STOP; //line 1779
+
+            return event -> {
+                if (event != null) {
+                    AnimationEventJS<E> animationEventJS = new AnimationEventJS<>(event);
+                    try {
+                        if (animationEventJS == null) return PlayState.STOP;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    return test(animationEventJS) ? PlayState.CONTINUE : PlayState.STOP;
+
+                } else {
+                    ConsoleJS.STARTUP.error("AnimationEventJS was null in IAnimationPredicateJS.toGecko()");
+                    return PlayState.STOP;
+                }
+            };
         }
     }
+
 
     /**
      * A simple wrapper around a {@link AnimationEvent} that restricts access to certain things
