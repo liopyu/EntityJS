@@ -20,7 +20,8 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow> extends Builde
 
     @Override
     public EntityType<T> createObject() {
-        ArrowEntityBuilder<?> getBuilder();
+        ArrowEntityBuilder<?> builder;
+        return null;
     }
 
 
@@ -32,6 +33,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow> extends Builde
     public transient MobCategory mobCategory;
 
     public transient Function<T, ResourceLocation> getTextureLocation;
+
     public ArrowEntityBuilder(ResourceLocation i) {
         super(i);
         thisList.add(this);
@@ -77,8 +79,8 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow> extends Builde
                         
             Defaults to returning <namespace>:textures/model/entity/<path>.png
             """)
-    public ArrowEntityBuilder<T> textureResourceFunction(Function<T, ResourceLocation> function) {
-        textureResource = function;
+    public ArrowEntityBuilder<T> getTextureLocation(Function<T, ResourceLocation> function) {
+        getTextureLocation = function;
         return this;
     }
 

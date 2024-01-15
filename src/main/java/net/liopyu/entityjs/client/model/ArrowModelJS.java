@@ -11,7 +11,8 @@ import net.minecraft.world.entity.projectile.Arrow;
 public class ArrowModelJS<T extends AbstractArrow> extends ArrowRenderer<T> {
     private final ArrowEntityBuilder<T> builder;
 
-    public ArrowModelJS(ArrowEntityBuilder<T> builder) {
+    public ArrowModelJS(ArrowEntityBuilder<T> builder, EntityRendererProvider.Context context) {
+        super(context);
         this.builder = builder;
     }
 
