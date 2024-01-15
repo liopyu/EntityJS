@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders;
 
+import dev.latvian.mods.kubejs.generator.DataJsonGenerator;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
@@ -33,6 +34,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.common.util.TriPredicate;
@@ -369,6 +371,13 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public transient BiPredicate<Level, BlockPos> mayInteract;
     public transient TriPredicate<BlockState, BlockPos, Float> canTrample;
     public transient Consumer<T> onRemovedFromWorld;
+    @Nullable
+    public transient SpawnPlacements.SpawnPredicate<T> spawnPredicate;
+    @Nullable
+    public transient SpawnPlacements.Type placementType;
+    @Nullable
+    public transient Heightmap.Types heightMap;
+    public static final List<BaseEntityBuilder<?>> spawnList = new ArrayList<>();
 
     //STUFF
     public BaseEntityBuilder(ResourceLocation i) {
@@ -1844,9 +1853,31 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
+    @Info(value = "Sets the render type of the entity", params = {
+            @Param(name = "type", value = "The render type of the entity, accepts 'soid', 'cutout', and 'translucent'")
+    })
     public BaseEntityBuilder<T> setRenderType(RenderType type) {
         renderType = type;
         return this;
+    }
+
+    @Info(value = "Sets the spawn placement of the entity type", params = {
+            @Param(name = "placementType", value = "The placement type of the spawn, accepts 'on_ground', 'in_water', 'no_restrictions', 'in_lava'"),
+            @Param(name = "heightMap", value = "The height map used for the spawner"),
+            @Param(name = "spawnPredicate", value = "The predicate that determines if the entity will spawn")
+    })
+    public BaseEntityBuilder<T> spawnPlacement(SpawnPlacements.Type placementType, Heightmap.Types heightMap, SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
+        spawnList.add(this);
+        this.spawnPredicate = spawnPredicate;
+        this.placementType = placementType;
+        this.heightMap = heightMap;
+        return this;
+    }
+
+    // TODO: create forge biome modifiers from user input and add it here
+    @Override
+    public void generateDataJsons(DataJsonGenerator generator) {
+        super.generateDataJsons(generator);
     }
 
     @Override

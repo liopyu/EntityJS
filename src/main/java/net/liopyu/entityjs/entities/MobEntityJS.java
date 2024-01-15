@@ -72,10 +72,10 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
-        if (EventHandlers.addGoalTargets.hasListeners(getTypeId())) {
+        if (EventHandlers.addGoalTargets.hasListeners()) {
             EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
         }
-        if (EventHandlers.addGoalSelectors.hasListeners(getTypeId())) {
+        if (EventHandlers.addGoalSelectors.hasListeners()) {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }

@@ -11,6 +11,7 @@ import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.Wrappers;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;

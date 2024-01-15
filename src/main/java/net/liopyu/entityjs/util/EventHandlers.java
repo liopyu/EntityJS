@@ -8,7 +8,9 @@ import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
+import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -25,11 +27,19 @@ public class EventHandlers {
 
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         modBus.addListener(EventHandlers::attributeCreation);
+        modBus.addListener(EventHandlers::registerSpawnPlacements);
     }
 
     private static void attributeCreation(EntityAttributeCreationEvent event) {
         for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
             event.put(builder.get(), builder.getAttributeBuilder().build());
         }
+    }
+
+    private static void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
+        for (BaseEntityBuilder<?> builder : BaseEntityBuilder.spawnList) {
+            event.register(UtilsJS.cast(builder.get()), builder.placementType, builder.heightMap, builder.spawnPredicate, SpawnPlacementRegisterEvent.Operation.REPLACE); // Cast because the '?' generics makes the event unhappy
+        }
+        // TODO: Do we want an event that also handles this for other entity types with replaceSpawns and mergeSpawns methods
     }
 }
