@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 
 public class ArrowItemBuilder extends ItemBuilder {
@@ -19,18 +20,24 @@ public class ArrowItemBuilder extends ItemBuilder {
     public ArrowItemBuilder(ResourceLocation i, ArrowEntityBuilder<?> parent) {
         super(i);
         stacksTo = 64;
-        creativeModeTab = CreativeModeTab.TAB_SEARCH;
+        creativeModeTab = CreativeModeTab.TAB_MISC;
         this.parent = parent;
+
     }
 
     @Override
-    public ArrowItem createObject() {
-
-        final ArrowItem.Properties properties = new ArrowItem.Properties()
+    public Item createObject() {
+        final Item.Properties properties = new Item.Properties()
                 .stacksTo(stacksTo)
                 .tab(creativeModeTab);
 
         return new ArrowItem(properties);
+    }
+
+    public transient ItemStack getStack;
+
+    public ItemStack getStack() {
+        return new ItemStack(this.createObject().getDefaultInstance().getItem());
     }
 
     @Info(value = "Sets the creative mode tab for the arrow item")
