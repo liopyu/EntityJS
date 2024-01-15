@@ -1,26 +1,24 @@
 package net.liopyu.entityjs.entities;
 
-import com.mojang.logging.LogUtils;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.*;
-import net.liopyu.entityjs.item.ArrowItemBuilder;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-
-import java.util.logging.Logger;
+import org.jetbrains.annotations.NotNull;
 
 public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
-    public static final org.slf4j.Logger LOGGER = LogUtils.getLogger();
     protected final ArrowEntityJSBuilder builder;
+    @NotNull
+    protected ItemStack pickUpStack;
 
     public ArrowEntityJS(ArrowEntityJSBuilder builder, EntityType<? extends AbstractArrow> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
+        pickUpStack = ItemStack.EMPTY;
     }
 
 
@@ -29,6 +27,12 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         return builder;
     }
 
+    @Override
+    public void setPickUpItem(ItemStack stack) {
+        pickUpStack = stack;
+    }
+
+    /*
     @Override
     protected boolean tryPickup(Player p_150121_) {
         if (builder.tryPickup != null) {
@@ -41,12 +45,11 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         }
         return super.tryPickup(p_150121_);
     }
-
+    */
 
     @Override
     protected ItemStack getPickupItem() {
-
-        return new ItemStack(Items.ARROW);
+        return pickUpStack;
     }
 
 }
