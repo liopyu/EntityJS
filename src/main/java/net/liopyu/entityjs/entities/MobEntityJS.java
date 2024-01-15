@@ -1,11 +1,15 @@
 package net.liopyu.entityjs.entities;
 
-
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
+import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
+import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
+import net.liopyu.entityjs.util.EventHandlers;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.liopyu.entityjs.util.*;
-import net.liopyu.entityjs.util.ai.goal.GoalSelectorBuilder;
-import net.liopyu.entityjs.util.ai.goal.GoalTargetBuilder;
+import net.liopyu.entityjs.util.ExitPortalInfo;
+import net.liopyu.entityjs.util.MobInteractContext;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -20,7 +24,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -31,8 +34,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.entity.EntityInLevelCallback;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -57,9 +58,6 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         super(p_21368_, p_21369_);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createFactory(this);
-        if (!p_21369_.isClientSide) {
-            this.registerGoals(); // Call again so that the builder isn't null
-        }
     }
 
     @Override
@@ -74,16 +72,12 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
-        if (builder == null)
-            return; // When called in the super method, the builder is null, thus we call it again when we do have a builder
-        // Goal selectors
-        final GoalSelectorBuilder<MobEntityJS> goalSelectorBuilder = new GoalSelectorBuilder<>();
-        builder.goalSelectorBuilder.accept(goalSelectorBuilder);
-        goalSelectorBuilder.apply(this.goalSelector, this);
-        // Goal targets
-        final GoalTargetBuilder<MobEntityJS> goalTargetBuilder = new GoalTargetBuilder<>();
-        builder.goalTargetBuilder.accept(goalTargetBuilder);
-        goalTargetBuilder.apply(this.targetSelector, this);
+        if (EventHandlers.addGoalTargets.hasListeners(getTypeId())) {
+            EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
+        }
+        if (EventHandlers.addGoalSelectors.hasListeners(getTypeId())) {
+            EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
+        }
     }
 
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);

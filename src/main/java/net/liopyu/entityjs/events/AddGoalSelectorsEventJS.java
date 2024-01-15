@@ -1,14 +1,16 @@
-package net.liopyu.entityjs.util.ai.goal;
+package net.liopyu.entityjs.events;
 
-import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import dev.latvian.mods.rhino.util.HideFromJS;
+import net.liopyu.entityjs.util.ai.CustomGoal;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -17,61 +19,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-/**
- * This is how {@link Goal}s are added to a mob's {@code goalSelector}. Some
- * basic goals are provided as well as the ability to arbitrary and custom
- * goals, but if you want to add more goal types, say those added by another
- * mod, then a mixin that adds a method(s) to this class is required. In
- * addition, if you wish to have the method documented with the {@link @Info}
- * annotation, a duck interface will be required.<br><br>
- *
- * An example of doing so:
- * <pre>{@code
- * @Mixin(GoalSelectorBuilder.class)
- * public abstract class GoalSelectorBuilderMixin implements IGoalSelectorBuilderMixin {
- *
- *     private GoalSelectorBuilder<?> self() {
- *         return (GoalSelectorBuilder) (Object) this;
- *     }
- *
- *     @Shadow
- *     @Final
- *     private final <T extends Mob> List<Pair<Integer, Function<T, Goal>>> goalSuppliers;
- *
- *     @Override
- *     public GoalSelectorBuilder<?> modid$moddedGoal(int priority, double distanceToSky, String chatter) {
- *         goalSuppliers.add(new Pair<>(priority, t -> new CoolModdedGoal(t, distanceToSky, chatter)));
- *         return self();
- *     }
- * }
- *
- * public interface IGoalSelectorBuilderMixin {
- *
- *     @Info(value = "Adds a `CoolModdedGoal` to the entity", params = {
- *         @Param(name = "priority", value = "The priority of the goal"),
- *         @param(name = "distanceToSky", value = "The minimum amount of sky light required"),
- *         @Param(name = "chatter", value = "The messages that should be played around the entity")
- *     })
- *     @RemapForJS("coolModdedGoal")
- *     GoalSelectorBuilder<?> modid$moddedGoal(int priority, double distanceToSky, String chatter);
- * }
- * }</pre>
- */
 @SuppressWarnings("unused")
-public class GoalSelectorBuilder<T extends Mob> {
+public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
 
-    private final List<Pair<Integer, Function<T, Goal>>> goalSuppliers;
-
-
-    public GoalSelectorBuilder() {
-        this.goalSuppliers = new ArrayList<>();
+    public AddGoalSelectorsEventJS(T mob, GoalSelector selector) {
+        super(mob, selector);
     }
 
     @Info(value = """
@@ -90,9 +47,8 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "goalSupplier", value = "The goal supplier, a function that takes a Mob and returns a Goal")
     })
-    public GoalSelectorBuilder<T> arbitraryGoal(int priority, Function<T, Goal> goalSupplier) {
-        goalSuppliers.add(new Pair<>(priority, goalSupplier));
-        return this;
+    public void arbitraryGoal(int priority, Function<T, Goal> goalSupplier) {
+        selector.addGoal(priority, goalSupplier.apply(mob));
     }
 
     @Info(value = "Adds a custom goal to the entity", params = {
@@ -106,7 +62,7 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "requiresUpdateEveryTick", value = "If the goal needs to be updated every tick"),
             @Param(name = "tick", value = "The action to perform when the goal ticks")
     })
-    public GoalSelectorBuilder<T> customGoal(
+    public void customGoal(
             String name,
             int priority,
             Predicate<T> canUse,
@@ -117,8 +73,7 @@ public class GoalSelectorBuilder<T extends Mob> {
             boolean requiresUpdateEveryTick,
             Consumer<T> tick
     ) {
-        goalSuppliers.add(new Pair<>(priority, t -> new CustomGoal<>(name, t, canUse, canContinueToUse, isInterruptable, start, stop, requiresUpdateEveryTick, tick)));
-        return this;
+        selector.addGoal(priority, new CustomGoal<>(name, mob, canUse, canContinueToUse, isInterruptable, start, stop, requiresUpdateEveryTick, tick));
     }
 
     @Info(value = "Adds a `AvoidEntityGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -130,9 +85,10 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "sprintSpeedModifier", value = "Modifies the mob's speed when avoiding an entity at close range"),
             @Param(name = "onAvoidEntityPredicate", value = "An additional predicate for entity avoidance") // Again, maybe? its ANDed with the other one and processed so who knows!
     })
-    public <E extends LivingEntity> GoalSelectorBuilder<T> avoidEntity(int priority, Class<E> entityClassToAvoid, Predicate<LivingEntity> avoidPredicate, float maxDist, double walkSpeedModifier, double sprintSpeedModifier, Predicate<LivingEntity> onAvoidEntityPredicate) {
-        goalSuppliers.add(new Pair<>(priority, t -> new AvoidEntityGoal<>((PathfinderMob) t, entityClassToAvoid, avoidPredicate, maxDist, walkSpeedModifier, sprintSpeedModifier, onAvoidEntityPredicate)));
-        return this;
+    public <E extends LivingEntity> void avoidEntity(int priority, Class<E> entityClassToAvoid, Predicate<LivingEntity> avoidPredicate, float maxDist, double walkSpeedModifier, double sprintSpeedModifier, Predicate<LivingEntity> onAvoidEntityPredicate) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new AvoidEntityGoal<>((PathfinderMob) mob, entityClassToAvoid, avoidPredicate, maxDist, walkSpeedModifier, sprintSpeedModifier, onAvoidEntityPredicate));
+        }
     }
 
     @Info(value = "Adds a `BreakDoorGoal` to the entity", params = {
@@ -140,17 +96,17 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "doorBreakTime", value = "The time it takes to break a door, limited to 240 ticks"), // I think that's what it is
             @Param(name = "validDifficulties", value = "Determines what difficulties are valid for the goal")
     })
-    public GoalSelectorBuilder<T> breakDoor(int priority, int doorBreakTime, Predicate<Difficulty> validDifficulties) {
-        goalSuppliers.add(new Pair<>(priority, t -> new BreakDoorGoal(t, doorBreakTime, validDifficulties)));
-        return this;
+    public void breakDoor(int priority, int doorBreakTime, Predicate<Difficulty> validDifficulties) {
+        selector.addGoal(priority, new BreakDoorGoal(mob, doorBreakTime, validDifficulties));
     }
 
     @Info(value = "Adds a `BreathAirGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal")
     })
-    public GoalSelectorBuilder<T> breathAir(int priority) {
-        goalSuppliers.add(new Pair<>(priority, t -> new BreathAirGoal((PathfinderMob) t)));
-        return this;
+    public void breathAir(int priority) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new BreathAirGoal((PathfinderMob) mob));
+        }
     }
 
     @Info(value = "Adds a `BreedGoal` to the entity, only applicable to **animal** mobs", params = {
@@ -158,9 +114,10 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move"),
             @Param(name = "partnerClass", value = "The class of animal that this entity breeds with, may be null to specify it be the same class as this entity")
     })
-    public GoalSelectorBuilder<T> breed(int priority, double speedModifier, @Nullable Class<? extends Animal> partnerClass) {
-        goalSuppliers.add(new Pair<>(priority, t -> new BreedGoal((Animal) t, speedModifier, partnerClass != null ? partnerClass : UtilsJS.cast(t.getClass()))));
-        return this;
+    public void breed(int priority, double speedModifier, @Nullable Class<? extends Animal> partnerClass) {
+        if (isAnimal) {
+            selector.addGoal(priority, new BreedGoal((Animal) mob, speedModifier, partnerClass != null ? partnerClass : UtilsJS.cast(mob.getClass())));
+        }
     }
 
     @Info(value = "Adds a `RemoveBlockGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -169,20 +126,24 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move"),
             @Param(name = "verticalSearchRange", value = "The vertical range the mob will search for the block")
     })
-    public GoalSelectorBuilder<T> removeBlock(int priority, ResourceLocation block, double speedModifier, int verticalSearchRange) {
-        goalSuppliers.add(new Pair<>(priority, t -> new RemoveBlockGoal(Registry.BLOCK.get(block), (PathfinderMob) t, speedModifier, verticalSearchRange)));
-        return this;
+    public void removeBlock(int priority, ResourceLocation block, double speedModifier, int verticalSearchRange) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new RemoveBlockGoal(Registry.BLOCK.get(block), (PathfinderMob) mob, speedModifier, verticalSearchRange));
+        }
     }
 
-    // This requires a Level in is constructor WTF mojank
-    // public GoalSelectorBuilder<T> climbOnTopOfPowderedSnow(int priority, )
+    @Info(value = "Adds a `ClimbOnTopOfPowderSnowGoal` to the entity", params = {
+            @Param(name = "priority", value = "The priority of the goal")
+    })
+    public void climbOnTopOfPowderedSnow(int priority) {
+        selector.addGoal(priority, new ClimbOnTopOfPowderSnowGoal(mob, mob.level));
+    }
 
     @Info(value = "Adds a `EatBlockGoal` to the entity", params = {
             @Param(name = "priority", value = "The priority of the goal")
     })
-    public GoalSelectorBuilder<T> eatGrass(int priority) {
-        goalSuppliers.add(new Pair<>(priority, EatBlockGoal::new)); // This is only used by sheep and is hardcoded to grass blocks
-        return this;
+    public void eatGrass(int priority) {
+        selector.addGoal(priority, new EatBlockGoal(mob));
     }
 
     @Info(value = "Adds a `MeleeAttackGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -190,26 +151,29 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move"),
             @Param(name = "followTargetEventIfNotSeen", value = "Determines if the entity should follow the target even if it doesn't see it")
     })
-    public GoalSelectorBuilder<T> meleeAttack(int priority, double speedModifier, boolean followTargetEvenIfNotSeen) {
-        goalSuppliers.add(new Pair<>(priority, t -> new MeleeAttackGoal((PathfinderMob) t, speedModifier, followTargetEvenIfNotSeen)));
-        return this;
+    public void meleeAttack(int priority, double speedModifier, boolean followTargetEvenIfNotSeen) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new MeleeAttackGoal((PathfinderMob) mob, speedModifier, followTargetEvenIfNotSeen));
+        }
     }
 
     @Info(value = "Adds a `FleeSunGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move")
     })
-    public GoalSelectorBuilder<T> fleeSun(int priority, double speedModifier) {
-        goalSuppliers.add(new Pair<>(priority, t -> new FleeSunGoal((PathfinderMob) t, speedModifier)));
-        return this;
+    public void fleeSun(int priority, double speedModifier) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new FleeSunGoal((PathfinderMob) mob, speedModifier));
+        }
     }
 
     @Info(value = "Adds a `FollowBoatGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal")
     })
-    public GoalSelectorBuilder<T> followBoat(int priority) {
-        goalSuppliers.add(new Pair<>(priority, t -> new FollowBoatGoal((PathfinderMob) t)));
-        return this;
+    public void followBoat(int priority) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new FollowBoatGoal((PathfinderMob) mob));
+        }
     }
 
     // How the hell does this not require a pathfinder mob
@@ -219,9 +183,8 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "stopDistance", value = "The distance away from the target the mob will stop"),
             @Param(name = "areaSize", value = "The distance away from the mob, that will be searched for mobs to follow")
     })
-    public GoalSelectorBuilder<T> followMob(int priority, double speedModifier, float stopDistance, float areaSize) {
-        goalSuppliers.add(new Pair<>(priority, t -> new FollowMobGoal(t, speedModifier, stopDistance, areaSize)));
-        return this;
+    public void followMob(int priority, double speedModifier, float stopDistance, float areaSize) {
+        selector.addGoal(priority, new FollowMobGoal(mob, speedModifier, stopDistance, areaSize));
     }
 
     @Info(value = "Adds a `FollowOwnerGoal` to the entity, only applicable to **tamable** mobs", params = {
@@ -231,9 +194,10 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "stopDistance", value = "The distance away from the owner the mob will stop moving"),
             @Param(name = "canFly", value = "If the mob can teleport into leaves") // Yes, this is what it means
     })
-    public GoalSelectorBuilder<T> followOwner(int priority, double speedModifier, float startDistance, float stopDistance, boolean canFly) {
-        goalSuppliers.add(new Pair<>(priority, t -> new FollowOwnerGoal((TamableAnimal) t, speedModifier, startDistance, stopDistance, canFly)));
-        return this;
+    public void followOwner(int priority, double speedModifier, float startDistance, float stopDistance, boolean canFly) {
+        if (isTamable) {
+            selector.addGoal(priority, new FollowOwnerGoal((TamableAnimal) mob, speedModifier, startDistance, stopDistance, canFly));
+        }
     }
 
     // Only usable by animal mobs
@@ -241,9 +205,10 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move")
     })
-    public GoalSelectorBuilder<T> followParent(int priority, double speedModifier) {
-        goalSuppliers.add(new Pair<>(priority, t -> new FollowParentGoal((Animal) t, speedModifier)));
-        return this;
+    public void followParent(int priority, double speedModifier) {
+        if (isAnimal) {
+            selector.addGoal(priority, new FollowParentGoal((Animal) mob, speedModifier));
+        }
     }
 
     @Info(value = "Adds a `LookAtPlayerGoal` to the entity", params = { // Should we lie and say adds a `LookAtEntityGoal`?
@@ -253,18 +218,16 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "probability", value = "The probability, in the range [0, 1], that the goal may be used"),
             @Param(name = "onlyHorizontal", value = "Determines if the eye level must be the same to follow the target entity")
     })
-    public <E extends LivingEntity> GoalSelectorBuilder<T> lookAtEntity(int priority, Class<E> targetClass, float lookDistance, float probability, boolean onlyHorizontal) {
-        goalSuppliers.add(new Pair<>(priority, t -> new LookAtPlayerGoal(t, targetClass, lookDistance, probability, onlyHorizontal)));
-        return this;
+    public <E extends LivingEntity> void lookAtEntity(int priority, Class<E> targetClass, float lookDistance, float probability, boolean onlyHorizontal) {
+        selector.addGoal(priority, new LookAtPlayerGoal(mob, targetClass, lookDistance, probability, onlyHorizontal));
     }
 
     @Info(value = "Adds a `LeapAtTargetGoal` to the entity", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "deltaY", value = "Sets the delta movement of the animal in the y-axis")
     })
-    public GoalSelectorBuilder<T> leapAtTarget(int priority, float deltaY) {
-        goalSuppliers.add(new Pair<>(priority, t -> new LeapAtTargetGoal(t, deltaY)));
-        return this;
+    public void leapAtTarget(int priority, float deltaY) {
+        selector.addGoal(priority, new LeapAtTargetGoal(mob, deltaY));
     }
 
     @Info(value = "Adds a `RandomStrollGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -273,9 +236,10 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "interval", value = "Sets the interval at which the goal will be 'refreshed'"), // I think? It indirectly determines when #canUse() returns false
             @Param(name = "checkNoActionTime", value = "Determines if the mob's noActionTime property should be checked")
     })
-    public GoalSelectorBuilder<T> randomStroll(int priority, double speedModifier, int interval, boolean checkNoActionTime) {
-        goalSuppliers.add(new Pair<>(priority, t -> new RandomStrollGoal((PathfinderMob) t, speedModifier, interval, checkNoActionTime)));
-        return this;
+    public void randomStroll(int priority, double speedModifier, int interval, boolean checkNoActionTime) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new RandomStrollGoal((PathfinderMob) mob, speedModifier, interval, checkNoActionTime));
+        }
     }
 
     @Info(value = "Adds a `MoveBackToVillageGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -283,9 +247,10 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move"),
             @Param(name = "checkNoActionTime", value = "Determines if the mob's noActionTime property should be checked")
     })
-    public GoalSelectorBuilder<T> moveBackToVillage(int priority, double speedModifier, boolean checkNoActionTime) {
-        goalSuppliers.add(new Pair<>(priority, t -> new MoveBackToVillageGoal((PathfinderMob) t, speedModifier, checkNoActionTime)));
-        return this;
+    public void moveBackToVillage(int priority, double speedModifier, boolean checkNoActionTime) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new MoveBackToVillageGoal((PathfinderMob) mob, speedModifier, checkNoActionTime));
+        }
     }
 
     @Info(value = "Adds a `MoveThroughVillageGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -295,18 +260,20 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "distanceToPoi", value = "The minimum distance to a poi the mob must be to have it be considered 'visited'"),
             @Param(name = "canDealWithDoors", value = "If doors can be opened to navigate as part of this goal") // Mention supplier somehow?
     })
-    public GoalSelectorBuilder<T> moveThroughVillage(int priority, double speedModifier, boolean onlyAtNight, int distanceToPoi, Supplier<Boolean> canDealWithDoors) {
-        goalSuppliers.add(new Pair<>(priority, t -> new MoveThroughVillageGoal((PathfinderMob) t, speedModifier, onlyAtNight, distanceToPoi, canDealWithDoors::get))); // BooleanSupplier is not nice for generalized supplier options (Forge config values / ConfigJS)
-        return this;
+    public void moveThroughVillage(int priority, double speedModifier, boolean onlyAtNight, int distanceToPoi, Supplier<Boolean> canDealWithDoors) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new MoveThroughVillageGoal((PathfinderMob) mob, speedModifier, onlyAtNight, distanceToPoi, canDealWithDoors::get)); // BooleanSupplier is not nice for generalized supplier options (Forge config values / ConfigJS)
+        }
     }
 
     @Info(value = "Adds a `MoveTowardsRestrictionGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move")
     })
-    public GoalSelectorBuilder<T> moveTowardsRestriction(int priority, double speedModifier) {
-        goalSuppliers.add(new Pair<>(priority, t -> new MoveTowardsRestrictionGoal((PathfinderMob) t, speedModifier)));
-        return this;
+    public void moveTowardsRestriction(int priority, double speedModifier) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new MoveTowardsRestrictionGoal((PathfinderMob) mob, speedModifier));
+        }
     }
 
     @Info(value = "Adds a `MoveTowardsTargetGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -314,43 +281,42 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move"),
             @Param(name = "distanceWithin", value = "The distance the target must be within to move towards it")
     })
-    public GoalSelectorBuilder<T> moveTowardsTarget(int priority, double speedModifier, float distanceWithin) {
-        goalSuppliers.add(new Pair<>(priority, t -> new MoveTowardsTargetGoal((PathfinderMob) t, speedModifier, distanceWithin)));
-        return this;
+    public void moveTowardsTarget(int priority, double speedModifier, float distanceWithin) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new MoveTowardsTargetGoal((PathfinderMob) mob, speedModifier, distanceWithin));
+        }
     }
 
     @Info(value = "Adds a `OcelotAttackGoal` to the entity", params = {
             @Param(name = "priority", value = "The priority of the goal")
     })
-    public GoalSelectorBuilder<T> ocelotAttack(int priority) {
-        goalSuppliers.add(new Pair<>(priority, OcelotAttackGoal::new)); // It's named that way for legacy reasons I assume
-        return this;
+    public void ocelotAttack(int priority) {
+        selector.addGoal(priority, new OcelotAttackGoal(mob)); // It's named that way for legacy reasons I assume
     }
 
     @Info(value = "Adds a `OpenDoorGoal` to the entity", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "closeDoor", value = "If the entity should also close doors")
     })
-    public GoalSelectorBuilder<T> openDoor(int priority, boolean closeDoor) {
-        goalSuppliers.add(new Pair<>(priority, t -> new OpenDoorGoal(t, closeDoor)));
-        return this;
+    public void openDoor(int priority, boolean closeDoor) {
+        selector.addGoal(priority, new OpenDoorGoal(mob, closeDoor));
     }
 
     @Info(value = "Adds a `PanicGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move")
     })
-    public GoalSelectorBuilder<T> panic(int priority, double speedModifier) {
-        goalSuppliers.add(new Pair<>(priority, t -> new PanicGoal((PathfinderMob) t, speedModifier)));
-        return this;
+    public void panic(int priority, double speedModifier) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new PanicGoal((PathfinderMob) mob, speedModifier));
+        }
     }
 
     @Info(value = "Adds a `RandomLookAroundGoal` to the entity", params = {
             @Param(name = "priority", value = "The priority of the goal")
     })
-    public GoalSelectorBuilder<T> randomLookAround(int priority) {
-        goalSuppliers.add(new Pair<>(priority, RandomLookAroundGoal::new));
-        return this;
+    public void randomLookAround(int priority) {
+        selector.addGoal(priority, new RandomLookAroundGoal(mob));
     }
 
     @Info(value = "Adds a `RandomSwimmingGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -358,9 +324,10 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move"),
             @Param(name = "interval", value = "Sets the interval at which the goal will be refreshed") // the randomStroll method's comment
     })
-    public GoalSelectorBuilder<T> randomSwimming(int priority, double speedModifier, int interval) {
-        goalSuppliers.add(new Pair<>(priority, t -> new RandomSwimmingGoal((PathfinderMob) t, speedModifier, interval)));
-        return this;
+    public void randomSwimming(int priority, double speedModifier, int interval) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new RandomSwimmingGoal((PathfinderMob) mob, speedModifier, interval));
+        }
     }
 
     @Info(value = "Adds a `RangedAttackGoal` to the entity, only applicable to **ranged attack** mobs", params = {
@@ -370,43 +337,48 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "attackIntervalMax", value = "The maximum interval between attacks"),
             @Param(name = "attackRadius", value = "The maximum distance something can be attacked from") // I think?
     })
-    public <E extends Mob & RangedAttackMob> GoalSelectorBuilder<T> rangedAttack(int priority, double speedModifier, int attackIntervalMin, int attackIntervalMax, float attackRadius) {
-        goalSuppliers.add(new Pair<>(priority, t -> new RangedAttackGoal((E) t, speedModifier, attackIntervalMin, attackIntervalMax, attackIntervalMax)));
-        return this;
+    public <E extends Mob & RangedAttackMob> void rangedAttack(int priority, double speedModifier, int attackIntervalMin, int attackIntervalMax, float attackRadius) {
+        if (isRangedAttack) {
+            selector.addGoal(priority, new RangedAttackGoal((E) mob, speedModifier, attackIntervalMin, attackIntervalMax, attackRadius));
+        }
     }
 
     @Info(value = "Adds a `RestrictSunGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal")
     })
-    public GoalSelectorBuilder<T> restrictSun(int priority) {
-        goalSuppliers.add(new Pair<>(priority, t -> new RestrictSunGoal((PathfinderMob) t)));
-        return this;
+    public void restrictSun(int priority) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new RestrictSunGoal((PathfinderMob) mob));
+        }
     }
 
     @Info(value = "Adds a `RunAroundLikeCrazyGoal` to the entity, only applicable to **horse** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move")
     })
-    public GoalSelectorBuilder<T> horseRunAroundLikeCrazy(int priority, double speedModifier) {
-        goalSuppliers.add(new Pair<>(priority, t -> new RunAroundLikeCrazyGoal((AbstractHorse) t, speedModifier)));
-        return this;
+    public void horseRunAroundLikeCrazy(int priority, double speedModifier) {
+        if (isHorse) {
+            selector.addGoal(priority, new RunAroundLikeCrazyGoal((AbstractHorse) mob, speedModifier));
+        }
     }
 
     @Info(value = "Adds a `SitWhenOrderedToGoal` to the entity, only applicable to **tamable** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal")
     })
-    public GoalSelectorBuilder<T> sitWhenOrdered(int priority) {
-        goalSuppliers.add(new Pair<>(priority, t -> new SitWhenOrderedToGoal((TamableAnimal) t)));
-        return this;
+    public void sitWhenOrdered(int priority) {
+        if (isTamable) {
+            selector.addGoal(priority, new SitWhenOrderedToGoal((TamableAnimal) mob));
+        }
     }
 
     @Info(value = "Adds a `StrollThroughVillageGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "interval", value = "Sets how often the goal 'refreshes'")
     })
-    public GoalSelectorBuilder<T> strollThroughVillage(int priority, int interval) {
-        goalSuppliers.add(new Pair<>(priority, t -> new StrollThroughVillageGoal((PathfinderMob) t, interval)));
-        return this;
+    public void strollThroughVillage(int priority, int interval) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new StrollThroughVillageGoal((PathfinderMob) mob, interval));
+        }
     }
 
     @Info(value = "Adds a `TemptGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -415,37 +387,39 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "temptItems", value = "The ingredient that determines what items tempt the mob"),
             @Param(name = "canScare", value = "If the mob can be scared by getting to close to the tempter")
     })
-    public GoalSelectorBuilder<T> tempt(int priority, double speedModifier, Ingredient temptItems, boolean canScare) {
-        goalSuppliers.add(new Pair<>(priority, t -> new TemptGoal((PathfinderMob) t, speedModifier, temptItems, canScare)));
-        return this;
+    public void tempt(int priority, double speedModifier, Ingredient temptItems, boolean canScare) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new TemptGoal((PathfinderMob) mob, speedModifier, temptItems, canScare));
+        }
     }
 
     @Info(value = "Adds a `TryFindWaterGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal")
     })
-    public GoalSelectorBuilder<T> tryFindWater(int priority) {
-        goalSuppliers.add(new Pair<>(priority, t -> new TryFindWaterGoal((PathfinderMob) t)));
-        return this;
+    public void tryFindWater(int priority) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new TryFindWaterGoal((PathfinderMob) mob));
+        }
     }
 
     @Info(value = "Adds a `UseItemGoal` to the entity", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "itemToUse", value = "The item that will be used"),
-            @Param(name = "soundEvent", value = "The registry name of a sound event that should play when the itme is used, may be null to indicate not sound event should play"),
+            @Param(name = "soundEvent", value = "The registry name of a sound event that should play when the item is used, may be null to indicate not sound event should play"),
             @Param(name = "canUseSelector", value = "Determines when the item may be used")
     })
-    public GoalSelectorBuilder<T> useItem(int priority, ItemStack itemToUse, @Nullable ResourceLocation soundEvent, Predicate<T> canUseSelector) {
-        goalSuppliers.add(new Pair<>(priority, t -> new UseItemGoal<>(t, itemToUse, soundEvent == null ? null : Registry.SOUND_EVENT.get(soundEvent), canUseSelector))); // I like this one, interesting function and not stupidly restricted, mojang please more of these :)
-        return this;
+    public void useItem(int priority, ItemStack itemToUse, @Nullable ResourceLocation soundEvent, Predicate<T> canUseSelector) {
+        selector.addGoal(priority, new UseItemGoal<>(mob, itemToUse, soundEvent == null ? null : Registry.SOUND_EVENT.get(soundEvent), canUseSelector)); // I like this one, interesting function and not stupidly restricted, Mojang please more of these :)
     }
 
     @Info(value = "Adds a `WaterAvoidingRandomFlyingGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move")
     })
-    public GoalSelectorBuilder<T> waterAvoidingRandomFlying(int priority, double speedModifier) {
-        goalSuppliers.add(new Pair<>(priority, t -> new WaterAvoidingRandomFlyingGoal((PathfinderMob) t,speedModifier)));
-        return this;
+    public void waterAvoidingRandomFlying(int priority, double speedModifier) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new WaterAvoidingRandomFlyingGoal((PathfinderMob) mob, speedModifier));
+        }
     }
 
     @Info(value = "Adds a `WaterAvoidRandomStrollingGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -453,15 +427,9 @@ public class GoalSelectorBuilder<T extends Mob> {
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move"),
             @Param(name = "probability", value = "The probability, in the range [0, 1], that the entity picks a new position")
     })
-    public GoalSelectorBuilder<T> waterAvoidingRandomStroll(int priority, double speedModifier, float probability) {
-        goalSuppliers.add(new Pair<>(priority, t -> new WaterAvoidingRandomStrollGoal((PathfinderMob) t, speedModifier, probability)));
-        return this;
-    }
-
-    @HideFromJS
-    public void apply(GoalSelector goalSelector, T entity) {
-        for (Pair<Integer, Function<T, Goal>> goalSupplier : goalSuppliers) {
-            goalSelector.addGoal(goalSupplier.getFirst(), goalSupplier.getSecond().apply(entity));
+    public void waterAvoidingRandomStroll(int priority, double speedModifier, float probability) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new WaterAvoidingRandomStrollGoal((PathfinderMob) mob, speedModifier, probability));
         }
     }
 }

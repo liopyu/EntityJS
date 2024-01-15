@@ -8,9 +8,10 @@ import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
 import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
+import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.Wrappers;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.SensorType;
@@ -36,5 +37,12 @@ public class EntityJSPlugin extends KubeJSPlugin {
         typeWrappers.registerSimple(SoundEvent.class, Wrappers::soundEvent);
         typeWrappers.registerSimple(MemoryModuleType.class, Wrappers::memoryModuleType);
         typeWrappers.registerSimple(SensorType.class, Wrappers::sensorType);
+        typeWrappers.registerSimple(Activity.class, Wrappers::activity);
+        typeWrappers.registerSimple(EntityType.class, Wrappers::entityType);
+    }
+
+    @Override
+    public void registerEvents() {
+        EventHandlers.EntityJSEvents.register();
     }
 }

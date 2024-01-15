@@ -1,7 +1,7 @@
 package net.liopyu.entityjs.builders;
 
-import net.liopyu.entityjs.entities.IAnimatableJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Block;

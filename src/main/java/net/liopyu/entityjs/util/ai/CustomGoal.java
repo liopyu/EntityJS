@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.util.ai.goal;
+package net.liopyu.entityjs.util.ai;
 
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;

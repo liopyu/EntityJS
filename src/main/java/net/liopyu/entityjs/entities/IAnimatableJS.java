@@ -2,6 +2,8 @@ package net.liopyu.entityjs.entities;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
+import net.minecraft.core.Registry;
+import net.minecraft.world.entity.EntityType;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
@@ -40,4 +42,13 @@ public interface IAnimatableJS extends IAnimatable {
      * @return The entity's {@link AnimationFactory}
      */
     AnimationFactory getFactory();
+
+    /**
+     * Gets the id of the entity's entity type
+     */
+    default String getTypeId() {
+        return Registry.ENTITY_TYPE.getKey(getType()).toString();
+    }
+
+    EntityType<?> getType();
 }

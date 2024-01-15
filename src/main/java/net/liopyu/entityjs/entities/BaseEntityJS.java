@@ -4,9 +4,12 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
+import net.liopyu.entityjs.events.BuildBrainEventJS;
+import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
+import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ExitPortalInfo;
-import net.liopyu.entityjs.util.ai.brain.BrainBuilder;
 import net.minecraft.BlockUtil;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -16,16 +19,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.liopyu.entityjs.util.ai.brain.BrainBuilder;
-import net.minecraft.core.NonNullList;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -42,23 +43,18 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
-import java.util.Collection;
-import java.util.Map;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Optional;
 
 /**
  * The 'basic' implementation of a custom entity, implements most methods through the builder with some
  * conditionally delegating to the {@code super} implementation if the function is null. Other implementations
  * are <strong>not</strong> required to override every method in a class.<br><br>
- * <p>
+ *
  * Further, the only real requirements for a custom entity class is that the class signature respects the contract
  * <pre>{@code public class YourEntityClass extends <? extends LivingEntity> implements <? extends IAnimatableJS>}</pre>
  * A basic implementation for a custom {@link net.minecraft.world.entity.animal.Animal Animal} entity could be as simple as
@@ -91,6 +87,8 @@ import java.util.Optional;
  * }}</pre>
  * Of course this does not implement any possible networking/synced entity data stuff. figure that out yourself, it scares me
  */
+@MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
+@ParametersAreNonnullByDefault
 public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
     private final AnimationFactory animationFactory;
@@ -107,19 +105,24 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected Brain.Provider<?> brainProvider() {
-
-        return builder.brainProviderBuilder == null ? super.brainProvider() : builder.brainProviderBuilder.build();
+        if (EventHandlers.buildBrainProvider.hasListeners(getTypeId())) {
+            final BuildBrainProviderEventJS event = new BuildBrainProviderEventJS();
+            EventHandlers.buildBrainProvider.post(event, getTypeId());
+            return event.provide();
+        } else {
+            return super.brainProvider();
+        }
     }
 
     @Override
     protected Brain<BaseEntityJS> makeBrain(Dynamic<?> p_21069_) {
-        final Brain<BaseEntityJS> brain = UtilsJS.cast(super.makeBrain(p_21069_)); // This has become a crutch
-        if (builder.brainBuilder != null) {
-            final BrainBuilder brainBuilder = new BrainBuilder(builder.id);
-            builder.brainBuilder.accept(brainBuilder);
-            return brainBuilder.build(brain);
+        if (EventHandlers.buildBrain.hasListeners(getTypeId())) {
+            final Brain<BaseEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
+            return brain;
+        } else {
+            return UtilsJS.cast(super.makeBrain(p_21069_));
         }
-        return brain;
     }
 
     // Synced entity data is basically impossible, it is class dependent and mostly static
