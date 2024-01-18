@@ -88,7 +88,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             Sets how the texture of the entity is determined, has access to the entity
             to allow changing the texture based on info about the entity
                         
-            Defaults to returning <namespace>:textures/model/entity/<path>.png
+            Defaults to returning <namespace>:textures/entity/projectiles/<path>.png
             """)
     public ArrowEntityBuilder<T> getTextureLocation(Function<T, ResourceLocation> function) {
         getTextureLocation = function;

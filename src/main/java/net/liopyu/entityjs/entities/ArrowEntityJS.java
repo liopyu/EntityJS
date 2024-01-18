@@ -32,8 +32,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         pickUpStack = stack;
     }
 
-    /*
-    @Override
+    /*@Override
     protected boolean tryPickup(Player p_150121_) {
         if (builder.tryPickup != null) {
             if (builder.tryPickup.getAsBoolean()) {
@@ -44,8 +43,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
             } else return builder.tryPickup.getAsBoolean();
         }
         return super.tryPickup(p_150121_);
-    }
-    */
+    }*/
 
     @Override
     protected ItemStack getPickupItem() {

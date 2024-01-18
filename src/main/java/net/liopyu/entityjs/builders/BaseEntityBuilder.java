@@ -72,7 +72,7 @@ import java.util.function.*;
  * of these as they wish
  *
  * @param <T> The entity class that the built entity type is for, this should be a custom class
- *           that extends {@link LivingEntity} or a subclass and {@link IAnimatableJS}
+ *            that extends {@link LivingEntity} or a subclass and {@link IAnimatableJS}
  */
 @SuppressWarnings("unused")
 public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> extends BuilderBase<EntityType<T>> {
@@ -385,7 +385,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         updateInterval = 3;
         mobCategory = MobCategory.MISC;
         modelResource = t -> t.getBuilder().newID("geo/", ".geo.json");
-        textureResource = t -> t.getBuilder().newID("textures/model/entity/", ".png");
+        textureResource = t -> t.getBuilder().newID("textures/models/entity/", ".png");
         animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");
         isPushable = true;
         isAttackable = true;
@@ -476,7 +476,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     @Info(value = """
             Sets how the model of the entity is determined, has access to the entity
             to allow changing the model based on info about the entity
-          
+                      
             Defaults to returning <namespace>:geo/<path>.geo.json
             """)
     public BaseEntityBuilder<T> modelResourceFunction(Function<T, ResourceLocation> function) {
@@ -487,7 +487,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     @Info(value = """
             Sets how the texture of the entity is determined, has access to the entity
             to allow changing the texture based on info about the entity
-          
+                      
             Defaults to returning <namespace>:textures/model/entity/<path>.png
             """)
     public BaseEntityBuilder<T> textureResourceFunction(Function<T, ResourceLocation> function) {
@@ -498,7 +498,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     @Info(value = """
             Sets how the animations of the entity is determined, has access to the entity
             to allow changing the animations based on info about the entity
-          
+                      
             Defaults to returning <namespace>:animations/<path>.animation.json
             """)
     public BaseEntityBuilder<T> animationResourceFunction(Function<T, ResourceLocation> function) {
@@ -1840,7 +1840,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
             @Nullable IParticleListenerJS<T> particleListener,
             @Nullable ICustomInstructionListenerJS<T> instructionListener
     ) {
-        animationSuppliers.add(new AnimationControllerSupplier<>(name,translationTicksLength, easingType, predicate, soundListener, particleListener, instructionListener));
+        animationSuppliers.add(new AnimationControllerSupplier<>(name, translationTicksLength, easingType, predicate, soundListener, particleListener, instructionListener));
         return this;
     }
 
@@ -1867,7 +1867,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
      * This is the method which should be overrriden to create new type, a typical implementation looks like
      * {@code (type, level) -> new <CustomEntityClass>(this, type, level)}. See {@link BaseEntityJSBuilder#factory()}
      * and {@link BaseEntityJS} for examples.<br><br>
-     * 
+     * <p>
      * Unlike most builder types, there is little need to override {@link #createObject()} due to entity types being
      * essentially a supplier for the class.
      *
@@ -2043,7 +2043,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     public interface ISoundListenerJS<E extends LivingEntity & IAnimatableJS> {
         void playSound(SoundKeyFrameEventJS<E> event);
     }
-              
+
     public static class SoundKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> extends KeyFrameEventJS<E> {
 
         @Info(value = "The name of the sound to play")
