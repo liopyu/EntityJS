@@ -3,6 +3,7 @@ package net.liopyu.entityjs.builders;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
 
 

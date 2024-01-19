@@ -2,7 +2,6 @@ package net.liopyu.entityjs.item;
 
 import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
-import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
@@ -16,13 +15,12 @@ import net.minecraft.world.level.Level;
 
 public class ArrowItemBuilder extends ItemBuilder {
     public transient final ArrowEntityBuilder<?> parent;
-    public transient final ArrowEntityJSBuilder builder;
+
     public transient boolean canBePickedUp;
 
-    public ArrowItemBuilder(ResourceLocation i, ArrowEntityBuilder<?> parent, ArrowEntityJSBuilder builder) {
+    public ArrowItemBuilder(ResourceLocation i, ArrowEntityBuilder<?> parent) {
         super(i);
         this.parent = parent;
-        this.builder = builder;
         canBePickedUp = true;
     }
 
@@ -31,12 +29,14 @@ public class ArrowItemBuilder extends ItemBuilder {
         return this;
     }
 
+    public transient ArrowEntityJSBuilder builder;
+
     @Override
     public Item createObject() {
         return new ArrowItem(createItemProperties()) {
             @Override
-            public Arrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter) {
-                ArrowEntityJS arrow = new ArrowEntityJS(builder, parent.get(), pLevel);
+            public ArrowEntityJS createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter) {
+                ArrowEntityJS arrow = new ArrowEntityJS(pLevel, pShooter, builder);
                 arrow.setPickUpItem(canBePickedUp ? pStack : ItemStack.EMPTY);
                 return arrow;
             }
