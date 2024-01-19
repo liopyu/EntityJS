@@ -7,7 +7,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
 
 
-public class ArrowEntityTypeBuilder<B extends Arrow & IArrowEntityJS> {
+public class ArrowEntityTypeBuilder<B extends AbstractArrow & IArrowEntityJS> {
 
     private final ArrowEntityBuilder<?> builder;
 

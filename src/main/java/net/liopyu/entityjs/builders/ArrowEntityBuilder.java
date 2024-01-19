@@ -25,7 +25,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 
-public abstract class ArrowEntityBuilder<T extends Arrow & IArrowEntityJS> extends BuilderBase<EntityType<T>> {
+public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BuilderBase<EntityType<T>> {
 
     public transient ArrowItemBuilder getPickupItem;
     public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();

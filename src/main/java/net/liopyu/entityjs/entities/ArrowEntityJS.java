@@ -1,15 +1,21 @@
 package net.liopyu.entityjs.entities;
 
+import com.google.common.collect.Sets;
 import net.liopyu.entityjs.builders.*;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
+
 
     protected final ArrowEntityJSBuilder builder;
     @NotNull
@@ -20,6 +26,18 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         this.builder = builder;
         pickUpStack = ItemStack.EMPTY;
     }
+
+    public ArrowEntityJS(Level pLevel, LivingEntity pShooter, ArrowEntityJSBuilder builder) {
+        super(EntityType.SPECTRAL_ARROW, pShooter, pLevel);
+        this.builder = builder;
+        pickUpStack = ItemStack.EMPTY;
+    }
+
+    /*public ArrowEntityJS(Level pLevel, LivingEntity pShooter, ArrowEntityJSBuilder builder) {
+        super(pLevel,pShooter);
+        this.builder = builder;
+        pickUpStack = ItemStack.EMPTY;
+    }*/
 
 
     @Override

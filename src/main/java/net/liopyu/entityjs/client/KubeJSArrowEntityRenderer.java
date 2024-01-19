@@ -11,7 +11,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
 
 
-public class KubeJSArrowEntityRenderer<T extends Arrow & IArrowEntityJS> extends ArrowRenderer<T> {
+public class KubeJSArrowEntityRenderer<T extends AbstractArrow & IArrowEntityJS> extends ArrowRenderer<T> {
 
     private final ArrowEntityBuilder<T> builder;
 
