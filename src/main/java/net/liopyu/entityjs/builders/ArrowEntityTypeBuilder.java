@@ -3,10 +3,10 @@ package net.liopyu.entityjs.builders;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
 
 
-public class ArrowEntityTypeBuilder<B extends AbstractArrow & IArrowEntityJS> {
+public class ArrowEntityTypeBuilder<B extends Arrow & IArrowEntityJS> {
 
     private final ArrowEntityBuilder<?> builder;
 

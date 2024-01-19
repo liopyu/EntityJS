@@ -7,8 +7,9 @@ import net.minecraft.client.renderer.entity.ArrowRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
 
-public class ArrowModelJS<T extends AbstractArrow & IArrowEntityJS> extends ArrowRenderer<T> {
+public class ArrowModelJS<T extends Arrow & IArrowEntityJS> extends ArrowRenderer<T> {
     private final ArrowEntityBuilder<T> builder;
 
 

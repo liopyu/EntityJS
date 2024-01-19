@@ -2,20 +2,19 @@ package net.liopyu.entityjs.entities;
 
 import net.liopyu.entityjs.builders.*;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
+public class ArrowEntityJS extends Arrow implements IArrowEntityJS {
 
     protected final ArrowEntityJSBuilder builder;
     @NotNull
     protected ItemStack pickUpStack;
 
-    public ArrowEntityJS(ArrowEntityJSBuilder builder, EntityType<? extends AbstractArrow> pEntityType, Level pLevel) {
+    public ArrowEntityJS(ArrowEntityJSBuilder builder, EntityType<? extends Arrow> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         pickUpStack = ItemStack.EMPTY;
@@ -30,6 +29,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     public void setPickUpItem(ItemStack stack) {
         pickUpStack = stack;
+
     }
 
     /*@Override

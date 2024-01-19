@@ -12,19 +12,16 @@ import net.liopyu.entityjs.item.ArrowItemBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.projectile.Arrow;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 
-public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BuilderBase<EntityType<T>> {
+public abstract class ArrowEntityBuilder<T extends Arrow & IArrowEntityJS> extends BuilderBase<EntityType<T>> {
 
     public transient ArrowItemBuilder getPickupItem;
     public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
@@ -38,8 +35,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     public transient Function<T, ResourceLocation> getTextureLocation;
 
-    public ArrowEntityBuilder(ResourceLocation i) {
+    public ArrowEntityBuilder(ResourceLocation i, ArrowEntityJSBuilder jsbuilder) {
         super(i);
+        this.jsbuilder = jsbuilder;
         thisList.add(this);
         clientTrackingRange = 5;
         updateInterval = 3;
@@ -97,10 +95,12 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     public abstract EntityType.EntityFactory<ArrowEntityJS> factory();
 
+    public transient ArrowEntityJSBuilder jsbuilder;
+
     @Info(value = "Creates an arrow item for this entity type")
-    @Generics(value = {AbstractArrow.class, ArrowEntityBuilder.class})
+    @Generics(value = {Arrow.class, ArrowEntityBuilder.class})
     public ArrowEntityBuilder<T> getPickupItem(Consumer<ArrowItemBuilder> getPickupItem) {
-        this.getPickupItem = new ArrowItemBuilder(id, this);
+        this.getPickupItem = new ArrowItemBuilder(id, this, jsbuilder);
         getPickupItem.accept(this.getPickupItem);
         return this;
     }
