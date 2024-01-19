@@ -1,6 +1,6 @@
 package net.liopyu.entityjs.client.model;
 
-import net.liopyu.entityjs.builders.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
 import net.minecraft.client.renderer.entity.ArrowRenderer;
@@ -10,10 +10,10 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
 
 public class ArrowModelJS<T extends AbstractArrow & IArrowEntityJS> extends ArrowRenderer<T> {
-    private final ArrowEntityBuilder<T> builder;
+    private final ProjectileEntityBuilder<T> builder;
 
 
-    public ArrowModelJS(EntityRendererProvider.Context p_173917_, ArrowEntityBuilder<T> builder) {
+    public ArrowModelJS(EntityRendererProvider.Context p_173917_, ProjectileEntityBuilder<T> builder) {
         super(p_173917_);
         this.builder = builder;
     }

@@ -5,32 +5,28 @@ import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
-import net.liopyu.entityjs.item.ArrowItemBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
-// TODO: Change this to a generic projectile builder, iirc items have to ba handled differently for arrows and other types
-public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BuilderBase<EntityType<T>> {
+public abstract class ProjectileEntityBuilder<T extends Projectile & IArrowEntityJS> extends BuilderBase<EntityType<T>> {
 
-    public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
+    public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
     public transient float width;
     public transient float height;
     public transient int clientTrackingRange;
     public transient int updateInterval;
     public transient MobCategory mobCategory;
 
-    public transient BooleanSupplier tryPickup;
-
     public transient Function<T, ResourceLocation> getTextureLocation;
 
-    public ArrowEntityBuilder(ResourceLocation i) {
+    public ProjectileEntityBuilder(ResourceLocation i) {
         super(i);
         thisList.add(this);
         clientTrackingRange = 5;
@@ -39,39 +35,38 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         width = 0.5f;
         height = 0.5f;
         getTextureLocation = t -> t.getBuilder().newID("textures/entity/projectiles/", ".png");
-
     }
 
     @Info(value = "Sets the hit box of the entity type", params = {
             @Param(name = "width", value = "The width of the entity, defaults to 0.5 for arrows"),
             @Param(name = "height", value = "The height if the entity, defaults to 0.5 for arrows")
     })
-    public ArrowEntityBuilder<T> sized(float width, float height) {
+    public ProjectileEntityBuilder<T> sized(float width, float height) {
         this.width = width;
         this.height = height;
         return this;
     }
 
 
-    public ArrowEntityBuilder<T> tryPickup(BooleanSupplier tryPickup) {
+    /*public ProjectileEntityBuilder<T> tryPickup(BooleanSupplier tryPickup) {
         this.tryPickup = tryPickup;
         return this;
-    }
+    }*/
 
     @Info(value = "Sets the client tracking range, defaults to 5")
-    public ArrowEntityBuilder<T> clientTrackingRange(int i) {
+    public ProjectileEntityBuilder<T> clientTrackingRange(int i) {
         clientTrackingRange = i;
         return this;
     }
 
     @Info(value = "Sets the update interval in ticks of the entity, defaults to 3")
-    public ArrowEntityBuilder<T> updateInterval(int i) {
+    public ProjectileEntityBuilder<T> updateInterval(int i) {
         updateInterval = i;
         return this;
     }
 
     @Info(value = "Sets the mob category, defaults to 'misc'")
-    public ArrowEntityBuilder<T> mobCategory(MobCategory category) {
+    public ProjectileEntityBuilder<T> mobCategory(MobCategory category) {
         mobCategory = category;
         return this;
     }
@@ -82,7 +77,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
                         
             Defaults to returning <namespace>:textures/entity/projectiles/<path>.png
             """)
-    public ArrowEntityBuilder<T> getTextureLocation(Function<T, ResourceLocation> function) {
+    public ProjectileEntityBuilder<T> getTextureLocation(Function<T, ResourceLocation> function) {
         getTextureLocation = function;
         return this;
     }
