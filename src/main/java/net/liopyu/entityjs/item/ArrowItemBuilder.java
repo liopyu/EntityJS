@@ -17,29 +17,37 @@ import net.minecraft.world.level.Level;
 
 public class ArrowItemBuilder extends ItemBuilder {
     public transient final ArrowEntityBuilder<?> parent;
-
+    public transient ArrowEntityJSBuilder builder;
     public transient boolean canBePickedUp;
 
-    public ArrowItemBuilder(ResourceLocation i, ArrowEntityBuilder<?> parent) {
+    public ArrowItemBuilder(ResourceLocation i, ArrowEntityBuilder<?> parent, ArrowEntityJSBuilder builder) {
         super(i);
         this.parent = parent;
+        if (builder != null) {
+            this.builder = builder;
+        }
         canBePickedUp = true;
     }
+
 
     public ArrowItemBuilder canBePickedup(boolean canBePickedUp) {
         this.canBePickedUp = canBePickedUp;
         return this;
     }
 
-    public transient ArrowEntityJSBuilder builder;
 
     @Override
     public Item createObject() {
         return new ArrowItem(createItemProperties()) {
             @Override
             public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter) {
-                ArrowEntityJS arrow = new ArrowEntityJS(pLevel, pShooter, builder);
-                return arrow;
+                // TODO fix this where builder is null
+                if (builder != null) {
+                    ArrowEntityJS arrow = new ArrowEntityJS(pLevel, pShooter, builder);
+                    return arrow;
+                }
+                return super.createArrow(pLevel, pStack, pShooter);
+
             }
         };
     }

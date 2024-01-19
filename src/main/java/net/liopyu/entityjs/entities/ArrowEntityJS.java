@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
 
-    protected final ArrowEntityJSBuilder builder;
+    public ArrowEntityJSBuilder builder;
     @NotNull
     protected ItemStack pickUpStack;
 
@@ -28,16 +28,12 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     public ArrowEntityJS(Level pLevel, LivingEntity pShooter, ArrowEntityJSBuilder builder) {
-        super(EntityType.SPECTRAL_ARROW, pShooter, pLevel);
+        super(builder.get(), pShooter, pLevel);
+
         this.builder = builder;
+
         pickUpStack = ItemStack.EMPTY;
     }
-
-    /*public ArrowEntityJS(Level pLevel, LivingEntity pShooter, ArrowEntityJSBuilder builder) {
-        super(pLevel,pShooter);
-        this.builder = builder;
-        pickUpStack = ItemStack.EMPTY;
-    }*/
 
 
     @Override

@@ -96,15 +96,20 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         return this;
     }
 
-    public abstract EntityType.EntityFactory<ArrowEntityJS> factory();
+    public abstract EntityType.EntityFactory<T> factory();
+
+    public transient ArrowEntityJSBuilder builder;
 
     @Info(value = "Creates an arrow item for this entity type")
-    @Generics(value = {Arrow.class, ArrowEntityBuilder.class})
+    @Generics(value = {AbstractArrow.class, ArrowEntityBuilder.class})
     public ArrowEntityBuilder<T> getPickupItem(Consumer<ArrowItemBuilder> getPickupItem) {
-        this.getPickupItem = new ArrowItemBuilder(id, this);
+
+        this.getPickupItem = new ArrowItemBuilder(id, this, builder);
         getPickupItem.accept(this.getPickupItem);
+        
         return this;
     }
+
 
     @Override
     public void createAdditionalObjects() {
