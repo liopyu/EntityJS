@@ -2,55 +2,51 @@ package net.liopyu.entityjs.item;
 
 import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
-import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
+import net.liopyu.entityjs.entities.ArrowEntityJS;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ArrowItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.SpectralArrow;
+import net.minecraft.world.item.*;
+import net.minecraft.world.level.Level;
 
 
 public class ArrowItemBuilder extends ItemBuilder {
-    public transient final ArrowEntityBuilder<?> parent;
-    public transient CreativeModeTab creativeModeTab;
-    public transient int stacksTo;
+    public transient final ArrowEntityJSBuilder parent;
+    public transient boolean canBePickedUp;
 
-
-    public ArrowItemBuilder(ResourceLocation i, ArrowEntityBuilder<?> parent) {
+    public ArrowItemBuilder(ResourceLocation i, ArrowEntityJSBuilder parent) {
         super(i);
-        stacksTo = 64;
-        creativeModeTab = CreativeModeTab.TAB_MISC;
         this.parent = parent;
+        canBePickedUp = true;
+    }
 
+
+    public ArrowItemBuilder canBePickedup(boolean canBePickedUp) {
+        this.canBePickedUp = canBePickedUp;
+        return this;
     }
 
     @Override
     public Item createObject() {
-        final Item.Properties properties = new Item.Properties()
-                .stacksTo(stacksTo)
-                .tab(creativeModeTab);
-
-        return new ArrowItem(properties);
+        return new ArrowItem(createItemProperties()) {
+            @Override
+            public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter) {
+                final ArrowEntityJS arrow = new ArrowEntityJS(pLevel, pShooter, parent);
+                if (canBePickedUp) {
+                    final ItemStack stack = new ItemStack(pStack.getItem());
+                    stack.setTag(pStack.getTag());
+                    arrow.setPickUpItem(stack);
+                }
+                return arrow;
+            }
+        };
     }
 
-    public transient ItemStack getStack;
-
-    public ItemStack getStack() {
-        return new ItemStack(this.createObject().getDefaultInstance().getItem());
-    }
-
-    @Info(value = "Sets the creative mode tab for the arrow item")
-    public ArrowItemBuilder creativeModeTab(CreativeModeTab i) {
-        creativeModeTab = i;
-        return this;
-    }
-
-    @Info(value = "Sets the stacks to for the arrow item")
-    public ArrowItemBuilder stacksTo(int i) {
-        stacksTo = i;
-        return this;
-    }
 
     @Override
     public void generateAssetJsons(AssetJsonGenerator generator) {

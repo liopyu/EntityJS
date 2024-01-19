@@ -24,7 +24,7 @@ public class EntityJSPlugin extends KubeJSPlugin {
     public void init() {
         RegistryInfo.ENTITY_TYPE.addType("entityjs:living", BaseEntityJSBuilder.class, BaseEntityJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:mob", MobEntityJSBuilder.class, MobEntityJSBuilder::new);
-        RegistryInfo.ENTITY_TYPE.addType("entityjs:projectile", ArrowEntityJSBuilder.class, ArrowEntityJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("entityjs:arrow", ArrowEntityJSBuilder.class, ArrowEntityJSBuilder::new);
     }
 
     @Override
