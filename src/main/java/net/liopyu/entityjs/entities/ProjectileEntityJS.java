@@ -4,37 +4,39 @@ import net.liopyu.entityjs.builders.*;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS, IProjectileEntityJS {
+public class ProjectileEntityJS extends AbstractHurtingProjectile implements IProjectileEntityJS {
 
 
-    public final ArrowEntityJSBuilder builder;
-    @NotNull
-    protected ItemStack pickUpStack;
+    public ProjectileEntityJSBuilder builder;
 
-    public ArrowEntityJS(ArrowEntityJSBuilder builder, EntityType<? extends AbstractArrow> pEntityType, Level pLevel) {
+    public ProjectileEntityJS(ProjectileEntityJSBuilder builder, EntityType<? extends AbstractHurtingProjectile> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
-        pickUpStack = ItemStack.EMPTY;
     }
 
-    public ArrowEntityJS(Level level, LivingEntity shooter, ArrowEntityJSBuilder builder) {
-        super(builder.get(), shooter, level);
+    public ProjectileEntityJS(EntityType<? extends AbstractHurtingProjectile> pEntityType, LivingEntity pShooter, double pOffsetX, double pOffsetY, double pOffsetZ, Level pLevel, ProjectileEntityJSBuilder builder) {
+        super(pEntityType, pShooter, pOffsetX, pOffsetY, pOffsetZ, pLevel);
         this.builder = builder;
-        pickUpStack = ItemStack.EMPTY;
+        super.setOwner(pShooter);
+        super.setRot(pShooter.getYRot(), pShooter.getXRot());
     }
+
 
     @Override
-    public ArrowEntityBuilder<?> getBuilder() {
+    public ProjectileEntityBuilder<?> getBuilder() {
         return builder;
     }
 
+
     @Override
-    public void setPickUpItem(ItemStack stack) {
-        pickUpStack = stack;
+    protected void defineSynchedData() {
+
     }
 
     /*@Override
@@ -50,9 +52,9 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS, IPro
         return super.tryPickup(p_150121_);
     }*/
 
-    @Override
+    /*@Override
     protected ItemStack getPickupItem() {
         return pickUpStack;
-    }
+    }*/
 
 }
