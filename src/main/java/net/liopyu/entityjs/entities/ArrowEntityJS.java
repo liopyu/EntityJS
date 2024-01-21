@@ -4,7 +4,6 @@ import net.liopyu.entityjs.builders.*;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -23,13 +22,13 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     public ArrowEntityJS(Level level, LivingEntity shooter, ArrowEntityJSBuilder builder) {
-        super(builder.get(), level);
+        super(builder.get(), shooter, level);
         this.builder = builder;
         pickUpStack = ItemStack.EMPTY;
     }
 
     @Override
-    public ProjectileEntityBuilder<?> getBuilder() {
+    public ArrowEntityBuilder<?> getBuilder() {
         return builder;
     }
 
@@ -52,11 +51,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }*/
 
     @Override
-    public ItemStack getPickupItem() {
+    protected ItemStack getPickupItem() {
         return pickUpStack;
     }
 
-    @Override
-    protected void defineSynchedData() {
-    }
 }

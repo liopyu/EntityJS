@@ -1,21 +1,23 @@
 package net.liopyu.entityjs.client;
 
 
-import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.ArrowEntityBuilder;
+import net.liopyu.entityjs.client.model.ArrowModelJS;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
 import net.minecraft.client.renderer.entity.ArrowRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
 
 
 public class KubeJSArrowEntityRenderer<T extends AbstractArrow & IArrowEntityJS> extends ArrowRenderer<T> {
 
-    private final ProjectileEntityBuilder<T> builder;
+    private final ArrowEntityBuilder<T> builder;
 
-    public KubeJSArrowEntityRenderer(EntityRendererProvider.Context renderManager, ProjectileEntityBuilder<?> builder) {
+    public KubeJSArrowEntityRenderer(EntityRendererProvider.Context renderManager, ArrowEntityBuilder<T> builder) {
         super(renderManager);
-        this.builder = (ProjectileEntityBuilder<T>) builder;
+        this.builder = builder;
     }
 
     @Override

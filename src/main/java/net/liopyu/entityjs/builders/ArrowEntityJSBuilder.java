@@ -11,7 +11,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 
 import java.util.function.Consumer;
 
-public class ArrowEntityJSBuilder extends ProjectileEntityBuilder<ArrowEntityJS> {
+public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
 
     public transient ArrowItemBuilder item;
 
@@ -25,7 +25,7 @@ public class ArrowEntityJSBuilder extends ProjectileEntityBuilder<ArrowEntityJS>
     }
 
     @Info(value = "Creates the arrow item for this entity type")
-    @Generics(value = ProjectileEntityBuilder.class)
+    @Generics(value = ArrowEntityBuilder.class)
     public ArrowEntityJSBuilder item(Consumer<ArrowItemBuilder> item) {
 
         this.item = new ArrowItemBuilder(id, this);
