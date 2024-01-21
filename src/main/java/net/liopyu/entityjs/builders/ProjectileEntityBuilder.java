@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
+// TODO: Change this to a generic projectile builder, iirc items have to ba handled differently for arrows and other types
 public abstract class ProjectileEntityBuilder<T extends Projectile & IArrowEntityJS> extends BuilderBase<EntityType<T>> {
 
     public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
@@ -23,6 +24,8 @@ public abstract class ProjectileEntityBuilder<T extends Projectile & IArrowEntit
     public transient int clientTrackingRange;
     public transient int updateInterval;
     public transient MobCategory mobCategory;
+
+    public transient BooleanSupplier tryPickup;
 
     public transient Function<T, ResourceLocation> getTextureLocation;
 
@@ -35,6 +38,7 @@ public abstract class ProjectileEntityBuilder<T extends Projectile & IArrowEntit
         width = 0.5f;
         height = 0.5f;
         getTextureLocation = t -> t.getBuilder().newID("textures/entity/projectiles/", ".png");
+
     }
 
     @Info(value = "Sets the hit box of the entity type", params = {
@@ -48,10 +52,10 @@ public abstract class ProjectileEntityBuilder<T extends Projectile & IArrowEntit
     }
 
 
-    /*public ProjectileEntityBuilder<T> tryPickup(BooleanSupplier tryPickup) {
+    public ProjectileEntityBuilder<T> tryPickup(BooleanSupplier tryPickup) {
         this.tryPickup = tryPickup;
         return this;
-    }*/
+    }
 
     @Info(value = "Sets the client tracking range, defaults to 5")
     public ProjectileEntityBuilder<T> clientTrackingRange(int i) {
@@ -84,10 +88,10 @@ public abstract class ProjectileEntityBuilder<T extends Projectile & IArrowEntit
 
     public abstract EntityType.EntityFactory<T> factory();
 
-    @Override
+    /*@Override
     public EntityType<T> createObject() {
-        return new ArrowEntityTypeBuilder<>(this).get();
-    }
+        return new ArrowEntityBuilder<>(this).get();
+    }*/
 
     @Override
     public RegistryInfo getRegistryType() {
