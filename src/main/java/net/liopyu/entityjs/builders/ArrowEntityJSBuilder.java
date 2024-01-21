@@ -7,7 +7,6 @@ import net.liopyu.entityjs.entities.ArrowEntityJS;
 import net.liopyu.entityjs.item.ArrowItemBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 
 import java.util.function.Consumer;
 
@@ -18,6 +17,7 @@ public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
     public ArrowEntityJSBuilder(ResourceLocation i) {
         super(i);
     }
+
 
     @Override
     public EntityType.EntityFactory<ArrowEntityJS> factory() {

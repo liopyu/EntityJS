@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS, IProjectileEntityJS {
+public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
 
     public final ArrowEntityJSBuilder builder;
@@ -28,7 +28,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS, IPro
     }
 
     @Override
-    public ArrowEntityBuilder<?> getBuilder() {
+    public ArrowEntityBuilder<?> getArrowBuilder() {
         return builder;
     }
 

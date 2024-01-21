@@ -8,11 +8,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.Projectile;
 
 
-public class ProjectileEntityTypeBuilder<B extends Projectile & IProjectileEntityJS> {
+public class ProjectileEntityTypeBuilder<B extends Projectile> {
 
-    private final ProjectileEntityBuilder<?> builder;
+    private final BaseProjectileBuilder<?> builder;
 
-    public <T extends ProjectileEntityBuilder<B>> ProjectileEntityTypeBuilder(T builder) {
+    public <T extends BaseProjectileBuilder<B>> ProjectileEntityTypeBuilder(T builder) {
         this.builder = builder;
     }
 
@@ -27,5 +27,6 @@ public class ProjectileEntityTypeBuilder<B extends Projectile & IProjectileEntit
 
         return UtilsJS.cast(builder.build(js.id.toString())); // If this fails, uh... do better?
     }
+
 }
 

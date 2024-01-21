@@ -25,11 +25,13 @@ public class ProjectileEntityJS extends AbstractHurtingProjectile implements IPr
         this.builder = builder;
         super.setOwner(pShooter);
         super.setRot(pShooter.getYRot(), pShooter.getXRot());
+        super.setPos(pShooter.getX(), pShooter.getY(), pShooter.getZ());
+        super.reapplyPosition();
     }
 
 
     @Override
-    public ProjectileEntityBuilder<?> getBuilder() {
+    public ProjectileEntityBuilder<?> getProjectileBuilder() {
         return builder;
     }
 
@@ -38,23 +40,5 @@ public class ProjectileEntityJS extends AbstractHurtingProjectile implements IPr
     protected void defineSynchedData() {
 
     }
-
-    /*@Override
-    protected boolean tryPickup(Player p_150121_) {
-        if (builder.tryPickup != null) {
-            if (builder.tryPickup.getAsBoolean()) {
-                if (!p_150121_.getAbilities().instabuild) {
-                    p_150121_.getInventory().add(this.getPickupItem());
-                    return builder.tryPickup.getAsBoolean();
-                }
-            } else return builder.tryPickup.getAsBoolean();
-        }
-        return super.tryPickup(p_150121_);
-    }*/
-
-    /*@Override
-    protected ItemStack getPickupItem() {
-        return pickUpStack;
-    }*/
 
 }
