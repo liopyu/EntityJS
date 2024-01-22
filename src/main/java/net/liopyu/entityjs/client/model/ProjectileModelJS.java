@@ -1,7 +1,6 @@
 package net.liopyu.entityjs.client.model;
 
 import net.liopyu.entityjs.builders.ArrowEntityBuilder;
-import net.liopyu.entityjs.builders.BaseProjectileBuilder;
 import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.entities.IArrowEntityJS;

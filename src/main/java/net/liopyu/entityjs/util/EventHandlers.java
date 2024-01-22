@@ -3,7 +3,7 @@ package net.liopyu.entityjs.util;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
 import dev.latvian.mods.kubejs.event.Extra;
-import net.liopyu.entityjs.builders.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
@@ -28,7 +28,7 @@ public class EventHandlers {
     }
 
     private static void attributeCreation(EntityAttributeCreationEvent event) {
-        for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
+        for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
             event.put(builder.get(), builder.getAttributeBuilder().build());
         }
     }

@@ -1,6 +1,6 @@
 package net.liopyu.entityjs.entities;
 
-import net.liopyu.entityjs.builders.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -61,7 +61,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
     @Override
-    public BaseEntityBuilder<?> getBuilder() {
+    public BaseLivingEntityBuilder<?> getBuilder() {
         return builder;
     }
 

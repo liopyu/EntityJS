@@ -2,7 +2,7 @@ package net.liopyu.entityjs.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.liopyu.entityjs.builders.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.model.EntityModelJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -19,9 +19,9 @@ import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
  */
 public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extends GeoEntityRenderer<T> {
 
-    private final BaseEntityBuilder<T> builder;
+    private final BaseLivingEntityBuilder<T> builder;
 
-    public KubeJSEntityRenderer(EntityRendererProvider.Context renderManager, BaseEntityBuilder<T> builder) {
+    public KubeJSEntityRenderer(EntityRendererProvider.Context renderManager, BaseLivingEntityBuilder<T> builder) {
         super(renderManager, new EntityModelJS<>(builder));
         this.builder = builder;
     }

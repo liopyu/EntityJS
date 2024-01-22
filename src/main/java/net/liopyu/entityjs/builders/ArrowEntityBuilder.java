@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.function.Function;
 
 
-public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseProjectileBuilder<T> {
+public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseEntityBuilder<T> {
     public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Function<T, ResourceLocation> getTextureLocation;
 
@@ -30,7 +30,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
                         
             Defaults to returning <namespace>:textures/entity/projectiles/<path>.png
             """)
-    public BaseProjectileBuilder<T> getTextureLocation(Function<T, ResourceLocation> function) {
+    public BaseEntityBuilder<T> getTextureLocation(Function<T, ResourceLocation> function) {
         getTextureLocation = function;
         return this;
     }

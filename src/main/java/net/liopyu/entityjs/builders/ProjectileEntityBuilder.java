@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile & IProjectileEntityJS> extends BaseProjectileBuilder<T> {
+public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile & IProjectileEntityJS> extends BaseEntityBuilder<T> {
     public transient Function<T, ResourceLocation> getTextureLocation;
     public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
 
@@ -34,7 +34,7 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
                         
             Defaults to returning <namespace>:textures/entity/projectiles/<path>.png
             """)
-    public BaseProjectileBuilder<T> getTextureLocation(Function<T, ResourceLocation> function) {
+    public BaseEntityBuilder<T> getTextureLocation(Function<T, ResourceLocation> function) {
         getTextureLocation = function;
         return this;
     }

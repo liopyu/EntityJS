@@ -30,7 +30,7 @@ public class ProjectileEntityJSBuilder extends ProjectileEntityBuilder<Projectil
     }
 
     @Info(value = "Creates the arrow item for this entity type")
-    @Generics(value = BaseProjectileBuilder.class)
+    @Generics(value = BaseEntityBuilder.class)
     public ProjectileEntityJSBuilder item(Consumer<ProjectileItemBuilder> item) {
 
         this.item = new ProjectileItemBuilder(id, this);

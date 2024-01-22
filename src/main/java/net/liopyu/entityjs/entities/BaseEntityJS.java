@@ -2,7 +2,7 @@ package net.liopyu.entityjs.entities;
 
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.builders.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
@@ -54,7 +54,7 @@ import java.util.Optional;
  * The 'basic' implementation of a custom entity, implements most methods through the builder with some
  * conditionally delegating to the {@code super} implementation if the function is null. Other implementations
  * are <strong>not</strong> required to override every method in a class.<br><br>
- *
+ * <p>
  * Further, the only real requirements for a custom entity class is that the class signature respects the contract
  * <pre>{@code public class YourEntityClass extends <? extends LivingEntity> implements <? extends IAnimatableJS>}</pre>
  * A basic implementation for a custom {@link net.minecraft.world.entity.animal.Animal Animal} entity could be as simple as
@@ -70,7 +70,7 @@ import java.util.Optional;
  *     }
  *
  *     @Override
- *     public BaseEntityBuilder<?> getBuilder() {
+ *     public BaseLivingEntityBuilder<?> getBuilder() {
  *         return builder;
  *     }
  *
@@ -172,7 +172,7 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     @Override
-    public BaseEntityBuilder<?> getBuilder() {
+    public BaseLivingEntityBuilder<?> getBuilder() {
         return builder;
     }
 

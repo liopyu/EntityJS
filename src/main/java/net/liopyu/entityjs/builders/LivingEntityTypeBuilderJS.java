@@ -9,9 +9,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class LivingEntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
 
-    private final BaseEntityBuilder<?> builder;
+    private final BaseLivingEntityBuilder<?> builder;
 
-    public <T extends BaseEntityBuilder<B>> LivingEntityTypeBuilderJS(T builder) {
+    public <T extends BaseLivingEntityBuilder<B>> LivingEntityTypeBuilderJS(T builder) {
         this.builder = builder;
     }
 

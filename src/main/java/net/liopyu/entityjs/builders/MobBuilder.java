@@ -12,11 +12,11 @@ import java.util.function.Consumer;
 
 /**
  * A helper class that acts as a base for all mob-based entity types<br><br>
- *
+ * <p>
  * Has methods for spawn eggs, goal selectors, goal targets, and anything else
  * in {@link Mob} that is not present in/related to {@link net.minecraft.world.entity.LivingEntity LivignEntity}
  */
-public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseEntityBuilder<T> {
+public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
 
     public transient SpawnEggItemBuilder eggItem;
 

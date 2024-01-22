@@ -7,9 +7,9 @@ import net.minecraft.world.entity.EntityType;
 
 public class EntityTypeBuilder<B extends Entity> {
 
-    private final BaseProjectileBuilder<?> builder;
+    private final BaseEntityBuilder<?> builder;
 
-    public <T extends BaseProjectileBuilder<B>> EntityTypeBuilder(T builder) {
+    public <T extends BaseEntityBuilder<B>> EntityTypeBuilder(T builder) {
         this.builder = builder;
     }
 
