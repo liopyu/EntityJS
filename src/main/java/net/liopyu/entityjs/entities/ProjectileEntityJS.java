@@ -23,11 +23,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     public ProjectileEntityJS(EntityType<? extends ThrowableItemProjectile> pEntityType, LivingEntity pShooter, Level pLevel) {
         super(pEntityType, pShooter, pLevel);
-    }
 
-    @Override
-    public void shootFromRotation(Entity pShooter, float pX, float pY, float pZ, float pVelocity, float pInaccuracy) {
-        super.shootFromRotation(pShooter, pX, pY, pZ, pVelocity, pInaccuracy);
     }
 
     @Override
@@ -35,11 +31,18 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
         return builder;
     }
 
-    @Override
-    public ProjectileItemBuilder getProjectileItemBuilder() {
-        return null;
-    }
+    /*@Override
+    public void shootFromRotation(Entity pShooter, float pX, float pY, float pZ, float pVelocity, float pInaccuracy) {
 
+        if (builder != null) {
+            // Ensure builder is not null before accessing it
+            super.shootFromRotation(pShooter, pX, pY, pZ, pVelocity, pInaccuracy);
+        } else {
+            // Handle the case where builder is null (throw an exception, log a message, etc.)
+            // Example: throw new IllegalStateException("ProjectileEntityBuilder is not set.");
+        }
+
+    }*/
 
     @Override
     protected Item getDefaultItem() {

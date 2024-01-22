@@ -11,5 +11,4 @@ import org.spongepowered.asm.mixin.Interface;
 public interface IProjectileEntityJS {
     ProjectileEntityBuilder<?> getProjectileBuilder();
 
-    ProjectileItemBuilder getProjectileItemBuilder();
 }
