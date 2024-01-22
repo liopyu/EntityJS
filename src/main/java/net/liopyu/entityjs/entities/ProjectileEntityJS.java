@@ -2,6 +2,7 @@ package net.liopyu.entityjs.entities;
 
 import net.liopyu.entityjs.builders.*;
 import net.liopyu.entityjs.item.ProjectileItemBuilder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.*;
@@ -24,6 +25,10 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
         super(pEntityType, pShooter, pLevel);
     }
 
+    @Override
+    public void shootFromRotation(Entity pShooter, float pX, float pY, float pZ, float pVelocity, float pInaccuracy) {
+        super.shootFromRotation(pShooter, pX, pY, pZ, pVelocity, pInaccuracy);
+    }
 
     @Override
     public ProjectileEntityBuilder<?> getProjectileBuilder() {

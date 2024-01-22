@@ -37,6 +37,7 @@ public class KubeJSProjectileEntityRenderer<T extends ThrowableItemProjectile & 
     public KubeJSProjectileEntityRenderer(EntityRendererProvider.Context renderManager, ProjectileEntityBuilder<T> builder) {
         super(renderManager);
         this.builder = builder;
+        RENDER_TYPE = RenderType.entityCutoutNoCull(getDynamicTextureLocation());
     }
 
     @Override
@@ -67,8 +68,9 @@ public class KubeJSProjectileEntityRenderer<T extends ThrowableItemProjectile & 
     }
 
 
-    static {
-        RENDER_TYPE = RenderType.entityCutoutNoCull(new ResourceLocation("kubejs:textures/entity/projectiles/projectile"));
+    private ResourceLocation getDynamicTextureLocation() {
+        return new ResourceLocation("kubejs:textures/entity/projectiles/" + builder.id.getPath() + ".png");
     }
+
 }
 
