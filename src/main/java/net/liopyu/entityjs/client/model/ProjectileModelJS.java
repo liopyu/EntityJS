@@ -10,12 +10,9 @@ import net.minecraft.client.renderer.entity.ArrowRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
-import net.minecraft.world.entity.projectile.Arrow;
-import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.*;
 
-public class ProjectileModelJS<T extends AbstractHurtingProjectile & IProjectileEntityJS> extends EntityRenderer<T> {
+public class ProjectileModelJS<T extends ThrowableItemProjectile & IProjectileEntityJS> extends EntityRenderer<T> {
     private final ProjectileEntityBuilder<T> builder;
 
 

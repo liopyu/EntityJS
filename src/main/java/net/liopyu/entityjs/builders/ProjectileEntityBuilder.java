@@ -8,12 +8,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class ProjectileEntityBuilder<T extends AbstractHurtingProjectile & IProjectileEntityJS> extends BaseProjectileBuilder<T> {
+public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile & IProjectileEntityJS> extends BaseProjectileBuilder<T> {
     public transient Function<T, ResourceLocation> getTextureLocation;
     public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
 
