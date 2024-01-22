@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
-public abstract class BaseProjectileBuilder<T extends Projectile> extends BuilderBase<EntityType<T>> {
+public abstract class BaseProjectileBuilder<T extends Entity> extends BuilderBase<EntityType<T>> {
 
 
     public transient float width;

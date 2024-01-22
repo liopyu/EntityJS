@@ -25,7 +25,7 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
 
     @Override
     public EntityType<T> createObject() {
-        return new ProjectileEntityTypeBuilder<>(this).get();
+        return new EntityTypeBuilder<>(this).get();
     }
 
     @Info(value = """

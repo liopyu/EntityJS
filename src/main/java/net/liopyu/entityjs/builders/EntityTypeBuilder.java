@@ -1,18 +1,15 @@
 package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.entities.IArrowEntityJS;
-import net.liopyu.entityjs.entities.IProjectileEntityJS;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.Projectile;
 
 
-public class ProjectileEntityTypeBuilder<B extends Projectile> {
+public class EntityTypeBuilder<B extends Entity> {
 
     private final BaseProjectileBuilder<?> builder;
 
-    public <T extends BaseProjectileBuilder<B>> ProjectileEntityTypeBuilder(T builder) {
+    public <T extends BaseProjectileBuilder<B>> EntityTypeBuilder(T builder) {
         this.builder = builder;
     }
 

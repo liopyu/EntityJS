@@ -1860,7 +1860,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
      */
     @Override
     public EntityType<T> createObject() {
-        return new EntityTypeBuilderJS<>(this).get();
+        return new LivingEntityTypeBuilderJS<>(this).get();
     }
 
     /**

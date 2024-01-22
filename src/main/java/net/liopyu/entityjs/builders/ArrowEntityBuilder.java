@@ -37,7 +37,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Override
     public EntityType<T> createObject() {
-        return new ProjectileEntityTypeBuilder<>(this).get();
+        return new EntityTypeBuilder<>(this).get();
     }
 }
 
