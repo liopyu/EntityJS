@@ -3,52 +3,24 @@ package net.liopyu.entityjs.entities;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
+import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
+import net.liopyu.entityjs.util.EntityTypeRegistry;
 import net.liopyu.entityjs.util.EventHandlers;
-import net.liopyu.entityjs.util.ExitPortalInfo;
-import net.minecraft.BlockUtil;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.CombatTracker;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.entity.EntityInLevelCallback;
-import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Optional;
 
 /**
  * The 'basic' implementation of a custom entity, implements most methods through the builder with some
@@ -89,15 +61,15 @@ import java.util.Optional;
  */
 @MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
 @ParametersAreNonnullByDefault
-public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
+public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     private final AnimationFactory animationFactory;
 
-    protected final BaseEntityJSBuilder builder;
+    protected final AnimalEntityJSBuilder builder;
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
-    public BaseEntityJS(BaseEntityJSBuilder builder, EntityType<? extends LivingEntity> pEntityType, Level pLevel) {
+    public AnimalEntityJS(AnimalEntityJSBuilder builder, EntityType<? extends Animal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createFactory(this);
@@ -115,9 +87,9 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     @Override
-    protected Brain<BaseEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<AnimalEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners(getTypeId())) {
-            final Brain<BaseEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<AnimalEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
@@ -125,22 +97,6 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    // Synced entity data is basically impossible, it is class dependent and mostly static
-    // @Override
-    // protected void defineSynchedData() {
-    //     super.defineSynchedData();
-    // }
-    //
-    // Do we actually want to let users touch this, kube's persistent data works well enough
-    // @Override
-    // public void readAdditionalSaveData(CompoundTag pCompound) {
-    //     super.readAdditionalSaveData(pCompound);
-    // }
-    //
-    // @Override
-    // public void addAdditionalSaveData(CompoundTag pCompound) {
-    //     super.addAdditionalSaveData(pCompound);
-    // }
 
     @Override
     public Iterable<ItemStack> getArmorSlots() {
@@ -196,5 +152,32 @@ public class BaseEntityJS extends LivingEntity implements IAnimatableJS {
     public boolean isAttackable() {
         return builder.isAttackable;
     }
-    //Below methods are removed for now - liopyu
+
+    @Nullable
+    @Override
+    public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        if (builder.breedOffspringLocation != null) {
+            EntityType<? extends AgeableMob> breedOffspringType = EntityTypeRegistry.getEntityType(builder.breedOffspringLocation);
+
+            if (breedOffspringType != null) {
+                return breedOffspringType.create(serverLevel);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isFood(ItemStack pStack) {
+        return super.isFood(pStack);
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+    }
+
+    @Override
+    public boolean canBreed() {
+        return true;
+    }
 }

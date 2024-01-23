@@ -7,7 +7,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
-import net.liopyu.entityjs.entities.BaseEntityJS;
+import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.*;
 import net.minecraft.BlockUtil;
@@ -29,6 +29,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -172,7 +173,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<T> tickDeath;
     public transient boolean shouldDropExperience;
 
-    public transient Function<BaseEntityJS, Integer> customExperienceReward;
+    public transient Function<AnimalEntityJS, Integer> customExperienceReward;
     public transient Supplier<Boolean> customShouldDiscardFriction;
     public transient Consumer<Boolean> customSetDiscardFriction;
 
@@ -384,6 +385,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         isPushable = true;
         isAttackable = true;
         attributes = builder -> {
+            builder.add(Attributes.FOLLOW_RANGE, 10);
         };
         animationSuppliers = new ArrayList<>();
         shouldDropLoot = true;
@@ -616,7 +618,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     // Add this method to set the dropExperienceHandler in BaseLivingEntityBuilder
-    /*public BaseLivingEntityBuilder<T> dropExperienceHandler(Consumer<BaseEntityJS> handler) {
+    /*public BaseLivingEntityBuilder<T> dropExperienceHandler(Consumer<AnimalEntityJS> handler) {
         dropExperienceHandler = handler;
         return this;
     }*/
@@ -896,17 +898,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    public BaseLivingEntityBuilder<T> experienceReward(Function<BaseEntityJS, Integer> customExperienceReward) {
+    public BaseLivingEntityBuilder<T> experienceReward(Function<AnimalEntityJS, Integer> customExperienceReward) {
         this.customExperienceReward = customExperienceReward;
         return this;
     }
 
-    /*public BaseLivingEntityBuilder<T> random(Function<BaseEntityJS, RandomSource> customRandom) {
+    /*public BaseLivingEntityBuilder<T> random(Function<AnimalEntityJS, RandomSource> customRandom) {
         this.customRandom = customRandom;
         return this;
     }
 
-    public BaseLivingEntityBuilder<T> lastHurtByMob(Function<BaseEntityJS, LivingEntity> customLastHurtByMob) {
+    public BaseLivingEntityBuilder<T> lastHurtByMob(Function<AnimalEntityJS, LivingEntity> customLastHurtByMob) {
         this.customLastHurtByMob = customLastHurtByMob;
         return this;
     }
@@ -932,7 +934,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    public BaseLivingEntityBuilder<T> lastHurtByMobTimestamp(Function<BaseEntityJS, Integer> customLastHurtByMobTimestamp) {
+    public BaseLivingEntityBuilder<T> lastHurtByMobTimestamp(Function<AnimalEntityJS, Integer> customLastHurtByMobTimestamp) {
         this.customGetLastHurtMobTimestamp = customGetLastHurtMobTimestamp;
         return this;
     }
@@ -1859,8 +1861,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     /**
      * This is the method which should be overrriden to create new type, a typical implementation looks like
-     * {@code (type, level) -> new <CustomEntityClass>(this, type, level)}. See {@link BaseEntityJSBuilder#factory()}
-     * and {@link BaseEntityJS} for examples.<br><br>
+     * {@code (type, level) -> new <CustomEntityClass>(this, type, level)}. See {@link AnimalEntityJSBuilder#factory()}
+     * and {@link AnimalEntityJS} for examples.<br><br>
      * <p>
      * Unlike most builder types, there is little need to override {@link #createObject()} due to entity types being
      * essentially a supplier for the class.
@@ -1873,7 +1875,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     /**
      * Used to retrieve the entity type's attributes. Implementors are encouraged to first
      * create a {@link AttributeSupplier.Builder} from a static method in the base class
-     * (i.e. {@link BaseEntityJS#createLivingAttributes()}) and then apply the {@code attributes}
+     * (i.e. {@link AnimalEntityJS#createLivingAttributes()}) and then apply the {@code attributes}
      * consumer to that before returning it
      *
      * @return The {@link AttributeSupplier.Builder} that will be built during Forge's EntityAttributeCreationEvent

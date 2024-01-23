@@ -4,5 +4,4 @@ import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
 
 public interface IProjectileEntityJS {
     ProjectileEntityBuilder<?> getProjectileBuilder();
-
 }

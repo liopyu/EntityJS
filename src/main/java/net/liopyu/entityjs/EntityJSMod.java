@@ -23,6 +23,4 @@ public class EntityJSMod {
             ClientEventHandlers.init();
         }
     }
-
-
 }

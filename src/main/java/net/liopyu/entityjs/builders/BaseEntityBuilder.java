@@ -4,20 +4,23 @@ import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import dev.latvian.mods.rhino.util.HideFromJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<EntityType<T>> {
-
 
     public transient float width;
     public transient float height;
     public transient int clientTrackingRange;
     public transient int updateInterval;
     public transient MobCategory mobCategory;
-
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
@@ -26,8 +29,6 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
         mobCategory = MobCategory.MISC;
         width = 0.5f;
         height = 0.5f;
-
-
     }
 
     @Info(value = "Sets the hit box of the entity type", params = {
@@ -67,4 +68,6 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
     public RegistryInfo getRegistryType() {
         return RegistryInfo.ENTITY_TYPE;
     }
+
+
 }
