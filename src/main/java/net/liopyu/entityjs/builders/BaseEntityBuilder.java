@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.builders;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import dev.latvian.mods.kubejs.generator.DataJsonGenerator;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
@@ -7,7 +9,9 @@ import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
+import dev.latvian.mods.kubejs.util.JsonIO;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.entities.BaseEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.*;
@@ -63,9 +67,7 @@ import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.*;
 
 /**
@@ -378,6 +380,8 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
     @Nullable
     public transient Heightmap.Types heightMap;
     public static final List<BaseEntityBuilder<?>> spawnList = new ArrayList<>();
+    public static final Map<ResourceLocation, String> spawnsBiomeModifiers = new HashMap<>();
+    private int biomeSpawnsCount;
 
     //STUFF
     public BaseEntityBuilder(ResourceLocation i) {
@@ -421,7 +425,7 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         mainArm = HumanoidArm.RIGHT;
         canBreatheUnderwater = false;
         passengerPredicate = entity -> true;
-
+        biomeSpawnsCount = 0;
     }
 
     @Info(value = "Sets the main arm of the entity, defaults to 'right'")
@@ -1874,10 +1878,36 @@ public abstract class BaseEntityBuilder<T extends LivingEntity & IAnimatableJS> 
         return this;
     }
 
-    // TODO: create forge biome modifiers from user input and add it here
-    @Override
-    public void generateDataJsons(DataJsonGenerator generator) {
-        super.generateDataJsons(generator);
+    @Info(value = "Adds a spawner for this entity to the provided biome(s)", params = {
+            @Param(name = "biomes", value = "A list of biomes that the entity should spawn in. If using a tag, only one value may be provided"),
+            @Param(name = "weight", value = "The spawn weight the entity should have"),
+            @Param(name = "minCount", value = "The minimum number of entities that can spawn at a time"),
+            @Param(name = "maxCount", value = "The maximum number of entities that can spawn at a time")
+    })
+    public BaseEntityBuilder<T> biomeSpawn(List<String> biomes, int weight, int minCount, int maxCount) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("type", "forge:add_spawns");
+        if (biomes.size() == 1) {
+            json.addProperty("biomes", biomes.get(0));
+        } else {
+            final JsonArray array = new JsonArray(biomes.size());
+            biomes.forEach(array::add);
+            json.add("biomes", array);
+        }
+
+        final JsonObject spawner = new JsonObject();
+        spawner.addProperty("type", id.toString());
+        spawner.addProperty("weight", weight);
+        spawner.addProperty("minCount", minCount);
+        spawner.addProperty("maxCount", maxCount);
+        final JsonArray spawners = new JsonArray(1);
+        spawners.add(spawner);
+        json.add("spawners", spawners);
+        spawnsBiomeModifiers.put(
+                EntityJSMod.identifier("forge/biome_modifiers/" + id.getNamespace() + "/" + id.getPath() + "_" + biomeSpawnsCount++),
+                JsonIO.toString(json)
+        );
+        return this;
     }
 
     @Override

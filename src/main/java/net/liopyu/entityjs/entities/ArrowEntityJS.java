@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
-
     public final ArrowEntityJSBuilder builder;
     @NotNull
     protected ItemStack pickUpStack;
