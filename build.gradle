@@ -205,4 +205,3 @@ tasks.withType(JavaCompile).configureEach {
 mixin {
     add sourceSets.main, "entityjs.refmap.json"
 }
-

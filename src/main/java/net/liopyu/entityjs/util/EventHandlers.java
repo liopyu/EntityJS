@@ -9,6 +9,11 @@ import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.events.*;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
+import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
+import net.liopyu.entityjs.events.BuildBrainEventJS;
+import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -32,13 +37,13 @@ public class EventHandlers {
     }
 
     private static void attributeCreation(EntityAttributeCreationEvent event) {
-        for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
+        for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
             event.put(builder.get(), builder.getAttributeBuilder().build());
         }
     }
 
     private static void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
-        for (BaseEntityBuilder<?> builder : BaseEntityBuilder.spawnList) {
+        for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.spawnList) {
             event.register(UtilsJS.cast(builder.get()), builder.placementType, builder.heightMap, builder.spawnPredicate, SpawnPlacementRegisterEvent.Operation.REPLACE); // Cast because the '?' generics makes the event unhappy
         }
         // TODO: Do we want an event that also handles this for other entity types with replaceSpawns and mergeSpawns methods
@@ -48,7 +53,7 @@ public class EventHandlers {
         if (pack != null && multiManager != null) {
             // Forge's biome modifiers are only read once during server startup, this event will be posted for every resource reload
             biomeSpawns.post(new ModifySpawnsEventJS(pack, multiManager));
-            BaseEntityBuilder.spawnsBiomeModifiers.forEach(pack::addData);
+            BaseLivingEntityBuilder.spawnsBiomeModifiers.forEach(pack::addData);
         }
     }
 }

@@ -27,7 +27,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     @Override
-    public ArrowEntityBuilder<?> getBuilder() {
+    public ArrowEntityBuilder<?> getArrowBuilder() {
         return builder;
     }
 

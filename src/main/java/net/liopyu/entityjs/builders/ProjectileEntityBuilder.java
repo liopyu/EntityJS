@@ -1,27 +1,31 @@
 package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.entities.IArrowEntityJS;
 import net.liopyu.entityjs.entities.IProjectileEntityJS;
+import net.liopyu.entityjs.item.ProjectileItemBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-
-public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseEntityBuilder<T> {
-    public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
+public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile & IProjectileEntityJS> extends BaseEntityBuilder<T> {
     public transient Function<T, ResourceLocation> getTextureLocation;
+    public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
 
-    public ArrowEntityBuilder(ResourceLocation i) {
+    public ProjectileEntityBuilder(ResourceLocation i) {
         super(i);
+        getTextureLocation = t -> t.getProjectileBuilder().newID("textures/entity/projectiles/", ".png");
         thisList.add(this);
-        getTextureLocation = t -> t.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
+    }
+
+    @Override
+    public EntityType<T> createObject() {
+        return new EntityTypeBuilder<>(this).get();
     }
 
     @Info(value = """
@@ -35,9 +39,4 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         return this;
     }
 
-    @Override
-    public EntityType<T> createObject() {
-        return new EntityTypeBuilder<>(this).get();
-    }
 }
-

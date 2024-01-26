@@ -7,11 +7,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class EntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
+public class LivingEntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
 
-    private final BaseEntityBuilder<?> builder;
+    private final BaseLivingEntityBuilder<?> builder;
 
-    public <T extends BaseEntityBuilder<B>> EntityTypeBuilderJS(T builder) {
+    public <T extends BaseLivingEntityBuilder<B>> LivingEntityTypeBuilderJS(T builder) {
         this.builder = builder;
     }
 

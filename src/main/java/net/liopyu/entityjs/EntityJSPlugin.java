@@ -6,8 +6,9 @@ import dev.latvian.mods.kubejs.script.BindingsEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
 import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
-import net.liopyu.entityjs.builders.BaseEntityJSBuilder;
+import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
+import net.liopyu.entityjs.builders.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.Wrappers;
 import net.minecraft.sounds.SoundEvent;
@@ -22,9 +23,10 @@ public class EntityJSPlugin extends KubeJSPlugin {
 
     @Override
     public void init() {
-        RegistryInfo.ENTITY_TYPE.addType("entityjs:living", BaseEntityJSBuilder.class, BaseEntityJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("entityjs:animal", AnimalEntityJSBuilder.class, AnimalEntityJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:mob", MobEntityJSBuilder.class, MobEntityJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:arrow", ArrowEntityJSBuilder.class, ArrowEntityJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("entityjs:projectile", ProjectileEntityJSBuilder.class, ProjectileEntityJSBuilder::new);
     }
 
     @Override

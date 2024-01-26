@@ -1,17 +1,15 @@
 package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.entities.IArrowEntityJS;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
 
 
-public class ArrowEntityTypeBuilder<B extends AbstractArrow & IArrowEntityJS> {
+public class EntityTypeBuilder<B extends Entity> {
 
-    private final ArrowEntityBuilder<?> builder;
+    private final BaseEntityBuilder<?> builder;
 
-    public <T extends ArrowEntityBuilder<B>> ArrowEntityTypeBuilder(T builder) {
+    public <T extends BaseEntityBuilder<B>> EntityTypeBuilder(T builder) {
         this.builder = builder;
     }
 
@@ -26,5 +24,6 @@ public class ArrowEntityTypeBuilder<B extends AbstractArrow & IArrowEntityJS> {
 
         return UtilsJS.cast(builder.build(js.id.toString())); // If this fails, uh... do better?
     }
+
 }
 
