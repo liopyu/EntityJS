@@ -33,15 +33,15 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
 
     @Info(value = """
             Enables the addition of arbitrary goals to an entity
-            
+                        
             It is the responsibility of the user to ensure the goal is
             compatible with the entity
-            
+                        
             Example of usage:
             =====================================
             builder.arbitraryGoal(3, entity -> new $PathFindToRaidGoal(entity))
             =====================================
-            
+                        
             Note in the example the entity must be an instance of Raider
             """, params = {
             @Param(name = "priority", value = "The priority of the goal"),

@@ -99,7 +99,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         return handItems;
     }
 
-    // Mirrors the implementation in Mob
+
     @Override
     public @NotNull ItemStack getItemBySlot(EquipmentSlot slot) {
         return switch (slot.getType()) {
@@ -108,7 +108,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         };
     }
 
-    // Mirrors the implementation in Mob
+
     @Override
     public void setItemSlot(EquipmentSlot slot, @NotNull ItemStack stack) {
         verifyEquippedItem(stack);

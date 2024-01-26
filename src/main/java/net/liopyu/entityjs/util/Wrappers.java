@@ -9,6 +9,12 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.registries.ForgeRegistries;
+import software.bernie.example.registry.ItemRegistry;
 
 // Move usages of Registry#<registry>#get() to RegistryInfo#<registry>#getValue() in 1.20+
 public class Wrappers {
@@ -59,7 +65,7 @@ public class Wrappers {
     public static Activity activity(Object unknown) {
         if (unknown instanceof ResourceLocation || unknown instanceof CharSequence) {
             return Registry.ACTIVITY.get(new ResourceLocation(unknown.toString()));
-        } else if (unknown instanceof Activity activity)  {
+        } else if (unknown instanceof Activity activity) {
             return activity;
         }
 
@@ -77,4 +83,14 @@ public class Wrappers {
 
         return null;
     }
+
+    public static ItemStack getItemStackFromObject(Object itemStack) {
+        if (itemStack instanceof ItemStack stack) {
+            return stack;
+        } else if (itemStack instanceof ResourceLocation) {
+            return new ItemStack(ForgeRegistries.ITEMS.getValue((ResourceLocation) itemStack));
+        }
+        return null;
+    }
+
 }

@@ -10,12 +10,14 @@ public class AnimalEntityJSBuilder extends AnimalEntityBuilder<AnimalEntityJS> {
 
     public AnimalEntityJSBuilder(ResourceLocation i) {
         super(i);
+
     }
 
     @Override
     public EntityType.EntityFactory<AnimalEntityJS> factory() {
         return (type, level) -> new AnimalEntityJS(this, type, level);
     }
+
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
