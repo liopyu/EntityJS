@@ -39,5 +39,14 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
             case TRANSLUCENT -> RenderType.entityTranslucent(texture);
         };
     }
+
+    @Override
+    public void render(T animatable, float entityYaw, float partialTick,
+                       PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        if (animatable.isBaby()) {
+            poseStack.scale(0.5F, 0.5F, 0.5F);
+        }
+        super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+    }
 }
 

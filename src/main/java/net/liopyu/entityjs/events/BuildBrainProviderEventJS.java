@@ -15,7 +15,7 @@ import java.util.List;
         This event is fired during entity creation and is responsible
         for adding the `MemoryModuleType` and `SensorType`s the used
         by the entity.
-        
+                
         This is only posted for entities made through a builder
         """)
 public class BuildBrainProviderEventJS extends EventJS {

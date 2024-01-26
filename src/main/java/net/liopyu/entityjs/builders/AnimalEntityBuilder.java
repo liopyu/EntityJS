@@ -1,38 +1,57 @@
 package net.liopyu.entityjs.builders;
 
+import dev.latvian.mods.kubejs.bindings.ItemWrapper;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
-import net.liopyu.entityjs.util.EntityTypeRegistry;
+import net.liopyu.entityjs.util.Wrappers;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.item.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.function.Predicate;
 
-public abstract class AnimalEntityBuilder<T extends AgeableMob & IAnimatableJS> extends MobBuilder<T> {
+public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> extends MobBuilder<T> {
+    @FunctionalInterface
+    public interface FoodChecker {
+        boolean test(ItemStack stack);
+    }
 
-
-    public transient ResourceLocation breedOffspringLocation;
+    public transient Object getBreedOffspring;
+    public transient FoodChecker isFood;
 
     public AnimalEntityBuilder(ResourceLocation i) {
         super(i);
     }
 
-    public AnimalEntityBuilder<T> getBreedOffspring(ResourceLocation breedOffspringLocation) {
-        this.breedOffspringLocation = breedOffspringLocation;
+    public AnimalEntityBuilder<T> getBreedOffspring(Object breedOffspring) {
+        this.getBreedOffspring = breedOffspring;
         return this;
     }
 
-    public EntityType<? extends AgeableMob> getBreedOffspringType() {
-        return EntityTypeRegistry.getEntityType(breedOffspringLocation);
+    public AnimalEntityBuilder<T> isFood(Object isFood) {
+        if (isFood instanceof Predicate<?>) {
+            this.isFood = (FoodChecker) isFood;
+        } else if (isFood instanceof String) {
+            this.isFood = stack -> {
+                ItemStack itemStack = Wrappers.getItemStackFromObject(isFood);
+                return ItemWrapper.isItem(itemStack) && this.isFood.test(itemStack);
+            };
+        } else if (isFood instanceof ResourceLocation foodItemLocation) {
+            this.isFood = stack -> {
+                ItemStack itemStack = Wrappers.getItemStackFromObject(foodItemLocation.toString());
+                return ItemWrapper.isItem(itemStack) && this.isFood.test(itemStack);
+            };
+        }
+        return this;
     }
+
+
+    public EntityType<?> getBreedOffspringType() {
+        return Wrappers.entityType(getBreedOffspring);
+    }
+
 }

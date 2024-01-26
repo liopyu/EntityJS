@@ -1,26 +1,36 @@
 package net.liopyu.entityjs.entities;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import dev.latvian.mods.kubejs.bindings.ItemWrapper;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
+import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
+import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
-import net.liopyu.entityjs.util.EntityTypeRegistry;
 import net.liopyu.entityjs.util.EventHandlers;
+import net.liopyu.entityjs.util.Wrappers;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * The 'basic' implementation of a custom entity, implements most methods through the builder with some
@@ -77,7 +87,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected Brain.Provider<?> brainProvider() {
-        if (EventHandlers.buildBrainProvider.hasListeners(getTypeId())) {
+        if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS event = new BuildBrainProviderEventJS();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
@@ -88,7 +98,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected Brain<AnimalEntityJS> makeBrain(Dynamic<?> p_21069_) {
-        if (EventHandlers.buildBrain.hasListeners(getTypeId())) {
+        if (EventHandlers.buildBrain.hasListeners()) {
             final Brain<AnimalEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
@@ -97,6 +107,19 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         }
     }
 
+    @Override
+    protected void registerGoals() {
+        if (EventHandlers.addGoalTargets.hasListeners()) {
+            EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
+        }
+        if (EventHandlers.addGoalSelectors.hasListeners()) {
+            EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
+        }
+
+        /*if (builder.canBreed) {
+            this.goalSelector.addGoal(0, new BreedGoal(this, 2.0D));
+        }*/
+    }
 
     @Override
     public Iterable<ItemStack> getArmorSlots() {
@@ -153,28 +176,65 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         return builder.isAttackable;
     }
 
+
+    private static final Logger LOGGER = LogManager.getLogger();
+
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        if (builder.breedOffspringLocation != null) {
-            EntityType<? extends AgeableMob> breedOffspringType = EntityTypeRegistry.getEntityType(builder.breedOffspringLocation);
+        if (builder.getBreedOffspring != null) {
+            EntityType<?> breedOffspringType = Wrappers.entityType(builder.getBreedOffspring);
 
             if (breedOffspringType != null) {
-                return breedOffspringType.create(serverLevel);
+                LOGGER.info("Breed offspring obtained: {}", builder.getBreedOffspring);
+
+                Object breedOffspringEntity = breedOffspringType.create(serverLevel);
+                if (breedOffspringEntity instanceof AgeableMob) {
+                    return (AgeableMob) breedOffspringEntity;
+                } else {
+                    LOGGER.warn("Created entity is not an instance of AgeableMob: {}", breedOffspringEntity);
+                }
+            } else {
+                LOGGER.warn("Invalid EntityType or ResourceLocation provided for breed offspring");
             }
-        }
+        } else return builder.get().create(serverLevel);
         return null;
     }
 
+
     @Override
     public boolean isFood(ItemStack pStack) {
-        return super.isFood(pStack);
+        LOGGER.info("Checking if {} is food", pStack);
+
+        if (ItemWrapper.isItem(pStack)) {
+            boolean isFoodResult;
+
+            if (builder.isFood instanceof Predicate) {
+                Predicate<ItemStack> foodPredicate = (Predicate<ItemStack>) builder.isFood;
+                isFoodResult = foodPredicate.test(pStack);
+            } else if (builder.isFood instanceof ResourceLocation) {
+                // If it's a ResourceLocation, convert it to ItemStack and then check
+                ItemStack itemStack = Wrappers.getItemStackFromObject(builder.isFood);
+                isFoodResult = ItemWrapper.isItem(itemStack) && builder.isFood.test(itemStack);
+            } else {
+                LOGGER.warn("Invalid isFood configuration");
+                return false; // or handle the invalid case accordingly
+            }
+
+            LOGGER.info("{} is food: {}", pStack, isFoodResult);
+            return isFoodResult;
+        } else {
+            LOGGER.warn("Invalid ItemStack provided for food check");
+            return false; // or handle the invalid case accordingly
+        }
     }
+
 
     @Override
     public void aiStep() {
         super.aiStep();
     }
+
 
     @Override
     public boolean canBreed() {

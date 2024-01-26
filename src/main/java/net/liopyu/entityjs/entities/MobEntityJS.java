@@ -72,10 +72,10 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
-        if (EventHandlers.addGoalTargets.hasListeners(getTypeId())) {
+        if (EventHandlers.addGoalTargets.hasListeners()) {
             EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
         }
-        if (EventHandlers.addGoalSelectors.hasListeners(getTypeId())) {
+        if (EventHandlers.addGoalSelectors.hasListeners()) {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }
@@ -99,7 +99,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         return handItems;
     }
 
-    // Mirrors the implementation in Mob
+
     @Override
     public @NotNull ItemStack getItemBySlot(EquipmentSlot slot) {
         return switch (slot.getType()) {
@@ -108,7 +108,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         };
     }
 
-    // Mirrors the implementation in Mob
+
     @Override
     public void setItemSlot(EquipmentSlot slot, @NotNull ItemStack stack) {
         verifyEquippedItem(stack);

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 @Mod(EntityJSMod.MOD_ID)
 public class EntityJSMod {
     public static final Logger LOGGER = LogUtils.getLogger();
+
     public static final String MOD_ID = "entityjs";
 
     public EntityJSMod() {
