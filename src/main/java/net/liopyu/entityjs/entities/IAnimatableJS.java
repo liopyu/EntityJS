@@ -13,7 +13,7 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
  * which delegates to the entity builder. Unfortunately, {@link #getFactory()} cannot have a default
  * implementation due to the {@link AnimationFactory} returned needing to be cached in the entity.<br><br>
  * <p>
- * See the comments on the methods here and in {@link BaseEntityJS} for further reading.
+ * See the comments on the methods here and in {@link AnimalEntityJS} for further reading.
  */
 public interface IAnimatableJS extends IAnimatable {
 

@@ -83,12 +83,16 @@ public class Wrappers {
         return null;
     }
 
-    public static ItemStack getItemStackFromObject(Object itemStack) {
-        if (itemStack instanceof ItemStack stack) {
+    public static Item getItemFromObject(Object item) {
+        if (item instanceof Item stack) {
             return stack;
-        } else if (itemStack instanceof ResourceLocation) {
-            return new ItemStack(ForgeRegistries.ITEMS.getValue((ResourceLocation) itemStack));
-        }
+        } else if (item instanceof ResourceLocation || item instanceof CharSequence) {
+            return ForgeRegistries.ITEMS.getValue(new ResourceLocation(item.toString()));
+        } /*else if (itemStack instanceof ItemLike) {
+            return new ItemStack(((ItemLike) itemStack).asItem());
+        } else if (itemStack instanceof String) {
+            return new ItemStack(ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse((String) itemStack)));
+        }*/
         return null;
     }
 
