@@ -173,6 +173,10 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     public void setPathfindingMalus(BlockPathTypes nodeType, float malus) {
+        if (builder == null) {
+            super.setPathfindingMalus(nodeType, malus);
+            return;
+        }
         if (builder.setPathfindingMalus != null) {
             builder.setPathfindingMalus.accept(nodeType, malus);
         } else {
@@ -188,15 +192,6 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
             return super.canCutCorner(pathType);
         }
     }
-
-    /*@Override
-    protected BodyRotationControl createBodyControl() {
-        if (builder.createBodyControl != null) {
-            return builder.createBodyControl.get();
-        } else {
-            return super.createBodyControl();
-        }
-    }*/
 
 
     @Override
@@ -840,27 +835,6 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
 
-   /* @Nullable
-    @Override
-    public MobEffectInstance removeEffectNoUpdate(@Nullable MobEffect effect) {
-        if (builder.removeEffectNoUpdateFunction != null) {
-            return builder.removeEffectNoUpdateFunction.apply(effect);
-        } else {
-            return super.removeEffectNoUpdate(effect);
-        }
-    }*/
-
-
-   /* @Override
-    public boolean removeEffect(@NotNull MobEffect effect) {
-        if (builder.removeEffect != null) {
-            return builder.removeEffect.test(effect, false);
-        } else {
-            return super.removeEffect(effect);
-        }
-    }*/
-
-
     @Override
     public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
         if (builder.onEffectAdded != null) {
@@ -870,16 +844,6 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
             super.onEffectAdded(effectInstance, entity);
         }
     }
-
-
-    /*@Override
-    protected void onEffectUpdated(@NotNull MobEffectInstance effectInstance, boolean isReapplied, @Nullable Entity entity) {
-        if (builder.onEffectUpdated != null) {
-            builder.onEffectUpdated.accept(effectInstance, isReapplied, entity);
-        } else {
-            super.onEffectUpdated(effectInstance, isReapplied, entity);
-        }
-    }*/
 
 
     @Override
@@ -953,16 +917,6 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
             super.die(damageSource);
         }
     }
-
-
-    /*@Override
-    protected void createWitherRose(@Nullable LivingEntity entity) {
-        if (builder.createWitherRose != null) {
-            builder.createWitherRose.accept(entity);
-        } else {
-            super.createWitherRose(entity);
-        }
-    }*/
 
 
     @Override
@@ -1347,15 +1301,6 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
             super.onItemPickup(p_21054_);
         }
     }
-
-   /* @Override
-    public void take(@NotNull Entity p_21030_, int p_21031_) {
-        if (builder.take != null) {
-            builder.take.accept(p_21030_, p_21031_);
-        } else {
-            super.take(p_21030_, p_21031_);
-        }
-    }*/
 
 
     @Override
@@ -1757,41 +1702,6 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         }
     }
 
-
-   /* @Override
-    public boolean closerThan(Entity entity, double distance) {
-        if (builder.closerThan != null) {
-            return builder.closerThan.test(entity, distance);
-        } else {
-            return super.closerThan(entity, distance);
-        }
-    }*/
-
-
-   /* @Override
-    public boolean closerThan(@NotNull Entity p_216993_, double p_216994_, double p_216995_) {
-        return super.closerThan(p_216993_, p_216994_, p_216995_);
-    }
-
-    @Override
-    protected void setRot(float p_19916_, float p_19917_) {
-        super.setRot(p_19916_, p_19917_);
-    }
-
-    @Override
-    public void setPos(double p_20210_, double p_20211_, double p_20212_) {
-        super.setPos(p_20210_, p_20211_, p_20212_);
-    }
-
-    @Override
-    public void turn(double p_19885_, double p_19886_) {
-        super.turn(p_19885_, p_19886_);
-    }*/
-
-    /*@Override
-    public void setPortalCooldown() {
-        super.setPortalCooldown();
-    }*/
 
     @Override
     public void lavaHurt() {

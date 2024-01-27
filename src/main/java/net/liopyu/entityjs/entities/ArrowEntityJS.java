@@ -1,13 +1,29 @@
 package net.liopyu.entityjs.entities;
 
 import net.liopyu.entityjs.builders.*;
+import net.liopyu.entityjs.util.Wrappers;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
 
@@ -37,22 +53,189 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         pickUpStack = stack;
     }
 
-    /*@Override
-    protected boolean tryPickup(Player p_150121_) {
-        if (builder.tryPickup != null) {
-            if (builder.tryPickup.getAsBoolean()) {
-                if (!p_150121_.getAbilities().instabuild) {
-                    p_150121_.getInventory().add(this.getPickupItem());
-                    return builder.tryPickup.getAsBoolean();
-                }
-            } else return builder.tryPickup.getAsBoolean();
-        }
-        return super.tryPickup(p_150121_);
-    }*/
-
     @Override
     protected ItemStack getPickupItem() {
         return pickUpStack;
     }
 
+    //Beginning of Base Overrides
+
+
+    @Override
+    public void setSoundEvent(SoundEvent pSoundEvent) {
+        if (builder.setSoundEvent != null) {
+            SoundEvent event = Wrappers.soundEvent(builder.setSoundEvent);
+            assert event != null;
+            this.setSoundEvent(event);
+        } else {
+            super.setSoundEvent(pSoundEvent);
+        }
+    }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        return builder.shouldRenderAtSqrDistance != null ? builder.shouldRenderAtSqrDistance.test(distance) : super.shouldRenderAtSqrDistance(distance);
+    }
+
+    @Override
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+        if (builder.lerpTo != null) {
+            builder.lerpTo.accept(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+        } else {
+            super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+        }
+    }
+
+
+    @Override
+    public void tick() {
+        if (builder.tick != null) {
+            builder.tick.accept(this);
+        } else {
+            super.tick();
+        }
+    }
+
+    @Override
+    public void move(MoverType pType, Vec3 pPos) {
+        if (builder.move != null) {
+            builder.move.accept(pType, pPos);
+        } else {
+            super.move(pType, pPos);
+        }
+    }
+
+    @Override
+    protected void tickDespawn() {
+        if (builder.tickDespawn != null) {
+            builder.tickDespawn.accept(this);
+        } else {
+            super.tickDespawn();
+        }
+    }
+
+    public static class ArrowEntityHitContext {
+        public final AbstractArrow entity;
+        public final EntityHitResult result;
+
+        public ArrowEntityHitContext(EntityHitResult result, AbstractArrow entity) {
+            this.entity = entity;
+            this.result = result;
+        }
+    }
+
+    public static class ArrowBlockHitContext {
+        public final AbstractArrow entity;
+        public final BlockHitResult result;
+
+        public ArrowBlockHitContext(BlockHitResult result, AbstractArrow entity) {
+            this.entity = entity;
+            this.result = result;
+        }
+    }
+
+    @Override
+    protected void onHitEntity(EntityHitResult result) {
+        if (builder.onHitEntity != null) {
+            final ArrowEntityHitContext context = new ArrowEntityHitContext(result, this);
+            builder.onHitEntity.accept(context);
+        } else {
+            super.onHitEntity(result);
+        }
+    }
+
+    @Override
+    protected void onHitBlock(BlockHitResult result) {
+        if (builder.onHitBlock != null) {
+            final ArrowBlockHitContext context = new ArrowBlockHitContext(result, this);
+            builder.onHitBlock.accept(context);
+        } else {
+            super.onHitBlock(result);
+        }
+    }
+
+    @Override
+    protected SoundEvent getDefaultHitGroundSoundEvent() {
+        if (builder.getDefaultHitGroundSoundEvent != null) {
+            SoundEvent event = Wrappers.soundEvent(builder.getDefaultHitGroundSoundEvent);
+            assert event != null;
+            return event;
+        }
+        return super.getDefaultHitGroundSoundEvent();
+    }
+
+
+    @Override
+    protected void doPostHurtEffects(LivingEntity target) {
+        if (builder.doPostHurtEffects != null) {
+            builder.doPostHurtEffects.accept(target);
+        } else {
+            super.doPostHurtEffects(target);
+        }
+    }
+
+    @Nullable
+    @Override
+    protected EntityHitResult findHitEntity(Vec3 startVec, Vec3 endVec) {
+        return builder.findHitEntity != null ? builder.findHitEntity.apply(startVec, endVec) : super.findHitEntity(startVec, endVec);
+    }
+
+    @Override
+    protected boolean canHitEntity(Entity entity) {
+        return builder.canHitEntity != null ? builder.canHitEntity.test(entity) : super.canHitEntity(entity);
+    }
+
+    public static class ArrowPlayerContext {
+        public final AbstractArrow entity;
+        public final Player player;
+
+        public ArrowPlayerContext(Player player, AbstractArrow entity) {
+            this.entity = entity;
+            this.player = player;
+        }
+    }
+
+    @Override
+    public void playerTouch(Player player) {
+        if (builder.playerTouch != null) {
+            final ArrowPlayerContext context = new ArrowPlayerContext(player, this);
+            builder.playerTouch.accept(context);
+        } else {
+            super.playerTouch(player);
+        }
+    }
+
+    @Override
+    protected boolean tryPickup(Player player) {
+        return builder.tryPickup != null ? builder.tryPickup.test(player) : super.tryPickup(player);
+    }
+
+
+    @Override
+    public void setBaseDamage(double damage) {
+        if (builder.setBaseDamage != null) {
+            builder.setBaseDamage.accept(damage);
+        } else {
+            super.setBaseDamage(damage);
+        }
+    }
+
+    @Override
+    public void setKnockback(int knockback) {
+        if (builder.setKnockback != null) {
+            builder.setKnockback.accept(knockback);
+        } else {
+            super.setKnockback(knockback);
+        }
+    }
+
+    @Override
+    public boolean isAttackable() {
+        return builder.isAttackable != null ? builder.isAttackable.getAsBoolean() : super.isAttackable();
+    }
+
+    @Override
+    protected float getWaterInertia() {
+        return builder.getWaterInertia != null ? builder.getWaterInertia.get() : super.getWaterInertia();
+    }
 }

@@ -500,7 +500,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Sets the isPushable property in the builder.\n\n" +
+            Sets the isPushable property in the builder.
+                        
+            " +
             "Defaults to true.
             """)
     public BaseLivingEntityBuilder<T> isPushable(boolean b) {
@@ -509,7 +511,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Sets the isAttackable property in the builder.\n\n" +
+            Sets the isAttackable property in the builder.
+                        
+            " +
             "Defaults to true.
             """)
     public BaseLivingEntityBuilder<T> isAttackable(boolean b) {
@@ -538,7 +542,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public Predicate<LivingEntity> livingpassengerPredicate;
 
     @Info(value = """
-            Sets the passenger predicate in the builder.\n\n" +
+            Sets the passenger predicate in the builder.
+                        
+            " +
             "Defaults to allowing any entity to be a passenger.
             """)
     public BaseLivingEntityBuilder<T> setCanAddPassenger(Predicate<Entity> predicate) {
@@ -547,7 +553,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Sets whether the entity is affected by fluids in the builder.\n\n" +
+            Sets whether the entity is affected by fluids in the builder.
+                        
+            " +
             "Defaults to true.
             """)
     public BaseLivingEntityBuilder<T> isAffectedByFluids(boolean b) {
@@ -556,7 +564,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Sets the summonable property in the builder.\n\n" +
+            Sets the summonable property in the builder.
+                        
+            " +
             "Defaults to true.
             """)
     public BaseLivingEntityBuilder<T> setSummonable(boolean b) {
@@ -565,7 +575,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Sets the immobility property in the builder.\n\n" +
+            Sets the immobility property in the builder.
+                        
+            " +
             "Defaults to false.
             """)
     public BaseLivingEntityBuilder<T> isImmobile(boolean b) {
@@ -574,7 +586,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Sets the always experience dropper property in the builder.\n\n" +
+            Sets the always experience dropper property in the builder.
+                        
+            " +
             "Defaults to false.
             """)
     public BaseLivingEntityBuilder<T> isAlwaysExperienceDropper(boolean b) {
@@ -615,7 +629,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Sets the block speed factor for the entity in the builder.\n\n" +
+            Sets the block speed factor for the entity in the builder.
+                        
+            " +
             "Defaults to 0.
             """)
     public BaseLivingEntityBuilder<T> blockSpeedFactor(int i) {
@@ -632,7 +648,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Sets the flapping property for the entity in the builder.\n\n" +
+            Sets the flapping property for the entity in the builder.
+                        
+            " +
             "Defaults to false.
             """)
     public BaseLivingEntityBuilder<T> isFlapping(boolean b) {
@@ -2050,11 +2068,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             return event -> {
                 if (event != null) {
                     AnimationEventJS<E> animationEventJS = new AnimationEventJS<>(event);
-                    try {
-                        if (animationEventJS == null) return PlayState.STOP;
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+
                     return test(animationEventJS) ? PlayState.CONTINUE : PlayState.STOP;
 
                 } else {
