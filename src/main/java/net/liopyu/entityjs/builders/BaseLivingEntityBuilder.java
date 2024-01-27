@@ -367,6 +367,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     private transient int biomeSpawnsCount;
     public static final Map<ResourceLocation, String> spawnsBiomeModifiers = new HashMap<>();
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
+    public transient BiFunction<Float, Float, Integer> calculateFallDamage;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {

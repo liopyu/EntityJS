@@ -1,7 +1,6 @@
 package net.liopyu.entityjs.entities;
 
 import com.mojang.serialization.Dynamic;
-import dev.latvian.mods.kubejs.bindings.ItemWrapper;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
@@ -16,15 +15,12 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -33,21 +29,14 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
-import net.minecraft.world.entity.ai.goal.BreedGoal;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -59,19 +48,15 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jline.utils.Log;
-import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  * The 'basic' implementation of a custom entity, implements most methods through the builder with some
@@ -203,14 +188,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         if (builder.getBreedOffspring != null) {
-            EntityType<?> breedOffspringType = Wrappers.entityType(builder.getBreedOffspring);
-            if (breedOffspringType != null) {
-                Object breedOffspringEntity = breedOffspringType.create(serverLevel);
-                if (breedOffspringEntity instanceof AgeableMob) {
-                    return (AgeableMob) breedOffspringEntity;
-                }
-            }
-        } else return builder.get().create(serverLevel);
+            return builder.getBreedOffspring.apply(serverLevel, ageableMob);
+        }
+
         return null;
     }
 
@@ -218,10 +198,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public boolean isFood(ItemStack pStack) {
         if (builder.isFood != null) {
-            final Item stack = Wrappers.getItemFromObject(builder.isFood);
-            if (stack != null) {
-                return pStack.is(stack);
-            }
+            return builder.isFood.test(pStack);
         }
         return false;
     }
@@ -382,7 +359,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     protected SoundEvent getAmbientSound() {
         if (builder.getAmbientSound != null) {
-            return Wrappers.soundEvent(builder.getAmbientSound);
+            return builder.getAmbientSound.get();
         } else {
             return super.getAmbientSound();
         }
@@ -392,12 +369,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public boolean canHoldItem(ItemStack stack) {
         if (builder.canHoldItem != null) {
-            for (Object item : builder.canHoldItem) {
-                if (Objects.requireNonNull(Wrappers.getItemStackFromObject(item)).sameItem(stack)) {
-                    return true;
-                }
-            }
-            return false;
+            return builder.canHoldItem.test(stack);
         } else {
             return super.canHoldItem(stack);
         }

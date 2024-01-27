@@ -21,7 +21,6 @@ import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -33,9 +32,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -229,7 +226,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     protected SoundEvent getAmbientSound() {
         if (builder.getAmbientSound != null) {
-            return Wrappers.soundEvent(builder.getAmbientSound);
+            return builder.getAmbientSound.get();
         } else {
             return super.getAmbientSound();
         }
@@ -239,12 +236,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     public boolean canHoldItem(ItemStack stack) {
         if (builder.canHoldItem != null) {
-            for (Object item : builder.canHoldItem) {
-                if (Objects.requireNonNull(Wrappers.getItemStackFromObject(item)).sameItem(stack)) {
-                    return true;
-                }
-            }
-            return false;
+            return builder.canHoldItem.test(stack);
         } else {
             return super.canHoldItem(stack);
         }

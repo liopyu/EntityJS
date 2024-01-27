@@ -2,12 +2,9 @@ package net.liopyu.entityjs.entities;
 
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
-import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.world.entity.EntityType;
 import net.liopyu.entityjs.util.*;
-import net.liopyu.entityjs.util.ExitPortalInfo;
-import net.liopyu.entityjs.util.MobInteractContext;
 import net.minecraft.BlockUtil;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

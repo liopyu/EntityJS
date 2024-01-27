@@ -1,7 +1,6 @@
 package net.liopyu.entityjs.builders;
 
 import net.liopyu.entityjs.entities.BaseLivingEntityJS;
-import net.liopyu.entityjs.entities.MobEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -18,8 +17,6 @@ public class BaseLivingEntityJSBuilder extends BaseLivingEntityBuilder<BaseLivin
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        final AttributeSupplier.Builder builder = BaseLivingEntityJS.createLivingAttributes();
-        attributes.accept(builder);
-        return builder;
+        return BaseLivingEntityJS.createLivingAttributes();
     }
 }

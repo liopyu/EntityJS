@@ -8,12 +8,13 @@ import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.liopyu.entityjs.util.MobInteractContext;
 import net.liopyu.entityjs.util.PlayerEntityContext;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import org.jetbrains.annotations.Nullable;
@@ -37,8 +38,8 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Consumer<LivingEntity> setTarget;
     public transient Predicate<ProjectileWeaponItem> canFireProjectileWeapon;
     public transient Consumer<LivingEntity> ate;
-    public transient Consumer<Object> getAmbientSound;
-    public transient List<Object> canHoldItem;
+    public transient Supplier<SoundEvent> getAmbientSound;
+    public transient Predicate<ItemStack> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
     public transient Boolean canPickUpLoot;
     public transient Boolean isPersistenceRequired;
@@ -64,11 +65,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         if (eggItem != null) {
             RegistryInfo.ITEM.addBuilder(eggItem);
         }
-    }
-
-    @Override
-    public AttributeSupplier.Builder getAttributeBuilder() {
-        return Mob.createMobAttributes();
     }
 
     @Info(value = """
@@ -130,15 +126,17 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     @Info(value = """
             Sets the custom supplier for providing the ambient sound for the mob in the builder.
             """)
-    public MobBuilder<T> getAmbientSound(Consumer<Object> getAmbientSound) {
+    public MobBuilder<T> getAmbientSound(Supplier<SoundEvent> getAmbientSound) {
         this.getAmbientSound = getAmbientSound;
         return this;
     }
 
     @Info(value = """
-            Sets the list of custom items or resource locations representing the items the entity can hold for the mob in the builder.
+            Sets the condition for whether the entity can hold specific items.
+            
+            Defaults to returning false.
             """)
-    public MobBuilder<T> canHoldItem(List<Object> items) {
+    public MobBuilder<T> canHoldItem(Predicate<ItemStack> items) {
         this.canHoldItem = items;
         return this;
     }
