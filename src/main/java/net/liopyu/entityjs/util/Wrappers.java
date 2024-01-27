@@ -16,6 +16,8 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.registries.ForgeRegistries;
 import software.bernie.example.registry.ItemRegistry;
 
+import java.util.Objects;
+
 // Move usages of Registry#<registry>#get() to RegistryInfo#<registry>#getValue() in 1.20+
 public class Wrappers {
 
@@ -88,12 +90,18 @@ public class Wrappers {
             return stack;
         } else if (item instanceof ResourceLocation || item instanceof CharSequence) {
             return ForgeRegistries.ITEMS.getValue(new ResourceLocation(item.toString()));
-        } /*else if (itemStack instanceof ItemLike) {
-            return new ItemStack(((ItemLike) itemStack).asItem());
-        } else if (itemStack instanceof String) {
-            return new ItemStack(ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse((String) itemStack)));
-        }*/
+        }
         return null;
     }
+
+    public static ItemStack getItemStackFromObject(Object item) {
+        if (item instanceof ItemStack stack) {
+            return stack;
+        } else if (item instanceof ResourceLocation || item instanceof CharSequence) {
+            return Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(new ResourceLocation(item.toString()))).getDefaultInstance();
+        }
+        return null;
+    }
+
 
 }

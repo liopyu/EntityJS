@@ -26,15 +26,18 @@ import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
@@ -166,6 +169,118 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     @Override
     protected boolean isFlapping() {
         return builder.isFlapping;
+    }
+
+    @Override
+    public void setPathfindingMalus(BlockPathTypes nodeType, float malus) {
+        if (builder.setPathfindingMalus != null) {
+            builder.setPathfindingMalus.accept(nodeType, malus);
+        } else {
+            super.setPathfindingMalus(nodeType, malus);
+        }
+    }
+
+    @Override
+    public boolean canCutCorner(BlockPathTypes pathType) {
+        if (builder.canCutCorner != null) {
+            return builder.canCutCorner.apply(pathType);
+        } else {
+            return super.canCutCorner(pathType);
+        }
+    }
+
+    @Override
+    protected BodyRotationControl createBodyControl() {
+        if (builder.createBodyControl != null) {
+            return builder.createBodyControl.get();
+        } else {
+            return super.createBodyControl();
+        }
+    }
+
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        if (builder.setTarget != null) {
+            builder.setTarget.accept(target);
+        } else {
+            super.setTarget(target);
+        }
+    }
+
+    @Override
+    public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeapon) {
+        if (builder.canFireProjectileWeapon != null) {
+            return builder.canFireProjectileWeapon.test(projectileWeapon);
+        } else {
+            return super.canFireProjectileWeapon(projectileWeapon);
+        }
+    }
+
+    @Override
+    public void ate() {
+        super.ate();
+        if (builder.ate != null) {
+            builder.ate.accept(this);
+        }
+    }
+
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        if (builder.getAmbientSound != null) {
+            return Wrappers.soundEvent(builder.getAmbientSound);
+        } else {
+            return super.getAmbientSound();
+        }
+    }
+
+
+    @Override
+    public boolean canHoldItem(ItemStack stack) {
+        if (builder.canHoldItem != null) {
+            for (Object item : builder.canHoldItem) {
+                if (Objects.requireNonNull(Wrappers.getItemStackFromObject(item)).sameItem(stack)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return super.canHoldItem(stack);
+        }
+    }
+
+
+    @Override
+    protected boolean shouldDespawnInPeaceful() {
+        return (builder.shouldDespawnInPeaceful != null) ? builder.shouldDespawnInPeaceful : super.shouldDespawnInPeaceful();
+    }
+
+    @Override
+    public boolean canPickUpLoot() {
+        return (builder.canPickUpLoot != null) ? builder.canPickUpLoot : super.canPickUpLoot();
+    }
+
+    @Override
+    public boolean isPersistenceRequired() {
+        return (builder.isPersistenceRequired != null) ? builder.isPersistenceRequired : super.isPersistenceRequired();
+    }
+
+    @Override
+    protected void onOffspringSpawnedFromEgg(Player player, Mob child) {
+
+        if (builder.onOffspringSpawnedFromEgg != null) {
+            final PlayerEntityContext context = new PlayerEntityContext(player, child);
+            builder.onOffspringSpawnedFromEgg.accept(context);
+        } else {
+            super.onOffspringSpawnedFromEgg(player, child);
+        }
+    }
+
+    @Override
+    public double getMeleeAttackRangeSqr(LivingEntity entity) {
+        return (builder.meleeAttackRangeSqr != null) ? builder.meleeAttackRangeSqr : super.getMeleeAttackRangeSqr(entity);
     }
 
     @Override
