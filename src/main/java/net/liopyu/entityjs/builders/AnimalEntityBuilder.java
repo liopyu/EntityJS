@@ -35,7 +35,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Function<T, Double> myRidingOffset;
     public transient Function<T, Integer> ambientSoundInterval;
     public transient BiPredicate<T, Double> removeWhenFarAway;
-    // Transients for AnimalEntityBuilder
+
     public transient BiPredicate<Animal, Animal> canMate;
     public transient BiConsumer<ServerLevel, Animal> spawnChildFromBreeding;
 
@@ -45,7 +45,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     public transient QuinaryFunction<ServerLevelAccessor, DifficultyInstance, MobSpawnType, SpawnGroupData, CompoundTag, SpawnGroupData> finalizeSpawn;
-    // Transients for AnimalEntityBuilder
+
     public transient Consumer<PlayerEntityContext> tickLeash;
     public transient Supplier<Boolean> shouldStayCloseToLeashHolder;
     public transient Supplier<Double> followLeashSpeed;
@@ -121,7 +121,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         return this;
     }
 
-    // AnimalEntityBuilder methods
+
     public AnimalEntityBuilder<T> tickLeash(Consumer<PlayerEntityContext> consumer) {
         this.tickLeash = consumer;
         return this;
@@ -167,7 +167,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         this.createBodyControl = createBodyControl;
         return this;
     }
-// AnimalEntityBuilder methods
+
 
     /**
      * Sets the target for the entity.
@@ -231,7 +231,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         this.shouldDespawnInPeaceful = shouldDespawnInPeaceful;
         return this;
     }
-// AnimalEntityBuilder methods
+
 
     /**
      * Sets whether the entity can pick up loot.
@@ -262,7 +262,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         this.onOffspringSpawnedFromEgg = onOffspringSpawnedFromEgg;
         return this;
     }
-// AnimalEntityBuilder methods
+
 
     /**
      * Sets the square of the melee attack range for the entity.

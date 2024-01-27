@@ -5,13 +5,16 @@ import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
+import net.liopyu.entityjs.util.MobInteractContext;
 import net.liopyu.entityjs.util.PlayerEntityContext;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.*;
@@ -23,7 +26,7 @@ import java.util.function.*;
  * in {@link Mob} that is not present in/related to {@link net.minecraft.world.entity.LivingEntity LivignEntity}
  */
 public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
-
+    public transient Function<MobInteractContext, @Nullable InteractionResult> mobInteract;
     public transient SpawnEggItemBuilder eggItem;
     public transient BiConsumer<BlockPathTypes, Float> setPathfindingMalus;
     public transient Function<BlockPathTypes, Boolean> canCutCorner;
@@ -89,7 +92,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         this.createBodyControl = createBodyControl;
         return this;
     }
-// MobBuilder methods
+
 
     /**
      * Sets the target for the entity.
@@ -121,6 +124,11 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         return this;
     }
 
+    @Info(value = "Sets the custom logic for mob interaction")
+    public BaseLivingEntityBuilder<T> mobInteract(Function<MobInteractContext, @Nullable InteractionResult> f) {
+        mobInteract = f;
+        return this;
+    }
 
     /**
      * Sets the ambient sound for the entity.
@@ -153,7 +161,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         this.shouldDespawnInPeaceful = shouldDespawnInPeaceful;
         return this;
     }
-// MobBuilder methods
+
 
     /**
      * Sets whether the entity can pick up loot.
@@ -184,7 +192,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         this.onOffspringSpawnedFromEgg = onOffspringSpawnedFromEgg;
         return this;
     }
-// MobBuilder methods
+
 
     /**
      * Sets the square of the melee attack range for the entity.

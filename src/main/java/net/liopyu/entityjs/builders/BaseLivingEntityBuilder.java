@@ -335,9 +335,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Predicate<LivingEntity> isCurrentlyGlowing;
     public transient Predicate<LivingEntity> canDisableShield;
     public transient IntSupplier getMaxFallDistance;
-    /*Right now Mob Interaction result is only functioning for MobEntityJS so we will probably have to add
-    More public transients as we add more extensions or figure out some other logic*/
-    public transient Function<MobInteractContext, @Nullable InteractionResult> mobInteract;
+    public transient Function<MobInteractContext, @Nullable InteractionResult> interact;
     public transient BiPredicate<BlockPos, BlockState> isColliding;
 
     public transient Predicate<String> addTag;
@@ -1664,9 +1662,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = "Sets the custom logic for mob interaction")
-    public BaseLivingEntityBuilder<T> mobInteract(Function<MobInteractContext, @Nullable InteractionResult> f) {
-        mobInteract = f;
+    @Info(value = "Sets the custom logic for living entity interaction")
+    public BaseLivingEntityBuilder<T> interact(Function<MobInteractContext, @Nullable InteractionResult> f) {
+        interact = f;
         return this;
     }
 
