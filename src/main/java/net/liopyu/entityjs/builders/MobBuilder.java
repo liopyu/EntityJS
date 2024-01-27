@@ -30,7 +30,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     public transient SpawnEggItemBuilder eggItem;
     public transient BiConsumer<BlockPathTypes, Float> setPathfindingMalus;
     public transient Function<BlockPathTypes, Boolean> canCutCorner;
-    public transient Supplier<BodyRotationControl> createBodyControl;
+    /* public transient Supplier<BodyRotationControl> createBodyControl;*/
 
     public transient Consumer<LivingEntity> setTarget;
     public transient Predicate<ProjectileWeaponItem> canFireProjectileWeapon;
@@ -63,144 +63,108 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         }
     }
 
-    /**
-     * Sets the pathfinding malus for a specific node type.
-     *
-     * @param setPathfindingMalus BiConsumer accepting pNodeType and pMalus.
-     */
+    @Info(value = """
+            Sets the custom behavior for the pathfinding malus of a specific node type for the mob in the builder.
+            """)
     public MobBuilder<T> setPathfindingMalus(BiConsumer<BlockPathTypes, Float> setPathfindingMalus) {
         this.setPathfindingMalus = setPathfindingMalus;
         return this;
     }
 
-    /**
-     * Determines if the entity can cut corners for a specific path type.
-     *
-     * @param canCutCorner Function accepting pPathType and returning a boolean.
-     */
+    @Info(value = """
+            Sets the custom function for determining if the entity can cut corners for a specific path type for the mob in the builder.
+            """)
     public MobBuilder<T> canCutCorner(Function<BlockPathTypes, Boolean> canCutCorner) {
         this.canCutCorner = canCutCorner;
         return this;
     }
 
-    /**
-     * Creates a custom BodyRotationControl.
-     *
-     * @param createBodyControl Supplier returning a custom BodyRotationControl.
-     */
-    public MobBuilder<T> createBodyControl(Supplier<BodyRotationControl> createBodyControl) {
-        this.createBodyControl = createBodyControl;
-        return this;
-    }
-
-
-    /**
-     * Sets the target for the entity.
-     *
-     * @param setTarget Consumer accepting a LivingEntity as the target.
-     */
+    @Info(value = """
+            Sets the custom consumer for the target of the entity for the mob in the builder.
+            """)
     public MobBuilder<T> setTarget(Consumer<LivingEntity> setTarget) {
         this.setTarget = setTarget;
         return this;
     }
 
-    /**
-     * Determines if the entity can fire a projectile weapon.
-     *
-     * @param canFireProjectileWeapon Predicate accepting a ProjectileWeaponItem and returning a boolean.
-     */
+    @Info(value = """
+            Sets the custom predicate for determining if the entity can fire a projectile weapon for the mob in the builder.
+            """)
     public MobBuilder<T> canFireProjectileWeapon(Predicate<ProjectileWeaponItem> canFireProjectileWeapon) {
         this.canFireProjectileWeapon = canFireProjectileWeapon;
         return this;
     }
 
-    /**
-     * Custom behavior when the entity eats.
-     *
-     * @param ate Runnable representing the custom eating behavior.
-     */
+    @Info(value = """
+            Sets the custom runnable representing the eating behavior for the mob in the builder.
+            """)
     public MobBuilder<T> ate(Consumer<LivingEntity> ate) {
         this.ate = ate;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for mob interaction")
+    @Info(value = """
+            Sets the custom logic for mob interaction using the provided function.
+            """)
     public BaseLivingEntityBuilder<T> mobInteract(Function<MobInteractContext, @Nullable InteractionResult> f) {
         mobInteract = f;
         return this;
     }
 
-    /**
-     * Sets the ambient sound for the entity.
-     *
-     * @param getAmbientSound Supplier providing the ambient sound.
-     */
+    @Info(value = """
+            Sets the custom supplier for providing the ambient sound for the mob in the builder.
+            """)
     public MobBuilder<T> getAmbientSound(Consumer<Object> getAmbientSound) {
         this.getAmbientSound = getAmbientSound;
         return this;
     }
 
-
-    /**
-     * Sets the condition for whether the entity can hold specific items.
-     *
-     * @param items List of ItemStacks or ResourceLocations representing the items the entity can hold.
-     */
+    @Info(value = """
+            Sets the list of custom items or resource locations representing the items the entity can hold for the mob in the builder.
+            """)
     public MobBuilder<T> canHoldItem(List<Object> items) {
         this.canHoldItem = items;
         return this;
     }
 
-
-    /**
-     * Sets whether the entity should despawn in peaceful mode.
-     *
-     * @param shouldDespawnInPeaceful Boolean indicating whether the entity should despawn in peaceful mode.
-     */
+    @Info(value = """
+            Sets whether the entity should despawn in peaceful mode for the mob in the builder.
+            """)
     public MobBuilder<T> shouldDespawnInPeaceful(Boolean shouldDespawnInPeaceful) {
         this.shouldDespawnInPeaceful = shouldDespawnInPeaceful;
         return this;
     }
 
-
-    /**
-     * Sets whether the entity can pick up loot.
-     *
-     * @param canPickUpLoot Boolean indicating whether the entity can pick up loot.
-     */
+    @Info(value = """
+            Sets whether the entity can pick up loot for the mob in the builder.
+            """)
     public MobBuilder<T> canPickUpLoot(Boolean canPickUpLoot) {
         this.canPickUpLoot = canPickUpLoot;
         return this;
     }
 
-    /**
-     * Sets whether the entity's persistence is required.
-     *
-     * @param isPersistenceRequired Boolean indicating whether the entity's persistence is required.
-     */
+    @Info(value = """
+            Sets whether the entity's persistence is required for the mob in the builder.
+            """)
     public MobBuilder<T> isPersistenceRequired(Boolean isPersistenceRequired) {
         this.isPersistenceRequired = isPersistenceRequired;
         return this;
     }
 
-    /**
-     * Sets the behavior when offspring is spawned from an egg.
-     *
-     * @param onOffspringSpawnedFromEgg Consumer accepting a Pair of Player and Mob when offspring is spawned.
-     */
+    @Info(value = """
+            Sets the custom behavior when offspring is spawned from an egg for the mob in the builder.
+            """)
     public MobBuilder<T> onOffspringSpawnedFromEgg(Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg) {
         this.onOffspringSpawnedFromEgg = onOffspringSpawnedFromEgg;
         return this;
     }
 
-
-    /**
-     * Sets the square of the melee attack range for the entity.
-     *
-     * @param meleeAttackRangeSqr Double representing the square of the melee attack range.
-     */
+    @Info(value = """
+            Sets the custom double representing the square of the melee attack range for the mob in the builder.
+            """)
     public MobBuilder<T> meleeAttackRangeSqr(Double meleeAttackRangeSqr) {
         this.meleeAttackRangeSqr = meleeAttackRangeSqr;
         return this;
     }
+
 }

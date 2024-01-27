@@ -22,6 +22,4 @@ public class BaseLivingEntityJSBuilder extends BaseLivingEntityBuilder<BaseLivin
         attributes.accept(builder);
         return builder;
     }
-
-
 }

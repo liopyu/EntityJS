@@ -189,14 +189,14 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         }
     }
 
-    @Override
+    /*@Override
     protected BodyRotationControl createBodyControl() {
         if (builder.createBodyControl != null) {
             return builder.createBodyControl.get();
         } else {
             return super.createBodyControl();
         }
-    }
+    }*/
 
 
     @Override

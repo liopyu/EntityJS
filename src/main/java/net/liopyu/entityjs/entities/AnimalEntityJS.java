@@ -331,6 +331,10 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     //Mob Overrides
     @Override
     public void setPathfindingMalus(BlockPathTypes nodeType, float malus) {
+        if (builder == null) {
+            super.setPathfindingMalus(nodeType, malus);
+            return;
+        }
         if (builder.setPathfindingMalus != null) {
             builder.setPathfindingMalus.accept(nodeType, malus);
         } else {
@@ -344,15 +348,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
             return builder.canCutCorner.apply(pathType);
         } else {
             return super.canCutCorner(pathType);
-        }
-    }
-
-    @Override
-    protected BodyRotationControl createBodyControl() {
-        if (builder.createBodyControl != null) {
-            return builder.createBodyControl.get();
-        } else {
-            return super.createBodyControl();
         }
     }
 

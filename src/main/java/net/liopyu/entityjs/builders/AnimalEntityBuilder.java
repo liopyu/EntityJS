@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.builders;
 
 import com.ibm.icu.impl.Pair;
+import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.PlayerEntityContext;
 import net.liopyu.entityjs.util.Wrappers;
@@ -51,7 +52,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Supplier<Double> followLeashSpeed;
     public transient BiConsumer<BlockPathTypes, Float> setPathfindingMalus;
     public transient Function<BlockPathTypes, Boolean> canCutCorner;
-    public transient Supplier<BodyRotationControl> createBodyControl;
 
     public transient Consumer<LivingEntity> setTarget;
     public transient Predicate<ProjectileWeaponItem> canFireProjectileWeapon;
@@ -71,204 +71,234 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         canBreed = true;
     }
 
+    @Info(value = """
+            Sets the breedOffspring property in the builder.\n\n" +
+            "Defaults to <namespace>:breeding/<path>.json
+            """)
     public AnimalEntityBuilder<T> getBreedOffspring(Object breedOffspring) {
         this.getBreedOffspring = breedOffspring;
         return this;
     }
 
+    @Info(value = """
+            Sets the canBreed property in the builder.\n\n" +
+            "Defaults to true.
+            """)
     public AnimalEntityBuilder<T> canBreed(boolean canBreed) {
         this.canBreed = canBreed;
         return this;
     }
 
+    @Info(value = """
+            Sets the isFood property in the builder.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> isFood(Object isFood) {
         this.isFood = isFood;
         return this;
     }
 
+    @Info(value = """
+            Sets the walkTargetValue property in the builder.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> walkTargetValue(BiFunction<BlockPos, LevelReader, Float> function) {
         this.walkTargetValue = function;
         return this;
     }
 
+    @Info(value = """
+            Sets the myRidingOffset property in the builder.\n\n" +
+            "Defaults to 0.0.
+            """)
     public AnimalEntityBuilder<T> myRidingOffset(Function<T, Double> myRidingOffset) {
         this.myRidingOffset = myRidingOffset;
         return this;
     }
 
+    @Info(value = """
+            Sets the ambientSoundInterval property in the builder.\n\n" +
+            "Defaults to 240.
+            """)
     public AnimalEntityBuilder<T> ambientSoundInterval(Function<T, Integer> ambientSoundInterval) {
         this.ambientSoundInterval = ambientSoundInterval;
         return this;
     }
 
+    @Info(value = """
+            Sets the removeWhenFarAway property in the builder.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> removeWhenFarAway(BiPredicate<T, Double> removeWhenFarAway) {
         this.removeWhenFarAway = removeWhenFarAway;
         return this;
     }
 
+    @Info(value = """
+            Sets the canMate property in the builder.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> canMate(BiPredicate<Animal, Animal> predicate) {
         this.canMate = predicate;
         return this;
     }
 
+
+    @Info(value = """
+            Sets the spawnChildFromBreeding property in the builder.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> spawnChildFromBreeding(BiConsumer<ServerLevel, Animal> consumer) {
         this.spawnChildFromBreeding = consumer;
         return this;
     }
 
+    @Info(value = """
+            Sets the finalizeSpawn property in the builder.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> finalizeSpawn(QuinaryFunction<ServerLevelAccessor, DifficultyInstance, MobSpawnType, SpawnGroupData, CompoundTag, SpawnGroupData> function) {
         this.finalizeSpawn = function;
         return this;
     }
 
-
+    @Info(value = """
+            Sets the tickLeash property in the builder.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> tickLeash(Consumer<PlayerEntityContext> consumer) {
         this.tickLeash = consumer;
         return this;
     }
 
+    @Info(value = """
+            Sets the shouldStayCloseToLeashHolder property in the builder.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> shouldStayCloseToLeashHolder(Supplier<Boolean> supplier) {
         this.shouldStayCloseToLeashHolder = supplier;
         return this;
     }
 
+    @Info(value = """
+            Sets the followLeashSpeed property in the builder.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> followLeashSpeed(Supplier<Double> supplier) {
         this.followLeashSpeed = supplier;
         return this;
     }
 
 
-    /**
-     * Sets the pathfinding malus for a specific node type.
-     *
-     * @param setPathfindingMalus BiConsumer accepting pNodeType and pMalus.
-     */
+    @Info(value = """
+            Sets the pathfinding malus for a specific node type.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> setPathfindingMalus(BiConsumer<BlockPathTypes, Float> setPathfindingMalus) {
         this.setPathfindingMalus = setPathfindingMalus;
         return this;
     }
 
-    /**
-     * Determines if the entity can cut corners for a specific path type.
-     *
-     * @param canCutCorner Function accepting pPathType and returning a boolean.
-     */
+    @Info(value = """
+            Determines if the entity can cut corners for a specific path type.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> canCutCorner(Function<BlockPathTypes, Boolean> canCutCorner) {
         this.canCutCorner = canCutCorner;
         return this;
     }
 
-    /**
-     * Creates a custom BodyRotationControl.
-     *
-     * @param createBodyControl Supplier returning a custom BodyRotationControl.
-     */
-    public AnimalEntityBuilder<T> createBodyControl(Supplier<BodyRotationControl> createBodyControl) {
-        this.createBodyControl = createBodyControl;
-        return this;
-    }
 
-
-    /**
-     * Sets the target for the entity.
-     *
-     * @param setTarget Consumer accepting a LivingEntity as the target.
-     */
+    @Info(value = """
+            Sets the target for the entity.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> setTarget(Consumer<LivingEntity> setTarget) {
         this.setTarget = setTarget;
         return this;
     }
 
-    /**
-     * Determines if the entity can fire a projectile weapon.
-     *
-     * @param canFireProjectileWeapon Predicate accepting a ProjectileWeaponItem and returning a boolean.
-     */
+    @Info(value = """
+            Determines if the entity can fire a projectile weapon.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> canFireProjectileWeapon(Predicate<ProjectileWeaponItem> canFireProjectileWeapon) {
         this.canFireProjectileWeapon = canFireProjectileWeapon;
         return this;
     }
 
-    /**
-     * Custom behavior when the entity eats.
-     *
-     * @param ate Runnable representing the custom eating behavior.
-     */
+    @Info(value = """
+            Custom behavior when the entity eats.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> ate(Consumer<LivingEntity> ate) {
         this.ate = ate;
         return this;
     }
 
 
-    /**
-     * Sets the ambient sound for the entity.
-     *
-     * @param getAmbientSound Supplier providing the ambient sound.
-     */
+    @Info(value = """
+            Sets the ambient sound for the entity.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> getAmbientSound(Consumer<Object> getAmbientSound) {
         this.getAmbientSound = getAmbientSound;
         return this;
     }
 
 
-    /**
-     * Sets the condition for whether the entity can hold specific items.
-     *
-     * @param items List of ItemStacks or ResourceLocations representing the items the entity can hold.
-     */
+    @Info(value = """
+            Sets the condition for whether the entity can hold specific items.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> canHoldItem(List<Object> items) {
         this.canHoldItem = items;
         return this;
     }
 
 
-    /**
-     * Sets whether the entity should despawn in peaceful mode.
-     *
-     * @param shouldDespawnInPeaceful Boolean indicating whether the entity should despawn in peaceful mode.
-     */
+    @Info(value = """
+            Sets whether the entity should despawn in peaceful mode.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> shouldDespawnInPeaceful(Boolean shouldDespawnInPeaceful) {
         this.shouldDespawnInPeaceful = shouldDespawnInPeaceful;
         return this;
     }
 
 
-    /**
-     * Sets whether the entity can pick up loot.
-     *
-     * @param canPickUpLoot Boolean indicating whether the entity can pick up loot.
-     */
+    @Info(value = """
+            Sets whether the entity can pick up loot.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> canPickUpLoot(Boolean canPickUpLoot) {
         this.canPickUpLoot = canPickUpLoot;
         return this;
     }
 
-    /**
-     * Sets whether the entity's persistence is required.
-     *
-     * @param isPersistenceRequired Boolean indicating whether the entity's persistence is required.
-     */
+    @Info(value = """
+            Sets whether the entity's persistence is required.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> isPersistenceRequired(Boolean isPersistenceRequired) {
         this.isPersistenceRequired = isPersistenceRequired;
         return this;
     }
 
-    /**
-     * Sets the behavior when offspring is spawned from an egg.
-     *
-     * @param onOffspringSpawnedFromEgg Consumer accepting a Pair of Player and Mob when offspring is spawned.
-     */
+    @Info(value = """
+            Sets the behavior when offspring is spawned from an egg.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> onOffspringSpawnedFromEgg(Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg) {
         this.onOffspringSpawnedFromEgg = onOffspringSpawnedFromEgg;
         return this;
     }
 
 
-    /**
-     * Sets the square of the melee attack range for the entity.
-     *
-     * @param meleeAttackRangeSqr Double representing the square of the melee attack range.
-     */
+    @Info(value = """
+            Sets the square of the melee attack range for the entity.\n\n" +
+            "Defaults to null.
+            """)
     public AnimalEntityBuilder<T> meleeAttackRangeSqr(Double meleeAttackRangeSqr) {
         this.meleeAttackRangeSqr = meleeAttackRangeSqr;
         return this;
