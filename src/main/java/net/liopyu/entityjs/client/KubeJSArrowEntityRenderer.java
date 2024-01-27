@@ -3,7 +3,6 @@ package net.liopyu.entityjs.client;
 
 import net.liopyu.entityjs.builders.ArrowEntityBuilder;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
-import net.liopyu.entityjs.entities.IProjectileEntityJS;
 import net.minecraft.client.renderer.entity.ArrowRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;

@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.entities;
 
-import net.liopyu.entityjs.builders.*;
+import net.liopyu.entityjs.builders.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;

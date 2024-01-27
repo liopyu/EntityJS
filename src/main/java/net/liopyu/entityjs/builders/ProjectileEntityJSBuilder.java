@@ -7,7 +7,6 @@ import net.liopyu.entityjs.entities.ProjectileEntityJS;
 import net.liopyu.entityjs.item.ProjectileItemBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;

@@ -2,12 +2,9 @@ package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.IProjectileEntityJS;
-import net.liopyu.entityjs.item.ProjectileItemBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
-import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.ArrayList;
 import java.util.List;

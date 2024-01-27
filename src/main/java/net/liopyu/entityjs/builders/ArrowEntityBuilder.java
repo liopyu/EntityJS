@@ -1,12 +1,9 @@
 package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
-import net.liopyu.entityjs.entities.IProjectileEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 
 import java.util.ArrayList;

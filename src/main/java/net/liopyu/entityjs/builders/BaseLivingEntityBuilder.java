@@ -31,26 +31,24 @@ import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.common.util.TriPredicate;
-import org.apache.commons.lang3.function.TriFunction;
-import org.jetbrains.annotations.Nullable;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.util.TriPredicate;
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.logging.log4j.util.TriConsumer;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.controller.AnimationController;
@@ -93,7 +91,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean isPushable;
 
     public transient boolean isAttackable;
-    public transient Consumer<AttributeSupplier.Builder> attributes;
     public transient final List<AnimationControllerSupplier<T>> animationSuppliers;
     public transient boolean shouldDropLoot;
     public transient Predicate<Entity> setCanAddPassenger;
@@ -393,9 +390,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");
         isPushable = true;
         isAttackable = true;
-        attributes = builder -> {
-            builder.add(Attributes.FOLLOW_RANGE, 10);
-        };
         animationSuppliers = new ArrayList<>();
         shouldDropLoot = true;
         isAffectedByFluids = false;
@@ -519,21 +513,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public BaseLivingEntityBuilder<T> isAttackable(boolean b) {
         isAttackable = b;
-        return this;
-    }
-
-    @Info(value = "Adds the provided attribute to the entity type")
-    public BaseLivingEntityBuilder<T> addAttribute(Attribute attribute) {
-        attributes = attributes.andThen(builder -> builder.add(attribute));
-        return this;
-    }
-
-    @Info(value = "Adds the provided attribute to the entity type with the provided base value", params = {
-            @Param(name = "attribute", value = "The attribute"),
-            @Param(name = "value", value = "The default value of the attribute")
-    })
-    public BaseLivingEntityBuilder<T> addAttribute(Attribute attribute, double value) {
-        attributes = attributes.andThen(builder -> builder.add(attribute, value));
         return this;
     }
 
@@ -1922,15 +1901,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     abstract public EntityType.EntityFactory<T> factory();
 
     /**
-     * Used to retrieve the entity type's attributes. Implementors are encouraged to first
-     * create a {@link AttributeSupplier.Builder} from a static method in the base class
-     * (i.e. {@link AnimalEntityJS#createLivingAttributes()}) and then apply the {@code attributes}
-     * consumer to that before returning it
+     * Used to retrieve the entity type's attributes. Implementors are encouraged to return
+     * the {@link AttributeSupplier.Builder} from a static method in the base class
+     * (i.e. {@link AnimalEntityJS#createLivingAttributes()})
      *
      * @return The {@link AttributeSupplier.Builder} that will be built during Forge's EntityAttributeCreationEvent
      */
     @HideFromJS
     abstract public AttributeSupplier.Builder getAttributeBuilder();
+
+    @Override
+    public RegistryInfo getRegistryType() {
+        return RegistryInfo.ENTITY_TYPE;
+    }
 
     /**
      * A 'supplier' for an {@link AnimationController} that does not require a reference to the entity being animated

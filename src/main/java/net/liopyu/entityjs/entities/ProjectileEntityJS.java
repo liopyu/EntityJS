@@ -1,15 +1,14 @@
 package net.liopyu.entityjs.entities;
 
-import net.liopyu.entityjs.builders.*;
-import net.liopyu.entityjs.item.ProjectileItemBuilder;
-import net.minecraft.world.entity.Entity;
+import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.ProjectileEntityJSBuilder;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.*;
+import net.minecraft.world.entity.projectile.ItemSupplier;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
 
 public class ProjectileEntityJS extends ThrowableItemProjectile implements IProjectileEntityJS, ItemSupplier {
 

@@ -1,21 +1,13 @@
 package net.liopyu.entityjs.builders;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import dev.latvian.mods.kubejs.generator.DataJsonGenerator;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
-import dev.latvian.mods.rhino.util.HideFromJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<EntityType<T>> {
 
