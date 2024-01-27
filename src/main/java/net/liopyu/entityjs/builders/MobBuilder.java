@@ -5,11 +5,21 @@ import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
+import net.liopyu.entityjs.util.MobInteractContext;
+import net.liopyu.entityjs.util.PlayerEntityContext;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.control.BodyRotationControl;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Consumer;
+import java.util.List;
+import java.util.function.*;
 
 /**
  * A helper class that acts as a base for all mob-based entity types<br><br>
@@ -17,9 +27,25 @@ import java.util.function.Consumer;
  * Has methods for spawn eggs, goal selectors, goal targets, and anything else
  * in {@link Mob} that is not present in/related to {@link net.minecraft.world.entity.LivingEntity LivignEntity}
  */
-public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
-
+public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
+    public transient Function<MobInteractContext, @Nullable InteractionResult> mobInteract;
     public transient SpawnEggItemBuilder eggItem;
+    public transient BiConsumer<BlockPathTypes, Float> setPathfindingMalus;
+    public transient Function<BlockPathTypes, Boolean> canCutCorner;
+    /* public transient Supplier<BodyRotationControl> createBodyControl;*/
+
+    public transient Consumer<LivingEntity> setTarget;
+    public transient Predicate<ProjectileWeaponItem> canFireProjectileWeapon;
+    public transient Consumer<LivingEntity> ate;
+    public transient Consumer<Object> getAmbientSound;
+    public transient List<Object> canHoldItem;
+    public transient Boolean shouldDespawnInPeaceful;
+    public transient Boolean canPickUpLoot;
+    public transient Boolean isPersistenceRequired;
+    public transient Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg;
+
+    public transient Function<LivingEntity, Double> meleeAttackRangeSqr;
+    /*public transient Consumer<Mob> updateControlFlags;*/
 
     public MobBuilder(ResourceLocation i) {
         super(i);
@@ -43,5 +69,115 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
         return Mob.createMobAttributes();
+    }
+
+    @Info(value = """
+            Sets the custom behavior for the pathfinding malus of a specific node type for the mob in the builder.
+            """)
+    public MobBuilder<T> setPathfindingMalus(BiConsumer<BlockPathTypes, Float> setPathfindingMalus) {
+        this.setPathfindingMalus = setPathfindingMalus;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the custom function for determining if the entity can cut corners for a specific path type for the mob in the builder.
+            """)
+    public MobBuilder<T> canCutCorner(Function<BlockPathTypes, Boolean> canCutCorner) {
+        this.canCutCorner = canCutCorner;
+        return this;
+    }
+
+    /*@Info(value = """
+            Sets the custom logic for updating the control flags for the mob in the builder.
+            """)
+    public MobBuilder<T> updateControlFlags(Consumer<Mob> updateControlFlags) {
+        this.updateControlFlags = updateControlFlags;
+        return this;
+    }*/
+
+    @Info(value = """
+            Sets the custom consumer for the target of the entity for the mob in the builder.
+            """)
+    public MobBuilder<T> setTarget(Consumer<LivingEntity> setTarget) {
+        this.setTarget = setTarget;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the custom predicate for determining if the entity can fire a projectile weapon for the mob in the builder.
+            """)
+    public MobBuilder<T> canFireProjectileWeapon(Predicate<ProjectileWeaponItem> canFireProjectileWeapon) {
+        this.canFireProjectileWeapon = canFireProjectileWeapon;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the custom runnable representing the eating behavior for the mob in the builder.
+            """)
+    public MobBuilder<T> ate(Consumer<LivingEntity> ate) {
+        this.ate = ate;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the custom logic for mob interaction using the provided function.
+            """)
+    public BaseLivingEntityBuilder<T> mobInteract(Function<MobInteractContext, @Nullable InteractionResult> f) {
+        mobInteract = f;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the custom supplier for providing the ambient sound for the mob in the builder.
+            """)
+    public MobBuilder<T> getAmbientSound(Consumer<Object> getAmbientSound) {
+        this.getAmbientSound = getAmbientSound;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the list of custom items or resource locations representing the items the entity can hold for the mob in the builder.
+            """)
+    public MobBuilder<T> canHoldItem(List<Object> items) {
+        this.canHoldItem = items;
+        return this;
+    }
+
+    @Info(value = """
+            Sets whether the entity should despawn in peaceful mode for the mob in the builder.
+            """)
+    public MobBuilder<T> shouldDespawnInPeaceful(Boolean shouldDespawnInPeaceful) {
+        this.shouldDespawnInPeaceful = shouldDespawnInPeaceful;
+        return this;
+    }
+
+    @Info(value = """
+            Sets whether the entity can pick up loot for the mob in the builder.
+            """)
+    public MobBuilder<T> canPickUpLoot(Boolean canPickUpLoot) {
+        this.canPickUpLoot = canPickUpLoot;
+        return this;
+    }
+
+    @Info(value = """
+            Sets whether the entity's persistence is required for the mob in the builder.
+            """)
+    public MobBuilder<T> isPersistenceRequired(Boolean isPersistenceRequired) {
+        this.isPersistenceRequired = isPersistenceRequired;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the custom behavior when offspring is spawned from an egg for the mob in the builder.
+            """)
+    public MobBuilder<T> onOffspringSpawnedFromEgg(Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg) {
+        this.onOffspringSpawnedFromEgg = onOffspringSpawnedFromEgg;
+        return this;
+    }
+
+    @Info(value = "Sets the custom double representing the square of the melee attack range for the mob in the builder.")
+    public MobBuilder<T> meleeAttackRangeSqr(Function<LivingEntity, Double> meleeAttackRangeSqr) {
+        this.meleeAttackRangeSqr = meleeAttackRangeSqr;
+        return this;
     }
 }

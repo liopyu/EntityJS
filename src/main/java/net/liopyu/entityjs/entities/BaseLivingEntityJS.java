@@ -1,10 +1,12 @@
 package net.liopyu.entityjs.entities;
 
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.MobEntityJSBuilder;
-import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
-import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
+import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.world.entity.EntityType;
 import net.liopyu.entityjs.util.*;
+import net.liopyu.entityjs.util.ExitPortalInfo;
+import net.liopyu.entityjs.util.MobInteractContext;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -17,23 +19,17 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
@@ -45,15 +41,18 @@ import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 import java.util.Optional;
 
-public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
-    private final MobEntityJSBuilder builder;
+    private final BaseLivingEntityJSBuilder builder;
     private final AnimationFactory animationFactory;
 
-    public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> p_21368_, Level p_21369_) {
+    public BaseLivingEntityJS(BaseLivingEntityJSBuilder builder, EntityType<? extends LivingEntity> p_21368_, Level p_21369_) {
         super(p_21368_, p_21369_);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createFactory(this);
@@ -69,31 +68,10 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         return animationFactory;
     }
 
-    /*@Override
-    protected void updateControlFlags() {
-        super.updateControlFlags();
-        if (builder.updateControlFlags != null) {
-            builder.updateControlFlags.accept(this);
-        }
-    }*/
-
-    @Override
-    protected void registerGoals() {
-        if (EventHandlers.addGoalTargets.hasListeners()) {
-            EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
-        }
-        if (EventHandlers.addGoalSelectors.hasListeners()) {
-            EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
-        }
-    }
 
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
-    @Override
-    protected @NotNull PathNavigation createNavigation(@NotNull Level p_21480_) {
-        return super.createNavigation(p_21480_);
-    }
 
     //Beginning of Base Overrides
     @Override
@@ -175,112 +153,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         return builder.isFlapping;
     }
 
-    @Override
-    public void setPathfindingMalus(BlockPathTypes nodeType, float malus) {
-        if (builder == null) {
-            super.setPathfindingMalus(nodeType, malus);
-            return;
-        }
-        if (builder.setPathfindingMalus != null) {
-            builder.setPathfindingMalus.accept(nodeType, malus);
-        } else {
-            super.setPathfindingMalus(nodeType, malus);
-        }
-    }
-
-    @Override
-    public boolean canCutCorner(BlockPathTypes pathType) {
-        if (builder.canCutCorner != null) {
-            return builder.canCutCorner.apply(pathType);
-        } else {
-            return super.canCutCorner(pathType);
-        }
-    }
-
-
-    @Override
-    public void setTarget(@Nullable LivingEntity target) {
-        if (builder.setTarget != null) {
-            builder.setTarget.accept(target);
-        } else {
-            super.setTarget(target);
-        }
-    }
-
-    @Override
-    public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeapon) {
-        if (builder.canFireProjectileWeapon != null) {
-            return builder.canFireProjectileWeapon.test(projectileWeapon);
-        } else {
-            return super.canFireProjectileWeapon(projectileWeapon);
-        }
-    }
-
-    @Override
-    public void ate() {
-        super.ate();
-        if (builder.ate != null) {
-            builder.ate.accept(this);
-        }
-    }
-
-
-    @Nullable
-    @Override
-    protected SoundEvent getAmbientSound() {
-        if (builder.getAmbientSound != null) {
-            return Wrappers.soundEvent(builder.getAmbientSound);
-        } else {
-            return super.getAmbientSound();
-        }
-    }
-
-
-    @Override
-    public boolean canHoldItem(ItemStack stack) {
-        if (builder.canHoldItem != null) {
-            for (Object item : builder.canHoldItem) {
-                if (Objects.requireNonNull(Wrappers.getItemStackFromObject(item)).sameItem(stack)) {
-                    return true;
-                }
-            }
-            return false;
-        } else {
-            return super.canHoldItem(stack);
-        }
-    }
-
-
-    @Override
-    protected boolean shouldDespawnInPeaceful() {
-        return (builder.shouldDespawnInPeaceful != null) ? builder.shouldDespawnInPeaceful : super.shouldDespawnInPeaceful();
-    }
-
-    @Override
-    public boolean canPickUpLoot() {
-        return (builder.canPickUpLoot != null) ? builder.canPickUpLoot : super.canPickUpLoot();
-    }
-
-    @Override
-    public boolean isPersistenceRequired() {
-        return (builder.isPersistenceRequired != null) ? builder.isPersistenceRequired : super.isPersistenceRequired();
-    }
-
-    @Override
-    protected void onOffspringSpawnedFromEgg(Player player, Mob child) {
-
-        if (builder.onOffspringSpawnedFromEgg != null) {
-            final PlayerEntityContext context = new PlayerEntityContext(player, child);
-            builder.onOffspringSpawnedFromEgg.accept(context);
-        } else {
-            super.onOffspringSpawnedFromEgg(player, child);
-        }
-    }
-
-    @Override
-    public double getMeleeAttackRangeSqr(LivingEntity entity) {
-        return (builder.meleeAttackRangeSqr != null) ? builder.meleeAttackRangeSqr.apply(entity) : super.getMeleeAttackRangeSqr(entity);
-    }
 
     @Override
     public int calculateFallDamage(float fallDistance, float fallHeight) {
@@ -297,26 +169,27 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public void onAddedToWorld() {
-        super.onAddedToWorld();
         if (builder.onAddedToWorld != null) {
             builder.onAddedToWorld.accept(this);
-
+            super.onAddedToWorld();
+        } else {
+            super.onAddedToWorld();
         }
     }
 
     @Override
-    public @NotNull InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand) {
-        if (builder.mobInteract != null) {
-            final MobInteractContext context = new MobInteractContext(this, player, hand);
-            final InteractionResult result = builder.mobInteract.apply(context);
-            return result == null ? super.mobInteract(player, hand) : result;
+    public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
+        if (builder.interact != null) {
+            final MobInteractContext context = new MobInteractContext(this, pPlayer, pHand);
+            final InteractionResult result = builder.interact.apply(context);
+            return result == null ? super.interact(pPlayer, pHand) : result;
         }
 
-        return super.mobInteract(player, hand);
+        return super.interact(pPlayer, pHand);
     }
 
 
-    /*@Override
+    @Override
     protected LootContext.@NotNull Builder createLootContext(boolean p_21105_, @NotNull DamageSource p_21106_) {
         LootContext.Builder originalBuilder = super.createLootContext(p_21105_, p_21106_);
 
@@ -325,14 +198,14 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
 
         return originalBuilder;
-    }*/
+    }
 
     @Override
     protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {
+        super.doAutoAttackOnTouch(target);
         if (builder.doAutoAttackOnTouch != null) {
             builder.doAutoAttackOnTouch.accept(target);
         }
-        super.doAutoAttackOnTouch(target);
     }
 
 
@@ -838,6 +711,27 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
 
+   /* @Nullable
+    @Override
+    public MobEffectInstance removeEffectNoUpdate(@Nullable MobEffect effect) {
+        if (builder.removeEffectNoUpdateFunction != null) {
+            return builder.removeEffectNoUpdateFunction.apply(effect);
+        } else {
+            return super.removeEffectNoUpdate(effect);
+        }
+    }*/
+
+
+   /* @Override
+    public boolean removeEffect(@NotNull MobEffect effect) {
+        if (builder.removeEffect != null) {
+            return builder.removeEffect.test(effect, false);
+        } else {
+            return super.removeEffect(effect);
+        }
+    }*/
+
+
     @Override
     public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
         if (builder.onEffectAdded != null) {
@@ -847,6 +741,16 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             super.onEffectAdded(effectInstance, entity);
         }
     }
+
+
+    /*@Override
+    protected void onEffectUpdated(@NotNull MobEffectInstance effectInstance, boolean isReapplied, @Nullable Entity entity) {
+        if (builder.onEffectUpdated != null) {
+            builder.onEffectUpdated.accept(effectInstance, isReapplied, entity);
+        } else {
+            super.onEffectUpdated(effectInstance, isReapplied, entity);
+        }
+    }*/
 
 
     @Override
@@ -922,6 +826,16 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
 
+    /*@Override
+    protected void createWitherRose(@Nullable LivingEntity entity) {
+        if (builder.createWitherRose != null) {
+            builder.createWitherRose.accept(entity);
+        } else {
+            super.createWitherRose(entity);
+        }
+    }*/
+
+
     @Override
     protected void dropAllDeathLoot(@NotNull DamageSource damageSource) {
         if (builder.dropAllDeathLoot != null) {
@@ -962,11 +876,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
 
     @Override
-    public void knockback(double x, double y, double z) {
+    public void knockback(double pStrength, double x, double z) {
         if (builder.knockback != null) {
-            builder.knockback.accept(x, y, z);
+            builder.knockback.accept(pStrength, x, z);
         } else {
-            super.knockback(x, y, z);
+            super.knockback(pStrength, x, z);
         }
     }
 
@@ -1073,16 +987,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             builder.hurtCurrentlyUsedShield.accept(amount);
         } else {
             super.hurtCurrentlyUsedShield(amount);
-        }
-    }
-
-
-    @Override
-    public @NotNull CombatTracker getCombatTracker() {
-        if (builder.combatTracker != null) {
-            return builder.combatTracker.apply(super.getCombatTracker());
-        } else {
-            return super.getCombatTracker();
         }
     }
 
@@ -1286,14 +1190,14 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
 
-    /*@Override
+    @Override
     public void setJumping(boolean p_21314_) {
         if (builder.setJumping != null) {
             builder.setJumping.accept(p_21314_);
         } else {
             super.setJumping(p_21314_);
         }
-    }*/
+    }
 
 
     @Override
@@ -1304,6 +1208,15 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             super.onItemPickup(p_21054_);
         }
     }
+
+   /* @Override
+    public void take(@NotNull Entity p_21030_, int p_21031_) {
+        if (builder.take != null) {
+            builder.take.accept(p_21030_, p_21031_);
+        } else {
+            super.take(p_21030_, p_21031_);
+        }
+    }*/
 
 
     @Override
@@ -1705,6 +1618,41 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
     }
 
+
+   /* @Override
+    public boolean closerThan(Entity entity, double distance) {
+        if (builder.closerThan != null) {
+            return builder.closerThan.test(entity, distance);
+        } else {
+            return super.closerThan(entity, distance);
+        }
+    }*/
+
+
+   /* @Override
+    public boolean closerThan(@NotNull Entity p_216993_, double p_216994_, double p_216995_) {
+        return super.closerThan(p_216993_, p_216994_, p_216995_);
+    }
+
+    @Override
+    protected void setRot(float p_19916_, float p_19917_) {
+        super.setRot(p_19916_, p_19917_);
+    }
+
+    @Override
+    public void setPos(double p_20210_, double p_20211_, double p_20212_) {
+        super.setPos(p_20210_, p_20211_, p_20212_);
+    }
+
+    @Override
+    public void turn(double p_19885_, double p_19886_) {
+        super.turn(p_19885_, p_19886_);
+    }*/
+
+    /*@Override
+    public void setPortalCooldown() {
+        super.setPortalCooldown();
+    }*/
 
     @Override
     public void lavaHurt() {
