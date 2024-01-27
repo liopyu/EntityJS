@@ -6,6 +6,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
@@ -102,6 +103,12 @@ public class Wrappers {
         }
         return null;
     }
-
+/*public static Goal.Flag flag(Object unknown) {
+    if (unknown instanceof ResourceLocation || unknown instanceof CharSequence) {
+        return Goal.Flag.
+    } else if (unknown instanceof Goal.Flag flag) {
+        return flag;
+    }
+}*/
 
 }

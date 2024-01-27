@@ -64,7 +64,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg;
 
     public transient Double meleeAttackRangeSqr;
-
+    public transient Consumer<LivingEntity> aiStep;
 
     public AnimalEntityBuilder(ResourceLocation i) {
         super(i);
@@ -72,7 +72,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the breedOffspring property in the builder.\n\n" +
+            Sets the breedOffspring property in the builder.
+                        
+            " +
             "Defaults to <namespace>:breeding/<path>.json
             """)
     public AnimalEntityBuilder<T> getBreedOffspring(Object breedOffspring) {
@@ -81,7 +83,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the canBreed property in the builder.\n\n" +
+            Sets the canBreed property in the builder.
+                        
+            " +
             "Defaults to true.
             """)
     public AnimalEntityBuilder<T> canBreed(boolean canBreed) {
@@ -90,7 +94,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the isFood property in the builder.\n\n" +
+            Sets the isFood property in the builder.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> isFood(Object isFood) {
@@ -99,7 +105,20 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the walkTargetValue property in the builder.\n\n" +
+            Sets the aiStep property in the builder.
+                        
+            " +
+            "Defaults to super-AgeableMob.
+            """)
+    public AnimalEntityBuilder<T> aiStep(Consumer<LivingEntity> aiStep) {
+        this.aiStep = aiStep;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the walkTargetValue property in the builder.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> walkTargetValue(BiFunction<BlockPos, LevelReader, Float> function) {
@@ -108,7 +127,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the myRidingOffset property in the builder.\n\n" +
+            Sets the myRidingOffset property in the builder.
+                        
+            " +
             "Defaults to 0.0.
             """)
     public AnimalEntityBuilder<T> myRidingOffset(Function<T, Double> myRidingOffset) {
@@ -117,7 +138,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the ambientSoundInterval property in the builder.\n\n" +
+            Sets the ambientSoundInterval property in the builder.
+                        
+            " +
             "Defaults to 240.
             """)
     public AnimalEntityBuilder<T> ambientSoundInterval(Function<T, Integer> ambientSoundInterval) {
@@ -126,7 +149,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the removeWhenFarAway property in the builder.\n\n" +
+            Sets the removeWhenFarAway property in the builder.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> removeWhenFarAway(BiPredicate<T, Double> removeWhenFarAway) {
@@ -135,7 +160,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the canMate property in the builder.\n\n" +
+            Sets the canMate property in the builder.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> canMate(BiPredicate<Animal, Animal> predicate) {
@@ -145,7 +172,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets the spawnChildFromBreeding property in the builder.\n\n" +
+            Sets the spawnChildFromBreeding property in the builder.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> spawnChildFromBreeding(BiConsumer<ServerLevel, Animal> consumer) {
@@ -154,7 +183,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the finalizeSpawn property in the builder.\n\n" +
+            Sets the finalizeSpawn property in the builder.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> finalizeSpawn(QuinaryFunction<ServerLevelAccessor, DifficultyInstance, MobSpawnType, SpawnGroupData, CompoundTag, SpawnGroupData> function) {
@@ -163,7 +194,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the tickLeash property in the builder.\n\n" +
+            Sets the tickLeash property in the builder.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> tickLeash(Consumer<PlayerEntityContext> consumer) {
@@ -172,7 +205,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the shouldStayCloseToLeashHolder property in the builder.\n\n" +
+            Sets the shouldStayCloseToLeashHolder property in the builder.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> shouldStayCloseToLeashHolder(Supplier<Boolean> supplier) {
@@ -181,7 +216,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the followLeashSpeed property in the builder.\n\n" +
+            Sets the followLeashSpeed property in the builder.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> followLeashSpeed(Supplier<Double> supplier) {
@@ -191,7 +228,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets the pathfinding malus for a specific node type.\n\n" +
+            Sets the pathfinding malus for a specific node type.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> setPathfindingMalus(BiConsumer<BlockPathTypes, Float> setPathfindingMalus) {
@@ -200,7 +239,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Determines if the entity can cut corners for a specific path type.\n\n" +
+            Determines if the entity can cut corners for a specific path type.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> canCutCorner(Function<BlockPathTypes, Boolean> canCutCorner) {
@@ -210,7 +251,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets the target for the entity.\n\n" +
+            Sets the target for the entity.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> setTarget(Consumer<LivingEntity> setTarget) {
@@ -219,7 +262,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Determines if the entity can fire a projectile weapon.\n\n" +
+            Determines if the entity can fire a projectile weapon.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> canFireProjectileWeapon(Predicate<ProjectileWeaponItem> canFireProjectileWeapon) {
@@ -228,7 +273,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Custom behavior when the entity eats.\n\n" +
+            Custom behavior when the entity eats.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> ate(Consumer<LivingEntity> ate) {
@@ -238,7 +285,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets the ambient sound for the entity.\n\n" +
+            Sets the ambient sound for the entity.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> getAmbientSound(Consumer<Object> getAmbientSound) {
@@ -248,7 +297,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets the condition for whether the entity can hold specific items.\n\n" +
+            Sets the condition for whether the entity can hold specific items.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> canHoldItem(List<Object> items) {
@@ -258,7 +309,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets whether the entity should despawn in peaceful mode.\n\n" +
+            Sets whether the entity should despawn in peaceful mode.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> shouldDespawnInPeaceful(Boolean shouldDespawnInPeaceful) {
@@ -268,7 +321,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets whether the entity can pick up loot.\n\n" +
+            Sets whether the entity can pick up loot.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> canPickUpLoot(Boolean canPickUpLoot) {
@@ -277,7 +332,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets whether the entity's persistence is required.\n\n" +
+            Sets whether the entity's persistence is required.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> isPersistenceRequired(Boolean isPersistenceRequired) {
@@ -286,7 +343,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the behavior when offspring is spawned from an egg.\n\n" +
+            Sets the behavior when offspring is spawned from an egg.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> onOffspringSpawnedFromEgg(Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg) {
@@ -296,7 +355,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets the square of the melee attack range for the entity.\n\n" +
+            Sets the square of the melee attack range for the entity.
+                        
+            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> meleeAttackRangeSqr(Double meleeAttackRangeSqr) {

@@ -118,7 +118,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean onSoulSpeedBlock;
 
     public transient Function<LootContext.Builder, LootContext.Builder> customLootContextBuilder;
-    public transient Consumer<LivingEntity> customDoAutoAttack;
+    public transient Consumer<LivingEntity> doAutoAttackOnTouch;
 
     public transient Function<Pose, Float> customGetStandingEyeHeight;
     public transient Function<BlockPos, BlockPos> customGetBlockPosBelow;
@@ -396,7 +396,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         getWaterSlowDown = 0.0f;
         setDeathSound = SoundEvents.BUCKET_EMPTY;
         setSwimSound = SoundEvents.MOOSHROOM_SHEAR;
-        fallDamageFunction = null;
         isFlapping = false;
         getDeathSound = SoundEvents.BUCKET_EMPTY;
         getSwimSound = SoundEvents.MOOSHROOM_SHEAR;
@@ -537,7 +536,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    public BiFunction<Float, Float, Integer> fallDamageFunction;
+    public BiFunction<Float, Float, Integer> calculateFallDamage;
     public Predicate<Entity> passengerPredicate;
     public Predicate<LivingEntity> livingpassengerPredicate;
 
@@ -600,7 +599,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets the fall damage calculation function in the builder.
             """)
     public BaseLivingEntityBuilder<T> calculateFallDamage(BiFunction<Float, Float, Integer> calculation) {
-        fallDamageFunction = calculation;
+        calculateFallDamage = calculation;
         return this;
     }
 
@@ -701,19 +700,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets a custom behavior for auto-attacking on touch for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> doAutoAttackOnTouch(Consumer<LivingEntity> customDoAutoAttack) {
-        this.customDoAutoAttack = customDoAutoAttack;
+    public BaseLivingEntityBuilder<T> doAutoAttackOnTouch(Consumer<LivingEntity> doAutoAttackOnTouch) {
+        this.doAutoAttackOnTouch = doAutoAttackOnTouch;
         return this;
     }
 
-    @Info(value = """
-            Applies the custom auto-attack behavior when the entity touches a target.
-            """)
-    public void applyCustomDoAutoAttackOnTouch(LivingEntity target) {
-        if (customDoAutoAttack != null) {
-            customDoAutoAttack.accept(target);
-        }
-    }
 
     @Info(value = """
             Sets the function to determine the custom standing eye height for the entity in the builder.

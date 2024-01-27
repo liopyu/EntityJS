@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -25,7 +26,7 @@ import java.util.function.*;
  * Has methods for spawn eggs, goal selectors, goal targets, and anything else
  * in {@link Mob} that is not present in/related to {@link net.minecraft.world.entity.LivingEntity LivignEntity}
  */
-public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
+public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
     public transient Function<MobInteractContext, @Nullable InteractionResult> mobInteract;
     public transient SpawnEggItemBuilder eggItem;
     public transient BiConsumer<BlockPathTypes, Float> setPathfindingMalus;
@@ -42,7 +43,8 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     public transient Boolean isPersistenceRequired;
     public transient Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg;
 
-    public transient Double meleeAttackRangeSqr;
+    public transient Function<LivingEntity, Double> meleeAttackRangeSqr;
+    /*public transient Consumer<Mob> updateControlFlags;*/
 
     public MobBuilder(ResourceLocation i) {
         super(i);
@@ -78,6 +80,14 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         this.canCutCorner = canCutCorner;
         return this;
     }
+
+    /*@Info(value = """
+            Sets the custom logic for updating the control flags for the mob in the builder.
+            """)
+    public MobBuilder<T> updateControlFlags(Consumer<Mob> updateControlFlags) {
+        this.updateControlFlags = updateControlFlags;
+        return this;
+    }*/
 
     @Info(value = """
             Sets the custom consumer for the target of the entity for the mob in the builder.
@@ -159,10 +169,8 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         return this;
     }
 
-    @Info(value = """
-            Sets the custom double representing the square of the melee attack range for the mob in the builder.
-            """)
-    public MobBuilder<T> meleeAttackRangeSqr(Double meleeAttackRangeSqr) {
+    @Info(value = "Sets the custom double representing the square of the melee attack range for the mob in the builder.")
+    public MobBuilder<T> meleeAttackRangeSqr(Function<LivingEntity, Double> meleeAttackRangeSqr) {
         this.meleeAttackRangeSqr = meleeAttackRangeSqr;
         return this;
     }

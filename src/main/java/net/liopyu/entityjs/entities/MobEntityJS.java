@@ -38,6 +38,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
@@ -52,12 +53,12 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 import java.util.Objects;
 import java.util.Optional;
 
-public class MobEntityJS extends Mob implements IAnimatableJS {
+public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     private final MobEntityJSBuilder builder;
     private final AnimationFactory animationFactory;
 
-    public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends Mob> p_21368_, Level p_21369_) {
+    public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> p_21368_, Level p_21369_) {
         super(p_21368_, p_21369_);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createFactory(this);
@@ -72,6 +73,14 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     public AnimationFactory getFactory() {
         return animationFactory;
     }
+
+    /*@Override
+    protected void updateControlFlags() {
+        super.updateControlFlags();
+        if (builder.updateControlFlags != null) {
+            builder.updateControlFlags.accept(this);
+        }
+    }*/
 
     @Override
     protected void registerGoals() {
@@ -275,12 +284,12 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     public double getMeleeAttackRangeSqr(LivingEntity entity) {
-        return (builder.meleeAttackRangeSqr != null) ? builder.meleeAttackRangeSqr : super.getMeleeAttackRangeSqr(entity);
+        return (builder.meleeAttackRangeSqr != null) ? builder.meleeAttackRangeSqr.apply(entity) : super.getMeleeAttackRangeSqr(entity);
     }
 
     @Override
     public int calculateFallDamage(float fallDistance, float fallHeight) {
-        return builder.fallDamageFunction == null ? super.calculateFallDamage(fallDistance, fallHeight) : builder.fallDamageFunction.apply(fallDistance, fallHeight);
+        return builder.calculateFallDamage == null ? super.calculateFallDamage(fallDistance, fallHeight) : builder.calculateFallDamage.apply(fallDistance, fallHeight);
     }
 
     @Override
@@ -293,11 +302,10 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
 
     @Override
     public void onAddedToWorld() {
+        super.onAddedToWorld();
         if (builder.onAddedToWorld != null) {
             builder.onAddedToWorld.accept(this);
-            super.onAddedToWorld();
-        } else {
-            super.onAddedToWorld();
+
         }
     }
 
@@ -313,7 +321,7 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
 
-    @Override
+    /*@Override
     protected LootContext.@NotNull Builder createLootContext(boolean p_21105_, @NotNull DamageSource p_21106_) {
         LootContext.Builder originalBuilder = super.createLootContext(p_21105_, p_21106_);
 
@@ -322,14 +330,14 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
         }
 
         return originalBuilder;
-    }
+    }*/
 
     @Override
     protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {
-        if (builder.customDoAutoAttack != null) {
-            builder.customDoAutoAttack.accept(target);
+        if (builder.doAutoAttackOnTouch != null) {
+            builder.doAutoAttackOnTouch.accept(target);
         }
-        builder.applyCustomDoAutoAttackOnTouch(target);
+        super.doAutoAttackOnTouch(target);
     }
 
 
@@ -1283,14 +1291,14 @@ public class MobEntityJS extends Mob implements IAnimatableJS {
     }
 
 
-    @Override
+    /*@Override
     public void setJumping(boolean p_21314_) {
         if (builder.setJumping != null) {
             builder.setJumping.accept(p_21314_);
         } else {
             super.setJumping(p_21314_);
         }
-    }
+    }*/
 
 
     @Override

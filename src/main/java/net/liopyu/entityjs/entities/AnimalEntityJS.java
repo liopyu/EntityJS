@@ -447,6 +447,13 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         return builder.mainArm;
     }
 
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (builder.aiStep != null) {
+            builder.aiStep.accept(this);
+        }
+    }
 
     @Override
     public boolean isAttackable() {
@@ -487,7 +494,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public int calculateFallDamage(float fallDistance, float fallHeight) {
-        return builder.fallDamageFunction == null ? super.calculateFallDamage(fallDistance, fallHeight) : builder.fallDamageFunction.apply(fallDistance, fallHeight);
+        return builder.calculateFallDamage == null ? super.calculateFallDamage(fallDistance, fallHeight) : builder.calculateFallDamage.apply(fallDistance, fallHeight);
     }
 
     @Override
@@ -534,10 +541,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {
-        if (builder.customDoAutoAttack != null) {
-            builder.customDoAutoAttack.accept(target);
+        if (builder.doAutoAttackOnTouch != null) {
+            builder.doAutoAttackOnTouch.accept(target);
         }
-        builder.applyCustomDoAutoAttackOnTouch(target);
     }
 
 

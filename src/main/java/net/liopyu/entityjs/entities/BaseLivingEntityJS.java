@@ -156,7 +156,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public int calculateFallDamage(float fallDistance, float fallHeight) {
-        return builder.fallDamageFunction == null ? super.calculateFallDamage(fallDistance, fallHeight) : builder.fallDamageFunction.apply(fallDistance, fallHeight);
+        return builder.calculateFallDamage == null ? super.calculateFallDamage(fallDistance, fallHeight) : builder.calculateFallDamage.apply(fallDistance, fallHeight);
     }
 
     @Override
@@ -202,10 +202,10 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {
-        if (builder.customDoAutoAttack != null) {
-            builder.customDoAutoAttack.accept(target);
+        super.doAutoAttackOnTouch(target);
+        if (builder.doAutoAttackOnTouch != null) {
+            builder.doAutoAttackOnTouch.accept(target);
         }
-        builder.applyCustomDoAutoAttackOnTouch(target);
     }
 
 

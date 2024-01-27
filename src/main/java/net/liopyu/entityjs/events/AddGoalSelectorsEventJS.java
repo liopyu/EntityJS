@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.util.ai.CustomGoal;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.LevelReader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -233,14 +235,28 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
     @Info(value = "Adds a `RandomStrollGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move"),
-            @Param(name = "interval", value = "Sets the interval at which the goal will be 'refreshed'"), // I think? It indirectly determines when #canUse() returns false
+            @Param(name = "interval", value = "Sets the interval at which the goal will be 'refreshed, any values below 1 will be 1.'"), // I think? It indirectly determines when #canUse() returns false
             @Param(name = "checkNoActionTime", value = "Determines if the mob's noActionTime property should be checked")
     })
     public void randomStroll(int priority, double speedModifier, int interval, boolean checkNoActionTime) {
         if (isPathFinder) {
-            selector.addGoal(priority, new RandomStrollGoal((PathfinderMob) mob, speedModifier, interval, checkNoActionTime));
+            selector.addGoal(priority, new RandomStrollGoal((PathfinderMob) mob, speedModifier, Math.max(1, interval), checkNoActionTime));
         }
+
     }
+
+    /*public void moveToBlock(int priority, double speedModifier, int interval, boolean checkNoActionTime) {
+        if (isPathFinder) {
+            selector.addGoal(priority, new MoveToBlockGoal(priority, (PathfinderMob) mob, speedModifier, Math.max(1, interval), checkNoActionTime) {
+                @Override
+                protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
+                    return false;
+                }
+            });
+            })
+        }
+
+    }*/
 
     @Info(value = "Adds a `MoveBackToVillageGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal"),
