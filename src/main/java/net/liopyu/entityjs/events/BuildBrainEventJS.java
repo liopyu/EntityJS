@@ -9,7 +9,6 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.schedule.Activity;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class BuildBrainEventJS<T extends LivingEntity> extends EventJS {

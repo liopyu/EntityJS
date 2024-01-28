@@ -2,10 +2,9 @@ package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.ArrowEntityJS;
-import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
-import net.liopyu.entityjs.entities.IProjectileEntityJS;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;

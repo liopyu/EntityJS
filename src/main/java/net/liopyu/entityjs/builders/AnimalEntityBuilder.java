@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.builders;
 
+import dev.latvian.mods.kubejs.bindings.ItemWrapper;
+import net.liopyu.entityjs.entities.IAnimatableJS;
 import com.ibm.icu.impl.Pair;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.IAnimatableJS;

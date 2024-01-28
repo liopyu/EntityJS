@@ -2,19 +2,15 @@ package net.liopyu.entityjs.item;
 
 import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
-import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.ProjectileEntityJSBuilder;
-import net.liopyu.entityjs.entities.IProjectileEntityJS;
 import net.liopyu.entityjs.entities.ProjectileEntityJS;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Snowball;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 

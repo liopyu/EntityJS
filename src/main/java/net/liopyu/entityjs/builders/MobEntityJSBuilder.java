@@ -18,8 +18,6 @@ public class MobEntityJSBuilder extends MobBuilder<MobEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        final AttributeSupplier.Builder builder = MobEntityJS.createMobAttributes();
-        attributes.accept(builder);
-        return builder;
+        return MobEntityJS.createMobAttributes();
     }
 }

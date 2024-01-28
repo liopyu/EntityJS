@@ -3,6 +3,7 @@ package net.liopyu.entityjs;
 import com.mojang.logging.LogUtils;
 import net.liopyu.entityjs.client.ClientEventHandlers;
 import net.liopyu.entityjs.util.EventHandlers;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -23,5 +24,9 @@ public class EntityJSMod {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ClientEventHandlers.init();
         }
+    }
+
+    public static ResourceLocation identifier(String path) {
+        return  new ResourceLocation(MOD_ID, path);
     }
 }

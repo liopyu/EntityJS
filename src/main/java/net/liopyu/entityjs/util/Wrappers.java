@@ -12,16 +12,14 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.registries.ForgeRegistries;
-import software.bernie.example.registry.ItemRegistry;
 
 import java.util.Objects;
 
 // Move usages of Registry#<registry>#get() to RegistryInfo#<registry>#getValue() in 1.20+
 public class Wrappers {
 
+    // TODO: Investigate if these are handled by kube since they're registry objects
     public static Attribute attribute(Object unknown) {
         if (unknown instanceof ResourceLocation || unknown instanceof CharSequence) {
             return Registry.ATTRIBUTE.get(new ResourceLocation(unknown.toString()));

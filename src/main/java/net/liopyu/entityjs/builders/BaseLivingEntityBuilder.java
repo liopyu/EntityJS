@@ -1,12 +1,16 @@
 package net.liopyu.entityjs.builders;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
+import dev.latvian.mods.kubejs.util.JsonIO;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.*;
@@ -29,23 +33,23 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.common.util.TriPredicate;
-import org.apache.commons.lang3.function.TriFunction;
-import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.util.TriPredicate;
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.logging.log4j.util.TriConsumer;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.controller.AnimationController;
@@ -56,9 +60,7 @@ import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.*;
 
 /**
@@ -90,7 +92,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean isPushable;
 
     public transient boolean isAttackable;
-    public transient Consumer<AttributeSupplier.Builder> attributes;
     public transient final List<AnimationControllerSupplier<T>> animationSuppliers;
     public transient boolean shouldDropLoot;
     public transient Predicate<Entity> setCanAddPassenger;
@@ -279,6 +280,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Predicate<Boolean> isAutoSpinAttack;
     public transient Runnable stopRidingCallback;
     public transient Consumer<T> rideTick;
+    public SpawnPlacements.Type placementType;
+    public Heightmap.Types heightMap;
+    public SpawnPlacements.SpawnPredicate<? extends Entity> spawnPredicate;
 
     @FunctionalInterface
     public interface HeptConsumer {
@@ -361,6 +365,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient BiPredicate<Level, BlockPos> mayInteract;
     public transient TriPredicate<BlockState, BlockPos, Float> canTrample;
     public transient Consumer<T> onRemovedFromWorld;
+    private transient int biomeSpawnsCount;
+    public static final Map<ResourceLocation, String> spawnsBiomeModifiers = new HashMap<>();
+    public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -381,9 +388,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");
         isPushable = true;
         isAttackable = true;
-        attributes = builder -> {
-            builder.add(Attributes.FOLLOW_RANGE, 10);
-        };
         animationSuppliers = new ArrayList<>();
         shouldDropLoot = true;
         isAffectedByFluids = false;
@@ -404,7 +408,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mainArm = HumanoidArm.RIGHT;
         canBreatheUnderwater = false;
         passengerPredicate = entity -> true;
-
+        biomeSpawnsCount = 0;
     }
 
     @Info(value = "Sets the main arm of the entity, defaults to 'right'")
@@ -521,20 +525,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
 
-    @Info(value = "Adds the provided attribute to the entity type")
-    public BaseLivingEntityBuilder<T> addAttribute(Attribute attribute) {
-        attributes = attributes.andThen(builder -> builder.add(attribute));
-        return this;
-    }
-
-    @Info(value = "Adds the provided attribute to the entity type with the provided base value", params = {
-            @Param(name = "attribute", value = "The attribute"),
-            @Param(name = "value", value = "The default value of the attribute")
-    })
-    public BaseLivingEntityBuilder<T> addAttribute(Attribute attribute, double value) {
-        attributes = attributes.andThen(builder -> builder.add(attribute, value));
-        return this;
-    }
 
     public BiFunction<Float, Float, Integer> calculateFallDamage;
     public Predicate<Entity> passengerPredicate;
@@ -1970,9 +1960,49 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Override
-    public RegistryInfo getRegistryType() {
-        return RegistryInfo.ENTITY_TYPE;
+    @Info(value = "Sets the spawn placement of the entity type", params = {
+            @Param(name = "placementType", value = "The placement type of the spawn, accepts 'on_ground', 'in_water', 'no_restrictions', 'in_lava'"),
+            @Param(name = "heightMap", value = "The height map used for the spawner"),
+            @Param(name = "spawnPredicate", value = "The predicate that determines if the entity will spawn")
+    })
+    public BaseLivingEntityBuilder<T> spawnPlacement(SpawnPlacements.Type placementType, Heightmap.Types heightMap, SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
+        spawnList.add(this);
+        this.spawnPredicate = spawnPredicate;
+        this.placementType = placementType;
+        this.heightMap = heightMap;
+        return this;
+    }
+
+    @Info(value = "Adds a spawner for this entity to the provided biome(s)", params = {
+            @Param(name = "biomes", value = "A list of biomes that the entity should spawn in. If using a tag, only one value may be provided"),
+            @Param(name = "weight", value = "The spawn weight the entity should have"),
+            @Param(name = "minCount", value = "The minimum number of entities that can spawn at a time"),
+            @Param(name = "maxCount", value = "The maximum number of entities that can spawn at a time")
+    })
+    public BaseLivingEntityBuilder<T> biomeSpawn(List<String> biomes, int weight, int minCount, int maxCount) {
+        final JsonObject json = new JsonObject();
+        json.addProperty("type", "forge:add_spawns");
+        if (biomes.size() == 1) {
+            json.addProperty("biomes", biomes.get(0));
+        } else {
+            final JsonArray array = new JsonArray(biomes.size());
+            biomes.forEach(array::add);
+            json.add("biomes", array);
+        }
+
+        final JsonObject spawner = new JsonObject();
+        spawner.addProperty("type", id.toString());
+        spawner.addProperty("weight", weight);
+        spawner.addProperty("minCount", minCount);
+        spawner.addProperty("maxCount", maxCount);
+        final JsonArray spawners = new JsonArray(1);
+        spawners.add(spawner);
+        json.add("spawners", spawners);
+        spawnsBiomeModifiers.put(
+                EntityJSMod.identifier("forge/biome_modifiers/" + id.getNamespace() + "/" + id.getPath() + "_" + biomeSpawnsCount++),
+                JsonIO.toString(json)
+        );
+        return this;
     }
 
     /**
@@ -1998,15 +2028,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     abstract public EntityType.EntityFactory<T> factory();
 
     /**
-     * Used to retrieve the entity type's attributes. Implementors are encouraged to first
-     * create a {@link AttributeSupplier.Builder} from a static method in the base class
-     * (i.e. {@link AnimalEntityJS#createLivingAttributes()}) and then apply the {@code attributes}
-     * consumer to that before returning it
+     * Used to retrieve the entity type's attributes. Implementors are encouraged to return
+     * the {@link AttributeSupplier.Builder} from a static method in the base class
+     * (i.e. {@link AnimalEntityJS#createLivingAttributes()})
      *
      * @return The {@link AttributeSupplier.Builder} that will be built during Forge's EntityAttributeCreationEvent
      */
     @HideFromJS
     abstract public AttributeSupplier.Builder getAttributeBuilder();
+
+    @Override
+    public RegistryInfo getRegistryType() {
+        return RegistryInfo.ENTITY_TYPE;
+    }
 
     /**
      * A 'supplier' for an {@link AnimationController} that does not require a reference to the entity being animated

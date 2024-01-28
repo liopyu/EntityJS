@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -63,6 +64,11 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         if (eggItem != null) {
             RegistryInfo.ITEM.addBuilder(eggItem);
         }
+    }
+
+    @Override
+    public AttributeSupplier.Builder getAttributeBuilder() {
+        return Mob.createMobAttributes();
     }
 
     @Info(value = """
@@ -174,5 +180,4 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         this.meleeAttackRangeSqr = meleeAttackRangeSqr;
         return this;
     }
-
 }
