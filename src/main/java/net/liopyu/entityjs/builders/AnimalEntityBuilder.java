@@ -66,18 +66,19 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg;
 
     public transient Double meleeAttackRangeSqr;
-    public transient Consumer<LivingEntity> aiStep;
+
 
     public AnimalEntityBuilder(ResourceLocation i) {
         super(i);
         canBreed = true;
+        canJump = true;
     }
 
     @Info(value = """
             Sets the breedOffspring property in the builder.
                         
             " +
-            "Defaults to <namespace>:breeding/<path>.json
+            "Defaults to this entity type.
             """)
     public AnimalEntityBuilder<T> getBreedOffspring(Object breedOffspring) {
         this.getBreedOffspring = breedOffspring;
@@ -106,16 +107,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         return this;
     }
 
-    @Info(value = """
-            Sets the aiStep property in the builder.
-                        
-            " +
-            "Defaults to super-AgeableMob.
-            """)
-    public AnimalEntityBuilder<T> aiStep(Consumer<LivingEntity> aiStep) {
-        this.aiStep = aiStep;
-        return this;
-    }
 
     @Info(value = """
             Sets the walkTargetValue property in the builder.

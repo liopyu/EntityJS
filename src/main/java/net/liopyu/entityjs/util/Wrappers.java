@@ -101,12 +101,5 @@ public class Wrappers {
         }
         return null;
     }
-/*public static Goal.Flag flag(Object unknown) {
-    if (unknown instanceof ResourceLocation || unknown instanceof CharSequence) {
-        return Goal.Flag.
-    } else if (unknown instanceof Goal.Flag flag) {
-        return flag;
-    }
-}*/
 
 }

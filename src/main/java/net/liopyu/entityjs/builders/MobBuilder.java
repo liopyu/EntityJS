@@ -46,9 +46,13 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
 
     public transient Function<LivingEntity, Double> meleeAttackRangeSqr;
     /*public transient Consumer<Mob> updateControlFlags;*/
+    public transient Consumer<PathfinderMob> aiStep;
+    public transient boolean canJump;
+    public transient Consumer<PathfinderMob> onJump;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
+        canJump = true;
     }
 
     @Info(value = "Creates a spawn egg item for this entity type")
@@ -80,6 +84,18 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     }
 
     @Info(value = """
+            Sets the aiStep property in the builder.
+                        
+            " +
+            "Defaults to super-AgeableMob.
+            """)
+    public MobBuilder<T> aiStep(Consumer<PathfinderMob> aiStep) {
+        this.aiStep = aiStep;
+        return this;
+    }
+
+
+    @Info(value = """
             Sets the custom function for determining if the entity can cut corners for a specific path type for the mob in the builder.
             """)
     public MobBuilder<T> canCutCorner(Function<BlockPathTypes, Boolean> canCutCorner) {
@@ -87,13 +103,15 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-    /*@Info(value = """
-            Sets the custom logic for updating the control flags for the mob in the builder.
-            """)
-    public MobBuilder<T> updateControlFlags(Consumer<Mob> updateControlFlags) {
-        this.updateControlFlags = updateControlFlags;
+    public MobBuilder<T> canJump(boolean canJump) {
+        this.canJump = canJump;
         return this;
-    }*/
+    }
+
+    public MobBuilder<T> onJump(Consumer<PathfinderMob> onJump) {
+        this.onJump = onJump;
+        return this;
+    }
 
     @Info(value = """
             Sets the custom consumer for the target of the entity for the mob in the builder.

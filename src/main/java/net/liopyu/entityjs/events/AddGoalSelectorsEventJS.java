@@ -122,6 +122,10 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
         }
     }
 
+    public void floatGoal(int priority) {
+        selector.addGoal(priority, new FloatGoal(mob));
+    }
+
     @Info(value = "Adds a `RemoveBlockGoal` to the entity, only applicable to **pathfinder** mobs", params = {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "block", value = "The registry name of a block, the block to be removed"),

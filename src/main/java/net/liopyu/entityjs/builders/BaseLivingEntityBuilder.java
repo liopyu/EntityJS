@@ -241,7 +241,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient BiConsumer<DamageSource, Boolean> dropFromLootTable;
 
-    public transient TriConsumer<Double, Double, Double> knockback;
+    /*public transient TriConsumer<Double, Double, Double> knockback;*/
 
     public transient Runnable skipDropExperience;
 
@@ -365,6 +365,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient BiPredicate<Level, BlockPos> mayInteract;
     public transient TriPredicate<BlockState, BlockPos, Float> canTrample;
     public transient Consumer<T> onRemovedFromWorld;
+    public transient Consumer<LivingEntity> onLivingJump;
+    public transient Consumer<LivingEntity> livingAiStep;
     private transient int biomeSpawnsCount;
     public static final Map<ResourceLocation, String> spawnsBiomeModifiers = new HashMap<>();
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
@@ -451,6 +453,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
+    @Info(value = "Sets the aiStep property in the builder.")
+    public BaseLivingEntityBuilder<T> livingAiStep(Consumer<LivingEntity> aiStep) {
+        this.livingAiStep = aiStep;
+        return this;
+    }
+
+    public BaseLivingEntityBuilder<T> onLivingJump(Consumer<LivingEntity> onJump) {
+        this.onLivingJump = onJump;
+        return this;
+    }
+
     @Info(value = "Sets the client tracking range, defaults to 5")
     public BaseLivingEntityBuilder<T> clientTrackingRange(int i) {
         clientTrackingRange = i;
@@ -523,7 +536,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         isAttackable = b;
         return this;
     }
-
 
 
     public BiFunction<Float, Float, Integer> calculateFallDamage;
@@ -1332,11 +1344,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
 
-    @Info(value = "Sets the custom logic for knockback effect on the entity")
+    /*@Info(value = "Sets the custom logic for knockback effect on the entity")
     public BaseLivingEntityBuilder<T> knockback(TriConsumer<Double, Double, Double> consumer) {
         knockback = consumer;
         return this;
-    }
+    }*/
 
     @Info(value = "Sets the custom logic to skip dropping experience points upon entity death")
     public BaseLivingEntityBuilder<T> skipDropExperience(Runnable runnable) {

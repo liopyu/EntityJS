@@ -45,6 +45,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.ForgeHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import net.minecraft.world.level.LevelAccessor;
@@ -452,6 +453,49 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
         }
+        if (canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
+            jump();
+        }
+    }
+
+    public boolean canJump() {
+        return builder.canJump;
+    }
+
+    public void onJump() {
+        if (builder.onJump != null) {
+            builder.onJump.accept(this);
+        }
+    }
+
+    public void jump() {
+        double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
+        Vec3 currentVelocity = this.getDeltaMovement();
+
+        // Adjust the Y component of the velocity to the calculated jump power
+        this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
+
+        if (this.isSprinting()) {
+            // If sprinting, add a horizontal impulse for forward boost
+            float yawRadians = this.getYRot() * 0.017453292F;
+            this.setDeltaMovement(
+                    this.getDeltaMovement().add(
+                            -Math.sin(yawRadians) * 0.2,
+                            0.0,
+                            Math.cos(yawRadians) * 0.2
+                    )
+            );
+        }
+
+        this.hasImpulse = true;
+        onJump();
+        ForgeHooks.onLivingJump(this);
+    }
+
+    public boolean shouldJump() {
+        // Check if the entity can stand on the forward block
+        BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
+        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -1171,15 +1215,15 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     }
 
 
-    @Override
-    public void knockback(double x, double y, double z) {
+    /*@Override
+    public void knockback(double pStrength, double x, double z) {
         if (builder.knockback != null) {
-            builder.knockback.accept(x, y, z);
+            builder.knockback.accept(pStrength, x, z);
         } else {
-            super.knockback(x, y, z);
+            super.knockback(pStrength, x, z);
         }
     }
-
+*/
 
     @Override
     public void skipDropExperience() {
@@ -1378,14 +1422,14 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     }
 
 
-    @Override
+    /*@Override
     public double getJumpBoostPower() {
         if (builder.jumpBoostPower != null) {
             return builder.jumpBoostPower.getAsDouble();
         } else {
             return super.getJumpBoostPower();
         }
-    }
+    }*/
 
     @Override
     public boolean canStandOnFluid(@NotNull FluidState fluidState) {
@@ -1469,10 +1513,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public void rideTick() {
+        super.rideTick();
         if (builder.rideTick != null) {
             builder.rideTick.accept(this);
-        } else {
-            super.rideTick();
         }
     }
 
@@ -1496,14 +1539,14 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     }
 
 
-    @Override
+    /*@Override
     public void setJumping(boolean p_21314_) {
         if (builder.setJumping != null) {
             builder.setJumping.accept(p_21314_);
         } else {
             super.setJumping(p_21314_);
         }
-    }
+    }*/
 
 
     @Override
