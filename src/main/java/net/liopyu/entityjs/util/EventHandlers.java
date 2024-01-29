@@ -23,7 +23,7 @@ public class EventHandlers {
     public static final EventHandler addGoalSelectors = EntityJSEvents.server("addGoalSelectors", () -> AddGoalSelectorsEventJS.class).extra(Extra.REQUIRES_ID);
     public static final EventHandler buildBrain = EntityJSEvents.server("buildBrain", () -> BuildBrainEventJS.class).extra(Extra.REQUIRES_ID);
     public static final EventHandler buildBrainProvider = EntityJSEvents.server("buildBrainProvider", () -> BuildBrainProviderEventJS.class).extra(Extra.REQUIRES_ID);
-    public static final EventHandler biomeSpawns = EntityJSEvents.server("modifyBiomeSpawns", () -> ModifySpawnsEventJS.class);
+    public static final EventHandler biomeSpawns = EntityJSEvents.server("biomeSpawns", () -> BiomeSpawnsEventJS.class);
 
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
@@ -59,9 +59,7 @@ public class EventHandlers {
 
     public static void postDataEvent(VirtualKubeJSDataPack pack, MultiPackResourceManager multiManager) {
         if (pack != null && multiManager != null) {
-            // Forge's biome modifiers are only read once during server startup, this event will be posted for every resource reload
-            biomeSpawns.post(new ModifySpawnsEventJS(pack, multiManager));
-            BaseLivingEntityBuilder.spawnsBiomeModifiers.forEach(pack::addData);
+            // Unused
         }
     }
 }

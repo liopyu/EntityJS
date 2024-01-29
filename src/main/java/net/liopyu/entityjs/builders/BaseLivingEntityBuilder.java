@@ -13,7 +13,9 @@ import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
+import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.*;
+import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -25,6 +27,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.random.Weight;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.CombatTracker;
@@ -37,6 +40,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
@@ -364,9 +368,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient BiPredicate<Level, BlockPos> mayInteract;
     public transient TriPredicate<BlockState, BlockPos, Float> canTrample;
     public transient Consumer<T> onRemovedFromWorld;
-    private transient int biomeSpawnsCount;
-    public static final Map<ResourceLocation, String> spawnsBiomeModifiers = new HashMap<>();
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
+    public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
     public transient BiFunction<Float, Float, Integer> calculateFallDamage;
 
     //STUFF
@@ -408,7 +411,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mainArm = HumanoidArm.RIGHT;
         canBreatheUnderwater = false;
         passengerPredicate = entity -> true;
-        biomeSpawnsCount = 0;
     }
 
     @Info(value = "Sets the main arm of the entity, defaults to 'right'")
@@ -1977,28 +1979,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             @Param(name = "maxCount", value = "The maximum number of entities that can spawn at a time")
     })
     public BaseLivingEntityBuilder<T> biomeSpawn(List<String> biomes, int weight, int minCount, int maxCount) {
-        final JsonObject json = new JsonObject();
-        json.addProperty("type", "forge:add_spawns");
-        if (biomes.size() == 1) {
-            json.addProperty("biomes", biomes.get(0));
-        } else {
-            final JsonArray array = new JsonArray(biomes.size());
-            biomes.forEach(array::add);
-            json.add("biomes", array);
-        }
-
-        final JsonObject spawner = new JsonObject();
-        spawner.addProperty("type", id.toString());
-        spawner.addProperty("weight", weight);
-        spawner.addProperty("minCount", minCount);
-        spawner.addProperty("maxCount", maxCount);
-        final JsonArray spawners = new JsonArray(1);
-        spawners.add(spawner);
-        json.add("spawners", spawners);
-        spawnsBiomeModifiers.put(
-                EntityJSMod.identifier("forge/biome_modifiers/" + id.getNamespace() + "/" + id.getPath() + "_" + biomeSpawnsCount++),
-                JsonIO.toString(json)
-        );
+        biomeSpawnList.add(new EventBasedSpawnModifier.BiomeSpawn(BiomeSpawnsEventJS.processBiomes(biomes), () -> new MobSpawnSettings.SpawnerData(get(), Weight.of(weight), minCount, maxCount)));
         return this;
     }
 

@@ -26,6 +26,7 @@ import java.util.LinkedList;
  * This is taken from <a href="https://github.com/Notenoughmail/KubeJS-TFC/blob/1.20.1/src/main/java/com/notenoughmail/kubejs_tfc/util/implementation/mixin/ServerScripManagerMixin.java">KubeJS TFC</a>
  * and modified to use Mixin Extra's {@link WrapOperation} annotation
  */
+// Currently unused but keeping it around just in case
 @Mixin(value = ServerScriptManager.class, remap = false)
 public abstract class ServerScriptManagerMixin {
 
