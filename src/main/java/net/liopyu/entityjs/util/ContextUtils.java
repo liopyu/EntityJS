@@ -2,16 +2,17 @@ package net.liopyu.entityjs.util;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 
 public class ContextUtils {
     public static class PlayerEntityContext {
@@ -52,6 +53,16 @@ public class ContextUtils {
 
         public DamageContext(LivingEntity targetEntity, DamageSource damageSource) {
             this.targetEntity = targetEntity;
+            this.damageSource = damageSource;
+        }
+    }
+
+    public static class DeathContext {
+        public final LivingEntity entity;
+        public final DamageSource damageSource;
+
+        public DeathContext(LivingEntity entity, DamageSource damageSource) {
+            this.entity = entity;
             this.damageSource = damageSource;
         }
     }
@@ -123,6 +134,109 @@ public class ContextUtils {
         public TargetChangeContext(LivingEntity target, PathfinderMob entity) {
             this.entity = entity;
             this.target = target;
+        }
+    }
+
+    public static class AutoAttackContext {
+        public final LivingEntity target;
+        public final LivingEntity entity;
+
+        public AutoAttackContext(LivingEntity target, LivingEntity entity) {
+            this.entity = entity;
+            this.target = target;
+        }
+    }
+
+    public static class EntityFloatContext {
+        public final LivingEntity livingEntity;
+        public final float absorbtionAmount;
+
+        public EntityFloatContext(LivingEntity livingEntity, float absorbtionAmount) {
+            this.livingEntity = livingEntity;
+            this.absorbtionAmount = absorbtionAmount;
+        }
+    }
+
+    public static class EntityHealContext {
+        public final LivingEntity livingEntity;
+        public final float healAmount;
+
+        public EntityHealContext(LivingEntity livingEntity, float healAmount) {
+            this.livingEntity = livingEntity;
+            this.healAmount = healAmount;
+        }
+    }
+
+
+    public static class EntityItemEntityContext {
+        public final LivingEntity livingEntity;
+        public final ItemEntity itemEntity;
+
+        public EntityItemEntityContext(LivingEntity livingEntity, ItemEntity itemEntity) {
+            this.livingEntity = livingEntity;
+            this.itemEntity = itemEntity;
+        }
+    }
+
+    public static class EntityTypeEntityContext {
+        public final LivingEntity livingEntity;
+        public final EntityType<?> targetType;
+
+        public EntityTypeEntityContext(LivingEntity livingEntity, EntityType<?> targetType) {
+            this.livingEntity = livingEntity;
+            this.targetType = targetType;
+        }
+    }
+
+    public static class EntityFluidStateContext {
+        public final LivingEntity livingEntity;
+        public final FluidState fluidState;
+
+        public EntityFluidStateContext(LivingEntity livingEntity, FluidState fluidState) {
+            this.livingEntity = livingEntity;
+            this.fluidState = fluidState;
+        }
+    }
+
+    public static class EntityFallDamageContext {
+        public final LivingEntity livingEntity;
+        public final float distance;
+        public final float damageMultiplier;
+        public final DamageSource damageSource;
+
+        public EntityFallDamageContext(LivingEntity livingEntity, float distance, float damageMultiplier, DamageSource damageSource) {
+            this.livingEntity = livingEntity;
+            this.distance = distance;
+            this.damageMultiplier = damageMultiplier;
+            this.damageSource = damageSource;
+        }
+    }
+
+    public static class EntityLootContext {
+        public final DamageSource damageSource;
+        public final int lootingMultiplier;
+        public final boolean allowDrops;
+        public final LivingEntity entity;
+
+        public EntityLootContext(DamageSource damageSource, int lootingMultiplier, boolean allowDrops, LivingEntity entity) {
+            this.damageSource = damageSource;
+            this.lootingMultiplier = lootingMultiplier;
+            this.allowDrops = allowDrops;
+            this.entity = entity;
+        }
+    }
+
+    public static class EntityEquipmentContext {
+        public final EquipmentSlot slot;
+        public final ItemStack previousStack;
+        public final ItemStack currentStack;
+        public final LivingEntity livingEntity;
+
+        public EntityEquipmentContext(EquipmentSlot slot, ItemStack previousStack, ItemStack currentStack, LivingEntity livingEntity) {
+            this.slot = slot;
+            this.previousStack = previousStack;
+            this.currentStack = currentStack;
+            this.livingEntity = livingEntity;
         }
     }
 }

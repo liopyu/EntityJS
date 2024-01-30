@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.EntityType;
 import net.liopyu.entityjs.util.*;
@@ -117,26 +119,36 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
 
-    @Override
+    /*@Override
     public boolean isAttackable() {
         return builder.isAttackable;
-    }
+    }*/
 
     //Start of the method adding madness - liopyu
     @Override
     protected boolean canAddPassenger(@NotNull Entity entity) {
-        return builder.passengerPredicate.test(entity);
+        if (builder.canAddPassenger != null) {
+            return builder.canAddPassenger.test(entity);
+        } else return super.canAddPassenger(entity);
     }
 
     @Override
     protected boolean shouldDropLoot() {
-        return builder.shouldDropLoot;
+        if (builder.shouldDropLoot != null) {
+            return builder.shouldDropLoot.test(this);
+        } else {
+            return super.shouldDropLoot();
+        }
     }
 
 
     @Override
     protected boolean isAffectedByFluids() {
-        return builder.isAffectedByFluids;
+        if (builder.isAffectedByFluids != null) {
+            return builder.isAffectedByFluids.test(this);
+        } else {
+            return super.isAffectedByFluids();
+        }
     }
 
     @Override
@@ -146,13 +158,19 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected boolean isImmobile() {
-        return builder.isImmobile;
+        if (builder.isImmobile != null) {
+            return builder.isImmobile.test(this);
+        } else return super.isImmobile();
     }
 
 
     @Override
     protected boolean isFlapping() {
-        return builder.isFlapping;
+        if (builder.isFlapping != null) {
+            return builder.isFlapping.apply(this);
+        } else {
+            return super.isFlapping();
+        }
     }
 
 
@@ -171,11 +189,10 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public void onAddedToWorld() {
+        super.onAddedToWorld();
         if (builder.onAddedToWorld != null) {
             builder.onAddedToWorld.accept(this);
-            super.onAddedToWorld();
-        } else {
-            super.onAddedToWorld();
+
         }
     }
 
@@ -191,7 +208,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
 
-    @Override
+    /*@Override
     protected LootContext.@NotNull Builder createLootContext(boolean p_21105_, @NotNull DamageSource p_21106_) {
         LootContext.Builder originalBuilder = super.createLootContext(p_21105_, p_21106_);
 
@@ -200,70 +217,78 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         }
 
         return originalBuilder;
-    }
+    }*/
 
     @Override
     protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {
         super.doAutoAttackOnTouch(target);
         if (builder.doAutoAttackOnTouch != null) {
-            builder.doAutoAttackOnTouch.accept(target);
+            final ContextUtils.AutoAttackContext context = new ContextUtils.AutoAttackContext(this, target);
+            builder.doAutoAttackOnTouch.accept(context);
         }
     }
 
 
     @Override
     protected int decreaseAirSupply(int p_21303_) {
-        if (builder.customDecreaseAirSupply != null) {
-            return builder.customDecreaseAirSupply.apply(p_21303_);
+        if (builder.onDecreaseAirSupply != null) {
+            builder.onDecreaseAirSupply.accept(this);
         }
         return super.decreaseAirSupply(p_21303_);
     }
 
     @Override
-    protected void blockedByShield(@NotNull LivingEntity p_21246_) {
-        if (builder.customBlockedByShield != null) {
-            builder.customBlockedByShield.accept(p_21246_);
-        } else {
-            super.blockedByShield(p_21246_);
+    protected int increaseAirSupply(int p_21307_) {
+        if (builder.onIncreaseAirSupply != null) {
+            builder.onIncreaseAirSupply.accept(this);
         }
+        return super.increaseAirSupply(p_21307_);
     }
 
     @Override
+    protected void blockedByShield(@NotNull LivingEntity p_21246_) {
+        super.blockedByShield(p_21246_);
+        if (builder.onBlockedByShield != null) {
+            builder.onBlockedByShield.accept(p_21246_);
+        }
+    }
+
+    /*@Override
     protected float tickHeadTurn(float p_21260_, float p_21261_) {
         if (builder.customTickHeadTurn != null) {
             return builder.customTickHeadTurn.apply(p_21260_, p_21261_);
         } else {
             return super.tickHeadTurn(p_21260_, p_21261_);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected boolean doesEmitEquipEvent(@NotNull EquipmentSlot p_217035_) {
         if (builder.customDoesEmitEquipEvent != null) {
             return builder.customDoesEmitEquipEvent.test(p_217035_);
         } else {
             return super.doesEmitEquipEvent(p_217035_);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected boolean canEnterPose(@NotNull Pose p_20176_) {
         if (builder.customCanEnterPose != null) {
             return builder.customCanEnterPose.test(p_20176_);
         } else {
             return super.canEnterPose(p_20176_);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     protected boolean isHorizontalCollisionMinor(@NotNull Vec3 p_196625_) {
         if (builder.customIsHorizontalCollisionMinor != null) {
             return builder.customIsHorizontalCollisionMinor.test(p_196625_);
         } else {
             return super.isHorizontalCollisionMinor(p_196625_);
         }
-    }
+    }*/
 
     @Override
     protected boolean repositionEntityAfterLoad() {
@@ -274,26 +299,26 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    @Override
+    /*@Override
     protected boolean updateInWaterStateAndDoFluidPushing() {
         if (builder.customUpdateInWaterStateAndDoFluidPushing != null) {
             return builder.customUpdateInWaterStateAndDoFluidPushing.getAsBoolean();
         } else {
             return super.updateInWaterStateAndDoFluidPushing();
         }
-    }
+    }*/
 
 
     @Override
     protected float nextStep() {
-        if (builder.customNextStep != null) {
-            return builder.customNextStep.apply(super.nextStep());
+        if (builder.nextStep != null) {
+            return builder.nextStep.apply(this);
         } else {
             return super.nextStep();
         }
     }
 
-    @Override
+    /*@Override
     protected @NotNull HoverEvent createHoverEvent() {
         HoverEvent originalHoverEvent = super.createHoverEvent();
         if (builder.customCreateHoverEvent != null) {
@@ -301,36 +326,28 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         } else {
             return originalHoverEvent;
         }
-    }
+    }*/
 
 
-    @Override
-    protected int increaseAirSupply(int p_21307_) {
-        int originalAirSupply = super.increaseAirSupply(p_21307_);
-        if (builder.customIncreaseAirSupply != null) {
-            return builder.customIncreaseAirSupply.apply(originalAirSupply);
-        } else {
-            return originalAirSupply;
-        }
-    }
 
-    @Override
+
+   /* @Override
     protected @NotNull ListTag newDoubleList(double @NotNull ... p_20064_) {
         if (builder.customNewDoubleList != null) {
             return builder.customNewDoubleList.apply(p_20064_);
         } else {
             return super.newDoubleList(p_20064_);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected @NotNull ListTag newFloatList(float @NotNull ... p_20066_) {
         if (builder.customNewFloatList != null) {
             return builder.customNewFloatList.apply(p_20066_);
         } else {
             return super.newFloatList(p_20066_);
         }
-    }
+    }*/
 
    /* @Override
     protected @NotNull Optional<BlockUtil.FoundRectangle> getExitPortal(@NotNull ServerLevel p_185935_, @NotNull BlockPos p_185936_, boolean p_185937_, @NotNull WorldBorder p_185938_) {
@@ -342,26 +359,27 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }*/
 
-    @Override
+    /*@Override
     protected @NotNull SoundEvent getDrinkingSound(@NotNull ItemStack p_21174_) {
-        if (builder.customGetDrinkingSound != null) {
-            return builder.customGetDrinkingSound.apply(p_21174_);
+        if (builder.setDrinkingSound != null) {
+            return Objects.requireNonNull(Wrappers.soundEvent(builder.setDrinkingSound));
         } else {
             return super.getDrinkingSound(p_21174_);
         }
-    }
+    }*/
 
     @Nullable
     @Override
     protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
-        if (builder.customGetHurtSound != null) {
-            return builder.customGetHurtSound.apply(p_21239_);
+        if (builder.setHurtSound != null) {
+            return Objects.requireNonNull(Wrappers.soundEvent(builder.setHurtSound));
         } else {
             return super.getHurtSound(p_21239_);
         }
     }
 
-    @Nullable
+
+/*@Nullable
     @Override
     protected PortalInfo findDimensionEntryPoint(@NotNull ServerLevel p_19923_) {
         if (builder.customFindDimensionEntryPoint != null) {
@@ -369,144 +387,148 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         } else {
             return super.findDimensionEntryPoint(p_19923_);
         }
-    }
+    }*/
 
     @Override
-    protected @NotNull SoundEvent getSwimSplashSound() {
-        if (builder.customGetSwimSplashSound != null) {
-            return builder.customGetSwimSplashSound.apply(super.getSwimSplashSound());
+    protected SoundEvent getSwimSplashSound() {
+        if (builder.setSwimSplashSound != null) {
+            return Objects.requireNonNull(Wrappers.soundEvent(builder.setSwimSplashSound));
         } else {
             return super.getSwimSplashSound();
         }
     }
 
-    @Override
+    /*@Override
     protected @NotNull Vec3 getRelativePortalPosition(Direction.@NotNull Axis p_21085_, BlockUtil.@NotNull FoundRectangle p_21086_) {
         if (builder.customGetRelativePortalPosition != null) {
             return builder.customGetRelativePortalPosition.apply(p_21085_, p_21086_);
         } else {
             return super.getRelativePortalPosition(p_21085_, p_21086_);
         }
-    }
+    }*/
 
-    @Override
+   /* @Override
     protected @NotNull Vec3 limitPistonMovement(@NotNull Vec3 p_20134_) {
         if (builder.customLimitPistonMovement != null) {
             return builder.customLimitPistonMovement.apply(p_20134_);
         } else {
             return super.limitPistonMovement(p_20134_);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected @NotNull Vec3 maybeBackOffFromEdge(@NotNull Vec3 p_20019_, @NotNull MoverType p_20020_) {
         if (builder.customMaybeBackOffFromEdge != null) {
             return builder.customMaybeBackOffFromEdge.apply(p_20019_, p_20020_);
         } else {
             return super.maybeBackOffFromEdge(p_20019_, p_20020_);
         }
-    }
+    }*/
 
-    @Override
+   /* @Override
     protected void actuallyHurt(@NotNull DamageSource p_21240_, float p_21241_) {
         if (builder.customActuallyHurt != null) {
             builder.customActuallyHurt.accept(p_21240_, p_21241_);
         } else {
             super.actuallyHurt(p_21240_, p_21241_);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected void blockUsingShield(@NotNull LivingEntity p_21200_) {
         if (builder.customBlockUsingShield != null) {
             builder.customBlockUsingShield.accept(p_21200_);
         } else {
             super.blockUsingShield(p_21200_);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     protected void checkAutoSpinAttack(@NotNull AABB p_21072_, @NotNull AABB p_21073_) {
         if (builder.customCheckAutoSpinAttack != null) {
             builder.customCheckAutoSpinAttack.accept(p_21072_, p_21073_);
         } else {
             super.checkAutoSpinAttack(p_21072_, p_21073_);
         }
-    }
+    }*/
 
-    @Override
+   /* @Override
     protected void checkFallDamage(double p_20990_, boolean p_20991_, @NotNull BlockState p_20992_, @NotNull BlockPos p_20993_) {
         if (builder.customCheckFallDamage != null) {
             builder.customCheckFallDamage.accept(p_20990_, ForgeRegistries.BLOCKS.getKey(p_20992_.getBlock()));
         }
         super.checkFallDamage(p_20990_, p_20991_, p_20992_, p_20993_);
-    }
+    }*/
 
-    @Override
+   /* @Override
     public void kill() {
         if (builder.kill != null) {
             builder.kill.accept(this);
         }
         super.kill();
-    }
+    }*/
 
     @Override
     public boolean canAttackType(@NotNull EntityType<?> entityType) {
-        return (builder.customCanAttackType != null && builder.customCanAttackType.apply(entityType)) || super.canAttackType(entityType);
+        if (builder.canAttackType != null) {
+            final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(this, entityType);
+            return builder.canAttackType.test(context);
+        }
+        return super.canAttackType(entityType);
     }
 
-    @Override
+    /*@Override
     public float getSwimAmount(float p_20999_) {
         if (builder.customGetSwimAmount != null) {
             return builder.customGetSwimAmount.apply(p_20999_);
         }
         return super.getSwimAmount(p_20999_);
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public boolean canSpawnSoulSpeedParticle() {
         return Objects.requireNonNullElseGet(builder.canSpawnSoulSpeedParticle, super::canSpawnSoulSpeedParticle);
-    }
+    }*/
 
-    @Override
+   /* @Override
     protected void spawnSoulSpeedParticle() {
         if (builder.customSpawnSoulSpeedParticle != null) {
             builder.customSpawnSoulSpeedParticle.run();
         } else {
             super.spawnSoulSpeedParticle();
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     protected void removeSoulSpeed() {
         if (builder.customRemoveSoulSpeed != null) {
             builder.customRemoveSoulSpeed.run();
         } else {
             super.removeSoulSpeed();
         }
-    }
+    }*/
 
-    @Override
+   /* @Override
     protected void tryAddSoulSpeed() {
         if (builder.customTryAddSoulSpeed != null) {
             builder.customTryAddSoulSpeed.run();
         } else {
             super.tryAddSoulSpeed();
         }
-    }
+    }*/
 
-    @Override
+   /* @Override
     protected void removeFrost() {
         if (builder.customRemoveFrost != null) {
             builder.customRemoveFrost.run();
         } else {
             super.removeFrost();
         }
-    }
+    }*/
 
-    @Override
+  /*  @Override
     protected void tryAddFrost() {
         if (builder.customTryAddFrost != null) {
             builder.customTryAddFrost.run();
@@ -514,105 +536,112 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
             super.tryAddFrost();
         }
     }
-
-    @Override
+*/
+    /*@Override
     protected void onChangedBlock(@NotNull BlockPos p_21175_) {
         if (builder.customOnChangedBlock != null) {
             builder.customOnChangedBlock.accept(p_21175_);
         } else {
             super.onChangedBlock(p_21175_);
         }
-    }
+    }*/
 
 
     @Override
     public float getScale() {
-        return Objects.requireNonNullElseGet(builder.customScale, super::getScale);
+        if (builder.scale != null) {
+            return builder.scale.apply(this);
+        } else {
+            return super.getScale();
+        }
     }
 
     @Override
     public boolean rideableUnderWater() {
-        return Objects.requireNonNullElseGet(builder.rideableUnderWater, super::rideableUnderWater);
+        return builder.rideableUnderWater;
     }
 
 
-    @Override
+   /* @Override
     protected void tickDeath() {
         if (builder.tickDeath != null) {
             builder.tickDeath.accept(this);
         } else {
             super.tickDeath();
         }
-    }
+    }*/
 
     @Override
     public boolean shouldDropExperience() {
-        return builder.shouldDropExperience;
+        if (builder.shouldDropExperience == null) {
+            return super.shouldDropExperience();
+        }
+        return builder.shouldDropExperience.test(this);
     }
 
-    @Override
+    /*@Override
     public boolean shouldDiscardFriction() {
         if (builder.customShouldDiscardFriction != null) {
             return builder.customShouldDiscardFriction.get();
         } else {
             return super.shouldDiscardFriction();
         }
-    }
+    }*/
 
 
-    @Override
+   /* @Override
     public void setDiscardFriction(boolean p_147245_) {
         if (builder.customSetDiscardFriction != null) {
             builder.customSetDiscardFriction.accept(p_147245_);
         } else {
             super.setDiscardFriction(p_147245_);
         }
-    }
+    }*/
 
-    //EquipmentSlot, Old Itemstack, New Itemstack
+
     @Override
-    public void onEquipItem(@NotNull EquipmentSlot slot, @NotNull ItemStack previous, @NotNull ItemStack current) {
-        if (builder.customOnEquipItem != null) {
-            builder.customOnEquipItem.accept(slot, previous, current);
-        } else {
-            super.onEquipItem(slot, previous, current);
+    public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
+        super.onEquipItem(slot, previous, current);
+        if (builder.onEquipItem != null) {
+            final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, this);
+            builder.onEquipItem.accept(context);
         }
     }
 
-    @Override
+    /*@Override
     protected void playEquipSound(@NotNull ItemStack itemStack) {
         if (builder.customPlayEquipSound != null) {
             builder.customPlayEquipSound.accept(itemStack);
         } else {
             super.playEquipSound(itemStack);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     protected void tickEffects() {
         if (builder.customTickEffects != null) {
             builder.customTickEffects.run();
         } else {
             super.tickEffects();
         }
-    }
+    }*/
 
 
-    @Override
+   /* @Override
     protected void updateInvisibilityStatus() {
         if (builder.customUpdateInvisibilityStatus != null) {
             builder.customUpdateInvisibilityStatus.run();
         } else {
             super.updateInvisibilityStatus();
         }
-    }
+    }*/
 
 
     @Override
     public double getVisibilityPercent(@Nullable Entity p_20969_) {
-        if (builder.customGetVisibilityPercent != null) {
-            return builder.customGetVisibilityPercent.apply(p_20969_);
+        if (builder.visibilityPercent != null) {
+            return builder.visibilityPercent.apply(p_20969_);
         } else {
             return super.getVisibilityPercent(p_20969_);
         }
@@ -620,72 +649,72 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
 
     @Override
-    public boolean canAttack(@NotNull LivingEntity p_21171_) {
+    public boolean canAttack(@NotNull LivingEntity entity) {
         if (builder.customCanAttack != null) {
-            return builder.customCanAttack.test(p_21171_);
+            return builder.customCanAttack.test(entity) && super.canAttack(entity);
         } else {
-            return super.canAttack(p_21171_);
+            return super.canAttack(entity);
         }
     }
 
 
-    @Override
+    /*@Override
     public boolean canAttack(@NotNull LivingEntity p_21041_, @NotNull TargetingConditions p_21042_) {
         if (builder.customCanAttackWithConditions != null) {
             return builder.customCanAttackWithConditions.test(p_21041_, p_21042_);
         } else {
             return super.canAttack(p_21041_, p_21042_);
         }
-    }
+    }*/
 
 
-    @Override
+   /* @Override
     public boolean canBeSeenAsEnemy() {
         if (builder.customCanBeSeenAsEnemy != null) {
             return builder.customCanBeSeenAsEnemy.getAsBoolean();
         } else {
             return super.canBeSeenAsEnemy();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public boolean canBeSeenByAnyone() {
-        if (builder.customCanBeSeenByAnyone != null) {
-            return builder.customCanBeSeenByAnyone.getAsBoolean();
+        if (builder.canBeSeenByAnyone != null) {
+            return builder.canBeSeenByAnyone.test(this);
         } else {
             return super.canBeSeenByAnyone();
         }
-    }
+    }*/
 
 
-    @Override
+   /* @Override
     protected void removeEffectParticles() {
         if (builder.customRemoveEffectParticles != null) {
             builder.customRemoveEffectParticles.run();
         } else {
             super.removeEffectParticles();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public boolean removeAllEffects() {
         if (builder.customRemoveAllEffects != null) {
             return builder.customRemoveAllEffects.test(super.removeAllEffects());
         } else {
             return super.removeAllEffects();
         }
-    }
+    }*/
 
-    @Override
+   /* @Override
     public boolean addEffect(@NotNull MobEffectInstance p_147208_, @Nullable Entity p_147209_) {
         if (builder.customAddEffect != null) {
             return builder.customAddEffect.test(p_147208_, p_147209_);
         } else {
             return super.addEffect(p_147208_, p_147209_);
         }
-    }
+    }*/
 
 
     @Override
@@ -697,14 +726,14 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
 
-    @Override
+   /* @Override
     public void forceAddEffect(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
         if (builder.forceAddEffectConsumer != null) {
             builder.forceAddEffectConsumer.accept(effectInstance, entity);
         } else {
             super.forceAddEffect(effectInstance, entity);
         }
-    }
+    }*/
 
 
     @Override
@@ -769,35 +798,35 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public void heal(float amount) {
-        if (builder.healAmount != null) {
-            builder.healAmount.accept(amount, this);
-        } else {
-            super.heal(amount);
+        super.heal(amount);
+        if (builder.onLivingHeal != null) {
+            final ContextUtils.EntityHealContext context = new ContextUtils.EntityHealContext(this, amount);
+            builder.onLivingHeal.accept(context);
         }
     }
 
 
-    @Override
+    /*@Override
     public boolean isDeadOrDying() {
         if (builder.isDeadOrDying != null) {
             return builder.isDeadOrDying.test(this);
         } else {
             return super.isDeadOrDying();
         }
-    }
+    }*/
 
 
-    @Override
+   /* @Override
     public boolean hurt(@NotNull DamageSource damageSource, float amount) {
         if (builder.hurtPredicate != null) {
             return builder.hurtPredicate.test(damageSource, amount);
         } else {
             return super.hurt(damageSource, amount);
         }
-    }
+    }*/
 
 
-    @Nullable
+    /*@Nullable
     @Override
     public DamageSource getLastDamageSource() {
         if (builder.lastDamageSourceSupplier != null) {
@@ -805,25 +834,25 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         } else {
             return super.getLastDamageSource();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public boolean isDamageSourceBlocked(@NotNull DamageSource damageSource) {
         if (builder.isDamageSourceBlocked != null) {
             return builder.isDamageSourceBlocked.test(damageSource);
         } else {
             return super.isDamageSourceBlocked(damageSource);
         }
-    }
+    }*/
 
 
     @Override
     public void die(@NotNull DamageSource damageSource) {
-        if (builder.die != null) {
-            builder.die.accept(damageSource);
-        } else {
-            super.die(damageSource);
+        super.die(damageSource);
+        if (builder.onDeath != null) {
+            final ContextUtils.DeathContext context = new ContextUtils.DeathContext(this, damageSource);
+            builder.onDeath.accept(context);
         }
     }
 
@@ -838,43 +867,44 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }*/
 
 
-    @Override
+    /*@Override
     protected void dropAllDeathLoot(@NotNull DamageSource damageSource) {
         if (builder.dropAllDeathLoot != null) {
             builder.dropAllDeathLoot.accept(damageSource);
         } else {
             super.dropAllDeathLoot(damageSource);
         }
-    }
+    }*/
 
 
-    @Override
+   /* @Override
     protected void dropEquipment() {
         if (builder.dropEquipment != null) {
             builder.dropEquipment.accept(null);
         } else {
             super.dropEquipment();
         }
-    }
+    }*/
 
 
     @Override
     protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
         if (builder.dropCustomDeathLoot != null) {
-            builder.dropCustomDeathLoot.accept(damageSource, lootingMultiplier, allowDrops);
+            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, this);
+            builder.dropCustomDeathLoot.accept(context);
         } else {
             super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
         }
     }
 
-    @Override
+    /*@Override
     protected void dropFromLootTable(@NotNull DamageSource source, boolean flag) {
         if (builder.dropFromLootTable != null) {
             builder.dropFromLootTable.accept(source, flag);
         } else {
             super.dropFromLootTable(source, flag);
         }
-    }
+    }*/
 
 
     /*@Override
@@ -887,30 +917,34 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }*/
 
 
-    @Override
+    /*@Override
     public void skipDropExperience() {
         if (builder.skipDropExperience != null) {
             builder.skipDropExperience.run();
         } else {
             super.skipDropExperience();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public boolean wasExperienceConsumed() {
         if (builder.wasExperienceConsumed != null) {
             return builder.wasExperienceConsumed.get();
         } else {
             return super.wasExperienceConsumed();
         }
-    }
+    }*/
 
 
     @Override
     public @NotNull Fallsounds getFallSounds() {
-        if (builder.fallSoundsFunction != null) {
-            return builder.fallSoundsFunction.apply(super.getFallSounds());
+        if (builder.fallSounds != null) {
+            final SoundEvent smallFall = Wrappers.soundEvent(builder.fallSounds.small());
+            final SoundEvent bigFall = Wrappers.soundEvent(builder.fallSounds.big());
+            assert smallFall != null;
+            assert bigFall != null;
+            return new Fallsounds(smallFall, bigFall);
         } else {
             return super.getFallSounds();
         }
@@ -920,7 +954,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null) {
-            return builder.eatingSound.apply(itemStack);
+            return Objects.requireNonNull(Wrappers.soundEvent(builder.eatingSound));
         } else {
             return super.getEatingSound(itemStack);
         }
@@ -936,6 +970,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
+
     //Deprecated but still works for 1.20.4 :shrug:
     @Override
     public boolean canBreatheUnderwater() {
@@ -945,55 +980,57 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
-        if (builder.causeFallDamage != null) {
-            return builder.causeFallDamage.test(distance, damageSource);
+        if (builder.onLivingFall != null) {
+            final ContextUtils.EntityFallDamageContext context = new ContextUtils.EntityFallDamageContext(this, damageMultiplier, distance, damageSource);
+            builder.onLivingFall.accept(context);
+            return super.causeFallDamage(distance, damageMultiplier, damageSource);
         } else {
             return super.causeFallDamage(distance, damageMultiplier, damageSource);
         }
     }
 
 
-    @Override
+    /*@Override
     protected void playBlockFallSound() {
         if (builder.playBlockFallSound != null) {
             builder.playBlockFallSound.accept(null);
         } else {
             super.playBlockFallSound();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     protected void hurtArmor(@NotNull DamageSource source, float amount) {
         if (builder.hurtArmor != null) {
             builder.hurtArmor.accept(source, amount);
         } else {
             super.hurtArmor(source, amount);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     protected void hurtHelmet(@NotNull DamageSource source, float amount) {
         if (builder.hurtHelmet != null) {
             builder.hurtHelmet.accept(source, amount);
         } else {
             super.hurtHelmet(source, amount);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     protected void hurtCurrentlyUsedShield(float amount) {
         if (builder.hurtCurrentlyUsedShield != null) {
             builder.hurtCurrentlyUsedShield.accept(amount);
         } else {
             super.hurtCurrentlyUsedShield(amount);
         }
-    }
+    }*/
 
 
-    @Nullable
+    /*@Nullable
     @Override
     public LivingEntity getKillCredit() {
         if (builder.killCredit != null) {
@@ -1002,82 +1039,83 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
             return super.getKillCredit();
         }
     }
+*/
 
-
-    @Override
+    /*@Override
     public void swing(@NotNull InteractionHand hand) {
         if (builder.swingHand != null) {
             builder.swingHand.accept(hand);
         } else {
             super.swing(hand);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public void swing(@NotNull InteractionHand hand, boolean extended) {
         if (builder.swingHandExtended != null) {
             builder.swingHandExtended.accept(hand, extended);
         } else {
             super.swing(hand, extended);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public void handleEntityEvent(byte event) {
         if (builder.handleEntityEvent != null) {
             builder.handleEntityEvent.accept(event);
         } else {
             super.handleEntityEvent(event);
         }
-    }
+    }*/
 
 
-    @Override
+   /* @Override
     public void setItemInHand(@NotNull InteractionHand hand, @NotNull ItemStack stack) {
         if (builder.setItemInHand != null) {
             builder.setItemInHand.accept(hand, stack);
         } else {
             super.setItemInHand(hand, stack);
         }
-    }
+    }*/
 
 
     @Override
     public void setSprinting(boolean sprinting) {
-        if (builder.setSprinting != null) {
-            builder.setSprinting.accept(sprinting);
+        if (builder.onSprint != null) {
+            builder.onSprint.accept(this);
+            super.setSprinting(sprinting);
         } else {
             super.setSprinting(sprinting);
         }
     }
 
 
-    @Override
+    /*@Override
     public void push(@NotNull Entity entity) {
         if (builder.pushEntity != null) {
             builder.pushEntity.accept(entity);
         } else {
             super.push(entity);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public boolean shouldShowName() {
         if (builder.shouldShowName != null) {
             return builder.shouldShowName.test(this);
         } else {
             return super.shouldShowName();
         }
-    }
+    }*/
 
 
     @Override
     public double getJumpBoostPower() {
         if (builder.jumpBoostPower != null) {
-            return builder.jumpBoostPower.getAsDouble();
+            return builder.jumpBoostPower.getAsDouble() + super.getJumpBoostPower();
         } else {
             return super.getJumpBoostPower();
         }
@@ -1086,126 +1124,126 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public boolean canStandOnFluid(@NotNull FluidState fluidState) {
         if (builder.canStandOnFluid != null) {
-            return builder.canStandOnFluid.test(fluidState);
+            final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(this, fluidState);
+            return builder.canStandOnFluid.test(context);
         } else {
             return super.canStandOnFluid(fluidState);
         }
     }
 
 
-    @Override
+    /*@Override
     public void travel(@NotNull Vec3 travelVector) {
         if (builder.travel != null) {
             builder.travel.accept(travelVector);
         } else {
             super.travel(travelVector);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public @NotNull Vec3 handleRelativeFrictionAndCalculateMovement(@NotNull Vec3 movementVector, float friction) {
         if (builder.handleRelativeFrictionAndCalculateMovement != null) {
             return builder.handleRelativeFrictionAndCalculateMovement.apply(movementVector, friction);
         } else {
             return super.handleRelativeFrictionAndCalculateMovement(movementVector, friction);
         }
-    }
+    }*/
 
 
     @Override
     public void setSpeed(float speed) {
-        if (builder.setSpeedConsumer != null) {
-            builder.setSpeedConsumer.accept(speed);
+        if (builder.setSpeed != null) {
+            builder.setSpeed.accept(speed);
         } else {
             super.setSpeed(speed);
         }
     }
 
 
-    @Override
+    /*@Override
     public boolean doHurtTarget(@NotNull Entity targetEntity) {
         if (builder.doHurtTarget != null) {
             return builder.doHurtTarget.test(targetEntity, false);
         } else {
             return super.doHurtTarget(targetEntity);
         }
-    }
+    }*/
 
 
     @Override
     public boolean isSensitiveToWater() {
         if (builder.isSensitiveToWater != null) {
-            return builder.isSensitiveToWater.test(false);
+            return builder.isSensitiveToWater.test(this);
         } else {
             return super.isSensitiveToWater();
         }
     }
 
 
-    @Override
+    /*@Override
     public boolean isAutoSpinAttack() {
         if (builder.isAutoSpinAttack != null) {
             return builder.isAutoSpinAttack.test(false);
         } else {
             return super.isAutoSpinAttack();
         }
-    }
+    }*/
 
 
     @Override
     public void stopRiding() {
-        if (builder.stopRidingCallback != null) {
-            builder.stopRidingCallback.run();
-        } else {
-            super.stopRiding();
+        super.stopRiding();
+        if (builder.onStopRiding != null) {
+            builder.onStopRiding.accept(this);
         }
     }
 
 
     @Override
     public void rideTick() {
+        super.rideTick();
         if (builder.rideTick != null) {
             builder.rideTick.accept(this);
-        } else {
-            super.rideTick();
         }
     }
 
 
-    @Override
+    /*@Override
     public void lerpTo(double x, double y, double z, float yRot, float xRot, int interpolationSteps, boolean interpolate) {
         if (builder.lerpTo != null) {
             builder.lerpTo.accept(x, y, z, yRot, xRot, interpolationSteps, interpolate);
         } else {
             super.lerpTo(x, y, z, yRot, xRot, interpolationSteps, interpolate);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void lerpHeadTo(float lyHeadRot, int lerpHeadSteps) {
         if (builder.lerpHeadTo != null) {
             builder.lerpHeadTo.accept(lyHeadRot, lerpHeadSteps);
         } else {
             super.lerpHeadTo(lyHeadRot, lerpHeadSteps);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public void setJumping(boolean p_21314_) {
         if (builder.setJumping != null) {
             builder.setJumping.accept(p_21314_);
         } else {
             super.setJumping(p_21314_);
         }
-    }
+    }*/
 
 
     @Override
     public void onItemPickup(@NotNull ItemEntity p_21054_) {
         if (builder.onItemPickup != null) {
-            builder.onItemPickup.accept(p_21054_);
+            final ContextUtils.EntityItemEntityContext context = new ContextUtils.EntityItemEntityContext(this, p_21054_);
+            builder.onItemPickup.accept(context);
         } else {
             super.onItemPickup(p_21054_);
         }
@@ -1231,14 +1269,14 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
 
-    @Override
+    /*@Override
     public boolean isEffectiveAi() {
         if (builder.isEffectiveAi != null) {
             return builder.isEffectiveAi.test(null);
         } else {
             return super.isEffectiveAi();
         }
-    }
+    }*/
 
     @Override
     public void aiStep() {
@@ -1278,17 +1316,17 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    @Override
+    /*@Override
     public boolean isPickable() {
         if (builder.isPickable != null) {
             return builder.isPickable.test(null);
         } else {
             return super.isPickable();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public void setYHeadRot(float value) {
         if (builder.setYHeadRot != null) {
             builder.setYHeadRot.accept(value);
@@ -1305,13 +1343,14 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         } else {
             super.setYBodyRot(value);
         }
-    }
+    }*/
 
 
     @Override
     public void setAbsorptionAmount(float value) {
         if (builder.setAbsorptionAmount != null) {
-            builder.setAbsorptionAmount.accept(value);
+            final ContextUtils.EntityFloatContext context = new ContextUtils.EntityFloatContext(this, value);
+            builder.setAbsorptionAmount.accept(context);
         } else {
             super.setAbsorptionAmount(value);
         }
@@ -1321,7 +1360,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public void onEnterCombat() {
         if (builder.onEnterCombat != null) {
-            builder.onEnterCombat.run();
+            builder.onEnterCombat.accept(this);
         } else {
             super.onEnterCombat();
         }
@@ -1331,111 +1370,111 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public void onLeaveCombat() {
         if (builder.onLeaveCombat != null) {
-            builder.onLeaveCombat.run();
+            builder.onLeaveCombat.accept(this);
         } else {
             super.onLeaveCombat();
         }
     }
 
 
-    @Override
+   /* @Override
     public boolean isUsingItem() {
         if (builder.isUsingItem != null) {
             return builder.isUsingItem.test(this);
         } else {
             return super.isUsingItem();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     protected void setLivingEntityFlag(int flag, boolean value) {
         if (builder.setLivingEntityFlag != null) {
             builder.setLivingEntityFlag.accept(flag, value);
         } else {
             super.setLivingEntityFlag(flag, value);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void startUsingItem(@NotNull InteractionHand hand) {
         if (builder.startUsingItem != null) {
             builder.startUsingItem.accept(hand);
         } else {
             super.startUsingItem(hand);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public void lookAt(EntityAnchorArgument.@NotNull Anchor anchor, @NotNull Vec3 target) {
         if (builder.lookAt != null) {
             builder.lookAt.accept(anchor, target);
         } else {
             super.lookAt(anchor, target);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public void releaseUsingItem() {
         if (builder.releaseUsingItem != null) {
             builder.releaseUsingItem.run();
         } else {
             super.releaseUsingItem();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public void stopUsingItem() {
         if (builder.stopUsingItem != null) {
             builder.stopUsingItem.run();
         } else {
             super.stopUsingItem();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public boolean isBlocking() {
         if (builder.isBlocking != null) {
             return builder.isBlocking.test(this);
         } else {
             return super.isBlocking();
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public boolean isSuppressingSlidingDownLadder() {
         if (builder.isSuppressingSlidingDownLadder != null) {
             return builder.isSuppressingSlidingDownLadder.test(this);
         } else {
             return super.isSuppressingSlidingDownLadder();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public boolean isFallFlying() {
         if (builder.isFallFlying != null) {
             return builder.isFallFlying.test(this);
         } else {
             return super.isFallFlying();
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public boolean isVisuallySwimming() {
         if (builder.isVisuallySwimming != null) {
             return builder.isVisuallySwimming.test(this);
         } else {
             return super.isVisuallySwimming();
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public boolean randomTeleport(double p_20985_, double p_20986_, double p_20987_, boolean p_20988_) {
         if (builder.randomTeleportX != null && builder.randomTeleportY != null && builder.randomTeleportZ != null && builder.randomTeleportFlag != null) {
             double newX = builder.randomTeleportX.apply(p_20985_, p_20986_);
@@ -1449,7 +1488,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
             }
         }
         return super.randomTeleport(p_20985_, p_20986_, p_20987_, p_20988_);
-    }
+    }*/
 
     @Override
     public boolean isAffectedByPotions() {
@@ -1462,8 +1501,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean attackable() {
-        if (builder.attackablePredicate != null) {
-            return builder.attackablePredicate.apply(this);
+        if (builder.isAttackable != null) {
+            return builder.isAttackable.test(this);
         }
         return super.attackable();
     }
@@ -1703,13 +1742,9 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     /*@Override
     public void setAirSupply(int p_20302_) {
-        if (builder.setAirSupply != null) {
-            builder.setAirSupply.accept(p_20302_);
-        } else {
-            super.setAirSupply(p_20302_);
-        }
-    }
-*/
+        super.setAirSupply(p_20302_);
+
+    }*/
 
    /* @Override
     public void setTicksFrozen(int p_146918_) {

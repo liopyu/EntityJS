@@ -94,13 +94,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<T, ResourceLocation> animationResource;
     public transient boolean isPushable;
 
-    public transient boolean isAttackable;
+    /* public transient boolean isAttackable;*/
     public transient final List<AnimationControllerSupplier<T>> animationSuppliers;
-    public transient boolean shouldDropLoot;
-    public transient Predicate<Entity> setCanAddPassenger;
-    public transient boolean isAffectedByFluids;
+    public transient Predicate<LivingEntity> shouldDropLoot;
+    public transient Predicate<Entity> canAddPassenger;
+    public transient Predicate<LivingEntity> isAffectedByFluids;
     public transient boolean isAlwaysExperienceDropper;
-    public transient boolean isImmobile;
+    public transient Predicate<LivingEntity> isImmobile;
     public transient float getBlockJumpFactor;
     public transient Function<T, Integer> blockSpeedFactor;
     public transient float getJumpPower;
@@ -108,7 +108,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient float getWaterSlowDown;
     public transient SoundEvent setDeathSound;
     public transient SoundEvent setSwimSound;
-    public transient boolean isFlapping;
+    public transient Function<LivingEntity, Boolean> isFlapping;
     public transient SoundEvent getDeathSound;
     public transient SoundEvent getSwimSound;
     public transient RenderType renderType;
@@ -122,12 +122,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean onSoulSpeedBlock;
 
     public transient Function<LootContext.Builder, LootContext.Builder> customLootContextBuilder;
-    public transient Consumer<LivingEntity> doAutoAttackOnTouch;
+    public transient Consumer<ContextUtils.AutoAttackContext> doAutoAttackOnTouch;
 
     public transient Function<Pose, Float> customGetStandingEyeHeight;
     public transient Function<BlockPos, BlockPos> customGetBlockPosBelow;
-    public transient Function<Integer, Integer> customDecreaseAirSupply;
-    public transient Consumer<LivingEntity> customBlockedByShield;
+    public transient Consumer<LivingEntity> onDecreaseAirSupply;
+    public transient Consumer<LivingEntity> onBlockedByShield;
     public transient BiFunction<Float, Float, Float> customTickHeadTurn;
     public transient Predicate<EquipmentSlot> customDoesEmitEquipEvent;
     public transient Function<Pose, AABB> customGetBoundingBoxForPose;
@@ -139,18 +139,18 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<LivingEntity, Component> customGetTypeName;
     public transient BiFunction<DamageSource, Float, Float> customGetDamageAfterArmorAbsorb;
     public transient BiFunction<DamageSource, Float, Float> customGetDamageAfterMagicAbsorb;
-    public transient Function<Float, Float> customNextStep;
+    public transient Function<Entity, Float> nextStep;
     public transient Function<HoverEvent, HoverEvent> customCreateHoverEvent;
     public transient Function<Integer, Integer> customGetPermissionLevel;
-    public transient Function<Integer, Integer> customIncreaseAirSupply;
+    public transient Consumer<LivingEntity> onIncreaseAirSupply;
     public transient Function<double[], ListTag> customNewDoubleList;
     public transient Function<float[], ListTag> customNewFloatList;
     public transient Function<Entity.MovementEmission, Entity.MovementEmission> customGetMovementEmission;
 
-    public transient Function<ItemStack, SoundEvent> customGetDrinkingSound;
-    public transient Function<DamageSource, SoundEvent> customGetHurtSound;
+    public transient Object setDrinkingSound;
+    public transient Object setHurtSound;
     public transient Function<ServerLevel, PortalInfo> customFindDimensionEntryPoint;
-    public transient Function<SoundEvent, SoundEvent> customGetSwimSplashSound;
+    public transient Object setSwimSplashSound;
     public transient BiFunction<Direction.Axis, BlockUtil.FoundRectangle, Vec3> customGetRelativePortalPosition;
     public transient Function<Vec3, Vec3> customLimitPistonMovement;
     public transient BiFunction<Vec3, MoverType, Vec3> customMaybeBackOffFromEdge;
@@ -159,7 +159,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient BiConsumer<AABB, AABB> customCheckAutoSpinAttack;
     public transient BiConsumer<Double, ResourceLocation> customCheckFallDamage;
     public transient Consumer<T> kill;
-    public transient Function<EntityType<?>, Boolean> customCanAttackType;
+    public transient Predicate<ContextUtils.EntityTypeEntityContext> canAttackType;
 
     public transient Function<Float, Float> customGetSwimAmount;
 
@@ -172,34 +172,34 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Runnable customTryAddFrost;
     public transient Consumer<BlockPos> customOnChangedBlock;
     public transient Boolean isBaby;
-    public transient Float customScale;
-    public transient Boolean rideableUnderWater;
+    public transient Function<LivingEntity, Float> scale;
+    public transient boolean rideableUnderWater;
     public transient Consumer<T> tickDeath;
-    public transient boolean shouldDropExperience;
+    public transient Predicate<LivingEntity> shouldDropExperience;
 
     public transient Function<AnimalEntityJS, Integer> customExperienceReward;
     public transient Supplier<Boolean> customShouldDiscardFriction;
     public transient Consumer<Boolean> customSetDiscardFriction;
 
-    public transient TriConsumer<EquipmentSlot, ItemStack, ItemStack> customOnEquipItem;
+    public transient Consumer<ContextUtils.EntityEquipmentContext> onEquipItem;
     public transient Consumer<ItemStack> customPlayEquipSound;
     public transient Runnable customTickEffects;
     public transient Runnable customUpdateInvisibilityStatus;
 
-    public transient Function<Entity, Double> customGetVisibilityPercent;
+    public transient Function<Entity, Double> visibilityPercent;
 
     public transient Predicate<LivingEntity> customCanAttack;
 
-    public transient BiPredicate<LivingEntity, TargetingConditions> customCanAttackWithConditions;
+    /* public transient BiPredicate<LivingEntity, TargetingConditions> customCanAttackWithConditions;*/
 
-    public transient BooleanSupplier customCanBeSeenAsEnemy;
+    /*  public transient BooleanSupplier customCanBeSeenAsEnemy;*/
 
-    public transient BooleanSupplier customCanBeSeenByAnyone;
+    /*public transient Predicate<LivingEntity> canBeSeenByAnyone;*/
 
     public transient Runnable customRemoveEffectParticles;
 
     public transient Predicate<Boolean> customRemoveAllEffects;
-    public transient BiPredicate<MobEffectInstance, Entity> customAddEffect;
+    /*public transient Predicate<ContextUtils.OnEffectContext> customAddEffect;*/
     public transient Predicate<MobEffectInstance> canBeAffectedPredicate;
 
     public transient BiConsumer<MobEffectInstance, @Nullable Entity> forceAddEffectConsumer;
@@ -218,7 +218,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
 
-    public transient BiConsumer<Float, T> healAmount;
+    public transient Consumer<ContextUtils.EntityHealContext> onLivingHeal;
 
 
     public transient Predicate<LivingEntity> isDeadOrDying;
@@ -229,7 +229,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Predicate<DamageSource> isDamageSourceBlocked;
 
-    public transient Consumer<DamageSource> die;
+    public transient Consumer<ContextUtils.DeathContext> onDeath;
 
     /*public transient Consumer<LivingEntity> createWitherRose;*/
 
@@ -237,7 +237,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Consumer<Void> dropEquipment;
 
-    public transient TriConsumer<DamageSource, Integer, Boolean> dropCustomDeathLoot;
+    public transient Consumer<ContextUtils.EntityLootContext> dropCustomDeathLoot;
 
     public transient Supplier<ResourceLocation> lootTable;
 
@@ -250,14 +250,14 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Supplier<Boolean> wasExperienceConsumed;
 
-    public transient Function<LivingEntity.Fallsounds, LivingEntity.Fallsounds> fallSoundsFunction;
+    public transient LivingEntity.Fallsounds fallSounds;
 
-    public transient Function<ItemStack, SoundEvent> eatingSound;
+    public transient Object eatingSound;
 
     public transient Predicate<LivingEntity> onClimbable;
     public transient boolean canBreatheUnderwater;
 
-    public transient BiPredicate<Float, DamageSource> causeFallDamage;
+    public transient Consumer<ContextUtils.EntityFallDamageContext> onLivingFall;
 
     public transient Consumer<Void> playBlockFallSound;
     public transient BiConsumer<DamageSource, Float> hurtArmor;
@@ -270,18 +270,18 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient BiConsumer<InteractionHand, Boolean> swingHandExtended;
     public transient Consumer<Byte> handleEntityEvent;
     public transient BiConsumer<InteractionHand, ItemStack> setItemInHand;
-    public transient Consumer<Boolean> setSprinting;
+    public transient Consumer<LivingEntity> onSprint;
     public transient Consumer<Entity> pushEntity;
     public transient Predicate<LivingEntity> shouldShowName;
     public transient DoubleSupplier jumpBoostPower;
-    public transient Predicate<FluidState> canStandOnFluid;
+    public transient Predicate<ContextUtils.EntityFluidStateContext> canStandOnFluid;
     public transient Consumer<Vec3> travel;
     public transient BiFunction<Vec3, Float, Vec3> handleRelativeFrictionAndCalculateMovement;
-    public transient Consumer<Float> setSpeedConsumer;
+    public transient Consumer<Float> setSpeed;
     public transient BiPredicate<Entity, Boolean> doHurtTarget;
-    public transient Predicate<Boolean> isSensitiveToWater;
+    public transient Predicate<LivingEntity> isSensitiveToWater;
     public transient Predicate<Boolean> isAutoSpinAttack;
-    public transient Runnable stopRidingCallback;
+    public transient Consumer<LivingEntity> onStopRiding;
     public transient Consumer<T> rideTick;
     public SpawnPlacements.Type placementType;
     public Heightmap.Types heightMap;
@@ -295,16 +295,16 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient HeptConsumer lerpTo;
     public transient BiConsumer<Float, Integer> lerpHeadTo;
     public transient Consumer<Boolean> setJumping;
-    public transient Consumer<ItemEntity> onItemPickup;
+    public transient Consumer<ContextUtils.EntityItemEntityContext> onItemPickup;
     /*public transient BiConsumer<Entity, Integer> take;*/
     public transient Predicate<Entity> hasLineOfSight;
     public transient Predicate<Void> isEffectiveAi;
     public transient Predicate<Void> isPickable;
     public transient Consumer<Float> setYHeadRot;
     public transient Consumer<Float> setYBodyRot;
-    public transient Consumer<Float> setAbsorptionAmount;
-    public transient Runnable onEnterCombat;
-    public transient Runnable onLeaveCombat;
+    public transient Consumer<ContextUtils.EntityFloatContext> setAbsorptionAmount;
+    public transient Consumer<LivingEntity> onEnterCombat;
+    public transient Consumer<LivingEntity> onLeaveCombat;
     public transient Predicate<LivingEntity> isUsingItem;
 
     public transient BiConsumer<Integer, Boolean> setLivingEntityFlag;
@@ -316,13 +316,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Predicate<LivingEntity> isSuppressingSlidingDownLadder;
     public transient Predicate<LivingEntity> isFallFlying;
     public transient Predicate<LivingEntity> isVisuallySwimming;
-    public transient BiFunction<Double, Double, Double> randomTeleportX;
+    /*public transient BiFunction<Double, Double, Double> randomTeleportX;
     public transient BiFunction<Double, Double, Double> randomTeleportY;
-    public transient BiFunction<Double, Double, Double> randomTeleportZ;
-    public transient Predicate<Boolean> randomTeleportFlag;
+    public transient BiFunction<Double, Double, Double> randomTeleportZ;*/
+    /*public transient Predicate<Boolean> randomTeleportFlag;*/
     public transient Predicate<LivingEntity> isAffectedByPotions;
 
-    public transient Function<LivingEntity, Boolean> attackablePredicate;
+    public transient Predicate<LivingEntity> isAttackable;
     public transient BiConsumer<BlockPos, Boolean> setRecordPlayingNearby;
     public transient Predicate<ContextUtils.EntityItemLevelContext> canTakeItem;
     public transient Consumer<BlockPos> setSleepingPos;
@@ -364,7 +364,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     /*public transient Consumer<Boolean> setInvulnerable;*/
     public transient Predicate<LivingEntity> canChangeDimensions;
     /*public transient Consumer<Optional<Component>> setCustomName;*/
-
+    public transient BiFunction<Float, Float, Integer> calculateFallDamage;
     public transient Predicate<ContextUtils.MayInteractContext> mayInteract;
     public transient Predicate<ContextUtils.CanTrampleContext> canTrample;
     public transient Consumer<T> onRemovedFromWorld;
@@ -373,6 +373,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     private transient int biomeSpawnsCount;
     public static final Map<ResourceLocation, String> spawnsBiomeModifiers = new HashMap<>();
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
+
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -392,33 +393,23 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         textureResource = t -> t.getBuilder().newID("textures/models/entity/", ".png");
         animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");
         isPushable = true;
-        isAttackable = true;
         animationSuppliers = new ArrayList<>();
-        shouldDropLoot = true;
-        isAffectedByFluids = false;
         isAlwaysExperienceDropper = false;
-        isImmobile = false;
         getBlockJumpFactor = 0.5f;
         blockSpeedFactor = t -> 1;
         getJumpPower = 0.5f;
         getSoundVolume = 1.0f;
         getWaterSlowDown = 0.0f;
-        setDeathSound = SoundEvents.BUCKET_EMPTY;
-        setSwimSound = SoundEvents.MOOSHROOM_SHEAR;
-        isFlapping = false;
-        getDeathSound = SoundEvents.BUCKET_EMPTY;
-        getSwimSound = SoundEvents.MOOSHROOM_SHEAR;
         renderType = RenderType.CUTOUT;
-        getSwimHighSpeedSplashSound = SoundEvents.MOOSHROOM_SHEAR;
         mainArm = HumanoidArm.RIGHT;
         canBreatheUnderwater = false;
-        passengerPredicate = entity -> true;
         biomeSpawnsCount = 0;
+        rideableUnderWater = false;
     }
 
     @Info(value = "Sets the main arm of the entity, defaults to 'right'")
     public BaseLivingEntityBuilder<T> mainArm(HumanoidArm arm) {
-        mainArm = arm;
+        this.mainArm = arm;
         return this;
     }
 
@@ -434,13 +425,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = "Determines if the entity should serialize its data, defaults to true")
     public BaseLivingEntityBuilder<T> saves(boolean b) {
-        save = b;
+        this.save = b;
         return this;
     }
 
     @Info(value = "Determines if the entity is immune to fire, defaults to false")
     public BaseLivingEntityBuilder<T> fireImmune(boolean b) {
-        fireImmune = b;
+        this.fireImmune = b;
         return this;
     }
 
@@ -452,7 +443,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = "Determines if the entity can spawn far from players")
     public BaseLivingEntityBuilder<T> canSpawnFarFromPlayer(boolean b) {
-        spawnFarFromPlayer = b;
+        this.spawnFarFromPlayer = b;
+        return this;
+    }
+
+    @Info(value = "Deciding logic for whether an entity drops their loot or not")
+    public BaseLivingEntityBuilder<T> shouldDropLoot(Predicate<LivingEntity> b) {
+        this.shouldDropLoot = b;
         return this;
     }
 
@@ -529,7 +526,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = """
+    /*@Info(value = """
             Sets the isAttackable property in the builder.
                         
             " +
@@ -538,12 +535,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> isAttackable(boolean b) {
         isAttackable = b;
         return this;
-    }
+    }*/
 
-
-    public BiFunction<Float, Float, Integer> calculateFallDamage;
-    public Predicate<Entity> passengerPredicate;
-    public Predicate<LivingEntity> livingpassengerPredicate;
 
     @Info(value = """
             Sets the passenger predicate in the builder.
@@ -551,8 +544,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             " +
             "Defaults to allowing any entity to be a passenger.
             """)
-    public BaseLivingEntityBuilder<T> setCanAddPassenger(Predicate<Entity> predicate) {
-        passengerPredicate = predicate;
+    public BaseLivingEntityBuilder<T> canAddPassenger(Predicate<Entity> predicate) {
+        canAddPassenger = predicate;
         return this;
     }
 
@@ -562,7 +555,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             " +
             "Defaults to true.
             """)
-    public BaseLivingEntityBuilder<T> isAffectedByFluids(boolean b) {
+    public BaseLivingEntityBuilder<T> isAffectedByFluids(Predicate<LivingEntity> b) {
         isAffectedByFluids = b;
         return this;
     }
@@ -584,7 +577,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             " +
             "Defaults to false.
             """)
-    public BaseLivingEntityBuilder<T> isImmobile(boolean b) {
+    public BaseLivingEntityBuilder<T> isImmobile(Predicate<LivingEntity> b) {
         isImmobile = b;
         return this;
     }
@@ -627,8 +620,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the swim high-speed splash sound for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> getSwimHighSpeedSplashSound(SoundEvent sound) {
-        getSwimHighSpeedSplashSound = sound;
+    public BaseLivingEntityBuilder<T> setSwimSplashSound(Object sound) {
+        setSwimSplashSound = sound;
         return this;
     }
 
@@ -657,7 +650,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             " +
             "Defaults to false.
             """)
-    public BaseLivingEntityBuilder<T> isFlapping(boolean b) {
+    public BaseLivingEntityBuilder<T> isFlapping(Function<LivingEntity, Boolean> b) {
         isFlapping = b;
         return this;
     }
@@ -705,7 +698,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets a custom behavior for auto-attacking on touch for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> doAutoAttackOnTouch(Consumer<LivingEntity> doAutoAttackOnTouch) {
+    public BaseLivingEntityBuilder<T> doAutoAttackOnTouch(Consumer<ContextUtils.AutoAttackContext> doAutoAttackOnTouch) {
         this.doAutoAttackOnTouch = doAutoAttackOnTouch;
         return this;
     }
@@ -730,16 +723,16 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the function to determine the custom decrease in air supply for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> decreaseAirSupply(Function<Integer, Integer> customDecreaseAirSupply) {
-        this.customDecreaseAirSupply = customDecreaseAirSupply;
+    public BaseLivingEntityBuilder<T> onDecreaseAirSupply(Consumer<LivingEntity> onDecreaseAirSupply) {
+        this.onDecreaseAirSupply = onDecreaseAirSupply;
         return this;
     }
 
     @Info(value = """
             Sets the custom behavior for when the entity is blocked by a shield in the builder.
             """)
-    public BaseLivingEntityBuilder<T> blockedByShield(Consumer<LivingEntity> customBlockedByShield) {
-        this.customBlockedByShield = customBlockedByShield;
+    public BaseLivingEntityBuilder<T> onBlockedByShield(Consumer<LivingEntity> onBlockedByShield) {
+        this.onBlockedByShield = onBlockedByShield;
         return this;
     }
 
@@ -835,8 +828,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the function to determine the next step for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> nextStep(Function<Float, Float> customNextStep) {
-        this.customNextStep = customNextStep;
+    public BaseLivingEntityBuilder<T> nextStep(Function<Entity, Float> nextStep) {
+        this.nextStep = nextStep;
         return this;
     }
 
@@ -859,8 +852,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the function to increase the air supply for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> increaseAirSupply(Function<Integer, Integer> customIncreaseAirSupply) {
-        this.customIncreaseAirSupply = customIncreaseAirSupply;
+    public BaseLivingEntityBuilder<T> onIncreaseAirSupply(Consumer<LivingEntity> onIncreaseAirSupply) {
+        this.onIncreaseAirSupply = onIncreaseAirSupply;
         return this;
     }
 
@@ -892,16 +885,16 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the function to get the drinking sound for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> getDrinkingSound(Function<ItemStack, SoundEvent> customGetDrinkingSound) {
-        this.customGetDrinkingSound = customGetDrinkingSound;
+    public BaseLivingEntityBuilder<T> setDrinkingSound(Function<ItemStack, SoundEvent> setDrinkingSound) {
+        this.setDrinkingSound = setDrinkingSound;
         return this;
     }
 
     @Info(value = """
             Sets the function to get the hurt sound for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> getHurtSound(Function<DamageSource, SoundEvent> customGetHurtSound) {
-        this.customGetHurtSound = customGetHurtSound;
+    public BaseLivingEntityBuilder<T> setHurtSound(Object setHurtSound) {
+        this.setHurtSound = setHurtSound;
         return this;
     }
 
@@ -913,13 +906,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = """
-            Sets the function to get the swim splash sound for the entity in the builder.
-            """)
-    public BaseLivingEntityBuilder<T> getSwimSplashSound(Function<SoundEvent, SoundEvent> customGetSwimSplashSound) {
-        this.customGetSwimSplashSound = customGetSwimSplashSound;
-        return this;
-    }
 
     @Info(value = """
             Sets the function to get the relative portal position for the entity in the builder.
@@ -998,8 +984,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the function to determine if the entity can attack a specific type in the builder.
             """)
-    public BaseLivingEntityBuilder<T> canAttackType(Function<EntityType<?>, Boolean> customCanAttackType) {
-        this.customCanAttackType = customCanAttackType;
+    public BaseLivingEntityBuilder<T> canAttackType(Predicate<ContextUtils.EntityTypeEntityContext> canAttackType) {
+        this.canAttackType = canAttackType;
         return this;
     }
 
@@ -1070,15 +1056,15 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the custom scale for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> scale(float customScale) {
-        this.customScale = customScale;
+    public BaseLivingEntityBuilder<T> scale(Function<LivingEntity, Float> customScale) {
+        this.scale = customScale;
         return this;
     }
 
     @Info(value = """
             Sets whether the entity is rideable underwater in the builder.
             """)
-    public BaseLivingEntityBuilder<T> rideableUnderWater(Boolean rideableUnderWater) {
+    public BaseLivingEntityBuilder<T> rideableUnderWater(boolean rideableUnderWater) {
         this.rideableUnderWater = rideableUnderWater;
         return this;
     }
@@ -1094,8 +1080,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets whether the entity should drop experience in the builder.
             """)
-    public BaseLivingEntityBuilder<T> shouldDropExperience(boolean b) {
-        this.shouldDropExperience = b;
+    public BaseLivingEntityBuilder<T> shouldDropExperience(Predicate<LivingEntity> p) {
+        this.shouldDropExperience = p;
         return this;
     }
 
@@ -1127,8 +1113,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the tri-consumer for the custom onEquipItem behavior for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> onEquipItem(TriConsumer<EquipmentSlot, ItemStack, ItemStack> customOnEquipItem) {
-        this.customOnEquipItem = customOnEquipItem;
+    public BaseLivingEntityBuilder<T> onEquipItem(Consumer<ContextUtils.EntityEquipmentContext> onEquipItem) {
+        this.onEquipItem = onEquipItem;
         return this;
     }
 
@@ -1159,8 +1145,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the function for getting the visibility percent for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> getVisibilityPercent(Function<Entity, Double> customGetVisibilityPercent) {
-        this.customGetVisibilityPercent = customGetVisibilityPercent;
+    public BaseLivingEntityBuilder<T> visibilityPercent(Function<Entity, Double> visibilityPercent) {
+        this.visibilityPercent = visibilityPercent;
         return this;
     }
 
@@ -1172,30 +1158,30 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = """
+    /*@Info(value = """
             Sets the bi-predicate for the custom canAttackWithConditions behavior for the entity in the builder.
             """)
     public BaseLivingEntityBuilder<T> canAttackWithConditions(BiPredicate<LivingEntity, TargetingConditions> customCanAttack) {
         this.customCanAttackWithConditions = customCanAttack;
         return this;
-    }
+    }*/
 
-    @Info(value = """
+    /*@Info(value = """
             Sets the boolean supplier for the custom canBeSeenAsEnemy behavior for the entity in the builder.
             """)
     public BaseLivingEntityBuilder<T> canBeSeenAsEnemy(BooleanSupplier customCanBeSeenAsEnemy) {
         this.customCanBeSeenAsEnemy = customCanBeSeenAsEnemy;
         return this;
-    }
+    }*/
 
-    @Info(value = """
-            Sets the boolean supplier for the custom canBeSeenByAnyone behavior for the entity in the builder.
-            """)
-    public BaseLivingEntityBuilder<T> canBeSeenByAnyone(BooleanSupplier customCanBeSeenByAnyone) {
-        this.customCanBeSeenByAnyone = customCanBeSeenByAnyone;
-        return this;
-    }
-
+    /* @Info(value = """
+             Sets the boolean supplier for the custom canBeSeenByAnyone behavior for the entity in the builder.
+             """)
+     public BaseLivingEntityBuilder<T> canBeSeenByAnyone(Predicate<LivingEntity> canBeSeenByAnyone) {
+         this.canBeSeenByAnyone = canBeSeenByAnyone;
+         return this;
+     }
+ */
     @Info(value = """
             Sets the runnable for the custom removeEffectParticles behavior for the entity in the builder.
             """)
@@ -1212,13 +1198,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = """
+    /*@Info(value = """
             Sets the bi-predicate for the custom addEffect behavior for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> addEffect(BiPredicate<MobEffectInstance, Entity> customAddEffect) {
+    public BaseLivingEntityBuilder<T> addEffect(Predicate<ContextUtils.OnEffectContext>  customAddEffect) {
         this.customAddEffect = customAddEffect;
         return this;
-    }
+    }*/
 
 
     @Info(value = "Sets the custom logic to determine if the entity can be affected by a specific potion effect.")
@@ -1249,9 +1235,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
 
-    @Info(value = "Sets the custom logic for healing the entity")
-    public BaseLivingEntityBuilder<T> customHeal(BiConsumer<Float, T> callback) {
-        healAmount = callback;
+    @Info(value = "Fires whenever the entity heals.")
+    public BaseLivingEntityBuilder<T> onLivingHeal(Consumer<ContextUtils.EntityHealContext> callback) {
+        onLivingHeal = callback;
         return this;
     }
 
@@ -1259,13 +1245,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = "Sets the custom logic for when a potion effect is removed from the entity.")
     public BaseLivingEntityBuilder<T> onEffectRemoved(Consumer<ContextUtils.OnEffectContext> consumer) {
         onEffectRemoved = consumer;
-        return this;
-    }
-
-
-    @Info(value = "Sets the custom logic for healing the entity")
-    public BaseLivingEntityBuilder<T> healAmount(BiConsumer<Float, T> callback) {
-        healAmount = callback;
         return this;
     }
 
@@ -1299,8 +1278,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = "Sets the custom logic for when the entity dies")
-    public BaseLivingEntityBuilder<T> die(Consumer<DamageSource> consumer) {
-        die = consumer;
+    public BaseLivingEntityBuilder<T> onDeath(Consumer<ContextUtils.DeathContext> consumer) {
+        onDeath = consumer;
         return this;
     }
 
@@ -1320,7 +1299,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = "Sets the custom logic for dropping custom death loot when the entity dies")
-    public BaseLivingEntityBuilder<T> dropCustomDeathLoot(TriConsumer<DamageSource, Integer, Boolean> consumer) {
+    public BaseLivingEntityBuilder<T> dropCustomDeathLoot(Consumer<ContextUtils.EntityLootContext> consumer) {
         dropCustomDeathLoot = consumer;
         return this;
     }
@@ -1361,14 +1340,14 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = "Sets the custom logic for determining fall sounds for the entity")
-    public BaseLivingEntityBuilder<T> fallSounds(Function<LivingEntity.Fallsounds, LivingEntity.Fallsounds> function) {
-        fallSoundsFunction = function;
+    public BaseLivingEntityBuilder<T> fallSounds(LivingEntity.Fallsounds function) {
+        fallSounds = function;
         return this;
     }
 
 
     @Info(value = "Sets the custom logic for determining the eating sound for the entity")
-    public BaseLivingEntityBuilder<T> eatingSound(Function<ItemStack, SoundEvent> function) {
+    public BaseLivingEntityBuilder<T> eatingSound(Object function) {
         eatingSound = function;
         return this;
     }
@@ -1388,8 +1367,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for causing fall damage")
-    public BaseLivingEntityBuilder<T> causeFallDamage(BiPredicate<Float, DamageSource> predicate) {
-        causeFallDamage = predicate;
+    public BaseLivingEntityBuilder<T> onLivingFall(Consumer<ContextUtils.EntityFallDamageContext> c) {
+        onLivingFall = c;
         return this;
     }
 
@@ -1453,9 +1432,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = "Sets the custom logic for setting the entity's sprinting state")
-    public BaseLivingEntityBuilder<T> setSprinting(Consumer<Boolean> consumer) {
-        setSprinting = consumer;
+    @Info(value = "Sets the custom logic to fire when the entity sprints")
+    public BaseLivingEntityBuilder<T> onSprint(Consumer<LivingEntity> consumer) {
+        onSprint = consumer;
         return this;
     }
 
@@ -1478,7 +1457,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for determining if the entity can stand on a specific fluid")
-    public BaseLivingEntityBuilder<T> canStandOnFluid(Predicate<FluidState> predicate) {
+    public BaseLivingEntityBuilder<T> canStandOnFluid(Predicate<ContextUtils.EntityFluidStateContext> predicate) {
         canStandOnFluid = predicate;
         return this;
     }
@@ -1497,7 +1476,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = "Sets the custom speed for the entity")
     public BaseLivingEntityBuilder<T> setSpeed(Consumer<Float> consumer) {
-        setSpeedConsumer = consumer;
+        setSpeed = consumer;
         return this;
     }
 
@@ -1508,7 +1487,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for determining if the entity is sensitive to water")
-    public BaseLivingEntityBuilder<T> isSensitiveToWater(Predicate<Boolean> predicate) {
+    public BaseLivingEntityBuilder<T> isSensitiveToWater(Predicate<LivingEntity> predicate) {
         isSensitiveToWater = predicate;
         return this;
     }
@@ -1520,8 +1499,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for when the entity stops riding")
-    public BaseLivingEntityBuilder<T> stopRidingCallback(Runnable callback) {
-        stopRidingCallback = callback;
+    public BaseLivingEntityBuilder<T> onStopRiding(Consumer<LivingEntity> callback) {
+        onStopRiding = callback;
         return this;
     }
 
@@ -1550,7 +1529,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for when the entity picks up an item")
-    public BaseLivingEntityBuilder<T> onItemPickup(Consumer<ItemEntity> consumer) {
+    public BaseLivingEntityBuilder<T> onItemPickup(Consumer<ContextUtils.EntityItemEntityContext> consumer) {
         onItemPickup = consumer;
         return this;
     }
@@ -1587,19 +1566,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for setting the entity's absorption amount")
-    public BaseLivingEntityBuilder<T> setAbsorptionAmount(Consumer<Float> consumer) {
+    public BaseLivingEntityBuilder<T> setAbsorptionAmount(Consumer<ContextUtils.EntityFloatContext> consumer) {
         setAbsorptionAmount = consumer;
         return this;
     }
 
     @Info(value = "Sets the custom logic for when the entity enters combat")
-    public BaseLivingEntityBuilder<T> onEnterCombat(Runnable runnable) {
+    public BaseLivingEntityBuilder<T> onEnterCombat(Consumer<LivingEntity> runnable) {
         onEnterCombat = runnable;
         return this;
     }
 
     @Info(value = "Sets the custom logic for when the entity leaves combat")
-    public BaseLivingEntityBuilder<T> onLeaveCombat(Runnable runnable) {
+    public BaseLivingEntityBuilder<T> onLeaveCombat(Consumer<LivingEntity> runnable) {
         onLeaveCombat = runnable;
         return this;
     }
@@ -1664,7 +1643,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = "Sets the custom logic for random teleportation of the entity")
+    /*@Info(value = "Sets the custom logic for random teleportation of the entity")
     public BaseLivingEntityBuilder<T> randomTeleport(
             BiFunction<Double, Double, Double> teleportX,
             BiFunction<Double, Double, Double> teleportY,
@@ -1675,7 +1654,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         randomTeleportZ = teleportZ;
         randomTeleportFlag = teleportFlag;
         return this;
-    }
+    }*/
 
     @Info(value = "Sets the custom logic for determining if the entity is affected by potions")
     public BaseLivingEntityBuilder<T> isAffectedByPotions(Predicate<LivingEntity> predicate) {
@@ -1684,8 +1663,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for determining if the entity is attackable")
-    public BaseLivingEntityBuilder<T> attackablePredicate(Function<LivingEntity, Boolean> predicate) {
-        attackablePredicate = predicate;
+    public BaseLivingEntityBuilder<T> isAttackable(Predicate<LivingEntity> predicate) {
+        isAttackable = predicate;
         return this;
     }
 
