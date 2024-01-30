@@ -10,8 +10,10 @@ import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.JsonIO;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import it.unimi.dsi.fastutil.booleans.BooleanPredicate;
 import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
+import net.liopyu.entityjs.entities.BaseLivingEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.*;
 import net.minecraft.BlockUtil;
@@ -37,6 +39,7 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -143,7 +146,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<double[], ListTag> customNewDoubleList;
     public transient Function<float[], ListTag> customNewFloatList;
     public transient Function<Entity.MovementEmission, Entity.MovementEmission> customGetMovementEmission;
-    public transient Function<ExitPortalInfo, Optional<BlockUtil.FoundRectangle>> customGetExitPortal;
+
     public transient Function<ItemStack, SoundEvent> customGetDrinkingSound;
     public transient Function<DamageSource, SoundEvent> customGetHurtSound;
     public transient Function<ServerLevel, PortalInfo> customFindDimensionEntryPoint;
@@ -209,11 +212,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     /*public transient BiPredicate<MobEffect, Boolean> removeEffect;*/
 
 
-    public transient Consumer<OnEffectContext> onEffectAdded;
+    public transient Consumer<ContextUtils.OnEffectContext> onEffectAdded;
 
     /* public transient TriConsumer<MobEffectInstance, Boolean, Entity> onEffectUpdated;*/
 
-    public transient Consumer<OnEffectContext> onEffectRemoved;
+    public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
 
     public transient BiConsumer<Float, T> healAmount;
 
@@ -319,19 +322,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Predicate<Boolean> randomTeleportFlag;
     public transient Predicate<LivingEntity> isAffectedByPotions;
 
-    public transient Predicate<Boolean> attackable;
+    public transient Function<LivingEntity, Boolean> attackablePredicate;
     public transient BiConsumer<BlockPos, Boolean> setRecordPlayingNearby;
-    public transient Predicate<ItemStack> canTakeItem;
+    public transient Predicate<ContextUtils.EntityItemLevelContext> canTakeItem;
     public transient Consumer<BlockPos> setSleepingPos;
-    public transient Supplier<Boolean> isSleeping;
-    public transient Consumer<BlockPos> startSleeping;
-    public transient Runnable stopSleeping;
+    public transient Predicate<LivingEntity> isSleeping;
+    public transient Consumer<ContextUtils.EntityBlockPosContext> onStartSleeping;
+    public transient Consumer<LivingEntity> onStopSleeping;
     public transient Supplier<Boolean> isInWall;
-    public transient BiFunction<Level, ItemStack, ItemStack> eat;
+    public transient Consumer<ContextUtils.EntityItemLevelContext> eat;
     public transient Consumer<EquipmentSlot> broadcastBreakEvent;
     public transient Consumer<InteractionHand> broadcastBreakEventHand;
     public transient BiPredicate<ItemStack, Boolean> curePotionEffects;
-    public transient Predicate<Player> shouldRiderFaceForward;
+    public transient Predicate<ContextUtils.PlayerEntityContext> shouldRiderFaceForward;
     public transient Runnable invalidateCaps;
 
     public transient Runnable reviveCaps;
@@ -339,7 +342,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Predicate<LivingEntity> isCurrentlyGlowing;
     public transient Predicate<LivingEntity> canDisableShield;
     public transient IntSupplier getMaxFallDistance;
-    public transient Function<MobInteractContext, @Nullable InteractionResult> interact;
+    public transient Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> interact;
     public transient BiPredicate<BlockPos, BlockState> isColliding;
 
     public transient Predicate<String> addTag;
@@ -349,21 +352,21 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<T> onFlap;
     public transient BooleanSupplier dampensVibrations;
 
-    public transient Consumer<PlayerEntityContext> playerTouch;
-    public transient TriFunction<Double, Float, Boolean, HitResult> pick;
+    public transient Consumer<ContextUtils.PlayerEntityContext> playerTouch;
+    public transient Function<ClipContext, HitResult> pick;
     public transient BooleanSupplier showVehicleHealth;
     public transient Consumer<Boolean> setInvisible;
     public transient IntConsumer setAirSupply;
     public transient IntConsumer setTicksFrozen;
-    public transient Consumer<ThunderHitContext> thunderHit;
-    public transient Consumer<StuckInBlockContext> makeStuckInBlock;
-    public transient Predicate<DamageSource> isInvulnerableTo;
-    public transient Consumer<Boolean> setInvulnerable;
-    public transient Supplier<Boolean> canChangeDimensions;
-    public transient Consumer<Optional<Component>> setCustomName;
+    public transient Consumer<ContextUtils.ThunderHitContext> thunderHit;
+    /*public transient Consumer<StuckInBlockContext> makeStuckInBlock;*/
+    public transient Predicate<ContextUtils.DamageContext> isInvulnerableTo;
+    /*public transient Consumer<Boolean> setInvulnerable;*/
+    public transient Predicate<LivingEntity> canChangeDimensions;
+    /*public transient Consumer<Optional<Component>> setCustomName;*/
 
-    public transient BiPredicate<Level, BlockPos> mayInteract;
-    public transient TriPredicate<BlockState, BlockPos, Float> canTrample;
+    public transient Predicate<ContextUtils.MayInteractContext> mayInteract;
+    public transient Predicate<ContextUtils.CanTrampleContext> canTrample;
     public transient Consumer<T> onRemovedFromWorld;
     public transient Consumer<LivingEntity> onLivingJump;
     public transient Consumer<LivingEntity> livingAiStep;
@@ -379,8 +382,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         height = 1;
         summonable = true;
         save = true;
-        fireImmune = false;
         immuneTo = new ResourceLocation[0];
+        fireImmune = false;
         spawnFarFromPlayer = false;
         clientTrackingRange = 5;
         updateInterval = 3;
@@ -885,13 +888,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = """
-            Sets the function to get the exit portal information for the entity in the builder.
-            """)
-    public BaseLivingEntityBuilder<T> getExitPortal(Function<ExitPortalInfo, Optional<BlockUtil.FoundRectangle>> customGetExitPortal) {
-        this.customGetExitPortal = customGetExitPortal;
-        return this;
-    }
 
     @Info(value = """
             Sets the function to get the drinking sound for the entity in the builder.
@@ -1247,7 +1243,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = "Sets the custom logic for when a potion effect is added to the entity.")
-    public BaseLivingEntityBuilder<T> onEffectAdded(Consumer<OnEffectContext> consumer) {
+    public BaseLivingEntityBuilder<T> onEffectAdded(Consumer<ContextUtils.OnEffectContext> consumer) {
         onEffectAdded = consumer;
         return this;
     }
@@ -1261,7 +1257,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = "Sets the custom logic for when a potion effect is removed from the entity.")
-    public BaseLivingEntityBuilder<T> onEffectRemoved(Consumer<OnEffectContext> consumer) {
+    public BaseLivingEntityBuilder<T> onEffectRemoved(Consumer<ContextUtils.OnEffectContext> consumer) {
         onEffectRemoved = consumer;
         return this;
     }
@@ -1688,8 +1684,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for determining if the entity is attackable")
-    public BaseLivingEntityBuilder<T> attackable(Predicate<Boolean> predicate) {
-        attackable = predicate;
+    public BaseLivingEntityBuilder<T> attackablePredicate(Function<LivingEntity, Boolean> predicate) {
+        attackablePredicate = predicate;
         return this;
     }
 
@@ -1700,7 +1696,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for determining if the entity can take a specific item")
-    public BaseLivingEntityBuilder<T> canTakeItem(Predicate<ItemStack> predicate) {
+    public BaseLivingEntityBuilder<T> canTakeItem(Predicate<ContextUtils.EntityItemLevelContext> predicate) {
         canTakeItem = predicate;
         return this;
     }
@@ -1712,20 +1708,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for determining if the entity is sleeping")
-    public BaseLivingEntityBuilder<T> isSleeping(Supplier<Boolean> supplier) {
+    public BaseLivingEntityBuilder<T> isSleeping(Predicate<LivingEntity> supplier) {
         isSleeping = supplier;
         return this;
     }
 
     @Info(value = "Sets the custom logic for starting sleeping at a specific position")
-    public BaseLivingEntityBuilder<T> startSleeping(Consumer<BlockPos> consumer) {
-        startSleeping = consumer;
+    public BaseLivingEntityBuilder<T> onStartSleeping(Consumer<ContextUtils.EntityBlockPosContext> consumer) {
+        onStartSleeping = consumer;
         return this;
     }
 
     @Info(value = "Sets the custom logic for stopping sleeping")
-    public BaseLivingEntityBuilder<T> stopSleeping(Runnable runnable) {
-        stopSleeping = runnable;
+    public BaseLivingEntityBuilder<T> onStopSleeping(Consumer<LivingEntity> runnable) {
+        onStopSleeping = runnable;
         return this;
     }
 
@@ -1736,7 +1732,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for eating an item in a level")
-    public BaseLivingEntityBuilder<T> eat(BiFunction<Level, ItemStack, ItemStack> function) {
+    public BaseLivingEntityBuilder<T> eat(Consumer<ContextUtils.EntityItemLevelContext> function) {
         eat = function;
         return this;
     }
@@ -1760,7 +1756,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for determining if the rider should face forward")
-    public BaseLivingEntityBuilder<T> shouldRiderFaceForward(Predicate<Player> predicate) {
+    public BaseLivingEntityBuilder<T> shouldRiderFaceForward(Predicate<ContextUtils.PlayerEntityContext> predicate) {
         shouldRiderFaceForward = predicate;
         return this;
     }
@@ -1796,7 +1792,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for living entity interaction")
-    public BaseLivingEntityBuilder<T> interact(Function<MobInteractContext, @Nullable InteractionResult> f) {
+    public BaseLivingEntityBuilder<T> interact(Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> f) {
         interact = f;
         return this;
     }
@@ -1845,13 +1841,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom behavior for handling player touch events")
-    public BaseLivingEntityBuilder<T> playerTouch(Consumer<PlayerEntityContext> consumer) {
+    public BaseLivingEntityBuilder<T> playerTouch(Consumer<ContextUtils.PlayerEntityContext> consumer) {
         playerTouch = consumer;
         return this;
     }
 
     @Info(value = "Sets the custom behavior for picking entity hit results")
-    public BaseLivingEntityBuilder<T> pick(TriFunction<Double, Float, Boolean, HitResult> function) {
+    public BaseLivingEntityBuilder<T> pick(Function<ClipContext, HitResult> function) {
         pick = function;
         return this;
     }
@@ -1881,49 +1877,52 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom behavior for when the entity is hit by lightning")
-    public BaseLivingEntityBuilder<T> thunderHit(Consumer<ThunderHitContext> consumer) {
+    public BaseLivingEntityBuilder<T> thunderHit(Consumer<ContextUtils.ThunderHitContext> consumer) {
         thunderHit = consumer;
         return this;
     }
 
-    @Info(value = "Sets the custom behavior when the entity gets stuck in a block")
+    /*@Info(value = "Sets the custom behavior when the entity gets stuck in a block")
     public BaseLivingEntityBuilder<T> makeStuckInBlock(Consumer<StuckInBlockContext> consumer) {
         makeStuckInBlock = consumer;
         return this;
-    }
+    }*/
 
     @Info(value = "Sets the custom condition for whether the entity is invulnerable to a specific damage source")
-    public BaseLivingEntityBuilder<T> isInvulnerableTo(Predicate<DamageSource> predicate) {
+    public BaseLivingEntityBuilder<T> isInvulnerableTo(Predicate<ContextUtils.DamageContext> predicate) {
         isInvulnerableTo = predicate;
         return this;
     }
 
-    @Info(value = "Sets whether the entity is invulnerable or not")
+    /*@Info(value = "Sets whether the entity is invulnerable or not")
     public BaseLivingEntityBuilder<T> setInvulnerable(Consumer<Boolean> consumer) {
         setInvulnerable = consumer;
         return this;
-    }
+    }*/
 
-    @Info(value = "Sets whether the entity can change dimensions")
-    public BaseLivingEntityBuilder<T> canChangeDimensions(Supplier<Boolean> supplier) {
+    @Info(value = "Sets whether the entity can change dimensions" +
+            "Must return boolean")
+    public BaseLivingEntityBuilder<T> canChangeDimensions(Predicate<LivingEntity> supplier) {
         canChangeDimensions = supplier;
         return this;
     }
 
-    @Info(value = "Sets the custom name of the entity")
+   /* @Info(value = "Sets the custom name of the entity")
     public BaseLivingEntityBuilder<T> setCustomName(Consumer<Optional<Component>> consumer) {
         setCustomName = consumer;
         return this;
-    }
+    }*/
 
-    @Info(value = "Sets the custom condition for whether the entity may interact with the specified block position")
-    public BaseLivingEntityBuilder<T> mayInteract(BiPredicate<Level, BlockPos> predicate) {
+    @Info(value = "Sets the custom condition for whether the entity may interact with the specified block position" +
+            "Must return a boolean")
+    public BaseLivingEntityBuilder<T> mayInteract(Predicate<ContextUtils.MayInteractContext> predicate) {
         mayInteract = predicate;
         return this;
     }
 
-    @Info(value = "Sets the custom condition for whether the entity can trample the specified block state at the given position with the given fall distance")
-    public BaseLivingEntityBuilder<T> canTrample(TriPredicate<BlockState, BlockPos, Float> predicate) {
+    @Info(value = "Sets the custom condition for whether the entity can trample the specified block state at the given position with the given fall distance" +
+            "Must return a boolean")
+    public BaseLivingEntityBuilder<T> canTrample(Predicate<ContextUtils.CanTrampleContext> predicate) {
         canTrample = predicate;
         return this;
     }

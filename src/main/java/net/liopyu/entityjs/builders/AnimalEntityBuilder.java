@@ -1,24 +1,15 @@
 package net.liopyu.entityjs.builders;
 
-import dev.latvian.mods.kubejs.bindings.ItemWrapper;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import com.ibm.icu.impl.Pair;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.util.PlayerEntityContext;
-import net.liopyu.entityjs.util.Wrappers;
+import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -49,8 +40,8 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     public transient QuinaryFunction<ServerLevelAccessor, DifficultyInstance, MobSpawnType, SpawnGroupData, CompoundTag, SpawnGroupData> finalizeSpawn;
 
-    public transient Consumer<PlayerEntityContext> tickLeash;
-    public transient Supplier<Boolean> shouldStayCloseToLeashHolder;
+    public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
+    public transient BooleanSupplier shouldStayCloseToLeashHolder;
     public transient Supplier<Double> followLeashSpeed;
     public transient BiConsumer<BlockPathTypes, Float> setPathfindingMalus;
     public transient Function<BlockPathTypes, Boolean> canCutCorner;
@@ -63,7 +54,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Boolean shouldDespawnInPeaceful;
     public transient Boolean canPickUpLoot;
     public transient Boolean isPersistenceRequired;
-    public transient Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg;
+    /*public transient Consumer<ContextUtils.PlayerEntityContext> onOffspringSpawnedFromEgg;*/
 
     public transient Double meleeAttackRangeSqr;
 
@@ -192,7 +183,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             " +
             "Defaults to null.
             """)
-    public AnimalEntityBuilder<T> tickLeash(Consumer<PlayerEntityContext> consumer) {
+    public AnimalEntityBuilder<T> tickLeash(Consumer<ContextUtils.PlayerEntityContext> consumer) {
         this.tickLeash = consumer;
         return this;
     }
@@ -201,10 +192,10 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             Sets the shouldStayCloseToLeashHolder property in the builder.
                         
             " +
-            "Defaults to null.
+            "Defaults to true for animals.
             """)
-    public AnimalEntityBuilder<T> shouldStayCloseToLeashHolder(Supplier<Boolean> supplier) {
-        this.shouldStayCloseToLeashHolder = supplier;
+    public AnimalEntityBuilder<T> shouldStayCloseToLeashHolder(BooleanSupplier b) {
+        this.shouldStayCloseToLeashHolder = b;
         return this;
     }
 
@@ -335,16 +326,16 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         return this;
     }
 
-    @Info(value = """
+   /* @Info(value = """
             Sets the behavior when offspring is spawned from an egg.
                         
             " +
             "Defaults to null.
             """)
-    public AnimalEntityBuilder<T> onOffspringSpawnedFromEgg(Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg) {
+    public AnimalEntityBuilder<T> onOffspringSpawnedFromEgg(Consumer<ContextUtils.PlayerEntityContext> onOffspringSpawnedFromEgg) {
         this.onOffspringSpawnedFromEgg = onOffspringSpawnedFromEgg;
         return this;
-    }
+    }*/
 
 
     @Info(value = """

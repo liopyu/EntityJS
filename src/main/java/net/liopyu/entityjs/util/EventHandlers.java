@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.util;
 
+
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
 import dev.latvian.mods.kubejs.event.Extra;

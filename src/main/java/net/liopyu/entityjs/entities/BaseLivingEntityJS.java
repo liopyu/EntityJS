@@ -1,19 +1,18 @@
 package net.liopyu.entityjs.entities;
 
+import com.mojang.logging.LogUtils;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.EntityType;
 import net.liopyu.entityjs.util.*;
-import net.liopyu.entityjs.util.ExitPortalInfo;
-import net.liopyu.entityjs.util.MobInteractContext;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -26,6 +25,7 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
@@ -39,6 +39,7 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
@@ -181,7 +182,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
         if (builder.interact != null) {
-            final MobInteractContext context = new MobInteractContext(this, pPlayer, pHand);
+            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
             final InteractionResult result = builder.interact.apply(context);
             return result == null ? super.interact(pPlayer, pHand) : result;
         }
@@ -331,7 +332,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    @Override
+   /* @Override
     protected @NotNull Optional<BlockUtil.FoundRectangle> getExitPortal(@NotNull ServerLevel p_185935_, @NotNull BlockPos p_185936_, boolean p_185937_, @NotNull WorldBorder p_185938_) {
         ExitPortalInfo exitPortalInfo = new ExitPortalInfo(p_185935_, p_185936_, p_185937_, p_185938_);
         if (builder.customGetExitPortal != null) {
@@ -339,7 +340,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         } else {
             return super.getExitPortal(p_185935_, p_185936_, p_185937_, p_185938_);
         }
-    }
+    }*/
 
     @Override
     protected @NotNull SoundEvent getDrinkingSound(@NotNull ItemStack p_21174_) {
@@ -736,7 +737,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
         if (builder.onEffectAdded != null) {
-            final OnEffectContext context = new OnEffectContext(effectInstance, this);
+            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
             builder.onEffectAdded.accept(context);
         } else {
             super.onEffectAdded(effectInstance, entity);
@@ -758,7 +759,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     protected void onEffectRemoved(@NotNull MobEffectInstance effectInstance) {
 
         if (builder.onEffectRemoved != null) {
-            final OnEffectContext context = new OnEffectContext(effectInstance, this);
+            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
             builder.onEffectRemoved.accept(context);
         } else {
             super.onEffectRemoved(effectInstance);
@@ -1461,53 +1462,57 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean attackable() {
-        if (builder.attackable != null) {
-            return builder.attackable.test(super.attackable());
+        if (builder.attackablePredicate != null) {
+            return builder.attackablePredicate.apply(this);
         }
         return super.attackable();
     }
 
-    @Override
+    /*@Override
     public void setRecordPlayingNearby(@NotNull BlockPos p_21082_, boolean p_21083_) {
         if (builder.setRecordPlayingNearby != null) {
             builder.setRecordPlayingNearby.accept(p_21082_, p_21083_);
         } else {
             super.setRecordPlayingNearby(p_21082_, p_21083_);
         }
-    }
+    }*/
 
     @Override
     public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
-            return builder.canTakeItem.test(itemStack);
+            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level);
+            return builder.canTakeItem.test(context);
         } else {
             return super.canTakeItem(itemStack);
         }
     }
 
-    @Override
+   /* @Override
     public void setSleepingPos(@NotNull BlockPos blockPos) {
         if (builder.setSleepingPos != null) {
             builder.setSleepingPos.accept(blockPos);
         } else {
             super.setSleepingPos(blockPos);
         }
-    }
+    }*/
 
 
     @Override
     public boolean isSleeping() {
         if (builder.isSleeping != null) {
-            return builder.isSleeping.get();
+            return builder.isSleeping.test(this);
         } else {
             return super.isSleeping();
         }
     }
 
+
     @Override
     public void startSleeping(@NotNull BlockPos blockPos) {
-        if (builder.startSleeping != null) {
-            builder.startSleeping.accept(blockPos);
+
+        if (builder.onStartSleeping != null) {
+            final ContextUtils.EntityBlockPosContext context = new ContextUtils.EntityBlockPosContext(this, blockPos);
+            builder.onStartSleeping.accept(context);
         } else {
             super.startSleeping(blockPos);
         }
@@ -1516,71 +1521,67 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public void stopSleeping() {
-        if (builder.stopSleeping != null) {
-            builder.stopSleeping.run();
+        if (builder.onStopSleeping != null) {
+            builder.onStopSleeping.accept(this);
         } else {
             super.stopSleeping();
         }
     }
 
-    @Override
+   /* @Override
     public boolean isInWall() {
         if (builder.isInWall != null) {
             return builder.isInWall.get();
         } else {
             return super.isInWall();
         }
-    }
+    }*/
 
 
     @Override
     public @NotNull ItemStack eat(@NotNull Level level, @NotNull ItemStack itemStack) {
         if (builder.eat != null) {
-            return builder.eat.apply(level, itemStack);
+            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, level);
+            builder.eat.accept(context);
+            return itemStack;
         } else {
             return super.eat(level, itemStack);
         }
     }
 
-    @Override
-    public void broadcastBreakEvent(@NotNull EquipmentSlot equipmentSlot) {
-        if (builder.broadcastBreakEvent != null) {
-            builder.broadcastBreakEvent.accept(equipmentSlot);
-        } else {
-            super.broadcastBreakEvent(equipmentSlot);
-        }
-    }
 
 
-    @Override
+
+    /*@Override
     public void broadcastBreakEvent(@NotNull InteractionHand interactionHand) {
         if (builder.broadcastBreakEventHand != null) {
             builder.broadcastBreakEventHand.accept(interactionHand);
         } else {
             super.broadcastBreakEvent(interactionHand);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public boolean curePotionEffects(@NotNull ItemStack curativeItem) {
         if (builder.curePotionEffects != null) {
             return builder.curePotionEffects.test(curativeItem, false);
         } else {
             return super.curePotionEffects(curativeItem);
         }
-    }
+    }*/
 
 
     @Override
     public boolean shouldRiderFaceForward(@NotNull Player player) {
         if (builder.shouldRiderFaceForward != null) {
-            return builder.shouldRiderFaceForward.test(player);
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, this);
+            return builder.shouldRiderFaceForward.test(context);
         } else {
             return super.shouldRiderFaceForward(player);
         }
     }
 
-    @Override
+    /*@Override
     public void invalidateCaps() {
         if (builder.invalidateCaps != null) {
             builder.invalidateCaps.run();
@@ -1597,12 +1598,12 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         } else {
             super.reviveCaps();
         }
-    }
+    }*/
 
     @Override
     public boolean canFreeze() {
         if (builder.canFreeze != null) {
-            return builder.canFreeze.test(this);
+            return builder.canFreeze.test(this) && !this.getType().is(EntityTypeTags.FREEZE_IMMUNE_ENTITY_TYPES);
         } else {
             return super.canFreeze();
         }
@@ -1611,7 +1612,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null) {
+        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
             return builder.isCurrentlyGlowing.test(this);
         } else {
             return super.isCurrentlyGlowing();
@@ -1627,25 +1628,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
-    @Override
-    public boolean isColliding(BlockPos pos, BlockState state) {
-        if (builder.isColliding != null) {
-            return builder.isColliding.test(pos, state);
-        } else {
-            return super.isColliding(pos, state);
-        }
-    }
-
-
-    @Override
-    public boolean addTag(String tag) {
-        if (builder.addTag != null) {
-            return builder.addTag.test(tag);
-        } else {
-            return super.addTag(tag);
-        }
-    }
-
 
     @Override
     public void onClientRemoval() {
@@ -1655,42 +1637,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
             super.onClientRemoval();
         }
     }
-
-
-   /* @Override
-    public boolean closerThan(Entity entity, double distance) {
-        if (builder.closerThan != null) {
-            return builder.closerThan.test(entity, distance);
-        } else {
-            return super.closerThan(entity, distance);
-        }
-    }*/
-
-
-   /* @Override
-    public boolean closerThan(@NotNull Entity p_216993_, double p_216994_, double p_216995_) {
-        return super.closerThan(p_216993_, p_216994_, p_216995_);
-    }
-
-    @Override
-    protected void setRot(float p_19916_, float p_19917_) {
-        super.setRot(p_19916_, p_19917_);
-    }
-
-    @Override
-    public void setPos(double p_20210_, double p_20211_, double p_20212_) {
-        super.setPos(p_20210_, p_20211_, p_20212_);
-    }
-
-    @Override
-    public void turn(double p_19885_, double p_19886_) {
-        super.turn(p_19885_, p_19886_);
-    }*/
-
-    /*@Override
-    public void setPortalCooldown() {
-        super.setPortalCooldown();
-    }*/
 
     @Override
     public void lavaHurt() {
@@ -1719,25 +1665,23 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
 
     @Override
-    public boolean fireImmune() {
-        return builder.fireImmune;
-    }
-
-
-    @Override
     public void playerTouch(Player p_20081_) {
         if (builder.playerTouch != null) {
-            final PlayerEntityContext context = new PlayerEntityContext(p_20081_, this);
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
             builder.playerTouch.accept(context);
         } else {
             super.playerTouch(p_20081_);
         }
     }
 
-
     @Override
     public HitResult pick(double p_19908_, float p_19909_, boolean p_19910_) {
-        return (builder.pick != null) ? builder.pick.apply(p_19908_, p_19909_, p_19910_) : super.pick(p_19908_, p_19909_, p_19910_);
+        if (builder.pick != null) {
+            final ClipContext context = new ClipContext(this.position(), this.position(), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this);
+            return builder.pick.apply(context);
+        } else {
+            return super.pick(p_19908_, p_19909_, p_19910_);
+        }
     }
 
 
@@ -1747,17 +1691,17 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
 
-    @Override
+    /*@Override
     public void setInvisible(boolean p_20304_) {
         if (builder.setInvisible != null) {
             builder.setInvisible.accept(p_20304_);
         } else {
             super.setInvisible(p_20304_);
         }
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     public void setAirSupply(int p_20302_) {
         if (builder.setAirSupply != null) {
             builder.setAirSupply.accept(p_20302_);
@@ -1765,30 +1709,29 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
             super.setAirSupply(p_20302_);
         }
     }
+*/
 
-
-    @Override
+   /* @Override
     public void setTicksFrozen(int p_146918_) {
         if (builder.setTicksFrozen != null) {
             builder.setTicksFrozen.accept(p_146918_);
         } else {
             super.setTicksFrozen(p_146918_);
         }
-    }
+    }*/
 
 
     @Override
     public void thunderHit(ServerLevel p_19927_, LightningBolt p_19928_) {
         if (builder.thunderHit != null) {
-            final ThunderHitContext context = new ThunderHitContext(p_19927_, p_19928_, this);
-            builder.thunderHit.accept(context);
-        } else {
             super.thunderHit(p_19927_, p_19928_);
+            final ContextUtils.ThunderHitContext context = new ContextUtils.ThunderHitContext(p_19927_, p_19928_, this);
+            builder.thunderHit.accept(context);
         }
     }
 
 
-    @Override
+   /* @Override
     public void makeStuckInBlock(@NotNull BlockState p_20006_, @NotNull Vec3 p_20007_) {
         if (builder.makeStuckInBlock != null) {
             final StuckInBlockContext context = new StuckInBlockContext(p_20006_, p_20007_, this);
@@ -1796,52 +1739,56 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         } else {
             super.makeStuckInBlock(p_20006_, p_20007_);
         }
-    }
+    }*/
+
 
     @Override
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
-            return builder.isInvulnerableTo.test(p_20122_);
-        } else {
-            return super.isInvulnerableTo(p_20122_);
+            super.isInvulnerableTo(p_20122_);
+            final ContextUtils.DamageContext context = new ContextUtils.DamageContext(this, p_20122_);
+            return builder.isInvulnerableTo.test(context);
         }
+        return super.isInvulnerableTo(p_20122_);
     }
 
 
-    @Override
+    /*@Override
     public void setInvulnerable(boolean p_20332_) {
         if (builder.setInvulnerable != null) {
             builder.setInvulnerable.accept(p_20332_);
         } else {
             super.setInvulnerable(p_20332_);
         }
-    }
+    }*/
+    public static final Logger LOGGER = LogUtils.getLogger();
 
 
     @Override
     public boolean canChangeDimensions() {
         if (builder.canChangeDimensions != null) {
-            return builder.canChangeDimensions.get();
+            return builder.canChangeDimensions.test(this);
         } else {
             return super.canChangeDimensions();
         }
     }
 
 
-    @Override
+    /*@Override
     public void setCustomName(@Nullable Component p_20053_) {
         if (builder.setCustomName != null) {
             builder.setCustomName.accept(Optional.ofNullable(p_20053_));
         } else {
             super.setCustomName(p_20053_);
         }
-    }
+    }*/
 
 
     @Override
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
         if (builder.mayInteract != null) {
-            return builder.mayInteract.test(p_146843_, p_146844_);
+            final ContextUtils.MayInteractContext context = new ContextUtils.MayInteractContext(p_146843_, p_146844_, this);
+            return builder.mayInteract.test(context);
         } else {
             return super.mayInteract(p_146843_, p_146844_);
         }
@@ -1851,7 +1798,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
-            return builder.canTrample.test(state, pos, fallDistance);
+            final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
+            return builder.canTrample.test(context);
         } else {
             return super.canTrample(state, pos, fallDistance);
         }

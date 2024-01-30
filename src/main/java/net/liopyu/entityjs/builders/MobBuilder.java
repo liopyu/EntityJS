@@ -3,10 +3,11 @@ package net.liopyu.entityjs.builders;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
+import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
+import net.liopyu.entityjs.entities.MobEntityJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
-import net.liopyu.entityjs.util.MobInteractContext;
-import net.liopyu.entityjs.util.PlayerEntityContext;
+import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,13 +29,13 @@ import java.util.function.*;
  * in {@link Mob} that is not present in/related to {@link net.minecraft.world.entity.LivingEntity LivignEntity}
  */
 public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
-    public transient Function<MobInteractContext, @Nullable InteractionResult> mobInteract;
+    public transient Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> mobInteract;
     public transient SpawnEggItemBuilder eggItem;
     public transient BiConsumer<BlockPathTypes, Float> setPathfindingMalus;
     public transient Function<BlockPathTypes, Boolean> canCutCorner;
     /* public transient Supplier<BodyRotationControl> createBodyControl;*/
 
-    public transient Consumer<LivingEntity> setTarget;
+    public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Predicate<ProjectileWeaponItem> canFireProjectileWeapon;
     public transient Consumer<LivingEntity> ate;
     public transient Consumer<Object> getAmbientSound;
@@ -42,7 +43,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Boolean shouldDespawnInPeaceful;
     public transient Boolean canPickUpLoot;
     public transient Boolean isPersistenceRequired;
-    public transient Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg;
+    /*public transient Consumer<ContextUtils.PlayerEntityContext> onOffspringSpawnedFromEgg;*/
 
     public transient Function<LivingEntity, Double> meleeAttackRangeSqr;
     /*public transient Consumer<Mob> updateControlFlags;*/
@@ -116,8 +117,8 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     @Info(value = """
             Sets the custom consumer for the target of the entity for the mob in the builder.
             """)
-    public MobBuilder<T> setTarget(Consumer<LivingEntity> setTarget) {
-        this.setTarget = setTarget;
+    public MobBuilder<T> onTargetChanged(Consumer<ContextUtils.TargetChangeContext> setTarget) {
+        this.onTargetChanged = setTarget;
         return this;
     }
 
@@ -140,7 +141,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     @Info(value = """
             Sets the custom logic for mob interaction using the provided function.
             """)
-    public BaseLivingEntityBuilder<T> mobInteract(Function<MobInteractContext, @Nullable InteractionResult> f) {
+    public BaseLivingEntityBuilder<T> mobInteract(Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> f) {
         mobInteract = f;
         return this;
     }
@@ -185,13 +186,13 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-    @Info(value = """
+    /*@Info(value = """
             Sets the custom behavior when offspring is spawned from an egg for the mob in the builder.
             """)
-    public MobBuilder<T> onOffspringSpawnedFromEgg(Consumer<PlayerEntityContext> onOffspringSpawnedFromEgg) {
+    public MobBuilder<T> onOffspringSpawnedFromEgg(Consumer<ContextUtils.PlayerEntityContext> onOffspringSpawnedFromEgg) {
         this.onOffspringSpawnedFromEgg = onOffspringSpawnedFromEgg;
         return this;
-    }
+    }*/
 
     @Info(value = "Sets the custom double representing the square of the melee attack range for the mob in the builder.")
     public MobBuilder<T> meleeAttackRangeSqr(Function<LivingEntity, Double> meleeAttackRangeSqr) {
