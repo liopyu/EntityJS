@@ -218,24 +218,32 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public boolean isFood(ItemStack pStack) {
         if (builder.isFood != null) {
-            final Item stack = Wrappers.getItemFromObject(builder.isFood);
-            if (stack != null) {
-                return pStack.is(stack);
+            final Item[] items = Wrappers.getItemFromObject(builder.isFood);
+            for (Item item : items) {
+                if (pStack.is(item)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
+
     @Override
     public boolean canBreed() {
-        return builder.canBreed;
+        if (builder.canBreed != null) {
+            return builder.canBreed.test(this);
+        } else {
+            return super.canBreed();
+        }
     }
 
 
     @Override
     public float getWalkTargetValue(BlockPos pos, LevelReader levelReader) {
         if (builder.walkTargetValue != null) {
-            return builder.walkTargetValue.apply(pos, levelReader);
+            final ContextUtils.EntityBlockPosLevelContext context = new ContextUtils.EntityBlockPosLevelContext(pos, levelReader, this);
+            return builder.walkTargetValue.apply(context);
         } else {
             return super.getWalkTargetValue(pos, levelReader);
         }
@@ -244,26 +252,19 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public double getMyRidingOffset() {
-        if (builder.myRidingOffset != null) {
-            return builder.myRidingOffset.apply(this);
-        } else {
-            return super.getMyRidingOffset();
-        }
+        return builder.myRidingOffset;
     }
 
     @Override
     public int getAmbientSoundInterval() {
-        if (builder.ambientSoundInterval != null) {
-            return builder.ambientSoundInterval.apply(this);
-        } else {
-            return super.getAmbientSoundInterval();
-        }
+        return builder.ambientSoundInterval;
     }
 
     @Override
     public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
         if (builder.removeWhenFarAway != null) {
-            return builder.removeWhenFarAway.test(this, pDistanceToClosestPlayer);
+            final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
+            return builder.removeWhenFarAway.test(context);
         } else {
             return super.removeWhenFarAway(pDistanceToClosestPlayer);
         }
@@ -273,7 +274,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public boolean canMate(Animal pOtherAnimal) {
         if (builder.canMate != null) {
-            return builder.canMate.test(this, pOtherAnimal);
+            final ContextUtils.EntityAnimalContext context = new ContextUtils.EntityAnimalContext(this, pOtherAnimal);
+            return builder.canMate.test(context);
         } else {
             return super.canMate(pOtherAnimal);
         }
@@ -320,11 +322,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected double followLeashSpeed() {
-        if (builder.followLeashSpeed != null) {
-            return builder.followLeashSpeed.get();
-        } else {
-            return super.followLeashSpeed();
-        }
+        return builder.followLeashSpeed;
     }
 
     //Mob Overrides
@@ -335,17 +333,23 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
             return;
         }
         if (builder.setPathfindingMalus != null) {
-            builder.setPathfindingMalus.accept(nodeType, malus);
+            builder.setPathfindingMalus.put(nodeType, malus);
         } else {
             super.setPathfindingMalus(nodeType, malus);
         }
     }
 
     @Override
+    public float getPathfindingMalus(BlockPathTypes pNodeType) {
+        return super.getPathfindingMalus(pNodeType);
+    }
+
+    @Override
     public boolean canCutCorner(BlockPathTypes pathType) {
 
         if (builder.canCutCorner != null) {
-            return builder.canCutCorner.apply(pathType);
+            final ContextUtils.EntityBlockPathTypeContext context = new ContextUtils.EntityBlockPathTypeContext(pathType, this);
+            return builder.canCutCorner.apply(context);
         }
         return super.canCutCorner(pathType);
     }
@@ -364,10 +368,14 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeapon != null) {
-            return builder.canFireProjectileWeapon.test(projectileWeapon);
-        } else {
-            return super.canFireProjectileWeapon(projectileWeapon);
+            final Item[] items = Wrappers.getItemFromObject(builder.canFireProjectileWeapon);
+            for (Item item : items) {
+                if (projectileWeapon.equals(item) && item instanceof ProjectileWeaponItem) {
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     @Override
@@ -410,10 +418,10 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         return (builder.shouldDespawnInPeaceful != null) ? builder.shouldDespawnInPeaceful : super.shouldDespawnInPeaceful();
     }
 
-    @Override
+    /*@Override
     public boolean canPickUpLoot() {
         return (builder.canPickUpLoot != null) ? builder.canPickUpLoot : super.canPickUpLoot();
-    }
+    }*/
 
     @Override
     public boolean isPersistenceRequired() {
@@ -423,7 +431,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public double getMeleeAttackRangeSqr(LivingEntity entity) {
-        return (builder.meleeAttackRangeSqr != null) ? builder.meleeAttackRangeSqr : super.getMeleeAttackRangeSqr(entity);
+        return (builder.meleeAttackRangeSqr != null) ? builder.meleeAttackRangeSqr.apply(this) : super.getMeleeAttackRangeSqr(entity);
     }
 
     //(Base LivingEntity/Entity Overrides)
@@ -713,7 +721,11 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public boolean isInvertedHealAndHarm() {
-        return builder.invertedHealAndHarm || super.isInvertedHealAndHarm();
+        if (builder.invertedHealAndHarm != null) {
+            return builder.invertedHealAndHarm.getAsBoolean();
+        } else {
+            return super.isInvertedHealAndHarm();
+        }
     }
 
 

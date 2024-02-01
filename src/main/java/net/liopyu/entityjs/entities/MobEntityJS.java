@@ -29,6 +29,7 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.ClipContext;
@@ -75,13 +76,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         return animationFactory;
     }
 
-    /*@Override
-    protected void updateControlFlags() {
-        super.updateControlFlags();
-        if (builder.updateControlFlags != null) {
-            builder.updateControlFlags.accept(this);
-        }
-    }*/
 
     @Override
     protected void registerGoals() {
@@ -150,6 +144,115 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     protected @NotNull PathNavigation createNavigation(@NotNull Level p_21480_) {
         return super.createNavigation(p_21480_);
+    }
+
+    //Mob Overrides
+    @Override
+    public void setPathfindingMalus(BlockPathTypes nodeType, float malus) {
+        if (builder == null) {
+            super.setPathfindingMalus(nodeType, malus);
+            return;
+        }
+        if (builder.setPathfindingMalus != null) {
+            builder.setPathfindingMalus.put(nodeType, malus);
+        } else {
+            super.setPathfindingMalus(nodeType, malus);
+        }
+    }
+
+    @Override
+    public float getPathfindingMalus(BlockPathTypes pNodeType) {
+        return super.getPathfindingMalus(pNodeType);
+    }
+
+    @Override
+    public boolean canCutCorner(BlockPathTypes pathType) {
+
+        if (builder.canCutCorner != null) {
+            final ContextUtils.EntityBlockPathTypeContext context = new ContextUtils.EntityBlockPathTypeContext(pathType, this);
+            return builder.canCutCorner.apply(context);
+        }
+        return super.canCutCorner(pathType);
+    }
+
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        super.setTarget(target);
+        if (builder.onTargetChanged != null) {
+            assert target != null;
+            final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(target, this);
+            builder.onTargetChanged.accept(context);
+        }
+    }
+
+    @Override
+    public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeapon) {
+        if (builder.canFireProjectileWeapon != null) {
+            final Item[] items = Wrappers.getItemFromObject(builder.canFireProjectileWeapon);
+            for (Item item : items) {
+                if (projectileWeapon.equals(item) && item instanceof ProjectileWeaponItem) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void ate() {
+        super.ate();
+        if (builder.ate != null) {
+            builder.ate.accept(this);
+        }
+    }
+
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        if (builder.getAmbientSound != null) {
+            return Wrappers.soundEvent(builder.getAmbientSound);
+        } else {
+            return super.getAmbientSound();
+        }
+    }
+
+
+    @Override
+    public boolean canHoldItem(ItemStack stack) {
+        if (builder.canHoldItem != null) {
+            for (Object item : builder.canHoldItem) {
+                if (Objects.requireNonNull(Wrappers.getItemStackFromObject(item)).sameItem(stack)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return super.canHoldItem(stack);
+        }
+    }
+
+
+    @Override
+    protected boolean shouldDespawnInPeaceful() {
+        return (builder.shouldDespawnInPeaceful != null) ? builder.shouldDespawnInPeaceful : super.shouldDespawnInPeaceful();
+    }
+
+    /*@Override
+    public boolean canPickUpLoot() {
+        return (builder.canPickUpLoot != null) ? builder.canPickUpLoot : super.canPickUpLoot();
+    }*/
+
+    @Override
+    public boolean isPersistenceRequired() {
+        return (builder.isPersistenceRequired != null) ? builder.isPersistenceRequired : super.isPersistenceRequired();
+    }
+
+
+    @Override
+    public double getMeleeAttackRangeSqr(LivingEntity entity) {
+        return (builder.meleeAttackRangeSqr != null) ? builder.meleeAttackRangeSqr.apply(this) : super.getMeleeAttackRangeSqr(entity);
     }
 
     //Beginning of Base Overrides

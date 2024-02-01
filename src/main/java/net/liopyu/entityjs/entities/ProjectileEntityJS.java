@@ -2,6 +2,7 @@ package net.liopyu.entityjs.entities;
 
 import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.ProjectileEntityJSBuilder;
+import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.Wrappers;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
@@ -70,7 +71,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     public void tick() {
         super.tick();
-        if (builder.tick != null) {
+        if (builder != null && builder.tick != null) {
             builder.tick.accept(this);
         }
     }
@@ -84,30 +85,10 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     }
 
 
-    public static class ProjectileEntityHitContext {
-        public final ThrowableItemProjectile entity;
-        public final EntityHitResult result;
-
-        public ProjectileEntityHitContext(EntityHitResult result, ThrowableItemProjectile entity) {
-            this.entity = entity;
-            this.result = result;
-        }
-    }
-
-    public static class ProjectileBlockHitContext {
-        public final ThrowableItemProjectile entity;
-        public final BlockHitResult result;
-
-        public ProjectileBlockHitContext(BlockHitResult result, ThrowableItemProjectile entity) {
-            this.entity = entity;
-            this.result = result;
-        }
-    }
-
     @Override
     protected void onHitEntity(EntityHitResult result) {
-        if (builder.onHitEntity != null) {
-            final ProjectileEntityHitContext context = new ProjectileEntityHitContext(result, this);
+        if (builder != null && builder.onHitEntity != null) {
+            final ContextUtils.ProjectileEntityHitContext context = new ContextUtils.ProjectileEntityHitContext(result, this);
             builder.onHitEntity.accept(context);
         } else {
             super.onHitEntity(result);
@@ -116,8 +97,8 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected void onHitBlock(BlockHitResult result) {
-        if (builder.onHitBlock != null) {
-            final ProjectileBlockHitContext context = new ProjectileBlockHitContext(result, this);
+        if (builder != null && builder.onHitBlock != null) {
+            final ContextUtils.ProjectileBlockHitContext context = new ContextUtils.ProjectileBlockHitContext(result, this);
             builder.onHitBlock.accept(context);
         } else {
             super.onHitBlock(result);
@@ -127,24 +108,18 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected boolean canHitEntity(Entity entity) {
-        return builder.canHitEntity != null ? builder.canHitEntity.test(entity) : super.canHitEntity(entity);
-    }
-
-    public static class ProjectilePlayerContext {
-        public final ThrowableItemProjectile entity;
-        public final Player player;
-
-        public ProjectilePlayerContext(Player player, ThrowableItemProjectile entity) {
-            this.entity = entity;
-            this.player = player;
+        if (builder != null && builder.canHitEntity != null) {
+            return builder.canHitEntity.test(entity);
+        } else {
+            return super.canHitEntity(entity);
         }
     }
 
 
     @Override
     public void playerTouch(Player player) {
-        if (builder.playerTouch != null) {
-            final ProjectilePlayerContext context = new ProjectilePlayerContext(player, this);
+        if (builder != null && builder.playerTouch != null) {
+            final ContextUtils.ProjectilePlayerContext context = new ContextUtils.ProjectilePlayerContext(player, this);
             builder.playerTouch.accept(context);
         } else {
             super.playerTouch(player);

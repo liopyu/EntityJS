@@ -7,12 +7,19 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 
 public class ContextUtils {
     public static class PlayerEntityContext {
@@ -262,6 +269,88 @@ public class ContextUtils {
             this.pose = pose;
             this.dimensions = dimensions;
             this.livingEntity = livingEntity;
+        }
+    }
+
+    public static class EntityProjectileWeaponContext {
+        public final ProjectileWeaponItem projectileWeapon;
+        public final LivingEntity livingEntity;
+
+        public EntityProjectileWeaponContext(ProjectileWeaponItem projectileWeapon, LivingEntity livingEntity) {
+            this.projectileWeapon = projectileWeapon;
+            this.livingEntity = livingEntity;
+        }
+    }
+
+    public static class EntityBlockPathTypeContext {
+        public final BlockPathTypes blockPathType;
+        public final LivingEntity livingEntity;
+
+        public EntityBlockPathTypeContext(BlockPathTypes blockPathType, LivingEntity livingEntity) {
+            this.blockPathType = blockPathType;
+            this.livingEntity = livingEntity;
+        }
+    }
+
+    public static class EntityAnimalContext {
+        public final Animal animal;
+        public final Animal otherAnimal;
+
+        public EntityAnimalContext(Animal animal, Animal otherAnimal) {
+            this.animal = animal;
+            this.otherAnimal = otherAnimal;
+        }
+    }
+
+    public static class EntityDistanceToPlayerContext {
+        public final double distanceToClosestPlayer;
+        public final LivingEntity entity;
+
+        public EntityDistanceToPlayerContext(double distanceToClosestPlayer, LivingEntity entity) {
+            this.distanceToClosestPlayer = distanceToClosestPlayer;
+            this.entity = entity;
+        }
+    }
+
+    public static class EntityBlockPosLevelContext {
+        public final BlockPos pos;
+        public final LevelReader levelReader;
+        public final LivingEntity entity;
+
+        public EntityBlockPosLevelContext(BlockPos pos, LevelReader levelReader, LivingEntity entity) {
+            this.pos = pos;
+            this.levelReader = levelReader;
+            this.entity = entity;
+        }
+    }
+
+    public static class ProjectilePlayerContext {
+        public final ThrowableItemProjectile entity;
+        public final Player player;
+
+        public ProjectilePlayerContext(Player player, ThrowableItemProjectile entity) {
+            this.entity = entity;
+            this.player = player;
+        }
+    }
+
+    public static class ProjectileEntityHitContext {
+        public final ThrowableItemProjectile entity;
+        public final EntityHitResult result;
+
+        public ProjectileEntityHitContext(EntityHitResult result, ThrowableItemProjectile entity) {
+            this.entity = entity;
+            this.result = result;
+        }
+    }
+
+    public static class ProjectileBlockHitContext {
+        public final ThrowableItemProjectile entity;
+        public final BlockHitResult result;
+
+        public ProjectileBlockHitContext(BlockHitResult result, ThrowableItemProjectile entity) {
+            this.entity = entity;
+            this.result = result;
         }
     }
 }

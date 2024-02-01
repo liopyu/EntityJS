@@ -84,14 +84,38 @@ public class Wrappers {
         return null;
     }
 
-    public static Item getItemFromObject(Object item) {
+    public static Item[] getItemFromObject(Object item) {
         if (item instanceof Item stack) {
-            return stack;
+            // If the object is already an instance of Item, return it in an array.
+            return new Item[]{stack};
         } else if (item instanceof ResourceLocation || item instanceof CharSequence) {
-            return ForgeRegistries.ITEMS.getValue(new ResourceLocation(item.toString()));
+            // If the object is a ResourceLocation or CharSequence, convert it to a ResourceLocation.
+            ResourceLocation resourceLocation = new ResourceLocation(item.toString());
+
+            // Retrieve the Item from the ForgeRegistries.ITEMS using the ResourceLocation and return it in an array.
+            Item resolvedItem = ForgeRegistries.ITEMS.getValue(resourceLocation);
+            return resolvedItem != null ? new Item[]{resolvedItem} : new Item[]{};
+        } else if (item instanceof Object[]) {
+            // If the object is an array, cast it to Object[] and return it directly.
+            Object[] array = (Object[]) item;
+            Item[] result = new Item[array.length];
+
+            for (int i = 0; i < array.length; i++) {
+                if (array[i] instanceof Item) {
+                    result[i] = (Item) array[i];
+                } else if (array[i] instanceof ResourceLocation || array[i] instanceof CharSequence) {
+                    ResourceLocation resourceLocation = new ResourceLocation(array[i].toString());
+                    result[i] = ForgeRegistries.ITEMS.getValue(resourceLocation);
+                }
+            }
+
+            return result;
         }
-        return null;
+
+        // If none of the conditions are met, return an empty array.
+        return new Item[]{};
     }
+
 
     public static ItemStack getItemStackFromObject(Object item) {
         if (item instanceof ItemStack stack) {

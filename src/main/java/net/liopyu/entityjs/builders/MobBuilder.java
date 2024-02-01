@@ -20,6 +20,7 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.*;
 
 /**
@@ -31,12 +32,12 @@ import java.util.function.*;
 public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
     public transient Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> mobInteract;
     public transient SpawnEggItemBuilder eggItem;
-    public transient BiConsumer<BlockPathTypes, Float> setPathfindingMalus;
-    public transient Function<BlockPathTypes, Boolean> canCutCorner;
+    public transient Map<BlockPathTypes, Float> setPathfindingMalus;
+    public transient Function<ContextUtils.EntityBlockPathTypeContext, Boolean> canCutCorner;
     /* public transient Supplier<BodyRotationControl> createBodyControl;*/
 
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
-    public transient Predicate<ProjectileWeaponItem> canFireProjectileWeapon;
+    public transient Object[] canFireProjectileWeapon;
     public transient Consumer<LivingEntity> ate;
     public transient Consumer<Object> getAmbientSound;
     public transient List<Object> canHoldItem;
@@ -45,7 +46,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Boolean isPersistenceRequired;
     /*public transient Consumer<ContextUtils.PlayerEntityContext> onOffspringSpawnedFromEgg;*/
 
-    public transient Function<LivingEntity, Double> meleeAttackRangeSqr;
+    public transient Function<PathfinderMob, Double> meleeAttackRangeSqr;
     /*public transient Consumer<Mob> updateControlFlags;*/
     public transient Consumer<PathfinderMob> aiStep;
     public transient boolean canJump;
@@ -79,7 +80,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     @Info(value = """
             Sets the custom behavior for the pathfinding malus of a specific node type for the mob in the builder.
             """)
-    public MobBuilder<T> setPathfindingMalus(BiConsumer<BlockPathTypes, Float> setPathfindingMalus) {
+    public MobBuilder<T> setPathfindingMalus(Map<BlockPathTypes, Float> setPathfindingMalus) {
         this.setPathfindingMalus = setPathfindingMalus;
         return this;
     }
@@ -99,7 +100,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     @Info(value = """
             Sets the custom function for determining if the entity can cut corners for a specific path type for the mob in the builder.
             """)
-    public MobBuilder<T> canCutCorner(Function<BlockPathTypes, Boolean> canCutCorner) {
+    public MobBuilder<T> canCutCorner(Function<ContextUtils.EntityBlockPathTypeContext, Boolean> canCutCorner) {
         this.canCutCorner = canCutCorner;
         return this;
     }
@@ -125,7 +126,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     @Info(value = """
             Sets the custom predicate for determining if the entity can fire a projectile weapon for the mob in the builder.
             """)
-    public MobBuilder<T> canFireProjectileWeapon(Predicate<ProjectileWeaponItem> canFireProjectileWeapon) {
+    public MobBuilder<T> canFireProjectileWeapon(Object... canFireProjectileWeapon) {
         this.canFireProjectileWeapon = canFireProjectileWeapon;
         return this;
     }
@@ -195,7 +196,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     }*/
 
     @Info(value = "Sets the custom double representing the square of the melee attack range for the mob in the builder.")
-    public MobBuilder<T> meleeAttackRangeSqr(Function<LivingEntity, Double> meleeAttackRangeSqr) {
+    public MobBuilder<T> meleeAttackRangeSqr(Function<PathfinderMob, Double> meleeAttackRangeSqr) {
         this.meleeAttackRangeSqr = meleeAttackRangeSqr;
         return this;
     }

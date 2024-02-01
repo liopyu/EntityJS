@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.ArrowEntityJS;
 import net.liopyu.entityjs.entities.IProjectileEntityJS;
 import net.liopyu.entityjs.entities.ProjectileEntityJS;
+import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -31,11 +32,11 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
     public transient Consumer<Projectile> tick;
     public transient BiConsumer<MoverType, Vec3> move;
 
-    public transient Consumer<ProjectileEntityJS.ProjectileEntityHitContext> onHitEntity;
-    public transient Consumer<ProjectileEntityJS.ProjectileBlockHitContext> onHitBlock;
+    public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
+    public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
 
     public transient Predicate<Entity> canHitEntity;
-    public transient Consumer<ProjectileEntityJS.ProjectilePlayerContext> playerTouch;
+    public transient Consumer<ContextUtils.ProjectilePlayerContext> playerTouch;
 
     public transient BooleanSupplier isAttackable;
 
@@ -92,13 +93,13 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
 
 
     @Info(value = "Sets the behavior when the arrow hits an entity.")
-    public ProjectileEntityBuilder<T> onHitEntity(Consumer<ProjectileEntityJS.ProjectileEntityHitContext> consumer) {
+    public ProjectileEntityBuilder<T> onHitEntity(Consumer<ContextUtils.ProjectileEntityHitContext> consumer) {
         onHitEntity = consumer;
         return this;
     }
 
-    @Info(value = "Sets the behavior when the arrow hits a block.")
-    public ProjectileEntityBuilder<T> onHitBlock(Consumer<ProjectileEntityJS.ProjectileBlockHitContext> consumer) {
+    @Info(value = "Sets the behavior when the projectile hits a block.")
+    public ProjectileEntityBuilder<T> onHitBlock(Consumer<ContextUtils.ProjectileBlockHitContext> consumer) {
         onHitBlock = consumer;
         return this;
     }
@@ -111,7 +112,7 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
     }
 
     @Info(value = "Sets the playerTouch behavior with parameters (player).")
-    public ProjectileEntityBuilder<T> playerTouch(Consumer<ProjectileEntityJS.ProjectilePlayerContext> consumer) {
+    public ProjectileEntityBuilder<T> playerTouch(Consumer<ContextUtils.ProjectilePlayerContext> consumer) {
         playerTouch = consumer;
         return this;
     }
