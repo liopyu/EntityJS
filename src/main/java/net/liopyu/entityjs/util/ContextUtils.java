@@ -67,6 +67,19 @@ public class ContextUtils {
         }
     }
 
+
+    public static class EntityDamageContext {
+        public final DamageSource damageSource;
+        public final float damageAmount;
+        public final LivingEntity livingEntity;
+
+        public EntityDamageContext(DamageSource damageSource, float damageAmount, LivingEntity livingEntity) {
+            this.damageSource = damageSource;
+            this.damageAmount = damageAmount;
+            this.livingEntity = livingEntity;
+        }
+    }
+
     public static class MayInteractContext {
         public final Level level;
         public final BlockPos pos;
@@ -236,6 +249,18 @@ public class ContextUtils {
             this.slot = slot;
             this.previousStack = previousStack;
             this.currentStack = currentStack;
+            this.livingEntity = livingEntity;
+        }
+    }
+
+    public static class EntityPoseDimensionsContext {
+        public final Pose pose;
+        public final EntityDimensions dimensions;
+        public final LivingEntity livingEntity;
+
+        public EntityPoseDimensionsContext(Pose pose, EntityDimensions dimensions, LivingEntity livingEntity) {
+            this.pose = pose;
+            this.dimensions = dimensions;
             this.livingEntity = livingEntity;
         }
     }
