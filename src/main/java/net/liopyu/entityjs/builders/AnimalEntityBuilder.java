@@ -26,6 +26,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     public transient Object getBreedOffspring;
     public transient Object[] isFood;
+    public transient Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate;
     public transient Predicate<LivingEntity> canBreed;
     public transient Function<ContextUtils.EntityBlockPosLevelContext, Float> walkTargetValue;
 
@@ -95,13 +96,24 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the isFood property in the builder.
+            Sets the list of items that the entity can eat.
                         
             " +
-            "Defaults to null.
+            "Defaults to wheat.
             """)
     public AnimalEntityBuilder<T> isFood(Object... isFood) {
         this.isFood = isFood;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a predicate for what an entity can eat.
+                        
+            " +
+            "Defaults to wheat.
+            """)
+    public AnimalEntityBuilder<T> isFoodPredicate(Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate) {
+        this.isFoodPredicate = isFoodPredicate;
         return this;
     }
 

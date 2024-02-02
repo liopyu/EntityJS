@@ -250,9 +250,9 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
-        if (builder.interact != null) {
+        if (builder.onInteract != null) {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            final InteractionResult result = builder.interact.apply(context);
+            final InteractionResult result = builder.onInteract.apply(context);
             return result == null ? super.interact(pPlayer, pHand) : result;
         }
 
@@ -912,6 +912,13 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         }
     }
 
+    @Override
+    protected float getBlockSpeedFactor() {
+        if (builder.blockSpeedFactor != null) {
+            return builder.blockSpeedFactor.apply(this);
+        }
+        return super.getBlockSpeedFactor();
+    }
 
     @Override
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {

@@ -147,6 +147,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
     //Mob Overrides
+
+
     @Override
     public void setPathfindingMalus(BlockPathTypes nodeType, float malus) {
         if (builder == null) {
@@ -186,8 +188,15 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
     }
 
-    @Override
-    public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeapon) {
+    public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
+        if (builder.canFireProjectileWeaponPredicate != null) {
+            final ContextUtils.EntityProjectileWeaponContext context = new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this);
+            return builder.canFireProjectileWeaponPredicate.test(context);
+        }
+        return false;
+    }
+
+    public boolean canFireProjectileWeaponBoolean(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeapon != null) {
             final Item[] items = Wrappers.getItemFromObject(builder.canFireProjectileWeapon);
             for (Item item : items) {
@@ -196,7 +205,20 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
                 }
             }
         }
-        return false;
+        return super.canFireProjectileWeapon(projectileWeapon);
+    }
+
+    @Override
+    public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeapon) {
+        if (canFireProjectileWeaponBoolean(projectileWeapon) || canFireProjectileWeaponPredicate(projectileWeapon)) {
+            final Item[] items = Wrappers.getItemFromObject(builder.canFireProjectileWeapon);
+            for (Item item : items) {
+                if (projectileWeapon.equals(item) && item instanceof ProjectileWeaponItem) {
+                    return true;
+                }
+            }
+        }
+        return super.canFireProjectileWeapon(projectileWeapon);
     }
 
     @Override
@@ -259,6 +281,14 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     public @NotNull Iterable<ItemStack> getArmorSlots() {
         return armorItems;
+    }
+
+    @Override
+    protected float getBlockSpeedFactor() {
+        if (builder.blockSpeedFactor != null) {
+            return builder.blockSpeedFactor.apply(this);
+        }
+        return super.getBlockSpeedFactor();
     }
 
     @Override
@@ -346,6 +376,16 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
     }
 
+    @Override
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        if (builder.onInteract != null) {
+            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+            final InteractionResult result = builder.onInteract.apply(context);
+            return result == null ? super.interact(pPlayer, pHand) : result;
+        }
+
+        return super.mobInteract(pPlayer, pHand);
+    }
 
     @Override
     public int calculateFallDamage(float fallDistance, float fallHeight) {

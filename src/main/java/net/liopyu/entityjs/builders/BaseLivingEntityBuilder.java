@@ -100,7 +100,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean isAlwaysExperienceDropper;
     public transient Predicate<LivingEntity> isImmobile;
     public transient float getBlockJumpFactor;
-    public transient Function<T, Integer> blockSpeedFactor;
+    public transient Function<LivingEntity, Integer> blockSpeedFactor;
     public transient float getJumpPower;
     public transient float getSoundVolume;
     public transient float getWaterSlowDown;
@@ -407,7 +407,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         public transient Predicate<Boolean> isAutoSpinAttack;
     */
     public transient Consumer<LivingEntity> onStopRiding;
-    public transient Consumer<T> rideTick;
+    public transient Consumer<LivingEntity> rideTick;
     public SpawnPlacements.Type placementType;
     public Heightmap.Types heightMap;
     public SpawnPlacements.SpawnPredicate<? extends Entity> spawnPredicate;
@@ -517,7 +517,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Predicate<LivingEntity> isCurrentlyGlowing;
     public transient Predicate<LivingEntity> canDisableShield;
     public transient IntSupplier getMaxFallDistance;
-    public transient Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> interact;
+    public transient Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> onInteract;
 /*
     public transient BiPredicate<BlockPos, BlockState> isColliding;
 */
@@ -525,10 +525,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     /*
         public transient Predicate<String> addTag;
     */
-    public transient Consumer<T> onClientRemoval;
-    public transient Consumer<T> onAddedToWorld;
-    public transient Consumer<T> lavaHurt;
-    public transient Consumer<T> onFlap;
+    public transient Consumer<LivingEntity> onClientRemoval;
+    public transient Consumer<LivingEntity> onAddedToWorld;
+    public transient Consumer<LivingEntity> lavaHurt;
+    public transient Consumer<LivingEntity> onFlap;
     public transient BooleanSupplier dampensVibrations;
 
     public transient Consumer<ContextUtils.PlayerEntityContext> playerTouch;
@@ -552,7 +552,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient BiFunction<Float, Float, Integer> calculateFallDamage;
     public transient Predicate<ContextUtils.MayInteractContext> mayInteract;
     public transient Predicate<ContextUtils.CanTrampleContext> canTrample;
-    public transient Consumer<T> onRemovedFromWorld;
+    public transient Consumer<LivingEntity> onRemovedFromWorld;
     public transient Consumer<LivingEntity> onLivingJump;
     public transient Consumer<LivingEntity> livingAiStep;
     private transient int biomeSpawnsCount;
@@ -849,7 +849,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the block speed factor function for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> blockSpeedFactor(Function<T, Integer> function) {
+    public BaseLivingEntityBuilder<T> blockSpeedFactor(Function<LivingEntity, Integer> function) {
         blockSpeedFactor = function;
         return this;
     }
@@ -878,15 +878,15 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     };
 
     @Info(value = "Sets the custom onAddedToWorld behavior")
-    public BaseLivingEntityBuilder<T> onAddedToWorld(Consumer<T> onAddedToWorldCallback) {
+    public BaseLivingEntityBuilder<T> onAddedToWorld(Consumer<LivingEntity> onAddedToWorldCallback) {
         onAddedToWorld = onAddedToWorldCallback;
         return this;
     }
 
-    public BaseLivingEntityBuilder<T> getType(EntityType<T> type) {
+    /*public BaseLivingEntityBuilder<T> getType(EntityType<T> type) {
         getType = type;
         return this;
-    }
+    }*/
 
 
     @Info(value = """
@@ -1693,7 +1693,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for when the entity is updated while riding")
-    public BaseLivingEntityBuilder<T> rideTick(Consumer<T> callback) {
+    public BaseLivingEntityBuilder<T> rideTick(Consumer<LivingEntity> callback) {
         rideTick = callback;
         return this;
     }
@@ -1959,8 +1959,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for living entity interaction")
-    public BaseLivingEntityBuilder<T> interact(Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> f) {
-        interact = f;
+    public BaseLivingEntityBuilder<T> onInteract(Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> f) {
+        onInteract = f;
         return this;
     }
 
@@ -1983,20 +1983,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }*/
 
     @Info(value = "Sets the custom onClientRemoval behavior")
-    public BaseLivingEntityBuilder<T> onClientRemoval(Consumer<T> consumer) {
+    public BaseLivingEntityBuilder<T> onClientRemoval(Consumer<LivingEntity> consumer) {
         onClientRemoval = consumer;
         return this;
     }
 
 
     @Info(value = "Sets the custom lavaHurt behavior")
-    public BaseLivingEntityBuilder<T> lavaHurt(Consumer<T> consumer) {
+    public BaseLivingEntityBuilder<T> lavaHurt(Consumer<LivingEntity> consumer) {
         lavaHurt = consumer;
         return this;
     }
 
     @Info(value = "Sets the custom behavior for entity flapping actions")
-    public BaseLivingEntityBuilder<T> onFlap(Consumer<T> consumer) {
+    public BaseLivingEntityBuilder<T> onFlap(Consumer<LivingEntity> consumer) {
         onFlap = consumer;
         return this;
     }
@@ -2095,7 +2095,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom behavior for when the entity is removed from the world")
-    public BaseLivingEntityBuilder<T> onRemovedFromWorld(Consumer<T> consumer) {
+    public BaseLivingEntityBuilder<T> onRemovedFromWorld(Consumer<LivingEntity> consumer) {
         onRemovedFromWorld = consumer;
         return this;
     }

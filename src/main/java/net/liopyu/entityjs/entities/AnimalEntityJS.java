@@ -228,6 +228,14 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         return false;
     }
 
+    public boolean isFoodPredicate(ItemStack pStack) {
+        if (builder.isFoodPredicate != null) {
+            final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
+            return builder.isFoodPredicate.test(context);
+        }
+        return false;
+    }
+
 
     @Override
     public boolean canBreed() {
@@ -290,7 +298,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         }
     }
 
-    //Ageable Mob Overrides
+
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
         if (builder.finalizeSpawn != null) {
@@ -326,6 +334,41 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     }
 
     //Mob Overrides
+    public InteractionResult onInteract(Player pPlayer, InteractionHand pHand) {
+        if (builder.onInteract != null) {
+            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+            final InteractionResult result = builder.onInteract.apply(context);
+            return result == null ? super.interact(pPlayer, pHand) : result;
+        }
+        return InteractionResult.PASS;
+    }
+
+    @Override
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
+        if (this.isFood(itemstack) || this.isFoodPredicate(itemstack)) {
+            int i = this.getAge();
+            if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
+                this.usePlayerItem(pPlayer, pHand, itemstack);
+                this.setInLove(pPlayer);
+                return InteractionResult.SUCCESS;
+            }
+
+            if (this.isBaby()) {
+                this.usePlayerItem(pPlayer, pHand, itemstack);
+                this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
+            }
+
+            if (this.level.isClientSide) {
+                return InteractionResult.CONSUME;
+            }
+        }
+
+        return onInteract(pPlayer, pHand);
+    }
+
     @Override
     public void setPathfindingMalus(BlockPathTypes nodeType, float malus) {
         if (builder == null) {
@@ -365,8 +408,15 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         }
     }
 
-    @Override
-    public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeapon) {
+    public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
+        if (builder.canFireProjectileWeaponPredicate != null) {
+            final ContextUtils.EntityProjectileWeaponContext context = new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this);
+            return builder.canFireProjectileWeaponPredicate.test(context);
+        }
+        return false;
+    }
+
+    public boolean canFireProjectileWeaponBoolean(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeapon != null) {
             final Item[] items = Wrappers.getItemFromObject(builder.canFireProjectileWeapon);
             for (Item item : items) {
@@ -375,7 +425,20 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
                 }
             }
         }
-        return false;
+        return super.canFireProjectileWeapon(projectileWeapon);
+    }
+
+    @Override
+    public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeapon) {
+        if (canFireProjectileWeaponBoolean(projectileWeapon) || canFireProjectileWeaponPredicate(projectileWeapon)) {
+            final Item[] items = Wrappers.getItemFromObject(builder.canFireProjectileWeapon);
+            for (Item item : items) {
+                if (projectileWeapon.equals(item) && item instanceof ProjectileWeaponItem) {
+                    return true;
+                }
+            }
+        }
+        return super.canFireProjectileWeapon(projectileWeapon);
     }
 
     @Override
@@ -438,6 +501,14 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public boolean isPushable() {
         return builder.isPushable;
+    }
+
+    @Override
+    protected float getBlockSpeedFactor() {
+        if (builder.blockSpeedFactor != null) {
+            return builder.blockSpeedFactor.apply(this);
+        }
+        return super.getBlockSpeedFactor();
     }
 
     @Override

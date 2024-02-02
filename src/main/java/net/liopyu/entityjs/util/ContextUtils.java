@@ -1,8 +1,8 @@
 package net.liopyu.entityjs.util;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -20,6 +20,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import org.apache.logging.log4j.core.jmx.Server;
 
 public class ContextUtils {
     public static class PlayerEntityContext {
@@ -177,6 +178,16 @@ public class ContextUtils {
         }
     }
 
+    public static class EntityItemStackContext {
+        public final ItemStack item;
+        public final LivingEntity entity;
+
+        public EntityItemStackContext(ItemStack item, LivingEntity entity) {
+            this.item = item;
+            this.entity = entity;
+        }
+    }
+
     public static class EntityHealContext {
         public final LivingEntity livingEntity;
         public final float healAmount;
@@ -323,6 +334,7 @@ public class ContextUtils {
             this.entity = entity;
         }
     }
+
 
     public static class ProjectilePlayerContext {
         public final ThrowableItemProjectile entity;

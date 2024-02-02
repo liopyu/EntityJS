@@ -30,7 +30,7 @@ import java.util.function.*;
  * in {@link Mob} that is not present in/related to {@link net.minecraft.world.entity.LivingEntity LivignEntity}
  */
 public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
-    public transient Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> mobInteract;
+    /*public transient Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> mobInteract;*/
     public transient SpawnEggItemBuilder eggItem;
     public transient Map<BlockPathTypes, Float> setPathfindingMalus;
     public transient Function<ContextUtils.EntityBlockPathTypeContext, Boolean> canCutCorner;
@@ -38,6 +38,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
 
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Object[] canFireProjectileWeapon;
+    public transient Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate;
     public transient Consumer<LivingEntity> ate;
     public transient Consumer<Object> getAmbientSound;
     public transient List<Object> canHoldItem;
@@ -124,10 +125,18 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     }
 
     @Info(value = """
-            Sets the custom predicate for determining if the entity can fire a projectile weapon for the mob in the builder.
+            List an array of ProjectileWeaponItems that the mob in the builder can fire.
             """)
     public MobBuilder<T> canFireProjectileWeapon(Object... canFireProjectileWeapon) {
         this.canFireProjectileWeapon = canFireProjectileWeapon;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the custom predicate for determining if the entity can fire a projectile weapon for the mob in the builder.
+            """)
+    public MobBuilder<T> canFireProjectileWeaponPredicate(Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate) {
+        this.canFireProjectileWeaponPredicate = canFireProjectileWeaponPredicate;
         return this;
     }
 
@@ -139,13 +148,13 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-    @Info(value = """
+    /*@Info(value = """
             Sets the custom logic for mob interaction using the provided function.
             """)
     public BaseLivingEntityBuilder<T> mobInteract(Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> f) {
         mobInteract = f;
         return this;
-    }
+    }*/
 
     @Info(value = """
             Sets the custom supplier for providing the ambient sound for the mob in the builder.
