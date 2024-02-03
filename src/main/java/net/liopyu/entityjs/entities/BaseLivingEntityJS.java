@@ -3,42 +3,29 @@ package net.liopyu.entityjs.entities;
 import com.mojang.logging.LogUtils;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
+import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.world.entity.EntityType;
-import net.liopyu.entityjs.util.*;
-import net.minecraft.BlockUtil;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -46,9 +33,44 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Objects;
-import java.util.Optional;
 
+/**
+ * The 'basic' implementation of a custom entity, implements most methods through the builder with some
+ * conditionally delegating to the {@code super} implementation if the function is null. Other implementations
+ * are <strong>not</strong> required to override every method in a class.<br><br>
+ * <p>
+ * Further, the only real requirements for a custom entity class is that the class signature respects the contract
+ * <pre>{@code public class YourEntityClass extends <? extends LivingEntity> implements <? extends IAnimatableJS>}</pre>
+ * A basic implementation for a custom {@link net.minecraft.world.entity.animal.Animal Animal} entity could be as simple as
+ * <pre>{@code public class AnimalEntityJS extends Animal implements IAnimatableJS {
+ *
+ *     private final AnimalBuilder builder;
+ *     private final AnimationFactory animationFactory;
+ *
+ *     public AnimalEntityJS(AnimalBuilder builder, EntityType<? extends Animal> type, Level level) {
+ *         super(type, level);
+ *         this.builder = builder;
+ *         animationFactory = GeckoLibUtil.createFactory(this);
+ *     }
+ *
+ *     @Override
+ *     public BaseLivingEntityBuilder<?> getBuilder() {
+ *         return builder;
+ *     }
+ *
+ *     @Override
+ *     public AnimationFactory getFactory() {
+ *         return animationFactory;
+ *     }
+ *
+ *     @Override
+ *     @Nullable
+ *     public AnimalEntityJS getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
+ *         return null;
+ *     }
+ * }}</pre>
+ * Of course this does not implement any possible networking/synced entity data stuff. figure that out yourself, it scares me
+ */
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
@@ -325,8 +347,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Nullable
     @Override
     protected SoundEvent getDeathSound() {
-        if (builder.setDeathSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.setDeathSound));
+        if (builder.deathSound != null) {
+            return Registry.SOUND_EVENT.get(builder.deathSound);
         } else {
             return super.getDeathSound();
         }
@@ -335,8 +357,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Nullable
     @Override
     protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
-        if (builder.setHurtSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.setHurtSound));
+        if (builder.hurtSound != null) {
+            return Registry.SOUND_EVENT.get(builder.hurtSound);
         } else {
             return super.getHurtSound(p_21239_);
         }
@@ -345,8 +367,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected SoundEvent getSwimSplashSound() {
-        if (builder.setSwimSplashSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.setSwimSplashSound));
+        if (builder.swimSplashSound != null) {
+            return Registry.SOUND_EVENT.get(builder.swimSplashSound);
         } else {
             return super.getSwimSplashSound();
         }
@@ -354,8 +376,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected SoundEvent getSwimSound() {
-        if (builder.setSwimSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.setSwimSound));
+        if (builder.swimSound != null) {
+            return Registry.SOUND_EVENT.get(builder.swimSound);
         } else {
             return super.getSwimSound();
         }
@@ -508,12 +530,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public @NotNull Fallsounds getFallSounds() {
-        if (builder.fallSounds != null) {
-            final SoundEvent smallFall = Wrappers.soundEvent(builder.fallSounds.small());
-            final SoundEvent bigFall = Wrappers.soundEvent(builder.fallSounds.big());
-            assert smallFall != null;
-            assert bigFall != null;
-            return new Fallsounds(smallFall, bigFall);
+        if (builder.smallFallSound != null && builder.largeFallSound != null) {
+            return new Fallsounds(Registry.SOUND_EVENT.get(builder.smallFallSound), Registry.SOUND_EVENT.get(builder.largeFallSound));
         } else {
             return super.getFallSounds();
         }
@@ -523,7 +541,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.eatingSound));
+            return Registry.SOUND_EVENT.get(builder.eatingSound);
         } else {
             return super.getEatingSound(itemStack);
         }

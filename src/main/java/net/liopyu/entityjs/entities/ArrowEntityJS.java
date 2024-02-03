@@ -1,9 +1,9 @@
 package net.liopyu.entityjs.entities;
 
-import net.liopyu.entityjs.builders.*;
-import net.liopyu.entityjs.util.Wrappers;
+import net.liopyu.entityjs.builders.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -15,7 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,18 +58,6 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     //Beginning of Base Overrides
 
-
-    @Override
-    public void setSoundEvent(SoundEvent pSoundEvent) {
-        if (builder.setSoundEvent != null) {
-            SoundEvent event = Wrappers.soundEvent(builder.setSoundEvent);
-            assert event != null;
-            this.setSoundEvent(event);
-        } else {
-            super.setSoundEvent(pSoundEvent);
-        }
-    }
-
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
         return builder.shouldRenderAtSqrDistance != null ? builder.shouldRenderAtSqrDistance.test(distance) : super.shouldRenderAtSqrDistance(distance);
@@ -109,25 +96,9 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         }
     }
 
-    public static class ArrowEntityHitContext {
-        public final AbstractArrow entity;
-        public final EntityHitResult result;
+    public record ArrowEntityHitContext(EntityHitResult getResult, AbstractArrow getArrow) {}
 
-        public ArrowEntityHitContext(EntityHitResult result, AbstractArrow entity) {
-            this.entity = entity;
-            this.result = result;
-        }
-    }
-
-    public static class ArrowBlockHitContext {
-        public final AbstractArrow entity;
-        public final BlockHitResult result;
-
-        public ArrowBlockHitContext(BlockHitResult result, AbstractArrow entity) {
-            this.entity = entity;
-            this.result = result;
-        }
-    }
+    public record ArrowBlockHitContext(BlockHitResult getResult, AbstractArrow getArrow) {}
 
     @Override
     protected void onHitEntity(EntityHitResult result) {
@@ -151,10 +122,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     protected SoundEvent getDefaultHitGroundSoundEvent() {
-        if (builder != null && builder.getDefaultHitGroundSoundEvent != null) {
-            SoundEvent event = Wrappers.soundEvent(builder.getDefaultHitGroundSoundEvent);
-            assert event != null;
-            return event;
+        if (builder.defaultHitGroundSoundEvent != null) {
+            return Registry.SOUND_EVENT.get(builder.defaultHitGroundSoundEvent);
         }
         return super.getDefaultHitGroundSoundEvent();
     }
@@ -180,15 +149,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         return builder.canHitEntity != null ? builder.canHitEntity.test(entity) : super.canHitEntity(entity);
     }
 
-    public static class ArrowPlayerContext {
-        public final AbstractArrow entity;
-        public final Player player;
-
-        public ArrowPlayerContext(Player player, AbstractArrow entity) {
-            this.entity = entity;
-            this.player = player;
-        }
-    }
+    public record ArrowPlayerContext(Player getPlayer, AbstractArrow getArrow) {}
 
     @Override
     public void playerTouch(Player player) {

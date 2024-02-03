@@ -1,58 +1,27 @@
 package net.liopyu.entityjs.builders;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
-import dev.latvian.mods.kubejs.util.JsonIO;
 import dev.latvian.mods.rhino.util.HideFromJS;
-import it.unimi.dsi.fastutil.booleans.BooleanPredicate;
-import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
-import net.liopyu.entityjs.entities.BaseLivingEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.util.*;
-import net.minecraft.BlockUtil;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
+import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
+import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.util.random.Weight;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.CombatTracker;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.TriPredicate;
-import org.apache.commons.lang3.function.TriFunction;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -64,7 +33,8 @@ import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
 import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.*;
 
 /**
@@ -105,9 +75,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient float getJumpPower;
     public transient float getSoundVolume;
     public transient float getWaterSlowDown;
-    public transient Object setSwimSound;
+    public transient ResourceLocation swimSound;
     public transient Function<LivingEntity, Boolean> isFlapping;
-    public transient Object setDeathSound;
+    public transient ResourceLocation deathSound;
     public transient RenderType renderType;
     public transient EntityType<?> getType;
     public transient HumanoidArm mainArm;
@@ -164,15 +134,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 /*
     public transient Function<Entity.MovementEmission, Entity.MovementEmission> customGetMovementEmission;
 */
-
-    /*
-        public transient Object setDrinkingSound;
-    */
-    public transient Object setHurtSound;
+    public transient ResourceLocation hurtSound;
     /*
         public transient Function<ServerLevel, PortalInfo> customFindDimensionEntryPoint;
     */
-    public transient Object setSwimSplashSound;
+    public transient ResourceLocation swimSplashSound;
     /*
         public transient BiFunction<Direction.Axis, BlockUtil.FoundRectangle, Vec3> customGetRelativePortalPosition;
     */
@@ -345,8 +311,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 */
 
     public transient LivingEntity.Fallsounds fallSounds;
+    public transient ResourceLocation smallFallSound;
+    public transient ResourceLocation largeFallSound;
 
-    public transient Object eatingSound;
+    public transient ResourceLocation eatingSound;
 
     public transient Predicate<LivingEntity> onClimbable;
     public transient boolean canBreatheUnderwater;
@@ -398,18 +366,24 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     */
 /*
     public transient BiFunction<Vec3, Float, Vec3> handleRelativeFrictionAndCalculateMovement;
-*/
+    */
+    public transient Consumer<Float> setSpeedConsumer;
+    public transient BiPredicate<Entity, Boolean> doHurtTarget;
+    public transient Predicate<Boolean> isAutoSpinAttack;
+    public transient Runnable stopRidingCallback;
+    public transient Consumer<T> rideTick;
+    public SpawnPlacements.Type placementType;
+    public Heightmap.Types heightMap;
+    public SpawnPlacements.SpawnPredicate<? extends Entity> spawnPredicate;
     public transient Consumer<Float> setSpeed;
     /*
         public transient BiPredicate<Entity, Boolean> doHurtTarget;
     */
-    public transient Predicate<LivingEntity> isSensitiveToWater;
+    public transient Predicate<T> isSensitiveToWater;
     /*
         public transient Predicate<Boolean> isAutoSpinAttack;
     */
     public transient Consumer<LivingEntity> onStopRiding;
-    public transient Consumer<LivingEntity> rideTick;
-
 
     @FunctionalInterface
     public interface HeptConsumer {
@@ -480,7 +454,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     /*public transient Predicate<Boolean> randomTeleportFlag;*/
     public transient Predicate<LivingEntity> isAffectedByPotions;
 
-    public transient Predicate<LivingEntity> isAttackable;
+    public transient Predicate<T> isAttackable;
     /*
         public transient BiConsumer<BlockPos, Boolean> setRecordPlayingNearby;
     */
@@ -551,11 +525,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient BiFunction<Float, Float, Integer> calculateFallDamage;
     public transient Predicate<ContextUtils.MayInteractContext> mayInteract;
     public transient Predicate<ContextUtils.CanTrampleContext> canTrample;
-    public transient Consumer<LivingEntity> onRemovedFromWorld;
     public transient Consumer<LivingEntity> onLivingJump;
     public transient Consumer<LivingEntity> livingAiStep;
 
-    public transient Consumer<AttributeSupplier.Builder> attributes;
+    public transient Consumer<T> onRemovedFromWorld;
+    public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
+    public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -575,6 +550,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         textureResource = t -> t.getBuilder().newID("textures/models/entity/", ".png");
         animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");
         isPushable = true;
+        isAttackable = t -> true;
         animationSuppliers = new ArrayList<>();
         isAlwaysExperienceDropper = false;
         getBlockJumpFactor = 0.5f;
@@ -586,10 +562,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         canBreatheUnderwater = false;
         renderType = RenderType.CUTOUT;
         mainArm = HumanoidArm.RIGHT;
-        attributes = builder -> {
-            builder.add(Attributes.FOLLOW_RANGE, 10);
-        };
-
     }
 
     @Info(value = "Sets the main arm of the entity, defaults to 'right'")
@@ -742,10 +714,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             "Defaults to true.
             """)
     public BaseLivingEntityBuilder<T> isAttackable(boolean b) {
-        isAttackable = b;
+        isAttackable = t -> b;
         return this;
+    }
+          
+    public Predicate<Entity> passengerPredicate;
+    public Predicate<LivingEntity> livingpassengerPredicate;
     }*/
-
 
     @Info(value = """
             Sets the passenger predicate in the builder.
@@ -813,24 +788,24 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the death sound for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> setDeathSound(Object sound) {
-        setDeathSound = sound;
+    public BaseLivingEntityBuilder<T> setDeathSound(ResourceLocation sound) {
+        deathSound = sound;
         return this;
     }
 
     @Info(value = """
             Sets the swim sound for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> setSwimSound(SoundEvent sound) {
-        setSwimSound = sound;
+    public BaseLivingEntityBuilder<T> setSwimSound(ResourceLocation sound) {
+        swimSound = sound;
         return this;
     }
 
     @Info(value = """
             Sets the swim high-speed splash sound for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> setSwimSplashSound(Object sound) {
-        setSwimSplashSound = sound;
+    public BaseLivingEntityBuilder<T> setSwimSplashSound(ResourceLocation sound) {
+        swimSplashSound = sound;
         return this;
     }
 
@@ -1085,8 +1060,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the function to get the hurt sound for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> setHurtSound(Object setHurtSound) {
-        this.setHurtSound = setHurtSound;
+    public BaseLivingEntityBuilder<T> setHurtSound(ResourceLocation hurtSound) {
+        this.hurtSound = hurtSound;
         return this;
     }
 
@@ -1525,16 +1500,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 */
 
-    @Info(value = "Sets the custom logic for determining fall sounds for the entity")
-    public BaseLivingEntityBuilder<T> fallSounds(LivingEntity.Fallsounds function) {
-        fallSounds = function;
+    @Info(value = "Sets the fall sounds for the entity")
+    public BaseLivingEntityBuilder<T> fallSounds(ResourceLocation smallFallSound, ResourceLocation largeFallSound) {
+        this.smallFallSound = smallFallSound;
+        this.largeFallSound = largeFallSound;
         return this;
     }
 
 
     @Info(value = "Sets the custom logic for determining the eating sound for the entity")
-    public BaseLivingEntityBuilder<T> eatingSound(Object function) {
-        eatingSound = function;
+    public BaseLivingEntityBuilder<T> eatingSound(ResourceLocation sound) {
+        eatingSound = sound;
         return this;
     }
 
@@ -1673,7 +1649,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 */
     @Info(value = "Sets the custom logic for determining if the entity is sensitive to water")
-    public BaseLivingEntityBuilder<T> isSensitiveToWater(Predicate<LivingEntity> predicate) {
+    public BaseLivingEntityBuilder<T> isSensitiveToWater(Predicate<T> predicate) {
         isSensitiveToWater = predicate;
         return this;
     }
@@ -1691,7 +1667,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for when the entity is updated while riding")
-    public BaseLivingEntityBuilder<T> rideTick(Consumer<LivingEntity> callback) {
+    public BaseLivingEntityBuilder<T> rideTick(Consumer<T> callback) {
         rideTick = callback;
         return this;
     }
@@ -1849,7 +1825,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom logic for determining if the entity is attackable")
-    public BaseLivingEntityBuilder<T> isAttackable(Predicate<LivingEntity> predicate) {
+    public BaseLivingEntityBuilder<T> isAttackable(Predicate<T> predicate) {
         isAttackable = predicate;
         return this;
     }
@@ -2093,24 +2069,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = "Sets the custom behavior for when the entity is removed from the world")
-    public BaseLivingEntityBuilder<T> onRemovedFromWorld(Consumer<LivingEntity> consumer) {
+    public BaseLivingEntityBuilder<T> onRemovedFromWorld(Consumer<T> consumer) {
         onRemovedFromWorld = consumer;
-        return this;
-    }
-
-    //STUFF
-    @Info(value = "Adds the provided attribute to the entity type")
-    public BaseLivingEntityBuilder<T> addAttribute(Attribute attribute) {
-        attributes = attributes.andThen(builder -> builder.add(attribute));
-        return this;
-    }
-
-    @Info(value = "Adds the provided attribute to the entity type with the provided base value", params = {
-            @Param(name = "attribute", value = "The attribute"),
-            @Param(name = "value", value = "The default value of the attribute")
-    })
-    public BaseLivingEntityBuilder<T> addAttribute(Attribute attribute, double value) {
-        attributes = attributes.andThen(builder -> builder.add(attribute, value));
         return this;
     }
 
@@ -2150,6 +2110,29 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
+    @Info(value = "Sets the spawn placement of the entity type", params = {
+            @Param(name = "placementType", value = "The placement type of the spawn, accepts 'on_ground', 'in_water', 'no_restrictions', 'in_lava'"),
+            @Param(name = "heightMap", value = "The height map used for the spawner"),
+            @Param(name = "spawnPredicate", value = "The predicate that determines if the entity will spawn")
+    })
+    public BaseLivingEntityBuilder<T> spawnPlacement(SpawnPlacements.Type placementType, Heightmap.Types heightMap, SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
+        spawnList.add(this);
+        this.spawnPredicate = spawnPredicate;
+        this.placementType = placementType;
+        this.heightMap = heightMap;
+        return this;
+    }
+
+    @Info(value = "Adds a spawner for this entity to the provided biome(s)", params = {
+            @Param(name = "biomes", value = "A list of biomes that the entity should spawn in. If using a tag, only one value may be provided"),
+            @Param(name = "weight", value = "The spawn weight the entity should have"),
+            @Param(name = "minCount", value = "The minimum number of entities that can spawn at a time"),
+            @Param(name = "maxCount", value = "The maximum number of entities that can spawn at a time")
+    })
+    public BaseLivingEntityBuilder<T> biomeSpawn(List<String> biomes, int weight, int minCount, int maxCount) {
+        biomeSpawnList.add(new EventBasedSpawnModifier.BiomeSpawn(BiomeSpawnsEventJS.processBiomes(biomes), () -> new MobSpawnSettings.SpawnerData(get(), Weight.of(weight), minCount, maxCount)));
+        return this;
+    }
 
     /**
      * <strong>Do not</strong> override unless you are creating a custom entity type builder<br><br>
