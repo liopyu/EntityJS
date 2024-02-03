@@ -35,6 +35,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -408,9 +409,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     */
     public transient Consumer<LivingEntity> onStopRiding;
     public transient Consumer<LivingEntity> rideTick;
-    public SpawnPlacements.Type placementType;
-    public Heightmap.Types heightMap;
-    public SpawnPlacements.SpawnPredicate<? extends Entity> spawnPredicate;
+
 
     @FunctionalInterface
     public interface HeptConsumer {
@@ -555,10 +554,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> onRemovedFromWorld;
     public transient Consumer<LivingEntity> onLivingJump;
     public transient Consumer<LivingEntity> livingAiStep;
-    private transient int biomeSpawnsCount;
-    public static final Map<ResourceLocation, String> spawnsBiomeModifiers = new HashMap<>();
-    public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
 
+    public transient Consumer<AttributeSupplier.Builder> attributes;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -589,7 +586,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         canBreatheUnderwater = false;
         renderType = RenderType.CUTOUT;
         mainArm = HumanoidArm.RIGHT;
-        biomeSpawnsCount = 0;
+        attributes = builder -> {
+            builder.add(Attributes.FOLLOW_RANGE, 10);
+        };
 
     }
 
@@ -2100,6 +2099,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     //STUFF
+    @Info(value = "Adds the provided attribute to the entity type")
+    public BaseLivingEntityBuilder<T> addAttribute(Attribute attribute) {
+        attributes = attributes.andThen(builder -> builder.add(attribute));
+        return this;
+    }
+
+    @Info(value = "Adds the provided attribute to the entity type with the provided base value", params = {
+            @Param(name = "attribute", value = "The attribute"),
+            @Param(name = "value", value = "The default value of the attribute")
+    })
+    public BaseLivingEntityBuilder<T> addAttribute(Attribute attribute, double value) {
+        attributes = attributes.andThen(builder -> builder.add(attribute, value));
+        return this;
+    }
 
     @Info(value = "Adds a new AnimationController to the entity", params = {
             @Param(name = "name", value = "The name of the controller"),
@@ -2137,50 +2150,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = "Sets the spawn placement of the entity type", params = {
-            @Param(name = "placementType", value = "The placement type of the spawn, accepts 'on_ground', 'in_water', 'no_restrictions', 'in_lava'"),
-            @Param(name = "heightMap", value = "The height map used for the spawner"),
-            @Param(name = "spawnPredicate", value = "The predicate that determines if the entity will spawn")
-    })
-    public BaseLivingEntityBuilder<T> spawnPlacement(SpawnPlacements.Type placementType, Heightmap.Types heightMap, SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
-        spawnList.add(this);
-        this.spawnPredicate = spawnPredicate;
-        this.placementType = placementType;
-        this.heightMap = heightMap;
-        return this;
-    }
-
-    @Info(value = "Adds a spawner for this entity to the provided biome(s)", params = {
-            @Param(name = "biomes", value = "A list of biomes that the entity should spawn in. If using a tag, only one value may be provided"),
-            @Param(name = "weight", value = "The spawn weight the entity should have"),
-            @Param(name = "minCount", value = "The minimum number of entities that can spawn at a time"),
-            @Param(name = "maxCount", value = "The maximum number of entities that can spawn at a time")
-    })
-    public BaseLivingEntityBuilder<T> biomeSpawn(List<String> biomes, int weight, int minCount, int maxCount) {
-        final JsonObject json = new JsonObject();
-        json.addProperty("type", "forge:add_spawns");
-        if (biomes.size() == 1) {
-            json.addProperty("biomes", biomes.get(0));
-        } else {
-            final JsonArray array = new JsonArray(biomes.size());
-            biomes.forEach(array::add);
-            json.add("biomes", array);
-        }
-
-        final JsonObject spawner = new JsonObject();
-        spawner.addProperty("type", id.toString());
-        spawner.addProperty("weight", weight);
-        spawner.addProperty("minCount", minCount);
-        spawner.addProperty("maxCount", maxCount);
-        final JsonArray spawners = new JsonArray(1);
-        spawners.add(spawner);
-        json.add("spawners", spawners);
-        spawnsBiomeModifiers.put(
-                EntityJSMod.identifier("forge/biome_modifiers/" + id.getNamespace() + "/" + id.getPath() + "_" + biomeSpawnsCount++),
-                JsonIO.toString(json)
-        );
-        return this;
-    }
 
     /**
      * <strong>Do not</strong> override unless you are creating a custom entity type builder<br><br>

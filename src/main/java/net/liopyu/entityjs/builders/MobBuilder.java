@@ -73,10 +73,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         }
     }
 
-    @Override
-    public AttributeSupplier.Builder getAttributeBuilder() {
-        return Mob.createMobAttributes();
-    }
 
     @Info(value = """
             Sets the custom behavior for the pathfinding malus of a specific node type for the mob in the builder.

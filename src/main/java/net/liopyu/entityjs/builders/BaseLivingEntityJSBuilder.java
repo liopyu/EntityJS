@@ -25,7 +25,8 @@ public class BaseLivingEntityJSBuilder extends BaseLivingEntityBuilder<BaseLivin
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
         final AttributeSupplier.Builder builder = BaseLivingEntityJS.createLivingAttributes();
-        builder.add(Attributes.FOLLOW_RANGE, 16.0F);
+
+        attributes.accept(builder);
         return builder;
     }
 

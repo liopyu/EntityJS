@@ -26,7 +26,5 @@ public class EntityJSMod {
         }
     }
 
-    public static ResourceLocation identifier(String path) {
-        return  new ResourceLocation(MOD_ID, path);
-    }
+
 }

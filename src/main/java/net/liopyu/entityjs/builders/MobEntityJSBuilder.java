@@ -13,11 +13,13 @@ public class MobEntityJSBuilder extends MobBuilder<MobEntityJS> {
 
     @Override
     public EntityType.EntityFactory<MobEntityJS> factory() {
-        return (type, level) -> new MobEntityJS(this, type ,level);
+        return (type, level) -> new MobEntityJS(this, type, level);
     }
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return MobEntityJS.createMobAttributes();
+        final AttributeSupplier.Builder builder = MobEntityJS.createMobAttributes();
+        attributes.accept(builder);
+        return builder;
     }
 }
