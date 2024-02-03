@@ -2,12 +2,10 @@ package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.util.PlayerEntityContext;
-import net.minecraft.core.BlockPos;
+import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,13 +13,9 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.function.*;
 
 public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> extends MobBuilder<T> {
@@ -29,14 +23,15 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     public transient BiFunction<ServerLevel, AgeableMob, @Nullable AgeableMob> getBreedOffspring;
     public transient Predicate<ItemStack> isFood;
-    public transient boolean canBreed;
-    public transient BiFunction<BlockPos, LevelReader, Float> walkTargetValue;
+    public transient Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate;
+    public transient Predicate<LivingEntity> canBreed;
+    public transient Function<ContextUtils.EntityBlockPosLevelContext, Float> walkTargetValue;
 
-    public transient Function<T, Double> myRidingOffset;
-    public transient Function<T, Integer> ambientSoundInterval;
-    public transient BiPredicate<T, Double> removeWhenFarAway;
+    public transient double myRidingOffset;
+    public transient int ambientSoundInterval;
+    public transient Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway;
 
-    public transient BiPredicate<Animal, Animal> canMate;
+    public transient Predicate<ContextUtils.EntityAnimalContext> canMate;
     public transient BiConsumer<ServerLevel, Animal> spawnChildFromBreeding;
 
     @FunctionalInterface
@@ -46,16 +41,32 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     public transient QuinaryFunction<ServerLevelAccessor, DifficultyInstance, MobSpawnType, SpawnGroupData, CompoundTag, SpawnGroupData> finalizeSpawn;
 
-    public transient Consumer<PlayerEntityContext> tickLeash;
     public transient Supplier<Boolean> shouldStayCloseToLeashHolder;
-    public transient Supplier<Double> followLeashSpeed;
+    public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
+    public transient double followLeashSpeed;
+    /*public transient Map<BlockPathTypes, Float> setPathfindingMalus;*/
+    /* public transient Function<BlockPathTypes, Boolean> canCutCorner;*/
 
-    public transient Double meleeAttackRangeSqr;
-    public transient Consumer<LivingEntity> aiStep;
+    public transient Consumer<LivingEntity> setTarget;
+
+    public transient Consumer<LivingEntity> ate;
+    public transient ResourceLocation ambientSound;
+    public transient Predicate<ItemStack> canHoldItem;
+    public transient Boolean shouldDespawnInPeaceful;
+    public transient Boolean canPickUpLoot;
+    public transient Boolean isPersistenceRequired;
+    /*public transient Consumer<ContextUtils.PlayerEntityContext> onOffspringSpawnedFromEgg;*/
+
+/*
+    public transient Function<LivingEntity, Double> meleeAttackRangeSqr;
+*/
 
     public AnimalEntityBuilder(ResourceLocation i) {
         super(i);
-        canBreed = true;
+        canJump = true;
+        followLeashSpeed = 1.0D;
+        ambientSoundInterval = 120;
+        myRidingOffset = 0.14;
     }
 
     @Info(value = """
@@ -73,7 +84,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             
             Defaults to true.
             """)
-    public AnimalEntityBuilder<T> canBreed(boolean canBreed) {
+    public AnimalEntityBuilder<T> canBreed(Predicate<LivingEntity> canBreed) {
         this.canBreed = canBreed;
         return this;
     }
@@ -93,17 +104,18 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             
             Defaults to super-AgeableMob.
             """)
-    public AnimalEntityBuilder<T> aiStep(Consumer<LivingEntity> aiStep) {
-        this.aiStep = aiStep;
+    public AnimalEntityBuilder<T> isFoodPredicate(Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate) {
+        this.isFoodPredicate = isFoodPredicate;
         return this;
     }
+
 
     @Info(value = """
             Sets the walkTargetValue property in the builder.
                         
             Defaults to null.
             """)
-    public AnimalEntityBuilder<T> walkTargetValue(BiFunction<BlockPos, LevelReader, Float> function) {
+    public AnimalEntityBuilder<T> walkTargetValue(Function<ContextUtils.EntityBlockPosLevelContext, Float> function) {
         this.walkTargetValue = function;
         return this;
     }
@@ -113,7 +125,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
                         
             Defaults to `0.0`.
             """)
-    public AnimalEntityBuilder<T> myRidingOffset(Function<T, Double> myRidingOffset) {
+    public AnimalEntityBuilder<T> myRidingOffset(double myRidingOffset) {
         this.myRidingOffset = myRidingOffset;
         return this;
     }
@@ -123,7 +135,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
                         
             Defaults to 240.
             """)
-    public AnimalEntityBuilder<T> ambientSoundInterval(Function<T, Integer> ambientSoundInterval) {
+    public AnimalEntityBuilder<T> ambientSoundInterval(int ambientSoundInterval) {
         this.ambientSoundInterval = ambientSoundInterval;
         return this;
     }
@@ -133,7 +145,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
                         
             Defaults to null.
             """)
-    public AnimalEntityBuilder<T> removeWhenFarAway(BiPredicate<T, Double> removeWhenFarAway) {
+    public AnimalEntityBuilder<T> removeWhenFarAway(Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway) {
         this.removeWhenFarAway = removeWhenFarAway;
         return this;
     }
@@ -143,7 +155,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
                         
             Defaults to null.
             """)
-    public AnimalEntityBuilder<T> canMate(BiPredicate<Animal, Animal> predicate) {
+    public AnimalEntityBuilder<T> canMate(Predicate<ContextUtils.EntityAnimalContext> predicate) {
         this.canMate = predicate;
         return this;
     }
@@ -174,7 +186,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
                         
             Defaults to null.
             """)
-    public AnimalEntityBuilder<T> tickLeash(Consumer<PlayerEntityContext> consumer) {
+    public AnimalEntityBuilder<T> tickLeash(Consumer<ContextUtils.PlayerEntityContext> consumer) {
         this.tickLeash = consumer;
         return this;
     }
@@ -182,10 +194,10 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     @Info(value = """
             Sets the shouldStayCloseToLeashHolder property in the builder.
                         
-            Defaults to null.
+            Defaults to true.
             """)
-    public AnimalEntityBuilder<T> shouldStayCloseToLeashHolder(Supplier<Boolean> supplier) {
-        this.shouldStayCloseToLeashHolder = supplier;
+    public AnimalEntityBuilder<T> shouldStayCloseToLeashHolder(Supplier<Boolean> b) {
+        this.shouldStayCloseToLeashHolder = b;
         return this;
     }
 
@@ -194,21 +206,114 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             
             Defaults to null.
             """)
-    public AnimalEntityBuilder<T> followLeashSpeed(Supplier<Double> supplier) {
+    public AnimalEntityBuilder<T> followLeashSpeed(double supplier) {
         this.followLeashSpeed = supplier;
+        return this;
+    }
+
+    /*@Info(value = """
+            Sets the pathfinding malus for a specific node type.
+
+            Defaults to null.
+            """)
+    public AnimalEntityBuilder<T> setPathfindingMalus(Map<BlockPathTypes, Float> setPathfindingMalus) {
+        this.setPathfindingMalus = setPathfindingMalus;
+        return this;
+    }*/
+
+    /*@Info(value = """
+            Determines if the entity can cut corners for a specific path type.
+                        
+            Defaults to null.
+            """)
+    public AnimalEntityBuilder<T> canCutCorner(Function<BlockPathTypes, Boolean> canCutCorner) {
+        this.canCutCorner = canCutCorner;
+        return this;
+    }*/
+
+
+    @Info(value = """
+            Sets the target for the entity.
+                        
+            Defaults to null.
+            """)
+    public AnimalEntityBuilder<T> setTarget(Consumer<LivingEntity> setTarget) {
+        this.setTarget = setTarget;
         return this;
     }
 
 
     @Info(value = """
-            Sets the square of the melee attack range for the entity.
+            Custom behavior when the entity eats.
                         
             Defaults to null.
             """)
-    public AnimalEntityBuilder<T> meleeAttackRangeSqr(Double meleeAttackRangeSqr) {
-        this.meleeAttackRangeSqr = meleeAttackRangeSqr;
+    public AnimalEntityBuilder<T> ate(Consumer<LivingEntity> ate) {
+        this.ate = ate;
         return this;
     }
 
 
+    @Info(value = """
+            Sets the condition for whether the entity can hold specific items.
+                        
+            Defaults to null.
+            """)
+    public AnimalEntityBuilder<T> canHoldItem(Predicate<ItemStack> items) {
+        this.canHoldItem = items;
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets whether the entity should despawn in peaceful mode.
+                        
+            Defaults to null.
+            """)
+    public AnimalEntityBuilder<T> shouldDespawnInPeaceful(Boolean shouldDespawnInPeaceful) {
+        this.shouldDespawnInPeaceful = shouldDespawnInPeaceful;
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets whether the entity can pick up loot.
+                        
+            Defaults to null.
+            """)
+    public AnimalEntityBuilder<T> canPickUpLoot(Boolean canPickUpLoot) {
+        this.canPickUpLoot = canPickUpLoot;
+        return this;
+    }
+
+    @Info(value = """
+            Sets whether the entity's persistence is required.
+                        
+            Defaults to null.
+            """)
+    public AnimalEntityBuilder<T> isPersistenceRequired(Boolean isPersistenceRequired) {
+        this.isPersistenceRequired = isPersistenceRequired;
+        return this;
+    }
+
+   /* @Info(value = """
+            Sets the behavior when offspring is spawned from an egg.
+                        
+            Defaults to null.
+            """)
+    public AnimalEntityBuilder<T> onOffspringSpawnedFromEgg(Consumer<ContextUtils.PlayerEntityContext> onOffspringSpawnedFromEgg) {
+        this.onOffspringSpawnedFromEgg = onOffspringSpawnedFromEgg;
+        return this;
+    }*/
+
+
+   /* @Info(value = """
+            Sets the square of the melee attack range for the entity.
+                        
+            Defaults to null.
+            """)
+    public AnimalEntityBuilder<T> meleeAttackRangeSqr(Function<LivingEntity, Double> meleeAttackRangeSqr) {
+        this.meleeAttackRangeSqr = meleeAttackRangeSqr;
+        return this;
+    }*/
 }

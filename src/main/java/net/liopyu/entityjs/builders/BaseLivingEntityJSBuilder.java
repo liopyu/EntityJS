@@ -6,6 +6,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 
 public class BaseLivingEntityJSBuilder extends BaseLivingEntityBuilder<BaseLivingEntityJS> {
+
     public BaseLivingEntityJSBuilder(ResourceLocation i) {
         super(i);
     }
@@ -19,4 +20,5 @@ public class BaseLivingEntityJSBuilder extends BaseLivingEntityBuilder<BaseLivin
     public AttributeSupplier.Builder getAttributeBuilder() {
         return BaseLivingEntityJS.createLivingAttributes();
     }
+
 }

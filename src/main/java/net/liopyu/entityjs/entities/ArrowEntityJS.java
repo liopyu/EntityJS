@@ -77,38 +77,34 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
         if (builder.lerpTo != null) {
             builder.lerpTo.accept(x, y, z, yaw, pitch, posRotationIncrements, teleport);
-        } else {
-            super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
         }
     }
 
 
     @Override
     public void tick() {
+        super.tick();
         if (builder.tick != null) {
             builder.tick.accept(this);
-        } else {
-            super.tick();
         }
     }
 
     @Override
     public void move(MoverType pType, Vec3 pPos) {
+        super.move(pType, pPos);
         if (builder.move != null) {
             builder.move.accept(pType, pPos);
-        } else {
-            super.move(pType, pPos);
         }
     }
 
     @Override
     protected void tickDespawn() {
+        super.tickDespawn();
         if (builder.tickDespawn != null) {
             builder.tickDespawn.accept(this);
-        } else {
-            super.tickDespawn();
         }
     }
 
@@ -138,7 +134,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     protected SoundEvent getDefaultHitGroundSoundEvent() {
-        if (builder.getDefaultHitGroundSoundEvent != null) {
+        if (builder != null && builder.getDefaultHitGroundSoundEvent != null) {
             SoundEvent event = Wrappers.soundEvent(builder.getDefaultHitGroundSoundEvent);
             assert event != null;
             return event;
