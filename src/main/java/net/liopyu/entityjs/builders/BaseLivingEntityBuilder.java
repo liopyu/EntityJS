@@ -865,17 +865,16 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
+    public transient Consumer<LivingEntity> tick;
+
     @Info(value = """
             Sets a custom tick callback for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> tick(Consumer<T> tickCallback) {
+    public BaseLivingEntityBuilder<T> tick(Consumer<LivingEntity> tickCallback) {
         tick = tickCallback;
         return this;
     }
 
-
-    public transient Consumer<T> tick = t -> {
-    };
 
     @Info(value = "Sets the custom onAddedToWorld behavior")
     public BaseLivingEntityBuilder<T> onAddedToWorld(Consumer<LivingEntity> onAddedToWorldCallback) {
@@ -2267,11 +2266,14 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         boolean test(AnimationEventJS<E> event);
 
         default AnimationController.IAnimationPredicate<E> toGecko() {
-
             return event -> {
                 if (event != null) {
                     AnimationEventJS<E> animationEventJS = new AnimationEventJS<>(event);
-
+                    try {
+                        if (animationEventJS == null) return PlayState.STOP;
+                    } catch (Exception e) {
+                        //throw new RuntimeException(e);
+                    }
                     return test(animationEventJS) ? PlayState.CONTINUE : PlayState.STOP;
 
                 } else {

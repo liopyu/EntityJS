@@ -627,7 +627,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            builder.tick.accept(this);
+            if (!this.level.isClientSide()) {
+                builder.tick.accept(this);
+            }
         }
     }
 
