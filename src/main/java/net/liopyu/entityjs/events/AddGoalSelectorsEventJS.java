@@ -120,7 +120,10 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
         }
     }
 
-    public void floatGoal(int priority) {
+    @Info(value = "Adds a `FloatGoal` to the entity", params = {
+            @Param(name = "priority", value = "The priority of the goal")
+    })
+    public void floatSwim(int priority) {
         selector.addGoal(priority, new FloatGoal(mob));
     }
 

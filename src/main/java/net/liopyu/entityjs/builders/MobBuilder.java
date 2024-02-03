@@ -3,27 +3,22 @@ package net.liopyu.entityjs.builders;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.entities.MobEntityJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Map;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * A helper class that acts as a base for all mob-based entity types<br><br>
@@ -39,7 +34,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     /* public transient Supplier<BodyRotationControl> createBodyControl;*/
 
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
-    public transient Object[] canFireProjectileWeapon;
     public transient Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate;
     public transient Consumer<LivingEntity> ate;
     public transient Supplier<SoundEvent> getAmbientSound;
@@ -119,14 +113,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             """)
     public MobBuilder<T> onTargetChanged(Consumer<ContextUtils.TargetChangeContext> setTarget) {
         this.onTargetChanged = setTarget;
-        return this;
-    }
-
-    @Info(value = """
-            List an array of ProjectileWeaponItems that the mob in the builder can fire.
-            """)
-    public MobBuilder<T> canFireProjectileWeapon(Object... canFireProjectileWeapon) {
-        this.canFireProjectileWeapon = canFireProjectileWeapon;
         return this;
     }
 

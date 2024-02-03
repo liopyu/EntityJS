@@ -22,7 +22,6 @@ import java.util.function.*;
 public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseEntityBuilder<T> {
     public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Function<T, ResourceLocation> getTextureLocation;
-    public transient Consumer<Object> setSoundEvent;
 
     public transient Predicate<Double> shouldRenderAtSqrDistance;
     public transient BaseLivingEntityBuilder.HeptConsumer lerpTo;
@@ -32,7 +31,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     public transient Consumer<ArrowEntityJS.ArrowEntityHitContext> onHitEntity;
     public transient Consumer<ArrowEntityJS.ArrowBlockHitContext> onHitBlock;
-    public transient Consumer<Object> getDefaultHitGroundSoundEvent;
+    public transient ResourceLocation defaultHitGroundSoundEvent;
 
     public transient Consumer<LivingEntity> doPostHurtEffects;
     public transient BiFunction<Vec3, Vec3, EntityHitResult> findHitEntity;
@@ -64,11 +63,6 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     @Override
     public EntityType<T> createObject() {
         return new EntityTypeBuilder<>(this).get();
-    }
-
-    public ArrowEntityBuilder<T> setSoundEvent(Consumer<Object> consumer) {
-        setSoundEvent = consumer;
-        return this;
     }
 
     @Info(value = "Sets whether the entity should render at a squared distance.")
@@ -114,8 +108,8 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     }
 
     @Info(value = "Sets the default sound event when the arrow hits the ground.")
-    public ArrowEntityBuilder<T> getDefaultHitGroundSoundEvent(Consumer<Object> function) {
-        getDefaultHitGroundSoundEvent = function;
+    public ArrowEntityBuilder<T> getDefaultHitGroundSoundEvent(ResourceLocation function) {
+        defaultHitGroundSoundEvent = function;
         return this;
     }
 

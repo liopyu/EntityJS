@@ -2,8 +2,8 @@ package net.liopyu.entityjs.entities;
 
 import net.liopyu.entityjs.builders.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
-import net.liopyu.entityjs.util.Wrappers;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.Registry;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -57,18 +57,6 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     //Beginning of Base Overrides
-
-
-    @Override
-    public void setSoundEvent(SoundEvent pSoundEvent) {
-        if (builder.setSoundEvent != null) {
-            SoundEvent event = Wrappers.soundEvent(builder.setSoundEvent);
-            assert event != null;
-            this.setSoundEvent(event);
-        } else {
-            super.setSoundEvent(pSoundEvent);
-        }
-    }
 
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
@@ -134,10 +122,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     protected SoundEvent getDefaultHitGroundSoundEvent() {
-        if (builder != null && builder.getDefaultHitGroundSoundEvent != null) {
-            SoundEvent event = Wrappers.soundEvent(builder.getDefaultHitGroundSoundEvent);
-            assert event != null;
-            return event;
+        if (builder.defaultHitGroundSoundEvent != null) {
+            return Registry.SOUND_EVENT.get(builder.defaultHitGroundSoundEvent);
         }
         return super.getDefaultHitGroundSoundEvent();
     }

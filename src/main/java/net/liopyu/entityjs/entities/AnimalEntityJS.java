@@ -10,11 +10,11 @@ import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EventHandlers;
-import net.liopyu.entityjs.util.Wrappers;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -29,7 +29,6 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.ClipContext;
@@ -48,7 +47,6 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Objects;
 
 @MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
 @ParametersAreNonnullByDefault
@@ -616,8 +614,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Nullable
     @Override
     protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
-        if (builder.setHurtSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.setHurtSound));
+        if (builder.hurtSound != null) {
+            return Registry.SOUND_EVENT.get(builder.hurtSound);
         } else {
             return super.getHurtSound(p_21239_);
         }
@@ -626,8 +624,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected SoundEvent getSwimSplashSound() {
-        if (builder.setSwimSplashSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.setSwimSplashSound));
+        if (builder.swimSplashSound != null) {
+            return Registry.SOUND_EVENT.get(builder.swimSplashSound);
         } else {
             return super.getSwimSplashSound();
         }
@@ -773,12 +771,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public @NotNull Fallsounds getFallSounds() {
-        if (builder.fallSounds != null) {
-            final SoundEvent smallFall = Wrappers.soundEvent(builder.fallSounds.small());
-            final SoundEvent bigFall = Wrappers.soundEvent(builder.fallSounds.big());
-            assert smallFall != null;
-            assert bigFall != null;
-            return new Fallsounds(smallFall, bigFall);
+        if (builder.smallFallSound != null && builder.largeFallSound != null) {
+            return new Fallsounds(Registry.SOUND_EVENT.get(builder.smallFallSound), Registry.SOUND_EVENT.get(builder.largeFallSound));
         } else {
             return super.getFallSounds();
         }
@@ -788,7 +782,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.eatingSound));
+            return Registry.SOUND_EVENT.get(builder.eatingSound);
         } else {
             return super.getEatingSound(itemStack);
         }

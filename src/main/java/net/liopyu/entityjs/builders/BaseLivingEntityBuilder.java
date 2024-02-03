@@ -13,7 +13,6 @@ import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.random.Weight;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -76,9 +75,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient float getJumpPower;
     public transient float getSoundVolume;
     public transient float getWaterSlowDown;
-    public transient Object setSwimSound;
+    public transient ResourceLocation swimSound;
     public transient Function<LivingEntity, Boolean> isFlapping;
-    public transient Object setDeathSound;
+    public transient ResourceLocation deathSound;
     public transient RenderType renderType;
     public transient EntityType<?> getType;
     public transient HumanoidArm mainArm;
@@ -135,15 +134,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 /*
     public transient Function<Entity.MovementEmission, Entity.MovementEmission> customGetMovementEmission;
 */
-
-    /*
-        public transient Object setDrinkingSound;
-    */
-    public transient Object setHurtSound;
+    public transient ResourceLocation hurtSound;
     /*
         public transient Function<ServerLevel, PortalInfo> customFindDimensionEntryPoint;
     */
-    public transient Object setSwimSplashSound;
+    public transient ResourceLocation swimSplashSound;
     /*
         public transient BiFunction<Direction.Axis, BlockUtil.FoundRectangle, Vec3> customGetRelativePortalPosition;
     */
@@ -316,8 +311,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 */
 
     public transient LivingEntity.Fallsounds fallSounds;
+    public transient ResourceLocation smallFallSound;
+    public transient ResourceLocation largeFallSound;
 
-    public transient Object eatingSound;
+    public transient ResourceLocation eatingSound;
 
     public transient Predicate<LivingEntity> onClimbable;
     public transient boolean canBreatheUnderwater;
@@ -791,24 +788,24 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the death sound for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> setDeathSound(Object sound) {
-        setDeathSound = sound;
+    public BaseLivingEntityBuilder<T> setDeathSound(ResourceLocation sound) {
+        deathSound = sound;
         return this;
     }
 
     @Info(value = """
             Sets the swim sound for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> setSwimSound(SoundEvent sound) {
-        setSwimSound = sound;
+    public BaseLivingEntityBuilder<T> setSwimSound(ResourceLocation sound) {
+        swimSound = sound;
         return this;
     }
 
     @Info(value = """
             Sets the swim high-speed splash sound for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> setSwimSplashSound(Object sound) {
-        setSwimSplashSound = sound;
+    public BaseLivingEntityBuilder<T> setSwimSplashSound(ResourceLocation sound) {
+        swimSplashSound = sound;
         return this;
     }
 
@@ -1063,8 +1060,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets the function to get the hurt sound for the entity in the builder.
             """)
-    public BaseLivingEntityBuilder<T> setHurtSound(Object setHurtSound) {
-        this.setHurtSound = setHurtSound;
+    public BaseLivingEntityBuilder<T> setHurtSound(ResourceLocation hurtSound) {
+        this.hurtSound = hurtSound;
         return this;
     }
 
@@ -1503,16 +1500,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 */
 
-    @Info(value = "Sets the custom logic for determining fall sounds for the entity")
-    public BaseLivingEntityBuilder<T> fallSounds(LivingEntity.Fallsounds function) {
-        fallSounds = function;
+    @Info(value = "Sets the fall sounds for the entity")
+    public BaseLivingEntityBuilder<T> fallSounds(ResourceLocation smallFallSound, ResourceLocation largeFallSound) {
+        this.smallFallSound = smallFallSound;
+        this.largeFallSound = largeFallSound;
         return this;
     }
 
 
     @Info(value = "Sets the custom logic for determining the eating sound for the entity")
-    public BaseLivingEntityBuilder<T> eatingSound(Object function) {
-        eatingSound = function;
+    public BaseLivingEntityBuilder<T> eatingSound(ResourceLocation sound) {
+        eatingSound = sound;
         return this;
     }
 

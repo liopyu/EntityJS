@@ -4,10 +4,10 @@ import com.mojang.logging.LogUtils;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.liopyu.entityjs.util.Wrappers;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.EntityTypeTags;
@@ -33,7 +33,6 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Objects;
 
 /**
  * The 'basic' implementation of a custom entity, implements most methods through the builder with some
@@ -348,8 +347,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Nullable
     @Override
     protected SoundEvent getDeathSound() {
-        if (builder.setDeathSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.setDeathSound));
+        if (builder.deathSound != null) {
+            return Registry.SOUND_EVENT.get(builder.deathSound);
         } else {
             return super.getDeathSound();
         }
@@ -358,8 +357,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Nullable
     @Override
     protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
-        if (builder.setHurtSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.setHurtSound));
+        if (builder.hurtSound != null) {
+            return Registry.SOUND_EVENT.get(builder.hurtSound);
         } else {
             return super.getHurtSound(p_21239_);
         }
@@ -368,8 +367,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected SoundEvent getSwimSplashSound() {
-        if (builder.setSwimSplashSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.setSwimSplashSound));
+        if (builder.swimSplashSound != null) {
+            return Registry.SOUND_EVENT.get(builder.swimSplashSound);
         } else {
             return super.getSwimSplashSound();
         }
@@ -377,8 +376,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected SoundEvent getSwimSound() {
-        if (builder.setSwimSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.setSwimSound));
+        if (builder.swimSound != null) {
+            return Registry.SOUND_EVENT.get(builder.swimSound);
         } else {
             return super.getSwimSound();
         }
@@ -531,12 +530,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public @NotNull Fallsounds getFallSounds() {
-        if (builder.fallSounds != null) {
-            final SoundEvent smallFall = Wrappers.soundEvent(builder.fallSounds.small());
-            final SoundEvent bigFall = Wrappers.soundEvent(builder.fallSounds.big());
-            assert smallFall != null;
-            assert bigFall != null;
-            return new Fallsounds(smallFall, bigFall);
+        if (builder.smallFallSound != null && builder.largeFallSound != null) {
+            return new Fallsounds(Registry.SOUND_EVENT.get(builder.smallFallSound), Registry.SOUND_EVENT.get(builder.largeFallSound));
         } else {
             return super.getFallSounds();
         }
@@ -546,7 +541,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null) {
-            return Objects.requireNonNull(Wrappers.soundEvent(builder.eatingSound));
+            return Registry.SOUND_EVENT.get(builder.eatingSound);
         } else {
             return super.getEatingSound(itemStack);
         }
