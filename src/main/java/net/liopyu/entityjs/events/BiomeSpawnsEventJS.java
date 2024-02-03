@@ -51,9 +51,9 @@ public class BiomeSpawnsEventJS extends EventJS {
         final List<Either<ResourceLocation, TagKey<Biome>>> biomeList = new ArrayList<>();
         for (String biome : biomes) {
             if (biome.charAt(0) == '#') {
-                biomeList.add(Either.left(new ResourceLocation(biome.substring(1))));
+                biomeList.add(Either.right(TagKey.create(ForgeRegistries.Keys.BIOMES, new ResourceLocation(biome.substring(1)))));
             } else {
-                biomeList.add(Either.right(TagKey.create(ForgeRegistries.Keys.BIOMES, new ResourceLocation(biome))));
+                biomeList.add(Either.left(new ResourceLocation(biome)));
             }
         }
         return biomeList;

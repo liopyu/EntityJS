@@ -9,7 +9,7 @@ import net.liopyu.entityjs.util.RegistryUtil;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraftforge.common.world.BiomeModifier;
@@ -26,9 +26,8 @@ public class EventBasedSpawnModifier implements BiomeModifier {
 
     public EventBasedSpawnModifier() {
         if (EventHandlers.biomeSpawns.hasListeners()) {
-            final BiomeSpawnsEventJS event = new BiomeSpawnsEventJS();
+            event = new BiomeSpawnsEventJS();
             EventHandlers.biomeSpawns.post(event);
-            this.event = event;
         } else {
             event = null;
         }
@@ -74,32 +73,29 @@ public class EventBasedSpawnModifier implements BiomeModifier {
                 }
             }
         }
-        if (event != null) {
-            if (phase == Phase.REMOVE) {
-                for (BiomeSpawnsEventJS.Removal removal : event.removals) {
-                    final AtomicBoolean atomicBoolean = new AtomicBoolean(false);
-                    for (Either<ResourceLocation, TagKey<Biome>> either : removal.biomes()) {
-                        either.map(rl -> {
-                           if (biome.is(rl)) {
-                               atomicBoolean.set(true);
-                           }
-                           return rl;
-                        }, tag -> {
-                            if (biome.is(tag)) {
-                                atomicBoolean.set(true);
-                            }
-                            return tag;
-                        });
-                        if (atomicBoolean.get()) {
-                            break;
+
+        if (event != null && phase == Phase.REMOVE) {
+            for (BiomeSpawnsEventJS.Removal removal : event.removals) {
+                final AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+                for (Either<ResourceLocation, TagKey<Biome>> either : removal.biomes()) {
+                    either.map(rl -> {
+                        if (biome.is(rl)) {
+                            atomicBoolean.set(true);
                         }
-                    }
+                        return rl;
+                    }, tag -> {
+                        if (biome.is(tag)) {
+                            atomicBoolean.set(true);
+                        }
+                        return tag;
+                    });
                     if (atomicBoolean.get()) {
-                        for (MobCategory category : MobCategory.values()) {
-                            final List<MobSpawnSettings.SpawnerData> spawns = spawnsBuilder.getSpawner(category);
-                            spawns.removeIf(spawnerData -> spawnerData.type == removal.entityType());
-                        }
+                        break;
                     }
+                }
+                if (atomicBoolean.get()) {
+                    final EntityType<?> type = removal.entityType();
+                    spawnsBuilder.getSpawner(type.getCategory()).removeIf(spawnerData -> spawnerData.type == type);
                 }
             }
         }
