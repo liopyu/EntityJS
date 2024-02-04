@@ -1,8 +1,9 @@
 package net.liopyu.entityjs.entities;
 
-import net.liopyu.entityjs.builders.ArrowEntityBuilder;
-import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
+import net.liopyu.entityjs.builders.*;
+import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
@@ -15,11 +16,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Objects;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -57,6 +61,16 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     //Beginning of Base Overrides
+
+
+    @Override
+    public void setSoundEvent(SoundEvent pSoundEvent) {
+        if (builder.setSoundEvent != null) {
+            this.setSoundEvent(Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.setSoundEvent)));
+        } else {
+            super.setSoundEvent(pSoundEvent);
+        }
+    }
 
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
@@ -96,14 +110,11 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         }
     }
 
-    public record ArrowEntityHitContext(EntityHitResult getResult, AbstractArrow getArrow) {}
-
-    public record ArrowBlockHitContext(BlockHitResult getResult, AbstractArrow getArrow) {}
 
     @Override
     protected void onHitEntity(EntityHitResult result) {
         if (builder.onHitEntity != null) {
-            final ArrowEntityHitContext context = new ArrowEntityHitContext(result, this);
+            final ContextUtils.ArrowEntityHitContext context = new ContextUtils.ArrowEntityHitContext(result, this);
             builder.onHitEntity.accept(context);
         } else {
             super.onHitEntity(result);
@@ -113,7 +124,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected void onHitBlock(BlockHitResult result) {
         if (builder.onHitBlock != null) {
-            final ArrowBlockHitContext context = new ArrowBlockHitContext(result, this);
+            final ContextUtils.ArrowBlockHitContext context = new ContextUtils.ArrowBlockHitContext(result, this);
             builder.onHitBlock.accept(context);
         } else {
             super.onHitBlock(result);
@@ -123,7 +134,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected SoundEvent getDefaultHitGroundSoundEvent() {
         if (builder.defaultHitGroundSoundEvent != null) {
-            return Registry.SOUND_EVENT.get(builder.defaultHitGroundSoundEvent);
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.defaultHitGroundSoundEvent));
         }
         return super.getDefaultHitGroundSoundEvent();
     }
@@ -149,12 +160,11 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         return builder.canHitEntity != null ? builder.canHitEntity.test(entity) : super.canHitEntity(entity);
     }
 
-    public record ArrowPlayerContext(Player getPlayer, AbstractArrow getArrow) {}
 
     @Override
     public void playerTouch(Player player) {
         if (builder.playerTouch != null) {
-            final ArrowPlayerContext context = new ArrowPlayerContext(player, this);
+            final ContextUtils.ArrowPlayerContext context = new ContextUtils.ArrowPlayerContext(player, this);
             builder.playerTouch.accept(context);
         } else {
             super.playerTouch(player);
