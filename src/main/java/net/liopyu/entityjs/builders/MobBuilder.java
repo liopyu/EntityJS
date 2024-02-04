@@ -3,26 +3,22 @@ package net.liopyu.entityjs.builders;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.entities.MobEntityJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
-import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Map;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * A helper class that acts as a base for all mob-based entity types<br><br>
@@ -38,11 +34,10 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     /* public transient Supplier<BodyRotationControl> createBodyControl;*/
 
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
-    public transient Ingredient canFireProjectileWeapon;
     public transient Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate;
     public transient Consumer<LivingEntity> ate;
-    public transient ResourceLocation getAmbientSound;
-    public transient Ingredient canHoldItem;
+    public transient Supplier<SoundEvent> getAmbientSound;
+    public transient Predicate<ItemStack> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
     public transient Boolean canPickUpLoot;
     public transient Boolean isPersistenceRequired;
@@ -122,14 +117,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     }
 
     @Info(value = """
-            List an array of ProjectileWeaponItems that the mob in the builder can fire.
-            """)
-    public MobBuilder<T> canFireProjectileWeapon(Ingredient canFireProjectileWeapon) {
-        this.canFireProjectileWeapon = canFireProjectileWeapon;
-        return this;
-    }
-
-    @Info(value = """
             Sets the custom predicate for determining if the entity can fire a projectile weapon for the mob in the builder.
             """)
     public MobBuilder<T> canFireProjectileWeaponPredicate(Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate) {
@@ -156,15 +143,17 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     @Info(value = """
             Sets the custom supplier for providing the ambient sound for the mob in the builder.
             """)
-    public MobBuilder<T> getAmbientSound(ResourceLocation getAmbientSound) {
+    public MobBuilder<T> getAmbientSound(Supplier<SoundEvent> getAmbientSound) {
         this.getAmbientSound = getAmbientSound;
         return this;
     }
 
     @Info(value = """
-            Sets the list of custom items or resource locations representing the items the entity can hold for the mob in the builder.
+            Sets the condition for whether the entity can hold specific items.
+            
+            Defaults to returning false.
             """)
-    public MobBuilder<T> canHoldItem(Ingredient items) {
+    public MobBuilder<T> canHoldItem(Predicate<ItemStack> items) {
         this.canHoldItem = items;
         return this;
     }

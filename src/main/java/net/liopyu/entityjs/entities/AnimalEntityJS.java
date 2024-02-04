@@ -1,9 +1,6 @@
 package net.liopyu.entityjs.entities;
 
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
-import dev.latvian.mods.kubejs.bindings.ItemWrapper;
-import dev.latvian.mods.kubejs.block.SoundTypeWrapper;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
@@ -11,106 +8,46 @@ import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
-import net.liopyu.entityjs.util.*;
-import net.minecraft.BlockUtil;
+import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Vec3i;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
-import net.minecraft.world.entity.ai.goal.BreedGoal;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.level.*;
-import net.minecraftforge.common.ForgeHooks;
-import org.apache.logging.log4j.LogManager;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.common.ForgeHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jline.utils.Log;
-import org.slf4j.Logger;
-import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Predicate;
 
-/**
- * The 'basic' implementation of a custom entity, implements most methods through the builder with some
- * conditionally delegating to the {@code super} implementation if the function is null. Other implementations
- * are <strong>not</strong> required to override every method in a class.<br><br>
- * <p>
- * Further, the only real requirements for a custom entity class is that the class signature respects the contract
- * <pre>{@code public class YourEntityClass extends <? extends LivingEntity> implements <? extends IAnimatableJS>}</pre>
- * A basic implementation for a custom {@link net.minecraft.world.entity.animal.Animal Animal} entity could be as simple as
- * <pre>{@code public class AnimalEntityJS extends Animal implements IAnimatableJS {
- *
- *     private final AnimalBuilder builder;
- *     private final AnimationFactory animationFactory;
- *
- *     public AnimalEntityJS(AnimalBuilder builder, EntityType<? extends Animal> type, Level level) {
- *         super(type, level);
- *         this.builder = builder;
- *         animationFactory = GeckoLibUtil.createFactory(this);
- *     }
- *
- *     @Override
- *     public BaseLivingEntityBuilder<?> getBuilder() {
- *         return builder;
- *     }
- *
- *     @Override
- *     public AnimationFactory getFactory() {
- *         return animationFactory;
- *     }
- *
- *     @Override
- *     @Nullable
- *     public AnimalEntityJS getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
- *         return null;
- *     }
- * }}</pre>
- * Of course this does not implement any possible networking/synced entity data stuff. figure that out yourself, it scares me
- */
 @MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
 @ParametersAreNonnullByDefault
 public class AnimalEntityJS extends Animal implements IAnimatableJS {
@@ -204,14 +141,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         if (builder.getBreedOffspring != null) {
-            EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(builder.getBreedOffspring);
-            if (breedOffspringType != null) {
-                Object breedOffspringEntity = breedOffspringType.create(serverLevel);
-                if (breedOffspringEntity instanceof AgeableMob) {
-                    return (AgeableMob) breedOffspringEntity;
-                }
-            }
-        } else return builder.get().create(serverLevel);
+            return builder.getBreedOffspring.apply(serverLevel, ageableMob);
+        }
+
         return null;
     }
 
@@ -318,7 +250,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     protected boolean shouldStayCloseToLeashHolder() {
         if (builder.shouldStayCloseToLeashHolder != null) {
-            return builder.shouldStayCloseToLeashHolder.getAsBoolean();
+            return builder.shouldStayCloseToLeashHolder.get();
         } else {
             return super.shouldStayCloseToLeashHolder();
         }
@@ -412,17 +344,17 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         return false;
     }
 
-    public boolean canFireProjectileWeapons(ProjectileWeaponItem projectileWeapon) {
-        if (builder.canFireProjectileWeapon != null) {
-            return builder.canFireProjectileWeapon.test(projectileWeapon.getDefaultInstance()) && projectileWeapon instanceof ProjectileWeaponItem;
+    public boolean canFireProjectileWeaponBoolean(ProjectileWeaponItem projectileWeapon) {
+        if (builder.canFireProjectileWeaponPredicate != null) {
+            return builder.canFireProjectileWeaponPredicate.test(new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this));
         }
         return super.canFireProjectileWeapon(projectileWeapon);
     }
 
     @Override
     public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeapon) {
-        if (canFireProjectileWeapons(projectileWeapon) || canFireProjectileWeaponPredicate(projectileWeapon)) {
-            return canFireProjectileWeapons(projectileWeapon) && canFireProjectileWeaponPredicate(projectileWeapon);
+        if (builder.canFireProjectileWeaponPredicate != null) {
+            return builder.canFireProjectileWeaponPredicate.test(new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this));
         }
         return super.canFireProjectileWeapon(projectileWeapon);
     }
@@ -440,7 +372,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     protected SoundEvent getAmbientSound() {
         if (builder.getAmbientSound != null) {
-            return ForgeRegistries.SOUND_EVENTS.getValue(builder.getAmbientSound);
+            return builder.getAmbientSound.get();
         } else {
             return super.getAmbientSound();
         }
@@ -682,8 +614,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Nullable
     @Override
     protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
-        if (builder.setHurtSound != null) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.setHurtSound));
+        if (builder.hurtSound != null) {
+            return Registry.SOUND_EVENT.get(builder.hurtSound);
         } else {
             return super.getHurtSound(p_21239_);
         }
@@ -692,8 +624,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected SoundEvent getSwimSplashSound() {
-        if (builder.setSwimSplashSound != null) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.setSwimSplashSound));
+        if (builder.swimSplashSound != null) {
+            return Registry.SOUND_EVENT.get(builder.swimSplashSound);
         } else {
             return super.getSwimSplashSound();
         }
@@ -839,8 +771,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public @NotNull Fallsounds getFallSounds() {
-        if (builder.fallSounds != null && builder.largeFallSound != null) {
-            return new Fallsounds(Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.smallFallSound)), Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.smallFallSound)));
+        if (builder.smallFallSound != null && builder.largeFallSound != null) {
+            return new Fallsounds(Registry.SOUND_EVENT.get(builder.smallFallSound), Registry.SOUND_EVENT.get(builder.largeFallSound));
         } else {
             return super.getFallSounds();
         }
@@ -850,7 +782,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.eatingSound));
+            return Registry.SOUND_EVENT.get(builder.eatingSound);
         } else {
             return super.getEatingSound(itemStack);
         }
@@ -1199,10 +1131,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         }
         return super.isInvulnerableTo(p_20122_);
     }
-
-
-    public static final Logger LOGGER = LogUtils.getLogger();
-
 
     @Override
     public boolean canChangeDimensions() {

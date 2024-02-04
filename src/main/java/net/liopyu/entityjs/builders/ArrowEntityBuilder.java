@@ -3,16 +3,14 @@ package net.liopyu.entityjs.builders;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.ArrowEntityJS;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
-import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.util.BiConsumer;
 
@@ -24,7 +22,6 @@ import java.util.function.*;
 public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseEntityBuilder<T> {
     public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Function<T, ResourceLocation> getTextureLocation;
-    public transient ResourceLocation setSoundEvent;
 
     public transient Predicate<Double> shouldRenderAtSqrDistance;
     public transient BaseLivingEntityBuilder.HeptConsumer lerpTo;
@@ -32,14 +29,14 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient BiConsumer<MoverType, Vec3> move;
     public transient Consumer<AbstractArrow> tickDespawn;
 
-    public transient Consumer<ContextUtils.ArrowEntityHitContext> onHitEntity;
-    public transient Consumer<ContextUtils.ArrowBlockHitContext> onHitBlock;
+    public transient Consumer<ArrowEntityJS.ArrowEntityHitContext> onHitEntity;
+    public transient Consumer<ArrowEntityJS.ArrowBlockHitContext> onHitBlock;
     public transient ResourceLocation defaultHitGroundSoundEvent;
 
     public transient Consumer<LivingEntity> doPostHurtEffects;
     public transient BiFunction<Vec3, Vec3, EntityHitResult> findHitEntity;
     public transient Predicate<Entity> canHitEntity;
-    public transient Consumer<ContextUtils.ArrowPlayerContext> playerTouch;
+    public transient Consumer<ArrowEntityJS.ArrowPlayerContext> playerTouch;
     public transient Predicate<Player> tryPickup;
     public transient DoubleConsumer setBaseDamage;
     public transient IntConsumer setKnockback;
@@ -66,11 +63,6 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     @Override
     public EntityType<T> createObject() {
         return new EntityTypeBuilder<>(this).get();
-    }
-
-    public ArrowEntityBuilder<T> setSoundEvent(ResourceLocation consumer) {
-        setSoundEvent = consumer;
-        return this;
     }
 
     @Info(value = "Sets whether the entity should render at a squared distance.")
@@ -104,19 +96,19 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     }
 
     @Info(value = "Sets the behavior when the arrow hits an entity.")
-    public ArrowEntityBuilder<T> onHitEntity(Consumer<ContextUtils.ArrowEntityHitContext> consumer) {
+    public ArrowEntityBuilder<T> onHitEntity(Consumer<ArrowEntityJS.ArrowEntityHitContext> consumer) {
         onHitEntity = consumer;
         return this;
     }
 
     @Info(value = "Sets the behavior when the arrow hits a block.")
-    public ArrowEntityBuilder<T> onHitBlock(Consumer<ContextUtils.ArrowBlockHitContext> consumer) {
+    public ArrowEntityBuilder<T> onHitBlock(Consumer<ArrowEntityJS.ArrowBlockHitContext> consumer) {
         onHitBlock = consumer;
         return this;
     }
 
     @Info(value = "Sets the default sound event when the arrow hits the ground.")
-    public ArrowEntityBuilder<T> defaultHitGroundSoundEvent(ResourceLocation function) {
+    public ArrowEntityBuilder<T> getDefaultHitGroundSoundEvent(ResourceLocation function) {
         defaultHitGroundSoundEvent = function;
         return this;
     }
@@ -140,7 +132,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     }
 
     @Info(value = "Sets the playerTouch behavior with parameters (player).")
-    public ArrowEntityBuilder<T> playerTouch(Consumer<ContextUtils.ArrowPlayerContext> consumer) {
+    public ArrowEntityBuilder<T> playerTouch(Consumer<ArrowEntityJS.ArrowPlayerContext> consumer) {
         playerTouch = consumer;
         return this;
     }
