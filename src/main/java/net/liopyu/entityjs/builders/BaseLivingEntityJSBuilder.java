@@ -1,9 +1,15 @@
 package net.liopyu.entityjs.builders;
 
+import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.BaseLivingEntityJS;
+import net.liopyu.entityjs.entities.MobEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+
+import java.util.function.Consumer;
 
 public class BaseLivingEntityJSBuilder extends BaseLivingEntityBuilder<BaseLivingEntityJS> {
 
@@ -20,5 +26,4 @@ public class BaseLivingEntityJSBuilder extends BaseLivingEntityBuilder<BaseLivin
     public AttributeSupplier.Builder getAttributeBuilder() {
         return BaseLivingEntityJS.createLivingAttributes();
     }
-
 }

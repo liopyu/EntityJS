@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.util;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -19,6 +21,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import org.apache.logging.log4j.core.jmx.Server;
 
 public class ContextUtils {
     public static class PlayerEntityContext {
@@ -363,5 +366,34 @@ public class ContextUtils {
             this.result = result;
         }
     }
-}
 
+    public static class ArrowEntityHitContext {
+        public final AbstractArrow entity;
+        public final EntityHitResult result;
+
+        public ArrowEntityHitContext(EntityHitResult result, AbstractArrow entity) {
+            this.entity = entity;
+            this.result = result;
+        }
+    }
+
+    public static class ArrowBlockHitContext {
+        public final AbstractArrow entity;
+        public final BlockHitResult result;
+
+        public ArrowBlockHitContext(BlockHitResult result, AbstractArrow entity) {
+            this.entity = entity;
+            this.result = result;
+        }
+    }
+
+    public static class ArrowPlayerContext {
+        public final AbstractArrow entity;
+        public final Player player;
+
+        public ArrowPlayerContext(Player player, AbstractArrow entity) {
+            this.entity = entity;
+            this.player = player;
+        }
+    }
+}

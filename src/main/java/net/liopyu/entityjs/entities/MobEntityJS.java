@@ -5,38 +5,55 @@ import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
-import net.liopyu.entityjs.util.ContextUtils;
-import net.liopyu.entityjs.util.EventHandlers;
+import net.liopyu.entityjs.util.*;
+import net.minecraft.BlockUtil;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
@@ -70,56 +87,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
     }
 
-    public boolean canJump() {
-        return builder.canJump;
-    }
-
-    @Override
-    public void aiStep() {
-        super.aiStep();
-        if (builder.aiStep != null) {
-            builder.aiStep.accept(this);
-        }
-        if (canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
-            jump();
-        }
-    }
-
-    public void onJump() {
-        if (builder.onJump != null) {
-            builder.onJump.accept(this);
-        }
-    }
-
-    public void jump() {
-        double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
-        Vec3 currentVelocity = this.getDeltaMovement();
-
-        // Adjust the Y component of the velocity to the calculated jump power
-        this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
-
-        if (this.isSprinting()) {
-            // If sprinting, add a horizontal impulse for forward boost
-            float yawRadians = this.getYRot() * 0.017453292F;
-            this.setDeltaMovement(
-                    this.getDeltaMovement().add(
-                            -Math.sin(yawRadians) * 0.2,
-                            0.0,
-                            Math.cos(yawRadians) * 0.2
-                    )
-            );
-        }
-
-        this.hasImpulse = true;
-        onJump();
-        ForgeHooks.onLivingJump(this);
-    }
-
-    public boolean shouldJump() {
-        // Check if the entity can stand on the forward block
-        BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
-    }
 
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
@@ -130,7 +97,14 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
     //Mob Overrides
-
+    public InteractionResult onInteract(Player pPlayer, InteractionHand pHand) {
+        if (builder.onInteract != null) {
+            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+            final InteractionResult result = builder.onInteract.apply(context);
+            return result == null ? super.interact(pPlayer, pHand) : result;
+        }
+        return InteractionResult.PASS;
+    }
 
     @Override
     public void setPathfindingMalus(BlockPathTypes nodeType, float malus) {
@@ -179,17 +153,17 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         return false;
     }
 
-    public boolean canFireProjectileWeaponBoolean(ProjectileWeaponItem projectileWeapon) {
-        if (builder.canFireProjectileWeaponPredicate != null) {
-            return builder.canFireProjectileWeaponPredicate.test(new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this));
+    public boolean canFireProjectileWeapons(ProjectileWeaponItem projectileWeapon) {
+        if (builder.canFireProjectileWeapon != null) {
+            return builder.canFireProjectileWeapon.test(projectileWeapon.getDefaultInstance()) && projectileWeapon instanceof ProjectileWeaponItem;
         }
         return super.canFireProjectileWeapon(projectileWeapon);
     }
 
     @Override
     public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeapon) {
-        if (builder.canFireProjectileWeaponPredicate != null) {
-            return builder.canFireProjectileWeaponPredicate.test(new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this));
+        if (canFireProjectileWeapons(projectileWeapon) || canFireProjectileWeaponPredicate(projectileWeapon)) {
+            return canFireProjectileWeapons(projectileWeapon) && canFireProjectileWeaponPredicate(projectileWeapon);
         }
         return super.canFireProjectileWeapon(projectileWeapon);
     }
@@ -207,7 +181,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     protected SoundEvent getAmbientSound() {
         if (builder.getAmbientSound != null) {
-            return builder.getAmbientSound.get();
+            return ForgeRegistries.SOUND_EVENTS.getValue(builder.getAmbientSound);
         } else {
             return super.getAmbientSound();
         }
@@ -251,13 +225,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         return armorItems;
     }
 
-    @Override
-    protected float getBlockSpeedFactor() {
-        if (builder.blockSpeedFactor != null) {
-            return builder.blockSpeedFactor.apply(this);
-        }
-        return super.getBlockSpeedFactor();
-    }
 
     @Override
     public @NotNull Iterable<ItemStack> getHandSlots() {
@@ -284,14 +251,74 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
 
+    //(Base LivingEntity/Entity Overrides)
     @Override
     public boolean isPushable() {
         return builder.isPushable;
     }
 
     @Override
-    public @NotNull HumanoidArm getMainArm() {
+    protected float getBlockSpeedFactor() {
+        if (builder.blockSpeedFactor != null) {
+            return builder.blockSpeedFactor.apply(this);
+        }
+        return super.getBlockSpeedFactor();
+    }
+
+    @Override
+    public HumanoidArm getMainArm() {
         return builder.mainArm;
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (builder.aiStep != null) {
+            builder.aiStep.accept(this);
+        }
+        if (canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
+            jump();
+        }
+    }
+
+    public boolean canJump() {
+        return builder.canJump;
+    }
+
+    public void onJump() {
+        if (builder.onJump != null) {
+            builder.onJump.accept(this);
+        }
+    }
+
+    public void jump() {
+        double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
+        Vec3 currentVelocity = this.getDeltaMovement();
+
+        // Adjust the Y component of the velocity to the calculated jump power
+        this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
+
+        if (this.isSprinting()) {
+            // If sprinting, add a horizontal impulse for forward boost
+            float yawRadians = this.getYRot() * 0.017453292F;
+            this.setDeltaMovement(
+                    this.getDeltaMovement().add(
+                            -Math.sin(yawRadians) * 0.2,
+                            0.0,
+                            Math.cos(yawRadians) * 0.2
+                    )
+            );
+        }
+
+        this.hasImpulse = true;
+        onJump();
+        ForgeHooks.onLivingJump(this);
+    }
+
+    public boolean shouldJump() {
+        // Check if the entity can stand on the forward block
+        BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
+        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
     }
 
 
@@ -344,16 +371,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
     }
 
-    @Override
-    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-        if (builder.onInteract != null) {
-            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            final InteractionResult result = builder.onInteract.apply(context);
-            return result == null ? super.interact(pPlayer, pHand) : result;
-        }
-
-        return super.mobInteract(pPlayer, pHand);
-    }
 
     @Override
     public int calculateFallDamage(float fallDistance, float fallHeight) {
@@ -438,8 +455,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Nullable
     @Override
     protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
-        if (builder.hurtSound != null) {
-            return Registry.SOUND_EVENT.get(builder.hurtSound);
+        if (builder.setHurtSound != null) {
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.setHurtSound));
         } else {
             return super.getHurtSound(p_21239_);
         }
@@ -448,13 +465,21 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     protected SoundEvent getSwimSplashSound() {
-        if (builder.swimSplashSound != null) {
-            return Registry.SOUND_EVENT.get(builder.swimSplashSound);
+        if (builder.setSwimSplashSound != null) {
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.setSwimSplashSound));
         } else {
             return super.getSwimSplashSound();
         }
     }
 
+    @Override
+    protected SoundEvent getSwimSound() {
+        if (builder.setSwimSound != null) {
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.setSwimSound));
+        } else {
+            return super.getSwimSound();
+        }
+    }
 
     @Override
     public boolean canAttackType(@NotNull EntityType<?> entityType) {
@@ -581,6 +606,15 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
     }
 
+    @Nullable
+    @Override
+    protected SoundEvent getDeathSound() {
+        if (builder.setDeathSound != null) {
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.setDeathSound));
+        } else {
+            return super.getDeathSound();
+        }
+    }
 
     @Override
     protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
@@ -595,8 +629,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public @NotNull Fallsounds getFallSounds() {
-        if (builder.smallFallSound != null && builder.largeFallSound != null) {
-            return new Fallsounds(Registry.SOUND_EVENT.get(builder.smallFallSound), Registry.SOUND_EVENT.get(builder.largeFallSound));
+        if (builder.fallSounds != null && builder.largeFallSound != null) {
+            return new Fallsounds(Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.smallFallSound)), Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.smallFallSound)));
         } else {
             return super.getFallSounds();
         }
@@ -606,7 +640,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null) {
-            return Registry.SOUND_EVENT.get(builder.eatingSound);
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.eatingSound));
         } else {
             return super.getEatingSound(itemStack);
         }
