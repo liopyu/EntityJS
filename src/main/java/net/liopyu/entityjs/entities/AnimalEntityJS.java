@@ -462,10 +462,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         return (builder.shouldDespawnInPeaceful != null) ? builder.shouldDespawnInPeaceful : super.shouldDespawnInPeaceful();
     }
 
-    /*@Override
-    public boolean canPickUpLoot() {
-        return (builder.canPickUpLoot != null) ? builder.canPickUpLoot : super.canPickUpLoot();
-    }*/
 
     @Override
     public boolean isPersistenceRequired() {

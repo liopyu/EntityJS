@@ -31,11 +31,9 @@ import java.util.function.*;
  * in {@link Mob} that is not present in/related to {@link net.minecraft.world.entity.LivingEntity LivignEntity}
  */
 public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
-    /*public transient Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> mobInteract;*/
     public transient SpawnEggItemBuilder eggItem;
     public transient Map<BlockPathTypes, Float> setPathfindingMalus;
     public transient Function<ContextUtils.EntityBlockPathTypeContext, Boolean> canCutCorner;
-    /* public transient Supplier<BodyRotationControl> createBodyControl;*/
 
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Ingredient canFireProjectileWeapon;
@@ -46,10 +44,8 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Boolean shouldDespawnInPeaceful;
     public transient Boolean canPickUpLoot;
     public transient Boolean isPersistenceRequired;
-    /*public transient Consumer<ContextUtils.PlayerEntityContext> onOffspringSpawnedFromEgg;*/
 
     public transient Function<PathfinderMob, Double> meleeAttackRangeSqr;
-    /*public transient Consumer<Mob> updateControlFlags;*/
     public transient Consumer<PathfinderMob> aiStep;
     public transient boolean canJump;
     public transient Consumer<PathfinderMob> onJump;
@@ -145,14 +141,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-    /*@Info(value = """
-            Sets the custom logic for mob interaction using the provided function.
-            """)
-    public BaseLivingEntityBuilder<T> mobInteract(Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> f) {
-        mobInteract = f;
-        return this;
-    }*/
-
     @Info(value = """
             Sets the custom supplier for providing the ambient sound for the mob in the builder.
             """)
@@ -193,13 +181,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-    /*@Info(value = """
-            Sets the custom behavior when offspring is spawned from an egg for the mob in the builder.
-            """)
-    public MobBuilder<T> onOffspringSpawnedFromEgg(Consumer<ContextUtils.PlayerEntityContext> onOffspringSpawnedFromEgg) {
-        this.onOffspringSpawnedFromEgg = onOffspringSpawnedFromEgg;
-        return this;
-    }*/
 
     @Info(value = "Sets the custom double representing the square of the melee attack range for the mob in the builder.")
     public MobBuilder<T> meleeAttackRangeSqr(Function<PathfinderMob, Double> meleeAttackRangeSqr) {

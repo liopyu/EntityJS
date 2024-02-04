@@ -49,24 +49,16 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
     public transient BooleanSupplier shouldStayCloseToLeashHolder;
     public transient double followLeashSpeed;
-    /*public transient Map<BlockPathTypes, Float> setPathfindingMalus;*/
-    /* public transient Function<BlockPathTypes, Boolean> canCutCorner;*/
+
 
     public transient Consumer<LivingEntity> setTarget;
 
     public transient Consumer<LivingEntity> ate;
-    /*
-        public transient ResourceLocation getAmbientSound;
-    */
+
     public transient Ingredient canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
     public transient Boolean canPickUpLoot;
     public transient Boolean isPersistenceRequired;
-    /*public transient Consumer<ContextUtils.PlayerEntityContext> onOffspringSpawnedFromEgg;*/
-
-/*
-    public transient Function<LivingEntity, Double> meleeAttackRangeSqr;
-*/
 
 
     public AnimalEntityBuilder(ResourceLocation i) {
@@ -234,29 +226,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
 
-    /*@Info(value = """
-            Sets the pathfinding malus for a specific node type.
-                        
-            " +
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> setPathfindingMalus(Map<BlockPathTypes, Float> setPathfindingMalus) {
-        this.setPathfindingMalus = setPathfindingMalus;
-        return this;
-    }*/
-
-    /*@Info(value = """
-            Determines if the entity can cut corners for a specific path type.
-                        
-            " +
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> canCutCorner(Function<BlockPathTypes, Boolean> canCutCorner) {
-        this.canCutCorner = canCutCorner;
-        return this;
-    }*/
-
-
     @Info(value = """
             Sets the target for the entity.
                         
@@ -279,18 +248,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         this.ate = ate;
         return this;
     }
-
-
-    /*@Info(value = """
-            Sets the ambient sound for the entity.
-                        
-            " +
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> getAmbientSound(ResourceLocation getAmbientSound) {
-        this.getAmbientSound = getAmbientSound;
-        return this;
-    }*/
 
 
     @Info(value = """
@@ -338,29 +295,4 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         this.isPersistenceRequired = isPersistenceRequired;
         return this;
     }
-
-   /* @Info(value = """
-            Sets the behavior when offspring is spawned from an egg.
-                        
-            " +
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> onOffspringSpawnedFromEgg(Consumer<ContextUtils.PlayerEntityContext> onOffspringSpawnedFromEgg) {
-        this.onOffspringSpawnedFromEgg = onOffspringSpawnedFromEgg;
-        return this;
-    }*/
-
-
-   /* @Info(value = """
-            Sets the square of the melee attack range for the entity.
-                        
-            " +
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> meleeAttackRangeSqr(Function<LivingEntity, Double> meleeAttackRangeSqr) {
-        this.meleeAttackRangeSqr = meleeAttackRangeSqr;
-        return this;
-    }*/
-
-
 }
