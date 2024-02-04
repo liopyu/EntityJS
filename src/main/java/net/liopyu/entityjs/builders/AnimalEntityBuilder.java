@@ -71,8 +71,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the breedOffspring property in the builder.
-                        
-            " +
             "Defaults to this entity type.
             """)
     public AnimalEntityBuilder<T> getBreedOffspring(ResourceLocation breedOffspring) {
@@ -82,8 +80,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the canBreed property in the builder.
-                        
-            " +
             "Defaults to true.
             """)
     public AnimalEntityBuilder<T> canBreed(Predicate<LivingEntity> canBreed) {
@@ -93,8 +89,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the list of items that the entity can eat.
-                        
-            " +
             "Defaults to wheat.
             """)
     public AnimalEntityBuilder<T> isFood(Ingredient isFood) {
@@ -104,8 +98,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets a predicate for what an entity can eat.
-                        
-            " +
             "Defaults to wheat.
             """)
     public AnimalEntityBuilder<T> isFoodPredicate(Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate) {
@@ -116,8 +108,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the walkTargetValue property in the builder.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> walkTargetValue(Function<ContextUtils.EntityBlockPosLevelContext, Float> function) {
@@ -127,8 +117,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the myRidingOffset property in the builder.
-                        
-            " +
             "Defaults to 0.0.
             """)
     public AnimalEntityBuilder<T> myRidingOffset(double myRidingOffset) {
@@ -138,8 +126,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the ambientSoundInterval property in the builder.
-                        
-            " +
             "Defaults to 240.
             """)
     public AnimalEntityBuilder<T> ambientSoundInterval(int ambientSoundInterval) {
@@ -149,8 +135,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the removeWhenFarAway property in the builder.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> removeWhenFarAway(Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway) {
@@ -160,8 +144,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the canMate property in the builder.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> canMate(Predicate<ContextUtils.EntityAnimalContext> predicate) {
@@ -172,8 +154,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the spawnChildFromBreeding property in the builder.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> spawnChildFromBreeding(BiConsumer<ServerLevel, Animal> consumer) {
@@ -183,8 +163,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the finalizeSpawn property in the builder.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> finalizeSpawn(QuinaryFunction<ServerLevelAccessor, DifficultyInstance, MobSpawnType, SpawnGroupData, CompoundTag, SpawnGroupData> function) {
@@ -194,8 +172,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the tickLeash property in the builder.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> tickLeash(Consumer<ContextUtils.PlayerEntityContext> consumer) {
@@ -205,8 +181,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the shouldStayCloseToLeashHolder property in the builder.
-                        
-            " +
             "Defaults to true for animals.
             """)
     public AnimalEntityBuilder<T> shouldStayCloseToLeashHolder(BooleanSupplier b) {
@@ -216,8 +190,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the followLeashSpeed property in the builder.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> followLeashSpeed(double supplier) {
@@ -228,8 +200,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the target for the entity.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> setTarget(Consumer<LivingEntity> setTarget) {
@@ -240,8 +210,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Custom behavior when the entity eats.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> ate(Consumer<LivingEntity> ate) {
@@ -252,8 +220,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets the condition for whether the entity can hold specific items.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> canHoldItem(Ingredient items) {
@@ -264,8 +230,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets whether the entity should despawn in peaceful mode.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> shouldDespawnInPeaceful(Boolean shouldDespawnInPeaceful) {
@@ -276,8 +240,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets whether the entity can pick up loot.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> canPickUpLoot(Boolean canPickUpLoot) {
@@ -287,8 +249,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     @Info(value = """
             Sets whether the entity's persistence is required.
-                        
-            " +
             "Defaults to null.
             """)
     public AnimalEntityBuilder<T> isPersistenceRequired(Boolean isPersistenceRequired) {

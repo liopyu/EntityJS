@@ -81,8 +81,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
 
     @Info(value = """
             Sets the aiStep property in the builder.
-                        
-            " +
             "Defaults to super-AgeableMob.
             """)
     public MobBuilder<T> aiStep(Consumer<PathfinderMob> aiStep) {
