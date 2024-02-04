@@ -25,7 +25,7 @@ import java.util.function.*;
 public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile & IProjectileEntityJS> extends BaseEntityBuilder<T> {
     public transient Function<T, ResourceLocation> getTextureLocation;
     public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
-    public transient Consumer<Object> setSoundEvent;
+    public transient ResourceLocation setSoundEvent;
 
     public transient Predicate<Double> shouldRenderAtSqrDistance;
     public transient BaseLivingEntityBuilder.HeptConsumer lerpTo;
@@ -62,7 +62,7 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
         return this;
     }
 
-    public ProjectileEntityBuilder<T> setSoundEvent(Consumer<Object> consumer) {
+    public ProjectileEntityBuilder<T> setSoundEvent(ResourceLocation consumer) {
         setSoundEvent = consumer;
         return this;
     }

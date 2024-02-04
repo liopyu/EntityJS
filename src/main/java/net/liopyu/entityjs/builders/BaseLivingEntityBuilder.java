@@ -15,6 +15,7 @@ import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.BaseLivingEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
+import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
 import net.minecraft.BlockUtil;
@@ -28,6 +29,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.random.Weight;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.CombatTracker;
@@ -43,6 +45,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
@@ -2105,7 +2108,29 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     //STUFF
-   
+    @Info(value = "Sets the spawn placement of the entity type", params = {
+            @Param(name = "placementType", value = "The placement type of the spawn, accepts 'on_ground', 'in_water', 'no_restrictions', 'in_lava'"),
+            @Param(name = "heightMap", value = "The height map used for the spawner"),
+            @Param(name = "spawnPredicate", value = "The predicate that determines if the entity will spawn")
+    })
+    public BaseLivingEntityBuilder<T> spawnPlacement(SpawnPlacements.Type placementType, Heightmap.Types heightMap, SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
+        spawnList.add(this);
+        this.spawnPredicate = spawnPredicate;
+        this.placementType = placementType;
+        this.heightMap = heightMap;
+        return this;
+    }
+
+    @Info(value = "Adds a spawner for this entity to the provided biome(s)", params = {
+            @Param(name = "biomes", value = "A list of biomes that the entity should spawn in. If using a tag, only one value may be provided"),
+            @Param(name = "weight", value = "The spawn weight the entity should have"),
+            @Param(name = "minCount", value = "The minimum number of entities that can spawn at a time"),
+            @Param(name = "maxCount", value = "The maximum number of entities that can spawn at a time")
+    })
+    public BaseLivingEntityBuilder<T> biomeSpawn(List<String> biomes, int weight, int minCount, int maxCount) {
+        biomeSpawnList.add(new EventBasedSpawnModifier.BiomeSpawn(BiomeSpawnsEventJS.processBiomes(biomes), () -> new MobSpawnSettings.SpawnerData(get(), Weight.of(weight), minCount, maxCount)));
+        return this;
+    }
 
     @Info(value = "Adds a new AnimationController to the entity", params = {
             @Param(name = "name", value = "The name of the controller"),
