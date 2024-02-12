@@ -105,6 +105,7 @@ repositories {
         }
     }
     maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+    maven { url 'https://dl.cloudsmith.io/public/workspace-for-mistaken/liolib-7cz/maven/' }
     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
     // flatDir {
     //     dir 'libs'
@@ -115,11 +116,10 @@ dependencies {
     minecraft "net.minecraftforge:forge:1.19.2-43.2.0"
 
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:1902.6.2-build.45")
-
     implementation fg.deobf("dev.latvian.mods:rhino-forge:1902.2.3-build.284")
     implementation fg.deobf("dev.architectury:architectury-forge:6.5.85")
     implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.19:3.1.40')
-
+    implementation fg.deobf('net.liopyu.liolib:liolib-forge-1.19.2-0.0.1:0.0.1')
     // Use kube's jij'd version
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.2.1"))
 
@@ -130,17 +130,17 @@ dependencies {
 
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
-            minecraft_version       : minecraft_version,
-            minecraft_version_range : minecraft_version_range,
-            forge_version           : forge_version,
-            forge_version_range     : forge_version_range,
-            loader_version_range    : loader_version_range,
-            mod_id                  : mod_id,
-            mod_name                : mod_name,
-            mod_license             : mod_license,
-            mod_version             : mod_version,
-            mod_authors             : mod_authors,
-            mod_description         : mod_description,
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            forge_version          : forge_version,
+            forge_version_range    : forge_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description,
     ]
     inputs.properties replaceProperties
 
