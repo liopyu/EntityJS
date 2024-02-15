@@ -12,6 +12,8 @@ import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
+import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
+import net.liopyu.liolib.util.GeckoLibUtil;
 import net.minecraft.BlockUtil;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -65,9 +67,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jline.utils.Log;
 import org.slf4j.Logger;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
@@ -115,7 +114,7 @@ import java.util.function.Predicate;
 @ParametersAreNonnullByDefault
 public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
-    private final AnimationFactory animationFactory;
+    private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     protected final AnimalEntityJSBuilder builder;
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
@@ -124,7 +123,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     public AnimalEntityJS(AnimalEntityJSBuilder builder, EntityType<? extends Animal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
-        animationFactory = GeckoLibUtil.createFactory(this);
+        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     }
 
     @Override
@@ -194,8 +193,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     }
 
     @Override
-    public AnimationFactory getFactory() {
-        return animationFactory;
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return getAnimatableInstanceCache;
     }
 
 

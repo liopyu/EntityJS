@@ -3,6 +3,8 @@ package net.liopyu.entityjs.entities;
 import com.mojang.logging.LogUtils;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
+import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
+import net.liopyu.liolib.util.GeckoLibUtil;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.sounds.SoundEvents;
@@ -42,8 +44,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
@@ -52,14 +52,14 @@ import java.util.Optional;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
+    private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     private final BaseLivingEntityJSBuilder builder;
-    private final AnimationFactory animationFactory;
 
     public BaseLivingEntityJS(BaseLivingEntityJSBuilder builder, EntityType<? extends LivingEntity> p_21368_, Level p_21369_) {
         super(p_21368_, p_21369_);
         this.builder = builder;
-        animationFactory = GeckoLibUtil.createFactory(this);
+        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     }
 
     @Override
@@ -68,8 +68,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     @Override
-    public AnimationFactory getFactory() {
-        return animationFactory;
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return getAnimatableInstanceCache;
     }
 
 

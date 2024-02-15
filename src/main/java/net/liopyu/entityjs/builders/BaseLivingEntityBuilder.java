@@ -11,6 +11,7 @@ import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.JsonIO;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.booleans.BooleanPredicate;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.BaseLivingEntityJS;
@@ -18,9 +19,8 @@ import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
-import net.liopyu.liolib.core.animation.AnimationController;
-import net.liopyu.liolib.core.animation.EasingType;
-import net.liopyu.liolib.core.animation.RawAnimation;
+import net.liopyu.liolib.core.animation.*;
+import net.liopyu.liolib.core.animation.AnimationState;
 import net.liopyu.liolib.core.keyframe.event.CustomInstructionKeyframeEvent;
 import net.liopyu.liolib.core.keyframe.event.KeyFrameEvent;
 import net.liopyu.liolib.core.keyframe.event.ParticleKeyframeEvent;
@@ -69,7 +69,6 @@ import net.minecraftforge.common.util.TriPredicate;
 import org.apache.commons.lang3.function.TriFunction;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
-import net.liopyu.liolib.core.animation.AnimationState;
 
 import java.util.*;
 import java.util.function.*;
@@ -1203,7 +1202,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
      * @param <E> The entity being animated in the event
      */
     public static class AnimationEventJS<E extends LivingEntity & IAnimatableJS> {
-
+        private final List<RawAnimation.Stage> animationList = new ObjectArrayList();
         private final AnimationState<E> parent;
 
         public AnimationEventJS(AnimationState<E> parent) {
@@ -1245,18 +1244,47 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             return parent.getController();
         }
 
-        @Info(value = "Adds a new Animation Builder to the AnimationController")
-        @Generics(value = AnimationState.class)
-        public void addAnimations(Consumer<AnimationState> builder) {
-            final AnimationState animationBuilder = new AnimationState<>(parent.getAnimatable(), parent.getLimbSwing(), parent.getLimbSwingAmount(), parent.getPartialTick(), parent.isMoving());
-            builder.accept(animationBuilder);
-            parent.getController().setAnimation(animationBuilder.getController().getCurrentRawAnimation());
+        @Info(value = "Sets an animation to play defaulting to the animations.json file loop type")
+        public PlayState thenPlay(String animationName) {
+            parent.getController().setAnimation(RawAnimation.begin().then(animationName, Animation.LoopType.DEFAULT));
+            return PlayState.CONTINUE;
         }
 
-        @Info(value = "Sets an animation to play")
-        public PlayState setAndContinue(String animationName) {
+        @Info(value = "Sets an animation to play in a loop")
+        public PlayState loop(String animationName) {
             parent.getController().setAnimation(RawAnimation.begin().thenLoop(animationName));
             return PlayState.CONTINUE;
+        }
+
+        @Info(value = "Wait a certain amount of ticks before starting the next animation")
+        public PlayState thenWait(int ticks) {
+            parent.getController().setAnimation(RawAnimation.begin().thenWait(ticks));
+            return PlayState.CONTINUE;
+        }
+
+        @Info(value = "Sets an animation to play and hold on the last frame")
+        public PlayState thenPlayAndHold(String animationName) {
+            parent.getController().setAnimation(RawAnimation.begin().then(animationName, Animation.LoopType.HOLD_ON_LAST_FRAME));
+            return PlayState.CONTINUE;
+        }
+
+        @Info(value = "Sets an animation to play an x amount of times")
+        public PlayState thenPlayXTimes(String animationName, int times) {
+            for (int i = 0; i < times; ++i) {
+                parent.getController().setAnimation(RawAnimation.begin().then(animationName, i == times - 1 ? Animation.LoopType.DEFAULT : Animation.LoopType.PLAY_ONCE));
+            }
+            return PlayState.CONTINUE;
+        }
+
+        @Info(value = "Adds an animation to the current animation list")
+        public AnimationEventJS<E> then(String animationName, Animation.LoopType loopType) {
+            this.animationList.add(new RawAnimation.Stage(animationName, loopType));
+            return this;
+        }
+
+        @Info(value = "Creates a new RawAnimation Instance")
+        public RawAnimation begin() {
+            return RawAnimation.begin();
         }
 
         @Info(value = """

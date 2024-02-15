@@ -2,15 +2,15 @@ package net.liopyu.entityjs.client.model;
 
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.entities.IAnimatableJS;
+import net.liopyu.liolib.model.GeoModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 /**
- * The default implementation of GeckoLib's {@link AnimatedGeoModel} which delegates model, texture,
+ * The default implementation of GeckoLib's {@link GeoModel} which delegates model, texture,
  * and animation handling to {@code Function<T, ResourceLocation>}s in the entity type's builder
  */
-public class EntityModelJS<T extends LivingEntity & IAnimatableJS> extends AnimatedGeoModel<T> {
+public class EntityModelJS<T extends LivingEntity & IAnimatableJS> extends GeoModel<T> {
 
     private final BaseLivingEntityBuilder<T> builder;
 
