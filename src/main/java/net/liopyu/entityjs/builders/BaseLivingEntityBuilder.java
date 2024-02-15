@@ -20,6 +20,7 @@ import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
 import net.liopyu.liolib.core.animation.AnimationController;
 import net.liopyu.liolib.core.animation.EasingType;
+import net.liopyu.liolib.core.animation.RawAnimation;
 import net.liopyu.liolib.core.keyframe.event.CustomInstructionKeyframeEvent;
 import net.liopyu.liolib.core.keyframe.event.KeyFrameEvent;
 import net.liopyu.liolib.core.keyframe.event.ParticleKeyframeEvent;
@@ -1245,11 +1246,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         }
 
         @Info(value = "Adds a new Animation Builder to the AnimationController")
-        @Generics(value = AnimationBuilder.class)
-        public void addAnimations(Consumer<AnimationBuilder> builder) {
-            final AnimationBuilder animationBuilder = new AnimationBuilder();
+        @Generics(value = AnimationState.class)
+        public void addAnimations(Consumer<AnimationState> builder) {
+            final AnimationState animationBuilder = new AnimationState<>(parent.getAnimatable(), parent.getLimbSwing(), parent.getLimbSwingAmount(), parent.getPartialTick(), parent.isMoving());
             builder.accept(animationBuilder);
-            parent.getController().setAnimation(animationBuilder);
+            parent.getController().setAnimation(animationBuilder.getController().getCurrentRawAnimation());
+        }
+
+        @Info(value = "Sets an animation to play")
+        public PlayState setAndContinue(String animationName) {
+            parent.getController().setAnimation(RawAnimation.begin().thenLoop(animationName));
+            return PlayState.CONTINUE;
         }
 
         @Info(value = """

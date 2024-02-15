@@ -5,6 +5,7 @@ import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.liolib.core.animatable.GeoAnimatable;
 import net.liopyu.liolib.core.animation.AnimatableManager;
 import net.minecraft.core.Registry;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
 
@@ -31,7 +32,7 @@ public interface IAnimatableJS extends GeoAnimatable {
      */
     default void registerControllers(AnimatableManager.ControllerRegistrar data) {
         for (BaseLivingEntityBuilder.AnimationControllerSupplier<?> supplier : getBuilder().animationSuppliers) {
-            data.addAnimationController(supplier.get(UtilsJS.cast(this)));
+            data.add(supplier.get(UtilsJS.cast(this)));
         }
     }
 
@@ -43,6 +44,10 @@ public interface IAnimatableJS extends GeoAnimatable {
      * @return The entity's {@link AnimatableInstanceCache}
      */
     AnimatableInstanceCache getAnimatableInstanceCache();
+
+    default double getTick(Object entity) {
+        return (double) ((Entity) entity).tickCount;
+    }
 
     /**
      * Gets the id of the entity's entity type

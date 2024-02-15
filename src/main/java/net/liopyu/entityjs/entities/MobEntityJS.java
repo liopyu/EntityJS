@@ -6,6 +6,8 @@ import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.util.*;
+import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
+import net.liopyu.liolib.util.GeckoLibUtil;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -58,12 +60,12 @@ import java.util.Optional;
 public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     private final MobEntityJSBuilder builder;
-    private final AnimationFactory animationFactory;
+    private final AnimatableInstanceCache animationFactory;
 
     public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> p_21368_, Level p_21369_) {
         super(p_21368_, p_21369_);
         this.builder = builder;
-        animationFactory = GeckoLibUtil.createFactory(this);
+        animationFactory = GeckoLibUtil.createInstanceCache(this);
     }
 
     @Override
@@ -72,7 +74,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
     @Override
-    public AnimationFactory getFactory() {
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
         return animationFactory;
     }
 
