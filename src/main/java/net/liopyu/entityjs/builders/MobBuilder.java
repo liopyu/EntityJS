@@ -31,6 +31,16 @@ import java.util.function.*;
  * in {@link Mob} that is not present in/related to {@link net.minecraft.world.entity.LivingEntity LivignEntity}
  */
 public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
+    //pathfinder mob
+    public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
+    //pathfinder mob
+    public transient BooleanSupplier shouldStayCloseToLeashHolder;
+    //pathfinder mob
+    public transient double followLeashSpeed;
+    //pathfinder mob
+    public transient Function<ContextUtils.EntityBlockPosLevelContext, Float> walkTargetValue;
+
+
     public transient SpawnEggItemBuilder eggItem;
     public transient Map<BlockPathTypes, Float> setPathfindingMalus;
     public transient Function<ContextUtils.EntityBlockPathTypeContext, Boolean> canCutCorner;
@@ -185,4 +195,41 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         this.meleeAttackRangeSqr = meleeAttackRangeSqr;
         return this;
     }
+
+    @Info(value = """
+            Sets the tickLeash property in the builder.
+            "Defaults to null.
+            """)
+    public MobBuilder<T> tickLeash(Consumer<ContextUtils.PlayerEntityContext> consumer) {
+        this.tickLeash = consumer;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the shouldStayCloseToLeashHolder property in the builder.
+            "Defaults to true for animals.
+            """)
+    public MobBuilder<T> shouldStayCloseToLeashHolder(BooleanSupplier b) {
+        this.shouldStayCloseToLeashHolder = b;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the followLeashSpeed property in the builder.
+            "Defaults to null.
+            """)
+    public MobBuilder<T> followLeashSpeed(double supplier) {
+        this.followLeashSpeed = supplier;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the walkTargetValue property in the builder.
+            "Defaults to null.
+            """)
+    public MobBuilder<T> walkTargetValue(Function<ContextUtils.EntityBlockPosLevelContext, Float> function) {
+        this.walkTargetValue = function;
+        return this;
+    }
+
 }

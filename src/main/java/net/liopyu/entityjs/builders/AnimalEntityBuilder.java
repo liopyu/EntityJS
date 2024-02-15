@@ -30,7 +30,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Ingredient isFood;
     public transient Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate;
     public transient Predicate<LivingEntity> canBreed;
-    public transient Function<ContextUtils.EntityBlockPosLevelContext, Float> walkTargetValue;
+
 
     public transient double myRidingOffset;
     public transient int ambientSoundInterval;
@@ -45,10 +45,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     public transient QuinaryFunction<ServerLevelAccessor, DifficultyInstance, MobSpawnType, SpawnGroupData, CompoundTag, SpawnGroupData> finalizeSpawn;
-
-    public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
-    public transient BooleanSupplier shouldStayCloseToLeashHolder;
-    public transient double followLeashSpeed;
 
 
     public transient Consumer<LivingEntity> setTarget;
@@ -107,15 +103,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets the walkTargetValue property in the builder.
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> walkTargetValue(Function<ContextUtils.EntityBlockPosLevelContext, Float> function) {
-        this.walkTargetValue = function;
-        return this;
-    }
-
-    @Info(value = """
             Sets the myRidingOffset property in the builder.
             "Defaults to 0.0.
             """)
@@ -167,33 +154,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             """)
     public AnimalEntityBuilder<T> finalizeSpawn(QuinaryFunction<ServerLevelAccessor, DifficultyInstance, MobSpawnType, SpawnGroupData, CompoundTag, SpawnGroupData> function) {
         this.finalizeSpawn = function;
-        return this;
-    }
-
-    @Info(value = """
-            Sets the tickLeash property in the builder.
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> tickLeash(Consumer<ContextUtils.PlayerEntityContext> consumer) {
-        this.tickLeash = consumer;
-        return this;
-    }
-
-    @Info(value = """
-            Sets the shouldStayCloseToLeashHolder property in the builder.
-            "Defaults to true for animals.
-            """)
-    public AnimalEntityBuilder<T> shouldStayCloseToLeashHolder(BooleanSupplier b) {
-        this.shouldStayCloseToLeashHolder = b;
-        return this;
-    }
-
-    @Info(value = """
-            Sets the followLeashSpeed property in the builder.
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> followLeashSpeed(double supplier) {
-        this.followLeashSpeed = supplier;
         return this;
     }
 

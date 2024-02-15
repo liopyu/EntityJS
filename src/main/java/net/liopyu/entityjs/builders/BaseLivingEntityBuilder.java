@@ -135,6 +135,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient ResourceLocation setSwimSplashSound;
 
+
     public transient Predicate<ContextUtils.EntityTypeEntityContext> canAttackType;
 
     public transient Function<LivingEntity, Float> scale;
@@ -1251,7 +1252,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         }
 
         @Info(value = "Sets an animation to play in a loop")
-        public PlayState loop(String animationName) {
+        public PlayState thenLoop(String animationName) {
             parent.getController().setAnimation(RawAnimation.begin().thenLoop(animationName));
             return PlayState.CONTINUE;
         }
