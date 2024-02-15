@@ -104,11 +104,12 @@ repositories {
             includeGroup "dev.latvian.mods"
         }
     }
-    maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+    //maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
     // flatDir {
     //     dir 'libs'
     // }
+    maven { url 'https://dl.cloudsmith.io/public/lio/liolib/maven/' }
 }
 
 dependencies {
@@ -117,10 +118,10 @@ dependencies {
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:1902.6.2-build.45")
     implementation fg.deobf("dev.latvian.mods:rhino-forge:1902.2.3-build.284")
     implementation fg.deobf("dev.architectury:architectury-forge:6.5.85")
-    implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.19:3.1.40')
+    //implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.19:3.1.40')
     // Use kube's jij'd version
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.2.1"))
-
+    implementation fg.deobf('net.liopyu.liolib:liolib-forge-1.19.2:0.0.2')
     if (System.getProperty("idea.sync.active") != "true") {
         annotationProcessor("org.spongepowered:mixin:${mixin_version}:processor")
     }

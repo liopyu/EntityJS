@@ -2,20 +2,20 @@ package net.liopyu.entityjs.entities;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
+import net.liopyu.liolib.core.animatable.GeoAnimatable;
+import net.liopyu.liolib.core.animation.AnimatableManager;
 import net.minecraft.core.Registry;
 import net.minecraft.world.entity.EntityType;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
+import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
 
 /**
- * This provides a default implementation of {@link IAnimatable#registerControllers(AnimationData)}
- * which delegates to the entity builder. Unfortunately, {@link #getFactory()} cannot have a default
- * implementation due to the {@link AnimationFactory} returned needing to be cached in the entity.<br><br>
+ * This provides a default implementation of {@link GeoAnimatable#registerControllers(AnimatableManager.ControllerRegistrar)}}
+ * which delegates to the entity builder. Unfortunately, {@link #getAnimatableInstanceCache()} cannot have a default
+ * implementation due to the {@link AnimatableInstanceCache} returned needing to be cached in the entity.<br><br>
  * <p>
  * See the comments on the methods here and in {@link AnimalEntityJS} for further reading.
  */
-public interface IAnimatableJS extends IAnimatable {
+public interface IAnimatableJS extends GeoAnimatable {
 
     /**
      * Used to retrieve the builder this entity(type) was built with. Used to retrieve information
@@ -29,7 +29,7 @@ public interface IAnimatableJS extends IAnimatable {
      * if your implementation is not a subclass of {@link net.minecraft.world.entity.LivingEntity} this will cause
      * problems and this will necessitate overriding this method with custom implementations
      */
-    default void registerControllers(AnimationData data) {
+    default void registerControllers(AnimatableManager.ControllerRegistrar data) {
         for (BaseLivingEntityBuilder.AnimationControllerSupplier<?> supplier : getBuilder().animationSuppliers) {
             data.addAnimationController(supplier.get(UtilsJS.cast(this)));
         }
@@ -40,9 +40,9 @@ public interface IAnimatableJS extends IAnimatable {
      * <p>
      * If the value is not cached, some of the values available through query in the animation json file will not 'progress'
      *
-     * @return The entity's {@link AnimationFactory}
+     * @return The entity's {@link AnimatableInstanceCache}
      */
-    AnimationFactory getFactory();
+    AnimatableInstanceCache getAnimatableInstanceCache();
 
     /**
      * Gets the id of the entity's entity type

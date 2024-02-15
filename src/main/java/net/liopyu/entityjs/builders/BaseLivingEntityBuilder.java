@@ -18,6 +18,16 @@ import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
+import net.liopyu.liolib.core.animation.AnimationController;
+import net.liopyu.liolib.core.animation.EasingType;
+import net.liopyu.liolib.core.keyframe.event.CustomInstructionKeyframeEvent;
+import net.liopyu.liolib.core.keyframe.event.KeyFrameEvent;
+import net.liopyu.liolib.core.keyframe.event.ParticleKeyframeEvent;
+import net.liopyu.liolib.core.keyframe.event.SoundKeyframeEvent;
+import net.liopyu.liolib.core.keyframe.event.data.KeyFrameData;
+import net.liopyu.liolib.core.keyframe.event.data.SoundKeyframeData;
+import net.liopyu.liolib.core.object.DataTicket;
+import net.liopyu.liolib.core.object.PlayState;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -58,15 +68,7 @@ import net.minecraftforge.common.util.TriPredicate;
 import org.apache.commons.lang3.function.TriFunction;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.easing.EasingType;
-import software.bernie.geckolib3.core.event.CustomInstructionKeyframeEvent;
-import software.bernie.geckolib3.core.event.KeyframeEvent;
-import software.bernie.geckolib3.core.event.ParticleKeyFrameEvent;
-import software.bernie.geckolib3.core.event.SoundKeyframeEvent;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
+import net.liopyu.liolib.core.animation.AnimationState;
 
 import java.util.*;
 import java.util.function.*;
@@ -1059,7 +1061,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             @Param(name = "predicate", value = "The predicate for the controller, determines if an animation should continue or not")
     })
     public BaseLivingEntityBuilder<T> addAnimationController(String name, int translationTicksLength, IAnimationPredicateJS<T> predicate) {
-        return addAnimationController(name, translationTicksLength, EasingType.CUSTOM, predicate, null, null, null);
+        return addAnimationController(name, translationTicksLength, EasingType.LINEAR, predicate, null, null, null);
     }
 
     @Info(value = "Adds a new AnimationController to the entity, with the ability to specify the easing type and add event listeners", params = {
@@ -1145,15 +1147,15 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             @Nullable ICustomInstructionListenerJS<E> instructionListener
     ) {
         public AnimationController<E> get(E entity) {
-            final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, easingType, predicate.toGecko());
+            final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
             if (soundListener != null) {
-                controller.registerSoundListener(event -> soundListener.playSound(new SoundKeyFrameEventJS<>(event)));
+                controller.setSoundKeyframeHandler(event -> soundListener.playSound(new SoundKeyFrameEventJS<>(event)));
             }
             if (particleListener != null) {
-                controller.registerParticleListener(event -> particleListener.summonParticle(new ParticleKeyFrameEventJS<>(event)));
+                controller.setParticleKeyframeHandler(event -> particleListener.summonParticle(new ParticleKeyFrameEventJS<>(event)));
             }
             if (instructionListener != null) {
-                controller.registerCustomInstructionListener(event -> instructionListener.executeInstruction(new CustomInstructionKeyframeEventJS<>(event)));
+                controller.setCustomInstructionKeyframeHandler(event -> instructionListener.executeInstruction(new CustomInstructionKeyframeEventJS<>(event)));
             }
             return controller;
         }
@@ -1173,7 +1175,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         })
         boolean test(AnimationEventJS<E> event);
 
-        default AnimationController.IAnimationPredicate<E> toGecko() {
+        default AnimationController.AnimationStateHandler<E> toGecko() {
             return event -> {
                 if (event != null) {
                     AnimationEventJS<E> animationEventJS = new AnimationEventJS<>(event);
@@ -1201,9 +1203,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
      */
     public static class AnimationEventJS<E extends LivingEntity & IAnimatableJS> {
 
-        private final AnimationEvent<E> parent;
+        private final AnimationState<E> parent;
 
-        public AnimationEventJS(AnimationEvent<E> parent) {
+        public AnimationEventJS(AnimationState<E> parent) {
             this.parent = parent;
         }
 
@@ -1255,42 +1257,39 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                                 
                 Usually used by armor animations to know what item is worn
                 """)
-        public List<Object> getExtraData() {
+        public Map<DataTicket<?>, ?> getExtraData() {
             return parent.getExtraData();
-        }
-
-        @Info(value = "Returns the extra data that is of the provided class")
-        public <D> List<D> getExtraDataOfType(Class<D> type) {
-            return parent.getExtraDataOfType(type);
         }
     }
 
-    public static class KeyFrameEventJS<E extends LivingEntity & IAnimatableJS> {
-
+    public static class KeyFrameEventJS<E extends LivingEntity & IAnimatableJS, B extends KeyFrameData> {
         @Info(value = "The amount of ticks that have passed in either the current transition or animation, depending on the controller's AnimationState")
         public final double animationTick;
         @Info(value = "The entity being animated")
         public final E entity;
+        @Info(value = "The KeyFrame data")
+        private final B eventKeyFrame;
 
-        protected KeyFrameEventJS(KeyframeEvent<E> parent) {
+        protected KeyFrameEventJS(KeyFrameEvent<E, B> parent) {
             animationTick = parent.getAnimationTick();
-            entity = parent.getEntity();
+            entity = parent.getAnimatable();
+            eventKeyFrame = parent.getKeyframeData();
         }
     }
+
 
     @FunctionalInterface
     public interface ISoundListenerJS<E extends LivingEntity & IAnimatableJS> {
         void playSound(SoundKeyFrameEventJS<E> event);
     }
 
-    public static class SoundKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> extends KeyFrameEventJS<E> {
+    public static class SoundKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> {
 
         @Info(value = "The name of the sound to play")
         public final String sound;
 
         public SoundKeyFrameEventJS(SoundKeyframeEvent<E> parent) {
-            super(parent);
-            sound = parent.sound;
+            sound = parent.getKeyframeData().getSound();
         }
     }
 
@@ -1299,18 +1298,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         void summonParticle(ParticleKeyFrameEventJS<E> event);
     }
 
-    public static class ParticleKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> extends KeyFrameEventJS<E> {
+    public static class ParticleKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> {
 
         // These aren't documented in geckolib, so I have no idea what they are
         public final String effect;
         public final String locator;
         public final String script;
 
-        public ParticleKeyFrameEventJS(ParticleKeyFrameEvent<E> parent) {
-            super(parent);
-            effect = parent.effect;
-            locator = parent.locator;
-            script = parent.script;
+        public ParticleKeyFrameEventJS(ParticleKeyframeEvent<E> parent) {
+            effect = parent.getKeyframeData().getEffect();
+            locator = parent.getKeyframeData().getLocator();
+            script = parent.getKeyframeData().script();
         }
     }
 
@@ -1319,14 +1317,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         void executeInstruction(CustomInstructionKeyframeEventJS<E> event);
     }
 
-    public static class CustomInstructionKeyframeEventJS<E extends LivingEntity & IAnimatableJS> extends KeyFrameEventJS<E> {
+    public static class CustomInstructionKeyframeEventJS<E extends LivingEntity & IAnimatableJS> {
 
         @Info(value = "A list of all the custom instructions. In blockbench, each line in the custom instruction box is a separate instruction.")
         public final String instructions;
 
         public CustomInstructionKeyframeEventJS(CustomInstructionKeyframeEvent<E> parent) {
-            super(parent);
-            instructions = parent.instructions;
+            instructions = parent.getKeyframeData().getInstructions();
         }
     }
 
