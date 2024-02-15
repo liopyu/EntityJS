@@ -37,7 +37,7 @@ public interface IAnimatableJS extends GeoAnimatable {
     }
 
     /**
-     * This cannot be implemented here, the returned value should be a cached value that is initialized in the entity's constructor. See {@link BaseEntityJS} for an example.<br><br>
+     * This cannot be implemented here, the returned value should be a cached value that is initialized in the entity's constructor. See {@link BaseLivingEntityJS} for an example.<br><br>
      * <p>
      * If the value is not cached, some of the values available through query in the animation json file will not 'progress'
      *

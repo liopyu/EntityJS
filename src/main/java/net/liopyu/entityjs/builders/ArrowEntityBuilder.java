@@ -1,18 +1,16 @@
 package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.entities.ArrowEntityJS;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.util.BiConsumer;
 
