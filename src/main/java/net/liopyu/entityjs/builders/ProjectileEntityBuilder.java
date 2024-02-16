@@ -28,7 +28,6 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
     public transient ResourceLocation setSoundEvent;
 
     public transient Predicate<Double> shouldRenderAtSqrDistance;
-    public transient BaseLivingEntityBuilder.HeptConsumer lerpTo;
     public transient Consumer<Projectile> tick;
     public transient BiConsumer<MoverType, Vec3> move;
 
@@ -73,11 +72,6 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
         return this;
     }
 
-    @Info(value = "Sets the lerpTo behavior with parameters (x, y, z, yaw, pitch, posRotationIncrements, teleport).")
-    public ProjectileEntityBuilder<T> lerpTo(BaseLivingEntityBuilder.HeptConsumer consumer) {
-        lerpTo = consumer;
-        return this;
-    }
 
     @Info(value = "Sets the custom tick behavior.")
     public ProjectileEntityBuilder<T> tick(Consumer<Projectile> consumer) {

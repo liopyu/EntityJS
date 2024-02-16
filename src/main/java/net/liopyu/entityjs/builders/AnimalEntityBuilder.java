@@ -26,30 +26,12 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate;
     public transient Predicate<LivingEntity> canBreed;
 
-
     public transient double myRidingOffset;
     public transient int ambientSoundInterval;
     public transient Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway;
 
     public transient Predicate<ContextUtils.EntityAnimalContext> canMate;
-    public transient BiConsumer<ServerLevel, Animal> spawnChildFromBreeding;
-
-    @FunctionalInterface
-    public interface QuinaryFunction<A, B, C, D, E, R> {
-        R apply(A a, B b, C c, D d, E e);
-    }
-
-    public transient QuinaryFunction<ServerLevelAccessor, DifficultyInstance, MobSpawnType, SpawnGroupData, CompoundTag, SpawnGroupData> finalizeSpawn;
-
-
-    public transient Consumer<LivingEntity> setTarget;
-
-    public transient Consumer<LivingEntity> ate;
-
-    public transient Ingredient canHoldItem;
-    public transient Boolean shouldDespawnInPeaceful;
-    public transient Boolean canPickUpLoot;
-    public transient Boolean isPersistenceRequired;
+    public transient Consumer<ContextUtils.LevelAnimalContext> onSpawnChildFromBreeding;
 
 
     public AnimalEntityBuilder(ResourceLocation i) {
@@ -61,35 +43,75 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the breedOffspring property in the builder.
-            "Defaults to this entity type.
+            Sets the resource location for the offspring spawned when breeding.
+                        
+            @param breedOffspring The resource location for the breed offspring.
+            Can also be an instance of AgeableMob Object.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.getBreedOffspring("minecraft:cow");
+            ```
             """)
     public AnimalEntityBuilder<T> getBreedOffspring(ResourceLocation breedOffspring) {
         this.getBreedOffspring = breedOffspring;
         return this;
     }
 
+
     @Info(value = """
-            Sets the canBreed property in the builder.
-            "Defaults to true.
+            Sets a predicate to determine if the animal entity can breed.
+                        
+            @param canBreed A {@link Predicate} that defines the conditions for breeding.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.canBreed(entity -> {
+                // Custom logic to determine if the entity can breed
+                // Return true if the entity can breed, false otherwise.
+            });
+            ```
             """)
     public AnimalEntityBuilder<T> canBreed(Predicate<LivingEntity> canBreed) {
         this.canBreed = canBreed;
         return this;
     }
 
+
     @Info(value = """
-            Sets the list of items that the entity can eat.
-            "Defaults to wheat.
+            Sets the ingredient representing the list of items that the animal entity can eat.
+                        
+            @param isFood An {@link Ingredient} specifying the items that the entity can eat.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.isFood([
+            "#minecraft:apple",
+            "minecraft:golden_apple",
+            "minecraft:diamond"
+            ]);
+            ```
             """)
     public AnimalEntityBuilder<T> isFood(Ingredient isFood) {
         this.isFood = isFood;
         return this;
     }
 
+
     @Info(value = """
-            Sets a predicate for what an entity can eat.
-            "Defaults to wheat.
+            Sets the predicate to determine if an entity item stack is considered as food for the animal entity.
+                        
+            @param isFoodPredicate A predicate accepting a {@link ContextUtils.EntityItemStackContext} parameter,
+                                   defining the conditions for an entity item stack to be considered as food.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.isFoodPredicate(context -> {
+                // Custom logic to determine if the entity item stack is considered as food.
+                // Access information about the item stack using the provided context.
+                return someCondition;
+            });
+            ```
             """)
     public AnimalEntityBuilder<T> isFoodPredicate(Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate) {
         this.isFoodPredicate = isFoodPredicate;
@@ -98,35 +120,72 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets the myRidingOffset property in the builder.
-            "Defaults to 0.0.
+            Sets the offset for riding on the animal entity.
+                        
+            @param myRidingOffset The offset value for riding on the animal.
+            Defaults to 0.0.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.myRidingOffset(1.5);
+            ```
             """)
     public AnimalEntityBuilder<T> myRidingOffset(double myRidingOffset) {
         this.myRidingOffset = myRidingOffset;
         return this;
     }
 
+
     @Info(value = """
-            Sets the ambientSoundInterval property in the builder.
-            "Defaults to 240.
+            Sets the interval in ticks between ambient sounds for the animal entity.
+                        
+            @param ambientSoundInterval The interval in ticks between ambient sounds.
+            Defaults to 240.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.ambientSoundInterval(100);
+            ```
             """)
     public AnimalEntityBuilder<T> ambientSoundInterval(int ambientSoundInterval) {
         this.ambientSoundInterval = ambientSoundInterval;
         return this;
     }
 
+
     @Info(value = """
-            Sets the removeWhenFarAway property in the builder.
-            "Defaults to null.
+            Sets a predicate to determine if the entity should be removed when far away from the player.
+                        
+            @param removeWhenFarAway A Predicate accepting a ContextUtils.EntityDistanceToPlayerContext parameter,
+                                     defining the condition for the entity to be removed when far away.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.removeWhenFarAway(context -> {
+                // Custom logic to determine if the entity should be removed when far away
+                // Return true if the entity should be removed based on the provided context.
+            });
+            ```
             """)
     public AnimalEntityBuilder<T> removeWhenFarAway(Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway) {
         this.removeWhenFarAway = removeWhenFarAway;
         return this;
     }
 
+
     @Info(value = """
-            Sets the canMate property in the builder.
-            "Defaults to null.
+            Sets a predicate to determine if the entity can mate.
+                        
+            @param predicate A Predicate accepting a ContextUtils.EntityAnimalContext parameter,
+                             defining the condition for the entity to be able to mate.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.canMate(context -> {
+                // Custom logic to determine if the entity can mate
+                // Return true if mating is allowed based on the provided context.
+            });
+            ```
             """)
     public AnimalEntityBuilder<T> canMate(Predicate<ContextUtils.EntityAnimalContext> predicate) {
         this.canMate = predicate;
@@ -135,79 +194,23 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets the spawnChildFromBreeding property in the builder.
-            "Defaults to null.
+            Sets a callback function to be executed when a child is spawned from breeding.
+                        
+            @param consumer A Consumer accepting a ContextUtils.LevelAnimalContext parameter,
+                             defining the behavior to be executed when a child is spawned from breeding.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.onSpawnChildFromBreeding(context -> {
+                // Custom logic to handle the spawning of a child from breeding
+                // Access information about the breeding event using the provided context.
+            });
+            ```
             """)
-    public AnimalEntityBuilder<T> spawnChildFromBreeding(BiConsumer<ServerLevel, Animal> consumer) {
-        this.spawnChildFromBreeding = consumer;
-        return this;
-    }
-
-    @Info(value = """
-            Sets the finalizeSpawn property in the builder.
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> finalizeSpawn(QuinaryFunction<ServerLevelAccessor, DifficultyInstance, MobSpawnType, SpawnGroupData, CompoundTag, SpawnGroupData> function) {
-        this.finalizeSpawn = function;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets the target for the entity.
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> setTarget(Consumer<LivingEntity> setTarget) {
-        this.setTarget = setTarget;
+    public AnimalEntityBuilder<T> onSpawnChildFromBreeding(Consumer<ContextUtils.LevelAnimalContext> consumer) {
+        this.onSpawnChildFromBreeding = consumer;
         return this;
     }
 
 
-    @Info(value = """
-            Custom behavior when the entity eats.
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> ate(Consumer<LivingEntity> ate) {
-        this.ate = ate;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets the condition for whether the entity can hold specific items.
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> canHoldItem(Ingredient items) {
-        this.canHoldItem = items;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets whether the entity should despawn in peaceful mode.
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> shouldDespawnInPeaceful(Boolean shouldDespawnInPeaceful) {
-        this.shouldDespawnInPeaceful = shouldDespawnInPeaceful;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets whether the entity can pick up loot.
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> canPickUpLoot(Boolean canPickUpLoot) {
-        this.canPickUpLoot = canPickUpLoot;
-        return this;
-    }
-
-    @Info(value = """
-            Sets whether the entity's persistence is required.
-            "Defaults to null.
-            """)
-    public AnimalEntityBuilder<T> isPersistenceRequired(Boolean isPersistenceRequired) {
-        this.isPersistenceRequired = isPersistenceRequired;
-        return this;
-    }
 }

@@ -60,10 +60,11 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+
         if (builder.lerpTo != null) {
-            builder.lerpTo.accept(x, y, z, yaw, pitch, posRotationIncrements, teleport);
-        }
+            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
+            builder.lerpTo.accept(context);
+        } else super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
     }
 
 
@@ -129,4 +130,5 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     public boolean isAttackable() {
         return builder.isAttackable != null ? builder.isAttackable.getAsBoolean() : super.isAttackable();
     }
+
 }

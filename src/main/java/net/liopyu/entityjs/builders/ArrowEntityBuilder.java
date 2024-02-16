@@ -25,7 +25,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient ResourceLocation setSoundEvent;
 
     public transient Predicate<Double> shouldRenderAtSqrDistance;
-    public transient BaseLivingEntityBuilder.HeptConsumer lerpTo;
+
     public transient Consumer<AbstractArrow> tick;
     public transient BiConsumer<MoverType, Vec3> move;
     public transient Consumer<AbstractArrow> tickDespawn;
@@ -77,11 +77,6 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         return this;
     }
 
-    @Info(value = "Sets the lerpTo behavior with parameters (x, y, z, yaw, pitch, posRotationIncrements, teleport).")
-    public ArrowEntityBuilder<T> lerpTo(BaseLivingEntityBuilder.HeptConsumer consumer) {
-        lerpTo = consumer;
-        return this;
-    }
 
     @Info(value = "Sets the custom tick behavior.")
     public ArrowEntityBuilder<T> tick(Consumer<AbstractArrow> consumer) {

@@ -179,6 +179,18 @@ public class ContextUtils {
         }
     }
 
+    public static class CalculateFallDamageContext {
+        public final float fallHeight;
+        public final float damageMultiplier;
+        public final LivingEntity entity;
+
+        public CalculateFallDamageContext(float fallHeight, float damageMultiplier, LivingEntity entity) {
+            this.fallHeight = fallHeight;
+            this.damageMultiplier = damageMultiplier;
+            this.entity = entity;
+        }
+    }
+
     public static class EntityItemStackContext {
         public final ItemStack item;
         public final LivingEntity entity;
@@ -311,6 +323,40 @@ public class ContextUtils {
         public EntityAnimalContext(Animal animal, Animal otherAnimal) {
             this.animal = animal;
             this.otherAnimal = otherAnimal;
+        }
+    }
+
+    public static class LerpToContext {
+        private final double x;
+        private final double y;
+        private final double z;
+        private final float yaw;
+        private final float pitch;
+        private final int posRotationIncrements;
+        private final boolean teleport;
+        private final Entity entity;
+
+        public LerpToContext(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport, Entity entity) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.yaw = yaw;
+            this.pitch = pitch;
+            this.posRotationIncrements = posRotationIncrements;
+            this.teleport = teleport;
+            this.entity = entity;
+        }
+    }
+
+    public static class LevelAnimalContext {
+        public final Animal entity;
+        public final Animal mate;
+        public final ServerLevel level;
+
+        public LevelAnimalContext(Animal mate, Animal entity, ServerLevel level) {
+            this.entity = entity;
+            this.mate = mate;
+            this.level = level;
         }
     }
 

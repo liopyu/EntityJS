@@ -106,11 +106,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Predicate<LivingEntity> isAffectedByFluids;
     public transient boolean isAlwaysExperienceDropper;
     public transient Predicate<LivingEntity> isImmobile;
-    public transient float getBlockJumpFactor;
+    public transient Consumer<ContextUtils.LerpToContext> lerpTo;
+    public transient float setBlockJumpFactor;
     public transient Function<LivingEntity, Integer> blockSpeedFactor;
-    public transient float getJumpPower;
-    public transient float getSoundVolume;
-    public transient float getWaterSlowDown;
+    public transient float setJumpPower;
+    public transient float setSoundVolume;
+    public transient float setWaterSlowDown;
     public transient ResourceLocation setSwimSound;
     public transient Function<LivingEntity, Boolean> isFlapping;
     public transient ResourceLocation setDeathSound;
@@ -125,7 +126,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> onDecreaseAirSupply;
     public transient Consumer<LivingEntity> onBlockedByShield;
 
-    public transient BooleanSupplier repositionEntityAfterLoad;
+    public transient boolean repositionEntityAfterLoad;
 
     public transient Function<Entity, Float> nextStep;
 
@@ -153,7 +154,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Predicate<LivingEntity> canAttack;
 
-    public transient Predicate<MobEffectInstance> canBeAffectedPredicate;
+    public transient Predicate<ContextUtils.OnEffectContext> canBeAffected;
 
     public transient BooleanSupplier invertedHealAndHarm;
 
@@ -187,21 +188,14 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Consumer<LivingEntity> onSprint;
 
-    public transient DoubleSupplier jumpBoostPower;
+    public transient double jumpBoostPower;
     public transient Predicate<ContextUtils.EntityFluidStateContext> canStandOnFluid;
 
-    public transient Consumer<Float> setSpeed;
 
     public transient Predicate<LivingEntity> isSensitiveToWater;
 
     public transient Consumer<LivingEntity> onStopRiding;
     public transient Consumer<LivingEntity> rideTick;
-
-
-    @FunctionalInterface
-    public interface HeptConsumer {
-        void accept(double arg1, double arg2, double arg3, float arg4, float arg5, int arg6, boolean arg7);
-    }
 
 
     public transient Consumer<ContextUtils.EntityItemEntityContext> onItemPickup;
@@ -228,7 +222,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Predicate<LivingEntity> canFreeze;
     public transient Predicate<LivingEntity> isCurrentlyGlowing;
     public transient Predicate<LivingEntity> canDisableShield;
-    public transient IntSupplier getMaxFallDistance;
+    public transient int setMaxFallDistance;
     public transient Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> onInteract;
 
     public transient Consumer<LivingEntity> onClientRemoval;
@@ -244,7 +238,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.ThunderHitContext> thunderHit;
     public transient Predicate<ContextUtils.DamageContext> isInvulnerableTo;
     public transient Predicate<LivingEntity> canChangeDimensions;
-    public transient BiFunction<Float, Float, Integer> calculateFallDamage;
+    public transient Function<ContextUtils.CalculateFallDamageContext, Integer> calculateFallDamage;
     public transient Predicate<ContextUtils.MayInteractContext> mayInteract;
     public transient Predicate<ContextUtils.CanTrampleContext> canTrample;
     public transient Consumer<LivingEntity> onRemovedFromWorld;
@@ -270,7 +264,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         fireImmune = false;
         spawnFarFromPlayer = false;
         clientTrackingRange = 5;
-        updateInterval = 3;
+        updateInterval = 0;
         mobCategory = MobCategory.MISC;
         modelResource = t -> t.getBuilder().newID("geo/", ".geo.json");
         textureResource = t -> t.getBuilder().newID("textures/models/entity/", ".png");
@@ -278,11 +272,14 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         isPushable = true;
         animationSuppliers = new ArrayList<>();
         isAlwaysExperienceDropper = false;
-        getBlockJumpFactor = 0.5f;
+        setBlockJumpFactor = 0.5f;
         blockSpeedFactor = t -> 1;
-        getJumpPower = 0.5f;
-        getSoundVolume = 1.0f;
-        getWaterSlowDown = 0.8f;
+        setJumpPower = 0.5f;
+        setSoundVolume = 1.0f;
+        setWaterSlowDown = 0.8f;
+        setMaxFallDistance = 3;
+        jumpBoostPower = 0.0f;
+        repositionEntityAfterLoad = true;
         rideableUnderWater = false;
         canBreatheUnderwater = false;
         renderType = RenderType.CUTOUT;
@@ -290,141 +287,349 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     }
 
-    @Info(value = "Sets the main arm of the entity, defaults to 'right'")
-    public BaseLivingEntityBuilder<T> mainArm(HumanoidArm arm) {
-        this.mainArm = arm;
+    @Info(value = """
+            Sets the main arm of the entity. Defaults to 'right'.
+                        
+            @param arm The main arm of the entity. Accepts values "left" or "right".
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.mainArm("left");
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> mainArm(String arm) {
+        switch (arm.toLowerCase()) {
+            case "left":
+                this.mainArm = HumanoidArm.LEFT;
+                break;
+            case "right":
+                this.mainArm = HumanoidArm.RIGHT;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid main arm string: " + arm);
+        }
         return this;
     }
 
-    @Info(value = "Sets the hit box of the entity type", params = {
-            @Param(name = "width", value = "The width of the entity, defaults to 1"),
-            @Param(name = "height", value = "The height if the entity, defaults to 1")
-    })
+
+    @Info(value = """
+            Sets the hit box of the entity type.
+                        
+            @param width The width of the entity, defaults to 1.
+            @param height The height of the entity, defaults to 1.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.sized(2, 3);
+            ```
+            """)
     public BaseLivingEntityBuilder<T> sized(float width, float height) {
         this.width = width;
         this.height = height;
         return this;
     }
 
-    @Info(value = "Determines if the entity should serialize its data, defaults to true")
-    public BaseLivingEntityBuilder<T> saves(boolean b) {
-        this.save = b;
+
+    @Info(value = """
+            Determines if the entity should serialize its data. Defaults to true.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.saves(false);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> saves(boolean shouldSave) {
+        this.save = shouldSave;
         return this;
     }
 
-    @Info(value = "Determines if the entity is immune to fire, defaults to false")
-    public BaseLivingEntityBuilder<T> fireImmune(boolean b) {
-        this.fireImmune = b;
+
+    @Info(value = """
+            Sets whether the entity is immune to fire damage.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.fireImmune(true);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> fireImmune(boolean isFireImmune) {
+        this.fireImmune = isFireImmune;
         return this;
     }
 
-    @Info(value = "Determines the blocks the entity is 'immune' to")
-    public BaseLivingEntityBuilder<T> immuneTo(ResourceLocation... blocks) {
-        this.immuneTo = blocks;
+    @Info(value = "Sets the lerpTo behavior with parameters (x, y, z, yaw, pitch, posRotationIncrements, teleport).")
+    public BaseLivingEntityBuilder<T> lerpTo(Consumer<ContextUtils.LerpToContext> consumer) {
+        lerpTo = consumer;
         return this;
     }
 
-    @Info(value = "Determines if the entity can spawn far from players")
-    public BaseLivingEntityBuilder<T> canSpawnFarFromPlayer(boolean b) {
-        this.spawnFarFromPlayer = b;
+    @Info(value = """
+            Sets the list of block names to which the entity is immune.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.immuneTo("minecraft:stone", "minecraft:dirt");
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> immuneTo(String... blockNames) {
+        this.immuneTo = Arrays.stream(blockNames)
+                .map(ResourceLocation::new)
+                .toArray(ResourceLocation[]::new);
         return this;
     }
 
-    @Info(value = "Sets the Jump Power of the entity")
-    public BaseLivingEntityBuilder<T> getJumpPower(float b) {
-        this.getJumpPower = b;
+
+    @Info(value = """
+            Sets whether the entity can spawn far from the player.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canSpawnFarFromPlayer(true);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> canSpawnFarFromPlayer(boolean canSpawnFar) {
+        this.spawnFarFromPlayer = canSpawnFar;
         return this;
     }
 
-    @Info(value = "Sets the Jump Factor of the entity")
-    public BaseLivingEntityBuilder<T> getBlockJumpFactor(float b) {
-        this.getBlockJumpFactor = b;
+
+    @Info(value = """
+            Sets the jump power for the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setJumpPower(1.5);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> setJumpPower(float jumpPower) {
+        this.setJumpPower = jumpPower;
         return this;
     }
 
-    @Info(value = "Sets the water slowdown defaults to 0.8")
-    public BaseLivingEntityBuilder<T> getWaterSlowDown(float b) {
-        this.getWaterSlowDown = b;
+
+    @Info(value = """
+            Sets the block jump factor for the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setBlockJumpFactor(1.2);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> setBlockJumpFactor(float blockJumpFactor) {
+        this.setBlockJumpFactor = blockJumpFactor;
         return this;
     }
 
-    @Info(value = "Sets the general volume of the entity")
-    public BaseLivingEntityBuilder<T> getSoundVolume(float b) {
-        this.getSoundVolume = b;
+
+    @Info(value = """
+            Sets the water slowdown factor for the entity. Defaults to 0.8.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setWaterSlowDown(0.6);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> setWaterSlowDown(float slowdownFactor) {
+        this.setWaterSlowDown = slowdownFactor;
         return this;
     }
 
-    @Info(value = "Deciding logic for whether an entity drops their loot or not")
+
+    @Info(value = """
+            Sets the sound volume for the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setSoundVolume(0.5);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> setSoundVolume(float volume) {
+        this.setSoundVolume = volume;
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets a predicate to determine whether the entity should drop loot upon death.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity whose loot dropping behavior is being determined.
+            It returns a Boolean indicating whether the entity should drop loot.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.shouldDropLoot(entity => {
+                // Define logic to determine whether the entity should drop loot
+                // Use information about the LivingEntity provided by the context.
+                return // Some Boolean value indicating whether the entity should drop loot;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> shouldDropLoot(Predicate<LivingEntity> b) {
         this.shouldDropLoot = b;
         return this;
     }
 
-    @Info(value = "Sets the aiStep property in the builder.")
+
+    @Info(value = """
+            Sets a callback function to be executed during the living entity's AI step.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            allowing customization of the AI behavior while its still 'alive'.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.livingAiStep(entity => {
+                // Custom logic to be executed during the living entity's AI step
+                // Access and modify information about the entity using the provided context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> livingAiStep(Consumer<LivingEntity> aiStep) {
         this.livingAiStep = aiStep;
         return this;
     }
 
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity jumps.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onLivingJump(entity => {
+                // Custom logic to handle the entity's jump action
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onLivingJump(Consumer<LivingEntity> onJump) {
         this.onLivingJump = onJump;
         return this;
     }
 
-    @Info(value = "Sets the client tracking range, defaults to 5")
+
+    @Info(value = """
+            Sets the client tracking range for the entity.
+            Defaults to 5.
+            Example usage:
+            ```javascript
+            entityBuilder.clientTrackingRange(64); // Set the client tracking range to 64 blocks
+            ```
+            """)
     public BaseLivingEntityBuilder<T> clientTrackingRange(int i) {
         clientTrackingRange = i;
         return this;
     }
 
-    @Info(value = "Sets the update interval in ticks of the entity, defaults to 3")
+
+    @Info(value = """
+            Sets the update interval for the entity.
+            Defaults to 0 ticks.
+            Example usage:
+            ```javascript
+            entityBuilder.updateInterval(20); // Set the update interval to 20 ticks
+            ```
+            """)
     public BaseLivingEntityBuilder<T> updateInterval(int i) {
         updateInterval = i;
         return this;
     }
 
-    @Info(value = "Sets the mob category, defaults to 'misc'")
-    public BaseLivingEntityBuilder<T> mobCategory(MobCategory category) {
-        mobCategory = category;
-        return this;
+    @HideFromJS
+    public static MobCategory stringToMobCategory(String category) {
+        return switch (category) {
+            case "monster" -> MobCategory.MONSTER;
+            case "creature" -> MobCategory.CREATURE;
+            case "ambient" -> MobCategory.AMBIENT;
+            case "water_creature" -> MobCategory.WATER_CREATURE;
+            case "misc" -> MobCategory.MISC;
+            default -> MobCategory.MISC;
+        };
     }
 
     @Info(value = """
-            Sets how the model of the entity is determined, has access to the entity
-            to allow changing the model based on info about the entity
-                      
-            Defaults to returning <namespace>:geo/<path>.geo.json
+            Sets the mob category for the entity.
+            Available options: 'monster', 'creature', 'ambient', 'water_creature', 'misc'.
+            Defaults to 'misc'.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.mobCategory('monster');
+            ```
             """)
-    public BaseLivingEntityBuilder<T> modelResourceFunction(Function<T, ResourceLocation> function) {
+    public BaseLivingEntityBuilder<T> mobCategory(String category) {
+        mobCategory = stringToMobCategory(category);
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets a function to determine the model resource for the entity.
+            The provided Function accepts a parameter of type T (the entity),
+            allowing changing the model based on information about the entity.
+            The default behavior returns <namespace>:geo/<path>.geo.json.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.modelResource(entity => {
+                // Define logic to determine the model resource for the entity
+                // Use information about the entity provided by the context.
+                return // Some ResourceLocation representing the model resource;
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> modelResource(Function<T, ResourceLocation> function) {
         modelResource = function;
         return this;
     }
 
+
     @Info(value = """
-            Sets how the texture of the entity is determined, has access to the entity
-            to allow changing the texture based on info about the entity
-                      
-            Defaults to returning <namespace>:textures/model/entity/<path>.png
+            Sets a function to determine the texture resource for the entity.
+            The provided Function accepts a parameter of type T (the entity),
+            allowing changing the texture based on information about the entity.
+            The default behavior returns <namespace>:textures/model/entity/<path>.png.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.textureResource(entity => {
+                // Define logic to determine the texture resource for the entity
+                // Use information about the entity provided by the context.
+                return // Some ResourceLocation representing the texture resource;
+            });
+            ```
             """)
-    public BaseLivingEntityBuilder<T> textureResourceFunction(Function<T, ResourceLocation> function) {
+    public BaseLivingEntityBuilder<T> textureResource(Function<T, ResourceLocation> function) {
         textureResource = function;
         return this;
     }
 
+
     @Info(value = """
-            Sets how the animations of the entity is determined, has access to the entity
-            to allow changing the animations based on info about the entity
-                      
-            Defaults to returning <namespace>:animations/<path>.animation.json
+            Sets a function to determine the animation resource for the entity.
+            The provided Function accepts a parameter of type T (the entity),
+            allowing changing the animations based on information about the entity.
+            The default behavior returns <namespace>:animations/<path>.animation.json.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.animationResource(entity => {
+                // Define logic to determine the animation resource for the entity
+                // Use information about the entity provided by the context.
+                return // Some ResourceLocation representing the animation resource;
+            });
+            ```
             """)
-    public BaseLivingEntityBuilder<T> animationResourceFunction(Function<T, ResourceLocation> function) {
+    public BaseLivingEntityBuilder<T> animationResource(Function<T, ResourceLocation> function) {
         animationResource = function;
         return this;
     }
 
+
     @Info(value = """
-            Sets the isPushable property in the builder.
-            "Defaults to true.
+            Sets whether the entity is pushable.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isPushable(true);
+            ```
             """)
     public BaseLivingEntityBuilder<T> isPushable(boolean b) {
         isPushable = b;
@@ -433,128 +638,253 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the passenger predicate in the builder.
-            "Defaults to allowing any entity to be a passenger.
+            Sets a predicate to determine whether the entity can add a passenger.
+            The provided Predicate accepts a {@link Entity} parameter,
+            representing the entity that is being considered as a potential passenger.
+            It returns a Boolean indicating whether the entity can add the specified passenger.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canAddPassenger(passenger => {
+                // Define logic to determine whether the entity can add the specified passenger
+                // Use information about the Entity provided by the context.
+                return // Some Boolean value indicating whether the entity can add the passenger;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> canAddPassenger(Predicate<Entity> predicate) {
         canAddPassenger = predicate;
         return this;
     }
 
+
     @Info(value = """
-            Sets whether the entity is affected by fluids in the builder.
-            "Defaults to true.
+            Sets a predicate to determine whether the entity is affected by fluids.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity whose interaction with fluids is being determined.
+            It returns a Boolean indicating whether the entity is affected by fluids.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isAffectedByFluids(entity => {
+                // Define logic to determine whether the entity is affected by fluids
+                // Use information about the LivingEntity provided by the context.
+                return // Some Boolean value indicating whether the entity is affected by fluids;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> isAffectedByFluids(Predicate<LivingEntity> b) {
         isAffectedByFluids = b;
         return this;
     }
 
+
     @Info(value = """
-            Sets the summonable property in the builder.
-            "Defaults to true.
+            Sets whether the entity is summonable.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setSummonable(true);
+            ```
             """)
     public BaseLivingEntityBuilder<T> setSummonable(boolean b) {
         summonable = b;
         return this;
     }
 
+
     @Info(value = """
-            Sets the immobility property in the builder.
-            "Defaults to false.
+            Sets a predicate to determine whether the entity is immobile.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity whose immobility is being determined.
+            It returns a Boolean indicating whether the entity is immobile.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isImmobile(entity => {
+                // Define logic to determine whether the entity is immobile
+                // Use information about the LivingEntity provided by the context.
+                return // Some Boolean value indicating whether the entity is immobile;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> isImmobile(Predicate<LivingEntity> b) {
         isImmobile = b;
         return this;
     }
 
+
     @Info(value = """
-            Sets the always experience dropper property in the builder.
-            "Defaults to false.
+            Sets whether the entity is always considered as an experience dropper.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isAlwaysExperienceDropper(true);
+            ```
             """)
     public BaseLivingEntityBuilder<T> isAlwaysExperienceDropper(boolean b) {
         isAlwaysExperienceDropper = b;
         return this;
     }
 
+
     @Info(value = """
-            Sets the fall damage calculation function in the builder.
+            Sets a function to calculate fall damage for the entity.
+            The provided Function accepts a {@link ContextUtils.CalculateFallDamageContext} parameter,
+            representing the context of the fall damage calculation.
+            It returns an Integer representing the calculated fall damage.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.calculateFallDamage(context => {
+                // Define logic to calculate and return the fall damage for the entity
+                // Use information about the CalculateFallDamageContext provided by the context.
+                return // Some Integer value representing the calculated fall damage;
+            });
+            ```
             """)
-    public BaseLivingEntityBuilder<T> calculateFallDamage(BiFunction<Float, Float, Integer> calculation) {
+    public BaseLivingEntityBuilder<T> calculateFallDamage(Function<ContextUtils.CalculateFallDamageContext, Integer> calculation) {
         calculateFallDamage = calculation;
         return this;
     }
 
+
     @Info(value = """
-            Sets the death sound for the entity in the builder.
+            Sets the death sound for the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setDeathSound("minecraft:entity.generic.death");
+            ```
             """)
-    public BaseLivingEntityBuilder<T> setDeathSound(ResourceLocation sound) {
-        setDeathSound = sound;
+    public BaseLivingEntityBuilder<T> setDeathSound(String sound) {
+        setDeathSound = new ResourceLocation(sound);
         return this;
     }
 
+
     @Info(value = """
-            Sets the swim sound for the entity in the builder.
+            Sets the swim sound for the entity using a string representation.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setSwimSound("minecraft:entity.generic.swim");
+            ```
             """)
-    public BaseLivingEntityBuilder<T> setSwimSound(ResourceLocation sound) {
-        setSwimSound = sound;
+    public BaseLivingEntityBuilder<T> setSwimSound(String sound) {
+        setSwimSound = new ResourceLocation(sound);
         return this;
     }
 
+
     @Info(value = """
-            Sets the swim high-speed splash sound for the entity in the builder.
+            Sets the swim splash sound for the entity using a string representation.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setSwimSplashSound("minecraft:entity.generic.splash");
+            ```
             """)
-    public BaseLivingEntityBuilder<T> setSwimSplashSound(ResourceLocation sound) {
-        setSwimSplashSound = sound;
+    public BaseLivingEntityBuilder<T> setSwimSplashSound(String sound) {
+        setSwimSplashSound = new ResourceLocation(sound);
         return this;
     }
 
-    @Info(value = """
-            Sets the block speed factor for the entity in the builder.
-            "Defaults to 0.
-            """)
-    public BaseLivingEntityBuilder<T> blockSpeedFactor(int i) {
-        blockSpeedFactor = t -> i;
-        return this;
-    }
 
     @Info(value = """
-            Sets the block speed factor function for the entity in the builder.
+            Sets a function to determine the block speed factor of the entity.
+            The provided Function accepts a {@link LivingEntity} parameter,
+            representing the entity whose block speed factor is being determined.
+            It returns an Integer representing the block speed factor.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.blockSpeedFactor(entity => {
+                // Define logic to calculate and return the block speed factor for the entity
+                // Use information about the LivingEntity provided by the context.
+                return // Some Integer value representing the block speed factor;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> blockSpeedFactor(Function<LivingEntity, Integer> function) {
-        blockSpeedFactor = function;
+        this.blockSpeedFactor = function;
         return this;
     }
 
+
     @Info(value = """
-            Sets the flapping property for the entity in the builder.
-            "Defaults to false.
+            Sets a function to determine whether the entity is currently flapping.
+            The provided Function accepts a {@link LivingEntity} parameter,
+            representing the entity whose flapping status is being determined.
+            It returns a Boolean indicating whether the entity is flapping.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isFlapping(entity => {
+                // Define logic to determine whether the entity is currently flapping
+                // Use information about the LivingEntity provided by the context.
+                return // Some Boolean value indicating whether the entity is flapping;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> isFlapping(Function<LivingEntity, Boolean> b) {
-        isFlapping = b;
+        this.isFlapping = b;
         return this;
     }
+
 
     public transient Consumer<LivingEntity> tick;
 
     @Info(value = """
-            Sets a custom tick callback for the entity in the builder.
+            Sets a callback function to be executed during each tick of the entity.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that is being ticked.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.tick(entity => {
+                // Define custom logic for handling during each tick of the entity
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> tick(Consumer<LivingEntity> tickCallback) {
-        tick = tickCallback;
-        return this;
-    }
-
-
-    @Info(value = "Sets the custom onAddedToWorld behavior")
-    public BaseLivingEntityBuilder<T> onAddedToWorld(Consumer<LivingEntity> onAddedToWorldCallback) {
-        onAddedToWorld = onAddedToWorldCallback;
+        this.tick = tickCallback;
         return this;
     }
 
 
     @Info(value = """
-            Sets a custom behavior for auto-attacking on touch for the entity in the builder.
+            Sets a callback function to be executed when the entity is added to the world.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that is added to the world.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onAddedToWorld(entity => {
+                // Define custom logic for handling when the entity is added to the world
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> onAddedToWorld(Consumer<LivingEntity> onAddedToWorldCallback) {
+        this.onAddedToWorld = onAddedToWorldCallback;
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity automatically attacks on touch.
+            The provided Consumer accepts a {@link ContextUtils.AutoAttackContext} parameter,
+            representing the context of the auto-attack when the entity touches another entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.doAutoAttackOnTouch(context => {
+                // Define custom logic for handling when the entity automatically attacks on touch
+                // Use information about the AutoAttackContext provided by the context.
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> doAutoAttackOnTouch(Consumer<ContextUtils.AutoAttackContext> doAutoAttackOnTouch) {
         this.doAutoAttackOnTouch = doAutoAttackOnTouch;
@@ -563,7 +893,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the function to determine the custom standing eye height for the entity in the builder.
+            Sets a function to determine the standing eye height of the entity.
+            The provided Function accepts a {@link ContextUtils.EntityPoseDimensionsContext} parameter,
+            representing the context of the entity's pose and dimensions when standing.
+            It returns a Float representing the standing eye height.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setStandingEyeHeight(context => {
+                // Define logic to calculate and return the standing eye height for the entity
+                // Use information about the EntityPoseDimensionsContext provided by the context.
+                return // Some Float value representing the standing eye height;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> setStandingEyeHeight(Function<ContextUtils.EntityPoseDimensionsContext, Float> setStandingEyeHeight) {
         this.setStandingEyeHeight = setStandingEyeHeight;
@@ -572,15 +914,36 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the function to determine the custom decrease in air supply for the entity in the builder.
+            Sets a callback function to be executed when the entity's air supply decreases.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity whose air supply is being decreased.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onDecreaseAirSupply(entity => {
+                // Define custom logic for handling when the entity's air supply decreases
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> onDecreaseAirSupply(Consumer<LivingEntity> onDecreaseAirSupply) {
         this.onDecreaseAirSupply = onDecreaseAirSupply;
         return this;
     }
 
+
     @Info(value = """
-            Sets the custom behavior for when the entity is blocked by a shield in the builder.
+            Sets a callback function to be executed when the entity is blocked by a shield.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that is blocked by a shield.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onBlockedByShield(entity => {
+                // Define custom logic for handling when the entity is blocked by a shield
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> onBlockedByShield(Consumer<LivingEntity> onBlockedByShield) {
         this.onBlockedByShield = onBlockedByShield;
@@ -589,15 +952,33 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the supplier to determine whether the entity should be repositioned after load in the builder.
+            Sets whether to reposition the entity after loading.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.repositionEntityAfterLoad(true);
+            ```
             """)
-    public BaseLivingEntityBuilder<T> repositionEntityAfterLoad(BooleanSupplier customRepositionEntityAfterLoad) {
+    public BaseLivingEntityBuilder<T> repositionEntityAfterLoad(boolean customRepositionEntityAfterLoad) {
         this.repositionEntityAfterLoad = customRepositionEntityAfterLoad;
         return this;
     }
 
+
     @Info(value = """
-            Sets the function to determine the next step for the entity in the builder.
+            Sets a function to determine the next step distance for the entity.
+            The provided Function accepts a {@link Entity} parameter,
+            representing the entity whose next step distance is being determined.
+            It returns a Float representing the next step distance.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.nextStep(entity => {
+                // Define logic to calculate and return the next step distance for the entity
+                // Use information about the Entity provided by the context.
+                return // Some Float value representing the next step distance;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> nextStep(Function<Entity, Float> nextStep) {
         this.nextStep = nextStep;
@@ -606,24 +987,51 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the function to increase the air supply for the entity in the builder.
+            Sets a callback function to be executed when the entity's air supply increases.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity whose air supply is being increased.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onIncreaseAirSupply(entity => {
+                // Define custom logic for handling when the entity's air supply increases
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> onIncreaseAirSupply(Consumer<LivingEntity> onIncreaseAirSupply) {
         this.onIncreaseAirSupply = onIncreaseAirSupply;
         return this;
     }
 
+
     @Info(value = """
-            Sets the function to get the hurt sound for the entity in the builder.
+            Sets the hurt sound for the entity using a string representation.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setHurtSound("minecraft:entity.generic.hurt");
+            ```
             """)
-    public BaseLivingEntityBuilder<T> setHurtSound(ResourceLocation setHurtSound) {
-        this.setHurtSound = setHurtSound;
+    public BaseLivingEntityBuilder<T> setHurtSound(String setHurtSound) {
+        this.setHurtSound = new ResourceLocation(setHurtSound);
         return this;
     }
 
 
     @Info(value = """
-            Sets the function to determine if the entity can attack a specific type in the builder.
+            Sets a predicate function to determine whether the entity can attack a specific entity type.
+            The provided Predicate accepts a {@link ContextUtils.EntityTypeEntityContext} parameter,
+            representing the context of the entity attacking a specific entity type.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canAttackType(context => {
+                // Define conditions to check if the entity can attack the specified entity type
+                // Use information about the EntityTypeEntityContext provided by the context.
+                return // Some boolean condition indicating if the entity can attack the specified entity type;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> canAttackType(Predicate<ContextUtils.EntityTypeEntityContext> canAttackType) {
         this.canAttackType = canAttackType;
@@ -632,15 +1040,33 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the custom scale for the entity in the builder.
+            Sets a function to determine the custom scale of the entity.
+            The provided Function accepts a {@link LivingEntity} parameter,
+            representing the entity whose scale is being determined.
+            It returns a Float representing the custom scale.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.scale(entity => {
+                // Define logic to calculate and return the custom scale for the entity
+                // Use information about the LivingEntity provided by the context.
+                return // Some Float value representing the custom scale;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> scale(Function<LivingEntity, Float> customScale) {
         this.scale = customScale;
         return this;
     }
 
+
     @Info(value = """
-            Sets whether the entity is rideable underwater in the builder.
+            Sets whether the entity is rideable underwater.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.rideableUnderWater(true);
+            ```
             """)
     public BaseLivingEntityBuilder<T> rideableUnderWater(boolean rideableUnderWater) {
         this.rideableUnderWater = rideableUnderWater;
@@ -649,15 +1075,39 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets whether the entity should drop experience in the builder.
+            Sets a predicate function to determine whether the entity should drop experience upon death.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity whose experience drop is being determined.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.shouldDropExperience(entity => {
+                // Define conditions to check if the entity should drop experience upon death
+                // Use information about the LivingEntity provided by the context.
+                return // Some boolean condition indicating if the entity should drop experience;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> shouldDropExperience(Predicate<LivingEntity> p) {
         this.shouldDropExperience = p;
         return this;
     }
 
+
     @Info(value = """
-            Sets the function to get the custom experience reward for the entity in the builder.
+            Sets a function to determine the experience reward for killing the entity.
+            The provided Function accepts a {@link LivingEntity} parameter,
+            representing the entity whose experience reward is being determined.
+            It returns an Integer representing the experience reward.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.experienceReward(killedEntity => {
+                // Define logic to calculate and return the experience reward for the killedEntity
+                // Use information about the LivingEntity provided by the context.
+                return // Some Integer value representing the experience reward;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> experienceReward(Function<LivingEntity, Integer> experienceReward) {
         this.experienceReward = experienceReward;
@@ -666,7 +1116,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the tri-consumer for the custom onEquipItem behavior for the entity in the builder.
+            Sets a callback function to be executed when the entity equips an item.
+            The provided Consumer accepts a {@link ContextUtils.EntityEquipmentContext} parameter,
+            representing the context of the entity equipping an item.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onEquipItem(context => {
+                // Define custom logic for handling when the entity equips an item
+                // Use information about the EntityEquipmentContext provided by the context.
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> onEquipItem(Consumer<ContextUtils.EntityEquipmentContext> onEquipItem) {
         this.onEquipItem = onEquipItem;
@@ -675,15 +1135,39 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the function for getting the visibility percent for the entity in the builder.
+            Sets a function to determine the visibility percentage of the entity.
+            The provided Function accepts a {@link Entity} parameter,
+            representing the entity whose visibility percentage is being determined.
+            It returns a Double representing the visibility percentage.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.visibilityPercent(targetEntity => {
+                // Define logic to calculate and return the visibility percentage for the targetEntity
+                // Use information about the Entity provided by the context.
+                return // Some Double value representing the visibility percentage;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> visibilityPercent(Function<Entity, Double> visibilityPercent) {
         this.visibilityPercent = visibilityPercent;
         return this;
     }
 
+
     @Info(value = """
-            Sets the predicate for the custom canAttack behavior for the entity in the builder.
+            Sets a predicate function to determine whether the entity can attack another entity.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity that may be attacked.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canAttack(targetEntity => {
+                // Define conditions to check if the entity can attack the targetEntity
+                // Use information about the LivingEntity provided by the context.
+                return // Some boolean condition indicating if the entity can attack the targetEntity;
+            });
+            ```
             """)
     public BaseLivingEntityBuilder<T> canAttack(Predicate<LivingEntity> customCanAttack) {
         this.canAttack = customCanAttack;
@@ -691,345 +1175,928 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
 
-    @Info(value = "Sets the custom logic to determine if the entity can be affected by a specific potion effect.")
-    public BaseLivingEntityBuilder<T> customCanBeAffected(Predicate<MobEffectInstance> predicate) {
-        canBeAffectedPredicate = predicate;
+    @Info(value = """
+            Sets a predicate function to determine whether the entity can be affected by an effect.
+            The provided Predicate accepts a {@link ContextUtils.OnEffectContext} parameter,
+            representing the context of the effect that may affect the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canBeAffected(context => {
+                // Define conditions to check if the entity can be affected by the effect
+                // Use information about the OnEffectContext provided by the context.
+                return // Some boolean condition indicating if the entity can be affected;
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> canBeAffected(Predicate<ContextUtils.OnEffectContext> predicate) {
+        canBeAffected = predicate;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for determining if healing and harming effects are inverted for the entity.")
+    @Info(value = """
+            Sets whether healing and harming effects are inverted for the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.invertedHealAndHarm(() => {
+                // Define a BooleanSupplier to determine whether healing and harming effects are inverted
+                // Implement custom logic to return true or false based on your requirements.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> invertedHealAndHarm(BooleanSupplier invertedHealAndHarm) {
         this.invertedHealAndHarm = invertedHealAndHarm;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for when a potion effect is added to the entity.")
+    @Info(value = """
+            Sets a callback function to be executed when an effect is added to the entity.
+            The provided Consumer accepts a {@link ContextUtils.OnEffectContext} parameter,
+            representing the context of the effect being added to the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onEffectAdded(context => {
+                // Define custom logic for handling when an effect is added to the entity
+                // Use information about the OnEffectContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onEffectAdded(Consumer<ContextUtils.OnEffectContext> consumer) {
         onEffectAdded = consumer;
         return this;
     }
 
 
-    @Info(value = "Fires whenever the entity heals.")
+    @Info(value = """
+            Sets a callback function to be executed when the entity receives healing.
+            The provided Consumer accepts a {@link ContextUtils.EntityHealContext} parameter,
+            representing the context of the entity receiving healing.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onLivingHeal(context => {
+                // Define custom logic for handling when the entity receives healing
+                // Use information about the EntityHealContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onLivingHeal(Consumer<ContextUtils.EntityHealContext> callback) {
         onLivingHeal = callback;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for when a potion effect is removed from the entity.")
+    @Info(value = """
+            Sets a callback function to be executed when an effect is removed from the entity.
+            The provided Consumer accepts a {@link ContextUtils.OnEffectContext} parameter,
+            representing the context of the effect being removed from the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onEffectRemoved(context => {
+                // Define custom logic for handling when an effect is removed from the entity
+                // Use information about the OnEffectContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onEffectRemoved(Consumer<ContextUtils.OnEffectContext> consumer) {
         onEffectRemoved = consumer;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for handling entity damage")
+    @Info(value = """
+            Sets a callback function to be executed when the entity is hurt.
+            The provided Consumer accepts a {@link ContextUtils.EntityDamageContext} parameter,
+            representing the context of the entity being hurt.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onHurt(context => {
+                // Define custom logic for handling when the entity is hurt
+                // Use information about the EntityDamageContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onHurt(Consumer<ContextUtils.EntityDamageContext> predicate) {
         onHurt = predicate;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for when the entity dies")
+    @Info(value = """
+            Sets a callback function to be executed when the entity dies.
+            The provided Consumer accepts a {@link ContextUtils.DeathContext} parameter,
+            representing the context of the entity's death.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onDeath(context => {
+                // Define custom logic for handling the entity's death
+                // Use information about the DeathContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onDeath(Consumer<ContextUtils.DeathContext> consumer) {
         onDeath = consumer;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for dropping custom death loot when the entity dies")
+    @Info(value = """
+            Sets a callback function to be executed when the entity drops custom loot upon death.
+            The provided Consumer accepts a {@link ContextUtils.EntityLootContext} parameter,
+            representing the context of the entity's death and loot dropping.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.dropCustomDeathLoot(context => {
+                // Define custom logic for handling the entity dropping custom loot upon death
+                // Use information about the EntityLootContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> dropCustomDeathLoot(Consumer<ContextUtils.EntityLootContext> consumer) {
         dropCustomDeathLoot = consumer;
         return this;
     }
 
 
-    @Info(value = "Sets the fall sounds for the entity")
-    public BaseLivingEntityBuilder<T> fallSounds(ResourceLocation smallFallSound, ResourceLocation largeFallSound) {
-        this.smallFallSound = smallFallSound;
-        this.largeFallSound = largeFallSound;
+    @Info(value = """
+            Sets the sound resource locations for small and large falls of the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.fallSounds("minecraft:entity.generic.small_fall",
+                                     "minecraft:entity.generic.large_fall");
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> fallSounds(String smallFallSound, String largeFallSound) {
+        this.smallFallSound = new ResourceLocation(smallFallSound);
+        this.largeFallSound = new ResourceLocation(largeFallSound);
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for determining the eating sound for the entity")
-    public BaseLivingEntityBuilder<T> eatingSound(ResourceLocation function) {
-        eatingSound = function;
+    @Info(value = """
+            Sets the sound resource location for the entity's eating sound.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.eatingSound("minecraft:entity.zombie.ambient");
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> eatingSound(String soundResourceLocation) {
+        eatingSound = new ResourceLocation(soundResourceLocation);
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for determining if the entity is on a climbable surface")
+    @Info(value = """
+            Sets a predicate function to determine whether the entity is on a climbable surface.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity that may be checked for being on a climbable surface.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onClimbable(entity => {
+                // Define conditions to check if the entity is on a climbable surface
+                // Use information about the LivingEntity provided by the context.
+                return // Some boolean condition indicating if the entity is on a climbable surface;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onClimbable(Predicate<LivingEntity> predicate) {
         onClimbable = predicate;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for determining if the entity can breathe underwater")
-    public BaseLivingEntityBuilder<T> canBreatheUnderwater(boolean b) {
-        canBreatheUnderwater = b;
+    @Info(value = """
+            Sets whether the entity can breathe underwater.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canBreatheUnderwater(true);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> canBreatheUnderwater(boolean canBreatheUnderwater) {
+        this.canBreatheUnderwater = canBreatheUnderwater;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for causing fall damage")
+
+    @Info(value = """
+            Sets a callback function to be executed when the living entity falls and takes damage.
+            The provided Consumer accepts a {@link ContextUtils.EntityFallDamageContext} parameter,
+            representing the context of the entity falling and taking fall damage.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onLivingFall(context => {
+                // Define custom logic for handling when the living entity falls and takes damage
+                // Use information about the EntityFallDamageContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onLivingFall(Consumer<ContextUtils.EntityFallDamageContext> c) {
         onLivingFall = c;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic to fire when the entity sprints")
+    @Info(value = """
+            Sets a callback function to be executed when the entity starts sprinting.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that has started sprinting.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onSprint(entity => {
+                // Define custom logic for handling when the entity starts sprinting
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onSprint(Consumer<LivingEntity> consumer) {
         onSprint = consumer;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for determining the entity's jump boost power")
-    public BaseLivingEntityBuilder<T> jumpBoostPower(DoubleSupplier supplier) {
-        jumpBoostPower = supplier;
+    @Info(value = """
+            Sets the jump boost power for the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.jumpBoostPower(2.5);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> jumpBoostPower(double jumpBoostPower) {
+        this.jumpBoostPower = jumpBoostPower;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for determining if the entity can stand on a specific fluid")
+
+    @Info(value = """
+            Sets a predicate function to determine whether the entity can stand on a fluid.
+            The provided Predicate accepts a {@link ContextUtils.EntityFluidStateContext} parameter,
+            representing the context of the entity potentially standing on a fluid.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canStandOnFluid(context => {
+                // Define conditions for the entity to be able to stand on a fluid
+                // Use information about the EntityFluidStateContext provided by the context.
+                return // Some boolean condition indicating if the entity can stand on the fluid;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> canStandOnFluid(Predicate<ContextUtils.EntityFluidStateContext> predicate) {
         canStandOnFluid = predicate;
         return this;
     }
 
 
-    @Info(value = "Sets the custom speed for the entity")
-    public BaseLivingEntityBuilder<T> setSpeed(Consumer<Float> consumer) {
-        setSpeed = consumer;
-        return this;
-    }
-
-
-    @Info(value = "Sets the custom logic for determining if the entity is sensitive to water")
+    @Info(value = """
+            Sets a predicate function to determine whether the entity is sensitive to water.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity that may be checked for sensitivity to water.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isSensitiveToWater(entity => {
+                // Define conditions to check if the entity is sensitive to water
+                // Use information about the LivingEntity provided by the context.
+                return // Some boolean condition indicating if the entity is sensitive to water;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> isSensitiveToWater(Predicate<LivingEntity> predicate) {
         isSensitiveToWater = predicate;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for when the entity stops riding")
+    @Info(value = """
+            Sets a callback function to be executed when the entity stops riding.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that has stopped being ridden.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onStopRiding(entity => {
+                // Define custom logic for handling when the entity stops being ridden
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onStopRiding(Consumer<LivingEntity> callback) {
         onStopRiding = callback;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for when the entity is updated while riding")
+
+    @Info(value = """
+            Sets a callback function to be executed during each tick when the entity is being ridden.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that is being ridden.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.rideTick(entity => {
+                // Define custom logic for handling each tick when the entity is being ridden
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> rideTick(Consumer<LivingEntity> callback) {
         rideTick = callback;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for when the entity picks up an item")
+    @Info(value = """
+            Sets a callback function to be executed when the entity picks up an item.
+            The provided Consumer accepts a {@link ContextUtils.EntityItemEntityContext} parameter,
+            representing the context of the entity picking up an item with another entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onItemPickup(context => {
+                // Define custom logic for handling the entity picking up an item
+                // Use information about the EntityItemEntityContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onItemPickup(Consumer<ContextUtils.EntityItemEntityContext> consumer) {
         onItemPickup = consumer;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for determining if the entity has line of sight to another entity")
+    @Info(value = """
+            Sets a predicate function to determine whether the entity has line of sight to another entity.
+            The provided Predicate accepts a {@link Entity} parameter,
+            representing the entity to check for line of sight.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.hasLineOfSight(targetEntity => {
+                // Define conditions to check if the entity has line of sight to the target entity
+                // Use information about the Entity provided by the context.
+                return // Some boolean condition indicating if there is line of sight;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> hasLineOfSight(Predicate<Entity> predicate) {
         hasLineOfSight = predicate;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for setting the entity's absorption amount")
+    @Info(value = """
+            Sets a callback function to define the absorption amount for the entity.
+            The provided Consumer accepts a {@link ContextUtils.EntityFloatContext} parameter,
+            representing the context of setting the absorption amount for the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setAbsorptionAmount(context => {
+                // Define custom logic for setting the absorption amount for the entity
+                // Use information about the EntityFloatContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> setAbsorptionAmount(Consumer<ContextUtils.EntityFloatContext> consumer) {
         setAbsorptionAmount = consumer;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for when the entity enters combat")
-    public BaseLivingEntityBuilder<T> onEnterCombat(Consumer<LivingEntity> runnable) {
-        onEnterCombat = runnable;
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity enters combat.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that has entered combat.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onEnterCombat(entity => {
+                // Define custom logic for handling the entity entering combat
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> onEnterCombat(Consumer<LivingEntity> c) {
+        onEnterCombat = c;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for when the entity leaves combat")
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity leaves combat.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that has left combat.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onLeaveCombat(entity => {
+                // Define custom logic for handling the entity leaving combat
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onLeaveCombat(Consumer<LivingEntity> runnable) {
         onLeaveCombat = runnable;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for determining if the entity is affected by potions")
+    @Info(value = """
+            Sets a predicate function to determine whether the entity is affected by potions.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity that may be checked for its susceptibility to potions.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isAffectedByPotions(entity => {
+                // Define conditions to check if the entity is affected by potions
+                // Use information about the LivingEntity provided by the context.
+                return // Some boolean condition indicating if the entity is affected by potions;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> isAffectedByPotions(Predicate<LivingEntity> predicate) {
         isAffectedByPotions = predicate;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for determining if the entity is attackable")
+
+    @Info(value = """
+            Sets a predicate function to determine whether the entity is attackable.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity that may be checked for its attackability.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isAttackable(entity => {
+                // Define conditions to check if the entity is attackable
+                // Use information about the LivingEntity provided by the context.
+                return // Some boolean condition indicating if the entity is attackable;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> isAttackable(Predicate<LivingEntity> predicate) {
         isAttackable = predicate;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for determining if the entity can take a specific item")
+    @Info(value = """
+            Sets a predicate function to determine whether the entity can take an item.
+            The provided Predicate accepts a {@link ContextUtils.EntityItemLevelContext} parameter,
+            representing the context of the entity potentially taking an item.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canTakeItem(context => {
+                // Define conditions for the entity to be able to take an item
+                // Use information about the EntityItemLevelContext provided by the context.
+                return // Some boolean condition indicating if the entity can take the item;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> canTakeItem(Predicate<ContextUtils.EntityItemLevelContext> predicate) {
         canTakeItem = predicate;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for determining if the entity is sleeping")
+    @Info(value = """
+            Sets a predicate function to determine whether the entity is currently sleeping.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity that may be checked for its sleeping state.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isSleeping(entity => {
+                // Define conditions to check if the entity is currently sleeping
+                // Use information about the LivingEntity provided by the context.
+                return // Some boolean condition indicating if the entity is sleeping;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> isSleeping(Predicate<LivingEntity> supplier) {
         isSleeping = supplier;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for starting sleeping at a specific position")
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity starts sleeping.
+            The provided Consumer accepts a {@link ContextUtils.EntityBlockPosContext} parameter,
+            representing the context of the entity starting to sleep at a specific block position.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onStartSleeping(context => {
+                // Define custom logic for handling the entity starting to sleep
+                // Use information about the EntityBlockPosContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onStartSleeping(Consumer<ContextUtils.EntityBlockPosContext> consumer) {
         onStartSleeping = consumer;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for stopping sleeping")
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity stops sleeping.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that has stopped sleeping.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onStopSleeping(entity => {
+                // Define custom logic for handling the entity stopping sleeping
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onStopSleeping(Consumer<LivingEntity> runnable) {
         onStopSleeping = runnable;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for eating an item in a level")
+    @Info(value = """
+            Sets a callback function to be executed when the entity performs an eating action.
+            The provided Consumer accepts a {@link ContextUtils.EntityItemLevelContext} parameter,
+            representing the context of the entity's interaction with a specific item during eating.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.eat(context => {
+                // Custom logic to handle the entity's eating action
+                // Access information about the item being consumed using the provided context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> eat(Consumer<ContextUtils.EntityItemLevelContext> function) {
         eat = function;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for determining if the rider should face forward")
+
+    @Info(value = """
+            Sets a predicate function to determine whether the rider of the entity should face forward.
+            The provided Predicate accepts a {@link ContextUtils.PlayerEntityContext} parameter,
+            representing the context of the player entity riding the main entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.shouldRiderFaceForward(context => {
+                // Define the conditions for the rider to face forward
+                // Use information about the player entity provided by the context.
+                return someBoolean;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> shouldRiderFaceForward(Predicate<ContextUtils.PlayerEntityContext> predicate) {
         shouldRiderFaceForward = predicate;
         return this;
     }
 
 
-    @Info(value = "Sets the custom logic for determining if the entity can freeze")
+    @Info(value = """
+            Sets a predicate function to determine whether the entity can undergo freezing.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity that may be subjected to freezing.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canFreezePredicate(entity => {
+                // Define the conditions for the entity to be able to freeze
+                // Use information about the LivingEntity provided by the context.
+                const someBoolean = // Some boolean condition;
+                return someBoolean;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> canFreezePredicate(Predicate<LivingEntity> predicate) {
         canFreeze = predicate;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for determining if the entity is currently glowing")
+
+    @Info(value = """
+            Sets a predicate function to determine whether the entity is currently glowing.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity that may be checked for its glowing state.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isCurrentlyGlowing(entity => {
+                // Define the conditions to check if the entity is currently glowing
+                // Use information about the LivingEntity provided by the context.
+                const isGlowing = // Some boolean condition to check if the entity is glowing;
+                return isGlowing;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> isCurrentlyGlowing(Predicate<LivingEntity> predicate) {
         isCurrentlyGlowing = predicate;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for determining if the entity can disable a shield")
+
+    @Info(value = """
+            Sets a predicate function to determine whether the entity can disable its shield.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity that may be checked for the ability to disable its shield.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canDisableShield(entity => {
+                // Define the conditions to check if the entity can disable its shield
+                // Use information about the LivingEntity provided by the context.
+                const canDisable = // Some boolean condition to check if the entity can disable its shield;
+                return canDisable;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> canDisableShield(Predicate<LivingEntity> predicate) {
         canDisableShield = predicate;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for living entity interaction")
+    @Info(value = """
+            Sets a function to handle the interaction with the entity.
+            The provided Function accepts a {@link ContextUtils.MobInteractContext} parameter,
+            representing the context of the interaction, and returns a nullable {@link InteractionResult}.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onInteract(context => {
+                // Define custom logic for the interaction with the entity
+                // Use information about the MobInteractContext provided by the context.
+                // Return an InteractionResult based on the interaction outcome.
+                return // Some InteractionResult based on the interaction logic;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onInteract(Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> f) {
         onInteract = f;
         return this;
     }
 
-    @Info(value = "Sets the custom logic for how far a mob falls before taking damage")
-    public BaseLivingEntityBuilder<T> getMaxFallDistance(IntSupplier i) {
-        getMaxFallDistance = i;
+
+    @Info(value = """
+            Sets the minimum fall distance for the entity before taking damage.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setMaxFallDistance(3);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> setMaxFallDistance(int maxFallDistance) {
+        setMaxFallDistance = maxFallDistance;
         return this;
     }
 
 
-    @Info(value = "Sets the custom onClientRemoval behavior")
+    @Info(value = """
+            Sets a callback function to be executed when the entity is removed on the client side.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that is being removed on the client side.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onClientRemoval(entity => {
+                // Define custom logic for handling the removal of the entity on the client side
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onClientRemoval(Consumer<LivingEntity> consumer) {
         onClientRemoval = consumer;
         return this;
     }
 
 
-    @Info(value = "Sets the custom lavaHurt behavior")
+    @Info(value = """
+            Sets a callback function to be executed when the entity is hurt by lava.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that is affected by lava.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.lavaHurt(entity => {
+                // Define custom logic for handling the entity being hurt by lava
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> lavaHurt(Consumer<LivingEntity> consumer) {
         lavaHurt = consumer;
         return this;
     }
 
-    @Info(value = "Sets the custom behavior for entity flapping actions")
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity performs a flap action.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that is flapping.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onFlap(entity => {
+                // Define custom logic for handling the entity's flap action
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onFlap(Consumer<LivingEntity> consumer) {
         onFlap = consumer;
         return this;
     }
 
-    @Info(value = "Sets the custom behavior for determining if the entity dampens vibrations")
+
+    @Info(value = "Sets a boolean for if the entity dampens vibrations")
     public BaseLivingEntityBuilder<T> dampensVibrations(BooleanSupplier supplier) {
         dampensVibrations = supplier;
         return this;
     }
 
-    @Info(value = "Sets the custom behavior for handling player touch events")
+    @Info(value = """
+            Sets a callback function to be executed when a player interacts with the entity.
+            The provided Consumer accepts a {@link ContextUtils.PlayerEntityContext} parameter,
+            representing the context of the player's interaction with the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.playerTouch(context => {
+                // Define custom logic for handling player interaction with the entity
+                // Use information about the PlayerEntityContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> playerTouch(Consumer<ContextUtils.PlayerEntityContext> consumer) {
         playerTouch = consumer;
         return this;
     }
 
-    @Info(value = "Sets the custom behavior for picking entity hit results")
+
+    @Info(value = """
+            Sets a function to handle the picking or selection of the entity in the game world.
+            The provided Function accepts a {@link ClipContext} parameter and returns a {@link HitResult},
+            representing the result of the picking operation.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.pick(context => {
+                // Define custom logic for picking or selecting the entity
+                // Use information about the ClipContext provided by the context.
+                // Return a HitResult indicating the result of the picking operation.
+                return // Some HitResult based on the picking logic;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> pick(Function<ClipContext, HitResult> function) {
         pick = function;
         return this;
     }
 
-    @Info(value = "Sets the custom behavior for determining if the vehicle health should be shown")
+
+    @Info(value = "Sets a boolean for determining if the vehicle health should be shown")
     public BaseLivingEntityBuilder<T> showVehicleHealth(BooleanSupplier supplier) {
         showVehicleHealth = supplier;
         return this;
     }
 
 
-    @Info(value = "Sets the custom behavior for when the entity is hit by lightning")
+    @Info(value = """
+            Sets a callback function to be executed when the entity is hit by thunder.
+            The provided Consumer accepts a {@link ContextUtils.ThunderHitContext} parameter,
+            representing the context of the entity being hit by thunder.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.thunderHit(context => {
+                // Define custom logic for handling the entity being hit by thunder
+                // Use information about the ThunderHitContext provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> thunderHit(Consumer<ContextUtils.ThunderHitContext> consumer) {
         thunderHit = consumer;
         return this;
     }
 
 
-    @Info(value = "Sets the custom condition for whether the entity is invulnerable to a specific damage source")
+    @Info(value = """
+            Sets a predicate function to determine whether the entity is invulnerable to a specific type of damage.
+            The provided Predicate accepts a {@link ContextUtils.DamageContext} parameter,
+            representing the context of the damage, and returns a boolean indicating invulnerability.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isInvulnerableTo(context => {
+                // Define conditions for the entity to be invulnerable to the specific type of damage
+                // Use information about the DamageContext provided by the context.
+                return // Some boolean condition indicating invulnerability to the damage type;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> isInvulnerableTo(Predicate<ContextUtils.DamageContext> predicate) {
         isInvulnerableTo = predicate;
         return this;
     }
 
 
-    @Info(value = "Sets whether the entity can change dimensions" +
-            "Must return boolean")
+    @Info(value = """
+            Sets a predicate function to determine whether the entity can change dimensions.
+            The provided Predicate accepts a {@link LivingEntity} parameter,
+            representing the entity that may attempt to change dimensions.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canChangeDimensions(entity => {
+                // Define the conditions for the entity to be able to change dimensions
+                // Use information about the LivingEntity provided by the context.
+                return // Some boolean condition indicating if the entity can change dimensions;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> canChangeDimensions(Predicate<LivingEntity> supplier) {
         canChangeDimensions = supplier;
         return this;
     }
 
 
-    @Info(value = "Sets the custom condition for whether the entity may interact with the specified block position" +
-            "Must return a boolean")
+    @Info(value = """
+            Sets a predicate function to determine whether the entity may interact with something.
+            The provided Predicate accepts a {@link ContextUtils.MayInteractContext} parameter,
+            representing the context of the potential interaction, and returns a boolean.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.mayInteract(context => {
+                // Define conditions for the entity to be allowed to interact
+                // Use information about the MayInteractContext provided by the context.
+                return // Some boolean condition indicating if the entity may interact;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> mayInteract(Predicate<ContextUtils.MayInteractContext> predicate) {
         mayInteract = predicate;
         return this;
     }
 
-    @Info(value = "Sets the custom condition for whether the entity can trample the specified block state at the given position with the given fall distance" +
-            "Must return a boolean")
+
+    @Info(value = """
+            Sets a predicate function to determine whether the entity can trample or step on something.
+            The provided Predicate accepts a {@link ContextUtils.CanTrampleContext} parameter,
+            representing the context of the potential trampling action, and returns a boolean.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canTrample(context => {
+                // Define conditions for the entity to be allowed to trample
+                // Use information about the CanTrampleContext provided by the context.
+                return // Some boolean condition indicating if the entity can trample;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> canTrample(Predicate<ContextUtils.CanTrampleContext> predicate) {
         canTrample = predicate;
         return this;
     }
 
-    @Info(value = "Sets the custom behavior for when the entity is removed from the world")
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity is removed from the world.
+            The provided Consumer accepts a {@link LivingEntity} parameter,
+            representing the entity that is being removed from the world.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onRemovedFromWorld(entity => {
+                // Define custom logic for handling the removal of the entity from the world
+                // Use information about the LivingEntity provided by the context.
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> onRemovedFromWorld(Consumer<LivingEntity> consumer) {
         onRemovedFromWorld = consumer;
         return this;
     }
+
 
     //STUFF
     @Info(value = "Sets the spawn placement of the entity type", params = {
@@ -1056,16 +2123,33 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = "Adds a new AnimationController to the entity", params = {
-            @Param(name = "name", value = "The name of the controller"),
-            @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
-            @Param(name = "predicate", value = "The predicate for the controller, determines if an animation should continue or not")
-    })
+    @Info(value = """
+            Adds an animation controller to the entity with the specified parameters.
+                        
+            @param name The name of the animation controller.
+            @param translationTicksLength The length of translation ticks for the animation.
+            @param predicate The animation predicate defining the conditions for the animation to be played.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.addAnimationController('exampleController', 20, entity => {
+                        
+                // Define conditions for the animation to be played based on the entity.
+                 if (event.entity.hurtTime > 0) {
+                            event.thenLoop('spawn');
+                        } else {
+                            event.thenPlayAndHold('idle');
+                        }
+                    return true // Some boolean condition indicating if the animation should be played;
+            });
+            ```
+            """)
     public BaseLivingEntityBuilder<T> addAnimationController(String name, int translationTicksLength, IAnimationPredicateJS<T> predicate) {
-        return addAnimationController(name, translationTicksLength, EasingType.LINEAR, predicate, null, null, null);
+        return addKeyAnimationController(name, translationTicksLength, EasingType.LINEAR, predicate, null, null, null);
     }
 
-    @Info(value = "Adds a new AnimationController to the entity, with the ability to specify the easing type and add event listeners", params = {
+
+    @Info(value = "Adds a new AnimationController to the entity, with the ability to add event listeners", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
             @Param(name = "easingType", value = "The easing type used by the animation controller"),
@@ -1074,7 +2158,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             @Param(name = "particleListener", value = "A particle listener, used to execute actions when the json requests a particle. May be null"),
             @Param(name = "instructionListener", value = "A custom instruction listener, used to execute actions based on arbitrary instructions provided by the json. May be null")
     })
-    public BaseLivingEntityBuilder<T> addAnimationController(
+    public BaseLivingEntityBuilder<T> addKeyAnimationController(
             String name,
             int translationTicksLength,
             EasingType easingType,
@@ -1087,8 +2171,43 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    public BaseLivingEntityBuilder<T> setRenderType(RenderType type) {
-        renderType = type;
+    @Info(value = """
+            Sets the render type for the entity.
+                        
+            @param type The render type to be set. Acceptable values are:
+                         - "solid
+                         - "cutout"
+                         - "translucent"
+                         - RenderType.SOLID
+                         - RenderType.CUTOUT
+                         - RenderType.TRANSLUCENT
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setRenderType("translucent");
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> setRenderType(Object type) {
+        if (type instanceof RenderType) {
+            renderType = (RenderType) type;
+        } else if (type instanceof String) {
+            String typeString = (String) type;
+            switch (typeString.toLowerCase()) {
+                case "solid":
+                    renderType = RenderType.SOLID;
+                    break;
+                case "cutout":
+                    renderType = RenderType.CUTOUT;
+                    break;
+                case "translucent":
+                    renderType = RenderType.TRANSLUCENT;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid render type string: " + typeString);
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid render type: " + type);
+        }
         return this;
     }
 
@@ -1097,6 +2216,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
      * <strong>Do not</strong> override unless you are creating a custom entity type builder<br><br>
      * See: {@link #factory()}
      */
+    @HideFromJS
     @Override
     public EntityType<T> createObject() {
         return new LivingEntityTypeBuilderJS<>(this).get();
@@ -1125,6 +2245,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @HideFromJS
     abstract public AttributeSupplier.Builder getAttributeBuilder();
 
+    @HideFromJS
     @Override
     public RegistryInfo getRegistryType() {
         return RegistryInfo.ENTITY_TYPE;
@@ -1183,7 +2304,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                     try {
                         if (animationEventJS == null) return PlayState.STOP;
                     } catch (Exception e) {
-                        //throw new RuntimeException(e);
+                        ConsoleJS.STARTUP.error("Exception in IAnimationPredicateJS.toGecko()", e);
+                        return PlayState.STOP;
                     }
                     return test(animationEventJS) ? PlayState.CONTINUE : PlayState.STOP;
 
@@ -1283,10 +2405,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             return this;
         }
 
-        @Info(value = "Creates a new RawAnimation Instance")
-        public RawAnimation begin() {
-            return RawAnimation.begin();
-        }
 
         @Info(value = """
                 Returns any extra data that the event may have

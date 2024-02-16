@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -18,6 +19,7 @@ public class LivingEntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
 
     public EntityType<B> get() {
         var js = this.builder;
+
         var builder = EntityType.Builder.of(js.factory(), js.mobCategory);
         builder
                 .sized(js.width, js.height)

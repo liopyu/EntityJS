@@ -34,7 +34,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     //pathfinder mob
     public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
     //pathfinder mob
-    public transient BooleanSupplier shouldStayCloseToLeashHolder;
+    public transient Predicate<PathfinderMob> shouldStayCloseToLeashHolder;
     //pathfinder mob
     public transient double followLeashSpeed;
     //pathfinder mob
@@ -42,7 +42,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
 
 
     public transient SpawnEggItemBuilder eggItem;
-    public transient Map<BlockPathTypes, Float> setPathfindingMalus;
     public transient Function<ContextUtils.EntityBlockPathTypeContext, Boolean> canCutCorner;
 
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
@@ -50,9 +49,9 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate;
     public transient Consumer<LivingEntity> ate;
     public transient ResourceLocation getAmbientSound;
-    public transient Ingredient canHoldItem;
+    public transient Predicate<ContextUtils.EntityItemStackContext> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
-    public transient Boolean canPickUpLoot;
+    public transient Predicate<PathfinderMob> canPickUpLoot;
     public transient Boolean isPersistenceRequired;
 
     public transient Function<PathfinderMob, Double> meleeAttackRangeSqr;
@@ -80,18 +79,18 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         }
     }
 
-
     @Info(value = """
-            Sets the custom behavior for the pathfinding malus of a specific node type for the mob in the builder.
-            """)
-    public MobBuilder<T> setPathfindingMalus(Map<BlockPathTypes, Float> setPathfindingMalus) {
-        this.setPathfindingMalus = setPathfindingMalus;
-        return this;
-    }
-
-    @Info(value = """
-            Sets the aiStep property in the builder.
-            "Defaults to super-AgeableMob.
+            Sets a callback function to be executed during the AI step of the entity.
+                        
+            @param aiStep A Consumer accepting a PathfinderMob parameter, defining the behavior
+                          to be executed during the AI step.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.aiStep(entity => {
+                // Custom logic to be executed during the AI step of the entity.
+            });
+            ```
             """)
     public MobBuilder<T> aiStep(Consumer<PathfinderMob> aiStep) {
         this.aiStep = aiStep;
@@ -100,89 +99,226 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
 
 
     @Info(value = """
-            Sets the custom function for determining if the entity can cut corners for a specific path type for the mob in the builder.
+            Sets a function to determine if the entity can cut corners when navigating paths.
+                        
+            @param canCutCorner A Function accepting a ContextUtils.EntityBlockPathTypeContext parameter,
+                                defining the logic to determine if the entity can cut corners.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.canCutCorner(context => {
+                // Custom logic to determine if the entity can cut corners based on the provided context.
+                // Return true if the entity can cut corners, false otherwise.
+            });
+            ```
             """)
     public MobBuilder<T> canCutCorner(Function<ContextUtils.EntityBlockPathTypeContext, Boolean> canCutCorner) {
         this.canCutCorner = canCutCorner;
         return this;
     }
 
+
+    @Info(value = """
+            Sets whether the entity can jump.
+                        
+            @param canJump A boolean indicating whether the entity can jump.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.canJump(true);
+            ```
+            """)
     public MobBuilder<T> canJump(boolean canJump) {
         this.canJump = canJump;
         return this;
     }
 
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity jumps.
+                        
+            @param onJump A Consumer accepting a PathfinderMob parameter,
+                          defining the behavior to be executed when the entity jumps.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.onJump(entity -> {
+                // Custom logic to handle the entity's jump action
+                // Access information about the jumping entity using the provided context.
+            });
+            ```
+            """)
     public MobBuilder<T> onJump(Consumer<PathfinderMob> onJump) {
         this.onJump = onJump;
         return this;
     }
 
+
     @Info(value = """
-            Sets the custom consumer for the target of the entity for the mob in the builder.
+            Sets a callback function to be executed when the entity's target changes.
+                        
+            @param setTarget A Consumer accepting a ContextUtils.TargetChangeContext parameter,
+                             defining the behavior to be executed when the entity's target changes.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.onTargetChanged(context -> {
+                // Custom logic to handle the entity's target change
+                // Access information about the target change using the provided context.
+            });
+            ```
             """)
     public MobBuilder<T> onTargetChanged(Consumer<ContextUtils.TargetChangeContext> setTarget) {
         this.onTargetChanged = setTarget;
         return this;
     }
 
+
     @Info(value = """
-            List an array of ProjectileWeaponItems that the mob in the builder can fire.
+            Sets the ingredient required for the entity to fire a projectile weapon.
+                        
+            @param canFireProjectileWeapon An Ingredient representing the required item for firing a projectile weapon.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.canFireProjectileWeapon([
+            'minecraft:bow',
+            'minecraft:crossbow'
+            ]);
+            ```
             """)
     public MobBuilder<T> canFireProjectileWeapon(Ingredient canFireProjectileWeapon) {
         this.canFireProjectileWeapon = canFireProjectileWeapon;
         return this;
     }
 
+
     @Info(value = """
-            Sets the custom predicate for determining if the entity can fire a projectile weapon for the mob in the builder.
+            Sets a predicate to determine whether the entity can fire a projectile weapon.
+                        
+            @param canFireProjectileWeaponPredicate A Predicate accepting a
+                       ContextUtils.EntityProjectileWeaponContext parameter,
+                       defining the condition under which the entity can fire a projectile weapon.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.canFireProjectileWeaponPredicate(context -> {
+                // Custom logic to determine whether the entity can fire a projectile weapon
+                // Access information about the entity and the projectile weapon using the provided context.
+                return true; // Replace with your specific condition.
+            });
+            ```
             """)
     public MobBuilder<T> canFireProjectileWeaponPredicate(Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate) {
         this.canFireProjectileWeaponPredicate = canFireProjectileWeaponPredicate;
         return this;
     }
 
+
     @Info(value = """
-            Sets the custom runnable representing the eating behavior for the mob in the builder.
+            Sets a callback function to be executed when the entity performs an eating action.
+                        
+            @param ate A Consumer accepting a LivingEntity parameter,
+                       defining the behavior to be executed when the entity eats.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.ate(entity -> {
+                // Custom logic to handle the entity's eating action
+                // Access information about the entity using the provided parameter.
+            });
+            ```
             """)
     public MobBuilder<T> ate(Consumer<LivingEntity> ate) {
         this.ate = ate;
         return this;
     }
 
+
     @Info(value = """
-            Sets the custom supplier for providing the ambient sound for the mob in the builder.
+            Sets the ambient sound for the entity using a string representation.
+                        
+            @param ambientSoundString A string representing the ambient sound.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.getAmbientSound("minecraft:entity.zombie.ambient");
+            ```
+                        
+            In this example, the string "minecraft:entity.zombie.ambient" represents the ambient sound for a zombie entity.
+            Make sure to replace it with the correct resource location for your specific mod or entity.
             """)
-    public MobBuilder<T> getAmbientSound(ResourceLocation getAmbientSound) {
-        this.getAmbientSound = getAmbientSound;
+    public MobBuilder<T> getAmbientSound(String ambientSoundString) {
+        this.getAmbientSound = new ResourceLocation(ambientSoundString);
         return this;
     }
 
+
     @Info(value = """
-            Sets the list of custom items or resource locations representing the items the entity can hold for the mob in the builder.
+            Sets the predicate to determine whether the entity can hold an item.
+                        
+            @param canHoldItem A Predicate accepting a {@link ContextUtils.EntityItemStackContext} parameter,
+                               defining the condition for the entity to hold an item.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.canHoldItem(context => {
+                // Custom logic to determine whether the entity can hold an item based on the provided context.
+                return someCondition;
+            });
+            ```
             """)
-    public MobBuilder<T> canHoldItem(Ingredient items) {
-        this.canHoldItem = items;
+    public MobBuilder<T> canHoldItem(Predicate<ContextUtils.EntityItemStackContext> canHoldItem) {
+        this.canHoldItem = canHoldItem;
         return this;
     }
 
+
     @Info(value = """
-            Sets whether the entity should despawn in peaceful mode for the mob in the builder.
+            Sets whether the entity should despawn in peaceful difficulty.
+                        
+            @param shouldDespawnInPeaceful A boolean indicating whether the entity should despawn in peaceful difficulty.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.shouldDespawnInPeaceful(true);
+            ```
             """)
     public MobBuilder<T> shouldDespawnInPeaceful(Boolean shouldDespawnInPeaceful) {
         this.shouldDespawnInPeaceful = shouldDespawnInPeaceful;
         return this;
     }
 
+
     @Info(value = """
-            Sets whether the entity can pick up loot for the mob in the builder.
+            Sets the predicate to determine whether the entity can pick up loot.
+                        
+            @param canPickUpLoot A Predicate accepting a {@link PathfinderMob} parameter,
+                                 defining the condition for the entity to pick up loot.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.canPickUpLoot(mob -> {
+                // Custom logic to determine whether the entity can pick up loot based on the provided mob.
+                return someCondition;
+            });
+            ```
             """)
-    public MobBuilder<T> canPickUpLoot(Boolean canPickUpLoot) {
+    public MobBuilder<T> canPickUpLoot(Predicate<PathfinderMob> canPickUpLoot) {
         this.canPickUpLoot = canPickUpLoot;
         return this;
     }
 
+
     @Info(value = """
-            Sets whether the entity's persistence is required for the mob in the builder.
+            Sets whether persistence is required for the entity.
+                        
+            @param isPersistenceRequired A boolean indicating whether persistence is required.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.isPersistenceRequired(true);
+            ```
             """)
     public MobBuilder<T> isPersistenceRequired(Boolean isPersistenceRequired) {
         this.isPersistenceRequired = isPersistenceRequired;
@@ -190,46 +326,101 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     }
 
 
-    @Info(value = "Sets the custom double representing the square of the melee attack range for the mob in the builder.")
+    @Info(value = """
+            Sets the function to determine the squared melee attack range for the entity.
+                        
+            @param meleeAttackRangeSqr A Function accepting a {@link PathfinderMob} parameter,
+                                      defining the squared melee attack range based on the entity's state.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.meleeAttackRangeSqr(mob -> {
+                // Custom logic to calculate the squared melee attack range based on the provided mob.
+                return someCalculatedValue;
+            });
+            ```
+            """)
     public MobBuilder<T> meleeAttackRangeSqr(Function<PathfinderMob, Double> meleeAttackRangeSqr) {
         this.meleeAttackRangeSqr = meleeAttackRangeSqr;
         return this;
     }
 
+
     @Info(value = """
-            Sets the tickLeash property in the builder.
-            "Defaults to null.
+            Sets the callback function to be executed when the entity ticks while leashed.
+                        
+            @param consumer A Consumer accepting a {@link ContextUtils.PlayerEntityContext} parameter,
+                            defining the behavior to be executed when the entity ticks while leashed.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.tickLeash(context -> {
+                // Custom logic to handle the entity's behavior while leashed.
+                // Access information about the player entity using the provided context.
+            });
+            ```
             """)
     public MobBuilder<T> tickLeash(Consumer<ContextUtils.PlayerEntityContext> consumer) {
         this.tickLeash = consumer;
         return this;
     }
 
+
     @Info(value = """
-            Sets the shouldStayCloseToLeashHolder property in the builder.
-            "Defaults to true for animals.
+            Sets the predicate to determine whether the entity should stay close to its leash holder.
+                        
+            @param predicate A Predicate accepting a {@link PathfinderMob} parameter,
+                             defining the condition for the entity to stay close to its leash holder.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.shouldStayCloseToLeashHolder(mob -> {
+                // Custom logic to determine whether the entity should stay close to its leash holder.
+                return someCondition;
+            });
+            ```
             """)
-    public MobBuilder<T> shouldStayCloseToLeashHolder(BooleanSupplier b) {
-        this.shouldStayCloseToLeashHolder = b;
+    public MobBuilder<T> shouldStayCloseToLeashHolder(Predicate<PathfinderMob> predicate) {
+        this.shouldStayCloseToLeashHolder = predicate;
         return this;
     }
 
+
     @Info(value = """
-            Sets the followLeashSpeed property in the builder.
-            "Defaults to null.
+            Sets the follow leash speed for the entity.
+                        
+            @param speed The follow leash speed.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.followLeashSpeed(1.5);
+            ```
             """)
-    public MobBuilder<T> followLeashSpeed(double supplier) {
-        this.followLeashSpeed = supplier;
+    public MobBuilder<T> followLeashSpeed(double speed) {
+        this.followLeashSpeed = speed;
         return this;
     }
 
+
     @Info(value = """
-            Sets the walkTargetValue property in the builder.
-            "Defaults to null.
+            Sets the walk target value function for the entity.
+                        
+            @param function A Function accepting a {@link ContextUtils.EntityBlockPosLevelContext} parameter,
+                            defining the walk target value based on the entity's interaction with a specific block.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.walkTargetValue(context -> {
+                // Custom logic to calculate the walk target value based on the provided context.
+                // Access information about the block position and level using the provided context.
+                return someCalculatedValue;
+            });
+            ```
             """)
     public MobBuilder<T> walkTargetValue(Function<ContextUtils.EntityBlockPosLevelContext, Float> function) {
         this.walkTargetValue = function;
         return this;
     }
+
 
 }

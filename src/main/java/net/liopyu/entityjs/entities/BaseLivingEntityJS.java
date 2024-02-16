@@ -195,12 +195,12 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected float getBlockJumpFactor() {
-        return builder.getBlockJumpFactor;
+        return builder.setBlockJumpFactor;
     }
 
     @Override
     protected float getJumpPower() {
-        return builder.getJumpPower;
+        return builder.setJumpPower;
     }
 
     @Override
@@ -227,8 +227,12 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
 
     @Override
-    public int calculateFallDamage(float fallDistance, float fallHeight) {
-        return builder.calculateFallDamage == null ? super.calculateFallDamage(fallDistance, fallHeight) : builder.calculateFallDamage.apply(fallDistance, fallHeight);
+    public int calculateFallDamage(float fallDistance, float pDamageMultiplier) {
+        final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(fallDistance, pDamageMultiplier, this);
+        if (builder.calculateFallDamage != null) {
+            return builder.calculateFallDamage.apply(context);
+        }
+        return super.calculateFallDamage(fallDistance, pDamageMultiplier);
     }
 
     @Override
@@ -296,21 +300,17 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected boolean repositionEntityAfterLoad() {
-        if (builder.repositionEntityAfterLoad != null) {
-            return builder.repositionEntityAfterLoad.getAsBoolean();
-        } else {
-            return super.repositionEntityAfterLoad();
-        }
+        return builder.repositionEntityAfterLoad;
     }
 
     @Override
     protected float getSoundVolume() {
-        return builder.getSoundVolume;
+        return builder.setSoundVolume;
     }
 
     @Override
     protected float getWaterSlowDown() {
-        return builder.getWaterSlowDown;
+        return builder.setWaterSlowDown;
     }
 
     @Override
@@ -435,8 +435,9 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean canBeAffected(@NotNull MobEffectInstance effectInstance) {
-        if (builder.canBeAffectedPredicate != null) {
-            return builder.canBeAffectedPredicate.test(effectInstance);
+        final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
+        if (builder.canBeAffected != null) {
+            return builder.canBeAffected.test(context);
         }
         return super.canBeAffected(effectInstance);
     }
@@ -572,11 +573,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public double getJumpBoostPower() {
-        if (builder.jumpBoostPower != null) {
-            return builder.jumpBoostPower.getAsDouble() + super.getJumpBoostPower();
-        } else {
-            return super.getJumpBoostPower();
-        }
+        return builder.jumpBoostPower + super.getJumpBoostPower();
     }
 
     @Override
@@ -586,16 +583,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
             return builder.canStandOnFluid.test(context);
         } else {
             return super.canStandOnFluid(fluidState);
-        }
-    }
-
-
-    @Override
-    public void setSpeed(float speed) {
-        if (builder.setSpeed != null) {
-            builder.setSpeed.accept(speed);
-        } else {
-            super.setSpeed(speed);
         }
     }
 
@@ -938,9 +925,15 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public int getMaxFallDistance() {
-        if (builder.getMaxFallDistance != null) {
-            return builder.getMaxFallDistance.getAsInt();
-        }
-        return super.getMaxFallDistance();
+        return builder.setMaxFallDistance;
+    }
+
+    @Override
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+
+        if (builder.lerpTo != null) {
+            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
+            builder.lerpTo.accept(context);
+        } else super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
     }
 }

@@ -156,18 +156,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         return InteractionResult.PASS;
     }
 
-    @Override
-    public void setPathfindingMalus(BlockPathTypes nodeType, float malus) {
-        if (builder == null) {
-            super.setPathfindingMalus(nodeType, malus);
-            return;
-        }
-        if (builder.setPathfindingMalus != null) {
-            builder.setPathfindingMalus.put(nodeType, malus);
-        } else {
-            super.setPathfindingMalus(nodeType, malus);
-        }
-    }
 
     @Override
     public float getPathfindingMalus(BlockPathTypes pNodeType) {
@@ -241,7 +229,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     public boolean canHoldItem(ItemStack stack) {
         if (builder.canHoldItem != null) {
-            return builder.canHoldItem.test(stack);
+            final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(stack, this);
+            return builder.canHoldItem.test(context);
         } else {
             return super.canHoldItem(stack);
         }
@@ -379,8 +368,12 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
 
     @Override
-    public int calculateFallDamage(float fallDistance, float fallHeight) {
-        return builder.calculateFallDamage == null ? super.calculateFallDamage(fallDistance, fallHeight) : builder.calculateFallDamage.apply(fallDistance, fallHeight);
+    public int calculateFallDamage(float fallDistance, float pDamageMultiplier) {
+        final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(fallDistance, pDamageMultiplier, this);
+        if (builder.calculateFallDamage != null) {
+            return builder.calculateFallDamage.apply(context);
+        }
+        return super.calculateFallDamage(fallDistance, pDamageMultiplier);
     }
 
     @Override
@@ -440,11 +433,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     protected boolean repositionEntityAfterLoad() {
-        if (builder.repositionEntityAfterLoad != null) {
-            return builder.repositionEntityAfterLoad.getAsBoolean();
-        } else {
-            return super.repositionEntityAfterLoad();
-        }
+        return builder.repositionEntityAfterLoad;
     }
 
 
@@ -553,8 +542,9 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public boolean canBeAffected(@NotNull MobEffectInstance effectInstance) {
-        if (builder.canBeAffectedPredicate != null) {
-            return builder.canBeAffectedPredicate.test(effectInstance);
+        final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
+        if (builder.canBeAffected != null) {
+            return builder.canBeAffected.test(context);
         }
         return super.canBeAffected(effectInstance);
     }
@@ -695,11 +685,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public double getJumpBoostPower() {
-        if (builder.jumpBoostPower != null) {
-            return builder.jumpBoostPower.getAsDouble() + super.getJumpBoostPower();
-        } else {
-            return super.getJumpBoostPower();
-        }
+        return builder.jumpBoostPower + super.getJumpBoostPower();
     }
 
     @Override
@@ -709,16 +695,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             return builder.canStandOnFluid.test(context);
         } else {
             return super.canStandOnFluid(fluidState);
-        }
-    }
-
-
-    @Override
-    public void setSpeed(float speed) {
-        if (builder.setSpeed != null) {
-            builder.setSpeed.accept(speed);
-        } else {
-            super.setSpeed(speed);
         }
     }
 
@@ -1043,9 +1019,54 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public int getMaxFallDistance() {
-        if (builder.getMaxFallDistance != null) {
-            return builder.getMaxFallDistance.getAsInt();
+        return builder.setMaxFallDistance;
+    }
+
+    @Override
+    protected float getSoundVolume() {
+        return builder.setSoundVolume;
+    }
+
+    @Override
+    protected boolean shouldStayCloseToLeashHolder() {
+        if (builder.shouldStayCloseToLeashHolder != null) {
+            return builder.shouldStayCloseToLeashHolder.test(this);
+        } else {
+            return super.shouldStayCloseToLeashHolder();
         }
-        return super.getMaxFallDistance();
+    }
+
+    @Override
+    protected void tickLeash() {
+        super.tickLeash();
+        if (builder.tickLeash != null) {
+            Player $$0 = (Player) this.getLeashHolder();
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, this);
+            builder.tickLeash.accept(context);
+        }
+    }
+
+    @Override
+    protected float getWaterSlowDown() {
+        return builder.setWaterSlowDown;
+    }
+
+    @Override
+    protected float getJumpPower() {
+        return builder.setJumpPower;
+    }
+
+    @Override
+    protected float getBlockJumpFactor() {
+        return builder.setBlockJumpFactor;
+    }
+
+    @Override
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+
+        if (builder.lerpTo != null) {
+            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
+            builder.lerpTo.accept(context);
+        } else super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
     }
 }
