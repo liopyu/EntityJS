@@ -23,25 +23,19 @@ import java.util.List;
 import java.util.function.*;
 
 public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile & IProjectileEntityJS> extends BaseEntityBuilder<T> {
-    public transient Function<T, ResourceLocation> getTextureLocation;
+    public transient Function<T, ResourceLocation> textureLocation;
     public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
-    public transient ResourceLocation setSoundEvent;
 
-    public transient Predicate<Double> shouldRenderAtSqrDistance;
-    public transient Consumer<Projectile> tick;
-    public transient BiConsumer<MoverType, Vec3> move;
 
     public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
 
     public transient Predicate<Entity> canHitEntity;
-    public transient Consumer<ContextUtils.ProjectilePlayerContext> playerTouch;
 
-    public transient BooleanSupplier isAttackable;
 
     public ProjectileEntityBuilder(ResourceLocation i) {
         super(i);
-        getTextureLocation = t -> t.getProjectileBuilder().newID("textures/entity/projectiles/", ".png");
+        textureLocation = t -> t.getProjectileBuilder().newID("textures/entity/projectiles/", ".png");
         thisList.add(this);
     }
 
@@ -50,70 +44,80 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
         return new EntityTypeBuilder<>(this).get();
     }
 
+
     @Info(value = """
-            Sets how the texture of the entity is determined, has access to the entity
-            to allow changing the texture based on info about the entity
+            Sets a function to determine the texture resource for the entity.
+            The provided Function accepts a parameter of type T (the entity),
+            allowing changing the texture based on information about the entity.
+            The default behavior returns <namespace>:textures/model/entity/<path>.png.
                         
-            Defaults to returning <namespace>:textures/entity/projectiles/<path>.png
+            Example usage:
+            ```javascript
+            entityBuilder.textureLocation(entity => {
+                // Define logic to determine the texture resource for the entity
+                // Use information about the entity provided by the context.
+                return // Some ResourceLocation representing the texture resource;
+            });
+            ```
             """)
-    public BaseEntityBuilder<T> getTextureLocation(Function<T, ResourceLocation> function) {
-        getTextureLocation = function;
+    public BaseEntityBuilder<T> textureLocation(Function<T, ResourceLocation> textureCallback) {
+        textureLocation = textureCallback;
         return this;
     }
 
-    public ProjectileEntityBuilder<T> setSoundEvent(ResourceLocation consumer) {
-        setSoundEvent = consumer;
-        return this;
-    }
-
-    @Info(value = "Sets whether the entity should render at a squared distance.")
-    public ProjectileEntityBuilder<T> shouldRenderAtSqrDistance(Predicate<Double> predicate) {
-        shouldRenderAtSqrDistance = predicate;
-        return this;
-    }
-
-
-    @Info(value = "Sets the custom tick behavior.")
-    public ProjectileEntityBuilder<T> tick(Consumer<Projectile> consumer) {
-        tick = consumer;
-        return this;
-    }
-
-    @Info(value = "Sets the custom move behavior with parameters (pType, pPos).")
-    public ProjectileEntityBuilder<T> move(BiConsumer<MoverType, Vec3> consumer) {
-        move = consumer;
-        return this;
-    }
-
-
-    @Info(value = "Sets the behavior when the arrow hits an entity.")
+    @Info(value = """
+            Sets a callback function to be executed when the projectile hits an entity.
+            The provided Consumer accepts a {@link ContextUtils.ProjectileEntityHitContext} parameter,
+            representing the context of the projectile's interaction with a specific entity.
+                        
+            Example usage:
+            ```javascript
+            projectileBuilder.onHitEntity(context -> {
+                // Custom logic to handle the projectile hitting an entity.
+                // Access information about the entity and projectile using the provided context.
+            });
+            ```
+            """)
     public ProjectileEntityBuilder<T> onHitEntity(Consumer<ContextUtils.ProjectileEntityHitContext> consumer) {
         onHitEntity = consumer;
         return this;
     }
 
-    @Info(value = "Sets the behavior when the projectile hits a block.")
+
+    @Info(value = """
+            Sets a callback function to be executed when the projectile hits a block.
+            The provided Consumer accepts a {@link ContextUtils.ProjectileBlockHitContext} parameter,
+            representing the context of the projectile's interaction with a specific block.
+                        
+            Example usage:
+            ```javascript
+            projectileBuilder.onHitBlock(context -> {
+                // Custom logic to handle the projectile hitting a block.
+                // Access information about the block and projectile using the provided context.
+            });
+            ```
+            """)
     public ProjectileEntityBuilder<T> onHitBlock(Consumer<ContextUtils.ProjectileBlockHitContext> consumer) {
         onHitBlock = consumer;
         return this;
     }
 
-
-    @Info(value = "Sets the canHitEntity behavior with parameters (entity).")
+    @Info(value = """
+            Sets a predicate to determine if the projectile can hit a specific entity.
+                        
+            @param predicate A predicate accepting an {@link Entity} parameter,
+                             defining the condition for the projectile to hit the entity.
+                        
+            Example usage:
+            ```javascript
+            projectileBuilder.canHitEntity(entity -> {
+                // Custom logic to determine if the projectile can hit the given entity.
+                // Return true if the projectile can hit, false otherwise.
+            });
+            ```
+            """)
     public ProjectileEntityBuilder<T> canHitEntity(Predicate<Entity> predicate) {
         canHitEntity = predicate;
-        return this;
-    }
-
-    @Info(value = "Sets the playerTouch behavior with parameters (player).")
-    public ProjectileEntityBuilder<T> playerTouch(Consumer<ContextUtils.ProjectilePlayerContext> consumer) {
-        playerTouch = consumer;
-        return this;
-    }
-
-    @Info(value = "Sets whether the arrow entity can be attacked.")
-    public ProjectileEntityBuilder<T> isAttackable(BooleanSupplier supplier) {
-        isAttackable = supplier;
         return this;
     }
 

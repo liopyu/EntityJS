@@ -55,7 +55,8 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
-        return builder.shouldRenderAtSqrDistance != null ? builder.shouldRenderAtSqrDistance.test(distance) : super.shouldRenderAtSqrDistance(distance);
+        final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
+        return builder.shouldRenderAtSqrDistance != null ? builder.shouldRenderAtSqrDistance.test(context) : super.shouldRenderAtSqrDistance(distance);
     }
 
     @Override
@@ -80,7 +81,8 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     public void move(MoverType pType, Vec3 pPos) {
         super.move(pType, pPos);
         if (builder.move != null) {
-            builder.move.accept(pType, pPos);
+            final ContextUtils.MovementContext context = new ContextUtils.MovementContext(pType, pPos, this);
+            builder.move.accept(context);
         }
     }
 
@@ -119,7 +121,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     public void playerTouch(Player player) {
         if (builder != null && builder.playerTouch != null) {
-            final ContextUtils.ProjectilePlayerContext context = new ContextUtils.ProjectilePlayerContext(player, this);
+            final ContextUtils.EntityPlayerContext context = new ContextUtils.EntityPlayerContext(player, this);
             builder.playerTouch.accept(context);
         } else {
             super.playerTouch(player);
@@ -128,7 +130,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean isAttackable() {
-        return builder.isAttackable != null ? builder.isAttackable.getAsBoolean() : super.isAttackable();
+        return builder.isAttackable != null ? builder.isAttackable : super.isAttackable();
     }
 
 }

@@ -62,12 +62,12 @@ import java.util.Objects;
  * <pre>{@code public class AnimalEntityJS extends Animal implements IAnimatableJS {
  *
  *     private final AnimalBuilder builder;
- *     private final AnimationFactory animationFactory;
+ *     private final AnimatableInstanceCache animatableInstanceCache;
  *
  *     public AnimalEntityJS(AnimalBuilder builder, EntityType<? extends Animal> type, Level level) {
  *         super(type, level);
  *         this.builder = builder;
- *         animationFactory = GeckoLibUtil.createFactory(this);
+ *         AnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
  *     }
  *
  *     @Override
@@ -76,8 +76,8 @@ import java.util.Objects;
  *     }
  *
  *     @Override
- *     public AnimationFactory getFactory() {
- *         return animationFactory;
+ *     public AnimatableInstanceCache getAnimatableInstanceCache() {
+ *         return animatableInstanceCache;
  *     }
  *
  *     @Override

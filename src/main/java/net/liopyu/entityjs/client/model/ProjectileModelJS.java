@@ -19,6 +19,6 @@ public class ProjectileModelJS<T extends ThrowableItemProjectile & IProjectileEn
 
     @Override
     public ResourceLocation getTextureLocation(T p_114482_) {
-        return (ResourceLocation) builder.getTextureLocation;
+        return (ResourceLocation) builder.textureLocation;
     }
 }

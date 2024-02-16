@@ -3,6 +3,7 @@ package net.liopyu.entityjs.builders;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.entities.MobEntityJS;
@@ -72,6 +73,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
+    @HideFromJS
     @Override
     public void createAdditionalObjects() {
         if (eggItem != null) {

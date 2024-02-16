@@ -520,7 +520,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the update interval for the entity.
-            Defaults to 0 ticks.
+            Defaults to 1 tick.
             Example usage:
             ```javascript
             entityBuilder.updateInterval(20); // Set the update interval to 20 ticks
@@ -2131,16 +2131,15 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                         
             Example usage:
             ```javascript
-            entityBuilder.addAnimationController('exampleController', 20, entity => {
-                        
-                // Define conditions for the animation to be played based on the entity.
-                 if (event.entity.hurtTime > 0) {
-                            event.thenLoop('spawn');
-                        } else {
-                            event.thenPlayAndHold('idle');
-                        }
-                    return true // Some boolean condition indicating if the animation should be played;
-            });
+            entityBuilder.addAnimationController('exampleController', 20, event => {
+                                  // Define conditions for the animation to be played based on the entity.
+                                  if (event.entity.hurtTime > 0) {
+                                        event.thenLoop('spawn');
+                                  } else {
+                                        event.thenPlayAndHold('idle');
+                                  }
+                                  return true; // Some boolean condition indicating if the animation should be played;
+                     });
             ```
             """)
     public BaseLivingEntityBuilder<T> addAnimationController(String name, int translationTicksLength, IAnimationPredicateJS<T> predicate) {
@@ -2215,7 +2214,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
      * <strong>Do not</strong> override unless you are creating a custom entity type builder<br><br>
      * See: {@link #factory()}
      */
-    @HideFromJS
+
     @Override
     public EntityType<T> createObject() {
         return new LivingEntityTypeBuilderJS<>(this).get();

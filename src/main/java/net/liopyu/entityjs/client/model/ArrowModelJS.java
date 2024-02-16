@@ -19,6 +19,6 @@ public class ArrowModelJS<T extends AbstractArrow & IArrowEntityJS> extends Arro
 
     @Override
     public ResourceLocation getTextureLocation(T p_114482_) {
-        return (ResourceLocation) builder.getTextureLocation;
+        return (ResourceLocation) builder.textureLocation;
     }
 }

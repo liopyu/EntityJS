@@ -9,8 +9,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.phys.Vec3;
+import org.apache.logging.log4j.util.BiConsumer;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<EntityType<T>> {
 
@@ -20,6 +26,11 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
     public transient int updateInterval;
     public transient MobCategory mobCategory;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
+    public transient Consumer<ContextUtils.EntityPlayerContext> playerTouch;
+    public transient Predicate<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
+    public transient Consumer<Entity> tick;
+    public transient Consumer<ContextUtils.MovementContext> move;
+    public transient Boolean isAttackable;
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
@@ -65,7 +76,8 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
 
 
     @Info(value = """
-            Sets the update interval in ticks of the entity. Defaults to 3.
+            Sets the update interval in ticks of the entity. 
+            Defaults to 1 tick.
                         
             @param updateInterval The update interval in ticks.
                         
@@ -95,11 +107,119 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
         return this;
     }
 
-    @Info(value = "Sets the lerpTo behavior with parameters (x, y, z, yaw, pitch, posRotationIncrements, teleport).")
+    @Info(value = """
+            Sets a consumer to handle lerping (linear interpolation) of the entity's position.
+                        
+            @param consumer Consumer accepting a {@link ContextUtils.LerpToContext} parameter,
+                            providing information and control over the lerping process.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.lerpTo(context -> {
+                // Custom logic for lerping the entity's position
+                // Access information about the lerping process using the provided context.
+            });
+            ```
+            """)
     public BaseEntityBuilder<T> lerpTo(Consumer<ContextUtils.LerpToContext> consumer) {
         lerpTo = consumer;
         return this;
     }
+
+
+    @Info(value = """
+            Sets a predicate to determine whether the entity should render at a squared distance.
+                        
+            @param predicate Predicate accepting a {@link ContextUtils.EntitySqrDistanceContext} parameter,
+                             defining the conditions under which the entity should render.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.shouldRenderAtSqrDistance(context -> {
+                // Custom logic to determine whether the entity should render
+                // Access information about the distance using the provided context.
+                return someCondition;
+            });
+            ```
+            """)
+    public BaseEntityBuilder<T> shouldRenderAtSqrDistance(Predicate<ContextUtils.EntitySqrDistanceContext> predicate) {
+        shouldRenderAtSqrDistance = predicate;
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets whether the entity is attackable or not.
+                        
+            @param b Boolean value indicating whether the entity is attackable.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isAttackable(true);
+            ```
+            """)
+    public BaseEntityBuilder<T> isAttackable(Boolean b) {
+        isAttackable = b;
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets a callback function to be executed when a player touches the entity.
+            The provided Consumer accepts a {@link ContextUtils.EntityPlayerContext} parameter,
+            representing the context of the player's interaction with the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.playerTouch(context -> {
+                // Custom logic to handle the player's touch interaction with the entity
+                // Access information about the interaction using the provided context.
+            });
+            ```
+            """)
+    public BaseEntityBuilder<T> playerTouch(Consumer<ContextUtils.EntityPlayerContext> consumer) {
+        playerTouch = consumer;
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity performs a movement action.
+            The provided Consumer accepts a {@link ContextUtils.MovementContext} parameter,
+            representing the context of the entity's movement.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.move(context -> {
+                // Custom logic to handle the entity's movement action
+                // Access information about the movement using the provided context.
+            });
+            ```
+            """)
+    public BaseEntityBuilder<T> move(Consumer<ContextUtils.MovementContext> consumer) {
+        move = consumer;
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets a callback function to be executed on each tick for the entity.
+                        
+            @param consumer A Consumer accepting a {@link Entity} parameter, defining the behavior to be executed on each tick.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.tick(entity -> {
+                // Custom logic to be executed on each tick of the entity.
+                // Access information about the entity using the provided parameter.
+            });
+            ```
+            """)
+    public BaseEntityBuilder<T> tick(Consumer<Entity> consumer) {
+        tick = consumer;
+        return this;
+    }
+
 
     public abstract EntityType.EntityFactory<T> factory();
 

@@ -21,13 +21,9 @@ import java.util.function.*;
 
 public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseEntityBuilder<T> {
     public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
-    public transient Function<T, ResourceLocation> getTextureLocation;
+    public transient Function<T, ResourceLocation> textureLocation;
     public transient ResourceLocation setSoundEvent;
 
-    public transient Predicate<Double> shouldRenderAtSqrDistance;
-
-    public transient Consumer<AbstractArrow> tick;
-    public transient BiConsumer<MoverType, Vec3> move;
     public transient Consumer<AbstractArrow> tickDespawn;
 
     public transient Consumer<ContextUtils.ArrowEntityHitContext> onHitEntity;
@@ -35,136 +31,253 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient ResourceLocation defaultHitGroundSoundEvent;
 
     public transient Consumer<LivingEntity> doPostHurtEffects;
-    public transient BiFunction<Vec3, Vec3, EntityHitResult> findHitEntity;
+    public transient Function<ContextUtils.ArrowVec3Context, EntityHitResult> findHitEntity;
     public transient Predicate<Entity> canHitEntity;
-    public transient Consumer<ContextUtils.ArrowPlayerContext> playerTouch;
     public transient Predicate<Player> tryPickup;
     public transient DoubleConsumer setBaseDamage;
     public transient IntConsumer setKnockback;
-    public transient BooleanSupplier isAttackable;
-    public transient Supplier<Float> getWaterInertia;
+    public transient Float setWaterInertia;
 
     public ArrowEntityBuilder(ResourceLocation i) {
         super(i);
         thisList.add(this);
-        getTextureLocation = t -> t.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
+        textureLocation = t -> t.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
     }
 
     @Info(value = """
-            Sets how the texture of the entity is determined, has access to the entity
-            to allow changing the texture based on info about the entity
+            Sets a function to determine the texture resource for the entity.
+            The provided Function accepts a parameter of type T (the entity),
+            allowing changing the texture based on information about the entity.
+            The default behavior returns <namespace>:textures/model/entity/<path>.png.
                         
-            Defaults to returning <namespace>:textures/entity/projectiles/<path>.png
+            Example usage:
+            ```javascript
+            entityBuilder.textureLocation(entity => {
+                // Define logic to determine the texture resource for the entity
+                // Use information about the entity provided by the context.
+                return // Some ResourceLocation representing the texture resource;
+            });
+            ```
             """)
-    public BaseEntityBuilder<T> getTextureLocation(Function<T, ResourceLocation> function) {
-        getTextureLocation = function;
+    public BaseEntityBuilder<T> textureLocation(Function<T, ResourceLocation> textureCallback) {
+        textureLocation = textureCallback;
         return this;
     }
+
 
     @Override
     public EntityType<T> createObject() {
         return new EntityTypeBuilder<>(this).get();
     }
 
-    public ArrowEntityBuilder<T> setSoundEvent(ResourceLocation consumer) {
-        setSoundEvent = consumer;
+    @Info(value = """
+            Sets the sound event for the arrow entity using a string representation.
+                        
+            @param soundEventString A string representing the sound event.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.setSoundEvent("minecraft:entity.arrow.shoot");
+            ```
+            """)
+    public ArrowEntityBuilder<T> setSoundEvent(String soundEventString) {
+        setSoundEvent = new ResourceLocation(soundEventString);
         return this;
     }
 
-    @Info(value = "Sets whether the entity should render at a squared distance.")
-    public ArrowEntityBuilder<T> shouldRenderAtSqrDistance(Predicate<Double> predicate) {
-        shouldRenderAtSqrDistance = predicate;
-        return this;
-    }
 
-
-    @Info(value = "Sets the custom tick behavior.")
-    public ArrowEntityBuilder<T> tick(Consumer<AbstractArrow> consumer) {
-        tick = consumer;
-        return this;
-    }
-
-    @Info(value = "Sets the custom move behavior with parameters (pType, pPos).")
-    public ArrowEntityBuilder<T> move(BiConsumer<MoverType, Vec3> consumer) {
-        move = consumer;
-        return this;
-    }
-
-    @Info(value = "Sets the custom tickDespawn behavior.")
+    @Info(value = """
+            Sets a consumer to be called during each tick to handle arrow entity despawn logic.
+                        
+            @param consumer The consumer to handle the arrow entity tick despawn logic.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.tickDespawn(arrow -> {
+                // Custom logic to handle arrow entity despawn during each tick
+            });
+            ```
+            """)
     public ArrowEntityBuilder<T> tickDespawn(Consumer<AbstractArrow> consumer) {
         tickDespawn = consumer;
         return this;
     }
 
-    @Info(value = "Sets the behavior when the arrow hits an entity.")
+
+    @Info(value = """
+            Sets a consumer to be called when the arrow entity hits another entity.
+                        
+            @param consumer The consumer to handle the arrow entity hit context.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.onHitEntity(context -> {
+                // Custom logic to handle the arrow hitting another entity
+            });
+            ```
+            """)
     public ArrowEntityBuilder<T> onHitEntity(Consumer<ContextUtils.ArrowEntityHitContext> consumer) {
         onHitEntity = consumer;
         return this;
     }
 
-    @Info(value = "Sets the behavior when the arrow hits a block.")
+
+    @Info(value = """
+            Sets a consumer to be called when the arrow entity hits a block.
+                        
+            @param consumer The consumer to handle the arrow block hit context.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.onHitBlock(context -> {
+                // Custom logic to handle the arrow hitting a block
+            });
+            ```
+            """)
     public ArrowEntityBuilder<T> onHitBlock(Consumer<ContextUtils.ArrowBlockHitContext> consumer) {
         onHitBlock = consumer;
         return this;
     }
 
-    @Info(value = "Sets the default sound event when the arrow hits the ground.")
-    public ArrowEntityBuilder<T> defaultHitGroundSoundEvent(ResourceLocation function) {
-        defaultHitGroundSoundEvent = function;
+
+    @Info(value = """
+            Sets the default sound event played when the arrow hits the ground using a string representation.
+                        
+            @param soundEventString A string representing the ResourceLocation of the sound event.
+                        
+            Example usage:
+            ```javascript
+            // Example to set a custom sound event for the arrow hitting the ground.
+            arrowEntityBuilder.defaultHitGroundSoundEvent("minecraft:entity.arrow.hit");
+            ```
+            """)
+    public ArrowEntityBuilder<T> defaultHitGroundSoundEvent(String soundEventString) {
+        defaultHitGroundSoundEvent = new ResourceLocation(soundEventString);
         return this;
     }
 
-    @Info(value = "Sets the doPostHurtEffects behavior with parameters (target).")
+
+    @Info(value = """
+            Sets a consumer to perform additional effects after the arrow successfully hurts a living entity.
+                        
+            @param consumer The consumer to perform additional effects.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.doPostHurtEffects(livingEntity -> {
+                // Custom logic to perform additional effects after the arrow hurts a living entity.
+            });
+            ```
+            """)
     public ArrowEntityBuilder<T> doPostHurtEffects(Consumer<LivingEntity> consumer) {
         doPostHurtEffects = consumer;
         return this;
     }
 
-    @Info(value = "Sets the findHitEntity behavior with parameters (startVec, endVec).")
-    public ArrowEntityBuilder<T> findHitEntity(BiFunction<Vec3, Vec3, EntityHitResult> function) {
+
+    @Info(value = """
+            Sets a function to find the entity hit by the arrow based on a context containing start and end vectors.
+                        
+            @param function The function to find the hit entity.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.findHitEntity(context -> {
+                // Custom logic to find the entity hit by the arrow based on the context
+                // ContextUtils.ArrowVec3Context provides start and end vectors.
+                // Return an EntityHitResult containing the hit entity or null if no entity is hit.
+            });
+            ```
+            """)
+    public ArrowEntityBuilder<T> findHitEntity(Function<ContextUtils.ArrowVec3Context, EntityHitResult> function) {
         findHitEntity = function;
         return this;
     }
 
-    @Info(value = "Sets the canHitEntity behavior with parameters (entity).")
+
+    @Info(value = """
+            Sets a predicate to determine if the arrow entity can hit a specific entity.
+                        
+            @param predicate The predicate to check if the arrow can hit the entity.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.canHitEntity(entity -> {
+                // Custom logic to determine if the arrow can hit the specified entity
+                // Return true if the arrow can hit, false otherwise.
+            });
+            ```
+            """)
     public ArrowEntityBuilder<T> canHitEntity(Predicate<Entity> predicate) {
         canHitEntity = predicate;
         return this;
     }
 
-    @Info(value = "Sets the playerTouch behavior with parameters (player).")
-    public ArrowEntityBuilder<T> playerTouch(Consumer<ContextUtils.ArrowPlayerContext> consumer) {
-        playerTouch = consumer;
-        return this;
-    }
 
-    @Info(value = "Sets the tryPickup behavior with parameters (player).")
+    @Info(value = """
+            Sets a predicate to determine if a player can pick up the arrow entity.
+                        
+            @param predicate The predicate to check if a player can pick up the arrow.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.tryPickup(player -> {
+                // Custom logic to determine if the player can pick up the arrow
+                // Return true if the player can pick up, false otherwise.
+            });
+            ```
+            """)
     public ArrowEntityBuilder<T> tryPickup(Predicate<Player> predicate) {
         tryPickup = predicate;
         return this;
     }
 
-    @Info(value = "Sets the base damage of the arrow entity.")
-    public ArrowEntityBuilder<T> setBaseDamage(DoubleConsumer consumer) {
-        setBaseDamage = consumer;
+
+    @Info(value = """
+            Sets the base damage value for the arrow entity.
+                        
+            @param baseDamage The base damage value to be set.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.setBaseDamage(8.0);
+            ```
+            """)
+    public ArrowEntityBuilder<T> setBaseDamage(DoubleConsumer baseDamage) {
+        setBaseDamage = baseDamage;
         return this;
     }
 
-    @Info(value = "Sets the knockback strength of the arrow entity.")
-    public ArrowEntityBuilder<T> setKnockback(IntConsumer consumer) {
-        setKnockback = consumer;
+
+    @Info(value = """
+            Sets the knockback value for the arrow entity.
+                        
+            @param knockback The knockback value to be set.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.setKnockback(2);
+            ```
+            """)
+    public ArrowEntityBuilder<T> setKnockback(IntConsumer knockback) {
+        setKnockback = knockback;
         return this;
     }
 
-    @Info(value = "Sets whether the arrow entity can be attacked.")
-    public ArrowEntityBuilder<T> isAttackable(BooleanSupplier supplier) {
-        isAttackable = supplier;
-        return this;
-    }
 
-    @Info(value = "Sets the water inertia of the arrow entity.")
-    public ArrowEntityBuilder<T> getWaterInertia(Supplier<Float> supplier) {
-        getWaterInertia = supplier;
+    @Info(value = """
+            Sets the water inertia value for the arrow entity.
+                        
+            @param waterInertia The water inertia value to be set.
+            Defaults to 0.6 for AbstractArrow
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.setWaterInertia(0.5);
+            ```
+            """)
+    public ArrowEntityBuilder<T> setWaterInertia(Float waterInertia) {
+        setWaterInertia = waterInertia;
         return this;
     }
 

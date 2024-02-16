@@ -74,7 +74,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
-        return builder.shouldRenderAtSqrDistance != null ? builder.shouldRenderAtSqrDistance.test(distance) : super.shouldRenderAtSqrDistance(distance);
+        final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
+        return builder.shouldRenderAtSqrDistance != null ? builder.shouldRenderAtSqrDistance.test(context) : super.shouldRenderAtSqrDistance(distance);
     }
 
     @Override
@@ -99,7 +100,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     public void move(MoverType pType, Vec3 pPos) {
         super.move(pType, pPos);
         if (builder.move != null) {
-            builder.move.accept(pType, pPos);
+            final ContextUtils.MovementContext context = new ContextUtils.MovementContext(pType, pPos, this);
+            builder.move.accept(context);
         }
     }
 
@@ -153,7 +155,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Nullable
     @Override
     protected EntityHitResult findHitEntity(Vec3 startVec, Vec3 endVec) {
-        return builder.findHitEntity != null ? builder.findHitEntity.apply(startVec, endVec) : super.findHitEntity(startVec, endVec);
+        final ContextUtils.ArrowVec3Context context = new ContextUtils.ArrowVec3Context(startVec, endVec, this);
+        return builder.findHitEntity != null ? builder.findHitEntity.apply(context) : super.findHitEntity(startVec, endVec);
     }
 
     @Override
@@ -165,7 +168,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     public void playerTouch(Player player) {
         if (builder.playerTouch != null) {
-            final ContextUtils.ArrowPlayerContext context = new ContextUtils.ArrowPlayerContext(player, this);
+            final ContextUtils.EntityPlayerContext context = new ContextUtils.EntityPlayerContext(player, this);
             builder.playerTouch.accept(context);
         } else {
             super.playerTouch(player);
@@ -198,11 +201,11 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     public boolean isAttackable() {
-        return builder.isAttackable != null ? builder.isAttackable.getAsBoolean() : super.isAttackable();
+        return builder.isAttackable != null ? builder.isAttackable : super.isAttackable();
     }
 
     @Override
     protected float getWaterInertia() {
-        return builder.getWaterInertia != null ? builder.getWaterInertia.get() : super.getWaterInertia();
+        return builder.setWaterInertia != null ? builder.setWaterInertia : super.getWaterInertia();
     }
 }
