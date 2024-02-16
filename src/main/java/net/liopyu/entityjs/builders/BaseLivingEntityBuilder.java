@@ -264,7 +264,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         fireImmune = false;
         spawnFarFromPlayer = false;
         clientTrackingRange = 5;
-        updateInterval = 0;
+        updateInterval = 1;
         mobCategory = MobCategory.MISC;
         modelResource = t -> t.getBuilder().newID("geo/", ".geo.json");
         textureResource = t -> t.getBuilder().newID("textures/models/entity/", ".png");
