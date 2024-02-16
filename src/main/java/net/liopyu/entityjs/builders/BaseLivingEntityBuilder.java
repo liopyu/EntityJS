@@ -188,7 +188,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Consumer<LivingEntity> onSprint;
 
-    public transient double jumpBoostPower;
+    public transient Double jumpBoostPower;
     public transient Predicate<ContextUtils.EntityFluidStateContext> canStandOnFluid;
 
 
@@ -278,7 +278,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         setSoundVolume = 1.0f;
         setWaterSlowDown = 0.8f;
         setMaxFallDistance = 3;
-        jumpBoostPower = 0.0f;
         repositionEntityAfterLoad = true;
         rideableUnderWater = false;
         canBreatheUnderwater = false;
@@ -1436,7 +1435,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.jumpBoostPower(2.5);
             ```
             """)
-    public BaseLivingEntityBuilder<T> jumpBoostPower(double jumpBoostPower) {
+    public BaseLivingEntityBuilder<T> jumpBoostPower(Double jumpBoostPower) {
         this.jumpBoostPower = jumpBoostPower;
         return this;
     }

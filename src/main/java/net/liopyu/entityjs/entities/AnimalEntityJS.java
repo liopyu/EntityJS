@@ -874,7 +874,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public double getJumpBoostPower() {
-        return builder.jumpBoostPower + super.getJumpBoostPower();
+        if (builder.jumpBoostPower != null) {
+            return builder.jumpBoostPower + super.getJumpBoostPower();
+        } else return super.getJumpBoostPower();
     }
 
     @Override
