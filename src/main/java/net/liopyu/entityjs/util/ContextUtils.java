@@ -1,6 +1,15 @@
 package net.liopyu.entityjs.util;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
 import dev.latvian.mods.kubejs.typings.Info;
+import net.liopyu.entityjs.client.KubeJSProjectileEntityRenderer;
+import net.liopyu.entityjs.entities.IProjectileEntityJS;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -34,6 +43,77 @@ public class ContextUtils {
         public PlayerEntityContext(Player player, LivingEntity entity) {
             this.entity = entity;
             this.player = player;
+        }
+    }
+
+    public static class RenderContext<T extends ThrowableItemProjectile> {
+        @Info("The entity being rendered")
+        public final T entity;
+
+        @Info("The yaw of the entity")
+        public final float entityYaw;
+
+        @Info("The partial tick value")
+        public final float partialTick;
+
+        @Info("The pose stack used for rendering")
+        public final PoseStack matrixStack;
+
+        @Info("The buffer source for rendering")
+        public final MultiBufferSource buffer;
+
+        @Info("The packed light value")
+        public final int packedLight;
+
+
+        public RenderContext(T entity, float entityYaw, float partialTick, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
+            this.entity = entity;
+            this.entityYaw = entityYaw;
+            this.partialTick = partialTick;
+            this.matrixStack = matrixStack;
+            this.buffer = buffer;
+            this.packedLight = packedLight;
+        }
+    }
+
+
+    public static class VertexContext {
+        @Info("The vertex consumer")
+        public final VertexConsumer vertexConsumer;
+
+        @Info("The position matrix")
+        public final Matrix4f positionMatrix;
+
+        @Info("The normal matrix")
+        public final Matrix3f normalMatrix;
+
+        @Info("The packed light value")
+        public final int packedLight;
+
+        @Info("The x position of the vertex")
+        public final float xPos;
+
+        @Info("The y position of the vertex")
+        public final float yPos;
+
+        @Info("The texture U coordinate of the vertex")
+        public final int textureU;
+
+        @Info("The texture V coordinate of the vertex")
+        public final int textureV;
+        @Info("The entityRenderDispatcher for this entity")
+        public final EntityRenderDispatcher entityRenderDispatcher;
+
+        public VertexContext(VertexConsumer vertexConsumer, Matrix4f positionMatrix, Matrix3f normalMatrix, int packedLight, float xPos, float yPos, int textureU, int textureV, EntityRenderDispatcher entityRenderDispatcher) {
+            this.vertexConsumer = vertexConsumer;
+            this.positionMatrix = positionMatrix;
+            this.normalMatrix = normalMatrix;
+            this.packedLight = packedLight;
+            this.xPos = xPos;
+            this.yPos = yPos;
+            this.textureU = textureU;
+            this.textureV = textureV;
+            this.entityRenderDispatcher = entityRenderDispatcher;
         }
     }
 

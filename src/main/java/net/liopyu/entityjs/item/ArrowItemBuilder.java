@@ -16,15 +16,12 @@ import net.minecraft.world.level.Level;
 public class ArrowItemBuilder extends ItemBuilder {
     public transient final ArrowEntityJSBuilder parent;
     public transient boolean canBePickedUp;
-    public transient String texture;
 
     public ArrowItemBuilder(ResourceLocation i, ArrowEntityJSBuilder parent) {
         super(i);
         this.parent = parent;
         canBePickedUp = true;
-        texture = "kubejs:item/" + i.getPath();
     }
-
 
     public ArrowItemBuilder canBePickedup(boolean canBePickedUp) {
         this.canBePickedUp = canBePickedUp;
@@ -46,39 +43,4 @@ public class ArrowItemBuilder extends ItemBuilder {
             }
         };
     }
-
-    @Override
-    public ItemBuilder texture(String tex) {
-        this.texture = tex;
-        return this;
-    }
-
-    @Override
-    public void generateAssetJsons(AssetJsonGenerator generator) {
-        if (modelJson != null) {
-            generator.json(AssetJsonGenerator.asItemModelLocation(id), modelJson);
-            return;
-        }
-
-        generator.itemModel(id, m -> {
-            m.parent(id.getPath());
-
-            if (!parentModel.isEmpty()) {
-                m.parent(parentModel);
-
-                if (texture.isEmpty()) {
-                    texture(newID("item/", "").toString());
-                }
-                m.texture("layer0", texture);
-            } else {
-                m.parent("item/generated");
-
-                if (texture.isEmpty()) {
-                    texture(newID("item/", "").toString());
-                }
-                m.texture("layer0", texture);
-            }
-        });
-    }
-
 }

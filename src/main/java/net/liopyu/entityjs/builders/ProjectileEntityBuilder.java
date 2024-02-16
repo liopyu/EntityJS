@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.ArrowEntityJS;
 import net.liopyu.entityjs.entities.IProjectileEntityJS;
@@ -31,6 +32,14 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
     public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
 
     public transient Predicate<Entity> canHitEntity;
+
+    public transient Float pX;
+    public transient Float pY;
+    public transient Float pZ;
+
+    public transient Float vX;
+    public transient Float vY;
+    public transient Float vZ;
 
 
     public ProjectileEntityBuilder(ResourceLocation i) {
@@ -118,6 +127,49 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
             """)
     public ProjectileEntityBuilder<T> canHitEntity(Predicate<Entity> predicate) {
         canHitEntity = predicate;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the scale for rendering the projectile entity.
+                        
+            @param pX The X-axis scale.
+                        
+            @param pY The Y-axis scale.
+                        
+            @param pZ The Z-axis scale.
+                        
+            Example usage:
+            ```javascript
+            projectileEntityBuilder.renderScale(1.5, 1.5, 1.5);
+            ```
+            """)
+    public ProjectileEntityBuilder<T> renderScale(Float pX, Float pY, Float pZ) {
+        this.pX = pX;
+        this.pY = pY;
+        this.pZ = pZ;
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets the offset for rendering the projectile entity.
+                        
+            @param vX The X-axis offset.
+                        
+            @param vY The Y-axis offset.
+                        
+            @param vZ The Z-axis offset.
+                        
+            Example usage:
+            ```javascript
+            projectileEntityBuilder.renderOffset(0.5, 1.0, -0.5);
+            ```
+            """)
+    public ProjectileEntityBuilder<T> renderOffset(Float vX, Float vY, Float vZ) {
+        this.vX = vX;
+        this.vY = vY;
+        this.vZ = vZ;
         return this;
     }
 

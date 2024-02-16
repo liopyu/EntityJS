@@ -1,7 +1,7 @@
 package net.liopyu.entityjs.item;
 
-import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
+import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.entities.ProjectileEntityJS;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +16,6 @@ import net.minecraft.world.level.Level;
 
 public class ProjectileItemBuilder extends ItemBuilder {
     public transient final ProjectileEntityJSBuilder parent;
-    public transient String texture;
     public transient boolean canThrow;
     public transient float projectileZ;
     public transient float projectileVelocity;
@@ -25,7 +24,6 @@ public class ProjectileItemBuilder extends ItemBuilder {
     public ProjectileItemBuilder(ResourceLocation i, ProjectileEntityJSBuilder parent) {
         super(i);
         this.parent = parent;
-        texture = "kubejs:item/" + i.getPath();
         canThrow = false;
         projectileZ = 0.0F;
         projectileVelocity = 1.5F;
@@ -59,61 +57,64 @@ public class ProjectileItemBuilder extends ItemBuilder {
         };
     }
 
+    @Info(value = """
+            Sets whether the item can be thrown.
+                        
+            @param canThrow True if the item can be thrown, false otherwise.
+                        
+            Example usage:
+            ```javascript
+            itemBuilder.canThrow(true);
+            ```
+            """)
     public ItemBuilder canThrow(boolean canThrow) {
         this.canThrow = canThrow;
         return this;
     }
 
-    public ItemBuilder projectileZ(float projectileZ) {
 
+    @Info(value = """
+            Sets the Z offset for the projectile.
+                        
+            @param projectileZ The Z offset for the projectile.
+                        
+            Example usage:
+            ```javascript
+            itemBuilder.projectileZ(0.5f);
+            ```
+            """)
+    public ItemBuilder projectileZ(float projectileZ) {
         this.projectileZ = projectileZ;
         return this;
     }
 
+    @Info(value = """
+            Sets the velocity of the projectile.
+                        
+            @param projectileVelocity The velocity of the projectile.
+                        
+            Example usage:
+            ```javascript
+            itemBuilder.projectileVelocity(1.5f);
+            ```
+            """)
     public ItemBuilder projectileVelocity(float projectileVelocity) {
-
         this.projectileVelocity = projectileVelocity;
         return this;
     }
 
+    @Info(value = """
+            Sets the inaccuracy of the projectile.
+                        
+            @param projectileInaccuracy The inaccuracy of the projectile.
+                        
+            Example usage:
+            ```javascript
+            itemBuilder.projectileInaccuracy(0.1f);
+            ```
+            """)
     public ItemBuilder projectileInaccuracy(float projectileInaccuracy) {
-
         this.projectileInaccuracy = projectileInaccuracy;
         return this;
     }
-
-    @Override
-    public ItemBuilder texture(String tex) {
-        this.texture = tex;
-        return this;
-    }
-
-    @Override
-    public void generateAssetJsons(AssetJsonGenerator generator) {
-        if (modelJson != null) {
-            generator.json(AssetJsonGenerator.asItemModelLocation(id), modelJson);
-            return;
-        }
-
-        generator.itemModel(id, m -> {
-            m.parent(id.getPath());
-
-            if (!parentModel.isEmpty()) {
-                m.parent(parentModel);
-
-                if (texture.isEmpty()) {
-                    texture(newID("item/", "").toString());
-                }
-                m.texture("layer0", texture);
-            } else {
-                m.parent("item/generated");
-
-                if (texture.isEmpty()) {
-                    texture(newID("item/", "").toString());
-                }
-                m.texture("layer0", texture);
-            }
-        });
-    }
-
 }

@@ -136,7 +136,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     protected SoundEvent getDefaultHitGroundSoundEvent() {
-        if (builder.defaultHitGroundSoundEvent != null) {
+        if (builder != null && builder.defaultHitGroundSoundEvent != null) {
             return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.defaultHitGroundSoundEvent));
         }
         return super.getDefaultHitGroundSoundEvent();
