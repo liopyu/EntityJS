@@ -103,8 +103,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
     public void onJump() {
-        if (builder.onJump != null) {
-            builder.onJump.accept(this);
+        if (builder.onLivingJump != null) {
+            builder.onLivingJump.accept(this);
         }
     }
 
@@ -310,7 +310,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     protected boolean canAddPassenger(@NotNull Entity entity) {
         if (builder.canAddPassenger != null) {
-            return builder.canAddPassenger.test(entity);
+            final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(entity, this);
+            return builder.canAddPassenger.test(context);
         } else return super.canAddPassenger(entity);
     }
 
@@ -533,7 +534,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     public boolean canAttack(@NotNull LivingEntity entity) {
         if (builder.canAttack != null) {
-            return builder.canAttack.test(entity) && super.canAttack(entity);
+            final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(this, entity);
+            return builder.canAttack.test(context) && super.canAttack(entity);
         } else {
             return super.canAttack(entity);
         }
@@ -553,7 +555,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     public boolean isInvertedHealAndHarm() {
         if (builder.invertedHealAndHarm != null) {
-            return builder.invertedHealAndHarm.getAsBoolean();
+            return builder.invertedHealAndHarm.test(this);
         } else {
             return super.isInvertedHealAndHarm();
         }

@@ -46,78 +46,6 @@ public class ContextUtils {
         }
     }
 
-    public static class RenderContext<T extends ThrowableItemProjectile> {
-        @Info("The entity being rendered")
-        public final T entity;
-
-        @Info("The yaw of the entity")
-        public final float entityYaw;
-
-        @Info("The partial tick value")
-        public final float partialTick;
-
-        @Info("The pose stack used for rendering")
-        public final PoseStack matrixStack;
-
-        @Info("The buffer source for rendering")
-        public final MultiBufferSource buffer;
-
-        @Info("The packed light value")
-        public final int packedLight;
-
-
-        public RenderContext(T entity, float entityYaw, float partialTick, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
-            this.entity = entity;
-            this.entityYaw = entityYaw;
-            this.partialTick = partialTick;
-            this.matrixStack = matrixStack;
-            this.buffer = buffer;
-            this.packedLight = packedLight;
-        }
-    }
-
-
-    public static class VertexContext {
-        @Info("The vertex consumer")
-        public final VertexConsumer vertexConsumer;
-
-        @Info("The position matrix")
-        public final Matrix4f positionMatrix;
-
-        @Info("The normal matrix")
-        public final Matrix3f normalMatrix;
-
-        @Info("The packed light value")
-        public final int packedLight;
-
-        @Info("The x position of the vertex")
-        public final float xPos;
-
-        @Info("The y position of the vertex")
-        public final float yPos;
-
-        @Info("The texture U coordinate of the vertex")
-        public final int textureU;
-
-        @Info("The texture V coordinate of the vertex")
-        public final int textureV;
-        @Info("The entityRenderDispatcher for this entity")
-        public final EntityRenderDispatcher entityRenderDispatcher;
-
-        public VertexContext(VertexConsumer vertexConsumer, Matrix4f positionMatrix, Matrix3f normalMatrix, int packedLight, float xPos, float yPos, int textureU, int textureV, EntityRenderDispatcher entityRenderDispatcher) {
-            this.vertexConsumer = vertexConsumer;
-            this.positionMatrix = positionMatrix;
-            this.normalMatrix = normalMatrix;
-            this.packedLight = packedLight;
-            this.xPos = xPos;
-            this.yPos = yPos;
-            this.textureU = textureU;
-            this.textureV = textureV;
-            this.entityRenderDispatcher = entityRenderDispatcher;
-        }
-    }
-
-
     public static class EntityBlockPosContext {
         @Info("The living entity")
         public final LivingEntity livingEntity;
@@ -128,6 +56,32 @@ public class ContextUtils {
         public EntityBlockPosContext(LivingEntity livingEntity, BlockPos blockPos) {
             this.livingEntity = livingEntity;
             this.blockPos = blockPos;
+        }
+    }
+
+    public static class PassengerEntityContext {
+
+        public final Entity passenger;
+
+
+        public final LivingEntity entity;
+
+        public PassengerEntityContext(Entity passenger, LivingEntity entity) {
+            this.passenger = passenger;
+            this.entity = entity;
+        }
+    }
+
+    public static class LivingEntityContext {
+
+        public final LivingEntity entity;
+
+
+        public final LivingEntity target;
+
+        public LivingEntityContext(LivingEntity entity, LivingEntity target) {
+            this.entity = entity;
+            this.target = target;
         }
     }
 

@@ -102,7 +102,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean isPushable;
     public transient final List<AnimationControllerSupplier<T>> animationSuppliers;
     public transient Predicate<LivingEntity> shouldDropLoot;
-    public transient Predicate<Entity> canAddPassenger;
+    public transient Predicate<ContextUtils.PassengerEntityContext> canAddPassenger;
     public transient Predicate<LivingEntity> isAffectedByFluids;
     public transient boolean isAlwaysExperienceDropper;
     public transient Predicate<LivingEntity> isImmobile;
@@ -152,11 +152,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Function<Entity, Double> visibilityPercent;
 
-    public transient Predicate<LivingEntity> canAttack;
+    public transient Predicate<ContextUtils.LivingEntityContext> canAttack;
 
     public transient Predicate<ContextUtils.OnEffectContext> canBeAffected;
 
-    public transient BooleanSupplier invertedHealAndHarm;
+    public transient Predicate<LivingEntity> invertedHealAndHarm;
 
     public transient Consumer<ContextUtils.OnEffectContext> onEffectAdded;
 
@@ -356,11 +356,31 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = "Sets the lerpTo behavior with parameters (x, y, z, yaw, pitch, posRotationIncrements, teleport).")
-    public BaseLivingEntityBuilder<T> lerpTo(Consumer<ContextUtils.LerpToContext> consumer) {
-        lerpTo = consumer;
+    @Info(value = """
+            Sets a consumer to handle custom lerping logic for the living entity.
+                
+            @param lerpTo The consumer to handle the custom lerping logic.
+                
+            The consumer should take a LerpToContext as a parameter, providing information about the lerping operation, including the target position, yaw, pitch, increment count, teleport flag, and the entity itself.
+                
+            Example usage:
+            ```javascript
+            baseLivingEntityBuilder.lerpTo(context => {
+                // Custom lerping logic for the living entity
+                const { x, y, z, yaw, pitch, posRotationIncrements, teleport, entity } = context;
+               \s
+                // Perform custom lerping operations using the provided context
+                // For example, you can smoothly move the entity from its current position to the target position
+                entity.setPositionAndRotation(x, y, z, yaw, pitch);
+                // You can also handle other properties like animation, sound effects, etc.
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> lerpTo(Consumer<ContextUtils.LerpToContext> lerpTo) {
+        this.lerpTo = lerpTo;
         return this;
     }
+
 
     @Info(value = """
             Sets the list of block names to which the entity is immune.
@@ -637,21 +657,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets a predicate to determine whether the entity can add a passenger.
-            The provided Predicate accepts a {@link Entity} parameter,
-            representing the entity that is being considered as a potential passenger.
-            It returns a Boolean indicating whether the entity can add the specified passenger.
+            Sets a predicate to determine if a passenger can be added to the entity.
+                        
+            @param predicate The predicate to check if a passenger can be added.
                         
             Example usage:
             ```javascript
-            entityBuilder.canAddPassenger(passenger => {
-                // Define logic to determine whether the entity can add the specified passenger
-                // Use information about the Entity provided by the context.
-                return // Some Boolean value indicating whether the entity can add the passenger;
+            entityBuilder.canAddPassenger(context -> {
+                // Custom logic to determine if a passenger can be added to the entity
+                return true; // Replace with your custom condition
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canAddPassenger(Predicate<Entity> predicate) {
+    public BaseLivingEntityBuilder<T> canAddPassenger(Predicate<ContextUtils.PassengerEntityContext> predicate) {
         canAddPassenger = predicate;
         return this;
     }
@@ -1168,7 +1186,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canAttack(Predicate<LivingEntity> customCanAttack) {
+    public BaseLivingEntityBuilder<T> canAttack(Predicate<ContextUtils.LivingEntityContext> customCanAttack) {
         this.canAttack = customCanAttack;
         return this;
     }
@@ -1195,17 +1213,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets whether healing and harming effects are inverted for the entity.
+            Sets a predicate to determine if the entity has inverted heal and harm behavior.
+                        
+            @param invertedHealAndHarm The predicate to check for inverted heal and harm behavior.
                         
             Example usage:
             ```javascript
-            entityBuilder.invertedHealAndHarm(() => {
-                // Define a BooleanSupplier to determine whether healing and harming effects are inverted
-                // Implement custom logic to return true or false based on your requirements.
+            entityBuilder.invertedHealAndHarm(entity -> {
+                // Custom logic to determine if the entity has inverted heal and harm behavior
+                return true; // Replace with your custom condition
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> invertedHealAndHarm(BooleanSupplier invertedHealAndHarm) {
+    public BaseLivingEntityBuilder<T> invertedHealAndHarm(Predicate<LivingEntity> invertedHealAndHarm) {
         this.invertedHealAndHarm = invertedHealAndHarm;
         return this;
     }

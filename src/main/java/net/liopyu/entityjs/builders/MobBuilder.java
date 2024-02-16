@@ -58,7 +58,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Function<PathfinderMob, Double> meleeAttackRangeSqr;
     public transient Consumer<PathfinderMob> aiStep;
     public transient boolean canJump;
-    public transient Consumer<PathfinderMob> onJump;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
@@ -132,26 +131,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             """)
     public MobBuilder<T> canJump(boolean canJump) {
         this.canJump = canJump;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a callback function to be executed when the entity jumps.
-                        
-            @param onJump A Consumer accepting a PathfinderMob parameter,
-                          defining the behavior to be executed when the entity jumps.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.onJump(entity -> {
-                // Custom logic to handle the entity's jump action
-                // Access information about the jumping entity using the provided context.
-            });
-            ```
-            """)
-    public MobBuilder<T> onJump(Consumer<PathfinderMob> onJump) {
-        this.onJump = onJump;
         return this;
     }
 
@@ -333,7 +312,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
                         
             @param meleeAttackRangeSqr A Function accepting a {@link PathfinderMob} parameter,
                                       defining the squared melee attack range based on the entity's state.
-                        
+                                      Returns a 'Double' value representing the squared melee attack range.
             Example usage:
             ```javascript
             mobBuilder.meleeAttackRangeSqr(mob -> {
