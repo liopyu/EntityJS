@@ -232,8 +232,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient BooleanSupplier dampensVibrations;
 
     public transient Consumer<ContextUtils.PlayerEntityContext> playerTouch;
-    public transient Function<ClipContext, HitResult> pick;
-    public transient BooleanSupplier showVehicleHealth;
+    public transient Predicate<LivingEntity> showVehicleHealth;
 
     public transient Consumer<ContextUtils.ThunderHitContext> thunderHit;
     public transient Predicate<ContextUtils.DamageContext> isInvulnerableTo;
@@ -1972,29 +1971,22 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets a function to handle the picking or selection of the entity in the game world.
-            The provided Function accepts a {@link ClipContext} parameter and returns a {@link HitResult},
-            representing the result of the picking operation.
-                        
+            Sets a predicate to determine whether to show the vehicle health for the living entity.
+                
+            @param predicate The predicate to determine whether to show the vehicle health.
+                
+            The predicate should take a LivingEntity as a parameter and return a boolean value indicating whether to show the vehicle health.
+                
             Example usage:
             ```javascript
-            entityBuilder.pick(context => {
-                // Define custom logic for picking or selecting the entity
-                // Use information about the ClipContext provided by the context.
-                // Return a HitResult indicating the result of the picking operation.
-                return // Some HitResult based on the picking logic;
+            baseLivingEntityBuilder.showVehicleHealth(entity => {
+                // Determine whether to show the vehicle health for the living entity
+                // Return true to show the vehicle health, false otherwise
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> pick(Function<ClipContext, HitResult> function) {
-        pick = function;
-        return this;
-    }
-
-
-    @Info(value = "Sets a boolean for determining if the vehicle health should be shown")
-    public BaseLivingEntityBuilder<T> showVehicleHealth(BooleanSupplier supplier) {
-        showVehicleHealth = supplier;
+    public BaseLivingEntityBuilder<T> showVehicleHealth(Predicate<LivingEntity> predicate) {
+        this.showVehicleHealth = predicate;
         return this;
     }
 

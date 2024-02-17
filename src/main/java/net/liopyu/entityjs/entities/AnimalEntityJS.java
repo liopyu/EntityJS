@@ -1128,20 +1128,10 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         }
     }
 
-    @Override
-    public HitResult pick(double p_19908_, float p_19909_, boolean p_19910_) {
-        if (builder.pick != null) {
-            final ClipContext context = new ClipContext(this.position(), this.position(), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this);
-            return builder.pick.apply(context);
-        } else {
-            return super.pick(p_19908_, p_19909_, p_19910_);
-        }
-    }
-
 
     @Override
     public boolean showVehicleHealth() {
-        return (builder.showVehicleHealth != null) ? builder.showVehicleHealth.getAsBoolean() : super.showVehicleHealth();
+        return (builder.showVehicleHealth != null) ? builder.showVehicleHealth.test(this) : super.showVehicleHealth();
     }
 
 
