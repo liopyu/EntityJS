@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import it.unimi.dsi.fastutil.objects.Object2FloatFunction;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.entities.MobEntityJS;
@@ -39,7 +40,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     //pathfinder mob
     public transient double followLeashSpeed;
     //pathfinder mob
-    public transient Function<ContextUtils.EntityBlockPosLevelContext, Float> walkTargetValue;
+    public transient Object2FloatFunction<ContextUtils.EntityBlockPosLevelContext> walkTargetValue;
 
 
     public transient SpawnEggItemBuilder eggItem;
@@ -398,8 +399,8 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             });
             ```
             """)
-    public MobBuilder<T> walkTargetValue(Function<ContextUtils.EntityBlockPosLevelContext, Float> function) {
-        this.walkTargetValue = function;
+    public MobBuilder<T> walkTargetValue(Object2FloatFunction<ContextUtils.EntityBlockPosLevelContext> function) {
+        this.walkTargetValue = function::getFloat;
         return this;
     }
 

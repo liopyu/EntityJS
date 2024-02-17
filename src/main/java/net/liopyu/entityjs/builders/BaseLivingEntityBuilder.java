@@ -11,6 +11,8 @@ import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.JsonIO;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.booleans.BooleanPredicate;
+import it.unimi.dsi.fastutil.objects.Object2FloatFunction;
+import it.unimi.dsi.fastutil.objects.Object2IntFunction;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
@@ -40,6 +42,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.ToFloatFunction;
 import net.minecraft.util.random.Weight;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -57,6 +60,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
@@ -108,7 +112,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Predicate<LivingEntity> isImmobile;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient float setBlockJumpFactor;
-    public transient Function<LivingEntity, Integer> blockSpeedFactor;
+    public transient Function<LivingEntity, Object> blockSpeedFactor;
     public transient float setJumpPower;
     public transient float setSoundVolume;
     public transient float setWaterSlowDown;
@@ -121,14 +125,14 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Consumer<ContextUtils.AutoAttackContext> doAutoAttackOnTouch;
 
-    public transient Function<ContextUtils.EntityPoseDimensionsContext, Float> setStandingEyeHeight;
+    public transient Object2FloatFunction<ContextUtils.EntityPoseDimensionsContext> setStandingEyeHeight;
 
     public transient Consumer<LivingEntity> onDecreaseAirSupply;
     public transient Consumer<LivingEntity> onBlockedByShield;
 
     public transient boolean repositionEntityAfterLoad;
 
-    public transient Function<Entity, Float> nextStep;
+    public transient Object2FloatFunction<Entity> nextStep;
 
     public transient Consumer<LivingEntity> onIncreaseAirSupply;
 
@@ -139,12 +143,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Predicate<ContextUtils.EntityTypeEntityContext> canAttackType;
 
-    public transient Function<LivingEntity, Float> scale;
+    public transient Object2FloatFunction<LivingEntity> scale;
     public transient boolean rideableUnderWater;
 
     public transient Predicate<LivingEntity> shouldDropExperience;
 
-    public transient Function<LivingEntity, Integer> experienceReward;
+    public transient Object2IntFunction<LivingEntity> experienceReward;
 
 
     public transient Consumer<ContextUtils.EntityEquipmentContext> onEquipItem;
@@ -201,7 +205,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.EntityItemEntityContext> onItemPickup;
     public transient Predicate<Entity> hasLineOfSight;
 
-    public transient Consumer<ContextUtils.EntityFloatContext> setAbsorptionAmount;
     public transient Consumer<LivingEntity> onEnterCombat;
     public transient Consumer<LivingEntity> onLeaveCombat;
 
@@ -223,13 +226,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Predicate<LivingEntity> isCurrentlyGlowing;
     public transient Predicate<LivingEntity> canDisableShield;
     public transient int setMaxFallDistance;
-    public transient Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> onInteract;
+    public transient Function<ContextUtils.MobInteractContext, InteractionResult> onInteract;
 
     public transient Consumer<LivingEntity> onClientRemoval;
     public transient Consumer<LivingEntity> onAddedToWorld;
     public transient Consumer<LivingEntity> lavaHurt;
     public transient Consumer<LivingEntity> onFlap;
-    public transient BooleanSupplier dampensVibrations;
+    public transient Predicate<LivingEntity> dampensVibrations;
 
     public transient Consumer<ContextUtils.PlayerEntityContext> playerTouch;
     public transient Predicate<LivingEntity> showVehicleHealth;
@@ -237,7 +240,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.ThunderHitContext> thunderHit;
     public transient Predicate<ContextUtils.DamageContext> isInvulnerableTo;
     public transient Predicate<LivingEntity> canChangeDimensions;
-    public transient Function<ContextUtils.CalculateFallDamageContext, Integer> calculateFallDamage;
+    public transient Object2IntFunction<ContextUtils.CalculateFallDamageContext> calculateFallDamage;
     public transient Predicate<ContextUtils.MayInteractContext> mayInteract;
     public transient Predicate<ContextUtils.CanTrampleContext> canTrample;
     public transient Consumer<LivingEntity> onRemovedFromWorld;
@@ -272,7 +275,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         animationSuppliers = new ArrayList<>();
         isAlwaysExperienceDropper = false;
         setBlockJumpFactor = 0.5f;
-        blockSpeedFactor = t -> 1;
         setJumpPower = 0.5f;
         setSoundVolume = 1.0f;
         setWaterSlowDown = 0.8f;
@@ -434,7 +436,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```
             """)
     public BaseLivingEntityBuilder<T> setBlockJumpFactor(float blockJumpFactor) {
-        this.setBlockJumpFactor = blockJumpFactor;
+        Object obj = blockJumpFactor;
+        if (obj instanceof Float) {
+            this.setBlockJumpFactor = (float) obj;
+        } else {
+            ConsoleJS.STARTUP.error("Invalid value for setBlockJumpFactor: " + obj + ". Must be a float");
+            this.setBlockJumpFactor = 1.0f;
+        }
         return this;
     }
 
@@ -576,7 +584,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mobCategory = stringToMobCategory(category);
         return this;
     }
-
+    /*modelResource = t -> t.getBuilder().newID("geo/", ".geo.json");
+    textureResource = t -> t.getBuilder().newID("textures/models/entity/", ".png");
+    animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");*/
 
     @Info(value = """
             Sets a function to determine the model resource for the entity.
@@ -594,7 +604,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```
             """)
     public BaseLivingEntityBuilder<T> modelResource(Function<T, ResourceLocation> function) {
-        modelResource = function;
+        modelResource = entity -> {
+            Object obj = function.apply(entity);
+            if (obj instanceof String) {
+                return new ResourceLocation((String) obj);
+            } else if (obj instanceof ResourceLocation) {
+                return (ResourceLocation) obj;
+            } else {
+                ConsoleJS.STARTUP.error("Invalid model resource: " + obj);
+                return entity.getBuilder().newID("geo/", ".geo.json");
+            }
+        };
         return this;
     }
 
@@ -615,7 +635,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```
             """)
     public BaseLivingEntityBuilder<T> textureResource(Function<T, ResourceLocation> function) {
-        textureResource = function;
+        textureResource = entity -> {
+            Object obj = function.apply(entity);
+            if (obj instanceof String) {
+                return new ResourceLocation((String) obj);
+            } else if (obj instanceof ResourceLocation) {
+                return (ResourceLocation) obj;
+            } else {
+                ConsoleJS.STARTUP.error("Invalid texture resource: " + obj);
+                return entity.getBuilder().newID("textures/models/entity/", ".png");
+            }
+        };
         return this;
     }
 
@@ -635,8 +665,18 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> animationResource(Function<T, ResourceLocation> function) {
-        animationResource = function;
+    public BaseLivingEntityBuilder<T> animationResource(Function<T, Object> function) {
+        animationResource = entity -> {
+            Object obj = function.apply(entity);
+            if (obj instanceof String) {
+                return new ResourceLocation((String) obj);
+            } else if (obj instanceof ResourceLocation) {
+                return (ResourceLocation) obj;
+            } else {
+                ConsoleJS.STARTUP.error("Invalid animation resource: " + obj);
+                return entity.getBuilder().newID("animations/", ".animation.json");
+            }
+        };
         return this;
     }
 
@@ -759,8 +799,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> calculateFallDamage(Function<ContextUtils.CalculateFallDamageContext, Integer> calculation) {
-        calculateFallDamage = calculation;
+    public BaseLivingEntityBuilder<T> calculateFallDamage(Object2IntFunction<ContextUtils.CalculateFallDamageContext> calculation) {
+        calculateFallDamage = calculation::getInt;
         return this;
     }
 
@@ -811,19 +851,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a function to determine the block speed factor of the entity.
             The provided Function accepts a {@link LivingEntity} parameter,
             representing the entity whose block speed factor is being determined.
-            It returns an Integer representing the block speed factor.
+            It returns a Float representing the block speed factor.
                         
             Example usage:
             ```javascript
             entityBuilder.blockSpeedFactor(entity => {
                 // Define logic to calculate and return the block speed factor for the entity
                 // Use information about the LivingEntity provided by the context.
-                return // Some Integer value representing the block speed factor;
+                return // Some Float value representing the block speed factor;
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> blockSpeedFactor(Function<LivingEntity, Integer> function) {
-        this.blockSpeedFactor = function;
+    public BaseLivingEntityBuilder<T> blockSpeedFactor(Function<LivingEntity, Object> callback) {
+        blockSpeedFactor = callback;
         return this;
     }
 
@@ -923,8 +963,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> setStandingEyeHeight(Function<ContextUtils.EntityPoseDimensionsContext, Float> setStandingEyeHeight) {
-        this.setStandingEyeHeight = setStandingEyeHeight;
+    public BaseLivingEntityBuilder<T> setStandingEyeHeight(Object2FloatFunction<ContextUtils.EntityPoseDimensionsContext> setStandingEyeHeight) {
+        this.setStandingEyeHeight = setStandingEyeHeight::getFloat;
         return this;
     }
 
@@ -996,8 +1036,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> nextStep(Function<Entity, Float> nextStep) {
-        this.nextStep = nextStep;
+    public BaseLivingEntityBuilder<T> nextStep(Object2FloatFunction<Entity> nextStep) {
+        this.nextStep = nextStep::getFloat;
         return this;
     }
 
@@ -1070,8 +1110,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> scale(Function<LivingEntity, Float> customScale) {
-        this.scale = customScale;
+    public BaseLivingEntityBuilder<T> scale(Object2FloatFunction<LivingEntity> customScale) {
+        this.scale = customScale::getFloat;
         return this;
     }
 
@@ -1125,8 +1165,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> experienceReward(Function<LivingEntity, Integer> experienceReward) {
-        this.experienceReward = experienceReward;
+    public BaseLivingEntityBuilder<T> experienceReward(Object2IntFunction<LivingEntity> experienceReward) {
+        this.experienceReward = experienceReward::getInt;
         return this;
     }
 
@@ -1578,25 +1618,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets a callback function to define the absorption amount for the entity.
-            The provided Consumer accepts a {@link ContextUtils.EntityFloatContext} parameter,
-            representing the context of setting the absorption amount for the entity.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.setAbsorptionAmount(context => {
-                // Define custom logic for setting the absorption amount for the entity
-                // Use information about the EntityFloatContext provided by the context.
-            });
-            ```
-            """)
-    public BaseLivingEntityBuilder<T> setAbsorptionAmount(Consumer<ContextUtils.EntityFloatContext> consumer) {
-        setAbsorptionAmount = consumer;
-        return this;
-    }
-
-
-    @Info(value = """
             Sets a callback function to be executed when the entity enters combat.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that has entered combat.
@@ -1868,7 +1889,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> onInteract(Function<ContextUtils.MobInteractContext, @Nullable InteractionResult> f) {
+    public BaseLivingEntityBuilder<T> onInteract(Function<ContextUtils.MobInteractContext, InteractionResult> f) {
         onInteract = f;
         return this;
     }
@@ -1945,11 +1966,26 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
 
-    @Info(value = "Sets a boolean for if the entity dampens vibrations")
-    public BaseLivingEntityBuilder<T> dampensVibrations(BooleanSupplier supplier) {
-        dampensVibrations = supplier;
+    @Info(value = """
+            Sets a predicate to determine whether the living entity dampens vibrations.
+                
+            @param predicate The predicate to determine whether the living entity dampens vibrations.
+                
+            The predicate should take a LivingEntity as a parameter and return a boolean value indicating whether the living entity dampens vibrations.
+                
+            Example usage:
+            ```javascript
+            baseLivingEntityBuilder.dampensVibrations(entity => {
+                // Determine whether the living entity dampens vibrations
+                // Return true if the entity dampens vibrations, false otherwise
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> dampensVibrations(Predicate<LivingEntity> predicate) {
+        this.dampensVibrations = predicate;
         return this;
     }
+
 
     @Info(value = """
             Sets a callback function to be executed when a player interacts with the entity.

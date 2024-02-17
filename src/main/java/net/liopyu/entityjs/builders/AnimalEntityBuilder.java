@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.nbt.CompoundTag;
@@ -148,7 +149,13 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             ```
             """)
     public AnimalEntityBuilder<T> ambientSoundInterval(int ambientSoundInterval) {
-        this.ambientSoundInterval = ambientSoundInterval;
+        Object obj = ambientSoundInterval;
+        if (obj instanceof Integer) {
+            this.ambientSoundInterval = (int) obj;
+        } else {
+            ConsoleJS.STARTUP.error("Invalid value for ambientSoundInterval: " + obj + "must be an Integer");
+            this.ambientSoundInterval = 240;
+        }
         return this;
     }
 

@@ -2,6 +2,7 @@ package net.liopyu.entityjs.entities;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
@@ -49,7 +50,9 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * The 'basic' implementation of a custom entity, implements most methods through the builder with some
@@ -224,7 +227,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     public float getWalkTargetValue(BlockPos pos, LevelReader levelReader) {
         if (builder.walkTargetValue != null) {
             final ContextUtils.EntityBlockPosLevelContext context = new ContextUtils.EntityBlockPosLevelContext(pos, levelReader, this);
-            return builder.walkTargetValue.apply(context);
+            return builder.walkTargetValue.getFloat(context);
         } else {
             return super.getWalkTargetValue(pos, levelReader);
         }
@@ -299,14 +302,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     }
 
     //Mob Overrides
-    public InteractionResult onInteract(Player pPlayer, InteractionHand pHand) {
-        if (builder.onInteract != null) {
-            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            final InteractionResult result = builder.onInteract.apply(context);
-            return result == null ? super.interact(pPlayer, pHand) : result;
-        }
-        return InteractionResult.PASS;
-    }
+
 
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
@@ -330,8 +326,12 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
                 return InteractionResult.CONSUME;
             }
         }
-
-        return onInteract(pPlayer, pHand);
+        if (builder.onInteract != null) {
+            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+            final InteractionResult result = builder.onInteract.apply(context);
+            return result == null ? super.mobInteract(pPlayer, pHand) : result;
+        }
+        return super.mobInteract(pPlayer, pHand);
     }
 
 
@@ -458,12 +458,25 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         return builder.isPushable;
     }
 
+    private final Set<String> errorMessagesLogged = new HashSet<>();
+
+    private void logErrorMessageOnce(String errorMessage) {
+        if (!errorMessagesLogged.contains(errorMessage)) {
+            ConsoleJS.STARTUP.error(errorMessage);
+            errorMessagesLogged.add(errorMessage);
+        }
+    }
+
     @Override
     protected float getBlockSpeedFactor() {
-        if (builder.blockSpeedFactor != null) {
-            return builder.blockSpeedFactor.apply(this);
+        Object obj = builder.blockSpeedFactor.apply(this);
+        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
+        if (obj instanceof Float) {
+            return (float) obj;
+        } else {
+            logErrorMessageOnce("Invalid value for blockSpeedFactor: " + obj + ". Must be a float");
+            return super.getBlockSpeedFactor();
         }
-        return super.getBlockSpeedFactor();
     }
 
     @Override
@@ -578,7 +591,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     public int calculateFallDamage(float fallDistance, float pDamageMultiplier) {
         final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(fallDistance, pDamageMultiplier, this);
         if (builder.calculateFallDamage != null) {
-            return builder.calculateFallDamage.apply(context);
+            return builder.calculateFallDamage.getInt(context);
         }
         return super.calculateFallDamage(fallDistance, pDamageMultiplier);
     }
@@ -596,9 +609,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder.onAddedToWorld != null) {
+        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             builder.onAddedToWorld.accept(this);
-
         }
     }
 
@@ -647,7 +659,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     protected float nextStep() {
         if (builder.nextStep != null) {
-            return builder.nextStep.apply(this);
+            return builder.nextStep.getFloat(this);
         } else {
             return super.nextStep();
         }
@@ -688,7 +700,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public float getScale() {
         if (builder.scale != null) {
-            return builder.scale.apply(this);
+            return builder.scale.getFloat(this);
         } else {
             return super.getScale();
         }
@@ -942,17 +954,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
 
     @Override
-    public void setAbsorptionAmount(float value) {
-        if (builder.setAbsorptionAmount != null) {
-            final ContextUtils.EntityFloatContext context = new ContextUtils.EntityFloatContext(this, value);
-            builder.setAbsorptionAmount.accept(context);
-        } else {
-            super.setAbsorptionAmount(value);
-        }
-    }
-
-
-    @Override
     public void onEnterCombat() {
         if (builder.onEnterCombat != null) {
             builder.onEnterCombat.accept(this);
@@ -1111,10 +1112,18 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         }
     }
 
+    @Override
+    public int getExperienceReward() {
+        if (builder.experienceReward != null) {
+            return builder.experienceReward.getInt(this);
+        } else {
+            return super.getExperienceReward();
+        }
+    }
 
     @Override
     public boolean dampensVibrations() {
-        return (builder.dampensVibrations != null) ? builder.dampensVibrations.getAsBoolean() : super.dampensVibrations();
+        return (builder.dampensVibrations != null) ? builder.dampensVibrations.test(this) : super.dampensVibrations();
     }
 
 

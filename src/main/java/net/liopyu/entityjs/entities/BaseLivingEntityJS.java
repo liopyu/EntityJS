@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.entities;
 
 import com.mojang.logging.LogUtils;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
 import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
@@ -188,7 +189,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
         if (builder.setStandingEyeHeight != null) {
             final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, this);
-            return builder.setStandingEyeHeight.apply(context);
+            return builder.setStandingEyeHeight.getFloat(context);
         } else {
             return super.getStandingEyeHeight(pPose, pDimensions);
         }
@@ -231,7 +232,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public int calculateFallDamage(float fallDistance, float pDamageMultiplier) {
         final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(fallDistance, pDamageMultiplier, this);
         if (builder.calculateFallDamage != null) {
-            return builder.calculateFallDamage.apply(context);
+            return builder.calculateFallDamage.getInt(context);
         }
         return super.calculateFallDamage(fallDistance, pDamageMultiplier);
     }
@@ -247,9 +248,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder.onAddedToWorld != null) {
+        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             builder.onAddedToWorld.accept(this);
-
         }
     }
 
@@ -260,7 +260,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
             final InteractionResult result = builder.onInteract.apply(context);
             return result == null ? super.interact(pPlayer, pHand) : result;
         }
-
         return super.interact(pPlayer, pHand);
     }
 
@@ -317,7 +316,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     protected float nextStep() {
         if (builder.nextStep != null) {
-            return builder.nextStep.apply(this);
+            return builder.nextStep.getFloat(this);
         } else {
             return super.nextStep();
         }
@@ -375,7 +374,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public float getScale() {
         if (builder.scale != null) {
-            return builder.scale.apply(this);
+            return builder.scale.getFloat(this);
         } else {
             return super.getScale();
         }
@@ -398,7 +397,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public int getExperienceReward() {
         if (builder.experienceReward != null) {
-            return builder.experienceReward.apply(this);
+            return builder.experienceReward.getInt(this);
         } else {
             return super.getExperienceReward();
         }
@@ -641,17 +640,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
 
     @Override
-    public void setAbsorptionAmount(float value) {
-        if (builder.setAbsorptionAmount != null) {
-            final ContextUtils.EntityFloatContext context = new ContextUtils.EntityFloatContext(this, value);
-            builder.setAbsorptionAmount.accept(context);
-        } else {
-            super.setAbsorptionAmount(value);
-        }
-    }
-
-
-    @Override
     public void onEnterCombat() {
         if (builder.onEnterCombat != null) {
             builder.onEnterCombat.accept(this);
@@ -824,7 +812,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean dampensVibrations() {
-        return (builder.dampensVibrations != null) ? builder.dampensVibrations.getAsBoolean() : super.dampensVibrations();
+        return (builder.dampensVibrations != null) ? builder.dampensVibrations.test(this) : super.dampensVibrations();
     }
 
 
@@ -891,10 +879,14 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected float getBlockSpeedFactor() {
-        if (builder.blockSpeedFactor != null) {
-            return builder.blockSpeedFactor.apply(this);
+        Object obj = builder.blockSpeedFactor.apply(this);
+        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
+        if (obj instanceof Float) {
+            return (float) obj;
+        } else {
+            ConsoleJS.STARTUP.error("Invalid value for blockSpeedFactor: " + obj + ". Must be a float");
+            return super.getBlockSpeedFactor();
         }
-        return super.getBlockSpeedFactor();
     }
 
     @Override

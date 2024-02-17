@@ -268,20 +268,6 @@ public class ContextUtils {
     }
 
 
-    public static class EntityFloatContext {
-        @Info("The living entity floating in a fluid")
-        public final LivingEntity livingEntity;
-
-        @Info("The amount of absorption by the living entity")
-        public final float absorptionAmount;
-
-        public EntityFloatContext(LivingEntity livingEntity, float absorptionAmount) {
-            this.livingEntity = livingEntity;
-            this.absorptionAmount = absorptionAmount;
-        }
-    }
-
-
     public static class CalculateFallDamageContext {
         @Info("The height from which the entity is falling")
         public final float fallHeight;

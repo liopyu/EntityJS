@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.entities;
 
 import com.mojang.logging.LogUtils;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
@@ -36,6 +37,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
@@ -147,15 +149,17 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
     //Mob Overrides
-    public InteractionResult onInteract(Player pPlayer, InteractionHand pHand) {
-        if (builder.onInteract != null) {
-            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            final InteractionResult result = builder.onInteract.apply(context);
-            return result == null ? super.interact(pPlayer, pHand) : result;
-        }
-        return InteractionResult.PASS;
-    }
 
+
+    @Override
+    public float getWalkTargetValue(BlockPos pos, LevelReader levelReader) {
+        if (builder.walkTargetValue != null) {
+            final ContextUtils.EntityBlockPosLevelContext context = new ContextUtils.EntityBlockPosLevelContext(pos, levelReader, this);
+            return builder.walkTargetValue.getFloat(context);
+        } else {
+            return super.getWalkTargetValue(pos, levelReader);
+        }
+    }
 
     @Override
     public float getPathfindingMalus(BlockPathTypes pNodeType) {
@@ -294,10 +298,14 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     protected float getBlockSpeedFactor() {
-        if (builder.blockSpeedFactor != null) {
-            return builder.blockSpeedFactor.apply(this);
+        Object obj = builder.blockSpeedFactor.apply(this);
+        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
+        if (obj instanceof Float) {
+            return (float) obj;
+        } else {
+            ConsoleJS.STARTUP.error("Invalid value for blockSpeedFactor: " + obj + ". Must be a float");
+            return super.getBlockSpeedFactor();
         }
-        return super.getBlockSpeedFactor();
     }
 
     @Override
@@ -334,14 +342,14 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
     }
 
+
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         if (builder.onInteract != null) {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
             final InteractionResult result = builder.onInteract.apply(context);
-            return result == null ? super.interact(pPlayer, pHand) : result;
+            return result == null ? super.mobInteract(pPlayer, pHand) : result;
         }
-
         return super.mobInteract(pPlayer, pHand);
     }
 
@@ -357,6 +365,14 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         } else return super.isImmobile();
     }
 
+    @Override
+    public int getExperienceReward() {
+        if (builder.experienceReward != null) {
+            return builder.experienceReward.getInt(this);
+        } else {
+            return super.getExperienceReward();
+        }
+    }
 
     @Override
     protected boolean isFlapping() {
@@ -372,7 +388,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     public int calculateFallDamage(float fallDistance, float pDamageMultiplier) {
         final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(fallDistance, pDamageMultiplier, this);
         if (builder.calculateFallDamage != null) {
-            return builder.calculateFallDamage.apply(context);
+            return builder.calculateFallDamage.getInt(context);
         }
         return super.calculateFallDamage(fallDistance, pDamageMultiplier);
     }
@@ -390,9 +406,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder.onAddedToWorld != null) {
+        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             builder.onAddedToWorld.accept(this);
-
         }
     }
 
@@ -441,7 +456,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     protected float nextStep() {
         if (builder.nextStep != null) {
-            return builder.nextStep.apply(this);
+            return builder.nextStep.getFloat(this);
         } else {
             return super.nextStep();
         }
@@ -490,7 +505,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     public float getScale() {
         if (builder.scale != null) {
-            return builder.scale.apply(this);
+            return builder.scale.getFloat(this);
         } else {
             return super.getScale();
         }
@@ -753,17 +768,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
 
     @Override
-    public void setAbsorptionAmount(float value) {
-        if (builder.setAbsorptionAmount != null) {
-            final ContextUtils.EntityFloatContext context = new ContextUtils.EntityFloatContext(this, value);
-            builder.setAbsorptionAmount.accept(context);
-        } else {
-            super.setAbsorptionAmount(value);
-        }
-    }
-
-
-    @Override
     public void onEnterCombat() {
         if (builder.onEnterCombat != null) {
             builder.onEnterCombat.accept(this);
@@ -925,7 +929,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public boolean dampensVibrations() {
-        return (builder.dampensVibrations != null) ? builder.dampensVibrations.getAsBoolean() : super.dampensVibrations();
+        return (builder.dampensVibrations != null) ? builder.dampensVibrations.test(this) : super.dampensVibrations();
     }
 
 
