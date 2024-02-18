@@ -1,6 +1,7 @@
 package net.liopyu.entityjs;
 
 import com.mojang.logging.LogUtils;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.client.ClientEventHandlers;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.RegistryUtil;
@@ -10,6 +11,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Mod(EntityJSMod.MOD_ID)
@@ -29,7 +33,8 @@ public class EntityJSMod {
         }
     }
 
+
     public static ResourceLocation identifier(String path) {
-        return  new ResourceLocation(MOD_ID, path);
+        return new ResourceLocation(MOD_ID, path);
     }
 }

@@ -148,7 +148,13 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean isPushable() {
-        return builder.isPushable;
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isPushable, "boolean");
+        if (obj != null) {
+            return (boolean) obj;
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isPushable from entity: " + builder.get() + ". Value: " + builder.isPushable + ". Must be a boolean, defaulting to " + super.isPushable());
+            return super.isPushable();
+        }
     }
 
     @Override
@@ -197,7 +203,13 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected float getBlockJumpFactor() {
-        return builder.setBlockJumpFactor;
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor, "float");
+        if (obj instanceof Float) {
+            return (float) obj;
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("Invalid value for setBlockJumpFactor: " + obj + ". Must be a float");
+            return super.getBlockJumpFactor();
+        }
     }
 
     @Override

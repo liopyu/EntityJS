@@ -4,6 +4,7 @@
   "package": "net.liopyu.entityjs.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "KubeJSCommandsMixin",
     "ServerScriptManagerMixin"
   ],
   "client": [],

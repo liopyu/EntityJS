@@ -103,7 +103,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<T, ResourceLocation> modelResource;
     public transient Function<T, ResourceLocation> textureResource;
     public transient Function<T, ResourceLocation> animationResource;
-    public transient boolean isPushable;
+    public transient Object isPushable;
     public transient final List<AnimationControllerSupplier<T>> animationSuppliers;
     public transient Predicate<LivingEntity> shouldDropLoot;
     public transient Predicate<ContextUtils.PassengerEntityContext> canAddPassenger;
@@ -111,7 +111,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean isAlwaysExperienceDropper;
     public transient Predicate<LivingEntity> isImmobile;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
-    public transient float setBlockJumpFactor;
+    public transient Object setBlockJumpFactor;
     public transient Function<LivingEntity, Object> blockSpeedFactor;
     public transient float setJumpPower;
     public transient float setSoundVolume;
@@ -274,7 +274,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         isPushable = true;
         animationSuppliers = new ArrayList<>();
         isAlwaysExperienceDropper = false;
-        setBlockJumpFactor = 0.5f;
+        setBlockJumpFactor = 1;
         setJumpPower = 0.5f;
         setSoundVolume = 1.0f;
         setWaterSlowDown = 0.8f;
@@ -435,14 +435,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.setBlockJumpFactor(1.2);
             ```
             """)
-    public BaseLivingEntityBuilder<T> setBlockJumpFactor(float blockJumpFactor) {
-        Object obj = blockJumpFactor;
-        if (obj instanceof Float) {
-            this.setBlockJumpFactor = (float) obj;
-        } else {
-            ConsoleJS.STARTUP.error("Invalid value for setBlockJumpFactor: " + obj + ". Must be a float");
-            this.setBlockJumpFactor = 1.0f;
-        }
+    public BaseLivingEntityBuilder<T> setBlockJumpFactor(Object blockJumpFactor) {
+        setBlockJumpFactor = blockJumpFactor;
         return this;
     }
 
@@ -584,9 +578,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mobCategory = stringToMobCategory(category);
         return this;
     }
-    /*modelResource = t -> t.getBuilder().newID("geo/", ".geo.json");
-    textureResource = t -> t.getBuilder().newID("textures/models/entity/", ".png");
-    animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");*/
+
 
     @Info(value = """
             Sets a function to determine the model resource for the entity.
@@ -689,7 +681,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.isPushable(true);
             ```
             """)
-    public BaseLivingEntityBuilder<T> isPushable(boolean b) {
+    public BaseLivingEntityBuilder<T> isPushable(Object b) {
         isPushable = b;
         return this;
     }
@@ -2191,14 +2183,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```
             """)
     public BaseLivingEntityBuilder<T> addAnimationController(String name, int translationTicksLength, IAnimationPredicateJS<T> predicate) {
-        return addKeyAnimationController(name, translationTicksLength, EasingType.LINEAR, predicate, null, null, null);
+        return addKeyAnimationController(name, translationTicksLength, predicate, null, null, null);
     }
 
 
     @Info(value = "Adds a new AnimationController to the entity, with the ability to add event listeners", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
-            @Param(name = "easingType", value = "The easing type used by the animation controller"),
             @Param(name = "predicate", value = "The predicate for the controller, determines if an animation should continue or not"),
             @Param(name = "soundListener", value = "A sound listener, used to execute actions when the json requests a sound to play. May be null"),
             @Param(name = "particleListener", value = "A particle listener, used to execute actions when the json requests a particle. May be null"),
@@ -2207,13 +2198,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> addKeyAnimationController(
             String name,
             int translationTicksLength,
-            EasingType easingType,
             IAnimationPredicateJS<T> predicate,
             @Nullable ISoundListenerJS<T> soundListener,
             @Nullable IParticleListenerJS<T> particleListener,
             @Nullable ICustomInstructionListenerJS<T> instructionListener
     ) {
-        animationSuppliers.add(new AnimationControllerSupplier<>(name, translationTicksLength, easingType, predicate, soundListener, particleListener, instructionListener));
+        animationSuppliers.add(new AnimationControllerSupplier<>(name, translationTicksLength, predicate, soundListener, particleListener, instructionListener));
         return this;
     }
 
@@ -2307,7 +2297,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public record AnimationControllerSupplier<E extends LivingEntity & IAnimatableJS>(
             String name,
             int translationTicksLength,
-            EasingType easingType,
             IAnimationPredicateJS<E> predicate,
             @Nullable ISoundListenerJS<E> soundListener,
 
@@ -2332,7 +2321,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**
-     * A wrapper around {@link software.bernie.geckolib3.core.controller.AnimationController.IAnimationPredicate IAnimationPredicate}
+     * A wrapper around {@link net.liopyu.liolib.core.controller.AnimationController.IAnimationPredicate IAnimationPredicate}
      * that is easier to work with in js
      */
     @FunctionalInterface

@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
@@ -11,6 +12,7 @@ import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
 import net.liopyu.liolib.util.GeckoLibUtil;
@@ -450,31 +452,34 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected float getBlockJumpFactor() {
-        return builder.setBlockJumpFactor;
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor, "float");
+        if (obj != null) {
+            return (float) obj;
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("Invalid value for setBlockJumpFactor: " + obj + ". Must be a float");
+            return super.getBlockJumpFactor();
+        }
     }
 
     @Override
     public boolean isPushable() {
-        return builder.isPushable;
-    }
-
-    private final Set<String> errorMessagesLogged = new HashSet<>();
-
-    private void logErrorMessageOnce(String errorMessage) {
-        if (!errorMessagesLogged.contains(errorMessage)) {
-            ConsoleJS.STARTUP.error(errorMessage);
-            errorMessagesLogged.add(errorMessage);
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isPushable, "boolean");
+        if (obj != null) {
+            return (boolean) obj;
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isPushable from entity: " + builder.get() + ". Value: " + builder.isPushable + ". Must be a boolean, defaulting to " + super.isPushable());
+            return super.isPushable();
         }
     }
 
     @Override
     protected float getBlockSpeedFactor() {
-        Object obj = builder.blockSpeedFactor.apply(this);
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
         if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
-        if (obj instanceof Float) {
+        if (obj != null) {
             return (float) obj;
         } else {
-            logErrorMessageOnce("Invalid value for blockSpeedFactor: " + obj + ". Must be a float");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + builder.get() + ". Value: " + builder.blockSpeedFactor.apply(this) + ". Must be a float, defaulting to " + super.getBlockSpeedFactor());
             return super.getBlockSpeedFactor();
         }
     }
