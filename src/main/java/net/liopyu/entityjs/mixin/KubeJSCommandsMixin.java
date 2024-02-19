@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * Mixin class to reload error messages on each startup script reload.
  * This ensures that scripters can see error messages again after reloading startup scripts,
- * as startup scripts are the only possible way to trigger a reload for entity methods.
+ * as startup scripts are the only possible way to trigger a reload for most entity methods.
  */
 @Mixin(KubeJSCommands.class)
 public abstract class KubeJSCommandsMixin {

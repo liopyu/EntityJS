@@ -5,25 +5,15 @@ import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.Object2FloatFunction;
-import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.entities.MobEntityJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
-import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Map;
 import java.util.function.*;
 
 /**
@@ -36,29 +26,28 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     //pathfinder mob
     public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
     //pathfinder mob
-    public transient Predicate<PathfinderMob> shouldStayCloseToLeashHolder;
+    public transient Function<PathfinderMob, Object> shouldStayCloseToLeashHolder;
     //pathfinder mob
-    public transient double followLeashSpeed;
+    public transient Object followLeashSpeed;
     //pathfinder mob
-    public transient Object2FloatFunction<ContextUtils.EntityBlockPosLevelContext> walkTargetValue;
+    public transient Function<ContextUtils.EntityBlockPosLevelContext, Object> walkTargetValue;
 
 
     public transient SpawnEggItemBuilder eggItem;
-    public transient Function<ContextUtils.EntityBlockPathTypeContext, Boolean> canCutCorner;
+    public transient Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner;
 
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Ingredient canFireProjectileWeapon;
-    public transient Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate;
+    public transient Function<ContextUtils.EntityProjectileWeaponContext, Object> canFireProjectileWeaponPredicate;
     public transient Consumer<LivingEntity> ate;
     public transient ResourceLocation getAmbientSound;
-    public transient Predicate<ContextUtils.EntityItemStackContext> canHoldItem;
-    public transient Boolean shouldDespawnInPeaceful;
-    public transient Predicate<PathfinderMob> canPickUpLoot;
-    public transient Boolean isPersistenceRequired;
+    public transient Function<ContextUtils.EntityItemStackContext, Object> canHoldItem;
+    public transient Object shouldDespawnInPeaceful;
+    public transient Function<PathfinderMob, Object> canPickUpLoot;
+    public transient Object isPersistenceRequired;
 
-    public transient Function<PathfinderMob, Double> meleeAttackRangeSqr;
-    public transient Consumer<PathfinderMob> aiStep;
-    public transient boolean canJump;
+    public transient Function<PathfinderMob, Object> meleeAttackRangeSqr;
+    public transient Object canJump;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
@@ -81,24 +70,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         }
     }
 
-    @Info(value = """
-            Sets a callback function to be executed during the AI step of the entity.
-                        
-            @param aiStep A Consumer accepting a PathfinderMob parameter, defining the behavior
-                          to be executed during the AI step.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.aiStep(entity => {
-                // Custom logic to be executed during the AI step of the entity.
-            });
-            ```
-            """)
-    public MobBuilder<T> aiStep(Consumer<PathfinderMob> aiStep) {
-        this.aiStep = aiStep;
-        return this;
-    }
-
 
     @Info(value = """
             Sets a function to determine if the entity can cut corners when navigating paths.
@@ -114,7 +85,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             });
             ```
             """)
-    public MobBuilder<T> canCutCorner(Function<ContextUtils.EntityBlockPathTypeContext, Boolean> canCutCorner) {
+    public MobBuilder<T> canCutCorner(Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner) {
         this.canCutCorner = canCutCorner;
         return this;
     }
@@ -191,7 +162,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             });
             ```
             """)
-    public MobBuilder<T> canFireProjectileWeaponPredicate(Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate) {
+    public MobBuilder<T> canFireProjectileWeaponPredicate(Function<ContextUtils.EntityProjectileWeaponContext, Object> canFireProjectileWeaponPredicate) {
         this.canFireProjectileWeaponPredicate = canFireProjectileWeaponPredicate;
         return this;
     }
@@ -250,7 +221,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             });
             ```
             """)
-    public MobBuilder<T> canHoldItem(Predicate<ContextUtils.EntityItemStackContext> canHoldItem) {
+    public MobBuilder<T> canHoldItem(Function<ContextUtils.EntityItemStackContext, Object> canHoldItem) {
         this.canHoldItem = canHoldItem;
         return this;
     }
@@ -286,7 +257,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             });
             ```
             """)
-    public MobBuilder<T> canPickUpLoot(Predicate<PathfinderMob> canPickUpLoot) {
+    public MobBuilder<T> canPickUpLoot(Function<PathfinderMob, Object> canPickUpLoot) {
         this.canPickUpLoot = canPickUpLoot;
         return this;
     }
@@ -322,7 +293,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             });
             ```
             """)
-    public MobBuilder<T> meleeAttackRangeSqr(Function<PathfinderMob, Double> meleeAttackRangeSqr) {
+    public MobBuilder<T> meleeAttackRangeSqr(Function<PathfinderMob, Object> meleeAttackRangeSqr) {
         this.meleeAttackRangeSqr = meleeAttackRangeSqr;
         return this;
     }
@@ -362,7 +333,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             });
             ```
             """)
-    public MobBuilder<T> shouldStayCloseToLeashHolder(Predicate<PathfinderMob> predicate) {
+    public MobBuilder<T> shouldStayCloseToLeashHolder(Function<PathfinderMob, Object> predicate) {
         this.shouldStayCloseToLeashHolder = predicate;
         return this;
     }

@@ -17,21 +17,22 @@ import net.minecraft.world.level.ServerLevelAccessor;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> extends MobBuilder<T> {
 
 
-    public transient ResourceLocation getBreedOffspring;
-    public transient Ingredient isFood;
-    public transient Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate;
-    public transient Predicate<LivingEntity> canBreed;
+    public transient Object getBreedOffspring;
+    public transient Object isFood;
+    public transient Function<ContextUtils.EntityItemStackContext, Object> isFoodPredicate;
+    public transient Function<LivingEntity, Object> canBreed;
 
-    public transient double myRidingOffset;
-    public transient int ambientSoundInterval;
-    public transient Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway;
+    public transient Object myRidingOffset;
+    public transient Object ambientSoundInterval;
+    public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
 
-    public transient Predicate<ContextUtils.EntityAnimalContext> canMate;
+    public transient Function<ContextUtils.EntityAnimalContext, Object> canMate;
     public transient Consumer<ContextUtils.LevelAnimalContext> onSpawnChildFromBreeding;
 
 
@@ -73,7 +74,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             });
             ```
             """)
-    public AnimalEntityBuilder<T> canBreed(Predicate<LivingEntity> canBreed) {
+    public AnimalEntityBuilder<T> canBreed(Function<LivingEntity, Object> canBreed) {
         this.canBreed = canBreed;
         return this;
     }
@@ -93,7 +94,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             ]);
             ```
             """)
-    public AnimalEntityBuilder<T> isFood(Ingredient isFood) {
+    public AnimalEntityBuilder<T> isFood(Object isFood) {
         this.isFood = isFood;
         return this;
     }
@@ -114,7 +115,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             });
             ```
             """)
-    public AnimalEntityBuilder<T> isFoodPredicate(Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate) {
+    public AnimalEntityBuilder<T> isFoodPredicate(Function<ContextUtils.EntityItemStackContext, Object> isFoodPredicate) {
         this.isFoodPredicate = isFoodPredicate;
         return this;
     }
@@ -174,7 +175,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             });
             ```
             """)
-    public AnimalEntityBuilder<T> removeWhenFarAway(Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway) {
+    public AnimalEntityBuilder<T> removeWhenFarAway(Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway) {
         this.removeWhenFarAway = removeWhenFarAway;
         return this;
     }
@@ -194,7 +195,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             });
             ```
             """)
-    public AnimalEntityBuilder<T> canMate(Predicate<ContextUtils.EntityAnimalContext> predicate) {
+    public AnimalEntityBuilder<T> canMate(Function<ContextUtils.EntityAnimalContext, Object> predicate) {
         this.canMate = predicate;
         return this;
     }

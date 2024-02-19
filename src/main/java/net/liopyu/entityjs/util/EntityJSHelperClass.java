@@ -1,6 +1,8 @@
 package net.liopyu.entityjs.util;
 
 import dev.latvian.mods.kubejs.util.ConsoleJS;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.HumanoidArm;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,8 +24,31 @@ public class EntityJSHelperClass {
             case "double" -> convertToDouble(input);
             case "float" -> convertToFloat(input);
             case "boolean" -> convertToBoolean(input);
+            case "humanoidarm" -> convertToHumanoidArm(input);
+            case "interactionresult" -> convertToInteractionResult(input);
             default -> input;
         };
+    }
+
+    private static InteractionResult convertToInteractionResult(Object input) {
+        if (input instanceof InteractionResult) {
+            return (InteractionResult) input;
+        } else if (input instanceof String) {
+            String stringValue = ((String) input).toLowerCase();
+            switch (stringValue) {
+                case "success":
+                    return InteractionResult.SUCCESS;
+                case "consume":
+                    return InteractionResult.CONSUME;
+                case "pass":
+                    return InteractionResult.PASS;
+                case "fail":
+                    return InteractionResult.FAIL;
+                case "consume_partial":
+                    return InteractionResult.CONSUME_PARTIAL;
+            }
+        }
+        return null;
     }
 
     private static Boolean convertToBoolean(Object input) {
@@ -70,5 +95,20 @@ public class EntityJSHelperClass {
             return null;
         }
     }
+
+    private static HumanoidArm convertToHumanoidArm(Object input) {
+        if (input instanceof HumanoidArm) {
+            return (HumanoidArm) input;
+        } else if (input instanceof String) {
+            String stringValue = ((String) input).toLowerCase();
+            if ("left".equals(stringValue)) {
+                return HumanoidArm.LEFT;
+            } else if ("right".equals(stringValue)) {
+                return HumanoidArm.RIGHT;
+            }
+        }
+        return null;
+    }
+
 
 }
