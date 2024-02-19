@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.util;
 
 import dev.latvian.mods.kubejs.util.ConsoleJS;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.HumanoidArm;
 
@@ -26,8 +27,18 @@ public class EntityJSHelperClass {
             case "boolean" -> convertToBoolean(input);
             case "humanoidarm" -> convertToHumanoidArm(input);
             case "interactionresult" -> convertToInteractionResult(input);
+            case "resourcelocation" -> convertToResourceLocation(input);
             default -> input;
         };
+    }
+
+    private static ResourceLocation convertToResourceLocation(Object input) {
+        if (input instanceof ResourceLocation) {
+            return (ResourceLocation) input;
+        } else if (input instanceof String) {
+            return new ResourceLocation((String) input);
+        }
+        return null;
     }
 
     private static InteractionResult convertToInteractionResult(Object input) {

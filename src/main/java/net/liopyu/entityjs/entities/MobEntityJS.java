@@ -79,6 +79,65 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         return animationFactory;
     }
 
+    //Jump logic up here because it's unused in Living Entity Builder.
+    public boolean canJump() {
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canJump, "boolean");
+        if (obj != null) {
+            return (boolean) obj;
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canJump from entity: " + entityName() + ". Value: " + builder.canJump + ". Must be a boolean. Defaulting to true");
+            return true;
+        }
+    }
+
+    public void onJump() {
+        if (builder.onLivingJump != null) {
+            builder.onLivingJump.accept(this);
+        }
+    }
+
+    public void jump() {
+        double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
+        Vec3 currentVelocity = this.getDeltaMovement();
+
+        // Adjust the Y component of the velocity to the calculated jump power
+        this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
+
+        if (this.isSprinting()) {
+            // If sprinting, add a horizontal impulse for forward boost
+            float yawRadians = this.getYRot() * 0.017453292F;
+            this.setDeltaMovement(
+                    this.getDeltaMovement().add(
+                            -Math.sin(yawRadians) * 0.2,
+                            0.0,
+                            Math.cos(yawRadians) * 0.2
+                    )
+            );
+        }
+
+        this.hasImpulse = true;
+        onJump();
+        ForgeHooks.onLivingJump(this);
+    }
+
+    public boolean shouldJump() {
+        BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
+        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
+    }
+
+    @Override
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        if (builder.onInteract != null) {
+            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.onInteract.apply(context), "interactionresult");
+            if (obj != null) {
+                return (InteractionResult) obj;
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.mobInteract(pPlayer, pHand));
+        }
+        return super.mobInteract(pPlayer, pHand);
+    }
+
     public String entityName() {
         return this.getType().toString();
     }
@@ -100,26 +159,26 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     //Mob Overrides
     @Override
-    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-        if (builder.onInteract != null) {
-            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.onInteract.apply(context), "interactionresult");
-            if (obj != null) {
-                return (InteractionResult) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.mobInteract(pPlayer, pHand));
-        }
-        return super.mobInteract(pPlayer, pHand);
+    public HumanoidArm getMainArm() {
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.mainArm, "humanoidarm");
+        if (obj != null)
+            return (HumanoidArm) obj;
+
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mainArm from entity: " + entityName() + ". Value: " + builder.mainArm + ". Must be a HumanoidArm. Defaulting to " + super.getMainArm());
+
+        return super.getMainArm();
     }
 
+
     @Override
-    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
-        if (builder.setStandingEyeHeight == null) return super.getStandingEyeHeight(pPose, pDimensions);
-        final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setStandingEyeHeight from entity: " + entityName() + ". Value: " + builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + super.getStandingEyeHeight(pPose, pDimensions));
-        return super.getStandingEyeHeight(pPose, pDimensions);
+    public void aiStep() {
+        super.aiStep();
+        if (builder.aiStep != null) {
+            builder.aiStep.accept(this);
+        }
+        if (canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
+            jump();
+        }
     }
 
     @Override
@@ -344,6 +403,17 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
     @Override
+    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
+        if (builder.setStandingEyeHeight == null) return super.getStandingEyeHeight(pPose, pDimensions);
+        final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, this);
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
+        if (obj != null) return (float) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setStandingEyeHeight from entity: " + entityName() + ". Value: " + builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + super.getStandingEyeHeight(pPose, pDimensions));
+        return super.getStandingEyeHeight(pPose, pDimensions);
+    }
+
+
+    @Override
     public boolean isPushable() {
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isPushable, "boolean");
         if (obj != null) {
@@ -366,31 +436,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
     }
 
-    @Override
-    public HumanoidArm getMainArm() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.mainArm, "humanoidarm");
-        if (obj != null)
-            return (HumanoidArm) obj;
-
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mainArm from entity: " + entityName() + ". Value: " + builder.mainArm + ". Must be a HumanoidArm. Defaulting to " + super.getMainArm());
-
-        return super.getMainArm();
-    }
-
-
-    @Override
-    public void aiStep() {
-        super.aiStep();
-        if (builder.aiStep != null) {
-            builder.aiStep.accept(this);
-        }
-        if (canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
-            jump();
-        }
-    }
-
-
-    //Start of the method adding madness - liopyu
     @Override
     protected boolean canAddPassenger(@NotNull Entity entity) {
         if (builder.canAddPassenger == null) return super.canAddPassenger(entity);
@@ -567,37 +612,31 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Nullable
     @Override
     protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
-        if (builder.setHurtSound != null) {
-            if (builder.setHurtSound instanceof ResourceLocation soundLocation) {
-                return ForgeRegistries.SOUND_EVENTS.getValue(soundLocation);
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound + ". Must be a ResourceLocation. Defaulting to " + super.getHurtSound(p_21239_));
-            }
-        }
+        if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound, "resourcelocation");
+        if (obj != null) return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj);
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound + ". Must be a ResourceLocation. Defaulting to " + super.getHurtSound(p_21239_));
         return super.getHurtSound(p_21239_);
     }
 
 
     @Override
     protected SoundEvent getSwimSplashSound() {
-        Object obj = builder.setSwimSplashSound;
-        if (obj instanceof ResourceLocation resourceLocation) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(resourceLocation));
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound from entity: " + entityName() + ". Value: " + obj + ". Must be a ResourceLocation. Defaulting to " + super.getSwimSplashSound());
-            return super.getSwimSplashSound();
-        }
+        if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setSwimSplashSound, "resourcelocation");
+        if (obj != null) return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound from entity: " + entityName() + ". Value: " + builder.setSwimSplashSound + ". Must be a ResourceLocation. Defaulting to " + super.getSwimSplashSound());
+        return super.getSwimSplashSound();
     }
+
 
     @Override
     protected SoundEvent getSwimSound() {
-        Object obj = builder.setSwimSound;
-        if (obj instanceof ResourceLocation resourceLocation) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(resourceLocation));
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound from entity: " + entityName() + ". Value: " + obj + ". Must be a ResourceLocation. Defaulting to " + super.getSwimSound());
-            return super.getSwimSound();
-        }
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setSwimSound, "resourcelocation");
+        if (builder.setSwimSound != null && obj != null)
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound from entity: " + entityName() + ". Value: " + builder.setSwimSound + ". Must be a ResourceLocation. Defaulting to " + super.getSwimSound());
+        return super.getSwimSound();
     }
 
 
@@ -766,16 +805,13 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
     }
 
-    @Nullable
     @Override
     protected SoundEvent getDeathSound() {
-        Object obj = builder.setDeathSound;
-        if (obj instanceof ResourceLocation resourceLocation) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(resourceLocation));
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound from entity: " + entityName() + ". Value: " + obj + ". Must be a ResourceLocation. Defaulting to " + super.getDeathSound());
-            return super.getDeathSound();
-        }
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setDeathSound, "resourcelocation");
+        if (builder.setDeathSound != null && obj != null)
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound from entity: " + entityName() + ". Value: " + builder.setDeathSound + ". Must be a ResourceLocation. Defaulting to " + super.getDeathSound());
+        return super.getDeathSound();
     }
 
 
@@ -792,32 +828,28 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public @NotNull Fallsounds getFallSounds() {
-        Object smallFallSound = builder.smallFallSound;
-        Object largeFallSound = builder.largeFallSound;
+        Object smallFallSound = EntityJSHelperClass.convertObjectToDesired(builder.smallFallSound, "resourcelocation");
+        Object largeFallSound = EntityJSHelperClass.convertObjectToDesired(builder.largeFallSound, "resourcelocation");
 
-        if (smallFallSound instanceof ResourceLocation small && largeFallSound instanceof ResourceLocation large) {
+        if (smallFallSound != null && largeFallSound != null)
             return new Fallsounds(
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(small)),
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(large))
+                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) smallFallSound)),
+                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) largeFallSound))
             );
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value(s) for fall sounds from entity: " + entityName() + ". Small fall sound: " + smallFallSound + ", Large fall sound: " + largeFallSound + ". Both must be ResourceLocations. Defaulting to " + super.getFallSounds());
-            return super.getFallSounds();
-        }
+
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value(s) for fall sounds from entity: " + entityName() + ". Small fall sound: " + smallFallSound + ", Large fall sound: " + largeFallSound + ". Both must be ResourceLocations. Defaulting to " + super.getFallSounds());
+        return super.getFallSounds();
     }
 
 
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
-        Object obj = builder.eatingSound;
-        if (obj instanceof ResourceLocation resourceLocation) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(resourceLocation));
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound from entity: " + entityName() + ". Value: " + obj + ". Must be a ResourceLocation. Defaulting to " + super.getEatingSound(itemStack));
-            return super.getEatingSound(itemStack);
-        }
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.eatingSound, "resourcelocation");
+        if (builder.eatingSound != null && obj != null)
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound from entity: " + entityName() + ". Value: " + builder.eatingSound + ". Must be a ResourceLocation. Defaulting to " + super.getEatingSound(itemStack));
+        return super.getEatingSound(itemStack);
     }
-
 
     @Override
     public boolean onClimbable() {
@@ -1117,6 +1149,16 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
     @Override
+    protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
+        if (builder.onHurt != null) {
+            final ContextUtils.EntityDamageContext context = new ContextUtils.EntityDamageContext(pDamageSource, pDamageAmount, this);
+            builder.onHurt.accept(context);
+        } else {
+            super.actuallyHurt(pDamageSource, pDamageAmount);
+        }
+    }
+
+    @Override
     public void lavaHurt() {
         if (builder.lavaHurt != null) {
             builder.lavaHurt.accept(this);
@@ -1209,9 +1251,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
 
-    public static final Logger LOGGER = LogUtils.getLogger();
-
-
     @Override
     public boolean canChangeDimensions() {
         if (builder.canChangeDimensions != null) {
@@ -1286,52 +1325,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         } else super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
     }
 
-    public boolean canJump() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canJump, "boolean");
-        if (obj != null) {
-            return (boolean) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canJump from entity: " + entityName() + ". Value: " + builder.canJump + ". Must be a boolean. Defaulting to true");
-            return true;
-        }
-    }
-
-
-    public void onJump() {
-        if (builder.onLivingJump != null) {
-            builder.onLivingJump.accept(this);
-        }
-    }
-
-    public void jump() {
-        double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
-        Vec3 currentVelocity = this.getDeltaMovement();
-
-        // Adjust the Y component of the velocity to the calculated jump power
-        this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
-
-        if (this.isSprinting()) {
-            // If sprinting, add a horizontal impulse for forward boost
-            float yawRadians = this.getYRot() * 0.017453292F;
-            this.setDeltaMovement(
-                    this.getDeltaMovement().add(
-                            -Math.sin(yawRadians) * 0.2,
-                            0.0,
-                            Math.cos(yawRadians) * 0.2
-                    )
-            );
-        }
-
-        this.hasImpulse = true;
-        onJump();
-        ForgeHooks.onLivingJump(this);
-    }
-
-    public boolean shouldJump() {
-        // Check if the entity can stand on the forward block
-        BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
-    }
 
     @Override
     public Iterable<ItemStack> getArmorSlots() {

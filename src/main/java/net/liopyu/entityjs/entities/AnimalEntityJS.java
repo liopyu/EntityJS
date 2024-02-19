@@ -125,6 +125,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         return getAnimatableInstanceCache;
     }
 
+    //Some logic overrides up here because there are different implementations in the other builders.
+
+
     @Override
     protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
@@ -159,26 +162,23 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
 
     //Ageable Mob Overrides
-    @Nullable
     @Override
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         if (builder.getBreedOffspring != null) {
-            if (builder.getBreedOffspring instanceof ResourceLocation resourceLocation) {
-                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.getBreedOffspring, "resourcelocation");
+            if (obj != null) {
+                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue((ResourceLocation) obj);
                 if (breedOffspringType != null) {
-                    Object breedOffspringEntity = breedOffspringType.create(serverLevel);
+                    Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
                     if (breedOffspringEntity instanceof AgeableMob) {
                         return (AgeableMob) breedOffspringEntity;
                     }
-                } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.getBreedOffspring + ". Must be an AgeableMob subclass. Defaulting to super method: " + builder.get());
-                    return builder.get().create(serverLevel);
                 }
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.getBreedOffspring + ". Must be an AgeableMob subclass. Defaulting to super method: " + builder.get());
             }
         }
         return null;
     }
-
 
     @Override
     public boolean isFood(ItemStack pStack) {
@@ -277,6 +277,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         }
     }
 
+    //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
 
@@ -312,7 +313,73 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     }
 
     //Mob Overrides
+    public boolean canJump() {
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canJump, "boolean");
+        if (obj != null) {
+            return (boolean) obj;
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canJump from entity: " + entityName() + ". Value: " + builder.canJump + ". Must be a boolean. Defaulting to true");
+            return true;
+        }
+    }
 
+    public void onJump() {
+        if (builder.onLivingJump != null) {
+            builder.onLivingJump.accept(this);
+        }
+    }
+
+    public void jump() {
+        double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
+        Vec3 currentVelocity = this.getDeltaMovement();
+
+        // Adjust the Y component of the velocity to the calculated jump power
+        this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
+
+        if (this.isSprinting()) {
+            // If sprinting, add a horizontal impulse for forward boost
+            float yawRadians = this.getYRot() * 0.017453292F;
+            this.setDeltaMovement(
+                    this.getDeltaMovement().add(
+                            -Math.sin(yawRadians) * 0.2,
+                            0.0,
+                            Math.cos(yawRadians) * 0.2
+                    )
+            );
+        }
+
+        this.hasImpulse = true;
+        onJump();
+        ForgeHooks.onLivingJump(this);
+    }
+
+    public boolean shouldJump() {
+        BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
+        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
+    }
+
+    @Override
+    public HumanoidArm getMainArm() {
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.mainArm, "humanoidarm");
+        if (obj != null)
+            return (HumanoidArm) obj;
+
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mainArm from entity: " + entityName() + ". Value: " + builder.mainArm + ". Must be a HumanoidArm. Defaulting to " + super.getMainArm());
+
+        return super.getMainArm();
+    }
+
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (builder.aiStep != null) {
+            builder.aiStep.accept(this);
+        }
+        if (canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
+            jump();
+        }
+    }
 
     @Override
     public float getWalkTargetValue(BlockPos pos, LevelReader levelReader) {
@@ -569,29 +636,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         }
     }
 
-    @Override
-    public HumanoidArm getMainArm() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.mainArm, "humanoidarm");
-        if (obj != null)
-            return (HumanoidArm) obj;
-
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mainArm from entity: " + entityName() + ". Value: " + builder.mainArm + ". Must be a HumanoidArm. Defaulting to " + super.getMainArm());
-
-        return super.getMainArm();
-    }
-
-
-    @Override
-    public void aiStep() {
-        super.aiStep();
-        if (builder.aiStep != null) {
-            builder.aiStep.accept(this);
-        }
-        if (canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
-            jump();
-        }
-    }
-
 
     //Start of the method adding madness - liopyu
     @Override
@@ -770,37 +814,31 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Nullable
     @Override
     protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
-        if (builder.setHurtSound != null) {
-            if (builder.setHurtSound instanceof ResourceLocation soundLocation) {
-                return ForgeRegistries.SOUND_EVENTS.getValue(soundLocation);
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound + ". Must be a ResourceLocation. Defaulting to " + super.getHurtSound(p_21239_));
-            }
-        }
+        if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound, "resourcelocation");
+        if (obj != null) return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj);
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound + ". Must be a ResourceLocation. Defaulting to " + super.getHurtSound(p_21239_));
         return super.getHurtSound(p_21239_);
     }
 
 
     @Override
     protected SoundEvent getSwimSplashSound() {
-        Object obj = builder.setSwimSplashSound;
-        if (obj instanceof ResourceLocation resourceLocation) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(resourceLocation));
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound from entity: " + entityName() + ". Value: " + obj + ". Must be a ResourceLocation. Defaulting to " + super.getSwimSplashSound());
-            return super.getSwimSplashSound();
-        }
+        if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setSwimSplashSound, "resourcelocation");
+        if (obj != null) return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound from entity: " + entityName() + ". Value: " + builder.setSwimSplashSound + ". Must be a ResourceLocation. Defaulting to " + super.getSwimSplashSound());
+        return super.getSwimSplashSound();
     }
+
 
     @Override
     protected SoundEvent getSwimSound() {
-        Object obj = builder.setSwimSound;
-        if (obj instanceof ResourceLocation resourceLocation) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(resourceLocation));
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound from entity: " + entityName() + ". Value: " + obj + ". Must be a ResourceLocation. Defaulting to " + super.getSwimSound());
-            return super.getSwimSound();
-        }
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setSwimSound, "resourcelocation");
+        if (builder.setSwimSound != null && obj != null)
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound from entity: " + entityName() + ". Value: " + builder.setSwimSound + ". Must be a ResourceLocation. Defaulting to " + super.getSwimSound());
+        return super.getSwimSound();
     }
 
 
@@ -969,16 +1007,13 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         }
     }
 
-    @Nullable
     @Override
     protected SoundEvent getDeathSound() {
-        Object obj = builder.setDeathSound;
-        if (obj instanceof ResourceLocation resourceLocation) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(resourceLocation));
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound from entity: " + entityName() + ". Value: " + obj + ". Must be a ResourceLocation. Defaulting to " + super.getDeathSound());
-            return super.getDeathSound();
-        }
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setDeathSound, "resourcelocation");
+        if (builder.setDeathSound != null && obj != null)
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound from entity: " + entityName() + ". Value: " + builder.setDeathSound + ". Must be a ResourceLocation. Defaulting to " + super.getDeathSound());
+        return super.getDeathSound();
     }
 
 
@@ -995,32 +1030,28 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public @NotNull Fallsounds getFallSounds() {
-        Object smallFallSound = builder.smallFallSound;
-        Object largeFallSound = builder.largeFallSound;
+        Object smallFallSound = EntityJSHelperClass.convertObjectToDesired(builder.smallFallSound, "resourcelocation");
+        Object largeFallSound = EntityJSHelperClass.convertObjectToDesired(builder.largeFallSound, "resourcelocation");
 
-        if (smallFallSound instanceof ResourceLocation small && largeFallSound instanceof ResourceLocation large) {
+        if (smallFallSound != null && largeFallSound != null)
             return new Fallsounds(
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(small)),
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(large))
+                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) smallFallSound)),
+                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) largeFallSound))
             );
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value(s) for fall sounds from entity: " + entityName() + ". Small fall sound: " + smallFallSound + ", Large fall sound: " + largeFallSound + ". Both must be ResourceLocations. Defaulting to " + super.getFallSounds());
-            return super.getFallSounds();
-        }
+
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value(s) for fall sounds from entity: " + entityName() + ". Small fall sound: " + smallFallSound + ", Large fall sound: " + largeFallSound + ". Both must be ResourceLocations. Defaulting to " + super.getFallSounds());
+        return super.getFallSounds();
     }
 
 
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
-        Object obj = builder.eatingSound;
-        if (obj instanceof ResourceLocation resourceLocation) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(resourceLocation));
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound from entity: " + entityName() + ". Value: " + obj + ". Must be a ResourceLocation. Defaulting to " + super.getEatingSound(itemStack));
-            return super.getEatingSound(itemStack);
-        }
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.eatingSound, "resourcelocation");
+        if (builder.eatingSound != null && obj != null)
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound from entity: " + entityName() + ". Value: " + builder.eatingSound + ". Must be a ResourceLocation. Defaulting to " + super.getEatingSound(itemStack));
+        return super.getEatingSound(itemStack);
     }
-
 
     @Override
     public boolean onClimbable() {
@@ -1421,10 +1452,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         return super.isInvulnerableTo(p_20122_);
     }
 
-
-    public static final Logger LOGGER = LogUtils.getLogger();
-
-
     @Override
     public boolean canChangeDimensions() {
         if (builder.canChangeDimensions != null) {
@@ -1499,52 +1526,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         } else super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
     }
 
-    public boolean canJump() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canJump, "boolean");
-        if (obj != null) {
-            return (boolean) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canJump from entity: " + entityName() + ". Value: " + builder.canJump + ". Must be a boolean. Defaulting to true");
-            return true;
-        }
-    }
-
-
-    public void onJump() {
-        if (builder.onLivingJump != null) {
-            builder.onLivingJump.accept(this);
-        }
-    }
-
-    public void jump() {
-        double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
-        Vec3 currentVelocity = this.getDeltaMovement();
-
-        // Adjust the Y component of the velocity to the calculated jump power
-        this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
-
-        if (this.isSprinting()) {
-            // If sprinting, add a horizontal impulse for forward boost
-            float yawRadians = this.getYRot() * 0.017453292F;
-            this.setDeltaMovement(
-                    this.getDeltaMovement().add(
-                            -Math.sin(yawRadians) * 0.2,
-                            0.0,
-                            Math.cos(yawRadians) * 0.2
-                    )
-            );
-        }
-
-        this.hasImpulse = true;
-        onJump();
-        ForgeHooks.onLivingJump(this);
-    }
-
-    public boolean shouldJump() {
-        // Check if the entity can stand on the forward block
-        BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
-    }
 
     @Override
     public Iterable<ItemStack> getArmorSlots() {
