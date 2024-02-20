@@ -670,24 +670,6 @@ public class ContextUtils {
     }
 
 
-    public static class ArrowVec3Context {
-        @Info("The starting position vector of the arrow")
-        public final Vec3 startVec;
-
-        @Info("The ending position vector of the arrow")
-        public final Vec3 endVec;
-
-        @Info("The abstract arrow entity")
-        public final AbstractArrow arrow;
-
-        public ArrowVec3Context(Vec3 startVec, Vec3 endVec, AbstractArrow arrow) {
-            this.startVec = startVec;
-            this.endVec = endVec;
-            this.arrow = arrow;
-        }
-    }
-
-
     public static class ArrowEntityHitContext {
         @Info("The abstract arrow entity")
         public final AbstractArrow entity;

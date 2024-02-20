@@ -83,7 +83,6 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
         return this;
     }
 
-    //Projectile Overrides
     @Info(value = """
             Sets a function to determine the texture resource for the entity.
             The provided Function accepts a parameter of type T (the entity),
@@ -113,6 +112,9 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
         };
         return this;
     }
+
+    //Projectile Overrides
+
 
     @Info(value = """
             Sets a callback function to be executed when the projectile hits an entity.

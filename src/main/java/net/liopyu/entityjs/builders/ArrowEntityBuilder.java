@@ -2,6 +2,7 @@ package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
+import net.liopyu.entityjs.entities.ArrowEntityJS;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -30,22 +31,56 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient Consumer<ContextUtils.ArrowBlockHitContext> onHitBlock;
     public transient ResourceLocation defaultHitGroundSoundEvent;
     public transient Consumer<ContextUtils.ArrowLivingEntityContext> doPostHurtEffects;
-    public transient Function<ContextUtils.ArrowVec3Context, EntityHitResult> findHitEntity;
     public transient Function<Entity, Object> canHitEntity;
     public transient Function<Player, Object> tryPickup;
-    public transient DoubleConsumer setBaseDamage;
-    public transient IntConsumer setKnockback;
+    public transient double setBaseDamage;
+    public transient Function<ArrowEntityJS, Object> setDamageFunction;
+    public transient Integer setKnockback;
     public transient Float setWaterInertia;
+    public transient Boolean canHitEnderman;
 
     public ArrowEntityBuilder(ResourceLocation i) {
         super(i);
         thisList.add(this);
         textureLocation = t -> t.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
+        setBaseDamage = 2;
+        setKnockback = 0;
+        canHitEnderman = false;
     }
 
     @Override
     public EntityType<T> createObject() {
         return new EntityTypeBuilder<>(this).get();
+    }
+
+    @Info(value = """
+            Sets a function to determine the texture resource for the entity.
+            The provided Function accepts a parameter of type T (the entity),
+            allowing changing the texture based on information about the entity.
+            The default behavior returns <namespace>:textures/entity/projectiles/<path>.png.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.textureResource(entity => {
+                // Define logic to determine the texture resource for the entity
+                // Use information about the entity provided by the context.
+                return // Some ResourceLocation representing the texture resource;
+            });
+            ```
+            """)
+    public ArrowEntityBuilder<T> textureLocation(Function<T, Object> function) {
+        textureLocation = entity -> {
+            Object obj = function.apply(entity);
+            if (obj instanceof String) {
+                return new ResourceLocation((String) obj);
+            } else if (obj instanceof ResourceLocation) {
+                return (ResourceLocation) obj;
+            } else {
+                EntityJSHelperClass.logErrorMessageOnce("Invalid texture resource in arrow builder: " + obj + "Defaulting to " + entity.getArrowBuilder().newID("textures/entity/projectiles/", ".png"));
+                return entity.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
+            }
+        };
+        return this;
     }
 
     //Arrow Overrides
@@ -78,24 +113,56 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             arrowEntityBuilder.setBaseDamage(8.0);
             ```
             """)
-    public ArrowEntityBuilder<T> setBaseDamage(DoubleConsumer baseDamage) {
+    public ArrowEntityBuilder<T> setBaseDamage(double baseDamage) {
         setBaseDamage = baseDamage;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the base damage value with a function for the arrow entity for more control.
+                        
+            @param setDamageFunction Function which returns a double.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.setBaseDamage(entity => {
+            return 10; //Some double based off entity context.
+            );
+            ```
+            """)
+    public ArrowEntityBuilder<T> setDamageFunction(Function<ArrowEntityJS, Object> baseDamage) {
+        setDamageFunction = baseDamage;
         return this;
     }
 
 
     @Info(value = """
-            Sets the knockback value for the arrow entity.
+            Sets the knockback value for the arrow entity when a bow has Punch Enchantment.
                         
-            @param setKnockback The knockback value to be set.
+            @param setKnockback The knockback value of the Punch Enchantment to be set.
                         
             Example usage:
             ```javascript
             arrowEntityBuilder.setKnockback(2);
             ```
             """)
-    public ArrowEntityBuilder<T> setKnockback(IntConsumer knockback) {
+    public ArrowEntityBuilder<T> setKnockback(int knockback) {
         setKnockback = knockback;
+        return this;
+    }
+
+    @Info(value = """
+            Sets whether the arrow is allowed to hit Endermen.
+                        
+            @param canHitEnderman Boolean value indicating whether the arrow is allowed to hit Endermen.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.canHitEnderman(true);
+            ```
+            """)
+    public ArrowEntityBuilder<T> canHitEnderman(boolean b) {
+        canHitEnderman = b;
         return this;
     }
 
@@ -133,24 +200,6 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         return this;
     }
 
-    @Info(value = """
-            Sets a function to find the entity hit by the arrow based on a context containing start and end vectors.
-                        
-            @param findHitEntity The function to find the hit entity.
-                        
-            Example usage:
-            ```javascript
-            arrowEntityBuilder.findHitEntity(context => {
-                // Custom logic to find the entity hit by the arrow based on the context
-                // ContextUtils.ArrowVec3Context provides start and end vectors.
-                // Return an EntityHitResult containing the hit entity or null if no entity is hit.
-            });
-            ```
-            """)
-    public ArrowEntityBuilder<T> findHitEntity(Function<ContextUtils.ArrowVec3Context, EntityHitResult> function) {
-        findHitEntity = function;
-        return this;
-    }
 
     @Info(value = """
             Sets the sound event for the arrow entity using a resource location.
@@ -207,35 +256,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     }
 
     //Projectile Overrides
-    @Info(value = """
-            Sets a function to determine the texture resource for the entity.
-            The provided Function accepts a parameter of type T (the entity),
-            allowing changing the texture based on information about the entity.
-            The default behavior returns <namespace>:textures/entity/projectiles/<path>.png.
-                        
-            Example usage:
-            ```javascript
-            arrowEntityBuilder.textureResource(entity => {
-                // Define logic to determine the texture resource for the entity
-                // Use information about the entity provided by the context.
-                return // Some ResourceLocation representing the texture resource;
-            });
-            ```
-            """)
-    public ArrowEntityBuilder<T> textureLocation(Function<T, Object> function) {
-        textureLocation = entity -> {
-            Object obj = function.apply(entity);
-            if (obj instanceof String) {
-                return new ResourceLocation((String) obj);
-            } else if (obj instanceof ResourceLocation) {
-                return (ResourceLocation) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("Invalid texture resource in arrow builder: " + obj + "Defaulting to " + entity.getArrowBuilder().newID("textures/entity/projectiles/", ".png"));
-                return entity.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
-            }
-        };
-        return this;
-    }
+
 
     @Info(value = """
             Sets a consumer to be called when the arrow entity hits another entity.

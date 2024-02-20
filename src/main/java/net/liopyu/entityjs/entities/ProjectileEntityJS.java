@@ -3,6 +3,7 @@ package net.liopyu.entityjs.entities;
 import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -52,22 +53,28 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
         return null;
     }
 
+    public String entityName() {
+        return this.getType().toString();
+    }
 
+    //Base Entity Overrides
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
+        if (builder.shouldRenderAtSqrDistance == null) super.shouldRenderAtSqrDistance(distance);
         final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-        return builder.shouldRenderAtSqrDistance != null ? (boolean) builder.shouldRenderAtSqrDistance.apply(context) : super.shouldRenderAtSqrDistance(distance);
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.shouldRenderAtSqrDistance.apply(context), "boolean");
+        if (obj != null) return (boolean) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for projectile builder: " + builder.shouldRenderAtSqrDistance.apply(context) + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
+        return super.shouldRenderAtSqrDistance(distance);
     }
 
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-
         if (builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
             builder.lerpTo.accept(context);
         } else super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
     }
-
 
     @Override
     public void tick() {
@@ -86,38 +93,6 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
         }
     }
 
-
-    @Override
-    protected void onHitEntity(EntityHitResult result) {
-        if (builder != null && builder.onHitEntity != null) {
-            final ContextUtils.ProjectileEntityHitContext context = new ContextUtils.ProjectileEntityHitContext(result, this);
-            builder.onHitEntity.accept(context);
-        } else {
-            super.onHitEntity(result);
-        }
-    }
-
-    @Override
-    protected void onHitBlock(BlockHitResult result) {
-        if (builder != null && builder.onHitBlock != null) {
-            final ContextUtils.ProjectileBlockHitContext context = new ContextUtils.ProjectileBlockHitContext(result, this);
-            builder.onHitBlock.accept(context);
-        } else {
-            super.onHitBlock(result);
-        }
-    }
-
-
-    @Override
-    protected boolean canHitEntity(Entity entity) {
-        if (builder != null && builder.canHitEntity != null) {
-            return (boolean) builder.canHitEntity.apply(entity);
-        } else {
-            return super.canHitEntity(entity);
-        }
-    }
-
-
     @Override
     public void playerTouch(Player player) {
         if (builder != null && builder.playerTouch != null) {
@@ -133,4 +108,32 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
         return builder.isAttackable != null ? builder.isAttackable : super.isAttackable();
     }
 
+    //Projectile overrides
+    @Override
+    protected void onHitEntity(EntityHitResult result) {
+        if (builder != null && builder.onHitEntity != null) {
+            final ContextUtils.ProjectileEntityHitContext context = new ContextUtils.ProjectileEntityHitContext(result, this);
+            builder.onHitEntity.accept(context);
+        } else {
+            super.onHitEntity(result);
+        }
+    }
+
+    @Override
+    protected void onHitBlock(BlockHitResult result) {
+        super.onHitBlock(result);
+        if (builder != null && builder.onHitBlock != null) {
+            final ContextUtils.ProjectileBlockHitContext context = new ContextUtils.ProjectileBlockHitContext(result, this);
+            builder.onHitBlock.accept(context);
+        }
+    }
+
+    @Override
+    protected boolean canHitEntity(Entity entity) {
+        if (builder.canHitEntity == null) return super.canHitEntity(entity);
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canHitEntity.apply(entity), "boolean");
+        if (obj != null) return super.canHitEntity(entity) && (boolean) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid canHitEntity for projectile builder: " + builder.canHitEntity.apply(entity) + ". Must be a boolean. Defaulting to super method: " + super.canHitEntity(entity));
+        return super.canHitEntity(entity);
+    }
 }
