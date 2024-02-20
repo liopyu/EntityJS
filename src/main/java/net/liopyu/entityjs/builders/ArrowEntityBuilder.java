@@ -37,7 +37,6 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient Function<ArrowEntityJS, Object> setDamageFunction;
     public transient Integer setKnockback;
     public transient Float setWaterInertia;
-    public transient Boolean canHitEnderman;
 
     public ArrowEntityBuilder(ResourceLocation i) {
         super(i);
@@ -45,7 +44,6 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         textureLocation = t -> t.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
         setBaseDamage = 2;
         setKnockback = 0;
-        canHitEnderman = false;
     }
 
     @Override
@@ -148,21 +146,6 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             """)
     public ArrowEntityBuilder<T> setKnockback(int knockback) {
         setKnockback = knockback;
-        return this;
-    }
-
-    @Info(value = """
-            Sets whether the arrow is allowed to hit Endermen.
-                        
-            @param canHitEnderman Boolean value indicating whether the arrow is allowed to hit Endermen.
-                        
-            Example usage:
-            ```javascript
-            arrowEntityBuilder.canHitEnderman(true);
-            ```
-            """)
-    public ArrowEntityBuilder<T> canHitEnderman(boolean b) {
-        canHitEnderman = b;
         return this;
     }
 

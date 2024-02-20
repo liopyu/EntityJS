@@ -293,15 +293,13 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
         boolean flag = entity.getType() == EntityType.ENDERMAN;
         int k = entity.getRemainingFireTicks();
-        if (this.isOnFire() && flag != builder.canHitEnderman) {
+        if (this.isOnFire() && !flag) {
             entity.setSecondsOnFire(5);
         }
 
         if (entity.hurt(damagesource, (float) i)) {
-            if (!builder.canHitEnderman) {
-                if (flag) {
-                    return;
-                }
+            if (flag) {
+                return;
             }
 
             if (entity instanceof LivingEntity) {

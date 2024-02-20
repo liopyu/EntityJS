@@ -130,7 +130,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected boolean canHitEntity(Entity entity) {
-        if (builder.canHitEntity == null) return super.canHitEntity(entity);
+        if (builder == null || builder.canHitEntity == null) return super.canHitEntity(entity);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canHitEntity.apply(entity), "boolean");
         if (obj != null) return super.canHitEntity(entity) && (boolean) obj;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid canHitEntity for projectile builder: " + builder.canHitEntity.apply(entity) + ". Must be a boolean. Defaulting to super method: " + super.canHitEntity(entity));
