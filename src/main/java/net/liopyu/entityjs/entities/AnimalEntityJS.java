@@ -539,9 +539,11 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected float getBlockJumpFactor() {
-        if (builder.setBlockJumpFactor != null) {
-            return builder.setBlockJumpFactor + this.getBlockJumpFactor();
-        } else return super.getBlockJumpFactor();
+        if (builder.setBlockJumpFactor == null) return super.getBlockJumpFactor();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor.apply(this), "float");
+        if (obj != null) return (float) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
+        return super.getBlockJumpFactor();
     }
 
     @Override

@@ -110,7 +110,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean isAlwaysExperienceDropper;
     public transient Function<LivingEntity, Object> isImmobile;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
-    public transient Float setBlockJumpFactor;
+    public transient Function<LivingEntity, Object> setBlockJumpFactor;
     public transient Function<LivingEntity, Object> blockSpeedFactor;
     public transient Float setJumpPower;
     public transient Float setSoundVolume;
@@ -253,6 +253,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
     public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
 
+    public transient Consumer<ContextUtils.RenderContext> render;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -282,6 +283,24 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         renderType = RenderType.CUTOUT;
         mainArm = HumanoidArm.RIGHT;
 
+    }
+
+    @Info(value = """
+            Defines logic to render the entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.render(context => {
+                // Define logic to render the entity
+                if (context.entity.isBaby()) {
+                context.poseStack.scale(0.5F, 0.5F, 0.5F);
+                }
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> render(Consumer<ContextUtils.RenderContext> render) {
+        this.render = render;
+        return this;
     }
 
     @Info(value = """
@@ -437,10 +456,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                         
             Example usage:
             ```javascript
-            entityBuilder.setBlockJumpFactor(1.2);
+            entityBuilder.setBlockJumpFactor(entity => {
+                //Set the jump factor for the entity through context
+                return 1 //some float value;
+            });
             ```
             """)
-    public BaseLivingEntityBuilder<T> setBlockJumpFactor(Float blockJumpFactor) {
+    public BaseLivingEntityBuilder<T> setBlockJumpFactor(Function<LivingEntity, Object> blockJumpFactor) {
         setBlockJumpFactor = blockJumpFactor;
         return this;
     }
@@ -600,7 +622,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> modelResource(Function<T, ResourceLocation> function) {
+    public BaseLivingEntityBuilder<T> modelResource(Function<T, Object> function) {
         modelResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String) {
@@ -608,7 +630,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                ConsoleJS.STARTUP.error("Invalid model resource: " + obj + "Defaulting to " + entity.getBuilder().newID("geo/", ".geo.json"));
+                EntityJSHelperClass.logErrorMessageOnce("Invalid model resource: " + obj + "Defaulting to " + entity.getBuilder().newID("geo/", ".geo.json"));
                 return entity.getBuilder().newID("geo/", ".geo.json");
             }
         };
@@ -631,7 +653,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> textureResource(Function<T, ResourceLocation> function) {
+    public BaseLivingEntityBuilder<T> textureResource(Function<T, Object> function) {
         textureResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String) {
@@ -639,7 +661,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                ConsoleJS.STARTUP.error("Invalid texture resource: " + obj + "Defaulting to " + entity.getBuilder().newID("textures/models/entity/", ".png"));
+                EntityJSHelperClass.logErrorMessageOnce("Invalid texture resource: " + obj + "Defaulting to " + entity.getBuilder().newID("textures/models/entity/", ".png"));
                 return entity.getBuilder().newID("textures/models/entity/", ".png");
             }
         };
@@ -670,7 +692,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                ConsoleJS.STARTUP.error("Invalid animation resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("animations/", ".animation.json"));
+                EntityJSHelperClass.logErrorMessageOnce("Invalid animation resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("animations/", ".animation.json"));
                 return entity.getBuilder().newID("animations/", ".animation.json");
             }
         };
@@ -699,9 +721,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                         
             Example usage:
             ```javascript
-            entityBuilder.canAddPassenger(context -> {
+            entityBuilder.canAddPassenger(context => {
                 // Custom logic to determine if a passenger can be added to the entity
-                return true; // Replace with your custom condition
+                return true; 
             });
             ```
             """)
@@ -1112,7 +1134,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets a function to determine the custom scale of the entity.
+            Sets a function to determine the custom hitbox scale of the entity.
             The provided Function accepts a {@link LivingEntity} parameter,
             representing the entity whose scale is being determined.
             It returns a Float representing the custom scale.
@@ -1122,7 +1144,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.scale(entity => {
                 // Define logic to calculate and return the custom scale for the entity
                 // Use information about the LivingEntity provided by the context.
-                return // Some Float value representing the custom scale;
+                return // Some Float value;
             });
             ```
             """)
@@ -1257,7 +1279,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.canBeAffected(context => {
                 // Define conditions to check if the entity can be affected by the effect
                 // Use information about the OnEffectContext provided by the context.
-                return // Some boolean condition indicating if the entity can be affected;
+                return // Some boolean condition indicating if the entity can be affected by an effect;
             });
             ```
             """)
@@ -1274,9 +1296,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                         
             Example usage:
             ```javascript
-            entityBuilder.invertedHealAndHarm(entity -> {
+            entityBuilder.invertedHealAndHarm(entity => {
                 // Custom logic to determine if the entity has inverted heal and harm behavior
-                return true; // Replace with your custom condition
+                return true; // Replace with your custom boolean condition
             });
             ```
             """)
@@ -1309,6 +1331,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity receives healing.
             The provided Consumer accepts a {@link ContextUtils.EntityHealContext} parameter,
             representing the context of the entity receiving healing.
+            Very similar to {@link ForgeEventFactory.onLivingHeal}
                         
             Example usage:
             ```javascript
@@ -1841,7 +1864,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.shouldRiderFaceForward(context => {
                 // Define the conditions for the rider to face forward
                 // Use information about the player entity provided by the context.
-                return someBoolean;
+                return true //someBoolean;
             });
             ```
             """)
@@ -1858,15 +1881,14 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                         
             Example usage:
             ```javascript
-            entityBuilder.canFreezePredicate(entity => {
+            entityBuilder.canFreeze(entity => {
                 // Define the conditions for the entity to be able to freeze
                 // Use information about the LivingEntity provided by the context.
-                const someBoolean = // Some boolean condition;
-                return someBoolean;
+                return true //someBoolean;
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canFreezePredicate(Function<LivingEntity, Object> predicate) {
+    public BaseLivingEntityBuilder<T> canFreeze(Function<LivingEntity, Object> predicate) {
         canFreeze = predicate;
         return this;
     }
@@ -1894,17 +1916,15 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets a predicate function to determine whether the entity can disable its shield.
-            The provided Predicate accepts a {@link LivingEntity} parameter,
-            representing the entity that may be checked for the ability to disable its shield.
+            Sets a function to determine whether the entity can disable its target's shield.
+            The provided Predicate accepts a {@link LivingEntity} parameter.
                         
             Example usage:
             ```javascript
             entityBuilder.canDisableShield(entity => {
                 // Define the conditions to check if the entity can disable its shield
                 // Use information about the LivingEntity provided by the context.
-                const canDisable = // Some boolean condition to check if the entity can disable its shield;
-                return canDisable;
+                return true;
             });
             ```
             """)
@@ -1923,8 +1943,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.onInteract(context => {
                 // Define custom logic for the interaction with the entity
                 // Use information about the MobInteractContext provided by the context.
-                // Return an InteractionResult based on the interaction outcome.
-                return // Some InteractionResult based on the interaction logic;
+                if (context.player.isShiftKeyDown()) return InteractionResult.FAIL
+                    context.player.startRiding(context.entity);
+                    return InteractionResult.sidedSuccess(context.entity.level.isClientSide());
             });
             ```
             """)
@@ -1942,7 +1963,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.setMaxFallDistance(entity => {
                 // Define custom logic to determine the maximum fall distance
                 // Use information about the LivingEntity provided by the context.
-                return someNumber;
+                return 3;
             });
             ```
             """)
@@ -2099,7 +2120,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.isInvulnerableTo(context => {
                 // Define conditions for the entity to be invulnerable to the specific type of damage
                 // Use information about the DamageContext provided by the context.
-                return // Some boolean condition indicating invulnerability to the damage type;
+                return true // Some boolean condition indicating if the entity has invulnerability to the damage type;
             });
             ```
             """)
@@ -2119,7 +2140,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.canChangeDimensions(entity => {
                 // Define the conditions for the entity to be able to change dimensions
                 // Use information about the LivingEntity provided by the context.
-                return // Some boolean condition indicating if the entity can change dimensions;
+                return false // Some boolean condition indicating if the entity can change dimensions;
             });
             ```
             """)
@@ -2139,7 +2160,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.mayInteract(context => {
                 // Define conditions for the entity to be allowed to interact
                 // Use information about the MayInteractContext provided by the context.
-                return // Some boolean condition indicating if the entity may interact;
+                return false // Some boolean condition indicating if the entity may interact;
             });
             ```
             """)
@@ -2159,7 +2180,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.canTrample(context => {
                 // Define conditions for the entity to be allowed to trample
                 // Use information about the CanTrampleContext provided by the context.
-                return // Some boolean condition indicating if the entity can trample;
+                return false // Some boolean condition indicating if the entity can trample;
             });
             ```
             """)
@@ -2189,7 +2210,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     //STUFF
-    @Info(value = "Sets the spawn placement of the entity type", params = {
+    @Info(value = """
+            Sets the spawn placement of the entity type
+            entityBuilder.spawnPlacement('on_ground', 'world_surface', entity => {
+                return entity.fireImmune()
+            })   
+            """, params = {
             @Param(name = "placementType", value = "The placement type of the spawn, accepts 'on_ground', 'in_water', 'no_restrictions', 'in_lava'"),
             @Param(name = "heightMap", value = "The height map used for the spawner"),
             @Param(name = "spawnPredicate", value = "The predicate that determines if the entity will spawn")

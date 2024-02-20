@@ -5,6 +5,7 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -75,12 +76,11 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
         final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-        return builder.shouldRenderAtSqrDistance != null ? builder.shouldRenderAtSqrDistance.test(context) : super.shouldRenderAtSqrDistance(distance);
+        return builder.shouldRenderAtSqrDistance != null ? (boolean) builder.shouldRenderAtSqrDistance.apply(context) : super.shouldRenderAtSqrDistance(distance);
     }
 
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-
         if (builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
             builder.lerpTo.accept(context);
@@ -146,7 +146,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected void doPostHurtEffects(LivingEntity target) {
         if (builder.doPostHurtEffects != null) {
-            builder.doPostHurtEffects.accept(target);
+            final ContextUtils.ArrowLivingEntityContext context = new ContextUtils.ArrowLivingEntityContext(this, target);
+            builder.doPostHurtEffects.accept(context);
         } else {
             super.doPostHurtEffects(target);
         }
@@ -161,7 +162,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     protected boolean canHitEntity(Entity entity) {
-        return builder.canHitEntity != null ? builder.canHitEntity.test(entity) : super.canHitEntity(entity);
+        return builder.canHitEntity != null ? (boolean) builder.canHitEntity.apply(entity) : super.canHitEntity(entity);
     }
 
 
@@ -177,7 +178,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     protected boolean tryPickup(Player player) {
-        return builder.tryPickup != null ? builder.tryPickup.test(player) : super.tryPickup(player);
+        return builder.tryPickup != null ? (boolean) builder.tryPickup.apply(player) : super.tryPickup(player);
     }
 
 

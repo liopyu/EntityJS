@@ -24,19 +24,12 @@ import java.util.function.*;
  * in {@link Mob} that is not present in/related to {@link net.minecraft.world.entity.LivingEntity LivignEntity}
  */
 public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
-    //pathfinder mob
     public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
-    //pathfinder mob
     public transient Function<PathfinderMob, Object> shouldStayCloseToLeashHolder;
-    //pathfinder mob
     public transient Double followLeashSpeed;
-    //pathfinder mob
     public transient Function<ContextUtils.EntityBlockPosLevelContext, Object> walkTargetValue;
-
-
     public transient SpawnEggItemBuilder eggItem;
     public transient Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner;
-
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Ingredient canFireProjectileWeapon;
     public transient Function<ContextUtils.EntityProjectileWeaponContext, Object> canFireProjectileWeaponPredicate;
@@ -46,7 +39,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Boolean shouldDespawnInPeaceful;
     public transient Function<PathfinderMob, Object> canPickUpLoot;
     public transient Boolean isPersistenceRequired;
-
     public transient Function<PathfinderMob, Object> meleeAttackRangeSqr;
     public transient Boolean canJump;
 
@@ -71,7 +63,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         }
     }
 
-
     @Info(value = """
             Sets a function to determine if the entity can cut corners when navigating paths.
                         
@@ -91,7 +82,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-
     @Info(value = """
             Sets whether the entity can jump.
                         
@@ -107,7 +97,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-
     @Info(value = """
             Sets a callback function to be executed when the entity's target changes.
                         
@@ -116,7 +105,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
                         
             Example usage:
             ```javascript
-            mobBuilder.onTargetChanged(context -> {
+            mobBuilder.onTargetChanged(context => {
                 // Custom logic to handle the entity's target change
                 // Access information about the target change using the provided context.
             });
@@ -126,7 +115,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         this.onTargetChanged = setTarget;
         return this;
     }
-
 
     @Info(value = """
             Sets the ingredient required for the entity to fire a projectile weapon.
@@ -146,7 +134,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-
     @Info(value = """
             Sets a predicate to determine whether the entity can fire a projectile weapon.
                         
@@ -156,10 +143,10 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
                         
             Example usage:
             ```javascript
-            mobBuilder.canFireProjectileWeaponPredicate(context -> {
+            mobBuilder.canFireProjectileWeaponPredicate(context => {
                 // Custom logic to determine whether the entity can fire a projectile weapon
                 // Access information about the entity and the projectile weapon using the provided context.
-                return true; // Replace with your specific condition.
+                return context.projectileWeapon.id == 'minecraft:bow'; // Replace with your specific condition.
             });
             ```
             """)
@@ -167,7 +154,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         this.canFireProjectileWeaponPredicate = canFireProjectileWeaponPredicate;
         return this;
     }
-
 
     @Info(value = """
             Sets a callback function to be executed when the entity performs an eating action.
@@ -177,7 +163,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
                         
             Example usage:
             ```javascript
-            mobBuilder.ate(entity -> {
+            mobBuilder.ate(entity => {
                 // Custom logic to handle the entity's eating action
                 // Access information about the entity using the provided parameter.
             });
@@ -187,7 +173,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         this.ate = ate;
         return this;
     }
-
 
     @Info(value = """
             Sets the sound to play when the entity is ambient using either a string representation or a ResourceLocation object.
@@ -204,23 +189,22 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             this.getAmbientSound = resourceLocation;
         } else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for getAmbientSound. Value: " + ambientSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
-            this.getAmbientSound = new ResourceLocation("minecraft", "entity/zombie/ambient");
+            this.getAmbientSound = null;
         }
         return this;
     }
 
-
     @Info(value = """
-            Sets the predicate to determine whether the entity can hold an item.
+            Sets the function to determine whether the entity can hold an item.
                         
-            @param canHoldItem A Predicate accepting a {@link ContextUtils.EntityItemStackContext} parameter,
+            @param canHoldItem A Function accepting a {@link ContextUtils.EntityItemStackContext} parameter,
                                defining the condition for the entity to hold an item.
                         
             Example usage:
             ```javascript
             mobBuilder.canHoldItem(context => {
                 // Custom logic to determine whether the entity can hold an item based on the provided context.
-                return someCondition;
+                return true;
             });
             ```
             """)
@@ -228,7 +212,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         this.canHoldItem = canHoldItem;
         return this;
     }
-
 
     @Info(value = """
             Sets whether the entity should despawn in peaceful difficulty.
@@ -245,18 +228,17 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-
     @Info(value = """
-            Sets the predicate to determine whether the entity can pick up loot.
+            Sets the function to determine whether the entity can pick up loot.
                         
-            @param canPickUpLoot A Predicate accepting a {@link PathfinderMob} parameter,
+            @param canPickUpLoot A Function accepting a {@link PathfinderMob} parameter,
                                  defining the condition for the entity to pick up loot.
                         
             Example usage:
             ```javascript
-            mobBuilder.canPickUpLoot(mob -> {
+            mobBuilder.canPickUpLoot(entity => {
                 // Custom logic to determine whether the entity can pick up loot based on the provided mob.
-                return someCondition;
+                return true;
             });
             ```
             """)
@@ -264,7 +246,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         this.canPickUpLoot = canPickUpLoot;
         return this;
     }
-
 
     @Info(value = """
             Sets whether persistence is required for the entity.
@@ -281,7 +262,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-
     @Info(value = """
             Sets the function to determine the squared melee attack range for the entity.
                         
@@ -290,9 +270,9 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
                                       Returns a 'Double' value representing the squared melee attack range.
             Example usage:
             ```javascript
-            mobBuilder.meleeAttackRangeSqr(mob -> {
+            mobBuilder.meleeAttackRangeSqr(entity => {
                 // Custom logic to calculate the squared melee attack range based on the provided mob.
-                return someCalculatedValue;
+                return 2;
             });
             ```
             """)
@@ -300,7 +280,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         this.meleeAttackRangeSqr = meleeAttackRangeSqr;
         return this;
     }
-
 
     @Info(value = """
             Sets the callback function to be executed when the entity ticks while leashed.
@@ -310,9 +289,9 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
                         
             Example usage:
             ```javascript
-            mobBuilder.tickLeash(context -> {
+            mobBuilder.tickLeash(context => {
                 // Custom logic to handle the entity's behavior while leashed.
-                // Access information about the player entity using the provided context.
+                // Access information about the player and entity using the provided context.
             });
             ```
             """)
@@ -321,18 +300,17 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-
     @Info(value = """
-            Sets the predicate to determine whether the entity should stay close to its leash holder.
+            Sets the function to determine whether the entity should stay close to its leash holder.
                         
-            @param predicate A Predicate accepting a {@link PathfinderMob} parameter,
+            @param predicate A Function accepting a {@link PathfinderMob} parameter,
                              defining the condition for the entity to stay close to its leash holder.
                         
             Example usage:
             ```javascript
-            mobBuilder.shouldStayCloseToLeashHolder(mob -> {
+            mobBuilder.shouldStayCloseToLeashHolder(entity => {
                 // Custom logic to determine whether the entity should stay close to its leash holder.
-                return someCondition;
+                return true;
             });
             ```
             """)
@@ -340,7 +318,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         this.shouldStayCloseToLeashHolder = predicate;
         return this;
     }
-
 
     @Info(value = """
             Sets the follow leash speed for the entity.
@@ -357,7 +334,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-
     @Info(value = """
             Sets the walk target value function for the entity.
                         
@@ -366,10 +342,10 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
                         
             Example usage:
             ```javascript
-            mobBuilder.walkTargetValue(context -> {
+            mobBuilder.walkTargetValue(context => {
                 // Custom logic to calculate the walk target value based on the provided context.
                 // Access information about the block position and level using the provided context.
-                return someCalculatedValue;
+                return 10;
             });
             ```
             """)
@@ -377,6 +353,4 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         this.walkTargetValue = function;
         return this;
     }
-
-
 }

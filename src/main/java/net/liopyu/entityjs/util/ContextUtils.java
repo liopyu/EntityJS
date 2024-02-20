@@ -6,6 +6,7 @@ import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.client.KubeJSProjectileEntityRenderer;
+import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.entities.IProjectileEntityJS;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -231,6 +232,19 @@ public class ContextUtils {
         public OnEffectContext(MobEffectInstance effect, LivingEntity entity) {
             this.entity = entity;
             this.effect = effect;
+        }
+    }
+
+    public static class ArrowLivingEntityContext {
+        @Info("The living entity hit by the arrow.")
+        public final LivingEntity entity;
+
+        @Info("The arrow being fired.")
+        public final AbstractArrow arrow;
+
+        public ArrowLivingEntityContext(AbstractArrow arrow, LivingEntity entity) {
+            this.entity = entity;
+            this.arrow = arrow;
         }
     }
 
@@ -714,5 +728,36 @@ public class ContextUtils {
             this.player = player;
         }
     }
+
+    public static class RenderContext<T extends LivingEntity & IAnimatableJS> {
+        @Info("The animatable entity being rendered")
+        public final T entity;
+
+        @Info("The yaw of the entity")
+        public final float entityYaw;
+
+        @Info("The partial tick")
+        public final float partialTick;
+
+        @Info("The pose stack for transformations")
+        public final PoseStack poseStack;
+
+        @Info("The buffer source for rendering")
+        public final MultiBufferSource bufferSource;
+
+        @Info("The packed light information")
+        public final int packedLight;
+
+        public RenderContext(T entity, float entityYaw, float partialTick,
+                             PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+            this.entity = entity;
+            this.entityYaw = entityYaw;
+            this.partialTick = partialTick;
+            this.poseStack = poseStack;
+            this.bufferSource = bufferSource;
+            this.packedLight = packedLight;
+        }
+    }
+
 
 }

@@ -1,46 +1,32 @@
 package net.liopyu.entityjs.builders;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.entities.ArrowEntityJS;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.entities.IProjectileEntityJS;
-import net.liopyu.entityjs.entities.ProjectileEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.util.BiConsumer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile & IProjectileEntityJS> extends BaseEntityBuilder<T> {
     public transient Function<T, ResourceLocation> textureLocation;
     public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
-
-
     public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
-
-    public transient Predicate<Entity> canHitEntity;
-
+    public transient Function<Entity, Object> canHitEntity;
     public transient Float pX;
     public transient Float pY;
     public transient Float pZ;
-
     public transient Float vX;
     public transient Float vY;
     public transient Float vZ;
-
 
     public ProjectileEntityBuilder(ResourceLocation i) {
         super(i);
@@ -53,24 +39,78 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
         return new EntityTypeBuilder<>(this).get();
     }
 
+    //Throwable Projectile Overrides
+    @Info(value = """
+            Sets the scale for rendering the projectile entity.
+                        
+            @param pX The X-axis scale.
+                        
+            @param pY The Y-axis scale.
+                        
+            @param pZ The Z-axis scale.
+                        
+            Example usage:
+            ```javascript
+            projectileEntityBuilder.renderScale(1.5, 1.5, 1.5);
+            ```
+            """)
+    public ProjectileEntityBuilder<T> renderScale(Float pX, Float pY, Float pZ) {
+        this.pX = pX;
+        this.pY = pY;
+        this.pZ = pZ;
+        return this;
+    }
 
+
+    @Info(value = """
+            Sets the offset for rendering the projectile entity.
+                        
+            @param vX The X-axis offset.
+                        
+            @param vY The Y-axis offset.
+                        
+            @param vZ The Z-axis offset.
+                        
+            Example usage:
+            ```javascript
+            projectileEntityBuilder.renderOffset(0.5, 1.0, -0.5);
+            ```
+            """)
+    public ProjectileEntityBuilder<T> renderOffset(Float vX, Float vY, Float vZ) {
+        this.vX = vX;
+        this.vY = vY;
+        this.vZ = vZ;
+        return this;
+    }
+
+    //Projectile Overrides
     @Info(value = """
             Sets a function to determine the texture resource for the entity.
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the texture based on information about the entity.
-            The default behavior returns <namespace>:textures/model/entity/<path>.png.
+            The default behavior returns <namespace>:textures/entity/projectiles/<path>.png.
                         
             Example usage:
             ```javascript
-            entityBuilder.textureLocation(entity => {
+            projectileBuilder.textureResource(entity => {
                 // Define logic to determine the texture resource for the entity
                 // Use information about the entity provided by the context.
                 return // Some ResourceLocation representing the texture resource;
             });
             ```
             """)
-    public BaseEntityBuilder<T> textureLocation(Function<T, ResourceLocation> textureCallback) {
-        textureLocation = textureCallback;
+    public ProjectileEntityBuilder<T> textureLocation(Function<T, Object> function) {
+        textureLocation = entity -> {
+            Object obj = function.apply(entity);
+            if (obj instanceof String) {
+                return new ResourceLocation((String) obj);
+            } else if (obj instanceof ResourceLocation) {
+                return (ResourceLocation) obj;
+            } else {
+                EntityJSHelperClass.logErrorMessageOnce("Invalid texture resource in projectile builder: " + obj + "Defaulting to " + entity.getProjectileBuilder().newID("textures/entity/projectiles/", ".png"));
+                return entity.getProjectileBuilder().newID("textures/entity/projectiles/", ".png");
+            }
+        };
         return this;
     }
 
@@ -112,64 +152,20 @@ public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile 
     }
 
     @Info(value = """
-            Sets a predicate to determine if the projectile can hit a specific entity.
+            Sets a function to determine if the projectile entity can hit a specific entity.
                         
-            @param predicate A predicate accepting an {@link Entity} parameter,
-                             defining the condition for the projectile to hit the entity.
+            @param canHitEntity The predicate to check if the arrow can hit the entity.
                         
             Example usage:
             ```javascript
-            projectileBuilder.canHitEntity(entity -> {
-                // Custom logic to determine if the projectile can hit the given entity.
-                // Return true if the projectile can hit, false otherwise.
+            projectileEntityBuilder.canHitEntity(entity -> {
+                // Custom logic to determine if the projectile can hit the specified entity
+                // Return true if the arrow can hit, false otherwise.
             });
             ```
             """)
-    public ProjectileEntityBuilder<T> canHitEntity(Predicate<Entity> predicate) {
-        canHitEntity = predicate;
-        return this;
-    }
-
-    @Info(value = """
-            Sets the scale for rendering the projectile entity.
-                        
-            @param pX The X-axis scale.
-                        
-            @param pY The Y-axis scale.
-                        
-            @param pZ The Z-axis scale.
-                        
-            Example usage:
-            ```javascript
-            projectileEntityBuilder.renderScale(1.5, 1.5, 1.5);
-            ```
-            """)
-    public ProjectileEntityBuilder<T> renderScale(Float pX, Float pY, Float pZ) {
-        this.pX = pX;
-        this.pY = pY;
-        this.pZ = pZ;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets the offset for rendering the projectile entity.
-                        
-            @param vX The X-axis offset.
-                        
-            @param vY The Y-axis offset.
-                        
-            @param vZ The Z-axis offset.
-                        
-            Example usage:
-            ```javascript
-            projectileEntityBuilder.renderOffset(0.5, 1.0, -0.5);
-            ```
-            """)
-    public ProjectileEntityBuilder<T> renderOffset(Float vX, Float vY, Float vZ) {
-        this.vX = vX;
-        this.vY = vY;
-        this.vZ = vZ;
+    public ProjectileEntityBuilder<T> canHitEntity(Function<Entity, Object> function) {
+        canHitEntity = function;
         return this;
     }
 

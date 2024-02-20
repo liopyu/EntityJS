@@ -16,6 +16,7 @@ import org.apache.logging.log4j.util.BiConsumer;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<EntityType<T>> {
@@ -27,7 +28,7 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
     public transient MobCategory mobCategory;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Consumer<ContextUtils.EntityPlayerContext> playerTouch;
-    public transient Predicate<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
+    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
     public transient Consumer<Entity> tick;
     public transient Consumer<ContextUtils.MovementContext> move;
     public transient Boolean isAttackable;
@@ -35,17 +36,17 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
         clientTrackingRange = 5;
-        updateInterval = 3;
+        updateInterval = 1;
         mobCategory = MobCategory.MISC;
-        width = 1.0f;
-        height = 1.5f;
+        width = 0.5f;
+        height = 0.5f;
     }
 
     @Info(value = """
             Sets the hit box of the entity type.
                         
-            @param width The width of the entity. Defaults to 1.0.
-            @param height The height of the entity. Defaults to 1.5.
+            @param width The width of the entity. Defaults to 0.5.
+            @param height The height of the entity. Defaults to 0.5.
                         
             Example usage:
             ```javascript
@@ -115,7 +116,7 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
                         
             Example usage:
             ```javascript
-            entityBuilder.lerpTo(context -> {
+            entityBuilder.lerpTo(context => {
                 // Custom logic for lerping the entity's position
                 // Access information about the lerping process using the provided context.
             });
@@ -128,22 +129,22 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
 
 
     @Info(value = """
-            Sets a predicate to determine whether the entity should render at a squared distance.
+            Sets a function to determine whether the entity should render at a squared distance.
                         
-            @param predicate Predicate accepting a {@link ContextUtils.EntitySqrDistanceContext} parameter,
+            @param function Function accepting a {@link ContextUtils.EntitySqrDistanceContext} parameter,
                              defining the conditions under which the entity should render.
                         
             Example usage:
             ```javascript
-            entityBuilder.shouldRenderAtSqrDistance(context -> {
+            entityBuilder.shouldRenderAtSqrDistance(context => {
                 // Custom logic to determine whether the entity should render
                 // Access information about the distance using the provided context.
-                return someCondition;
+                return true;
             });
             ```
             """)
-    public BaseEntityBuilder<T> shouldRenderAtSqrDistance(Predicate<ContextUtils.EntitySqrDistanceContext> predicate) {
-        shouldRenderAtSqrDistance = predicate;
+    public BaseEntityBuilder<T> shouldRenderAtSqrDistance(Function<ContextUtils.EntitySqrDistanceContext, Object> func) {
+        shouldRenderAtSqrDistance = func;
         return this;
     }
 
@@ -158,7 +159,7 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
             entityBuilder.isAttackable(true);
             ```
             """)
-    public BaseEntityBuilder<T> isAttackable(Boolean b) {
+    public BaseEntityBuilder<T> isAttackable(boolean b) {
         isAttackable = b;
         return this;
     }
@@ -171,7 +172,7 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
                         
             Example usage:
             ```javascript
-            entityBuilder.playerTouch(context -> {
+            entityBuilder.playerTouch(context => {
                 // Custom logic to handle the player's touch interaction with the entity
                 // Access information about the interaction using the provided context.
             });
@@ -190,7 +191,7 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
                         
             Example usage:
             ```javascript
-            entityBuilder.move(context -> {
+            entityBuilder.move(context => {
                 // Custom logic to handle the entity's movement action
                 // Access information about the movement using the provided context.
             });
@@ -209,7 +210,7 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
                         
             Example usage:
             ```javascript
-            entityBuilder.tick(entity -> {
+            entityBuilder.tick(entity => {
                 // Custom logic to be executed on each tick of the entity.
                 // Access information about the entity using the provided parameter.
             });

@@ -56,7 +56,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
         final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-        return builder.shouldRenderAtSqrDistance != null ? builder.shouldRenderAtSqrDistance.test(context) : super.shouldRenderAtSqrDistance(distance);
+        return builder.shouldRenderAtSqrDistance != null ? (boolean) builder.shouldRenderAtSqrDistance.apply(context) : super.shouldRenderAtSqrDistance(distance);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     protected boolean canHitEntity(Entity entity) {
         if (builder != null && builder.canHitEntity != null) {
-            return builder.canHitEntity.test(entity);
+            return (boolean) builder.canHitEntity.apply(entity);
         } else {
             return super.canHitEntity(entity);
         }

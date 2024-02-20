@@ -1,40 +1,26 @@
 package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.ServerLevelAccessor;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> extends MobBuilder<T> {
-
-
     public transient Object getBreedOffspring;
     public transient Ingredient isFood;
     public transient Function<ContextUtils.EntityItemStackContext, Object> isFoodPredicate;
     public transient Function<LivingEntity, Object> canBreed;
-
     public transient Function<LivingEntity, Object> myRidingOffset;
     public transient Object ambientSoundInterval;
     public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
-
     public transient Function<ContextUtils.EntityAnimalContext, Object> canMate;
     public transient Consumer<ContextUtils.LevelAnimalContext> onSpawnChildFromBreeding;
-
 
     public AnimalEntityBuilder(ResourceLocation i) {
         super(i);
@@ -63,11 +49,11 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     @Info(value = """
             Sets a predicate to determine if the animal entity can breed.
                         
-            @param canBreed A {@link Predicate} that defines the conditions for breeding.
+            @param canBreed A {@link Function} that defines the conditions for breeding.
                         
             Example usage:
             ```javascript
-            animalBuilder.canBreed(entity -> {
+            animalBuilder.canBreed(entity => {
                 // Custom logic to determine if the entity can breed
                 // Return true if the entity can breed, false otherwise.
             });
@@ -107,7 +93,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
                         
             Example usage:
             ```javascript
-            animalBuilder.isFoodPredicate(context -> {
+            animalBuilder.isFoodPredicate(context => {
                 // Custom logic to determine if the entity item stack is considered as food.
                 // Access information about the item stack using the provided context.
                 return someCondition;
@@ -141,7 +127,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             Sets the interval in ticks between ambient sounds for the animal entity.
                         
             @param ambientSoundInterval The interval in ticks between ambient sounds.
-            Defaults to 240.
+            Defaults to 120.
                         
             Example usage:
             ```javascript
@@ -149,13 +135,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             ```
             """)
     public AnimalEntityBuilder<T> ambientSoundInterval(int ambientSoundInterval) {
-        Object obj = ambientSoundInterval;
-        if (obj instanceof Integer) {
-            this.ambientSoundInterval = (int) obj;
-        } else {
-            ConsoleJS.STARTUP.error("Invalid value for ambientSoundInterval: " + obj + "must be an Integer");
-            this.ambientSoundInterval = 240;
-        }
+        this.ambientSoundInterval = ambientSoundInterval;
         return this;
     }
 
@@ -163,12 +143,12 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     @Info(value = """
             Sets a predicate to determine if the entity should be removed when far away from the player.
                         
-            @param removeWhenFarAway A Predicate accepting a ContextUtils.EntityDistanceToPlayerContext parameter,
+            @param removeWhenFarAway A Function accepting a ContextUtils.EntityDistanceToPlayerContext parameter,
                                      defining the condition for the entity to be removed when far away.
                         
             Example usage:
             ```javascript
-            animalBuilder.removeWhenFarAway(context -> {
+            animalBuilder.removeWhenFarAway(context => {
                 // Custom logic to determine if the entity should be removed when far away
                 // Return true if the entity should be removed based on the provided context.
             });
@@ -183,12 +163,12 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     @Info(value = """
             Sets a predicate to determine if the entity can mate.
                         
-            @param predicate A Predicate accepting a ContextUtils.EntityAnimalContext parameter,
+            @param predicate A Function accepting a ContextUtils.EntityAnimalContext parameter,
                              defining the condition for the entity to be able to mate.
                         
             Example usage:
             ```javascript
-            animalBuilder.canMate(context -> {
+            animalBuilder.canMate(context => {
                 // Custom logic to determine if the entity can mate
                 // Return true if mating is allowed based on the provided context.
             });
@@ -208,7 +188,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
                         
             Example usage:
             ```javascript
-            animalBuilder.onSpawnChildFromBreeding(context -> {
+            animalBuilder.onSpawnChildFromBreeding(context => {
                 // Custom logic to handle the spawning of a child from breeding
                 // Access information about the breeding event using the provided context.
             });

@@ -155,12 +155,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public HumanoidArm getMainArm() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.mainArm, "humanoidarm");
-        if (obj != null)
-            return (HumanoidArm) obj;
-
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mainArm from entity: " + entityName() + ". Value: " + builder.mainArm + ". Must be a HumanoidArm. Defaulting to " + super.getMainArm());
-
+        if (builder.mainArm != null) return (HumanoidArm) builder.mainArm;
         return super.getMainArm();
     }
 
@@ -182,7 +177,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         final ContextUtils.EntityBlockPosLevelContext context = new ContextUtils.EntityBlockPosLevelContext(pos, levelReader, this);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.walkTargetValue.apply(context), "float");
         if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for walkTargetValue from entity: " + entityName() + ". Value: " + builder.walkTargetValue.apply(context) + ". Must be a float. Defaulting to " + super.getWalkTargetValue(pos, levelReader));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for walkTargetValue from entity: " + entityName() + ". Value: " + builder.walkTargetValue.apply(context) + ". Must be a float. Defaulting to " + super.getWalkTargetValue(pos, levelReader));
         return super.getWalkTargetValue(pos, levelReader);
     }
 
@@ -201,7 +196,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         if (builder.shouldStayCloseToLeashHolder == null) return super.shouldStayCloseToLeashHolder();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.shouldStayCloseToLeashHolder.apply(this), "boolean");
         if (obj != null) return (boolean) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for shouldStayCloseToLeashHolder from entity: " + entityName() + ". Value: " + builder.shouldStayCloseToLeashHolder.apply(this) + ". Must be a boolean. Defaulting to " + super.shouldStayCloseToLeashHolder());
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityName() + ". Value: " + builder.shouldStayCloseToLeashHolder.apply(this) + ". Must be a boolean. Defaulting to " + super.shouldStayCloseToLeashHolder());
         return super.shouldStayCloseToLeashHolder();
     }
 
@@ -214,7 +209,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canCutCorner from entity: " + entityName() + ". Value: " + builder.canCutCorner.apply(context) + ". Must be a boolean. Defaulting to " + super.canCutCorner(pathType));
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCutCorner from entity: " + entityName() + ". Value: " + builder.canCutCorner.apply(context) + ". Must be a boolean. Defaulting to " + super.canCutCorner(pathType));
                 return super.canCutCorner(pathType);
             }
         }
@@ -243,7 +238,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canFireProjectileWeaponPredicate from entity: " + entityName() + ". Value: " + builder.canFireProjectileWeaponPredicate.apply(context) + ". Must be a boolean. Defaulting to false.");
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFireProjectileWeaponPredicate from entity: " + entityName() + ". Value: " + builder.canFireProjectileWeaponPredicate.apply(context) + ". Must be a boolean. Defaulting to false.");
                 return false;
             }
         }
@@ -294,7 +289,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canHoldItem from entity: " + entityName() + ". Value: " + builder.canHoldItem.apply(context) + ". Must be a boolean. Defaulting to " + super.canHoldItem(stack));
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canHoldItem from entity: " + entityName() + ". Value: " + builder.canHoldItem.apply(context) + ". Must be a boolean. Defaulting to " + super.canHoldItem(stack));
                 return super.canHoldItem(stack);
             }
         } else {
@@ -321,7 +316,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (double) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for meleeAttackRangeSqr from entity: " + entityName() + ". Value: " + builder.meleeAttackRangeSqr.apply(this) + ". Must be a double. Defaulting to " + super.getMeleeAttackRangeSqr(entity));
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityName() + ". Value: " + builder.meleeAttackRangeSqr.apply(this) + ". Must be a double. Defaulting to " + super.getMeleeAttackRangeSqr(entity));
                 return super.getMeleeAttackRangeSqr(entity);
             }
         } else {
@@ -351,9 +346,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     protected float getBlockJumpFactor() {
-        if (builder.setBlockJumpFactor != null) {
-            return builder.setBlockJumpFactor + this.getBlockJumpFactor();
-        } else return super.getBlockJumpFactor();
+        if (builder.setBlockJumpFactor == null) return super.getBlockJumpFactor();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor.apply(this), "float");
+        if (obj != null) return (float) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
+        return super.getBlockJumpFactor();
     }
 
     @Override
@@ -363,7 +360,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, this);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
         if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setStandingEyeHeight from entity: " + entityName() + ". Value: " + builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + super.getStandingEyeHeight(pPose, pDimensions));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setStandingEyeHeight from entity: " + entityName() + ". Value: " + builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + super.getStandingEyeHeight(pPose, pDimensions));
         return super.getStandingEyeHeight(pPose, pDimensions);
     }
 
@@ -417,7 +414,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null)
                 return (boolean) obj;
 
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isAffectedByFluids from entity: " + entityName() + ". Value: " + builder.isAffectedByFluids.apply(this) + ". Must be a boolean. Defaulting to " + super.isAffectedByFluids());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByFluids from entity: " + entityName() + ". Value: " + builder.isAffectedByFluids.apply(this) + ". Must be a boolean. Defaulting to " + super.isAffectedByFluids());
         }
 
         return super.isAffectedByFluids();
@@ -437,7 +434,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null)
                 return (boolean) obj;
 
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isImmobile from entity: " + entityName() + ". Value: " + builder.isImmobile.apply(this) + ". Must be a boolean. Defaulting to " + super.isImmobile());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isImmobile from entity: " + entityName() + ". Value: " + builder.isImmobile.apply(this) + ". Must be a boolean. Defaulting to " + super.isImmobile());
         }
 
         return super.isImmobile();
@@ -451,7 +448,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null)
                 return (boolean) obj;
 
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isFlapping from entity: " + entityName() + ". Value: " + builder.isFlapping.apply(this) + ". Must be a boolean. Defaulting to " + super.isFlapping());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFlapping from entity: " + entityName() + ". Value: " + builder.isFlapping.apply(this) + ". Must be a boolean. Defaulting to " + super.isFlapping());
         }
 
         return super.isFlapping();
@@ -580,7 +577,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canAttackType from entity: " + entityName() + ". Value: " + builder.canAttackType.apply(context) + ". Must be a boolean. Defaulting to " + super.canAttackType(entityType));
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttackType from entity: " + entityName() + ". Value: " + builder.canAttackType.apply(context) + ". Must be a boolean. Defaulting to " + super.canAttackType(entityType));
                 return super.canAttackType(entityType);
             }
         }
@@ -595,7 +592,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         if (obj != null) {
             return (float) obj;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for scale from entity: " + entityName() + ". Value: " + builder.scale.apply(this) + ". Must be a float. Defaulting to " + super.getScale());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for scale from entity: " + entityName() + ". Value: " + builder.scale.apply(this) + ". Must be a float. Defaulting to " + super.getScale());
             return super.getScale();
         }
     }
@@ -614,7 +611,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for shouldDropExperience from entity: " + entityName() + ". Value: " + builder.shouldDropExperience.apply(this) + ". Must be a boolean. Defaulting to " + super.shouldDropExperience());
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropExperience from entity: " + entityName() + ". Value: " + builder.shouldDropExperience.apply(this) + ". Must be a boolean. Defaulting to " + super.shouldDropExperience());
                 return super.shouldDropExperience();
             }
         }
@@ -639,7 +636,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (double) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for visibilityPercent from entity: " + entityName() + ". Value: " + builder.visibilityPercent.apply(p_20969_) + ". Must be a double. Defaulting to " + super.getVisibilityPercent(p_20969_));
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityName() + ". Value: " + builder.visibilityPercent.apply(p_20969_) + ". Must be a double. Defaulting to " + super.getVisibilityPercent(p_20969_));
                 return super.getVisibilityPercent(p_20969_);
             }
         } else {
@@ -656,7 +653,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj && super.canAttack(entity);
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canAttack from entity: " + entityName() + ". Value: " + builder.canAttack.apply(context) + ". Must be a boolean. Defaulting to " + super.canAttack(entity));
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttack from entity: " + entityName() + ". Value: " + builder.canAttack.apply(context) + ". Must be a boolean. Defaulting to " + super.canAttack(entity));
                 return super.canAttack(entity);
             }
         } else {
@@ -672,7 +669,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         if (obj != null) {
             return (boolean) obj;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canBeAffected from entity: " + entityName() + ". Value: " + builder.canBeAffected.apply(context) + ". Must be a boolean. Defaulting to " + super.canBeAffected(effectInstance));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeAffected from entity: " + entityName() + ". Value: " + builder.canBeAffected.apply(context) + ". Must be a boolean. Defaulting to " + super.canBeAffected(effectInstance));
             return super.canBeAffected(effectInstance);
         }
     }
@@ -684,7 +681,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         if (obj != null) {
             return (boolean) obj;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for invertedHealAndHarm from entity: " + entityName() + ". Value: " + builder.invertedHealAndHarm.apply(this) + ". Must be a boolean. Defaulting to " + super.isInvertedHealAndHarm());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for invertedHealAndHarm from entity: " + entityName() + ". Value: " + builder.invertedHealAndHarm.apply(this) + ". Must be a boolean. Defaulting to " + super.isInvertedHealAndHarm());
             return super.isInvertedHealAndHarm();
         }
     }
@@ -774,7 +771,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         if (obj != null) {
             return (boolean) obj;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for onClimbable from entity: " + entityName() + ". Value: " + builder.onClimbable.apply(this) + ". Must be a boolean. Defaulting to super.onClimbable(): " + super.onClimbable());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onClimbable from entity: " + entityName() + ". Value: " + builder.onClimbable.apply(this) + ". Must be a boolean. Defaulting to super.onClimbable(): " + super.onClimbable());
             return super.onClimbable();
         }
     }
@@ -820,7 +817,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canStandOnFluid from entity: " + entityName() + ". Value: " + builder.canStandOnFluid.apply(context) + ". Must be a boolean. Defaulting to " + super.canStandOnFluid(fluidState));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canStandOnFluid from entity: " + entityName() + ". Value: " + builder.canStandOnFluid.apply(context) + ". Must be a boolean. Defaulting to " + super.canStandOnFluid(fluidState));
         }
         return super.canStandOnFluid(fluidState);
     }
@@ -833,7 +830,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isSensitiveToWater from entity: " + entityName() + ". Value: " + builder.isSensitiveToWater.apply(this) + ". Must be a boolean. Defaulting to " + super.isSensitiveToWater());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSensitiveToWater from entity: " + entityName() + ". Value: " + builder.isSensitiveToWater.apply(this) + ". Must be a boolean. Defaulting to " + super.isSensitiveToWater());
         }
         return super.isSensitiveToWater();
     }
@@ -874,7 +871,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for hasLineOfSight from entity: " + entityName() + ". Value: " + builder.hasLineOfSight.apply(entity) + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityName() + ". Value: " + builder.hasLineOfSight.apply(entity) + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
         }
         return super.hasLineOfSight(entity);
     }
@@ -905,7 +902,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isAffectedByPotions from entity: " + entityName() + ". Value: " + builder.isAffectedByPotions.apply(this) + ". Must be a boolean. Defaulting to " + super.isAffectedByPotions());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByPotions from entity: " + entityName() + ". Value: " + builder.isAffectedByPotions.apply(this) + ". Must be a boolean. Defaulting to " + super.isAffectedByPotions());
         }
         return super.isAffectedByPotions();
     }
@@ -917,7 +914,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isAttackable from entity: " + entityName() + ". Value: " + builder.isAttackable.apply(this) + ". Must be a boolean. Defaulting to " + super.attackable());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAttackable from entity: " + entityName() + ". Value: " + builder.isAttackable.apply(this) + ". Must be a boolean. Defaulting to " + super.attackable());
         }
         return super.attackable();
     }
@@ -931,7 +928,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canTakeItem from entity: " + entityName() + ". Value: " + builder.canTakeItem.apply(context) + ". Must be a boolean. Defaulting to " + super.canTakeItem(itemStack));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTakeItem from entity: " + entityName() + ". Value: " + builder.canTakeItem.apply(context) + ". Must be a boolean. Defaulting to " + super.canTakeItem(itemStack));
         }
         return super.canTakeItem(itemStack);
     }
@@ -944,7 +941,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isSleeping from entity: " + entityName() + ". Value: " + builder.isSleeping.apply(this) + ". Must be a boolean. Defaulting to " + super.isSleeping());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSleeping from entity: " + entityName() + ". Value: " + builder.isSleeping.apply(this) + ". Must be a boolean. Defaulting to " + super.isSleeping());
         }
         return super.isSleeping();
     }
@@ -989,7 +986,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for shouldRiderFaceForward from entity: " + entityName() + ". Value: " + builder.shouldRiderFaceForward.apply(context) + ". Must be a boolean. Defaulting to " + super.shouldRiderFaceForward(player));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldRiderFaceForward from entity: " + entityName() + ". Value: " + builder.shouldRiderFaceForward.apply(context) + ". Must be a boolean. Defaulting to " + super.shouldRiderFaceForward(player));
         }
         return super.shouldRiderFaceForward(player);
     }
@@ -1002,7 +999,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj && !this.getType().is(EntityTypeTags.FREEZE_IMMUNE_ENTITY_TYPES);
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canFreeze from entity: " + entityName() + ". Value: " + builder.canFreeze.apply(this) + ". Must be a boolean. Defaulting to " + super.canFreeze());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityName() + ". Value: " + builder.canFreeze.apply(this) + ". Must be a boolean. Defaulting to " + super.canFreeze());
         }
         return super.canFreeze();
     }
@@ -1015,7 +1012,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isCurrentlyGlowing from entity: " + entityName() + ". Value: " + builder.isCurrentlyGlowing.apply(this) + ". Must be a boolean. Defaulting to " + super.isCurrentlyGlowing());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isCurrentlyGlowing from entity: " + entityName() + ". Value: " + builder.isCurrentlyGlowing.apply(this) + ". Must be a boolean. Defaulting to " + super.isCurrentlyGlowing());
         }
         return super.isCurrentlyGlowing();
     }
@@ -1028,7 +1025,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canDisableShield from entity: " + entityName() + ". Value: " + builder.canDisableShield.apply(this) + ". Must be a boolean. Defaulting to " + super.canDisableShield());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canDisableShield from entity: " + entityName() + ". Value: " + builder.canDisableShield.apply(this) + ". Must be a boolean. Defaulting to " + super.canDisableShield());
         }
         return super.canDisableShield();
     }
@@ -1075,7 +1072,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (int) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getExperienceReward());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getExperienceReward());
         }
         return super.getExperienceReward();
     }
@@ -1088,7 +1085,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for dampensVibrations from entity: " + entityName() + ". Value: " + builder.dampensVibrations.apply(this) + ". Must be a boolean. Defaulting to " + super.dampensVibrations());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for dampensVibrations from entity: " + entityName() + ". Value: " + builder.dampensVibrations.apply(this) + ". Must be a boolean. Defaulting to " + super.dampensVibrations());
         }
         return super.dampensVibrations();
     }
@@ -1110,7 +1107,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for showVehicleHealth from entity: " + entityName() + ". Value: " + builder.showVehicleHealth.apply(this) + ". Must be a boolean. Defaulting to " + super.showVehicleHealth());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for showVehicleHealth from entity: " + entityName() + ". Value: " + builder.showVehicleHealth.apply(this) + ". Must be a boolean. Defaulting to " + super.showVehicleHealth());
         }
         return super.showVehicleHealth();
     }
@@ -1134,7 +1131,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isInvulnerableTo from entity: " + entityName() + ". Value: " + builder.isInvulnerableTo.apply(context) + ". Must be a boolean. Defaulting to " + super.isInvulnerableTo(p_20122_));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isInvulnerableTo from entity: " + entityName() + ". Value: " + builder.isInvulnerableTo.apply(context) + ". Must be a boolean. Defaulting to " + super.isInvulnerableTo(p_20122_));
         }
         return super.isInvulnerableTo(p_20122_);
     }
@@ -1146,7 +1143,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null)
                 return (boolean) obj;
 
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canChangeDimensions from entity: " + entityName() + ". Value: " + builder.canChangeDimensions.apply(this) + ". Must be a boolean. Defaulting to " + super.canChangeDimensions());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + builder.canChangeDimensions.apply(this) + ". Must be a boolean. Defaulting to " + super.canChangeDimensions());
         }
 
         return super.canChangeDimensions();
@@ -1161,7 +1158,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null)
                 return (boolean) obj;
 
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mayInteract from entity: " + entityName() + ". Value: " + builder.mayInteract.apply(context) + ". Must be a boolean. Defaulting to " + super.mayInteract(p_146843_, p_146844_));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for mayInteract from entity: " + entityName() + ". Value: " + builder.mayInteract.apply(context) + ". Must be a boolean. Defaulting to " + super.mayInteract(p_146843_, p_146844_));
         }
 
         return super.mayInteract(p_146843_, p_146844_);
@@ -1176,7 +1173,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
             if (obj != null)
                 return (boolean) obj;
 
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canTrample from entity: " + entityName() + ". Value: " + builder.canTrample.apply(context) + ". Must be a boolean. Defaulting to " + super.canTrample(state, pos, fallDistance));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTrample from entity: " + entityName() + ". Value: " + builder.canTrample.apply(context) + ". Must be a boolean. Defaulting to " + super.canTrample(state, pos, fallDistance));
         }
 
         return super.canTrample(state, pos, fallDistance);
@@ -1198,7 +1195,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setMaxFallDistance.apply(this), "integer");
         if (obj != null)
             return (int) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
         return super.getMaxFallDistance();
     }
 

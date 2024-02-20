@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.model.EntityModelJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
+import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.liolib.renderer.GeoEntityRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -38,16 +39,23 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
             case SOLID -> RenderType.entitySolid(texture);
             case CUTOUT -> RenderType.entityCutout(texture);
             case TRANSLUCENT -> RenderType.entityTranslucent(texture);
+
         };
     }
 
     @Override
     public void render(T animatable, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-        if (animatable.isBaby()) {
-            poseStack.scale(0.5F, 0.5F, 0.5F);
+        if (builder.render != null) {
+            final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+            builder.render.accept(context);
+            super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+        } else {
+            if (animatable.isBaby()) {
+                poseStack.scale(0.5F, 0.5F, 0.5F);
+            }
+            super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         }
-        super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
     }
 }
 
