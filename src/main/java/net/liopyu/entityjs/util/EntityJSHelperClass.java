@@ -10,11 +10,19 @@ import java.util.Set;
 
 public class EntityJSHelperClass {
     public static final Set<String> errorMessagesLogged = new HashSet<>();
+    public static final Set<String> warningMessagesLogged = new HashSet<>();
 
     public static void logErrorMessageOnce(String errorMessage) {
         if (!errorMessagesLogged.contains(errorMessage)) {
             ConsoleJS.STARTUP.error(errorMessage);
             errorMessagesLogged.add(errorMessage);
+        }
+    }
+
+    public static void logWarningMessageOnce(String errorMessage) {
+        if (!warningMessagesLogged.contains(errorMessage)) {
+            ConsoleJS.STARTUP.warn(errorMessage);
+            warningMessagesLogged.add(errorMessage);
         }
     }
 
@@ -25,7 +33,6 @@ public class EntityJSHelperClass {
             case "double" -> convertToDouble(input);
             case "float" -> convertToFloat(input);
             case "boolean" -> convertToBoolean(input);
-            case "humanoidarm" -> convertToHumanoidArm(input);
             case "interactionresult" -> convertToInteractionResult(input);
             case "resourcelocation" -> convertToResourceLocation(input);
             default -> input;
@@ -105,20 +112,6 @@ public class EntityJSHelperClass {
         } else {
             return null;
         }
-    }
-
-    private static HumanoidArm convertToHumanoidArm(Object input) {
-        if (input instanceof HumanoidArm) {
-            return (HumanoidArm) input;
-        } else if (input instanceof String) {
-            String stringValue = ((String) input).toLowerCase();
-            if ("left".equals(stringValue)) {
-                return HumanoidArm.LEFT;
-            } else if ("right".equals(stringValue)) {
-                return HumanoidArm.RIGHT;
-            }
-        }
-        return null;
     }
 
 

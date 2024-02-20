@@ -203,7 +203,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         } else if (ambientSound instanceof ResourceLocation resourceLocation) {
             this.getAmbientSound = resourceLocation;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for getAmbientSound from entity: " + entityName() + ". Value: " + ambientSound + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.zombie.ambient\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for getAmbientSound. Value: " + ambientSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
             this.getAmbientSound = new ResourceLocation("minecraft", "entity/zombie/ambient");
         }
         return this;

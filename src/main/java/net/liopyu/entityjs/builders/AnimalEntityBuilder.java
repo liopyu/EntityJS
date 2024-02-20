@@ -28,7 +28,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Function<ContextUtils.EntityItemStackContext, Object> isFoodPredicate;
     public transient Function<LivingEntity, Object> canBreed;
 
-    public transient Object myRidingOffset;
+    public transient Function<LivingEntity, Object> myRidingOffset;
     public transient Object ambientSoundInterval;
     public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
 
@@ -41,7 +41,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         canJump = true;
         followLeashSpeed = 1.0D;
         ambientSoundInterval = 120;
-        myRidingOffset = 0.14;
     }
 
     @Info(value = """
@@ -132,7 +131,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             animalBuilder.myRidingOffset(1.5);
             ```
             """)
-    public AnimalEntityBuilder<T> myRidingOffset(double myRidingOffset) {
+    public AnimalEntityBuilder<T> myRidingOffset(Function<LivingEntity, Object> myRidingOffset) {
         this.myRidingOffset = myRidingOffset;
         return this;
     }

@@ -18,5 +18,6 @@ public abstract class KubeJSCommandsMixin {
     @Inject(method = "reloadStartup", at = @At(value = "RETURN", ordinal = 0), remap = false)
     private static void entityjs$onReloadStartup(CommandSourceStack source, CallbackInfoReturnable<Integer> cir) {
         EntityJSHelperClass.errorMessagesLogged.clear();
+        EntityJSHelperClass.warningMessagesLogged.clear();
     }
 }

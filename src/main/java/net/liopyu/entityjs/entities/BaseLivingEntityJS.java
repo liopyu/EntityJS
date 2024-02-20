@@ -132,12 +132,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public HumanoidArm getMainArm() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.mainArm, "humanoidarm");
-        if (obj != null)
-            return (HumanoidArm) obj;
-
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mainArm from entity: " + entityName() + ". Value: " + builder.mainArm + ". Must be a HumanoidArm. Defaulting to " + HumanoidArm.RIGHT);
-
+        if (builder.mainArm != null) return (HumanoidArm) builder.mainArm;
         return HumanoidArm.RIGHT;
     }
 
