@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2FloatFunction;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -28,7 +29,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     //pathfinder mob
     public transient Function<PathfinderMob, Object> shouldStayCloseToLeashHolder;
     //pathfinder mob
-    public transient Object followLeashSpeed;
+    public transient Double followLeashSpeed;
     //pathfinder mob
     public transient Function<ContextUtils.EntityBlockPosLevelContext, Object> walkTargetValue;
 
@@ -40,14 +41,14 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Ingredient canFireProjectileWeapon;
     public transient Function<ContextUtils.EntityProjectileWeaponContext, Object> canFireProjectileWeaponPredicate;
     public transient Consumer<LivingEntity> ate;
-    public transient ResourceLocation getAmbientSound;
+    public transient Object getAmbientSound;
     public transient Function<ContextUtils.EntityItemStackContext, Object> canHoldItem;
-    public transient Object shouldDespawnInPeaceful;
+    public transient Boolean shouldDespawnInPeaceful;
     public transient Function<PathfinderMob, Object> canPickUpLoot;
-    public transient Object isPersistenceRequired;
+    public transient Boolean isPersistenceRequired;
 
     public transient Function<PathfinderMob, Object> meleeAttackRangeSqr;
-    public transient Object canJump;
+    public transient Boolean canJump;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
@@ -189,20 +190,22 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
 
 
     @Info(value = """
-            Sets the ambient sound for the entity using a string representation.
-                        
-            @param ambientSoundString A string representing the ambient sound.
+            Sets the sound to play when the entity is ambient using either a string representation or a ResourceLocation object.
                         
             Example usage:
             ```javascript
             mobBuilder.getAmbientSound("minecraft:entity.zombie.ambient");
             ```
-                        
-            In this example, the string "minecraft:entity.zombie.ambient" represents the ambient sound for a zombie entity.
-            Make sure to replace it with the correct resource location for your specific mod or entity.
             """)
-    public MobBuilder<T> getAmbientSound(String ambientSoundString) {
-        this.getAmbientSound = new ResourceLocation(ambientSoundString);
+    public MobBuilder<T> getAmbientSound(Object ambientSound) {
+        if (ambientSound instanceof String) {
+            this.getAmbientSound = new ResourceLocation((String) ambientSound);
+        } else if (ambientSound instanceof ResourceLocation resourceLocation) {
+            this.getAmbientSound = resourceLocation;
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for getAmbientSound from entity: " + entityName() + ". Value: " + ambientSound + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.zombie.ambient\"");
+            this.getAmbientSound = new ResourceLocation("minecraft", "entity/zombie/ambient");
+        }
         return this;
     }
 
@@ -237,7 +240,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             mobBuilder.shouldDespawnInPeaceful(true);
             ```
             """)
-    public MobBuilder<T> shouldDespawnInPeaceful(Boolean shouldDespawnInPeaceful) {
+    public MobBuilder<T> shouldDespawnInPeaceful(boolean shouldDespawnInPeaceful) {
         this.shouldDespawnInPeaceful = shouldDespawnInPeaceful;
         return this;
     }
@@ -273,7 +276,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             mobBuilder.isPersistenceRequired(true);
             ```
             """)
-    public MobBuilder<T> isPersistenceRequired(Boolean isPersistenceRequired) {
+    public MobBuilder<T> isPersistenceRequired(boolean isPersistenceRequired) {
         this.isPersistenceRequired = isPersistenceRequired;
         return this;
     }
@@ -370,8 +373,8 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             });
             ```
             """)
-    public MobBuilder<T> walkTargetValue(Object2FloatFunction<ContextUtils.EntityBlockPosLevelContext> function) {
-        this.walkTargetValue = function::getFloat;
+    public MobBuilder<T> walkTargetValue(Function<ContextUtils.EntityBlockPosLevelContext, Object> function) {
+        this.walkTargetValue = function;
         return this;
     }
 

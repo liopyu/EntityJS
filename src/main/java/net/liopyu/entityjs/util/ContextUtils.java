@@ -131,6 +131,19 @@ public class ContextUtils {
         }
     }
 
+    public static class HurtContext {
+        @Info("The living entity that was hurt")
+        public final LivingEntity entity;
+
+        @Info("The source of the damage")
+        public final DamageSource damageSource;
+
+        public HurtContext(LivingEntity entity, DamageSource damageSource) {
+            this.entity = entity;
+            this.damageSource = damageSource;
+        }
+    }
+
 
     public static class EntityDamageContext {
         @Info("The source of the damage")

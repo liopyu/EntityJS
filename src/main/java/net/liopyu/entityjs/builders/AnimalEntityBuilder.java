@@ -24,7 +24,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     public transient Object getBreedOffspring;
-    public transient Object isFood;
+    public transient Ingredient isFood;
     public transient Function<ContextUtils.EntityItemStackContext, Object> isFoodPredicate;
     public transient Function<LivingEntity, Object> canBreed;
 
@@ -48,7 +48,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             Sets the resource location for the offspring spawned when breeding.
                         
             @param breedOffspring The resource location for the breed offspring.
-            Can also be an instance of AgeableMob Object.
+            Can also be an instance of AgeableMob.
                         
             Example usage:
             ```javascript
@@ -94,7 +94,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             ]);
             ```
             """)
-    public AnimalEntityBuilder<T> isFood(Object isFood) {
+    public AnimalEntityBuilder<T> isFood(Ingredient isFood) {
         this.isFood = isFood;
         return this;
     }

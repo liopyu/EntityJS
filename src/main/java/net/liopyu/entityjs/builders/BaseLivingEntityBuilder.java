@@ -95,6 +95,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean summonable;
     public transient boolean save;
     public transient boolean fireImmune;
+    public transient boolean canSpawnFarFromPlayer;
     public transient ResourceLocation[] immuneTo;
     public transient boolean spawnFarFromPlayer;
     public transient int clientTrackingRange;
@@ -103,19 +104,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<T, ResourceLocation> modelResource;
     public transient Function<T, ResourceLocation> textureResource;
     public transient Function<T, ResourceLocation> animationResource;
-    public transient Object isPushable;
+    public transient boolean isPushable;
     public transient final List<AnimationControllerSupplier<T>> animationSuppliers;
     public transient Function<LivingEntity, Object> shouldDropLoot;
     public transient Function<ContextUtils.PassengerEntityContext, Object> canAddPassenger;
     public transient Function<LivingEntity, Object> isAffectedByFluids;
-    public transient Object isAlwaysExperienceDropper;
+    public transient boolean isAlwaysExperienceDropper;
     public transient Function<LivingEntity, Object> isImmobile;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
-    public transient Object setBlockJumpFactor;
+    public transient Float setBlockJumpFactor;
     public transient Function<LivingEntity, Object> blockSpeedFactor;
-    public transient Object setJumpPower;
-    public transient Object setSoundVolume;
-    public transient Object setWaterSlowDown;
+    public transient Float setJumpPower;
+    public transient Float setSoundVolume;
+    public transient Float setWaterSlowDown;
     public transient Object setSwimSound;
     public transient Function<LivingEntity, Object> isFlapping;
     public transient Object setDeathSound;
@@ -130,13 +131,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> onDecreaseAirSupply;
     public transient Consumer<LivingEntity> onBlockedByShield;
 
-    public transient Object repositionEntityAfterLoad;
+    public transient Boolean repositionEntityAfterLoad;
 
     public transient Function<Entity, Object> nextStep;
 
     public transient Consumer<LivingEntity> onIncreaseAirSupply;
 
-    public transient Object setHurtSound;
+    public transient Function<ContextUtils.HurtContext, Object> setHurtSound;
 
     public transient Object setSwimSplashSound;
 
@@ -144,7 +145,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<ContextUtils.EntityTypeEntityContext, Object> canAttackType;
 
     public transient Function<LivingEntity, Object> scale;
-    public transient Object rideableUnderWater;
+    public transient Boolean rideableUnderWater;
 
     public transient Function<LivingEntity, Object> shouldDropExperience;
 
@@ -186,13 +187,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Object eatingSound;
 
     public transient Function<LivingEntity, Object> onClimbable;
-    public transient Object canBreatheUnderwater;
+    public transient Boolean canBreatheUnderwater;
 
     public transient Consumer<ContextUtils.EntityFallDamageContext> onLivingFall;
 
     public transient Consumer<LivingEntity> onSprint;
 
-    public transient Object jumpBoostPower;
+    public transient Double jumpBoostPower;
     public transient Function<ContextUtils.EntityFluidStateContext, Object> canStandOnFluid;
 
 
@@ -225,7 +226,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<LivingEntity, Object> canFreeze;
     public transient Function<LivingEntity, Object> isCurrentlyGlowing;
     public transient Function<LivingEntity, Object> canDisableShield;
-    public transient Object setMaxFallDistance;
+    public transient Function<LivingEntity, Object> setMaxFallDistance;
     public transient Function<ContextUtils.MobInteractContext, Object> onInteract;
 
     public transient Consumer<LivingEntity> onClientRemoval;
@@ -254,6 +255,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
     public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
 
+    public String entityName() {
+        return this.get().toString();
+    }
+
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
         super(i);
@@ -274,11 +279,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         isPushable = true;
         animationSuppliers = new ArrayList<>();
         isAlwaysExperienceDropper = false;
-        setBlockJumpFactor = 1;
-        setJumpPower = 0.5f;
         setSoundVolume = 1.0f;
         setWaterSlowDown = 0.8f;
-        setMaxFallDistance = 3;
         repositionEntityAfterLoad = true;
         rideableUnderWater = false;
         canBreatheUnderwater = false;
@@ -297,16 +299,24 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.mainArm("left");
             ```
             """)
-    public BaseLivingEntityBuilder<T> mainArm(String arm) {
-        switch (arm.toLowerCase()) {
-            case "left":
-                this.mainArm = HumanoidArm.LEFT;
-                break;
-            case "right":
-                this.mainArm = HumanoidArm.RIGHT;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid main arm string: " + arm);
+    public BaseLivingEntityBuilder<T> mainArm(Object arm) {
+        if (arm instanceof HumanoidArm) {
+            this.mainArm = (HumanoidArm) arm;
+            return this;
+        } else if (arm instanceof String string) {
+            switch (string.toLowerCase()) {
+                case "left":
+                    this.mainArm = HumanoidArm.LEFT;
+                    break;
+                case "right":
+                    this.mainArm = HumanoidArm.RIGHT;
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            this.mainArm = HumanoidArm.RIGHT;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mainArm: " + arm + ". Must be a HumanoidArm. Defaulting to " + HumanoidArm.RIGHT);
         }
         return this;
     }
@@ -435,7 +445,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.setBlockJumpFactor(1.2);
             ```
             """)
-    public BaseLivingEntityBuilder<T> setBlockJumpFactor(Object blockJumpFactor) {
+    public BaseLivingEntityBuilder<T> setBlockJumpFactor(Float blockJumpFactor) {
         setBlockJumpFactor = blockJumpFactor;
         return this;
     }
@@ -681,7 +691,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.isPushable(true);
             ```
             """)
-    public BaseLivingEntityBuilder<T> isPushable(Object b) {
+    public BaseLivingEntityBuilder<T> isPushable(boolean b) {
         isPushable = b;
         return this;
     }
@@ -805,8 +815,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.setDeathSound("minecraft:entity.generic.death");
             ```
             """)
-    public BaseLivingEntityBuilder<T> setDeathSound(String sound) {
-        setDeathSound = new ResourceLocation(sound);
+    public BaseLivingEntityBuilder<T> setDeathSound(Object sound) {
+        if (sound instanceof String) setDeathSound = new ResourceLocation((String) sound);
+        else if (sound instanceof ResourceLocation) setDeathSound = (ResourceLocation) sound;
+        else
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound from entity: " + entityName() + ". Value: " + sound + ". Must be a ResourceLocation. Defaulting to \"minecraft:entity.generic.death\"");
         return this;
     }
 
@@ -819,22 +832,36 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.setSwimSound("minecraft:entity.generic.swim");
             ```
             """)
-    public BaseLivingEntityBuilder<T> setSwimSound(String sound) {
-        setSwimSound = new ResourceLocation(sound);
+    public BaseLivingEntityBuilder<T> setSwimSound(Object sound) {
+        if (sound instanceof String) setSwimSound = new ResourceLocation((String) sound);
+        else if (sound instanceof ResourceLocation) setSwimSound = (ResourceLocation) sound;
+        else {
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound from entity: " + entityName() + ". Value: " + sound + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.swim\"");
+
+            setSwimSound = new ResourceLocation("minecraft:entity.generic.swim");
+        }
         return this;
     }
 
 
     @Info(value = """
-            Sets the swim splash sound for the entity using a string representation.
+            Sets the swim splash sound for the entity using either a string representation or a ResourceLocation object.
                         
             Example usage:
             ```javascript
             entityBuilder.setSwimSplashSound("minecraft:entity.generic.splash");
             ```
             """)
-    public BaseLivingEntityBuilder<T> setSwimSplashSound(String sound) {
-        setSwimSplashSound = new ResourceLocation(sound);
+    public BaseLivingEntityBuilder<T> setSwimSplashSound(Object sound) {
+        if (sound instanceof String) {
+            setSwimSplashSound = new ResourceLocation((String) sound);
+        } else if (sound instanceof ResourceLocation) {
+            setSwimSplashSound = (ResourceLocation) sound;
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound from entity: " + entityName() + ". Value: " + sound + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.splash\"");
+
+            setSwimSplashSound = new ResourceLocation("minecraft", "entity/generic/splash");
+        }
         return this;
     }
 
@@ -1028,8 +1055,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> nextStep(Object2FloatFunction<Entity> nextStep) {
-        this.nextStep = nextStep::getFloat;
+    public BaseLivingEntityBuilder<T> nextStep(Function<Entity, Object> nextStep) {
+        this.nextStep = nextStep;
         return this;
     }
 
@@ -1054,15 +1081,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the hurt sound for the entity using a string representation.
-                        
-            Example usage:
+            Sets a function to determine the custom hurt sound of the entity.
+            The provided Function accepts a {@link ContextUtils.HurtContext} parameter,
             ```javascript
-            entityBuilder.setHurtSound("minecraft:entity.generic.hurt");
-            ```
+            entityBuilder.setHurtSound(context => {
+                // Define logic to calculate and return the custom hurt sound for the entity
+                // Use information about the HurtContext provided by the context.
+                return "minecraft:entity.generic.hurt" // Some ResourceLocation or String representing the sound to play when the entity is hurt;
+            }); 
             """)
-    public BaseLivingEntityBuilder<T> setHurtSound(String setHurtSound) {
-        this.setHurtSound = new ResourceLocation(setHurtSound);
+    public BaseLivingEntityBuilder<T> setHurtSound(Function<ContextUtils.HurtContext, Object> sound) {
+        this.setHurtSound = sound;
         return this;
     }
 
@@ -1102,8 +1131,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> scale(Object2FloatFunction<LivingEntity> customScale) {
-        this.scale = customScale::getFloat;
+    public BaseLivingEntityBuilder<T> scale(Function<LivingEntity, Object> customScale) {
+        this.scale = customScale;
         return this;
     }
 
@@ -1157,8 +1186,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> experienceReward(Object2IntFunction<LivingEntity> experienceReward) {
-        this.experienceReward = experienceReward::getInt;
+    public BaseLivingEntityBuilder<T> experienceReward(Function<LivingEntity, Object> experienceReward) {
+        this.experienceReward = experienceReward;
         return this;
     }
 
@@ -1377,7 +1406,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the sound resource locations for small and large falls of the entity.
+            Sets the sound resource locations for small and large falls of the entity using either string representations or ResourceLocation objects.
                         
             Example usage:
             ```javascript
@@ -1385,23 +1414,46 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                                      "minecraft:entity.generic.large_fall");
             ```
             """)
-    public BaseLivingEntityBuilder<T> fallSounds(String smallFallSound, String largeFallSound) {
-        this.smallFallSound = new ResourceLocation(smallFallSound);
-        this.largeFallSound = new ResourceLocation(largeFallSound);
+    public BaseLivingEntityBuilder<T> fallSounds(Object smallFallSound, Object largeFallSound) {
+        if (smallFallSound instanceof String) {
+            this.smallFallSound = new ResourceLocation((String) smallFallSound);
+        } else if (smallFallSound instanceof ResourceLocation) {
+            this.smallFallSound = (ResourceLocation) smallFallSound;
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for smallFallSound from entity: " + entityName() + ". Value: " + smallFallSound + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.small_fall\"");
+            this.smallFallSound = new ResourceLocation("minecraft", "entity/generic/small_fall");
+        }
+
+        if (largeFallSound instanceof String) {
+            this.largeFallSound = new ResourceLocation((String) largeFallSound);
+        } else if (largeFallSound instanceof ResourceLocation) {
+            this.largeFallSound = (ResourceLocation) largeFallSound;
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for largeFallSound from entity: " + entityName() + ". Value: " + largeFallSound + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.large_fall\"");
+            this.largeFallSound = new ResourceLocation("minecraft", "entity/generic/large_fall");
+        }
+
         return this;
     }
 
 
     @Info(value = """
-            Sets the sound resource location for the entity's eating sound.
+            Sets the sound resource location for the entity's eating sound using either a string representation or a ResourceLocation object.
                         
             Example usage:
             ```javascript
             entityBuilder.eatingSound("minecraft:entity.zombie.ambient");
             ```
             """)
-    public BaseLivingEntityBuilder<T> eatingSound(String soundResourceLocation) {
-        eatingSound = new ResourceLocation(soundResourceLocation);
+    public BaseLivingEntityBuilder<T> eatingSound(Object sound) {
+        if (sound instanceof String) {
+            this.eatingSound = new ResourceLocation((String) sound);
+        } else if (sound instanceof ResourceLocation) {
+            this.eatingSound = (ResourceLocation) sound;
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound from entity: " + entityName() + ". Value: " + sound + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.zombie.ambient\"");
+            this.eatingSound = new ResourceLocation("minecraft", "entity/zombie/ambient");
+        }
         return this;
     }
 
@@ -1486,7 +1538,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.jumpBoostPower(2.5);
             ```
             """)
-    public BaseLivingEntityBuilder<T> jumpBoostPower(Double jumpBoostPower) {
+    public BaseLivingEntityBuilder<T> jumpBoostPower(double jumpBoostPower) {
         this.jumpBoostPower = jumpBoostPower;
         return this;
     }
@@ -1892,10 +1944,14 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                         
             Example usage:
             ```javascript
-            entityBuilder.setMaxFallDistance(3);
+            entityBuilder.setMaxFallDistance(entity => {
+                // Define custom logic to determine the maximum fall distance
+                // Use information about the LivingEntity provided by the context.
+                return someNumber;
+            });
             ```
             """)
-    public BaseLivingEntityBuilder<T> setMaxFallDistance(int maxFallDistance) {
+    public BaseLivingEntityBuilder<T> setMaxFallDistance(Function<LivingEntity, Object> maxFallDistance) {
         setMaxFallDistance = maxFallDistance;
         return this;
     }

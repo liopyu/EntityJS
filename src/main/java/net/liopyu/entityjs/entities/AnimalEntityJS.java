@@ -48,6 +48,7 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -183,13 +184,15 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public boolean isFood(ItemStack pStack) {
         if (builder.isFood != null) {
-            Ingredient ingredient = (Ingredient) builder.isFood;
-            return ingredient.test(pStack);
+            return builder.isFood.test(pStack);
         }
         return super.isFood(pStack);
     }
 
     public boolean isFoodPredicate(ItemStack pStack) {
+        if (builder.isFoodPredicate == null) {
+            return super.isFood(pStack);
+        }
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isFoodPredicate.apply(context), "boolean");
         if (obj != null) {
@@ -267,14 +270,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected double followLeashSpeed() {
-        if (builder.followLeashSpeed == null) return super.followLeashSpeed();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.followLeashSpeed, "double");
-        if (obj != null) {
-            return (double) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for followLeashSpeed from entity: " + entityName() + ". Value: " + builder.followLeashSpeed + ". Must be a double. Defaulting to " + super.followLeashSpeed());
-            return super.followLeashSpeed();
-        }
+        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
     }
 
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
@@ -306,21 +302,15 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
             if (obj != null) {
                 return (InteractionResult) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.interact(pPlayer, pHand));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.mobInteract(pPlayer, pHand));
         }
-        return super.interact(pPlayer, pHand);
+        return super.mobInteract(pPlayer, pHand);
 
     }
 
     //Mob Overrides
     public boolean canJump() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canJump, "boolean");
-        if (obj != null) {
-            return (boolean) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canJump from entity: " + entityName() + ". Value: " + builder.canJump + ". Must be a boolean. Defaulting to true");
-            return true;
-        }
+        return Objects.requireNonNullElse(builder.canJump, true);
     }
 
     public void onJump() {
@@ -412,11 +402,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
 
     @Override
-    public float getPathfindingMalus(BlockPathTypes pNodeType) {
-        return super.getPathfindingMalus(pNodeType);
-    }
-
-    @Override
     public boolean canCutCorner(BlockPathTypes pathType) {
         if (builder.canCutCorner != null) {
             final ContextUtils.EntityBlockPathTypeContext context = new ContextUtils.EntityBlockPathTypeContext(pathType, this);
@@ -431,15 +416,19 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         return super.canCutCorner(pathType);
     }
 
-
     @Override
     public void setTarget(@Nullable LivingEntity target) {
-        super.setTarget(target);
+        LivingChangeTargetEvent changeTargetEvent = ForgeHooks.onLivingChangeTarget(this, target, LivingChangeTargetEvent.LivingTargetType.MOB_TARGET);
         if (builder.onTargetChanged != null) {
-            assert target != null;
-            final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(target, this);
-            builder.onTargetChanged.accept(context);
-        }
+            if (!changeTargetEvent.isCanceled()) {
+                assert target != null;
+                @Nullable LivingEntity target1 = changeTargetEvent.getNewTarget();
+                //noinspection removal
+                ForgeHooks.onLivingSetAttackTarget(this, target1);
+                final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(target, this);
+                builder.onTargetChanged.accept(context);
+            }
+        } else super.setTarget(target);
     }
 
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
@@ -485,7 +474,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     protected SoundEvent getAmbientSound() {
         if (builder.getAmbientSound != null) {
-            return ForgeRegistries.SOUND_EVENTS.getValue(builder.getAmbientSound);
+            return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.getAmbientSound);
         } else {
             return super.getAmbientSound();
         }
@@ -511,32 +500,12 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected boolean shouldDespawnInPeaceful() {
-        if (builder.shouldDespawnInPeaceful != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.shouldDespawnInPeaceful, "boolean");
-            if (obj != null) {
-                return (boolean) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for shouldDespawnInPeaceful from entity: " + entityName() + ". Value: " + builder.shouldDespawnInPeaceful + ". Must be a boolean. Defaulting to " + super.shouldDespawnInPeaceful());
-                return super.shouldDespawnInPeaceful();
-            }
-        } else {
-            return super.shouldDespawnInPeaceful();
-        }
+        return Objects.requireNonNullElseGet(builder.shouldDespawnInPeaceful, super::shouldDespawnInPeaceful);
     }
 
     @Override
     public boolean isPersistenceRequired() {
-        if (builder.isPersistenceRequired != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isPersistenceRequired, "boolean");
-            if (obj != null) {
-                return (boolean) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isPersistenceRequired from entity: " + entityName() + ". Value: " + builder.isPersistenceRequired + ". Must be a boolean. Defaulting to " + super.isPersistenceRequired());
-                return super.isPersistenceRequired();
-            }
-        } else {
-            return super.isPersistenceRequired();
-        }
+        return Objects.requireNonNullElseGet(builder.isPersistenceRequired, super::isPersistenceRequired);
     }
 
 
@@ -559,52 +528,33 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     //(Base LivingEntity/Entity Overrides)
     @Override
     protected float getSoundVolume() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setSoundVolume, "float");
-        if (obj instanceof Float)
-            return (float) obj;
-
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSoundVolume from entity: " + entityName() + ". Value: " + builder.setSoundVolume + ". Must be a float. Defaulting to " + super.getSoundVolume());
-
-        return super.getSoundVolume();
+        return Objects.requireNonNullElseGet(builder.setSoundVolume, super::getSoundVolume);
     }
 
     @Override
     protected float getWaterSlowDown() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setWaterSlowDown, "float");
-        if (obj instanceof Float)
-            return (float) obj;
-
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setWaterSlowDown from entity: " + entityName() + ". Value: " + builder.setWaterSlowDown + ". Must be a float. Defaulting to " + super.getWaterSlowDown());
-
-        return super.getWaterSlowDown();
+        return Objects.requireNonNullElseGet(builder.setWaterSlowDown, super::getWaterSlowDown);
     }
 
     @Override
     protected float getJumpPower() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setJumpPower, "float");
-        if (obj instanceof Float)
-            return (float) obj;
-
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setJumpPower from entity: " + entityName() + ". Value: " + builder.setJumpPower + ". Must be a float. Defaulting to " + super.getJumpPower());
-
-        return super.getJumpPower();
+        if (builder.setJumpPower != null) {
+            return builder.setJumpPower * this.getBlockJumpFactor();
+        } else return super.getJumpPower();
     }
 
 
     @Override
     protected float getBlockJumpFactor() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor, "float");
-        if (obj != null) {
-            return (float) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("Invalid value for setBlockJumpFactor: " + obj + ". Must be a float");
-            return super.getBlockJumpFactor();
-        }
+        if (builder.setBlockJumpFactor != null) {
+            return builder.setBlockJumpFactor + this.getBlockJumpFactor();
+        } else return super.getBlockJumpFactor();
     }
 
     @Override
     protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
-        if (builder.setStandingEyeHeight == null) return super.getStandingEyeHeight(pPose, pDimensions);
+        if (builder == null || builder.setStandingEyeHeight == null)
+            return super.getStandingEyeHeight(pPose, pDimensions);
         final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, this);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
         if (obj != null) return (float) obj;
@@ -615,13 +565,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public boolean isPushable() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isPushable, "boolean");
-        if (obj != null) {
-            return (boolean) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isPushable from entity: " + builder.get() + ". Value: " + builder.isPushable + ". Must be a boolean, defaulting to " + super.isPushable());
-            return super.isPushable();
-        }
+        return builder.isPushable;
     }
 
     @Override
@@ -636,8 +580,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         }
     }
 
-
-    //Start of the method adding madness - liopyu
     @Override
     protected boolean canAddPassenger(@NotNull Entity entity) {
         if (builder.canAddPassenger == null) return super.canAddPassenger(entity);
@@ -679,13 +621,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected boolean isAlwaysExperienceDropper() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isAlwaysExperienceDropper, "boolean");
-        if (obj != null)
-            return (boolean) obj;
-
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for isAlwaysExperienceDropper from entity: " + entityName() + ". Value: " + builder.isAlwaysExperienceDropper + ". Must be a boolean. Defaulting to " + super.isAlwaysExperienceDropper());
-
-        return super.isAlwaysExperienceDropper();
+        return builder.isAlwaysExperienceDropper;
     }
 
 
@@ -785,15 +721,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected boolean repositionEntityAfterLoad() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.repositionEntityAfterLoad, "boolean");
-        if (obj != null)
-            return (boolean) obj;
-
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for repositionEntityAfterLoad from entity: " + entityName() + ". Value: " + builder.repositionEntityAfterLoad + ". Must be a boolean. Defaulting to " + super.repositionEntityAfterLoad());
-
-        return super.repositionEntityAfterLoad();
+        return Objects.requireNonNullElseGet(builder.repositionEntityAfterLoad, super::repositionEntityAfterLoad);
     }
-
 
     @Override
     protected float nextStep() {
@@ -815,9 +744,10 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
         if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound, "resourcelocation");
-        if (obj != null) return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj);
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound + ". Must be a ResourceLocation. Defaulting to " + super.getHurtSound(p_21239_));
+        final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, p_21239_);
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
+        if (obj != null) return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
         return super.getHurtSound(p_21239_);
     }
 
@@ -825,20 +755,15 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setSwimSplashSound, "resourcelocation");
-        if (obj != null) return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound from entity: " + entityName() + ". Value: " + builder.setSwimSplashSound + ". Must be a ResourceLocation. Defaulting to " + super.getSwimSplashSound());
-        return super.getSwimSplashSound();
+        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setSwimSound, "resourcelocation");
-        if (builder.setSwimSound != null && obj != null)
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound from entity: " + entityName() + ". Value: " + builder.setSwimSound + ". Must be a ResourceLocation. Defaulting to " + super.getSwimSound());
-        return super.getSwimSound();
+        if (builder.setSwimSound == null) return super.getSwimSound();
+        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+
     }
 
 
@@ -860,11 +785,12 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public float getScale() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.scale, "float");
+        if (builder.scale == null) return super.getScale();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.scale.apply(this), "float");
         if (obj != null) {
             return (float) obj;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for scale from entity: " + entityName() + ". Value: " + builder.scale + ". Must be a float. Defaulting to " + super.getScale());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for scale from entity: " + entityName() + ". Value: " + builder.scale.apply(this) + ". Must be a float. Defaulting to " + super.getScale());
             return super.getScale();
         }
     }
@@ -872,13 +798,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public boolean rideableUnderWater() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.rideableUnderWater, "boolean");
-        if (obj != null) {
-            return (boolean) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for rideableUnderWater from entity: " + entityName() + ". Value: " + builder.rideableUnderWater + ". Must be a boolean. Defaulting to " + super.rideableUnderWater());
-            return super.rideableUnderWater();
-        }
+        return Objects.requireNonNullElseGet(builder.rideableUnderWater, super::rideableUnderWater);
     }
 
 
@@ -1009,11 +929,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     protected SoundEvent getDeathSound() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setDeathSound, "resourcelocation");
-        if (builder.setDeathSound != null && obj != null)
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound from entity: " + entityName() + ". Value: " + builder.setDeathSound + ". Must be a ResourceLocation. Defaulting to " + super.getDeathSound());
-        return super.getDeathSound();
+        if (builder.setDeathSound == null) return super.getDeathSound();
+        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));
     }
 
 
@@ -1030,31 +947,24 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public @NotNull Fallsounds getFallSounds() {
-        Object smallFallSound = EntityJSHelperClass.convertObjectToDesired(builder.smallFallSound, "resourcelocation");
-        Object largeFallSound = EntityJSHelperClass.convertObjectToDesired(builder.largeFallSound, "resourcelocation");
-
-        if (smallFallSound != null && largeFallSound != null)
+        if (builder.fallSounds != null)
             return new Fallsounds(
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) smallFallSound)),
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) largeFallSound))
+                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.smallFallSound)),
+                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.largeFallSound))
             );
-
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value(s) for fall sounds from entity: " + entityName() + ". Small fall sound: " + smallFallSound + ", Large fall sound: " + largeFallSound + ". Both must be ResourceLocations. Defaulting to " + super.getFallSounds());
         return super.getFallSounds();
     }
 
-
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.eatingSound, "resourcelocation");
-        if (builder.eatingSound != null && obj != null)
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound from entity: " + entityName() + ". Value: " + builder.eatingSound + ". Must be a ResourceLocation. Defaulting to " + super.getEatingSound(itemStack));
+        if (builder.eatingSound != null)
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.eatingSound));
         return super.getEatingSound(itemStack);
     }
 
     @Override
     public boolean onClimbable() {
+        if (builder.onClimbable == null) return super.onClimbable();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.onClimbable.apply(this), "boolean");
         if (obj != null) {
             return (boolean) obj;
@@ -1068,13 +978,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     //Deprecated but still works for 1.20.4 :shrug:
     @Override
     public boolean canBreatheUnderwater() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canBreatheUnderwater, "boolean");
-        if (obj != null) {
-            return (boolean) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for canBreatheUnderwater from entity: " + entityName() + ". Value: " + builder.canBreatheUnderwater + ". Must be a boolean. Defaulting to " + super.canBreatheUnderwater());
-            return super.canBreatheUnderwater();
-        }
+        return Objects.requireNonNullElseGet(builder.canBreatheUnderwater, super::canBreatheUnderwater);
     }
 
 
@@ -1083,10 +987,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         if (builder.onLivingFall != null) {
             final ContextUtils.EntityFallDamageContext context = new ContextUtils.EntityFallDamageContext(this, damageMultiplier, distance, damageSource);
             builder.onLivingFall.accept(context);
-            return super.causeFallDamage(distance, damageMultiplier, damageSource);
-        } else {
-            return super.causeFallDamage(distance, damageMultiplier, damageSource);
         }
+        return super.causeFallDamage(distance, damageMultiplier, damageSource);
     }
 
 
@@ -1094,23 +996,14 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     public void setSprinting(boolean sprinting) {
         if (builder.onSprint != null) {
             builder.onSprint.accept(this);
-            super.setSprinting(sprinting);
-        } else {
-            super.setSprinting(sprinting);
         }
+        super.setSprinting(sprinting);
     }
 
 
     @Override
     public double getJumpBoostPower() {
-        if (builder.jumpBoostPower != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower, "double");
-            if (obj != null) {
-                return (double) obj + super.getJumpBoostPower();
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower + ". Must be a double. Defaulting to " + super.getJumpBoostPower());
-        }
-        return super.getJumpBoostPower();
+        return Objects.requireNonNullElseGet(builder.jumpBoostPower, super::getJumpBoostPower);
     }
 
 
@@ -1161,11 +1054,10 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public void onItemPickup(@NotNull ItemEntity p_21054_) {
+        super.onItemPickup(p_21054_);
         if (builder.onItemPickup != null) {
             final ContextUtils.EntityItemEntityContext context = new ContextUtils.EntityItemEntityContext(this, p_21054_);
             builder.onItemPickup.accept(context);
-        } else {
-            super.onItemPickup(p_21054_);
         }
     }
 
@@ -1197,9 +1089,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     public void onLeaveCombat() {
         if (builder.onLeaveCombat != null) {
             builder.onLeaveCombat.accept(this);
-        } else {
-            super.onLeaveCombat();
         }
+        super.onLeaveCombat();
     }
 
     @Override
@@ -1260,9 +1151,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         if (builder.onStartSleeping != null) {
             final ContextUtils.EntityBlockPosContext context = new ContextUtils.EntityBlockPosContext(this, blockPos);
             builder.onStartSleeping.accept(context);
-        } else {
-            super.startSleeping(blockPos);
         }
+        super.startSleeping(blockPos);
     }
 
 
@@ -1270,9 +1160,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     public void stopSleeping() {
         if (builder.onStopSleeping != null) {
             builder.onStopSleeping.accept(this);
-        } else {
-            super.stopSleeping();
         }
+        super.stopSleeping();
     }
 
 
@@ -1282,9 +1171,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
             final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, level);
             builder.eat.accept(context);
             return itemStack;
-        } else {
-            return super.eat(level, itemStack);
         }
+        return super.eat(level, itemStack);
     }
 
 
@@ -1345,9 +1233,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     public void onClientRemoval() {
         if (builder.onClientRemoval != null) {
             builder.onClientRemoval.accept(this);
-        } else {
-            super.onClientRemoval();
         }
+        super.onClientRemoval();
     }
 
     @Override
@@ -1355,18 +1242,16 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         if (builder.onHurt != null) {
             final ContextUtils.EntityDamageContext context = new ContextUtils.EntityDamageContext(pDamageSource, pDamageAmount, this);
             builder.onHurt.accept(context);
-        } else {
-            super.actuallyHurt(pDamageSource, pDamageAmount);
         }
+        super.actuallyHurt(pDamageSource, pDamageAmount);
     }
 
     @Override
     public void lavaHurt() {
         if (builder.lavaHurt != null) {
             builder.lavaHurt.accept(this);
-        } else {
-            super.lavaHurt();
         }
+        super.lavaHurt();
     }
 
 
@@ -1374,9 +1259,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     protected void onFlap() {
         if (builder.onFlap != null) {
             builder.onFlap.accept(this);
-        } else {
-            super.onFlap();
         }
+        super.onFlap();
     }
 
     @Override
@@ -1410,8 +1294,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         if (builder.playerTouch != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
             builder.playerTouch.accept(context);
-        } else {
-            super.playerTouch(p_20081_);
         }
     }
 
@@ -1507,19 +1389,17 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
     @Override
     public int getMaxFallDistance() {
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setMaxFallDistance, "integer");
+        if (builder.setMaxFallDistance == null) return super.getMaxFallDistance();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setMaxFallDistance.apply(this), "integer");
         if (obj != null)
             return (int) obj;
-
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
-
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
         return super.getMaxFallDistance();
     }
 
 
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-
         if (builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
             builder.lerpTo.accept(context);
