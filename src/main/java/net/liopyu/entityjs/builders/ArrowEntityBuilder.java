@@ -34,7 +34,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient Function<Entity, Object> canHitEntity;
     public transient Function<Player, Object> tryPickup;
     public transient double setBaseDamage;
-    public transient Function<ArrowEntityJS, Object> setDamageFunction;
+    public transient Function<Entity, Object> setDamageFunction;
     public transient Integer setKnockback;
     public transient Float setWaterInertia;
 
@@ -128,7 +128,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             );
             ```
             """)
-    public ArrowEntityBuilder<T> setDamageFunction(Function<ArrowEntityJS, Object> baseDamage) {
+    public ArrowEntityBuilder<T> setDamageFunction(Function<Entity, Object> baseDamage) {
         setDamageFunction = baseDamage;
         return this;
     }
