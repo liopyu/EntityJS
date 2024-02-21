@@ -40,7 +40,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             animalBuilder.getBreedOffspring("minecraft:cow");
             ```
             """)
-    public AnimalEntityBuilder<T> getBreedOffspring(ResourceLocation breedOffspring) {
+    public AnimalEntityBuilder<T> getBreedOffspring(Object breedOffspring) {
         this.getBreedOffspring = breedOffspring;
         return this;
     }
@@ -107,14 +107,17 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
 
     @Info(value = """
-            Sets the offset for riding on the animal entity.
+            Function which sets the offset for riding on the animal entity.
                         
             @param myRidingOffset The offset value for riding on the animal.
             Defaults to 0.0.
                         
             Example usage:
             ```javascript
-            animalBuilder.myRidingOffset(1.5);
+            animalBuilder.myRidingOffset(entity => {
+                //Use the provided context about the entity to determine the riding offset of the passengers
+                return 5 //Some double value;
+            })
             ```
             """)
     public AnimalEntityBuilder<T> myRidingOffset(Function<LivingEntity, Object> myRidingOffset) {

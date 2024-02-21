@@ -20,7 +20,9 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.CombatTracker;
@@ -32,10 +34,11 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -59,7 +62,7 @@ import org.slf4j.Logger;
 import java.util.Objects;
 import java.util.Optional;
 
-public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
+public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedAttackMob {
 
     private final MobEntityJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
@@ -114,6 +117,33 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
 
     //Mob Overrides
+    @Override
+    public MobType getMobType() {
+        return builder.mobType;
+    }
+
+    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
+        ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, (item) -> {
+            return item instanceof BowItem;
+        })));
+        AbstractArrow abstractarrow = this.getArrow(itemstack, pDistanceFactor);
+        if (this.getMainHandItem().getItem() instanceof BowItem) {
+            abstractarrow = ((BowItem) this.getMainHandItem().getItem()).customArrow(abstractarrow);
+        }
+
+        double d0 = pTarget.getX() - this.getX();
+        double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
+        double d2 = pTarget.getZ() - this.getZ();
+        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level.getDifficulty().getId() * 4));
+        this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.level.addFreshEntity(abstractarrow);
+    }
+
+    protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
+        return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
+    }
+
     public boolean canJump() {
         return Objects.requireNonNullElse(builder.canJump, true);
     }
@@ -280,7 +310,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
     }
 
-
     @Override
     public boolean canHoldItem(ItemStack stack) {
         if (builder.canHoldItem != null) {
@@ -372,6 +401,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     protected float getBlockSpeedFactor() {
+        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
         if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         if (obj != null) {
@@ -664,6 +694,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public boolean canBeAffected(@NotNull MobEffectInstance effectInstance) {
+        if (builder.canBeAffected == null) return super.canBeAffected(effectInstance);
         final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canBeAffected.apply(context), "boolean");
         if (obj != null) {
@@ -677,6 +708,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public boolean isInvertedHealAndHarm() {
+        if (builder.invertedHealAndHarm == null) super.isInvertedHealAndHarm();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.invertedHealAndHarm.apply(this), "boolean");
         if (obj != null) {
             return (boolean) obj;
@@ -867,11 +899,12 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     @Override
     public boolean hasLineOfSight(@NotNull Entity entity) {
         if (builder.hasLineOfSight != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.hasLineOfSight.apply(entity), "boolean");
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entity, this);
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.hasLineOfSight.apply(context), "boolean");
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityName() + ". Value: " + builder.hasLineOfSight.apply(entity) + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityName() + ". Value: " + builder.hasLineOfSight.apply(context) + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
         }
         return super.hasLineOfSight(entity);
     }
@@ -1004,6 +1037,14 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         return super.canFreeze();
     }
 
+    @Override
+    public boolean isFreezing() {
+        if (builder.isFreezing == null) return super.isFreezing();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isFreezing.apply(this), "boolean");
+        if (obj != null) return (boolean) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + builder.isFreezing.apply(this) + ". Must be a boolean. Defaulting to " + super.isFreezing());
+        return super.isFreezing();
+    }
 
     @Override
     public boolean isCurrentlyGlowing() {

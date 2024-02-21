@@ -18,4 +18,5 @@ public class RegistryUtil {
     private static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIERS = DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, EntityJSMod.MOD_ID);
 
     public static final RegistryObject<Codec<EventBasedSpawnModifier>> EVENT_SPAWN_MODIFIER = BIOME_MODIFIERS.register("event_based", () -> Codec.unit(EventBasedSpawnModifier::new));
+
 }

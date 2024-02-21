@@ -17,6 +17,7 @@ import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.BaseLivingEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
+import net.liopyu.entityjs.events.RegisterMobCategoryEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
 import net.liopyu.liolib.core.animation.*;
@@ -202,7 +203,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     public transient Consumer<ContextUtils.EntityItemEntityContext> onItemPickup;
-    public transient Function<Entity, Object> hasLineOfSight;
+    public transient Function<ContextUtils.LineOfSightContext, Object> hasLineOfSight;
 
     public transient Consumer<LivingEntity> onEnterCombat;
     public transient Consumer<LivingEntity> onLeaveCombat;
@@ -254,6 +255,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
 
     public transient Consumer<ContextUtils.RenderContext> render;
+    public transient MobType mobType;
+    public transient Function<LivingEntity, Object> isFreezing;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -282,7 +285,61 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         canBreatheUnderwater = false;
         renderType = RenderType.CUTOUT;
         mainArm = HumanoidArm.RIGHT;
+        mobType = MobType.UNDEFINED;
+    }
 
+    @Info(value = """
+            Defines the Mob's Type
+            Examples: 'undead', 'water', 'arthropod', 'undefined', 'illager'
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.mobType('undead');
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> mobType(Object mt) {
+        if (mt instanceof String string) {
+            switch (string.toLowerCase()) {
+                case "undead":
+                    this.mobType = MobType.UNDEAD;
+                    break;
+                case "arthropod":
+                    this.mobType = MobType.ARTHROPOD;
+                    break;
+                case "undefined":
+                    this.mobType = MobType.UNDEFINED;
+                    break;
+                case "illager":
+                    this.mobType = MobType.ILLAGER;
+                    break;
+                case "water":
+                    this.mobType = MobType.WATER;
+                    break;
+                default:
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mobType: " + mt + ". Example: \"undead\"");
+                    break;
+            }
+        } else if (mt instanceof MobType type) {
+            this.mobType = type;
+        } else
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mobType: " + mt + ". Example: \"undead\"");
+
+        return this;
+    }
+
+    @Info(value = """
+            Defines in what condition the entity will start freezing.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isFreezing(entity => {
+                return true;
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> isFreezing(Function<LivingEntity, Object> isFreezing) {
+        this.isFreezing = isFreezing;
+        return this;
     }
 
     @Info(value = """
@@ -302,6 +359,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         this.render = render;
         return this;
     }
+
 
     @Info(value = """
             Sets the main arm of the entity. Defaults to 'right'.
@@ -680,7 +738,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.animationResource(entity => {
                 // Define logic to determine the animation resource for the entity
                 // Use information about the entity provided by the context.
-                return // Some ResourceLocation representing the animation resource;
+                //return some ResourceLocation representing the animation resource;
+                return entity.hurtTime > 0 ? "kubejs:animations/sasuke.animation.json" : "kubejs:animations/wyrm.animation.json"
             });
             ```
             """)
@@ -1106,6 +1165,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 // Use information about the HurtContext provided by the context.
                 return "minecraft:entity.generic.hurt" // Some ResourceLocation or String representing the sound to play when the entity is hurt;
             }); 
+            ```
             """)
     public BaseLivingEntityBuilder<T> setHurtSound(Function<ContextUtils.HurtContext, Object> sound) {
         this.setHurtSound = sound;
@@ -1661,20 +1721,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a predicate function to determine whether the entity has line of sight to another entity.
-            The provided Predicate accepts a {@link Entity} parameter,
+            The provided Function accepts a {@link LineOfSightContext} parameter,
             representing the entity to check for line of sight.
                         
             Example usage:
             ```javascript
-            entityBuilder.hasLineOfSight(targetEntity => {
+            entityBuilder.hasLineOfSight(context => {
                 // Define conditions to check if the entity has line of sight to the target entity
                 // Use information about the Entity provided by the context.
                 return // Some boolean condition indicating if there is line of sight;
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> hasLineOfSight(Function<Entity, Object> predicate) {
-        hasLineOfSight = predicate;
+    public BaseLivingEntityBuilder<T> hasLineOfSight(Function<ContextUtils.LineOfSightContext, Object> f) {
+        hasLineOfSight = f;
         return this;
     }
 

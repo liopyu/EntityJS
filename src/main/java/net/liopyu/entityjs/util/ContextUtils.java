@@ -49,13 +49,13 @@ public class ContextUtils {
 
     public static class EntityBlockPosContext {
         @Info("The living entity")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
         @Info("The block position")
         public final BlockPos blockPos;
 
-        public EntityBlockPosContext(LivingEntity livingEntity, BlockPos blockPos) {
-            this.livingEntity = livingEntity;
+        public EntityBlockPosContext(LivingEntity entity, BlockPos blockPos) {
+            this.entity = entity;
             this.blockPos = blockPos;
         }
     }
@@ -89,7 +89,7 @@ public class ContextUtils {
 
     public static class EntityItemLevelContext {
         @Info("The living entity")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
         @Info("The item stack")
         public final ItemStack itemStack;
@@ -97,8 +97,8 @@ public class ContextUtils {
         @Info("The level")
         public final Level level;
 
-        public EntityItemLevelContext(LivingEntity livingEntity, ItemStack itemStack, Level level) {
-            this.livingEntity = livingEntity;
+        public EntityItemLevelContext(LivingEntity entity, ItemStack itemStack, Level level) {
+            this.entity = entity;
             this.itemStack = itemStack;
             this.level = level;
         }
@@ -154,12 +154,12 @@ public class ContextUtils {
         public final float damageAmount;
 
         @Info("The living entity receiving the damage")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
-        public EntityDamageContext(DamageSource damageSource, float damageAmount, LivingEntity livingEntity) {
+        public EntityDamageContext(DamageSource damageSource, float damageAmount, LivingEntity entity) {
             this.damageSource = damageSource;
             this.damageAmount = damageAmount;
-            this.livingEntity = livingEntity;
+            this.entity = entity;
         }
     }
 
@@ -329,13 +329,13 @@ public class ContextUtils {
 
     public static class EntityHealContext {
         @Info("The living entity being healed")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
         @Info("The amount of healing applied to the living entity")
         public final float healAmount;
 
-        public EntityHealContext(LivingEntity livingEntity, float healAmount) {
-            this.livingEntity = livingEntity;
+        public EntityHealContext(LivingEntity entity, float healAmount) {
+            this.entity = entity;
             this.healAmount = healAmount;
         }
     }
@@ -343,13 +343,13 @@ public class ContextUtils {
 
     public static class EntityItemEntityContext {
         @Info("The living entity involved")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
         @Info("The item entity associated with the living entity")
         public final ItemEntity itemEntity;
 
-        public EntityItemEntityContext(LivingEntity livingEntity, ItemEntity itemEntity) {
-            this.livingEntity = livingEntity;
+        public EntityItemEntityContext(LivingEntity entity, ItemEntity itemEntity) {
+            this.entity = entity;
             this.itemEntity = itemEntity;
         }
     }
@@ -357,13 +357,13 @@ public class ContextUtils {
 
     public static class EntityTypeEntityContext {
         @Info("The living entity")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
         @Info("The target entity type")
         public final EntityType<?> targetType;
 
-        public EntityTypeEntityContext(LivingEntity livingEntity, EntityType<?> targetType) {
-            this.livingEntity = livingEntity;
+        public EntityTypeEntityContext(LivingEntity entity, EntityType<?> targetType) {
+            this.entity = entity;
             this.targetType = targetType;
         }
     }
@@ -371,13 +371,13 @@ public class ContextUtils {
 
     public static class EntityFluidStateContext {
         @Info("The living entity")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
         @Info("The fluid state associated with the living entity")
         public final FluidState fluidState;
 
-        public EntityFluidStateContext(LivingEntity livingEntity, FluidState fluidState) {
-            this.livingEntity = livingEntity;
+        public EntityFluidStateContext(LivingEntity entity, FluidState fluidState) {
+            this.entity = entity;
             this.fluidState = fluidState;
         }
     }
@@ -385,7 +385,7 @@ public class ContextUtils {
 
     public static class EntityFallDamageContext {
         @Info("The living entity experiencing fall damage")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
         @Info("The distance fallen by the living entity")
         public final float distance;
@@ -396,8 +396,8 @@ public class ContextUtils {
         @Info("The source of the fall damage")
         public final DamageSource damageSource;
 
-        public EntityFallDamageContext(LivingEntity livingEntity, float distance, float damageMultiplier, DamageSource damageSource) {
-            this.livingEntity = livingEntity;
+        public EntityFallDamageContext(LivingEntity entity, float distance, float damageMultiplier, DamageSource damageSource) {
+            this.entity = entity;
             this.distance = distance;
             this.damageMultiplier = damageMultiplier;
             this.damageSource = damageSource;
@@ -438,13 +438,13 @@ public class ContextUtils {
         public final ItemStack currentStack;
 
         @Info("The living entity associated with the equipment change")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
-        public EntityEquipmentContext(EquipmentSlot slot, ItemStack previousStack, ItemStack currentStack, LivingEntity livingEntity) {
+        public EntityEquipmentContext(EquipmentSlot slot, ItemStack previousStack, ItemStack currentStack, LivingEntity entity) {
             this.slot = slot;
             this.previousStack = previousStack;
             this.currentStack = currentStack;
-            this.livingEntity = livingEntity;
+            this.entity = entity;
         }
     }
 
@@ -457,12 +457,12 @@ public class ContextUtils {
         public final EntityDimensions dimensions;
 
         @Info("The living entity associated with the pose and dimensions")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
-        public EntityPoseDimensionsContext(Pose pose, EntityDimensions dimensions, LivingEntity livingEntity) {
+        public EntityPoseDimensionsContext(Pose pose, EntityDimensions dimensions, LivingEntity entity) {
             this.pose = pose;
             this.dimensions = dimensions;
-            this.livingEntity = livingEntity;
+            this.entity = entity;
         }
     }
 
@@ -472,11 +472,11 @@ public class ContextUtils {
         public final ProjectileWeaponItem projectileWeapon;
 
         @Info("The living entity using the projectile weapon")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
-        public EntityProjectileWeaponContext(ProjectileWeaponItem projectileWeapon, LivingEntity livingEntity) {
+        public EntityProjectileWeaponContext(ProjectileWeaponItem projectileWeapon, LivingEntity entity) {
             this.projectileWeapon = projectileWeapon;
-            this.livingEntity = livingEntity;
+            this.entity = entity;
         }
     }
 
@@ -485,11 +485,11 @@ public class ContextUtils {
         public final BlockPathTypes blockPathType;
 
         @Info("The living entity associated with the block path type")
-        public final LivingEntity livingEntity;
+        public final LivingEntity entity;
 
-        public EntityBlockPathTypeContext(BlockPathTypes blockPathType, LivingEntity livingEntity) {
+        public EntityBlockPathTypeContext(BlockPathTypes blockPathType, LivingEntity entity) {
             this.blockPathType = blockPathType;
-            this.livingEntity = livingEntity;
+            this.entity = entity;
         }
     }
 
@@ -504,6 +504,19 @@ public class ContextUtils {
         public EntityAnimalContext(Animal animal, Animal otherAnimal) {
             this.animal = animal;
             this.otherAnimal = otherAnimal;
+        }
+    }
+
+    public static class LineOfSightContext {
+        @Info("The target entity")
+        public final Entity targetEntity;
+
+        @Info("The entity looking at the target entity")
+        public final LivingEntity entity;
+
+        public LineOfSightContext(Entity targetEntity, LivingEntity entity) {
+            this.targetEntity = targetEntity;
+            this.entity = entity;
         }
     }
 

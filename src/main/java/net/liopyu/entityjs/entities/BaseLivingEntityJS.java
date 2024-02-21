@@ -191,6 +191,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected float getBlockSpeedFactor() {
+        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
         if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         if (obj != null) {
@@ -483,6 +484,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean canBeAffected(@NotNull MobEffectInstance effectInstance) {
+        if (builder.canBeAffected == null) return super.canBeAffected(effectInstance);
         final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canBeAffected.apply(context), "boolean");
         if (obj != null) {
@@ -496,6 +498,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean isInvertedHealAndHarm() {
+        if (builder.invertedHealAndHarm == null) super.isInvertedHealAndHarm();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.invertedHealAndHarm.apply(this), "boolean");
         if (obj != null) {
             return (boolean) obj;
@@ -686,11 +689,12 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public boolean hasLineOfSight(@NotNull Entity entity) {
         if (builder.hasLineOfSight != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.hasLineOfSight.apply(entity), "boolean");
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entity, this);
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.hasLineOfSight.apply(context), "boolean");
             if (obj != null) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityName() + ". Value: " + builder.hasLineOfSight.apply(entity) + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityName() + ". Value: " + builder.hasLineOfSight.apply(context) + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
         }
         return super.hasLineOfSight(entity);
     }
@@ -823,6 +827,14 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         return super.canFreeze();
     }
 
+    @Override
+    public boolean isFreezing() {
+        if (builder.isFreezing == null) return super.isFreezing();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isFreezing.apply(this), "boolean");
+        if (obj != null) return (boolean) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + builder.isFreezing.apply(this) + ". Must be a boolean. Defaulting to " + super.isFreezing());
+        return super.isFreezing();
+    }
 
     @Override
     public boolean isCurrentlyGlowing() {

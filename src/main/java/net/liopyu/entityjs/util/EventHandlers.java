@@ -8,6 +8,8 @@ import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.events.*;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
@@ -34,6 +36,7 @@ public class EventHandlers {
         modBus.addListener(EventHandlers::attributeCreation);
         modBus.addListener(EventHandlers::attributeModification);
         modBus.addListener(EventPriority.LOW, EventHandlers::registerSpawnPlacements); // Low to allow REPLACE to work and addons to effect the result
+
     }
 
     private static void attributeCreation(EntityAttributeCreationEvent event) {
