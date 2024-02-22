@@ -365,13 +365,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         return Objects.requireNonNullElseGet(builder.setWaterSlowDown, super::getWaterSlowDown);
     }
 
-    @Override
-    protected float getJumpPower() {
-        if (builder.setJumpPower != null) {
-            return builder.setJumpPower * this.getBlockJumpFactor();
-        } else return super.getJumpPower();
-    }
-
 
     @Override
     protected float getBlockJumpFactor() {
@@ -837,7 +830,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     @Override
     public double getJumpBoostPower() {
-        return Objects.requireNonNullElseGet(builder.jumpBoostPower, super::getJumpBoostPower);
+        if (builder.jumpBoostPower == null) return super.getJumpBoostPower();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "double");
+        if (obj != null) return (double) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a double. Defaulting to " + super.getJumpBoostPower());
+        return super.getJumpBoostPower();
     }
 
 

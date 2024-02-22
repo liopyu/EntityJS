@@ -25,14 +25,13 @@ import java.util.function.*;
 public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseEntityBuilder<T> {
     public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Function<T, ResourceLocation> textureLocation;
-    public transient ResourceLocation setSoundEvent;
     public transient Consumer<AbstractArrow> tickDespawn;
     public transient Consumer<ContextUtils.ArrowEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ArrowBlockHitContext> onHitBlock;
     public transient ResourceLocation defaultHitGroundSoundEvent;
     public transient Consumer<ContextUtils.ArrowLivingEntityContext> doPostHurtEffects;
     public transient Function<Entity, Object> canHitEntity;
-    public transient Function<Player, Object> tryPickup;
+    public transient Function<ContextUtils.ArrowPlayerContext, Object> tryPickup;
     public transient double setBaseDamage;
     public transient Function<Entity, Object> setDamageFunction;
     public transient Integer setKnockback;
@@ -43,7 +42,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         thisList.add(this);
         textureLocation = t -> t.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
         setBaseDamage = 2;
-        setKnockback = 0;
+        setKnockback = 1;
     }
 
     @Override
@@ -69,7 +68,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public ArrowEntityBuilder<T> textureLocation(Function<T, Object> function) {
         textureLocation = entity -> {
             Object obj = function.apply(entity);
-            if (obj instanceof String) {
+            if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return new ResourceLocation((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
@@ -89,13 +88,13 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
                         
             Example usage:
             ```javascript
-            arrowEntityBuilder.tryPickup(player => {
+            arrowEntityBuilder.tryPickup(context => {
                 // Custom logic to determine if the player can pick up the arrow
                 // Return true if the player can pick up, false otherwise.
             });
             ```
             """)
-    public ArrowEntityBuilder<T> tryPickup(Function<Player, Object> function) {
+    public ArrowEntityBuilder<T> tryPickup(Function<ContextUtils.ArrowPlayerContext, Object> function) {
         tryPickup = function;
         return this;
     }
@@ -183,24 +182,6 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         return this;
     }
 
-
-    @Info(value = """
-            Sets the sound event for the arrow entity using a resource location.
-                        
-            @param setSoundEvent A resource location representing the sound event.
-                        
-            Example usage:
-            ```javascript
-            arrowEntityBuilder.setSoundEvent("minecraft:entity.arrow.shoot");
-            ```
-            """)
-    public ArrowEntityBuilder<T> setSoundEvent(Object sound) {
-        if (sound instanceof String) setSoundEvent = new ResourceLocation((String) sound);
-        else if (sound instanceof ResourceLocation) setSoundEvent = (ResourceLocation) sound;
-        else
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSoundEvent. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.arrow.shoot\"");
-        return this;
-    }
 
     @Info(value = """
             Sets the default sound event played when the arrow hits the ground using a string representation.

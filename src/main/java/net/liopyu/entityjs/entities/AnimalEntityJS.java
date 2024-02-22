@@ -33,12 +33,16 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.control.JumpControl;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -121,6 +125,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     }
+
 
     @Override
     public BaseLivingEntityBuilder<?> getBuilder() {
@@ -562,13 +567,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return Objects.requireNonNullElseGet(builder.setWaterSlowDown, super::getWaterSlowDown);
     }
 
-    @Override
-    protected float getJumpPower() {
-        if (builder.setJumpPower != null) {
-            return builder.setJumpPower * this.getBlockJumpFactor();
-        } else return super.getJumpPower();
-    }
-
 
     @Override
     protected float getBlockJumpFactor() {
@@ -702,6 +700,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
                 builder.tick.accept(this);
             }
         }
+        if (this.tickCount % 5 == 0) {
+            this.updateControlFlags();
+        }
     }
 
     @Override
@@ -762,8 +763,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             } else {
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityName() + ". Value: " + builder.nextStep.apply(this) + ". Must be a float, defaulting to " + super.nextStep());
             }
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Missing nextStep value for entity: " + entityName() + ". Defaulting to " + super.nextStep());
         }
         return super.nextStep();
     }
@@ -1034,7 +1033,11 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public double getJumpBoostPower() {
-        return Objects.requireNonNullElseGet(builder.jumpBoostPower, super::getJumpBoostPower);
+        if (builder.jumpBoostPower == null) return super.getJumpBoostPower();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "double");
+        if (obj != null) return (double) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a double. Defaulting to " + super.getJumpBoostPower());
+        return super.getJumpBoostPower();
     }
 
 

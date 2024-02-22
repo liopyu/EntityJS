@@ -715,7 +715,7 @@ public class ContextUtils {
         @Info("The abstract arrow entity")
         public final AbstractArrow entity;
 
-        @Info("The player who is targeted by the arrow")
+        @Info("The player")
         public final Player player;
 
         public ArrowPlayerContext(Player player, AbstractArrow entity) {

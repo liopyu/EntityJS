@@ -113,7 +113,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Function<LivingEntity, Object> setBlockJumpFactor;
     public transient Function<LivingEntity, Object> blockSpeedFactor;
-    public transient Float setJumpPower;
     public transient Float setSoundVolume;
     public transient Float setWaterSlowDown;
     public transient Object setSwimSound;
@@ -192,7 +191,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Consumer<LivingEntity> onSprint;
 
-    public transient Double jumpBoostPower;
+    public transient Function<LivingEntity, Object> jumpBoostPower;
     public transient Function<ContextUtils.EntityFluidStateContext, Object> canStandOnFluid;
 
 
@@ -496,20 +495,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the jump power for the entity.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.setJumpPower(1.5);
-            ```
-            """)
-    public BaseLivingEntityBuilder<T> setJumpPower(float jumpPower) {
-        this.setJumpPower = jumpPower;
-        return this;
-    }
-
-
-    @Info(value = """
             Sets the block jump factor for the entity.
                         
             Example usage:
@@ -683,7 +668,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> modelResource(Function<T, Object> function) {
         modelResource = entity -> {
             Object obj = function.apply(entity);
-            if (obj instanceof String) {
+            if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return new ResourceLocation((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
@@ -714,7 +699,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> textureResource(Function<T, Object> function) {
         textureResource = entity -> {
             Object obj = function.apply(entity);
-            if (obj instanceof String) {
+            if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return new ResourceLocation((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
@@ -746,7 +731,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> animationResource(Function<T, Object> function) {
         animationResource = entity -> {
             Object obj = function.apply(entity);
-            if (obj instanceof String) {
+            if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return new ResourceLocation((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
@@ -1613,10 +1598,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                         
             Example usage:
             ```javascript
-            entityBuilder.jumpBoostPower(2.5);
+            entityBuilder.jumpBoostPower(entity => {
+            return //some double value
+            });
             ```
             """)
-    public BaseLivingEntityBuilder<T> jumpBoostPower(double jumpBoostPower) {
+    public BaseLivingEntityBuilder<T> jumpBoostPower(Function<LivingEntity, Object> jumpBoostPower) {
         this.jumpBoostPower = jumpBoostPower;
         return this;
     }

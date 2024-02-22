@@ -50,7 +50,6 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     protected ItemStack pickUpStack;
     private double baseDamage;
     private int knockback;
-    private final SoundEvent soundEvent;
     @Nullable
     private IntOpenHashSet piercingIgnoreEntityIds;
     @Nullable
@@ -60,7 +59,6 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         super(pEntityType, pLevel);
         this.builder = builder;
         pickUpStack = ItemStack.EMPTY;
-        this.soundEvent = this.getDefaultHitGroundSoundEvent();
         this.baseDamage = builder.setBaseDamage;
     }
 
@@ -68,7 +66,6 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         super(builder.get(), shooter, level);
         this.builder = builder;
         pickUpStack = ItemStack.EMPTY;
-        this.soundEvent = this.getDefaultHitGroundSoundEvent();
         this.baseDamage = builder.setBaseDamage;
     }
 
@@ -107,15 +104,6 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         return super.getDefaultHitGroundSoundEvent();
     }
 
-    @Override
-    public void setSoundEvent(SoundEvent pSoundEvent) {
-        if (builder.setSoundEvent != null) {
-            this.setSoundEvent(Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.setSoundEvent)));
-        } else {
-            super.setSoundEvent(pSoundEvent);
-        }
-    }
-
 
     @Override
     protected void doPostHurtEffects(LivingEntity target) {
@@ -136,9 +124,10 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected boolean tryPickup(Player player) {
         if (builder.tryPickup == null) return super.tryPickup(player);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.tryPickup.apply(player), "boolean");
+        final ContextUtils.ArrowPlayerContext context = new ContextUtils.ArrowPlayerContext(player, this);
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.tryPickup.apply(context), "boolean");
         if (obj != null) return (boolean) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for tryPickup from entity: " + entityName() + ". Value: " + builder.tryPickup.apply(player) + ". Must be a boolean. Defaulting to " + super.tryPickup(player));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for tryPickup from entity: " + entityName() + ". Value: " + builder.tryPickup.apply(context) + ". Must be a boolean. Defaulting to " + super.tryPickup(player));
         return super.tryPickup(player);
     }
 
@@ -340,7 +329,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
                 }
             }
 
-            this.playSound(this.soundEvent, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
+            this.playSound(this.getDefaultHitGroundSoundEvent(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
             if (this.getPierceLevel() <= 0) {
                 this.discard();
             }
