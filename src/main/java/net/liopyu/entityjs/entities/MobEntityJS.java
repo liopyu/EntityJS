@@ -224,9 +224,10 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     protected boolean shouldStayCloseToLeashHolder() {
         if (builder.shouldStayCloseToLeashHolder == null) return super.shouldStayCloseToLeashHolder();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.shouldStayCloseToLeashHolder.apply(this), "boolean");
-        if (obj != null) return (boolean) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityName() + ". Value: " + builder.shouldStayCloseToLeashHolder.apply(this) + ". Must be a boolean. Defaulting to " + super.shouldStayCloseToLeashHolder());
+        Object value = builder.shouldStayCloseToLeashHolder.apply(this);
+        if (value instanceof Boolean b)
+            return b;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.shouldStayCloseToLeashHolder());
         return super.shouldStayCloseToLeashHolder();
     }
 
@@ -235,13 +236,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean canCutCorner(BlockPathTypes pathType) {
         if (builder.canCutCorner != null) {
             final ContextUtils.EntityBlockPathTypeContext context = new ContextUtils.EntityBlockPathTypeContext(pathType, this);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canCutCorner.apply(context), "boolean");
-            if (obj != null) {
-                return (boolean) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCutCorner from entity: " + entityName() + ". Value: " + builder.canCutCorner.apply(context) + ". Must be a boolean. Defaulting to " + super.canCutCorner(pathType));
-                return super.canCutCorner(pathType);
+            Object value = builder.canCutCorner.apply(context);
+            if (value instanceof Boolean b) {
+                return b;
             }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCutCorner from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.canCutCorner(pathType));
         }
         return super.canCutCorner(pathType);
     }
@@ -264,13 +263,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeaponPredicate != null) {
             final ContextUtils.EntityProjectileWeaponContext context = new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canFireProjectileWeaponPredicate.apply(context), "boolean");
-            if (obj != null) {
+            Object obj = builder.canFireProjectileWeaponPredicate.apply(context);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFireProjectileWeaponPredicate from entity: " + entityName() + ". Value: " + builder.canFireProjectileWeaponPredicate.apply(context) + ". Must be a boolean. Defaulting to false.");
-                return false;
             }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFireProjectileWeaponPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
         }
         return false;
     }
@@ -314,16 +311,13 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean canHoldItem(ItemStack stack) {
         if (builder.canHoldItem != null) {
             final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(stack, this);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canHoldItem.apply(context), "boolean");
-            if (obj != null) {
+            Object obj = builder.canHoldItem.apply(context);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canHoldItem from entity: " + entityName() + ". Value: " + builder.canHoldItem.apply(context) + ". Must be a boolean. Defaulting to " + super.canHoldItem(stack));
-                return super.canHoldItem(stack);
             }
-        } else {
-            return super.canHoldItem(stack);
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canHoldItem from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canHoldItem(stack));
         }
+        return super.canHoldItem(stack);
     }
 
 
@@ -407,11 +401,15 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     @Override
     protected boolean canAddPassenger(@NotNull Entity entity) {
-        if (builder.canAddPassenger == null) return super.canAddPassenger(entity);
+        if (builder.canAddPassenger == null) {
+            return super.canAddPassenger(entity);
+        }
         final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(entity, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canAddPassenger.apply(context), "boolean");
-        if (obj != null) return (boolean) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAddPassenger from entity: " + entityName() + ". Value: " + builder.canAddPassenger.apply(context) + ". Must be a boolean, defaulting to " + super.canAddPassenger(entity));
+        Object obj = builder.canAddPassenger.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAddPassenger from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean, defaulting to " + super.canAddPassenger(entity));
         return super.canAddPassenger(entity);
     }
 
@@ -419,13 +417,12 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     protected boolean shouldDropLoot() {
         if (builder.shouldDropLoot != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.shouldDropLoot.apply(this), "boolean");
-            if (obj != null)
+            Object obj = builder.shouldDropLoot.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
-
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropLoot from entity: " + entityName() + ". Value: " + builder.shouldDropLoot.apply(this) + ". Must be a boolean, defaulting to " + super.shouldDropLoot());
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropLoot from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean, defaulting to " + super.shouldDropLoot());
         }
-
         return super.shouldDropLoot();
     }
 
@@ -433,13 +430,12 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     protected boolean isAffectedByFluids() {
         if (builder.isAffectedByFluids != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isAffectedByFluids.apply(this), "boolean");
-            if (obj != null)
+            Object obj = builder.isAffectedByFluids.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
-
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByFluids from entity: " + entityName() + ". Value: " + builder.isAffectedByFluids.apply(this) + ". Must be a boolean. Defaulting to " + super.isAffectedByFluids());
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByFluids from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAffectedByFluids());
         }
-
         return super.isAffectedByFluids();
     }
 
@@ -453,13 +449,12 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     protected boolean isImmobile() {
         if (builder.isImmobile != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isImmobile.apply(this), "boolean");
-            if (obj != null)
+            Object obj = builder.isImmobile.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
-
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isImmobile from entity: " + entityName() + ". Value: " + builder.isImmobile.apply(this) + ". Must be a boolean. Defaulting to " + super.isImmobile());
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isImmobile from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isImmobile());
         }
-
         return super.isImmobile();
     }
 
@@ -467,13 +462,12 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     protected boolean isFlapping() {
         if (builder.isFlapping != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isFlapping.apply(this), "boolean");
-            if (obj != null)
+            Object obj = builder.isFlapping.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
-
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFlapping from entity: " + entityName() + ". Value: " + builder.isFlapping.apply(this) + ". Must be a boolean. Defaulting to " + super.isFlapping());
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFlapping from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFlapping());
         }
-
         return super.isFlapping();
     }
 
@@ -558,8 +552,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
             } else {
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityName() + ". Value: " + builder.nextStep.apply(this) + ". Must be a float, defaulting to " + super.nextStep());
             }
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Missing nextStep value for entity: " + entityName() + ". Defaulting to " + super.nextStep());
         }
         return super.nextStep();
     }
@@ -596,13 +588,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean canAttackType(@NotNull EntityType<?> entityType) {
         if (builder.canAttackType != null) {
             final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(this, entityType);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canAttackType.apply(context), "boolean");
-            if (obj != null) {
+            Object obj = builder.canAttackType.apply(context);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttackType from entity: " + entityName() + ". Value: " + builder.canAttackType.apply(context) + ". Must be a boolean. Defaulting to " + super.canAttackType(entityType));
-                return super.canAttackType(entityType);
             }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttackType from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canAttackType(entityType));
         }
         return super.canAttackType(entityType);
     }
@@ -630,13 +620,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     public boolean shouldDropExperience() {
         if (builder.shouldDropExperience != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.shouldDropExperience.apply(this), "boolean");
-            if (obj != null) {
+            Object obj = builder.shouldDropExperience.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropExperience from entity: " + entityName() + ". Value: " + builder.shouldDropExperience.apply(this) + ". Must be a boolean. Defaulting to " + super.shouldDropExperience());
-                return super.shouldDropExperience();
             }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropExperience from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.shouldDropExperience());
         }
         return super.shouldDropExperience();
     }
@@ -655,11 +643,12 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     public double getVisibilityPercent(@Nullable Entity p_20969_) {
         if (builder.visibilityPercent != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.visibilityPercent.apply(p_20969_), "double");
+            final ContextUtils.VisualContext context = new ContextUtils.VisualContext(p_20969_, this);
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.visibilityPercent.apply(context), "double");
             if (obj != null) {
                 return (double) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityName() + ". Value: " + builder.visibilityPercent.apply(p_20969_) + ". Must be a double. Defaulting to " + super.getVisibilityPercent(p_20969_));
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityName() + ". Value: " + builder.visibilityPercent.apply(context) + ". Must be a double. Defaulting to " + super.getVisibilityPercent(p_20969_));
                 return super.getVisibilityPercent(p_20969_);
             }
         } else {
@@ -672,43 +661,42 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean canAttack(@NotNull LivingEntity entity) {
         if (builder.canAttack != null) {
             final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(this, entity);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canAttack.apply(context), "boolean");
-            if (obj != null) {
+            Object obj = builder.canAttack.apply(context);
+            if (obj instanceof Boolean) {
                 return (boolean) obj && super.canAttack(entity);
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttack from entity: " + entityName() + ". Value: " + builder.canAttack.apply(context) + ". Must be a boolean. Defaulting to " + super.canAttack(entity));
-                return super.canAttack(entity);
             }
-        } else {
-            return super.canAttack(entity);
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttack from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canAttack(entity));
         }
+        return super.canAttack(entity);
     }
 
 
     @Override
     public boolean canBeAffected(@NotNull MobEffectInstance effectInstance) {
-        if (builder.canBeAffected == null) return super.canBeAffected(effectInstance);
-        final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canBeAffected.apply(context), "boolean");
-        if (obj != null) {
-            return (boolean) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeAffected from entity: " + entityName() + ". Value: " + builder.canBeAffected.apply(context) + ". Must be a boolean. Defaulting to " + super.canBeAffected(effectInstance));
+        if (builder.canBeAffected == null) {
             return super.canBeAffected(effectInstance);
         }
+        final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
+        Object result = builder.canBeAffected.apply(context);
+        if (result instanceof Boolean) {
+            return (boolean) result;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeAffected from entity: " + entityName() + ". Value: " + result + ". Must be a boolean. Defaulting to " + super.canBeAffected(effectInstance));
+        return super.canBeAffected(effectInstance);
     }
 
 
     @Override
     public boolean isInvertedHealAndHarm() {
-        if (builder.invertedHealAndHarm == null) super.isInvertedHealAndHarm();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.invertedHealAndHarm.apply(this), "boolean");
-        if (obj != null) {
-            return (boolean) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for invertedHealAndHarm from entity: " + entityName() + ". Value: " + builder.invertedHealAndHarm.apply(this) + ". Must be a boolean. Defaulting to " + super.isInvertedHealAndHarm());
+        if (builder.invertedHealAndHarm == null) {
             return super.isInvertedHealAndHarm();
         }
+        Object obj = builder.invertedHealAndHarm.apply(this);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for invertedHealAndHarm from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isInvertedHealAndHarm());
+        return super.isInvertedHealAndHarm();
     }
 
 
@@ -791,14 +779,15 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     @Override
     public boolean onClimbable() {
-        if (builder.onClimbable == null) return super.onClimbable();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.onClimbable.apply(this), "boolean");
-        if (obj != null) {
-            return (boolean) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onClimbable from entity: " + entityName() + ". Value: " + builder.onClimbable.apply(this) + ". Must be a boolean. Defaulting to super.onClimbable(): " + super.onClimbable());
+        if (builder.onClimbable == null) {
             return super.onClimbable();
         }
+        Object obj = builder.onClimbable.apply(this);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onClimbable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super.onClimbable(): " + super.onClimbable());
+        return super.onClimbable();
     }
 
 
@@ -842,11 +831,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean canStandOnFluid(@NotNull FluidState fluidState) {
         if (builder.canStandOnFluid != null) {
             final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(this, fluidState);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canStandOnFluid.apply(context), "boolean");
-            if (obj != null) {
+            Object obj = builder.canStandOnFluid.apply(context);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canStandOnFluid from entity: " + entityName() + ". Value: " + builder.canStandOnFluid.apply(context) + ". Must be a boolean. Defaulting to " + super.canStandOnFluid(fluidState));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canStandOnFluid from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canStandOnFluid(fluidState));
         }
         return super.canStandOnFluid(fluidState);
     }
@@ -855,11 +844,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     public boolean isSensitiveToWater() {
         if (builder.isSensitiveToWater != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isSensitiveToWater.apply(this), "boolean");
-            if (obj != null) {
+            Object obj = builder.isSensitiveToWater.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSensitiveToWater from entity: " + entityName() + ". Value: " + builder.isSensitiveToWater.apply(this) + ". Must be a boolean. Defaulting to " + super.isSensitiveToWater());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSensitiveToWater from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isSensitiveToWater());
         }
         return super.isSensitiveToWater();
     }
@@ -897,11 +886,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean hasLineOfSight(@NotNull Entity entity) {
         if (builder.hasLineOfSight != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entity, this);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.hasLineOfSight.apply(context), "boolean");
-            if (obj != null) {
+            Object obj = builder.hasLineOfSight.apply(context);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityName() + ". Value: " + builder.hasLineOfSight.apply(context) + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
         }
         return super.hasLineOfSight(entity);
     }
@@ -928,23 +917,24 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     public boolean isAffectedByPotions() {
         if (builder.isAffectedByPotions != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isAffectedByPotions.apply(this), "boolean");
-            if (obj != null) {
+            Object obj = builder.isAffectedByPotions.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByPotions from entity: " + entityName() + ". Value: " + builder.isAffectedByPotions.apply(this) + ". Must be a boolean. Defaulting to " + super.isAffectedByPotions());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByPotions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAffectedByPotions());
         }
         return super.isAffectedByPotions();
     }
 
+
     @Override
     public boolean attackable() {
         if (builder.isAttackable != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isAttackable.apply(this), "boolean");
-            if (obj != null) {
+            Object obj = builder.isAttackable.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAttackable from entity: " + entityName() + ". Value: " + builder.isAttackable.apply(this) + ". Must be a boolean. Defaulting to " + super.attackable());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAttackable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.attackable());
         }
         return super.attackable();
     }
@@ -954,11 +944,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
             final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canTakeItem.apply(context), "boolean");
-            if (obj != null) {
+            Object obj = builder.canTakeItem.apply(context);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTakeItem from entity: " + entityName() + ". Value: " + builder.canTakeItem.apply(context) + ". Must be a boolean. Defaulting to " + super.canTakeItem(itemStack));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTakeItem from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTakeItem(itemStack));
         }
         return super.canTakeItem(itemStack);
     }
@@ -967,11 +957,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     public boolean isSleeping() {
         if (builder.isSleeping != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isSleeping.apply(this), "boolean");
-            if (obj != null) {
+            Object obj = builder.isSleeping.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSleeping from entity: " + entityName() + ". Value: " + builder.isSleeping.apply(this) + ". Must be a boolean. Defaulting to " + super.isSleeping());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSleeping from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isSleeping());
         }
         return super.isSleeping();
     }
@@ -1012,11 +1002,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean shouldRiderFaceForward(@NotNull Player player) {
         if (builder.shouldRiderFaceForward != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, this);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.shouldRiderFaceForward.apply(context), "boolean");
-            if (obj != null) {
+            Object obj = builder.shouldRiderFaceForward.apply(context);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldRiderFaceForward from entity: " + entityName() + ". Value: " + builder.shouldRiderFaceForward.apply(context) + ". Must be a boolean. Defaulting to " + super.shouldRiderFaceForward(player));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldRiderFaceForward from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.shouldRiderFaceForward(player));
         }
         return super.shouldRiderFaceForward(player);
     }
@@ -1025,32 +1015,37 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     public boolean canFreeze() {
         if (builder.canFreeze != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canFreeze.apply(this), "boolean");
-            if (obj != null) {
-                return (boolean) obj && !this.getType().is(EntityTypeTags.FREEZE_IMMUNE_ENTITY_TYPES);
+            Object obj = builder.canFreeze.apply(this);
+            if (obj instanceof Boolean) {
+                return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityName() + ". Value: " + builder.canFreeze.apply(this) + ". Must be a boolean. Defaulting to " + super.canFreeze());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canFreeze());
         }
         return super.canFreeze();
     }
 
+
     @Override
     public boolean isFreezing() {
-        if (builder.isFreezing == null) return super.isFreezing();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isFreezing.apply(this), "boolean");
-        if (obj != null) return (boolean) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + builder.isFreezing.apply(this) + ". Must be a boolean. Defaulting to " + super.isFreezing());
+        if (builder.isFreezing != null) {
+            Object obj = builder.isFreezing.apply(this);
+            if (obj instanceof Boolean) {
+                return (boolean) obj;
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFreezing());
+        }
         return super.isFreezing();
     }
+
 
     @Override
     public boolean isCurrentlyGlowing() {
         if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isCurrentlyGlowing.apply(this), "boolean");
-            if (obj != null) {
+            Object obj = builder.isCurrentlyGlowing.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isCurrentlyGlowing from entity: " + entityName() + ". Value: " + builder.isCurrentlyGlowing.apply(this) + ". Must be a boolean. Defaulting to " + super.isCurrentlyGlowing());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isCurrentlyGlowing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isCurrentlyGlowing());
         }
         return super.isCurrentlyGlowing();
     }
@@ -1059,11 +1054,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     public boolean canDisableShield() {
         if (builder.canDisableShield != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canDisableShield.apply(this), "boolean");
-            if (obj != null) {
+            Object obj = builder.canDisableShield.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canDisableShield from entity: " + entityName() + ". Value: " + builder.canDisableShield.apply(this) + ". Must be a boolean. Defaulting to " + super.canDisableShield());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canDisableShield from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canDisableShield());
         }
         return super.canDisableShield();
     }
@@ -1119,11 +1114,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     public boolean dampensVibrations() {
         if (builder.dampensVibrations != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.dampensVibrations.apply(this), "boolean");
-            if (obj != null) {
+            Object obj = builder.dampensVibrations.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for dampensVibrations from entity: " + entityName() + ". Value: " + builder.dampensVibrations.apply(this) + ". Must be a boolean. Defaulting to " + super.dampensVibrations());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for dampensVibrations from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.dampensVibrations());
         }
         return super.dampensVibrations();
     }
@@ -1141,11 +1136,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Override
     public boolean showVehicleHealth() {
         if (builder.showVehicleHealth != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.showVehicleHealth.apply(this), "boolean");
-            if (obj != null) {
+            Object obj = builder.showVehicleHealth.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for showVehicleHealth from entity: " + entityName() + ". Value: " + builder.showVehicleHealth.apply(this) + ". Must be a boolean. Defaulting to " + super.showVehicleHealth());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for showVehicleHealth from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.showVehicleHealth());
         }
         return super.showVehicleHealth();
     }
@@ -1165,25 +1160,25 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
             final ContextUtils.DamageContext context = new ContextUtils.DamageContext(this, p_20122_);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isInvulnerableTo.apply(context), "boolean");
-            if (obj != null) {
+            Object obj = builder.isInvulnerableTo.apply(context);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isInvulnerableTo from entity: " + entityName() + ". Value: " + builder.isInvulnerableTo.apply(context) + ". Must be a boolean. Defaulting to " + super.isInvulnerableTo(p_20122_));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isInvulnerableTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isInvulnerableTo(p_20122_));
         }
         return super.isInvulnerableTo(p_20122_);
     }
 
+
     @Override
     public boolean canChangeDimensions() {
         if (builder.canChangeDimensions != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canChangeDimensions.apply(this), "boolean");
-            if (obj != null)
+            Object obj = builder.canChangeDimensions.apply(this);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
-
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + builder.canChangeDimensions.apply(this) + ". Must be a boolean. Defaulting to " + super.canChangeDimensions());
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions());
         }
-
         return super.canChangeDimensions();
     }
 
@@ -1192,11 +1187,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
         if (builder.mayInteract != null) {
             final ContextUtils.MayInteractContext context = new ContextUtils.MayInteractContext(p_146843_, p_146844_, this);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.mayInteract.apply(context), "boolean");
-            if (obj != null)
+            Object obj = builder.mayInteract.apply(context);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
-
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for mayInteract from entity: " + entityName() + ". Value: " + builder.mayInteract.apply(context) + ". Must be a boolean. Defaulting to " + super.mayInteract(p_146843_, p_146844_));
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for mayInteract from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.mayInteract(p_146843_, p_146844_));
         }
 
         return super.mayInteract(p_146843_, p_146844_);
@@ -1207,11 +1202,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
             final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canTrample.apply(context), "boolean");
-            if (obj != null)
+            Object obj = builder.canTrample.apply(context);
+            if (obj instanceof Boolean) {
                 return (boolean) obj;
-
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTrample from entity: " + entityName() + ". Value: " + builder.canTrample.apply(context) + ". Must be a boolean. Defaulting to " + super.canTrample(state, pos, fallDistance));
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTrample from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTrample(state, pos, fallDistance));
         }
 
         return super.canTrample(state, pos, fallDistance);

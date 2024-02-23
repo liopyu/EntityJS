@@ -153,7 +153,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.EntityEquipmentContext> onEquipItem;
 
 
-    public transient Function<Entity, Object> visibilityPercent;
+    public transient Function<ContextUtils.VisualContext, Object> visibilityPercent;
 
     public transient Function<ContextUtils.LivingEntityContext, Object> canAttack;
 
@@ -286,7 +286,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mainArm = HumanoidArm.RIGHT;
         mobType = MobType.UNDEFINED;
     }
-
+    
     @Info(value = """
             Defines the Mob's Type
             Examples: 'undead', 'water', 'arthropod', 'undefined', 'illager'
@@ -1275,8 +1275,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a function to determine the visibility percentage of the entity.
-            The provided Function accepts a {@link Entity} parameter,
-            representing the entity whose visibility percentage is being determined.
+            The provided Function accepts a {@link ContextUtils.VisualContext} parameter,
+            representing both the entity whose visibility percentage is being determined
+            and the the builder entity who is being looked at.
             It returns a Double representing the visibility percentage.
                         
             Example usage:
@@ -1288,7 +1289,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> visibilityPercent(Function<Entity, Object> visibilityPercent) {
+    public BaseLivingEntityBuilder<T> visibilityPercent(Function<ContextUtils.VisualContext, Object> visibilityPercent) {
         this.visibilityPercent = visibilityPercent;
         return this;
     }

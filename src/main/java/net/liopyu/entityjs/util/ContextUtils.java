@@ -520,6 +520,19 @@ public class ContextUtils {
         }
     }
 
+    public static class VisualContext {
+        @Info("The looking entity")
+        public final Entity lookingEntity;
+
+        @Info("Our entity which is looked at")
+        public final LivingEntity entity;
+
+        public VisualContext(Entity lookingEntity, LivingEntity entity) {
+            this.lookingEntity = lookingEntity;
+            this.entity = entity;
+        }
+    }
+
 
     public static class LerpToContext {
         @Info("The target x-coordinate for lerping")
