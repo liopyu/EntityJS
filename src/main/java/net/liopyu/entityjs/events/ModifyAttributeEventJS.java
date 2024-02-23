@@ -4,6 +4,8 @@ import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -47,11 +49,12 @@ public class ModifyAttributeEventJS extends EventJS {
         return present;
     }
 
-    public record AttributeModificationHelper(@HideFromJS EntityType<? extends LivingEntity> type, @HideFromJS EntityAttributeModificationEvent event) {
+    public record AttributeModificationHelper(@HideFromJS EntityType<? extends LivingEntity> type,
+                                              @HideFromJS EntityAttributeModificationEvent event) {
 
         @Info(value = """
                 Adds the given attribute to the entity type, using its default value
-                
+                                
                 It is safe to add an attribute that an entity type already has
                 """)
         public void add(Attribute attribute) {
@@ -60,14 +63,25 @@ public class ModifyAttributeEventJS extends EventJS {
 
         @Info(value = """
                 Adds the given attribute to the entity type, using the provided default value
-                
+                                
                 It is safe to add an attribute that an entity type already has
                 """, params = {
                 @Param(name = "attribute", value = "The attribute to add"),
                 @Param(name = "defaultValue", value = "The default value of the attribute")
         })
-        public void add(Attribute attribute, double defaultValue) {
-            event.add(type, attribute, defaultValue);
+        public void add(Object attribute, double defaultValue) {
+            if (attribute instanceof String string) {
+                ResourceLocation stringLocation = new ResourceLocation(string.toLowerCase());
+                Attribute att = ForgeRegistries.ATTRIBUTES.getValue(stringLocation);
+                if (att != null) {
+                    event.add(type, att, defaultValue);
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Unable to add attribute, attribute " + attribute + " does not exist");
+                }
+            } else if (attribute instanceof Attribute att) {
+                event.add(type, att, defaultValue);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Unable to add attribute, attribute " + attribute + " does not exist");
         }
     }
 }
