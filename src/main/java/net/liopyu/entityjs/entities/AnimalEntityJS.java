@@ -178,7 +178,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         if (builder.getBreedOffspring != null) {
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.getBreedOffspring, "resourcelocation");
-            if (obj != null) {
+            if (obj instanceof ResourceLocation) {
                 EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue((ResourceLocation) obj);
                 if (breedOffspringType != null) {
                     Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
@@ -205,26 +205,26 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             return super.isFood(pStack);
         }
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isFoodPredicate.apply(context), "boolean");
-        if (obj != null) {
+        Object obj = builder.isFoodPredicate.apply(context);
+        if (obj instanceof Boolean) {
             return (boolean) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + builder.isFoodPredicate.apply(context) + ". Must be a boolean. Defaulting to false.");
-            return false;
         }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
+        return false;
     }
 
 
     @Override
     public boolean canBreed() {
-        if (builder.canBreed == null) return super.canBreed();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canBreed.apply(this), "boolean");
-        if (obj != null) {
-            return (boolean) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBreed from entity: " + entityName() + ". Value: " + builder.canBreed.apply(this) + ". Must be a boolean. Defaulting to super method: " + super.canBreed());
+        if (builder.canBreed == null) {
             return super.canBreed();
         }
+        Object obj = builder.canBreed.apply(this);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBreed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super method: " + super.canBreed());
+        return super.canBreed();
     }
 
 
@@ -246,22 +246,30 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
-        if (builder.removeWhenFarAway == null) return super.removeWhenFarAway(pDistanceToClosestPlayer);
+        if (builder.removeWhenFarAway == null) {
+            return super.removeWhenFarAway(pDistanceToClosestPlayer);
+        }
         final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.removeWhenFarAway.apply(context), "boolean");
-        if (obj != null) return (boolean) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + builder.removeWhenFarAway.apply(context) + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
+        Object obj = builder.removeWhenFarAway.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
         return super.removeWhenFarAway(pDistanceToClosestPlayer);
     }
 
 
     @Override
     public boolean canMate(Animal pOtherAnimal) {
-        if (builder.canMate == null) return super.canMate(pOtherAnimal);
+        if (builder.canMate == null) {
+            return super.canMate(pOtherAnimal);
+        }
         final ContextUtils.EntityAnimalContext context = new ContextUtils.EntityAnimalContext(this, pOtherAnimal);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canMate.apply(context), "boolean");
-        if (obj != null) return (boolean) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canMate from entity: " + entityName() + ". Value: " + builder.canMate.apply(context) + ". Must be a boolean. Defaulting to " + super.canMate(pOtherAnimal));
+        Object obj = builder.canMate.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canMate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canMate(pOtherAnimal));
         return super.canMate(pOtherAnimal);
     }
 
@@ -308,8 +316,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         }
         if (builder.onInteract != null) {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.onInteract.apply(context), "interactionresult");
-            if (obj != null) {
+            Object obj = builder.onInteract.apply(context);
+            if (obj instanceof InteractionResult) {
                 return (InteractionResult) obj;
             }
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.mobInteract(pPlayer, pHand));
