@@ -27,6 +27,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -84,6 +86,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
             builder.onLivingJump.accept(this);
         }
     }
+
 
     public void jump() {
         double jumpPower = this.getJumpPower() + this.getJumpBoostPower();

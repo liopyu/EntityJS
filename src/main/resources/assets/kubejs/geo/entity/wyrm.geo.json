@@ -18,7 +18,7 @@
 				{
 					"name": "Tail",
 					"parent": "Mainbod",
-					"pivot": [0, -2.2, 0]
+					"pivot": [0, 2, 15]
 				},
 				{
 					"name": "tail1",

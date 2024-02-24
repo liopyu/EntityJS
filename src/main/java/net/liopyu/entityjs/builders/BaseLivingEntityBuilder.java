@@ -271,9 +271,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         clientTrackingRange = 5;
         updateInterval = 1;
         mobCategory = MobCategory.MISC;
-        modelResource = t -> t.getBuilder().newID("geo/", ".geo.json");
-        textureResource = t -> t.getBuilder().newID("textures/models/entity/", ".png");
-        animationResource = t -> t.getBuilder().newID("animations/", ".animation.json");
+        modelResource = t -> t.getBuilder().newID("geo/entity/", ".geo.json");
+        textureResource = t -> t.getBuilder().newID("textures/entity/", ".png");
+        animationResource = t -> t.getBuilder().newID("animations/entity/", ".animation.json");
         isPushable = true;
         animationSuppliers = new ArrayList<>();
         isAlwaysExperienceDropper = false;
@@ -654,7 +654,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a function to determine the model resource for the entity.
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the model based on information about the entity.
-            The default behavior returns <namespace>:geo/<path>.geo.json.
+            The default behavior returns <namespace>:geo/entity/<path>.geo.json.
                         
             Example usage:
             ```javascript
@@ -673,8 +673,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                EntityJSHelperClass.logWarningMessageOnce("Invalid model resource: " + obj + "Defaulting to " + entity.getBuilder().newID("geo/", ".geo.json"));
-                return entity.getBuilder().newID("geo/", ".geo.json");
+                EntityJSHelperClass.logWarningMessageOnce("Invalid model resource: " + obj + "Defaulting to " + entity.getBuilder().newID("geo/entity/", ".geo.json"));
+                return entity.getBuilder().newID("geo/entity/", ".geo.json");
             }
         };
         return this;
@@ -685,7 +685,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a function to determine the texture resource for the entity.
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the texture based on information about the entity.
-            The default behavior returns <namespace>:textures/model/entity/<path>.png.
+            The default behavior returns <namespace>:textures/entity/<path>.png.
                         
             Example usage:
             ```javascript
@@ -704,8 +704,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource: " + obj + "Defaulting to " + entity.getBuilder().newID("textures/models/entity/", ".png"));
-                return entity.getBuilder().newID("textures/models/entity/", ".png");
+                EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource: " + obj + "Defaulting to " + entity.getBuilder().newID("textures/entity/", ".png"));
+                return entity.getBuilder().newID("textures/entity/", ".png");
             }
         };
         return this;
@@ -724,7 +724,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 // Define logic to determine the animation resource for the entity
                 // Use information about the entity provided by the context.
                 //return some ResourceLocation representing the animation resource;
-                return entity.hurtTime > 0 ? "kubejs:animations/sasuke.animation.json" : "kubejs:animations/wyrm.animation.json"
+                return entity.hurtTime > 0 ? "kubejs:animations/entity/sasuke.animation.json" : "kubejs:animations/wyrm.animation.json"
             });
             ```
             """)
@@ -736,8 +736,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                EntityJSHelperClass.logWarningMessageOnce("Invalid animation resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("animations/", ".animation.json"));
-                return entity.getBuilder().newID("animations/", ".animation.json");
+                EntityJSHelperClass.logWarningMessageOnce("Invalid animation resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("animations/entity/", ".animation.json"));
+                return entity.getBuilder().newID("animations/entity/", ".animation.json");
             }
         };
         return this;

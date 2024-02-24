@@ -23,7 +23,6 @@ public class AnimalEntityJSBuilder extends AnimalEntityBuilder<AnimalEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-
         return MobEntityJS.createMobAttributes()
                 .add(Attributes.MAX_HEALTH)
                 .add(Attributes.FOLLOW_RANGE)
