@@ -20,16 +20,16 @@ import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.events.RegisterMobCategoryEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
-import net.liopyu.liolib.core.animation.*;
-import net.liopyu.liolib.core.animation.AnimationState;
-import net.liopyu.liolib.core.keyframe.event.CustomInstructionKeyframeEvent;
-import net.liopyu.liolib.core.keyframe.event.KeyFrameEvent;
-import net.liopyu.liolib.core.keyframe.event.ParticleKeyframeEvent;
-import net.liopyu.liolib.core.keyframe.event.SoundKeyframeEvent;
-import net.liopyu.liolib.core.keyframe.event.data.KeyFrameData;
-import net.liopyu.liolib.core.keyframe.event.data.SoundKeyframeData;
-import net.liopyu.liolib.core.object.DataTicket;
-import net.liopyu.liolib.core.object.PlayState;
+import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.keyframe.event.CustomInstructionKeyframeEvent;
+import software.bernie.geckolib.core.keyframe.event.KeyFrameEvent;
+import software.bernie.geckolib.core.keyframe.event.ParticleKeyframeEvent;
+import software.bernie.geckolib.core.keyframe.event.SoundKeyframeEvent;
+import software.bernie.geckolib.core.keyframe.event.data.KeyFrameData;
+import software.bernie.geckolib.core.keyframe.event.data.SoundKeyframeData;
+import software.bernie.geckolib.core.object.DataTicket;
+import software.bernie.geckolib.core.object.PlayState;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -2446,7 +2446,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**
-     * A wrapper around {@link net.liopyu.liolib.core.controller.AnimationController.IAnimationPredicate IAnimationPredicate}
+     * A wrapper around {@link software.bernie.geckolib.core.controller.AnimationController.IAnimationPredicate IAnimationPredicate}
      * that is easier to work with in js
      */
     @FunctionalInterface

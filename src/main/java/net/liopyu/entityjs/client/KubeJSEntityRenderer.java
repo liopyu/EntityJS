@@ -6,7 +6,7 @@ import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.model.EntityModelJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.liopyu.liolib.renderer.GeoEntityRenderer;
+import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;

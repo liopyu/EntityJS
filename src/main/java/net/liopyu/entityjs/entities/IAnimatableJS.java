@@ -2,12 +2,12 @@ package net.liopyu.entityjs.entities;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
-import net.liopyu.liolib.core.animatable.GeoAnimatable;
-import net.liopyu.liolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import software.bernie.geckolib.core.animation.AnimatableManager;
 import net.minecraft.core.Registry;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 
 /**
  * This provides a default implementation of {@link GeoAnimatable#registerControllers(AnimatableManager.ControllerRegistrar)}}
