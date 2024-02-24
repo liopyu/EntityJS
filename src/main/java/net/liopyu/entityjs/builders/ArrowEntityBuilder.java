@@ -73,7 +73,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("Invalid texture resource in arrow builder: " + obj + "Defaulting to " + entity.getArrowBuilder().newID("textures/entity/projectiles/", ".png"));
+                EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource in arrow builder: " + obj + "Defaulting to " + entity.getArrowBuilder().newID("textures/entity/projectiles/", ".png"));
                 return entity.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
             }
         };

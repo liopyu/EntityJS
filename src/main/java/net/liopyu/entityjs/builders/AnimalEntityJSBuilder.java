@@ -5,6 +5,7 @@ import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.MobEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
@@ -22,9 +23,16 @@ public class AnimalEntityJSBuilder extends AnimalEntityBuilder<AnimalEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        final AttributeSupplier.Builder builder = MobEntityJS.createMobAttributes();
-        //Animals need the follow range attribute to load in.
-        builder.add(Attributes.FOLLOW_RANGE, 16.0F);
-        return MobEntityJS.createMobAttributes();
+
+        return MobEntityJS.createMobAttributes()
+                .add(Attributes.MAX_HEALTH)
+                .add(Attributes.FOLLOW_RANGE)
+                .add(Attributes.ATTACK_DAMAGE)
+                .add(Attributes.ARMOR)
+                .add(Attributes.ARMOR_TOUGHNESS)
+                .add(Attributes.ATTACK_SPEED)
+                .add(Attributes.ATTACK_KNOCKBACK)
+                .add(Attributes.LUCK)
+                .add(Attributes.MOVEMENT_SPEED);
     }
 }

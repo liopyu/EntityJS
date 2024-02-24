@@ -40,10 +40,14 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Boolean isPersistenceRequired;
     public transient Function<PathfinderMob, Object> meleeAttackRangeSqr;
     public transient Boolean canJump;
+    public transient Function<LivingEntity, Object> myRidingOffset;
+    public transient Object ambientSoundInterval;
+    public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
         canJump = true;
+        ambientSoundInterval = 120;
     }
 
     @Info(value = "Creates a spawn egg item for this entity type")
@@ -60,6 +64,60 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         if (eggItem != null) {
             RegistryInfo.ITEM.addBuilder(eggItem);
         }
+    }
+
+    @Info(value = """
+            Sets a predicate to determine if the entity should be removed when far away from the player.
+                        
+            @param removeWhenFarAway A Function accepting a ContextUtils.EntityDistanceToPlayerContext parameter,
+                                     defining the condition for the entity to be removed when far away.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.removeWhenFarAway(context => {
+                // Custom logic to determine if the entity should be removed when far away
+                // Return true if the entity should be removed based on the provided context.
+            });
+            ```
+            """)
+    public MobBuilder<T> removeWhenFarAway(Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway) {
+        this.removeWhenFarAway = removeWhenFarAway;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the interval in ticks between ambient sounds for the mob entity.
+                        
+            @param ambientSoundInterval The interval in ticks between ambient sounds.
+            Defaults to 120.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.ambientSoundInterval(100);
+            ```
+            """)
+    public MobBuilder<T> ambientSoundInterval(int ambientSoundInterval) {
+        this.ambientSoundInterval = ambientSoundInterval;
+        return this;
+    }
+
+    @Info(value = """
+            Function which sets the offset for riding on the mob entity.
+                        
+            @param myRidingOffset The offset value for riding on the mob.
+            Defaults to 0.0.
+                        
+            Example usage:
+            ```javascript
+            animalBuilder.myRidingOffset(entity => {
+                //Use the provided context about the entity to determine the riding offset of the passengers
+                return 5 //Some double value;
+            })
+            ```
+            """)
+    public MobBuilder<T> myRidingOffset(Function<LivingEntity, Object> myRidingOffset) {
+        this.myRidingOffset = myRidingOffset;
+        return this;
     }
 
     @Info(value = """

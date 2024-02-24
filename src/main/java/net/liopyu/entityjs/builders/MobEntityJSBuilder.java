@@ -4,6 +4,7 @@ import net.liopyu.entityjs.entities.MobEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class MobEntityJSBuilder extends MobBuilder<MobEntityJS> {
 
@@ -18,6 +19,15 @@ public class MobEntityJSBuilder extends MobBuilder<MobEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return MobEntityJS.createMobAttributes();
+        return MobEntityJS.createMobAttributes()
+                .add(Attributes.MAX_HEALTH)
+                .add(Attributes.FOLLOW_RANGE)
+                .add(Attributes.ATTACK_DAMAGE)
+                .add(Attributes.ARMOR)
+                .add(Attributes.ARMOR_TOUGHNESS)
+                .add(Attributes.ATTACK_SPEED)
+                .add(Attributes.ATTACK_KNOCKBACK)
+                .add(Attributes.LUCK)
+                .add(Attributes.MOVEMENT_SPEED);
     }
 }

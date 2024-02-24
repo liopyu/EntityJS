@@ -227,38 +227,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return super.canBreed();
     }
 
-
-    @Override
-    public double getMyRidingOffset() {
-        if (builder.myRidingOffset == null) return super.getMyRidingOffset();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.myRidingOffset.apply(this), "double");
-        if (obj != null) return (double) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for myRidingOffset from entity: " + entityName() + ". Value: " + builder.myRidingOffset.apply(this) + ". Must be a double. Defaulting to " + super.getMyRidingOffset());
-        return super.getMyRidingOffset();
-    }
-
-
-    @Override
-    public int getAmbientSoundInterval() {
-        if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
-        return super.getAmbientSoundInterval();
-    }
-
-    @Override
-    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
-        if (builder.removeWhenFarAway == null) {
-            return super.removeWhenFarAway(pDistanceToClosestPlayer);
-        }
-        final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
-        Object obj = builder.removeWhenFarAway.apply(context);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
-        return super.removeWhenFarAway(pDistanceToClosestPlayer);
-    }
-
-
     @Override
     public boolean canMate(Animal pOtherAnimal) {
         if (builder.canMate == null) {
@@ -285,11 +253,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         }
     }
 
-
-    @Override
-    protected double followLeashSpeed() {
-        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
-    }
 
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
     @Override
@@ -327,6 +290,40 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
     //Mob Overrides
+    @Override
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
+        if (builder.removeWhenFarAway == null) {
+            return super.removeWhenFarAway(pDistanceToClosestPlayer);
+        }
+        final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
+        Object obj = builder.removeWhenFarAway.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
+        return super.removeWhenFarAway(pDistanceToClosestPlayer);
+    }
+
+    @Override
+    protected double followLeashSpeed() {
+        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
+    }
+
+    @Override
+    public int getAmbientSoundInterval() {
+        if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
+        return super.getAmbientSoundInterval();
+    }
+
+    @Override
+    public double getMyRidingOffset() {
+        if (builder.myRidingOffset == null) return super.getMyRidingOffset();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.myRidingOffset.apply(this), "double");
+        if (obj != null) return (double) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for myRidingOffset from entity: " + entityName() + ". Value: " + builder.myRidingOffset.apply(this) + ". Must be a double. Defaulting to " + super.getMyRidingOffset());
+        return super.getMyRidingOffset();
+    }
+
     @Override
     public MobType getMobType() {
         return builder.mobType;
@@ -457,17 +454,11 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public void setTarget(@Nullable LivingEntity target) {
-        LivingChangeTargetEvent changeTargetEvent = ForgeHooks.onLivingChangeTarget(this, target, LivingChangeTargetEvent.LivingTargetType.MOB_TARGET);
+        super.setTarget(target);
         if (builder.onTargetChanged != null) {
-            if (!changeTargetEvent.isCanceled()) {
-                assert target != null;
-                @Nullable LivingEntity target1 = changeTargetEvent.getNewTarget();
-                //noinspection removal
-                ForgeHooks.onLivingSetAttackTarget(this, target1);
-                final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(target, this);
-                builder.onTargetChanged.accept(context);
-            }
-        } else super.setTarget(target);
+            final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(target, this);
+            builder.onTargetChanged.accept(context);
+        }
     }
 
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {

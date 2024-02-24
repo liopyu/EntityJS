@@ -286,7 +286,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mainArm = HumanoidArm.RIGHT;
         mobType = MobType.UNDEFINED;
     }
-    
+
     @Info(value = """
             Defines the Mob's Type
             Examples: 'undead', 'water', 'arthropod', 'undefined', 'illager'
@@ -673,7 +673,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("Invalid model resource: " + obj + "Defaulting to " + entity.getBuilder().newID("geo/", ".geo.json"));
+                EntityJSHelperClass.logWarningMessageOnce("Invalid model resource: " + obj + "Defaulting to " + entity.getBuilder().newID("geo/", ".geo.json"));
                 return entity.getBuilder().newID("geo/", ".geo.json");
             }
         };
@@ -704,7 +704,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("Invalid texture resource: " + obj + "Defaulting to " + entity.getBuilder().newID("textures/models/entity/", ".png"));
+                EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource: " + obj + "Defaulting to " + entity.getBuilder().newID("textures/models/entity/", ".png"));
                 return entity.getBuilder().newID("textures/models/entity/", ".png");
             }
         };
@@ -736,7 +736,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("Invalid animation resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("animations/", ".animation.json"));
+                EntityJSHelperClass.logWarningMessageOnce("Invalid animation resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("animations/", ".animation.json"));
                 return entity.getBuilder().newID("animations/", ".animation.json");
             }
         };

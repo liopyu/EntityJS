@@ -16,9 +16,8 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Ingredient isFood;
     public transient Function<ContextUtils.EntityItemStackContext, Object> isFoodPredicate;
     public transient Function<LivingEntity, Object> canBreed;
-    public transient Function<LivingEntity, Object> myRidingOffset;
-    public transient Object ambientSoundInterval;
-    public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
+
+
     public transient Function<ContextUtils.EntityAnimalContext, Object> canMate;
     public transient Consumer<ContextUtils.LevelAnimalContext> onSpawnChildFromBreeding;
 
@@ -26,7 +25,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         super(i);
         canJump = true;
         followLeashSpeed = 1.0D;
-        ambientSoundInterval = 120;
+
     }
 
     @Info(value = """
@@ -102,63 +101,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             """)
     public AnimalEntityBuilder<T> isFoodPredicate(Function<ContextUtils.EntityItemStackContext, Object> isFoodPredicate) {
         this.isFoodPredicate = isFoodPredicate;
-        return this;
-    }
-
-
-    @Info(value = """
-            Function which sets the offset for riding on the animal entity.
-                        
-            @param myRidingOffset The offset value for riding on the animal.
-            Defaults to 0.0.
-                        
-            Example usage:
-            ```javascript
-            animalBuilder.myRidingOffset(entity => {
-                //Use the provided context about the entity to determine the riding offset of the passengers
-                return 5 //Some double value;
-            })
-            ```
-            """)
-    public AnimalEntityBuilder<T> myRidingOffset(Function<LivingEntity, Object> myRidingOffset) {
-        this.myRidingOffset = myRidingOffset;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets the interval in ticks between ambient sounds for the animal entity.
-                        
-            @param ambientSoundInterval The interval in ticks between ambient sounds.
-            Defaults to 120.
-                        
-            Example usage:
-            ```javascript
-            animalBuilder.ambientSoundInterval(100);
-            ```
-            """)
-    public AnimalEntityBuilder<T> ambientSoundInterval(int ambientSoundInterval) {
-        this.ambientSoundInterval = ambientSoundInterval;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a predicate to determine if the entity should be removed when far away from the player.
-                        
-            @param removeWhenFarAway A Function accepting a ContextUtils.EntityDistanceToPlayerContext parameter,
-                                     defining the condition for the entity to be removed when far away.
-                        
-            Example usage:
-            ```javascript
-            animalBuilder.removeWhenFarAway(context => {
-                // Custom logic to determine if the entity should be removed when far away
-                // Return true if the entity should be removed based on the provided context.
-            });
-            ```
-            """)
-    public AnimalEntityBuilder<T> removeWhenFarAway(Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway) {
-        this.removeWhenFarAway = removeWhenFarAway;
         return this;
     }
 

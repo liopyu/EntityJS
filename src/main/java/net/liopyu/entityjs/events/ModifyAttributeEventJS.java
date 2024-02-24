@@ -81,7 +81,7 @@ public class ModifyAttributeEventJS extends EventJS {
             } else if (attribute instanceof Attribute att) {
                 event.add(type, att, defaultValue);
             } else
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Unable to add attribute, attribute " + attribute + " does not exist");
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Unable to add attribute, attribute: " + attribute + ". Must be of type Attribute or resource location. Example: \"minecraft:generic.max_health\"");
         }
     }
 }
