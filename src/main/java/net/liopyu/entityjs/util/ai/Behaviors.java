@@ -396,88 +396,63 @@ public enum Behaviors {
         return RingBell.create();
     }
 
-    @Info(value = "Creates a `RunIf` behavior", params = {
-            @Param(name = "predicate", value = "Determines when the `wrappedBehavior` will be used"),
-            @Param(name = "wrappedBehavior", value = "A behavior, used when the `predicate` passes"),
-            @Param(name = "checkWhileRunningAlso", value = "If the predicate and `wrappedBehavior`'s conditions should be checked while running")
-    })
-    public <E extends LivingEntity> RunIf<E> runIf(Predicate<E> predicate, Behavior<? super E> wrappedBehavior, boolean checkWhileRunningAlso) {
-        return new RunIf<>(predicate, wrappedBehavior, checkWhileRunningAlso);
-    }
-
-    // RunOne impl, requires a List<Pair<Behavior<? super LivingEntity>, Integer>>
-
-    @Info(value = "Creates a `RunSometimes` behavior", params = {
-            @Param(name = "wrappedBehavior", value = "A behavior, used when the `predicate` passes"),
-            @Param(name = "keepTicks", value = "If the restart ticks should be reset when checking the start conditions"),
-            @Param(name = "minInterval", value = "The minimum amount of ticks the behavior will run for"),
-            @Param(name = "maxInterval", value = "The maximum amount of ticks the behavior will run for")
-    })
-    public <E extends LivingEntity> RunSometimes<E> runSometimes(Behavior<? super E> wrappedBehavior, boolean keepTicks, int minInterval, int maxInterval) {
-        return new RunSometimes<>(wrappedBehavior, keepTicks, UniformInt.of(minInterval, maxInterval));
-    }
-
     // These may cause problems with B E A N S, but it's a simple fix if so
     @Info(value = "Creates a `SetClosestHomeAsWalkTarget` behavior", params = {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public SetClosestHomeAsWalkTarget setClosestHomeAsWalkTarget(float speedModifier) {
-        return new SetClosestHomeAsWalkTarget(speedModifier);
+    public BehaviorControl<PathfinderMob> setClosestHomeAsWalkTarget(float speedModifier) {
+        return SetClosestHomeAsWalkTarget.create(speedModifier);
     }
 
     @Info(value = "Creates a `setEntityLookTarget` behavior", params = {
             @Param(name = "predicate", value = "A predicate for valid target entities"),
             @Param(name = "maxDist", value = "The maximum distance a target may be")
     })
-    public SetEntityLookTarget setEntityLookTarget(Predicate<LivingEntity> predicate, float maxDist) {
-        return new SetEntityLookTarget(predicate, maxDist);
+    public BehaviorControl<LivingEntity> setEntityLookTarget(Predicate<LivingEntity> predicate, float maxDist) {
+        return SetEntityLookTarget.create(predicate, maxDist);
     }
 
     @Info(value = "Creates a `SetHiddenState` behavior", params = {
             @Param(name = "stayHiddenSeconds", value = "How long the entity should be hidden for"),
             @Param(name = "closeEnoughDist", value = "The distance that is considered close enough to a hiding place")
     })
-    public SetHiddenState setHiddenState(int stayHiddenSeconds, int closeEnoughDist) {
-        return new SetHiddenState(stayHiddenSeconds, closeEnoughDist);
+    public BehaviorControl<LivingEntity> setHiddenState(int stayHiddenSeconds, int closeEnoughDist) {
+        return SetHiddenState.create(stayHiddenSeconds, closeEnoughDist);
     }
 
     @Info(value = "Creates a `SetLookAndInteract` behavior", params = {
             @Param(name = "type", value = "The entity type that the entity interacts with"),
-            @Param(name = "interactionRange", value = "The range that the entity will interact with the target"),
-            @Param(name = "selfFilter", value = "A predicate for the entity, determines if the behavior can be used"),
-            @Param(name = "targetFilter", value = "A predicate for target entities")
+            @Param(name = "interactionRange", value = "The range that the entity will interact with the target")
     })
-    public SetLookAndInteract setLookAndInteract(EntityType<?> type, int interactionRange, Predicate<LivingEntity> selfFilter, Predicate<LivingEntity> targetFilter) {
-        return new SetLookAndInteract(type, interactionRange, selfFilter, targetFilter);
+    public BehaviorControl<LivingEntity> setLookAndInteract(EntityType<?> type, int interactionRange) {
+        return SetLookAndInteract.create(type, interactionRange);
     }
 
     @Info(value = "Creates a `SetRaidStatus` behavior")
-    public SetRaidStatus setRaidStatus() {
-        return new SetRaidStatus();
+    public BehaviorControl<LivingEntity> setRaidStatus() {
+        return SetRaidStatus.create();
     }
 
     @Info(value = "Creates a `SetWalkTargetAwayFrom` behavior, only applicable to **pathfinder** mobs", params = {
-            @Param(name = "walkTargetAwayFromMemory", value = "The memory type to use as the walk away from target"),
-            @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active"),
-            @Param(name = "desiredDist", value = "The desired distance away from the target the entity will attempt to be"),
-            @Param(name = "hasTarget", value = "If the entity needs the `minecraft:walk_target` memory type"),
-            @Param(name = "toPosition", value = "Sets the entities desired direction based on the memory type's value")
+            @Param(name = "pWalkTargetAwayFromMemory", value = "The memory type to use as the walk away from target"),
+            @Param(name = "pSpeedModifier", value = "The modifier to the mob's speed when this behavior is active"),
+            @Param(name = "pDesiredDistance", value = "The desired distance away from the target the entity will attempt to be"),
+            @Param(name = "pHasTarget", value = "If the entity needs the `minecraft:walk_target` memory type")
     })
-    public <T> SetWalkTargetAwayFrom<T> setWalkTargetAwayFrom(
-            MemoryModuleType<T> walkTargetAwayFromMemory,
-            float speedModifier,
-            int desiredDist,
-            boolean hasTarget,
-            Function<T, Vec3> toPosition
+    public OneShot<PathfinderMob> setWalkTargetAwayFrom(
+            MemoryModuleType<? extends Entity> pWalkTargetAwayFromMemory,
+            float pSpeedModifier,
+            int pDesiredDistance,
+            boolean pHasTarget
     ) {
-        return new SetWalkTargetAwayFrom<>(walkTargetAwayFromMemory, speedModifier, desiredDist, hasTarget, toPosition);
+        return SetWalkTargetAwayFrom.entity(pWalkTargetAwayFromMemory, pSpeedModifier, pDesiredDistance, pHasTarget);
     }
 
     @Info(value = "Creates a behavior which sets the entity's attack target to its walk target if the target is out of reach", params = {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public SetWalkTargetFromAttackTargetIfTargetOutOfReach setWalkTargetFromAttackTargetIfTargetOutOfReach(Function<LivingEntity, Float> speedModifier) {
-        return new SetWalkTargetFromAttackTargetIfTargetOutOfReach(speedModifier); // One hell of a name
+    public BehaviorControl<Mob> setWalkTargetFromAttackTargetIfTargetOutOfReach(Function<LivingEntity, Float> speedModifier) {
+        return SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(speedModifier); // One hell of a name
     }
 
     @Info(value = "Creates a `SetWalkTargetFromLookTarget` behavior", params = {
@@ -485,8 +460,8 @@ public enum Behaviors {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active"),
             @Param(name = "closeEnoughDistance", value = "The distance that is close enough to the target to stop walking")
     })
-    public SetWalkTargetFromLookTarget setWalkTargetFromLookTarget(Predicate<LivingEntity> predicate, Function<LivingEntity, Float> speedModifier, int closeEnoughDistance) {
-        return new SetWalkTargetFromLookTarget(predicate, speedModifier, closeEnoughDistance);
+    public OneShot<LivingEntity> setWalkTargetFromLookTarget(Predicate<LivingEntity> predicate, Function<LivingEntity, Float> speedModifier, int closeEnoughDistance) {
+        return SetWalkTargetFromLookTarget.create(predicate, speedModifier, closeEnoughDistance);
     }
 
     @Info(value = "Creates a `SleepInBed` behavior")
@@ -495,8 +470,8 @@ public enum Behaviors {
     }
 
     @Info(value = "Creates a `SocializeAtBell` behavior")
-    public SocializeAtBell socializeAtBell() {
-        return new SocializeAtBell();
+    public OneShot<LivingEntity> socializeAtBell() {
+        return SocializeAtBell.create();
     }
 
     @Info(value = "Creates a `StartAttacking` behavior, only applicable to **mob** entities", params = {
@@ -504,16 +479,16 @@ public enum Behaviors {
             @Param(name = "targetFinder", value = "A function that finds a target to attack"),
             @Param(name = "duration", value = "The number of ticks that the behavior should be active for")
     })
-    public <E extends Mob> StartAttacking<E> startAttacking(Predicate<E> canAttackPredicate, Function<E, @Nullable LivingEntity> targetFinder, int duration) {
-        return new StartAttacking<>(canAttackPredicate, e -> Optional.ofNullable(targetFinder.apply(e)), duration);
+    public <E extends Mob> BehaviorControl<E> startAttacking(Predicate<E> canAttackPredicate, Function<E, @Nullable LivingEntity> targetFinder) {
+        return StartAttacking.create(canAttackPredicate, e -> Optional.ofNullable(targetFinder.apply(e)));
     }
 
     @Info(value = "Creates a `StartCelebratingIfTargetDead` behavior", params = {
             @Param(name = "celebrationDuration", value = "The number of ticks the entity should celebrate for"),
             @Param(name = "dancePredicate", value = "A predicate for if the entity should dance. The first entity provided is the entity that will dance, the second is the target")
     })
-    public StartCelebratingIfTargetDead startCelebratingIfTargetDead(int celebrationDuration, BiPredicate<LivingEntity, LivingEntity> dancePredicate) {
-        return new StartCelebratingIfTargetDead(celebrationDuration, dancePredicate);
+    public BehaviorControl<LivingEntity> startCelebratingIfTargetDead(int celebrationDuration, BiPredicate<LivingEntity, LivingEntity> dancePredicate) {
+        return StartCelebratingIfTargetDead.create(celebrationDuration, dancePredicate);
     }
 
     @Info(value = "Creates a `BlockPosTracker` for use in `.stayCloseToTarget()`", params = {
@@ -533,12 +508,13 @@ public enum Behaviors {
 
     @Info(value = "Creates a `StayCloseToTarget` behavior", params = {
             @Param(name = "targetPositionTracker", value = "A function that returns the position tracker for the entity, the returned tracker may be null, see `.blockPosTracker()` and `.entityPosTracker()`"),
+            @Param(name = "pPredicate", value = "The predicate to use with the Living Entity as an argument"),
             @Param(name = "closeEnough", value = "The distance that is close enough to the target"),
             @Param(name = "tooFar", value = "The distance that is too far from the target"),
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public <E extends LivingEntity> StayCloseToTarget<E> stayCloseToTarget(Function<LivingEntity, @Nullable PositionTracker> targetPositionGetter, int closeEnough, int tooFar, float speedModifier) {
-        return new StayCloseToTarget<>(e -> Optional.ofNullable(targetPositionGetter.apply(e)), closeEnough, tooFar, speedModifier);
+    public BehaviorControl<LivingEntity> stayCloseToTarget(Function<LivingEntity, @Nullable PositionTracker> targetPositionGetter, Predicate<LivingEntity> pPredicate, int closeEnough, int tooFar, float speedModifier) {
+        return StayCloseToTarget.create(e -> Optional.ofNullable(targetPositionGetter.apply(e)), pPredicate, closeEnough, tooFar, speedModifier);
     }
 
     @Info(value = "Creates a `StopAttackingIfTargetInvalid` behavior, only applicable to **mob** entities", params = {
@@ -546,13 +522,13 @@ public enum Behaviors {
             @Param(name = "onTargetErased", value = "Actions that should be performed when the attack target is cleared, the first entity is the attacker and the second is the target"),
             @Param(name = "canGetTiredOfTryingToReachTarget", value = "If the attacker can get tired of trying to reach its target")
     })
-    public <E extends Mob> StopAttackingIfTargetInvalid<E> stopAttackingIfTargetInvalid(Predicate<LivingEntity> stopAttackingWhen, BiConsumer<E, LivingEntity> onTargetErased, boolean canGetTiredOfTryingToReachTarget) {
-        return new StopAttackingIfTargetInvalid<>(stopAttackingWhen, onTargetErased, canGetTiredOfTryingToReachTarget);
+    public <E extends Mob> BehaviorControl<E> stopAttackingIfTargetInvalid(Predicate<LivingEntity> stopAttackingWhen, BiConsumer<E, LivingEntity> onTargetErased, boolean canGetTiredOfTryingToReachTarget) {
+        return StopAttackingIfTargetInvalid.create(stopAttackingWhen, onTargetErased, canGetTiredOfTryingToReachTarget);
     }
 
     @Info(value = "Creates a `StopBeingAngryIfTargetDead` behavior, only applicable to **mob** entities")
-    public <E extends Mob> StopBeingAngryIfTargetDead<E> stopBeingAngryIfTargetDead() {
-        return new StopBeingAngryIfTargetDead<>();
+    public BehaviorControl<LivingEntity> stopBeingAngryIfTargetDead() {
+        return StopBeingAngryIfTargetDead.create();
     }
 
     @Info(value = "Creates a `StrollAroundPoi` behavior, only applicable to **pathfinder** mobs", params = {
@@ -560,8 +536,8 @@ public enum Behaviors {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active"),
             @Param(name = "maxDistanceFromPoi", value = "The maximum distance away from the poi that the mob may go while strolling")
     })
-    public StrollAroundPoi strollAroundPoi(MemoryModuleType<GlobalPos> memoryType, float speedModifier, int maxDistanceFromPoi) {
-        return new StrollAroundPoi(memoryType, speedModifier, maxDistanceFromPoi);
+    public OneShot<PathfinderMob> strollAroundPoi(MemoryModuleType<GlobalPos> memoryType, float speedModifier, int maxDistanceFromPoi) {
+        return StrollAroundPoi.create(memoryType, speedModifier, maxDistanceFromPoi);
     }
 
     @Info(value = "Creates a `StrollToPoi` behavior, only applicable to **pathfinder** mobs", params = {
@@ -570,8 +546,8 @@ public enum Behaviors {
             @Param(name = "closeEnoughDist", value = "The distance that is considered close enough to the poi"),
             @Param(name = "maxDistanceFromPoi", value = "The maximum distance away from the poi that this behavior will apply")
     })
-    public StrollToPoi strollToPoi(MemoryModuleType<GlobalPos> memoryType, float speedModifier, int closeEnoughDist, int maxDistanceFromPoi) {
-        return new StrollToPoi(memoryType, speedModifier, closeEnoughDist, maxDistanceFromPoi);
+    public BehaviorControl<PathfinderMob> strollToPoi(MemoryModuleType<GlobalPos> memoryType, float speedModifier, int closeEnoughDist, int maxDistanceFromPoi) {
+        return StrollToPoi.create(memoryType, speedModifier, closeEnoughDist, maxDistanceFromPoi);
     }
 
     @Info(value = "Creates a `Swim` behavior, only applicable to **mob** entities", params = {
@@ -585,44 +561,37 @@ public enum Behaviors {
             @Param(name = "range", value = "The range, in all directions, at which the mob will search for land"),
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public TryFindLand tryFindLand(int range, float speedModifier) {
-        return new TryFindLand(range, speedModifier);
+    public BehaviorControl<PathfinderMob> tryFindLand(int range, float speedModifier) {
+        return TryFindLand.create(range, speedModifier);
     }
 
     @Info(value = "Creates a `TryFindLandNearWater` behavior, only applicable to **pathfinder** mobs", params = {
             @Param(name = "range", value = "The range, in all directions, at which the mob will search for land"),
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public TryFindLandNearWater tryFindLandNearWater(int range, float speedModifier) {
-        return new TryFindLandNearWater(range, speedModifier);
+    public BehaviorControl<PathfinderMob> tryFindLandNearWater(int range, float speedModifier) {
+        return TryFindLandNearWater.create(range, speedModifier);
     }
 
     @Info(value = "Creates a `TryFindWater` behavior, only applicable to **pathfinder** mobs", params = {
             @Param(name = "range", value = "The range, in all directions, at which the mob will search for land"),
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public TryFindWater tryFindWater(int range, float speedModifier) {
-        return new TryFindWater(range, speedModifier);
+    public BehaviorControl<PathfinderMob> tryFindWater(int range, float speedModifier) {
+        return TryFindWater.create(range, speedModifier);
     }
 
     @Info(value = "Creates a `UpdateActivityFromSchedule` behavior")
-    public UpdateActivityFromSchedule updateActivityFromSchedule() {
-        return new UpdateActivityFromSchedule();
+    public BehaviorControl<LivingEntity> updateActivityFromSchedule() {
+        return UpdateActivityFromSchedule.create();
     }
 
     @Info(value = "Creates a `ValidateNearbyPoi` behavior", params = {
             @Param(name = "poiPredicate", value = "The predicate that is used to validate the poi"),
             @Param(name = "memoryType", value = "The memory that is used for the poi")
     })
-    public ValidateNearbyPoi validateNearbyPoi(Predicate<Holder<PoiType>> poiPredicate, MemoryModuleType<GlobalPos> memoryType) {
-        return new ValidateNearbyPoi(poiPredicate, memoryType);
-    }
-
-    @Info(value = "Creates a `VictoryStroll` behavior, only applicable to **pathfinder** mobs", params = {
-            @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
-    })
-    public VictoryStroll victoryStroll(float speedModifier) {
-        return new VictoryStroll(speedModifier);
+    public BehaviorControl<LivingEntity> validateNearbyPoi(Predicate<Holder<PoiType>> poiPredicate, MemoryModuleType<GlobalPos> memoryType) {
+        return ValidateNearbyPoi.create(poiPredicate, memoryType);
     }
 
     @Info(value = "Creates a `VillageBoundRandomStroll` behavior, only applicable to **pathfinder** mobs", params = {
@@ -630,12 +599,12 @@ public enum Behaviors {
             @Param(name = "radius", value = "The radius around the village the mob will stroll"),
             @Param(name = "maxyDist", value = "The vertical range the mob will wander in")
     })
-    public VillageBoundRandomStroll villageBoundRandomStroll(float speedModifier, int radius, int maxYDist) {
-        return new VillageBoundRandomStroll(speedModifier, radius, maxYDist);
+    public OneShot<PathfinderMob> villageBoundRandomStroll(float speedModifier, int radius, int maxYDist) {
+        return VillageBoundRandomStroll.create(speedModifier, radius, maxYDist);
     }
 
     @Info(value = "Creates a `WakeUp` behavior")
-    public WakeUp wakeUp() {
-        return new WakeUp();
+    public BehaviorControl<LivingEntity> wakeUp() {
+        return WakeUp.create();
     }
 }

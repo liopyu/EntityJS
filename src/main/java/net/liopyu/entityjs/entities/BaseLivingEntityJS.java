@@ -114,7 +114,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     public boolean shouldJump() {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
+        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -287,7 +287,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            if (!this.level.isClientSide()) {
+            if (!this.level().isClientSide()) {
                 builder.tick.accept(this);
             }
         }
@@ -296,7 +296,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
+        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
     }
@@ -410,11 +410,11 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
 
-    @Override
+   /* @Override
     public boolean rideableUnderWater() {
         return Objects.requireNonNullElseGet(builder.rideableUnderWater, super::rideableUnderWater);
     }
-
+*/
 
     @Override
     public boolean shouldDropExperience() {
@@ -617,11 +617,11 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
 
     @Override
-    public double getJumpBoostPower() {
+    public float getJumpBoostPower() {
         if (builder.jumpBoostPower == null) return super.getJumpBoostPower();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "double");
-        if (obj != null) return (double) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a double. Defaulting to " + super.getJumpBoostPower());
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "float");
+        if (obj != null) return (float) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
         return super.getJumpBoostPower();
     }
 
@@ -742,7 +742,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level);
+            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
             Object obj = builder.canTakeItem.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -839,7 +839,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
+        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;

@@ -66,13 +66,13 @@ side = "BOTH"
 [[dependencies.entityjs]]
 modId = "kubejs"
 mandatory = true
-versionRange = "[1902.6.0-build.130,)"
+versionRange = "[2001.6.4-build.99,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.entityjs]]
-modId = "liolib"
+modId = "geckolib"
 mandatory = true
-versionRange = "[1.19-0.0.1,)"
+versionRange = "[4.3,)"
 ordering = "NONE"
 side = "BOTH"
