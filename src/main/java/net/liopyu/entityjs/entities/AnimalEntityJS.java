@@ -193,6 +193,11 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
     @Override
+    public boolean canBeCollidedWith() {
+        return super.canBeCollidedWith();
+    }
+
+    @Override
     public boolean isFood(ItemStack pStack) {
         if (builder.isFood != null) {
             return builder.isFood.test(pStack);

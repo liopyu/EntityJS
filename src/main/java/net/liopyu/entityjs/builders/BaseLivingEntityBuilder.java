@@ -143,7 +143,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<ContextUtils.EntityTypeEntityContext, Object> canAttackType;
 
     public transient Function<LivingEntity, Object> scale;
-    public transient Boolean rideableUnderWater;
 
     public transient Function<LivingEntity, Object> shouldDropExperience;
 
@@ -280,7 +279,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         setSoundVolume = 1.0f;
         setWaterSlowDown = 0.8f;
         repositionEntityAfterLoad = true;
-        rideableUnderWater = false;
         canBreatheUnderwater = false;
         renderType = RenderType.CUTOUT;
         mainArm = HumanoidArm.RIGHT;
@@ -1195,20 +1193,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> scale(Function<LivingEntity, Object> customScale) {
         this.scale = customScale;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets whether the entity is rideable underwater.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.rideableUnderWater(true);
-            ```
-            """)
-    public BaseLivingEntityBuilder<T> rideableUnderWater(boolean rideableUnderWater) {
-        this.rideableUnderWater = rideableUnderWater;
         return this;
     }
 
