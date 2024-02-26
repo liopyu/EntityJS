@@ -1262,10 +1262,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
         if (builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
             builder.lerpTo.accept(context);
-        } else super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+        }
     }
 
 
