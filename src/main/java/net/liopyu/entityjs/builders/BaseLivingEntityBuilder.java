@@ -288,6 +288,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
+            Sets whether the entity is rideable underwater.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.rideableUnderWater(true);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> rideableUnderWater(boolean rideableUnderWater) {
+        this.rideableUnderWater = rideableUnderWater;
+        return this;
+    }
+
+    @Info(value = """
             Defines the Mob's Type
             Examples: 'undead', 'water', 'arthropod', 'undefined', 'illager'
                         
@@ -349,7 +362,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.render(context => {
                 // Define logic to render the entity
                 if (context.entity.isBaby()) {
-                context.poseStack.scale(0.5F, 0.5F, 0.5F);
+                    context.poseStack.scale(0.5, 0.5, 0.5);
                 }
             });
             ```
@@ -450,11 +463,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             baseLivingEntityBuilder.lerpTo(context => {
                 // Custom lerping logic for the living entity
                 const { x, y, z, yaw, pitch, posRotationIncrements, teleport, entity } = context;
-               \s
                 // Perform custom lerping operations using the provided context
                 // For example, you can smoothly move the entity from its current position to the target position
                 entity.setPositionAndRotation(x, y, z, yaw, pitch);
-                // You can also handle other properties like animation, sound effects, etc.
             });
             ```
             """)
@@ -526,7 +537,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the sound volume for the entity.
+            Sets the overall sound volume for the entity.
                         
             Example usage:
             ```javascript
@@ -661,7 +672,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.modelResource(entity => {
                 // Define logic to determine the model resource for the entity
                 // Use information about the entity provided by the context.
-                return // Some ResourceLocation representing the model resource;
+                return "kubejs:geo/entity/wyrm.geo.json" // Some ResourceLocation representing the model resource;
             });
             ```
             """)
@@ -692,7 +703,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.textureResource(entity => {
                 // Define logic to determine the texture resource for the entity
                 // Use information about the entity provided by the context.
-                return // Some ResourceLocation representing the texture resource;
+                return "kubejs:textures/entity/wyrm.png" // Some ResourceLocation representing the texture resource;
             });
             ```
             """)
@@ -724,7 +735,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 // Define logic to determine the animation resource for the entity
                 // Use information about the entity provided by the context.
                 //return some ResourceLocation representing the animation resource;
-                return entity.hurtTime > 0 ? "kubejs:animations/entity/sasuke.animation.json" : "kubejs:animations/wyrm.animation.json"
+                return "kubejs:animations/entity/wyrm.animation.json" // Some ResourceLocation representing the animation resource;
             });
             ```
             """)
@@ -1146,10 +1157,23 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Function accepts a {@link ContextUtils.HurtContext} parameter,
             ```javascript
             entityBuilder.setHurtSound(context => {
-                // Define logic to calculate and return the custom hurt sound for the entity
-                // Use information about the HurtContext provided by the context.
-                return "minecraft:entity.generic.hurt" // Some ResourceLocation or String representing the sound to play when the entity is hurt;
-            }); 
+                // Custom logic to determine the hurt sound for the entity
+                // You can use information from the HurtContext to customize the sound based on the context
+                const { entity, damageSource } = context;
+                // Determine the hurt sound based on the type of damage source
+                switch (damageSource.getType()) {
+                    case "fire":
+                        return "minecraft:entity.generic.burn";
+                    case "fall":
+                        return "minecraft:entity.generic.hurt";
+                    case "drown":
+                        return "minecraft:entity.generic.hurt";
+                    case "explosion":
+                        return "minecraft:entity.generic.explode";
+                    default:
+                        return "minecraft:entity.generic.explode";
+                }
+            })
             ```
             """)
     public BaseLivingEntityBuilder<T> setHurtSound(Function<ContextUtils.HurtContext, Object> sound) {
@@ -1195,20 +1219,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> scale(Function<LivingEntity, Object> customScale) {
         this.scale = customScale;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets whether the entity is rideable underwater.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.rideableUnderWater(true);
-            ```
-            """)
-    public BaseLivingEntityBuilder<T> rideableUnderWater(boolean rideableUnderWater) {
-        this.rideableUnderWater = rideableUnderWater;
         return this;
     }
 
@@ -1282,7 +1292,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                         
             Example usage:
             ```javascript
-            entityBuilder.visibilityPercent(targetEntity => {
+            entityBuilder.visibilityPercent(context => {
                 // Define logic to calculate and return the visibility percentage for the targetEntity
                 // Use information about the Entity provided by the context.
                 return // Some Double value representing the visibility percentage;
@@ -1297,12 +1307,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a predicate function to determine whether the entity can attack another entity.
-            The provided Predicate accepts a {@link LivingEntity} parameter,
+            The provided Predicate accepts a {@link ContextUtils.LivingEntityContext} parameter,
             representing the entity that may be attacked.
                         
             Example usage:
             ```javascript
-            entityBuilder.canAttack(targetEntity => {
+            entityBuilder.canAttack(context => {
                 // Define conditions to check if the entity can attack the targetEntity
                 // Use information about the LivingEntity provided by the context.
                 return // Some boolean condition indicating if the entity can attack the targetEntity;
@@ -1475,7 +1485,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Example usage:
             ```javascript
             entityBuilder.fallSounds("minecraft:entity.generic.small_fall",
-                                     "minecraft:entity.generic.large_fall");
+                "minecraft:entity.generic.large_fall");
             ```
             """)
     public BaseLivingEntityBuilder<T> fallSounds(Object smallFallSound, Object largeFallSound) {
@@ -1600,7 +1610,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Example usage:
             ```javascript
             entityBuilder.jumpBoostPower(entity => {
-            return //some double value
+                return //some float value
             });
             ```
             """)
@@ -1991,9 +2001,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.onInteract(context => {
                 // Define custom logic for the interaction with the entity
                 // Use information about the MobInteractContext provided by the context.
+                // InteractionResult is a bound value able to be used without loading the class with Java.loadClass()
                 if (context.player.isShiftKeyDown()) return InteractionResult.FAIL
-                    context.player.startRiding(context.entity);
-                    return InteractionResult.sidedSuccess(context.entity.level.isClientSide());
+                context.player.startRiding(context.entity);
+                return InteractionResult.sidedSuccess(context.entity.level.isClientSide());
             });
             ```
             """)
@@ -2260,9 +2271,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     //STUFF
     @Info(value = """
             Sets the spawn placement of the entity type
-            entityBuilder.spawnPlacement('on_ground', 'world_surface', entity => {
-                return entity.fireImmune()
-            })   
+            entityBuilder.spawnPlacement('on_ground', 'world_surface', (entitypredicate, levelaccessor, spawntype, blockpos, randomsource) => {
+                if (levelaccessor.getLevel().getBiome(blockpos) == 'minecraft:plains') return true;
+                return false
+            })  
             """, params = {
             @Param(name = "placementType", value = "The placement type of the spawn, accepts 'on_ground', 'in_water', 'no_restrictions', 'in_lava'"),
             @Param(name = "heightMap", value = "The height map used for the spawner"),
@@ -2296,15 +2308,15 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                         
             Example usage:
             ```javascript
-            entityBuilder.addAnimationController('exampleController', 20, event => {
-                                  // Define conditions for the animation to be played based on the entity.
-                                  if (event.entity.hurtTime > 0) {
-                                        event.thenLoop('spawn');
-                                  } else {
-                                        event.thenPlayAndHold('idle');
-                                  }
-                                  return true; // Some boolean condition indicating if the animation should be played;
-                     });
+            entityBuilder.addAnimationController('exampleController', 5, event => {
+                // Define conditions for the animation to be played based on the entity.
+                if (event.entity.hurtTime > 0) {
+                    event.thenLoop('spawn');
+                } else {
+                    event.thenPlayAndHold('idle');
+                }
+                return true; // Some boolean condition indicating if the animation should be played;
+            });
             ```
             """)
     public BaseLivingEntityBuilder<T> addAnimationController(String name, int translationTicksLength, IAnimationPredicateJS<T> predicate) {

@@ -28,12 +28,11 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Double followLeashSpeed;
     public transient Function<ContextUtils.EntityBlockPosLevelContext, Object> walkTargetValue;
     public transient SpawnEggItemBuilder eggItem;
-    public transient Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner;
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Ingredient canFireProjectileWeapon;
     public transient Function<ContextUtils.EntityProjectileWeaponContext, Object> canFireProjectileWeaponPredicate;
     public transient Consumer<LivingEntity> ate;
-    public transient Object getAmbientSound;
+    public transient Object setAmbientSound;
     public transient Function<ContextUtils.EntityItemStackContext, Object> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
     public transient Function<PathfinderMob, Object> canPickUpLoot;
@@ -43,6 +42,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Function<LivingEntity, Object> myRidingOffset;
     public transient Object ambientSoundInterval;
     public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
+    public transient Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
@@ -64,6 +64,25 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         if (eggItem != null) {
             RegistryInfo.ITEM.addBuilder(eggItem);
         }
+    }
+
+    @Info(value = """
+            Sets a function to determine if the entity can cut corners when navigating paths.
+                        
+            @param canCutCorner A Function accepting a ContextUtils.EntityBlockPathTypeContext parameter,
+                                defining the logic to determine if the entity can cut corners.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.canCutCorner(context => {
+                // Custom logic to determine if the entity can cut corners based on the provided context.
+                // Return true if the entity can cut corners, false otherwise.
+            });
+            ```
+            """)
+    public MobBuilder<T> canCutCorner(Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner) {
+        this.canCutCorner = canCutCorner;
+        return this;
     }
 
     @Info(value = """
@@ -121,25 +140,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     }
 
     @Info(value = """
-            Sets a function to determine if the entity can cut corners when navigating paths.
-                        
-            @param canCutCorner A Function accepting a ContextUtils.EntityBlockPathTypeContext parameter,
-                                defining the logic to determine if the entity can cut corners.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.canCutCorner(context => {
-                // Custom logic to determine if the entity can cut corners based on the provided context.
-                // Return true if the entity can cut corners, false otherwise.
-            });
-            ```
-            """)
-    public MobBuilder<T> canCutCorner(Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner) {
-        this.canCutCorner = canCutCorner;
-        return this;
-    }
-
-    @Info(value = """
             Sets whether the entity can jump.
                         
             @param canJump A boolean indicating whether the entity can jump.
@@ -181,8 +181,8 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             Example usage:
             ```javascript
             mobBuilder.canFireProjectileWeapon([
-            'minecraft:bow',
-            'minecraft:crossbow'
+                'minecraft:bow',
+                'minecraft:crossbow'
             ]);
             ```
             """)
@@ -236,17 +236,17 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
                         
             Example usage:
             ```javascript
-            mobBuilder.getAmbientSound("minecraft:entity.zombie.ambient");
+            mobBuilder.setAmbientSound("minecraft:entity.zombie.ambient");
             ```
             """)
-    public MobBuilder<T> getAmbientSound(Object ambientSound) {
+    public MobBuilder<T> setAmbientSound(Object ambientSound) {
         if (ambientSound instanceof String) {
-            this.getAmbientSound = new ResourceLocation((String) ambientSound);
+            this.setAmbientSound = new ResourceLocation((String) ambientSound);
         } else if (ambientSound instanceof ResourceLocation resourceLocation) {
-            this.getAmbientSound = resourceLocation;
+            this.setAmbientSound = resourceLocation;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for getAmbientSound. Value: " + ambientSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
-            this.getAmbientSound = null;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setAmbientSound. Value: " + ambientSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
+            this.setAmbientSound = null;
         }
         return this;
     }

@@ -1,10 +1,7 @@
 package net.liopyu.entityjs.entities;
 
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
@@ -20,54 +17,38 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.control.JumpControl;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * The 'basic' implementation of a custom entity, implements most methods through the builder with some
@@ -176,17 +157,18 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     //Ageable Mob Overrides
     @Override
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        if (builder.getBreedOffspring != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.getBreedOffspring, "resourcelocation");
-            if (obj instanceof ResourceLocation) {
-                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue((ResourceLocation) obj);
+        if (builder.setBreedOffspring != null) {
+            final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
+            if (obj instanceof ResourceLocation resourceLocation) {
+                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
                 if (breedOffspringType != null) {
                     Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
                     if (breedOffspringEntity instanceof AgeableMob) {
                         return (AgeableMob) breedOffspringEntity;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.getBreedOffspring + ". Must be an AgeableMob subclass. Defaulting to super method: " + builder.get());
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
             }
         }
         return null;
@@ -501,8 +483,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Nullable
     @Override
     protected SoundEvent getAmbientSound() {
-        if (builder.getAmbientSound != null) {
-            return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.getAmbientSound);
+        if (builder.setAmbientSound != null) {
+            return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setAmbientSound);
         } else {
             return super.getAmbientSound();
         }
