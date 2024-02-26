@@ -294,8 +294,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     @Nullable
     @Override
     protected SoundEvent getAmbientSound() {
-        if (builder.getAmbientSound != null) {
-            return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.getAmbientSound);
+        if (builder.setAmbientSound != null) {
+            return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setAmbientSound);
         } else {
             return super.getAmbientSound();
         }

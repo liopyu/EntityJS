@@ -347,7 +347,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.render(context => {
                 // Define logic to render the entity
                 if (context.entity.isBaby()) {
-                context.poseStack.scale(0.5, 0.5, 0.5);
+                    context.poseStack.scale(0.5, 0.5, 0.5);
                 }
             });
             ```
@@ -448,7 +448,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             baseLivingEntityBuilder.lerpTo(context => {
                 // Custom lerping logic for the living entity
                 const { x, y, z, yaw, pitch, posRotationIncrements, teleport, entity } = context;
-                
                 // Perform custom lerping operations using the provided context
                 // For example, you can smoothly move the entity from its current position to the target position
                 entity.setPositionAndRotation(x, y, z, yaw, pitch);
@@ -1471,7 +1470,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Example usage:
             ```javascript
             entityBuilder.fallSounds("minecraft:entity.generic.small_fall",
-                                     "minecraft:entity.generic.large_fall");
+                "minecraft:entity.generic.large_fall");
             ```
             """)
     public BaseLivingEntityBuilder<T> fallSounds(Object smallFallSound, Object largeFallSound) {
@@ -1596,7 +1595,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Example usage:
             ```javascript
             entityBuilder.jumpBoostPower(entity => {
-            return //some float value
+                return //some float value
             });
             ```
             """)
@@ -1989,8 +1988,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 // Use information about the MobInteractContext provided by the context.
                 // InteractionResult is a bound value able to be used without loading the class with Java.loadClass()
                 if (context.player.isShiftKeyDown()) return InteractionResult.FAIL
-                    context.player.startRiding(context.entity);
-                    return InteractionResult.sidedSuccess(context.entity.level.isClientSide());
+                context.player.startRiding(context.entity);
+                return InteractionResult.sidedSuccess(context.entity.level.isClientSide());
             });
             ```
             """)

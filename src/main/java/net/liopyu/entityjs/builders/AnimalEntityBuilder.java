@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -12,7 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> extends MobBuilder<T> {
-    public transient Object getBreedOffspring;
+    public transient Function<ContextUtils.BreedableEntityContext, Object> setBreedOffspring;
     public transient Ingredient isFood;
     public transient Function<ContextUtils.EntityItemStackContext, Object> isFoodPredicate;
     public transient Function<LivingEntity, Object> canBreed;
@@ -29,18 +30,21 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     }
 
     @Info(value = """
-            Sets the resource location for the offspring spawned when breeding.
+            Sets the offspring for the Animal Entity.
                         
-            @param breedOffspring The resource location for the breed offspring.
-            Can also be an instance of AgeableMob.
+            @param breedOffspring Function returning a resource location for the breed offspring.
                         
             Example usage:
             ```javascript
-            animalBuilder.getBreedOffspring("minecraft:cow");
+            animalBuilder.setBreedOffspring(context => {
+                const { entity, mate, level } = context
+                // Use the context to return a ResourceLocation of an entity to spawn when the entity mates
+                return 'minecraft:cow' //Some Resource location representing the entity to spawn.
+            })
             ```
             """)
-    public AnimalEntityBuilder<T> getBreedOffspring(Object breedOffspring) {
-        this.getBreedOffspring = breedOffspring;
+    public AnimalEntityBuilder<T> setBreedOffspring(Function<ContextUtils.BreedableEntityContext, Object> breedOffspring) {
+        this.setBreedOffspring = breedOffspring;
         return this;
     }
 
@@ -48,7 +52,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     @Info(value = """
             Sets a predicate to determine if the animal entity can breed.
                         
-            @param canBreed A {@link Function} that defines the conditions for breeding.
+            @param canBreed A Function that defines the conditions for breeding.
                         
             Example usage:
             ```javascript
@@ -72,9 +76,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             Example usage:
             ```javascript
             animalBuilder.isFood([
-            "#minecraft:apple",
-            "minecraft:golden_apple",
-            "minecraft:diamond"
+                "#minecraft:apple",
+                "minecraft:golden_apple",
+                "minecraft:diamond"
             ]);
             ```
             """)
@@ -95,7 +99,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             animalBuilder.isFoodPredicate(context => {
                 // Custom logic to determine if the entity item stack is considered as food.
                 // Access information about the item stack using the provided context.
-                return someCondition;
+                return true // Some Boolean value;
             });
             ```
             """)
@@ -143,6 +147,4 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         this.onSpawnChildFromBreeding = consumer;
         return this;
     }
-
-
 }

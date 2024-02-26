@@ -156,17 +156,18 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     //Ageable Mob Overrides
     @Override
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        if (builder.getBreedOffspring != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.getBreedOffspring, "resourcelocation");
-            if (obj instanceof ResourceLocation) {
-                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue((ResourceLocation) obj);
+        if (builder.setBreedOffspring != null) {
+            final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
+            if (obj instanceof ResourceLocation resourceLocation) {
+                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
                 if (breedOffspringType != null) {
                     Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
                     if (breedOffspringEntity instanceof AgeableMob) {
                         return (AgeableMob) breedOffspringEntity;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.getBreedOffspring + ". Must be an AgeableMob subclass. Defaulting to super method: " + builder.get());
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
             }
         }
         return null;
@@ -486,8 +487,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Nullable
     @Override
     protected SoundEvent getAmbientSound() {
-        if (builder.getAmbientSound != null) {
-            return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.getAmbientSound);
+        if (builder.setAmbientSound != null) {
+            return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setAmbientSound);
         } else {
             return super.getAmbientSound();
         }

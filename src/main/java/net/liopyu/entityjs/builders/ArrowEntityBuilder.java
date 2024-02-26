@@ -61,7 +61,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             arrowEntityBuilder.textureResource(entity => {
                 // Define logic to determine the texture resource for the entity
                 // Use information about the entity provided by the context.
-                return // Some ResourceLocation representing the texture resource;
+                return "kubejs:textures/entity/projectiles/arrow.png" // Some ResourceLocation representing the texture resource;
             });
             ```
             """)
@@ -123,8 +123,8 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             Example usage:
             ```javascript
             arrowEntityBuilder.setBaseDamage(entity => {
-            return 10; //Some double based off entity context.
-            );
+                return 10; //Some double based off entity context.
+            });
             ```
             """)
     public ArrowEntityBuilder<T> setDamageFunction(Function<Entity, Object> baseDamage) {
@@ -160,7 +160,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             arrowEntityBuilder.setWaterInertia(0.5);
             ```
             """)
-    public ArrowEntityBuilder<T> setWaterInertia(Float waterInertia) {
+    public ArrowEntityBuilder<T> setWaterInertia(float waterInertia) {
         setWaterInertia = waterInertia;
         return this;
     }

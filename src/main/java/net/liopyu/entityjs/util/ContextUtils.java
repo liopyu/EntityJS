@@ -47,6 +47,22 @@ public class ContextUtils {
         }
     }
 
+    public static class BreedableEntityContext {
+        @Info("The entity who mated.")
+        public final AgeableMob entity;
+        @Info("The other parent the entity mated with.")
+        public final AgeableMob mate;
+
+        @Info("The Server Level")
+        public final ServerLevel level;
+
+        public BreedableEntityContext(AgeableMob entity, AgeableMob mate, ServerLevel level) {
+            this.entity = entity;
+            this.mate = mate;
+            this.level = level;
+        }
+    }
+
     public static class EntityBlockPosContext {
         @Info("The living entity")
         public final LivingEntity entity;

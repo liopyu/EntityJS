@@ -32,7 +32,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Ingredient canFireProjectileWeapon;
     public transient Function<ContextUtils.EntityProjectileWeaponContext, Object> canFireProjectileWeaponPredicate;
     public transient Consumer<LivingEntity> ate;
-    public transient Object getAmbientSound;
+    public transient Object setAmbientSound;
     public transient Function<ContextUtils.EntityItemStackContext, Object> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
     public transient Function<PathfinderMob, Object> canPickUpLoot;
@@ -161,8 +161,8 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             Example usage:
             ```javascript
             mobBuilder.canFireProjectileWeapon([
-            'minecraft:bow',
-            'minecraft:crossbow'
+                'minecraft:bow',
+                'minecraft:crossbow'
             ]);
             ```
             """)
@@ -216,17 +216,17 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
                         
             Example usage:
             ```javascript
-            mobBuilder.getAmbientSound("minecraft:entity.zombie.ambient");
+            mobBuilder.setAmbientSound("minecraft:entity.zombie.ambient");
             ```
             """)
-    public MobBuilder<T> getAmbientSound(Object ambientSound) {
+    public MobBuilder<T> setAmbientSound(Object ambientSound) {
         if (ambientSound instanceof String) {
-            this.getAmbientSound = new ResourceLocation((String) ambientSound);
+            this.setAmbientSound = new ResourceLocation((String) ambientSound);
         } else if (ambientSound instanceof ResourceLocation resourceLocation) {
-            this.getAmbientSound = resourceLocation;
+            this.setAmbientSound = resourceLocation;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for getAmbientSound. Value: " + ambientSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
-            this.getAmbientSound = null;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setAmbientSound. Value: " + ambientSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
+            this.setAmbientSound = null;
         }
         return this;
     }
