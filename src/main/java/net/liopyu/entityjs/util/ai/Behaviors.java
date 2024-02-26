@@ -19,9 +19,11 @@ import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.*;
 
 @SuppressWarnings("unused")
@@ -35,8 +37,8 @@ public enum Behaviors {
             @Param(name = "onlyIfAdult", value = "If this behavior should only apply when the entity is an adult"),
             @Param(name = "onPoiAcquisitionEvent", value = "The entity event to be sent to the entity when it acquires the poi, may be null to not send a client bound packet. This value is handled by an entity's implementation of the `handleEntityEvent` method")
     })
-    public AcquirePoi acquirePoi(Predicate<Holder<PoiType>> poiType, MemoryModuleType<GlobalPos> memoryKey, MemoryModuleType<GlobalPos> memoryToAcquire, boolean onlyIfAdult, @Nullable Byte onPoiAcquisitionEvent) {
-        return new AcquirePoi(poiType, memoryKey, memoryToAcquire, onlyIfAdult, Optional.ofNullable(onPoiAcquisitionEvent));
+    public BehaviorControl<PathfinderMob> acquirePoi(Predicate<Holder<PoiType>> poiType, MemoryModuleType<GlobalPos> memoryKey, MemoryModuleType<GlobalPos> memoryToAcquire, boolean onlyIfAdult, @Nullable Byte onPoiAcquisitionEvent) {
+        return AcquirePoi.create(poiType, memoryKey, memoryToAcquire, onlyIfAdult, Optional.ofNullable(onPoiAcquisitionEvent));
     }
 
     @Info(value = "Creates an `AnimalMakeLove` behavior, only applicable to **animal** entities", params = {
@@ -59,8 +61,8 @@ public enum Behaviors {
             @Param(name = "maxFollowRange", value = "The maximum follow distance of the baby"),
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public <E extends AgeableMob> BabyFollowAdult<E> babyFollowAdult(int minFollowRange, int maxFollowRange, Function<LivingEntity, Float> speedModifier) {
-        return new BabyFollowAdult<>(UniformInt.of(minFollowRange, maxFollowRange), speedModifier);
+    public OneShot<AgeableMob> babyFollowAdult(int minFollowRange, int maxFollowRange, Function<LivingEntity, Float> speedModifier) {
+        return BabyFollowAdult.create(UniformInt.of(minFollowRange, maxFollowRange), speedModifier);
     }
 
     @Info(value = "Creates a `CountCooldownTicks` behavior", params = {
@@ -74,16 +76,15 @@ public enum Behaviors {
             @Param(name = "maxWalkDistToRideTarget", value = "The maximum distance the entity is willing to walk to ride an entity"),
             @Param(name = "dontRideIf", value = "The predicate for when the entity should get off its mount")
     })
-    public <E extends LivingEntity, T extends Entity> DismountOrSkipMounting<E, T> dismountOrSkipMounting(int maxWalkDistToRideTarget, BiPredicate<E, Entity> dontRideIf) {
-        return new DismountOrSkipMounting<>(maxWalkDistToRideTarget, dontRideIf);
+    public <E extends LivingEntity> BehaviorControl<E> dismountOrSkipMounting(int maxWalkDistToRideTarget, BiPredicate<E, Entity> dontRideIf) {
+        return DismountOrSkipMounting.create(maxWalkDistToRideTarget, dontRideIf);
     }
 
     @Info(value = "Creates a `FlyingRandomStroll` behavior, only applicable to **pathfinder** mobs", params = {
-            @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active"),
-            @Param(name = "mayStrollFromWater", value = "If the mob may stroll out of water")
+            @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public FlyingRandomStroll flyingRandomStroll(float speedModifier, boolean mayStrollFromWater) {
-        return new FlyingRandomStroll(speedModifier, mayStrollFromWater);
+    public BehaviorControl<PathfinderMob> flyingRandomStroll(float speedModifier) {
+        return RandomStroll.fly(speedModifier);
     }
 
     @Info(value = "Creates a `FollowTemptation` behavior, only applicable to **pathfinder** mobs", params = {
@@ -101,8 +102,8 @@ public enum Behaviors {
     @Info(value = "Creates a `MoveToSkySeeingSpot` behavior", params = {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public MoveToSkySeeingSpot moveToSkySeeingSpot(float speedModifier) {
-        return new MoveToSkySeeingSpot(speedModifier);
+    public OneShot<LivingEntity> moveToSkySeeingSpot(float speedModifier) {
+        return MoveToSkySeeingSpot.create(speedModifier);
     }
 
     @Info(value = "Creates a `GoToTargetLocation` behavior, only applicable to **mob** entities", params = {
@@ -110,8 +111,8 @@ public enum Behaviors {
             @Param(name = "closeEnoughDistance", value = "The distance that is close enough to the location for the entity to consider it 'at' the target location"),
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public <E extends Mob> GoToTargetLocation<E> gotoTargetLocation(MemoryModuleType<BlockPos> locationMemory, int closeEnoughDistance, float speedModifier) {
-        return new GoToTargetLocation<>(locationMemory, closeEnoughDistance, speedModifier);
+    public <E extends Mob> OneShot<E> gotoTargetLocation(MemoryModuleType<BlockPos> locationMemory, int closeEnoughDistance, float speedModifier) {
+        return GoToTargetLocation.create(locationMemory, closeEnoughDistance, speedModifier);
     }
 
     @Info(value = "Creates a `GoToWantedItem` behavior", params = {
@@ -120,15 +121,15 @@ public enum Behaviors {
             @Param(name = "maxDistToWalk", value = "The maximum distance the entity will walk to go to the wanted item"),
             @Param(name = "hasWlkTargetMemoryModuleType", value = "If the entity has the `minecraft:walk_target` memory type")
     })
-    public <E extends LivingEntity> GoToWantedItem<E> goToWantedItem(Predicate<E> predicate, float speedModifier, int maxDistToWalk, boolean hasWalkTargetMemoryModuleType) {
-        return new GoToWantedItem<>(predicate, speedModifier, hasWalkTargetMemoryModuleType, maxDistToWalk);
+    public <E extends LivingEntity> BehaviorControl<E> goToWantedItem(Predicate<E> predicate, float speedModifier, int maxDistToWalk, boolean hasWalkTargetMemoryModuleType) {
+        return GoToWantedItem.create(predicate, speedModifier, hasWalkTargetMemoryModuleType, maxDistToWalk);
     }
 
     @Info(value = "Creates a `InsideBrownianWalk` behavior, only applicable to **pathfinder** entities", params = {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public InsideBrownianWalk insideBrownianWalk(float speedModifier) {
-        return new InsideBrownianWalk(speedModifier);
+    public BehaviorControl<PathfinderMob> insideBrownianWalk(float speedModifier) {
+        return InsideBrownianWalk.create(speedModifier);
     }
 
     @Info(value = "Creates an `InteractWith` behavior", params = {
@@ -140,7 +141,7 @@ public enum Behaviors {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active"),
             @Param(name = "maxDistance", value = "The maximum distance they entity may acquire an interaction target from")
     })
-    public <E extends LivingEntity, T extends LivingEntity> InteractWith<E, T> interactWith(
+    public <E extends LivingEntity, T extends LivingEntity> BehaviorControl<E> interactWith(
             EntityType<? extends T> typeToInteractWith,
             int interactionRange,
             Predicate<E> selfFilter,
@@ -149,7 +150,7 @@ public enum Behaviors {
             float speedModifier,
             int maxDistance
     ) {
-        return new InteractWith<>(
+        return InteractWith.of(
                 typeToInteractWith,
                 interactionRange,
                 selfFilter,
@@ -177,8 +178,8 @@ public enum Behaviors {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active"),
             @Param(name = "closeEnoughDistance", value = "The distance at which the entity considers itself close enough to the hiding place")
     })
-    public LocateHidingPlace locateHidingPlace(int radius, float speedModifier, int closeEnoughDistance) {
-        return new LocateHidingPlace(radius, speedModifier, closeEnoughDistance);
+    public OneShot<LivingEntity> locateHidingPlace(int radius, float speedModifier, int closeEnoughDistance) {
+        return LocateHidingPlace.create(radius, speedModifier, closeEnoughDistance);
     }
 
     @Info(value = "Creates a `LongJumpMidJump` behavior, only applicable to **mob** entities", params = {
@@ -194,8 +195,8 @@ public enum Behaviors {
             @Param(name = "memoryType", value = "The memory type that will pacify the entity"),
             @Param(name = "pacifyDuration", value = "How long the entity will be pacified for")
     })
-    public BecomePassiveIfMemoryPresent becomePassiveIfMemoryPresent(MemoryModuleType<?> memoryType, int pacifyDuration) {
-        return new BecomePassiveIfMemoryPresent(memoryType, pacifyDuration);
+    public BehaviorControl<LivingEntity> becomePassiveIfMemoryPresent(MemoryModuleType<?> memoryType, int pacifyDuration) {
+        return BecomePassiveIfMemoryPresent.create(memoryType, pacifyDuration);
     }
 
     @Info(value = "Creates a `DoNothing` behavior", params = {
@@ -210,16 +211,16 @@ public enum Behaviors {
             @Param(name = "predicate", value = "When to erase the memory"),
             @Param(name = "memoryType", value = "The memory type to be erased")
     })
-    public <E extends LivingEntity> EraseMemoryIf<E> eraseMemoryIf(Predicate<E> predicate, MemoryModuleType<?> memoryType) {
-        return new EraseMemoryIf<>(predicate, memoryType);
+    public <E extends LivingEntity> BehaviorControl<E> eraseMemoryIf(Predicate<E> predicate, MemoryModuleType<?> memoryType) {
+        return EraseMemoryIf.create(predicate, memoryType);
     }
 
     @Info(value = "Creates a `BackUpIfTooClose` behavior, only applicable to **mob** entities", params = {
             @Param(name = "tooCloseDistance", value = "The distance at which the mob will begin to backup"),
             @Param(name = "strafeSpeed", value = "The speed at which the entity will back away")
     })
-    public <E extends Mob> BackUpIfTooClose<E> backUpIfTooClose(int tooCloseDistance, float strafeSpeed) {
-        return new BackUpIfTooClose<>(tooCloseDistance, strafeSpeed);
+    public OneShot<Mob> backUpIfTooClose(int tooCloseDistance, float strafeSpeed) {
+        return BackUpIfTooClose.create(tooCloseDistance, strafeSpeed);
     }
 
     @Info(value = "Creates a `LongJumpToPreferredBlock` behavior, only applicable to **mob** entities", params = {
@@ -242,7 +243,7 @@ public enum Behaviors {
             Function<E, SoundEvent> jumpSound,
             ResourceLocation preferredBlockTag,
             float preferredBlockChance,
-            Predicate<BlockState> acceptableLandingSpot
+            BiPredicate<E, BlockPos> acceptableLandingSpot
     ) {
         return new LongJumpToPreferredBlock<>(
                 UniformInt.of(minTimeBetweenJumps, maxTimeBetweenJumps),
@@ -250,7 +251,7 @@ public enum Behaviors {
                 maxJumpWidth,
                 maxJumpVelocity,
                 jumpSound,
-                TagKey.create(Registry.BLOCK_REGISTRY, preferredBlockTag),
+                TagKey.create(ForgeRegistries.BLOCKS.getRegistryKey(), preferredBlockTag),
                 preferredBlockChance,
                 acceptableLandingSpot
         );
@@ -272,7 +273,7 @@ public enum Behaviors {
             int maxJumpWidth,
             float maxJumpVelocity,
             Function<E, SoundEvent> jumpSound,
-            Predicate<BlockState> acceptableLandingSpot
+            BiPredicate<E, BlockPos> acceptableLandingSpot
     ) {
         return new LongJumpToRandomPos<>(
                 UniformInt.of(minTimeBetweenJumps, maxTimeBetweenJumps),
@@ -295,15 +296,15 @@ public enum Behaviors {
     @Info(value = "Creates a `MeleeAttack` behavior, only applicable to **mob** entities", params = {
             @Param(name = "attackCooldown", value = "The attack cooldown of the entity when this behavior is active")
     })
-    public MeleeAttack meleeAttack(int attackCooldown) {
-        return new MeleeAttack(attackCooldown);
+    public OneShot<Mob> meleeAttack(int attackCooldown) {
+        return MeleeAttack.create(attackCooldown);
     }
 
     @Info(value = "Creates a `Mount` behavior", params = {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public <E extends LivingEntity> Mount<E> mount(float speedModifier) {
-        return new Mount<>(speedModifier);
+    public BehaviorControl<LivingEntity> mount(float speedModifier) {
+        return Mount.create(speedModifier);
     }
 
     @Info(value = "Creates a `MoveToTargetSink` behavior, only applicable to **mob** entities", params = {
@@ -367,33 +368,32 @@ public enum Behaviors {
     @Info(value = "Creates a `RandomStroll` behavior, only applicable to **pathfinder** mobs", params = {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active"),
             @Param(name = "maxHorizontalDistance", value = "The maximum horizontal distance the mob will stroll"),
-            @Param(name = "maxVerticalDistance", value = "The maximum vertical distance the mob will stroll"),
-            @Param(name = "mayStrollFromWater", value = "If the mob may stroll from water")
+            @Param(name = "maxVerticalDistance", value = "The maximum vertical distance the mob will stroll")
     })
-    public RandomStroll randomStroll(float speedModifier, int maxHorizontalDistance, int maxVerticalDistance, boolean mayStrollFromWater) {
-        return new RandomStroll(speedModifier, maxHorizontalDistance, maxVerticalDistance, mayStrollFromWater);
+    public BehaviorControl<PathfinderMob> randomStroll(float speedModifier, int maxHorizontalDistance, int maxVerticalDistance) {
+        return RandomStroll.stroll(speedModifier, maxHorizontalDistance, maxVerticalDistance);
     }
 
     @Info(value = "Creates a `RandomSwim` behavior, only applicable to **pathfinder** mobs", params = {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
-    public RandomSwim randomSwim(float speedModifier) {
-        return new RandomSwim(speedModifier);
+    public BehaviorControl<PathfinderMob> randomSwim(float speedModifier) {
+        return RandomStroll.swim(speedModifier);
     }
 
     @Info(value = "Creates a `ReactToBell` behavior")
-    public ReactToBell reactToBell() {
-        return new ReactToBell();
+    public BehaviorControl<LivingEntity> reactToBell() {
+        return ReactToBell.create();
     }
 
     @Info(value = "Creates a `ResetRaidStatus` behavior")
-    public ResetRaidStatus resetRaidStatus() {
-        return new ResetRaidStatus();
+    public BehaviorControl<LivingEntity> resetRaidStatus() {
+        return ResetRaidStatus.create();
     }
 
     @Info(value = "Creates a `RingBell` behavior")
-    public RingBell ringBell() {
-        return new RingBell();
+    public BehaviorControl<LivingEntity> ringBell() {
+        return RingBell.create();
     }
 
     @Info(value = "Creates a `RunIf` behavior", params = {

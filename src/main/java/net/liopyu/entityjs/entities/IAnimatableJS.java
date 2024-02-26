@@ -2,12 +2,15 @@ package net.liopyu.entityjs.entities;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
+import net.minecraftforge.registries.ForgeRegistries;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import net.minecraft.core.Registry;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+
+import java.util.Objects;
 
 /**
  * This provides a default implementation of {@link GeoAnimatable#registerControllers(AnimatableManager.ControllerRegistrar)}}
@@ -53,7 +56,7 @@ public interface IAnimatableJS extends GeoAnimatable {
      * Gets the id of the entity's entity type
      */
     default String getTypeId() {
-        return Registry.ENTITY_TYPE.getKey(getType()).toString();
+        return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(getType())).toString();
     }
 
     EntityType<?> getType();

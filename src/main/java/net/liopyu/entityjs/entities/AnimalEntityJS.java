@@ -261,7 +261,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (this.isFood(itemstack) || this.isFoodPredicate(itemstack)) {
             int i = this.getAge();
-            if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
+            if (!this.level().isClientSide && i == 0 && this.canFallInLove()) {
                 this.usePlayerItem(pPlayer, pHand, itemstack);
                 this.setInLove(pPlayer);
                 return InteractionResult.SUCCESS;
@@ -270,10 +270,10 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             if (this.isBaby()) {
                 this.usePlayerItem(pPlayer, pHand, itemstack);
                 this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
             }
 
-            if (this.level.isClientSide) {
+            if (this.level().isClientSide) {
                 return InteractionResult.CONSUME;
             }
         }
@@ -342,9 +342,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
         double d2 = pTarget.getZ() - this.getZ();
         double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level.getDifficulty().getId() * 4));
+        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level().getDifficulty().getId() * 4));
         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-        this.level.addFreshEntity(abstractarrow);
+        this.level().addFreshEntity(abstractarrow);
     }
 
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
@@ -387,7 +387,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     public boolean shouldJump() {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
+        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -403,7 +403,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
         }
-        if (canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
+        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
     }
@@ -439,7 +439,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
 
-    @Override
+    /*@Override
     public boolean canCutCorner(BlockPathTypes pathType) {
         if (builder.canCutCorner != null) {
             final ContextUtils.EntityBlockPathTypeContext context = new ContextUtils.EntityBlockPathTypeContext(pathType, this);
@@ -450,7 +450,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCutCorner from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.canCutCorner(pathType));
         }
         return super.canCutCorner(pathType);
-    }
+    }*/
 
     @Override
     public void setTarget(@Nullable LivingEntity target) {
@@ -689,7 +689,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            if (!this.level.isClientSide()) {
+            if (!this.level().isClientSide()) {
                 builder.tick.accept(this);
             }
         }
@@ -698,7 +698,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
+        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
     }
@@ -812,10 +812,10 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
 
-    @Override
+    /*@Override
     public boolean rideableUnderWater() {
         return Objects.requireNonNullElseGet(builder.rideableUnderWater, super::rideableUnderWater);
-    }
+    }*/
 
 
     @Override
@@ -1019,11 +1019,11 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
 
     @Override
-    public double getJumpBoostPower() {
+    public float getJumpBoostPower() {
         if (builder.jumpBoostPower == null) return super.getJumpBoostPower();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "double");
-        if (obj != null) return (double) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a double. Defaulting to " + super.getJumpBoostPower());
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "float");
+        if (obj != null) return (float) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
         return super.getJumpBoostPower();
     }
 
@@ -1144,7 +1144,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level);
+            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
             Object obj = builder.canTakeItem.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -1241,7 +1241,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
+        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;

@@ -174,7 +174,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     public void setEnchantmentEffectsFromEntity(LivingEntity pShooter, float pVelocity) {
         int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.POWER_ARROWS, pShooter);
         int j = EnchantmentHelper.getEnchantmentLevel(Enchantments.PUNCH_ARROWS, pShooter);
-        this.setBaseDamage((double) (pVelocity * 2.0F) + this.random.triangle((double) this.level.getDifficulty().getId() * 0.11, 0.57425));
+        this.setBaseDamage((double) (pVelocity * 2.0F) + this.random.triangle((double) this.level().getDifficulty().getId() * 0.11, 0.57425));
         if (i > 0) {
             this.setBaseDamage(this.getBaseDamage() + (double) i * 0.5 + 0.5);
         }
@@ -272,9 +272,9 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         Entity entity1 = this.getOwner();
         DamageSource damagesource;
         if (entity1 == null) {
-            damagesource = DamageSource.arrow(this, this);
+            damagesource = this.damageSources().arrow(this, this);
         } else {
-            damagesource = DamageSource.arrow(this, entity1);
+            damagesource = this.damageSources().arrow(this, entity1);
             if (entity1 instanceof LivingEntity) {
                 ((LivingEntity) entity1).setLastHurtMob(entity);
             }
@@ -293,7 +293,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
             if (entity instanceof LivingEntity) {
                 LivingEntity livingentity = (LivingEntity) entity;
-                if (!this.level.isClientSide && this.getPierceLevel() <= 0) {
+                if (!this.level().isClientSide && this.getPierceLevel() <= 0) {
                     livingentity.setArrowCount(livingentity.getArrowCount() + 1);
                 }
 
@@ -305,7 +305,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
                     }
                 }
 
-                if (!this.level.isClientSide && entity1 instanceof LivingEntity) {
+                if (!this.level().isClientSide && entity1 instanceof LivingEntity) {
                     EnchantmentHelper.doPostHurtEffects(livingentity, entity1);
                     EnchantmentHelper.doPostDamageEffects((LivingEntity) entity1, livingentity);
                 }
@@ -319,7 +319,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
                     this.piercedAndKilledEntities.add(livingentity);
                 }
 
-                if (!this.level.isClientSide && entity1 instanceof ServerPlayer) {
+                if (!this.level().isClientSide && entity1 instanceof ServerPlayer) {
                     ServerPlayer serverplayer = (ServerPlayer) entity1;
                     if (this.piercedAndKilledEntities != null && this.shotFromCrossbow()) {
                         CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverplayer, this.piercedAndKilledEntities);
@@ -338,7 +338,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
             this.setDeltaMovement(this.getDeltaMovement().scale(-0.1));
             this.setYRot(this.getYRot() + 180.0F);
             this.yRotO += 180.0F;
-            if (!this.level.isClientSide && this.getDeltaMovement().lengthSqr() < 1.0E-7) {
+            if (!this.level().isClientSide && this.getDeltaMovement().lengthSqr() < 1.0E-7) {
                 if (this.pickup == AbstractArrow.Pickup.ALLOWED) {
                     this.spawnAtLocation(this.getPickupItem(), 0.1F);
                 }
