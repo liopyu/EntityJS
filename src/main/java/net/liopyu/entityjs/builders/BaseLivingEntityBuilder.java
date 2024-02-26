@@ -1610,7 +1610,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Example usage:
             ```javascript
             entityBuilder.jumpBoostPower(entity => {
-                return //some float value
+                return //some double value
             });
             ```
             """)
