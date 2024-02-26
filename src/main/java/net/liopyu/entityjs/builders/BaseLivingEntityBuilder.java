@@ -347,7 +347,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.render(context => {
                 // Define logic to render the entity
                 if (context.entity.isBaby()) {
-                context.poseStack.scale(0.5F, 0.5F, 0.5F);
+                context.poseStack.scale(0.5, 0.5, 0.5);
                 }
             });
             ```
