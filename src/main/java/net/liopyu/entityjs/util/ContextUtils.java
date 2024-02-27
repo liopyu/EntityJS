@@ -47,6 +47,19 @@ public class ContextUtils {
         }
     }
 
+    public static class CollidingEntityContext {
+        @Info("The entity getting collided with")
+        public final LivingEntity entity;
+
+        @Info("The entity colliding")
+        public final Entity collidingEntity;
+
+        public CollidingEntityContext(LivingEntity entity, Entity collidingEntity) {
+            this.entity = entity;
+            this.collidingEntity = collidingEntity;
+        }
+    }
+
     public static class BreedableEntityContext {
         @Info("The entity who mated.")
         public final AgeableMob entity;
