@@ -533,6 +533,17 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     //(Base LivingEntity/Entity Overrides)
     @Override
+    public boolean canCollideWith(Entity pEntity) {
+        if (builder.canCollideWith != null) {
+            final ContextUtils.CollidingEntityContext context = new ContextUtils.CollidingEntityContext(this, pEntity);
+            Object obj = builder.canCollideWith.apply(context);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + builder.canCollideWith.apply(context) + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
+        }
+        return super.canCollideWith(pEntity);
+    }
+
+    @Override
     protected float getSoundVolume() {
         return Objects.requireNonNullElseGet(builder.setSoundVolume, super::getSoundVolume);
     }

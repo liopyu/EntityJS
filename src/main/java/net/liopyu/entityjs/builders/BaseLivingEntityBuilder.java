@@ -256,6 +256,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.RenderContext> render;
     public transient MobType mobType;
     public transient Function<LivingEntity, Object> isFreezing;
+    public transient Function<ContextUtils.CollidingEntityContext, Object> canCollideWith;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -285,6 +286,23 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         renderType = RenderType.CUTOUT;
         mainArm = HumanoidArm.RIGHT;
         mobType = MobType.UNDEFINED;
+    }
+
+    @Info(value = """
+            Function determining if the entity may collide with another entity
+            using the ContextUtils.CollidingEntityContext which has this entity and the
+            one colliding with this entity.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canCollideWith(context => {
+                return true //Some Boolean value determining whether the entity may collide with another
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> canCollideWith(Function<ContextUtils.CollidingEntityContext, Object> canCollideWith) {
+        this.canCollideWith = canCollideWith;
+        return this;
     }
 
     @Info(value = """
