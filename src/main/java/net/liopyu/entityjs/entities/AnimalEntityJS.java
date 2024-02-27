@@ -538,7 +538,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             final ContextUtils.CollidingEntityContext context = new ContextUtils.CollidingEntityContext(this, pEntity);
             Object obj = builder.canCollideWith.apply(context);
             if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + builder.canCollideWith.apply(context) + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
         }
         return super.canCollideWith(pEntity);
     }
