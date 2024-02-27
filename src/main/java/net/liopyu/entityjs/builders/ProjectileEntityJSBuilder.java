@@ -15,9 +15,11 @@ import java.util.function.Consumer;
 public class ProjectileEntityJSBuilder extends ProjectileEntityBuilder<ProjectileEntityJS> {
 
     public transient ProjectileItemBuilder item;
+    public transient boolean noItem;
 
     public ProjectileEntityJSBuilder(ResourceLocation i) {
         super(i);
+        this.item = new ProjectileItemBuilder(id, this);
     }
 
     public transient Level level;
@@ -26,6 +28,12 @@ public class ProjectileEntityJSBuilder extends ProjectileEntityBuilder<Projectil
     @Override
     public EntityType.EntityFactory<ProjectileEntityJS> factory() {
         return (type, level) -> new ProjectileEntityJS(this, type, level);
+    }
+
+    @Info(value = "Indicates that no projectile item should be created for this entity type")
+    public ProjectileEntityJSBuilder noItem() {
+        this.noItem = true;
+        return this;
     }
 
     @Info(value = "Creates the arrow item for this entity type")
@@ -40,7 +48,7 @@ public class ProjectileEntityJSBuilder extends ProjectileEntityBuilder<Projectil
 
     @Override
     public void createAdditionalObjects() {
-        if (item != null) {
+        if (!noItem) {
             RegistryInfo.ITEM.addBuilder(item);
         }
     }

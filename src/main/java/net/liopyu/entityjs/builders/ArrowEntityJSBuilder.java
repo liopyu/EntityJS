@@ -13,15 +13,23 @@ import java.util.function.Consumer;
 public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
 
     public transient ArrowItemBuilder item;
+    public transient boolean noItem;
 
     public ArrowEntityJSBuilder(ResourceLocation i) {
         super(i);
+        this.item = new ArrowItemBuilder(id, this);
     }
 
 
     @Override
     public EntityType.EntityFactory<ArrowEntityJS> factory() {
         return (type, level) -> new ArrowEntityJS(this, type, level);
+    }
+
+    @Info(value = "Indicates that no arrow item should be created for this entity type")
+    public ArrowEntityJSBuilder noItem() {
+        this.noItem = true;
+        return this;
     }
 
     @Info(value = "Creates the arrow item for this entity type")
@@ -36,7 +44,7 @@ public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
 
     @Override
     public void createAdditionalObjects() {
-        if (item != null) {
+        if (!noItem) {
             RegistryInfo.ITEM.addBuilder(item);
         }
     }
