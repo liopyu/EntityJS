@@ -20,7 +20,9 @@ public class ProjectileEntityJSBuilder extends ProjectileEntityBuilder<Projectil
 
     public ProjectileEntityJSBuilder(ResourceLocation i) {
         super(i);
-        this.item = new ProjectileItemBuilder(id, this);
+        this.item = (ProjectileItemBuilder) new ProjectileItemBuilder(id, this)
+                .canThrow(true)
+                .texture(i.getNamespace() + ":item/" + i.getPath());
     }
 
     public transient Level level;

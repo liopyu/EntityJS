@@ -17,7 +17,9 @@ public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
 
     public ArrowEntityJSBuilder(ResourceLocation i) {
         super(i);
-        this.item = new ArrowItemBuilder(id, this);
+        this.item = (ArrowItemBuilder) new ArrowItemBuilder(id, this)
+                .canBePickedup(true)
+                .texture(i.getNamespace() + ":item/" + i.getPath());
     }
 
 
