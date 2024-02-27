@@ -91,7 +91,7 @@ public class KubeJSProjectileEntityRenderer<T extends ThrowableItemProjectile & 
 
 
     private ResourceLocation getDynamicTextureLocation() {
-        return new ResourceLocation("kubejs:textures/entity/projectiles/" + builder.id.getPath() + ".png");
+        return new ResourceLocation(builder.id.getNamespace() + ":textures/entity/projectiles/" + builder.id.getPath() + ".png");
     }
 
 }

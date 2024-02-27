@@ -43,6 +43,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         textureLocation = t -> t.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
         setBaseDamage = 2;
         setKnockback = 1;
+
     }
 
     @Override

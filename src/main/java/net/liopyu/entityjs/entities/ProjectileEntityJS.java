@@ -60,20 +60,22 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     //Base Entity Overrides
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
-        if (builder.shouldRenderAtSqrDistance == null) super.shouldRenderAtSqrDistance(distance);
-        final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.shouldRenderAtSqrDistance.apply(context), "boolean");
-        if (obj != null) return (boolean) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for projectile builder: " + builder.shouldRenderAtSqrDistance.apply(context) + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
+        if (builder.shouldRenderAtSqrDistance != null) {
+            final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
+            Object obj = builder.shouldRenderAtSqrDistance.apply(context);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for arrow builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
+        }
         return super.shouldRenderAtSqrDistance(distance);
     }
 
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
         if (builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
             builder.lerpTo.accept(context);
-        } else super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+        }
     }
 
     @Override
@@ -130,10 +132,11 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected boolean canHitEntity(Entity entity) {
-        if (builder == null || builder.canHitEntity == null) return super.canHitEntity(entity);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canHitEntity.apply(entity), "boolean");
-        if (obj != null) return super.canHitEntity(entity) && (boolean) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid canHitEntity for projectile builder: " + builder.canHitEntity.apply(entity) + ". Must be a boolean. Defaulting to super method: " + super.canHitEntity(entity));
+        if (builder != null && builder.canHitEntity != null) {
+            Object obj = builder.canHitEntity.apply(entity);
+            if (obj instanceof Boolean b) return super.canHitEntity(entity) && b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid canHitEntity for arrow builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.canHitEntity(entity));
+        }
         return super.canHitEntity(entity);
     }
 }
