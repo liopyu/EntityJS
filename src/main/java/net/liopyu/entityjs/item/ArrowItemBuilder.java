@@ -2,6 +2,7 @@ package net.liopyu.entityjs.item;
 
 import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
+import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.entities.ArrowEntityJS;
 import net.minecraft.resources.ResourceLocation;
@@ -22,9 +23,10 @@ public class ArrowItemBuilder extends ItemBuilder {
         super(i);
         this.parent = parent;
         canBePickedUp = true;
-        texture = i.getNamespace() + ":item/" + i.getPath();
+        texture = i.getNamespace().toString() + ":item/" + i.getPath().toString();
     }
 
+    @Info(value = "Sets if the arrow can be picked up")
     public ArrowItemBuilder canBePickedup(boolean canBePickedUp) {
         this.canBePickedUp = canBePickedUp;
         return this;

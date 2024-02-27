@@ -30,7 +30,7 @@ public class ProjectileItemBuilder extends ItemBuilder {
         projectileZ = 0.0F;
         projectileVelocity = 1.5F;
         projectileInaccuracy = 1.0F;
-        texture = i.getNamespace() + ":item/" + i.getPath();
+        texture = parent.id.getNamespace() + ":item/" + parent.id.getPath();
     }
 
     @Override
