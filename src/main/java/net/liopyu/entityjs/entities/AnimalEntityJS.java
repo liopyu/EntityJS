@@ -11,7 +11,13 @@ import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
+import net.liopyu.liolib.animatable.GeoEntity;
+import net.liopyu.liolib.animatable.GeoItem;
+import net.liopyu.liolib.animatable.SingletonGeoAnimatable;
 import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
+import net.liopyu.liolib.core.animation.AnimatableManager;
+import net.liopyu.liolib.network.GeckoLibNetwork;
+import net.liopyu.liolib.network.packet.EntityAnimTriggerPacket;
 import net.liopyu.liolib.util.GeckoLibUtil;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
@@ -43,6 +49,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -113,10 +120,17 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return builder;
     }
 
+    /*@Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar data) {
+        IAnimatableJS.super.registerControllers(data);
+    }*/
+
+
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return getAnimatableInstanceCache;
     }
+
 
     //Some logic overrides up here because there are different implementations in the other builders.
 
@@ -337,7 +351,17 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return Objects.requireNonNullElse(builder.canJump, true);
     }
 
+    public void triggerAnimation(String controllerName, String animName) {
+        Entity entity = this;
+        if (entity.getLevel().isClientSide()) {
+            getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
+        } else {
+            GeckoLibNetwork.send(new EntityAnimTriggerPacket<>(entity.getId(), controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
+        }
+    }
+
     public void onJump() {
+
         if (builder.onLivingJump != null) {
             builder.onLivingJump.accept(this);
         }

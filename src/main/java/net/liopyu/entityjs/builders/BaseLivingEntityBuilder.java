@@ -2358,47 +2358,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             @Nullable IParticleListenerJS<T> particleListener,
             @Nullable ICustomInstructionListenerJS<T> instructionListener
     ) {
-        animationSuppliers.add(new AnimationControllerSupplier<>(name, translationTicksLength, predicate, soundListener, particleListener, instructionListener));
-        return this;
-    }
-
-    @Info(value = """
-            Sets the render type for the entity.
-                        
-            @param type The render type to be set. Acceptable values are:
-                         - "solid
-                         - "cutout"
-                         - "translucent"
-                         - RenderType.SOLID
-                         - RenderType.CUTOUT
-                         - RenderType.TRANSLUCENT
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.setRenderType("translucent");
-            ```
-            """)
-    public BaseLivingEntityBuilder<T> setRenderType(Object type) {
-        if (type instanceof RenderType) {
-            renderType = (RenderType) type;
-        } else if (type instanceof String) {
-            String typeString = (String) type;
-            switch (typeString.toLowerCase()) {
-                case "solid":
-                    renderType = RenderType.SOLID;
-                    break;
-                case "cutout":
-                    renderType = RenderType.CUTOUT;
-                    break;
-                case "translucent":
-                    renderType = RenderType.TRANSLUCENT;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid render type string: " + typeString);
-            }
-        } else {
-            throw new IllegalArgumentException("Invalid render type: " + type);
-        }
+        animationSuppliers.add(new AnimationControllerSupplier<>(name, translationTicksLength, predicate, null, null, null, soundListener, particleListener, instructionListener));
         return this;
     }
 
@@ -2453,13 +2413,23 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             String name,
             int translationTicksLength,
             IAnimationPredicateJS<E> predicate,
+            String triggerableAnimID, // Identifier for triggerable animation
+            String triggerableAnimName, // Animation name for RawAnimation
+            String loopType, // Added loopType for triggerable animations
             @Nullable ISoundListenerJS<E> soundListener,
-
             @Nullable IParticleListenerJS<E> particleListener,
             @Nullable ICustomInstructionListenerJS<E> instructionListener
     ) {
         public AnimationController<E> get(E entity) {
             final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
+            if (triggerableAnimID != null && triggerableAnimName != null) {
+                // Using loopType for triggerable animations
+                if ("loop".equalsIgnoreCase(loopType)) {
+                    controller.triggerableAnim(triggerableAnimID, RawAnimation.begin().thenLoop(triggerableAnimName));
+                } else {
+                    controller.triggerableAnim(triggerableAnimID, RawAnimation.begin().thenPlay(triggerableAnimName));
+                }
+            }
             if (soundListener != null) {
                 controller.setSoundKeyframeHandler(event -> soundListener.playSound(new SoundKeyFrameEventJS<>(event)));
             }
@@ -2472,6 +2442,41 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             return controller;
         }
     }
+
+
+    @Info(value = "Adds a triggerable AnimationController to the entity.", params = {
+            @Param(name = "name", value = "The name of the controller"),
+            @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
+            @Param(name = "triggerableAnimationID", value = "The identifier of the triggerable animation"),
+            @Param(name = "triggerableAnimationName", value = "The name of the triggerable animation"),
+            @Param(name = "loopType", value = "The loop type for the triggerable animation, either 'loop' or 'default'")
+    })
+    public BaseLivingEntityBuilder<T> addTriggerableAnimationController(
+            String name,
+            int translationTicksLength,
+            String triggerableAnimationID,
+            String triggerableAnimationName,
+            String loopType
+    ) {
+        animationSuppliers.add(new AnimationControllerSupplier<>(
+                name,
+                translationTicksLength,
+                new IAnimationPredicateJS<T>() {
+                    @Override
+                    public boolean test(AnimationEventJS<T> event) {
+                        return true;
+                    }
+                },
+                triggerableAnimationID,
+                triggerableAnimationName,
+                loopType,
+                null,
+                null,
+                null
+        ));
+        return this;
+    }
+
 
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
@@ -2627,6 +2632,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         void playSound(SoundKeyFrameEventJS<E> event);
     }
 
+
     public static class SoundKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> {
 
         @Info(value = "The name of the sound to play")
@@ -2669,6 +2675,46 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         public CustomInstructionKeyframeEventJS(CustomInstructionKeyframeEvent<E> parent) {
             instructions = parent.getKeyframeData().getInstructions();
         }
+    }
+
+    @Info(value = """
+            Sets the render type for the entity.
+                        
+            @param type The render type to be set. Acceptable values are:
+                         - "solid
+                         - "cutout"
+                         - "translucent"
+                         - RenderType.SOLID
+                         - RenderType.CUTOUT
+                         - RenderType.TRANSLUCENT
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.setRenderType("translucent");
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> setRenderType(Object type) {
+        if (type instanceof RenderType) {
+            renderType = (RenderType) type;
+        } else if (type instanceof String) {
+            String typeString = (String) type;
+            switch (typeString.toLowerCase()) {
+                case "solid":
+                    renderType = RenderType.SOLID;
+                    break;
+                case "cutout":
+                    renderType = RenderType.CUTOUT;
+                    break;
+                case "translucent":
+                    renderType = RenderType.TRANSLUCENT;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid render type string: " + typeString);
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid render type: " + type);
+        }
+        return this;
     }
 
     public enum RenderType {
