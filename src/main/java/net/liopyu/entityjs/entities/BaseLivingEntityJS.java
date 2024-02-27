@@ -149,6 +149,17 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     //(Base LivingEntity/Entity Overrides)
     @Override
+    public boolean canCollideWith(Entity pEntity) {
+        if (builder.canCollideWith != null) {
+            final ContextUtils.CollidingEntityContext context = new ContextUtils.CollidingEntityContext(this, pEntity);
+            Object obj = builder.canCollideWith.apply(context);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
+        }
+        return super.canCollideWith(pEntity);
+    }
+
+    @Override
     protected float getSoundVolume() {
         return Objects.requireNonNullElseGet(builder.setSoundVolume, super::getSoundVolume);
     }
