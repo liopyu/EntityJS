@@ -2425,6 +2425,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             if (triggerableAnimationID != null) {
                 Animation.LoopType loopTypeEnum = Animation.LoopType.fromString(loopType);
                 controller.triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(triggerableAnimationName, loopTypeEnum));
+                //if (controller.hasAnimationFinished()) controller.stop();
             }
             if (soundListener != null) {
                 controller.setSoundKeyframeHandler(event -> soundListener.playSound(new SoundKeyFrameEventJS<>(event)));
