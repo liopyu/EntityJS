@@ -23,6 +23,7 @@ public class ArrowItemBuilder extends ItemBuilder {
         this.parent = parent;
         canBePickedUp = true;
         texture = i.getNamespace() + ":item/" + i.getPath();
+
     }
 
     @Info(value = "Sets if the arrow can be picked up")
