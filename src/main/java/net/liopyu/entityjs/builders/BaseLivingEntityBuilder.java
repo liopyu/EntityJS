@@ -2413,22 +2413,18 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             String name,
             int translationTicksLength,
             IAnimationPredicateJS<E> predicate,
-            String triggerableAnimID, // Identifier for triggerable animation
-            String triggerableAnimName, // Animation name for RawAnimation
-            String loopType, // Added loopType for triggerable animations
+            String triggerableAnimationID,
+            String triggerableAnimationName,
+            String loopType,
             @Nullable ISoundListenerJS<E> soundListener,
             @Nullable IParticleListenerJS<E> particleListener,
             @Nullable ICustomInstructionListenerJS<E> instructionListener
     ) {
         public AnimationController<E> get(E entity) {
             final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
-            if (triggerableAnimID != null && triggerableAnimName != null) {
-                // Using loopType for triggerable animations
-                if ("loop".equalsIgnoreCase(loopType)) {
-                    controller.triggerableAnim(triggerableAnimID, RawAnimation.begin().thenLoop(triggerableAnimName));
-                } else {
-                    controller.triggerableAnim(triggerableAnimID, RawAnimation.begin().thenPlay(triggerableAnimName));
-                }
+            if (triggerableAnimationID != null) {
+                Animation.LoopType loopTypeEnum = Animation.LoopType.fromString(loopType);
+                controller.triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(triggerableAnimationName, loopTypeEnum));
             }
             if (soundListener != null) {
                 controller.setSoundKeyframeHandler(event -> soundListener.playSound(new SoundKeyFrameEventJS<>(event)));
@@ -2444,12 +2440,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
 
-    @Info(value = "Adds a triggerable AnimationController to the entity.", params = {
+    @Info(value = "Adds a triggerable AnimationController to the entity callable off the entity's methods anywhere.", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
             @Param(name = "triggerableAnimationID", value = "The identifier of the triggerable animation"),
             @Param(name = "triggerableAnimationName", value = "The name of the triggerable animation"),
-            @Param(name = "loopType", value = "The loop type for the triggerable animation, either 'loop' or 'default'")
+            @Param(name = "loopType", value = "The loop type for the triggerable animation, either 'LOOP' or 'PLAY_ONCE' or 'HOLD_ON_LAST_FRAME' or 'DEFAULT'")
     })
     public BaseLivingEntityBuilder<T> addTriggerableAnimationController(
             String name,

@@ -120,11 +120,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return builder;
     }
 
-    /*@Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar data) {
-        IAnimatableJS.super.registerControllers(data);
-    }*/
-
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
@@ -351,14 +346,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return Objects.requireNonNullElse(builder.canJump, true);
     }
 
-    public void triggerAnimation(String controllerName, String animName) {
-        Entity entity = this;
-        if (entity.getLevel().isClientSide()) {
-            getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
-        } else {
-            GeckoLibNetwork.send(new EntityAnimTriggerPacket<>(entity.getId(), controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
-        }
-    }
 
     public void onJump() {
 
@@ -556,6 +543,15 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
 
     //(Base LivingEntity/Entity Overrides)
+    public void triggerAnimation(String controllerName, String animName) {
+        Entity entity = this;
+        if (entity.getLevel().isClientSide()) {
+            getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
+        } else {
+            GeckoLibNetwork.send(new EntityAnimTriggerPacket<>(entity.getId(), controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
+        }
+    }
+
     @Override
     public boolean canCollideWith(Entity pEntity) {
         if (builder.canCollideWith != null) {
