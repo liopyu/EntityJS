@@ -21,7 +21,6 @@ public class ProjectileItemBuilder extends ItemBuilder {
     public transient float projectileZ;
     public transient float projectileVelocity;
     public transient float projectileInaccuracy;
-    public transient String texture;
 
     public ProjectileItemBuilder(ResourceLocation i, ProjectileEntityJSBuilder parent) {
         super(i);
@@ -30,7 +29,7 @@ public class ProjectileItemBuilder extends ItemBuilder {
         projectileZ = 0.0F;
         projectileVelocity = 1.5F;
         projectileInaccuracy = 1.0F;
-        texture = parent.id.getNamespace() + ":item/" + parent.id.getPath();
+        texture = i.getNamespace() + ":item/" + i.getPath();
     }
 
     @Override
@@ -119,29 +118,5 @@ public class ProjectileItemBuilder extends ItemBuilder {
     public ItemBuilder projectileInaccuracy(float projectileInaccuracy) {
         this.projectileInaccuracy = projectileInaccuracy;
         return this;
-    }
-
-    @Override
-    public void generateAssetJsons(AssetJsonGenerator generator) {
-        if (modelJson != null) {
-            generator.json(AssetJsonGenerator.asItemModelLocation(id), modelJson);
-            return;
-        }
-        generator.itemModel(id, m -> {
-            if (!parentModel.isEmpty()) {
-                m.parent(parentModel);
-
-                if (textureJson.size() == 0) {
-                    texture(newID("item/", "").toString());
-                }
-                m.textures(textureJson);
-            } else {
-                m.parent("item/generated");
-
-                if (textureJson.size() != 0) {
-                    m.textures(textureJson);
-                }
-            }
-        });
     }
 }

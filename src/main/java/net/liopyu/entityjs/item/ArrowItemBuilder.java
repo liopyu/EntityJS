@@ -17,13 +17,12 @@ import net.minecraft.world.level.Level;
 public class ArrowItemBuilder extends ItemBuilder {
     public transient final ArrowEntityJSBuilder parent;
     public transient boolean canBePickedUp;
-    public transient String texture;
 
     public ArrowItemBuilder(ResourceLocation i, ArrowEntityJSBuilder parent) {
         super(i);
         this.parent = parent;
         canBePickedUp = true;
-        texture = i.getNamespace().toString() + ":item/" + i.getPath().toString();
+        texture = i.getNamespace() + ":item/" + i.getPath();
     }
 
     @Info(value = "Sets if the arrow can be picked up")
@@ -46,29 +45,5 @@ public class ArrowItemBuilder extends ItemBuilder {
                 return arrow;
             }
         };
-    }
-
-    @Override
-    public void generateAssetJsons(AssetJsonGenerator generator) {
-        if (modelJson != null) {
-            generator.json(AssetJsonGenerator.asItemModelLocation(id), modelJson);
-            return;
-        }
-        generator.itemModel(id, m -> {
-            if (!parentModel.isEmpty()) {
-                m.parent(parentModel);
-
-                if (textureJson.size() == 0) {
-                    texture(newID("item/", "").toString());
-                }
-                m.textures(textureJson);
-            } else {
-                m.parent("item/generated");
-
-                if (textureJson.size() != 0) {
-                    m.textures(textureJson);
-                }
-            }
-        });
     }
 }
