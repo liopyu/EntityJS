@@ -5,6 +5,8 @@ import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
 import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
+import net.liopyu.liolib.network.GeckoLibNetwork;
+import net.liopyu.liolib.network.packet.EntityAnimTriggerPacket;
 import net.liopyu.liolib.util.GeckoLibUtil;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -44,6 +46,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -148,6 +151,15 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     //(Base LivingEntity/Entity Overrides)
+    public void triggerAnimation(String controllerName, String animName) {
+        Entity entity = this;
+        if (entity.getLevel().isClientSide()) {
+            getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
+        } else {
+            GeckoLibNetwork.send(new EntityAnimTriggerPacket<>(entity.getId(), controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
+        }
+    }
+
     @Override
     public boolean canCollideWith(Entity pEntity) {
         if (builder.canCollideWith != null) {
