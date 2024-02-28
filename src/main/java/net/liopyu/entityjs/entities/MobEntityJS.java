@@ -7,7 +7,10 @@ import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.util.*;
+import net.minecraftforge.network.PacketDistributor;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.network.GeckoLibNetwork;
+import software.bernie.geckolib.network.packet.EntityAnimTriggerPacket;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -376,6 +379,15 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     }
 
     //(Base LivingEntity/Entity Overrides)
+    public void triggerAnimation(String controllerName, String animName) {
+        Entity entity = this;
+        if (entity.level().isClientSide()) {
+            getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
+        } else {
+            GeckoLibNetwork.send(new EntityAnimTriggerPacket<>(entity.getId(), controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
+        }
+    }
+
     @Override
     public boolean canCollideWith(Entity pEntity) {
         if (builder.canCollideWith != null) {

@@ -4,7 +4,10 @@ import com.mojang.logging.LogUtils;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
+import net.minecraftforge.network.PacketDistributor;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.network.GeckoLibNetwork;
+import software.bernie.geckolib.network.packet.EntityAnimTriggerPacket;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -148,6 +151,15 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     //(Base LivingEntity/Entity Overrides)
+    public void triggerAnimation(String controllerName, String animName) {
+        Entity entity = this;
+        if (entity.level().isClientSide()) {
+            getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
+        } else {
+            GeckoLibNetwork.send(new EntityAnimTriggerPacket<>(entity.getId(), controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
+        }
+    }
+
     @Override
     public boolean canCollideWith(Entity pEntity) {
         if (builder.canCollideWith != null) {

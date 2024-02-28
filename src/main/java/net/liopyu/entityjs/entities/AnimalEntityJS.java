@@ -40,10 +40,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.network.GeckoLibNetwork;
+import software.bernie.geckolib.network.packet.EntityAnimTriggerPacket;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -536,6 +539,15 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
 
     //(Base LivingEntity/Entity Overrides)
+    public void triggerAnimation(String controllerName, String animName) {
+        Entity entity = this;
+        if (entity.level().isClientSide()) {
+            getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
+        } else {
+            GeckoLibNetwork.send(new EntityAnimTriggerPacket<>(entity.getId(), controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
+        }
+    }
+
     @Override
     public boolean canCollideWith(Entity pEntity) {
         if (builder.canCollideWith != null) {
