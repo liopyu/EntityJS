@@ -123,11 +123,12 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected void onHitBlock(BlockHitResult result) {
-        super.onHitBlock(result);
+
         if (builder != null && builder.onHitBlock != null) {
             final ContextUtils.ProjectileBlockHitContext context = new ContextUtils.ProjectileBlockHitContext(result, this);
             builder.onHitBlock.accept(context);
-        }
+            super.onHitBlock(result);
+        } else super.onHitBlock(result);
     }
 
     @Override
