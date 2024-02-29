@@ -2468,7 +2468,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = "Adds a triggerable AnimationController to the entity callable off the entity's methods anywhere.", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
-            @Param(name = "predicate", value = "The predicate for the controller, determines if an animation should continue or not"),
             @Param(name = "triggerableAnimationID", value = "The unique identifier of the triggerable animation(sets it apart from other triggerable animations)"),
             @Param(name = "triggerableAnimationName", value = "The name of the animation defined in the animations.json"),
             @Param(name = "loopType", value = "The loop type for the triggerable animation, either 'LOOP' or 'PLAY_ONCE' or 'HOLD_ON_LAST_FRAME' or 'DEFAULT'")
