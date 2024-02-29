@@ -38,25 +38,8 @@ public class EntityJSHelperClass {
             case "boolean" -> convertToBoolean(input);
             case "interactionresult" -> convertToInteractionResult(input);
             case "resourcelocation" -> convertToResourceLocation(input);
-            case "looptype" -> convertToLoopType(input);
             default -> input;
         };
-    }
-
-    private static Animation.LoopType convertToLoopType(Object input) {
-        if (input instanceof Animation.LoopType) {
-            return (Animation.LoopType) input;
-        } else if (input instanceof String) {
-            String stringValue = ((String) input).toUpperCase();
-            return switch (stringValue) {
-                case "LOOP" -> Animation.LoopType.LOOP;
-                case "PLAY_ONCE" -> Animation.LoopType.PLAY_ONCE;
-                case "HOLD_ON_LAST_FRAME" -> Animation.LoopType.HOLD_ON_LAST_FRAME;
-                case "DEFAULT" -> Animation.LoopType.DEFAULT;
-                default -> Animation.LoopType.DEFAULT;
-            };
-        }
-        return Animation.LoopType.DEFAULT;
     }
 
     private static ResourceLocation convertToResourceLocation(Object input) {
