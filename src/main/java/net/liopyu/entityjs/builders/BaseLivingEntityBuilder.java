@@ -2439,8 +2439,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             String name,
             int translationTicksLength,
             IAnimationPredicateJS<E> predicate,
-            String triggerableAnimationID,
             String triggerableAnimationName,
+            String triggerableAnimationID,
             String loopType,
             @Nullable ISoundListenerJS<E> soundListener,
             @Nullable IParticleListenerJS<E> particleListener,
@@ -2449,7 +2449,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         public AnimationController<E> get(E entity) {
             final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
             if (triggerableAnimationID != null) {
-                Animation.LoopType loopTypeEnum = Animation.LoopType.fromString(loopType);
+                Animation.LoopType loopTypeEnum = Animation.LoopType.fromString(loopType.toUpperCase());
                 controller.triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(triggerableAnimationName, loopTypeEnum));
             }
             if (soundListener != null) {
@@ -2476,17 +2476,21 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> addTriggerableAnimationController(
             String name,
             int translationTicksLength,
-            IAnimationPredicateJS<T> predicate,
-            String triggerableAnimationID,
             String triggerableAnimationName,
+            String triggerableAnimationID,
             String loopType
     ) {
         animationSuppliers.add(new AnimationControllerSupplier<>(
                 name,
                 translationTicksLength,
-                predicate,
-                triggerableAnimationID,
+                new IAnimationPredicateJS<T>() {
+                    @Override
+                    public boolean test(AnimationEventJS<T> event) {
+                        return true;
+                    }
+                },
                 triggerableAnimationName,
+                triggerableAnimationID,
                 loopType,
                 null,
                 null,
