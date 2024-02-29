@@ -2358,7 +2358,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             @Nullable IParticleListenerJS<T> particleListener,
             @Nullable ICustomInstructionListenerJS<T> instructionListener
     ) {
-        animationSuppliers.add(new AnimationControllerSupplier<>(name, translationTicksLength, predicate, soundListener, particleListener, instructionListener));
+        animationSuppliers.add(new AnimationControllerSupplier<>(name, translationTicksLength, predicate, null, null, null, soundListener, particleListener, instructionListener));
         return this;
     }
 
@@ -2413,12 +2413,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             String name,
             int translationTicksLength,
             IAnimationPredicateJS<E> predicate,
+            String triggerableAnimationID,
+            String triggerableAnimationName,
+            String loopType,
             @Nullable ISoundListenerJS<E> soundListener,
             @Nullable IParticleListenerJS<E> particleListener,
             @Nullable ICustomInstructionListenerJS<E> instructionListener
     ) {
         public AnimationController<E> get(E entity) {
             final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
+            if (triggerableAnimationID != null) {
+                Animation.LoopType loopTypeEnum = Animation.LoopType.fromString(loopType);
+                controller.triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(triggerableAnimationName, loopTypeEnum));
+                //if (controller.hasAnimationFinished()) controller.stop();
+            }
             if (soundListener != null) {
                 controller.setSoundKeyframeHandler(event -> soundListener.playSound(new SoundKeyFrameEventJS<>(event)));
             }
@@ -2431,6 +2439,38 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             return controller;
         }
     }
+
+
+    @Info(value = "Adds a triggerable AnimationController to the entity callable off the entity's methods anywhere.", params = {
+            @Param(name = "name", value = "The name of the controller"),
+            @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
+            @Param(name = "predicate", value = "The predicate for the controller, determines if an animation should continue or not"),
+            @Param(name = "triggerableAnimationID", value = "The unique identifier of the triggerable animation(sets it apart from other triggerable animations)"),
+            @Param(name = "triggerableAnimationName", value = "The name of the animation defined in the animations.json"),
+            @Param(name = "loopType", value = "The loop type for the triggerable animation, either 'LOOP' or 'PLAY_ONCE' or 'HOLD_ON_LAST_FRAME' or 'DEFAULT'")
+    })
+    public BaseLivingEntityBuilder<T> addTriggerableAnimationController(
+            String name,
+            int translationTicksLength,
+            IAnimationPredicateJS<T> predicate,
+            String triggerableAnimationID,
+            String triggerableAnimationName,
+            String loopType
+    ) {
+        animationSuppliers.add(new AnimationControllerSupplier<>(
+                name,
+                translationTicksLength,
+                predicate,
+                triggerableAnimationID,
+                triggerableAnimationName,
+                loopType,
+                null,
+                null,
+                null
+        ));
+        return this;
+    }
+
 
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
@@ -2491,12 +2531,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             return parent.getAnimatable();
         }
 
-        // ?
+        @Info(value = "Returns the entity's limb swing")
         public float getLimbSwing() {
             return parent.getLimbSwing();
         }
 
-        // ?
+        @Info(value = "Returns the entity's limb swing amount")
         public float getLimbSwingAmount() {
             return parent.getLimbSwingAmount();
         }
