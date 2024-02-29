@@ -32,5 +32,6 @@ examples to help you unleash the full potential of EntityJS.
 
 ## Community
 
-Join our Discord community to connect with other users, share your creations, and get help with any questions or issues
+Join our [Discord](https://discord.gg/lat) community to connect with other users, share your creations, and get help
+with any questions or issues
 you encounter while using EntityJS.
