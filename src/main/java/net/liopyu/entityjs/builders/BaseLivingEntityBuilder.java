@@ -2413,8 +2413,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             String name,
             int translationTicksLength,
             IAnimationPredicateJS<E> predicate,
-            String triggerableAnimationID,
             String triggerableAnimationName,
+            String triggerableAnimationID,
             String loopType,
             @Nullable ISoundListenerJS<E> soundListener,
             @Nullable IParticleListenerJS<E> particleListener,
@@ -2423,7 +2423,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         public AnimationController<E> get(E entity) {
             final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
             if (triggerableAnimationID != null) {
-                Animation.LoopType loopTypeEnum = Animation.LoopType.fromString(loopType);
+                Animation.LoopType loopTypeEnum = Animation.LoopType.fromString(loopType.toUpperCase());
                 controller.triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(triggerableAnimationName, loopTypeEnum));
             }
             if (soundListener != null) {
@@ -2439,29 +2439,31 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         }
     }
 
-
     @Info(value = "Adds a triggerable AnimationController to the entity callable off the entity's methods anywhere.", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
-            @Param(name = "predicate", value = "The predicate for the controller, determines if an animation should continue or not"),
-            @Param(name = "triggerableAnimationID", value = "The unique identifier of the triggerable animation(sets it apart from other triggerable animations)"),
-            @Param(name = "triggerableAnimationName", value = "The name of the animation defined in the animations.json"),
+            @Param(name = "triggerableAnimationName", value = "The unique identifier of the triggerable animation(sets it apart from other triggerable animations)"),
+            @Param(name = "triggerableAnimationID", value = "The name of the animation defined in the animations.json"),
             @Param(name = "loopType", value = "The loop type for the triggerable animation, either 'LOOP' or 'PLAY_ONCE' or 'HOLD_ON_LAST_FRAME' or 'DEFAULT'")
     })
     public BaseLivingEntityBuilder<T> addTriggerableAnimationController(
             String name,
             int translationTicksLength,
-            IAnimationPredicateJS<T> predicate,
-            String triggerableAnimationID,
             String triggerableAnimationName,
+            String triggerableAnimationID,
             String loopType
     ) {
         animationSuppliers.add(new AnimationControllerSupplier<>(
                 name,
                 translationTicksLength,
-                predicate,
-                triggerableAnimationID,
+                new IAnimationPredicateJS<T>() {
+                    @Override
+                    public boolean test(AnimationEventJS<T> event) {
+                        return true;
+                    }
+                },
                 triggerableAnimationName,
+                triggerableAnimationID,
                 loopType,
                 null,
                 null,
