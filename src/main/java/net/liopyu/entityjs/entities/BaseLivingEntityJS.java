@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.entities;
 
 import com.mojang.logging.LogUtils;
+import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
@@ -151,13 +152,11 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     //(Base LivingEntity/Entity Overrides)
+    @Info(value = """
+            Calls a triggerable animation to be played anywhere.
+            """)
     public void triggerAnimation(String controllerName, String animName) {
-        Entity entity = this;
-        if (entity.getLevel().isClientSide()) {
-            getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
-        } else {
-            GeckoLibNetwork.send(new EntityAnimTriggerPacket<>(entity.getId(), controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
-        }
+        triggerAnim(controllerName, animName);
     }
 
     @Override

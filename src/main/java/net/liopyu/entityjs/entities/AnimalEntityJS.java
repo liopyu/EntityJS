@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.entities;
 
 import com.mojang.serialization.Dynamic;
+import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
@@ -543,13 +544,11 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
 
     //(Base LivingEntity/Entity Overrides)
+    @Info(value = """
+            Calls a triggerable animation to be played anywhere.
+            """)
     public void triggerAnimation(String controllerName, String animName) {
-        Entity entity = this;
-        if (entity.getLevel().isClientSide()) {
-            getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
-        } else {
-            GeckoLibNetwork.send(new EntityAnimTriggerPacket<>(entity.getId(), controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
-        }
+        triggerAnim(controllerName, animName);
     }
 
     @Override
