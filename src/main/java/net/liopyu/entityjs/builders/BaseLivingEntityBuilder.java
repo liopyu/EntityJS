@@ -2430,7 +2430,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             IAnimationPredicateJS<E> predicate,
             String triggerableAnimationName,
             String triggerableAnimationID,
-            String loopType,
+            Object loopType,
             @Nullable ISoundListenerJS<E> soundListener,
             @Nullable IParticleListenerJS<E> particleListener,
             @Nullable ICustomInstructionListenerJS<E> instructionListener
