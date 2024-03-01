@@ -5,6 +5,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.client.ClientModHandler;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
@@ -562,6 +563,13 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
                 z *= 0.25F;
             }
             this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+            if (this.getControllingPassenger() instanceof Player) {
+                if (ClientModHandler.isJumpKeyPressed() && this.isOnGround() && this.canJump()) {
+                    this.jump();
+                    onJump();
+                    ForgeHooks.onLivingJump(this);
+                }
+            }
             super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
         }
         if (builder.travel != null) {

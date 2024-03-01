@@ -38,7 +38,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Function<PathfinderMob, Object> canPickUpLoot;
     public transient Boolean isPersistenceRequired;
     public transient Function<PathfinderMob, Object> meleeAttackRangeSqr;
-    public transient Boolean canJump;
     public transient Function<LivingEntity, Object> myRidingOffset;
     public transient Object ambientSoundInterval;
     public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
@@ -139,20 +138,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-    @Info(value = """
-            Sets whether the entity can jump.
-                        
-            @param canJump A boolean indicating whether the entity can jump.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.canJump(true);
-            ```
-            """)
-    public MobBuilder<T> canJump(boolean canJump) {
-        this.canJump = canJump;
-        return this;
-    }
 
     @Info(value = """
             Sets a callback function to be executed when the entity's target changes.

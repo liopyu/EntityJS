@@ -261,6 +261,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Boolean isControlledByLocalInstance;
     public transient Consumer<ContextUtils.Vec3Context> travel;
     public transient Boolean canSteer;
+    public transient Boolean canJump;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -293,6 +294,21 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         defaultDeathPose = true;
         isControlledByLocalInstance = true;
         canSteer = true;
+    }
+
+    @Info(value = """
+            Sets whether the entity can jump when mounted.
+                        
+            @param canJump A boolean indicating whether the entity can jump.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canJump(true);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> canJump(boolean canJump) {
+        this.canJump = canJump;
+        return this;
     }
 
     @Info(value = """
