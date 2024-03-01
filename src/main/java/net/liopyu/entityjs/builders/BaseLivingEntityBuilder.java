@@ -257,6 +257,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient MobType mobType;
     public transient Function<LivingEntity, Object> isFreezing;
     public transient Function<ContextUtils.CollidingEntityContext, Object> canCollideWith;
+    public transient Boolean defaultDeathPose;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -286,6 +287,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         renderType = RenderType.CUTOUT;
         mainArm = HumanoidArm.RIGHT;
         mobType = MobType.UNDEFINED;
+        defaultDeathPose = true;
+    }
+
+    @Info(value = """
+            Boolean determining if the entity will turn sideways on death.
+            Defaults to true.
+            Example usage:
+            ```javascript
+            entityBuilder.defaultDeathPose(false);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> defaultDeathPose(boolean defaultDeathPose) {
+        this.defaultDeathPose = defaultDeathPose;
+        return this;
     }
 
     @Info(value = """
