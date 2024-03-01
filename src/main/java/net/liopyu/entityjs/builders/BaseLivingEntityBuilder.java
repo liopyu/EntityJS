@@ -294,6 +294,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         defaultDeathPose = true;
         isControlledByLocalInstance = true;
         canSteer = true;
+        canJump = true;
     }
 
     @Info(value = """
