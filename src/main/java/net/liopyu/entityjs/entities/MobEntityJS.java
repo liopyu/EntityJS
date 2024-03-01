@@ -8,6 +8,7 @@ import net.liopyu.entityjs.builders.MobEntityJSBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.util.*;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.network.PacketDistributor;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.network.GeckoLibNetwork;
@@ -66,7 +67,7 @@ import org.slf4j.Logger;
 import java.util.Objects;
 import java.util.Optional;
 
-public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedAttackMob {
+public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedAttackMob, PlayerRideableJumping {
 
     private final MobEntityJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
@@ -148,8 +149,24 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
 
+    @Override
+    public void onPlayerJump(int i) {
+
+    }
+
+    @Override
     public boolean canJump() {
         return Objects.requireNonNullElse(builder.canJump, true);
+    }
+
+    @Override
+    public void handleStartJump(int i) {
+
+    }
+
+    @Override
+    public void handleStopJump() {
+
     }
 
     public void onJump() {
@@ -200,7 +217,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
         }
-        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
+        if (this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
     }
@@ -382,30 +399,43 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     //(Base LivingEntity/Entity Overrides)
     @Override
     public void travel(Vec3 pTravelVector) {
+        if (this.isAlive() && this.isVehicle() && builder.canSteer) {
+            LivingEntity passenger = this.getControllingPassenger();
+            this.yRotO = this.getYRot();
+            this.xRotO = this.getXRot();
+            this.setYRot(passenger.getYRot());
+            this.setXRot(passenger.getXRot() * 0.5F);
+            this.setRot(this.getYRot(), this.getXRot());
+            this.yBodyRot = this.getYRot();
+            this.yHeadRot = this.yBodyRot;
+            float x = passenger.xxa * 0.5F;
+            float z = passenger.zza;
+            if (z <= 0.0F) {
+                z *= 0.25F;
+            }
+            this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+            super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
+        }
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
             builder.travel.accept(context);
         }
-        if (builder.travelVector != null) {
-            final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
-            Object obj = builder.travelVector.apply(context);
-            if (obj instanceof Vec3 vec3) {
-                super.travel(new Vec3(vec3.x, vec3.y, vec3.z));
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for travelVector from entity: " + entityName() + ". Value: " + obj + ". Must be a Vec3. Defaulting to super method");
-            }
-        } else super.travel(pTravelVector);
+        if (builder.travel == null && !builder.canSteer) {
+            super.travel(pTravelVector);
+        }
     }
 
-    @Nullable
     @Override
     public LivingEntity getControllingPassenger() {
-        if (builder.setControllingPassenger != null) {
-            Object obj = builder.setControllingPassenger.apply(this);
-            if (obj instanceof LivingEntity entity) return entity;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setControllingPassenger from entity: " + entityName() + ". Value: " + obj + ". Must be an instance of LivingEntity. Defaulting to " + super.getControllingPassenger());
+        Entity var2 = this.getFirstPassenger();
+        LivingEntity var10000;
+        if (var2 instanceof LivingEntity entity) {
+            var10000 = entity;
+        } else {
+            var10000 = null;
         }
-        return super.getControllingPassenger();
+
+        return var10000;
     }
 
     @Override

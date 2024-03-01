@@ -26,6 +26,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.RangedAttackMob;
@@ -41,13 +42,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.network.GeckoLibNetwork;
-import software.bernie.geckolib.network.packet.EntityAnimTriggerPacket;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -92,7 +90,7 @@ import java.util.Objects;
  */
 @MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
 @ParametersAreNonnullByDefault
-public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttackMob {
+public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttackMob, PlayerRideableJumping {
 
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
@@ -341,9 +339,24 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
 
+    @Override
+    public void onPlayerJump(int pJumpPower) {
+        //this.jump();
+    }
+
+    @Override
     public boolean canJump() {
         return Objects.requireNonNullElse(builder.canJump, true);
     }
+
+    @Override
+    public void handleStartJump(int i) {
+    }
+
+    @Override
+    public void handleStopJump() {
+    }
+
 
     public void onJump() {
         if (builder.onLivingJump != null) {
@@ -393,7 +406,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
         }
-        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
+        if (this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
     }
@@ -544,30 +557,43 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     //(Base LivingEntity/Entity Overrides)
     @Override
     public void travel(Vec3 pTravelVector) {
+        if (this.isAlive() && this.isVehicle() && builder.canSteer) {
+            LivingEntity passenger = this.getControllingPassenger();
+            this.yRotO = this.getYRot();
+            this.xRotO = this.getXRot();
+            this.setYRot(passenger.getYRot());
+            this.setXRot(passenger.getXRot() * 0.5F);
+            this.setRot(this.getYRot(), this.getXRot());
+            this.yBodyRot = this.getYRot();
+            this.yHeadRot = this.yBodyRot;
+            float x = passenger.xxa * 0.5F;
+            float z = passenger.zza;
+            if (z <= 0.0F) {
+                z *= 0.25F;
+            }
+            this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+            super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
+        }
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
             builder.travel.accept(context);
         }
-        if (builder.travelVector != null) {
-            final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
-            Object obj = builder.travelVector.apply(context);
-            if (obj instanceof Vec3 vec3) {
-                super.travel(new Vec3(vec3.x, vec3.y, vec3.z));
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for travelVector from entity: " + entityName() + ". Value: " + obj + ". Must be a Vec3. Defaulting to super method");
-            }
-        } else super.travel(pTravelVector);
+        if (builder.travel == null && !builder.canSteer) {
+            super.travel(pTravelVector);
+        }
     }
 
-    @Nullable
     @Override
     public LivingEntity getControllingPassenger() {
-        if (builder.setControllingPassenger != null) {
-            Object obj = builder.setControllingPassenger.apply(this);
-            if (obj instanceof LivingEntity entity) return entity;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setControllingPassenger from entity: " + entityName() + ". Value: " + obj + ". Must be an instance of LivingEntity. Defaulting to " + super.getControllingPassenger());
+        Entity var2 = this.getFirstPassenger();
+        LivingEntity var10000;
+        if (var2 instanceof LivingEntity entity) {
+            var10000 = entity;
+        } else {
+            var10000 = null;
         }
-        return super.getControllingPassenger();
+
+        return var10000;
     }
 
     @Override
