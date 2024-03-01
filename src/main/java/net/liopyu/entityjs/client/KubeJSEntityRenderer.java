@@ -100,6 +100,10 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
                 poseStack.translate(0.0F, animatable.getBbHeight() + 0.1F, 0.0F);
                 poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
             }
+            if (name != null && (name.equalsIgnoreCase("liopyu") || name.equalsIgnoreCase("toomuchmail"))) {
+                poseStack.translate(0.0F, animatable.getBbHeight() + 0.1F, 0.0F);
+                poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
+            }
         }
     }
 }
