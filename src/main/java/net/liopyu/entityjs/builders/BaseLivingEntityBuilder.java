@@ -2456,7 +2456,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             IAnimationPredicateJS<E> predicate,
             String triggerableAnimationName,
             String triggerableAnimationID,
-            String loopType,
+            Object loopType,
             @Nullable ISoundListenerJS<E> soundListener,
             @Nullable IParticleListenerJS<E> particleListener,
             @Nullable ICustomInstructionListenerJS<E> instructionListener
@@ -2464,8 +2464,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         public AnimationController<E> get(E entity) {
             final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
             if (triggerableAnimationID != null) {
-                Animation.LoopType loopTypeEnum = Animation.LoopType.fromString(loopType.toUpperCase());
-                Object type = EntityJSHelperClass.convertObjectToDesired(loopTypeEnum, "looptype");
+                Object type = EntityJSHelperClass.convertObjectToDesired(loopType, "looptype");
                 controller.triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(triggerableAnimationName, (Animation.LoopType) type));
             }
             if (soundListener != null) {
