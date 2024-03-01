@@ -259,9 +259,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<ContextUtils.CollidingEntityContext, Object> canCollideWith;
     public transient Boolean defaultDeathPose;
     public transient Boolean isControlledByLocalInstance;
-    public transient Function<LivingEntity, Object> setControllingPassenger;
-    public transient Function<ContextUtils.Vec3Context, Object> travelVector;
     public transient Consumer<ContextUtils.Vec3Context> travel;
+    public transient Boolean canSteer;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -292,7 +291,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mainArm = HumanoidArm.RIGHT;
         mobType = MobType.UNDEFINED;
         defaultDeathPose = true;
-        isControlledByLocalInstance = false;
+        isControlledByLocalInstance = true;
+        canSteer = true;
     }
 
     @Info(value = """
@@ -312,46 +312,26 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Function determining the travel vector of the entity.
-                        
+            Boolean determining whether the passenger is able to steer the entity while riding.
+            Defaults to true.  
             Example usage:
             ```javascript
-            entityBuilder.travelVector(context => {
-                const { entity, vec3 } = context
-                return //Some Vec3 value
-            });
+            entityBuilder.canSteer(false);
             ```
             """)
-    public BaseLivingEntityBuilder<T> travelVector(Function<ContextUtils.Vec3Context, Object> travelVector) {
-        this.travelVector = travelVector;
+    public BaseLivingEntityBuilder<T> canSteer(boolean canSteer) {
+        this.canSteer = canSteer;
         return this;
     }
 
-
-    @Info(value = """
-            Function determining which entity is the controlling passenger.
-            Defaults to null.
-            AbstractHorse sets this to entity.getFirstPassenger().
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.setControllingPassenger(entity => {
-                return entity.getFirstPassenger() //Some Entity determining the controlling passenger
-            });
-            ```
-            """)
-    public BaseLivingEntityBuilder<T> setControllingPassenger(Function<LivingEntity, Object> setControllingPassenger) {
-        this.setControllingPassenger = setControllingPassenger;
-        return this;
-    }
 
     @Info(value = """
             Boolean determining if the entity is controlled by the local instance.
             For vehicles to be controlled this must be set to true.
-            Defaults to false.
+            Defaults to true.
             Example usage:
             ```javascript
-            entityBuilder.isControlledByLocalInstance(true);
+            entityBuilder.isControlledByLocalInstance(false);
             ```
             """)
     public BaseLivingEntityBuilder<T> isControlledByLocalInstance(boolean isControlledByLocalInstance) {
