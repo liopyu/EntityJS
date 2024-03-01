@@ -2438,8 +2438,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         public AnimationController<E> get(E entity) {
             final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
             if (triggerableAnimationID != null) {
-                Animation.LoopType loopTypeEnum = Animation.LoopType.fromString(loopType.toUpperCase());
-                controller.triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(triggerableAnimationName, loopTypeEnum));
+                Object type = EntityJSHelperClass.convertObjectToDesired(loopType, "looptype");
+                controller.triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(triggerableAnimationName, (Animation.LoopType) type));
             }
             if (soundListener != null) {
                 controller.setSoundKeyframeHandler(event -> soundListener.playSound(new SoundKeyFrameEventJS<>(event)));
@@ -2582,9 +2582,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                  event.addTriggerableAnimation('spawn', 'spawning', 'default')
                  ```
                 """)
-        public PlayState addTriggerableAnimation(String animationName, String triggerableAnimationID, String loopTypeEnum) {
-            Animation.LoopType loopType = Animation.LoopType.fromString(loopTypeEnum.toUpperCase());
-            parent.getController().triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(animationName, loopType));
+        public PlayState addTriggerableAnimation(String animationName, String triggerableAnimationID, Object loopTypeEnum) {
+            Object type = EntityJSHelperClass.convertObjectToDesired(loopTypeEnum, "looptype");
+            parent.getController().triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(animationName, (Animation.LoopType) type));
             return PlayState.CONTINUE;
         }
 
