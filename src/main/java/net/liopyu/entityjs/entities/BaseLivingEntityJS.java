@@ -152,6 +152,39 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     //(Base LivingEntity/Entity Overrides)
+    @Override
+    public void travel(Vec3 pTravelVector) {
+        if (builder.travel != null) {
+            final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
+            builder.travel.accept(context);
+        }
+        if (builder.travelVector != null) {
+            final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
+            Object obj = builder.travelVector.apply(context);
+            if (obj instanceof Vec3 vec3) {
+                super.travel(new Vec3(vec3.x, vec3.y, vec3.z));
+            } else {
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for travelVector from entity: " + entityName() + ". Value: " + obj + ". Must be a Vec3. Defaulting to super method");
+            }
+        } else super.travel(pTravelVector);
+    }
+
+    @Nullable
+    @Override
+    public LivingEntity getControllingPassenger() {
+        if (builder.setControllingPassenger != null) {
+            Object obj = builder.setControllingPassenger.apply(this);
+            if (obj instanceof LivingEntity entity) return entity;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setControllingPassenger from entity: " + entityName() + ". Value: " + obj + ". Must be an instance of LivingEntity. Defaulting to " + super.getControllingPassenger());
+        }
+        return super.getControllingPassenger();
+    }
+
+    @Override
+    public boolean isControlledByLocalInstance() {
+        return builder.isControlledByLocalInstance;
+    }
+
     @Info(value = """
             Calls a triggerable animation to be played anywhere.
             """)
