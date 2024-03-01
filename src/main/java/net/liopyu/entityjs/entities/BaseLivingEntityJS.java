@@ -5,6 +5,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
+import net.liopyu.entityjs.client.ClientModHandler;
 import net.minecraftforge.network.PacketDistributor;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.network.GeckoLibNetwork;
@@ -169,6 +170,13 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
                 z *= 0.25F;
             }
             this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+            if (this.getControllingPassenger() instanceof Player) {
+                if (ClientModHandler.isJumpKeyPressed() && this.onGround()) {
+                    this.jump();
+                    onJump();
+                    ForgeHooks.onLivingJump(this);
+                }
+            }
             super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
         }
         if (builder.travel != null) {

@@ -3,10 +3,15 @@ package net.liopyu.entityjs;
 import com.mojang.logging.LogUtils;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.client.ClientEventHandlers;
+import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.RegistryUtil;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -32,7 +37,6 @@ public class EntityJSMod {
             ClientEventHandlers.init();
         }
     }
-
 
     public static ResourceLocation identifier(String path) {
         return new ResourceLocation(MOD_ID, path);

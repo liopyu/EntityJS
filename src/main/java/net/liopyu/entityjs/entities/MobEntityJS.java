@@ -5,6 +5,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
+import net.liopyu.entityjs.client.ClientModHandler;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.util.*;
@@ -414,6 +415,13 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
                 z *= 0.25F;
             }
             this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+            if (this.getControllingPassenger() instanceof Player) {
+                if (ClientModHandler.isJumpKeyPressed() && this.onGround() && this.canJump()) {
+                    this.jump();
+                    onJump();
+                    ForgeHooks.onLivingJump(this);
+                }
+            }
             super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
         }
         if (builder.travel != null) {

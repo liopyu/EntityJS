@@ -27,4 +27,5 @@ public class ClientEventHandlers {
             event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSProjectileEntityRenderer<>(renderManager, builder));
         }
     }
+
 }

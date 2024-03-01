@@ -1,10 +1,13 @@
 package net.liopyu.entityjs.entities;
 
+import ca.weblite.objc.Client;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.client.ClientModHandler;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
@@ -90,7 +93,7 @@ import java.util.Objects;
  */
 @MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
 @ParametersAreNonnullByDefault
-public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttackMob, PlayerRideableJumping {
+public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttackMob {
 
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
@@ -339,24 +342,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
 
-    @Override
-    public void onPlayerJump(int pJumpPower) {
-        //this.jump();
-    }
-
-    @Override
     public boolean canJump() {
         return Objects.requireNonNullElse(builder.canJump, true);
     }
-
-    @Override
-    public void handleStartJump(int i) {
-    }
-
-    @Override
-    public void handleStopJump() {
-    }
-
 
     public void onJump() {
         if (builder.onLivingJump != null) {
@@ -555,6 +543,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
 
     //(Base LivingEntity/Entity Overrides)
+
+
     @Override
     public void travel(Vec3 pTravelVector) {
         if (this.isAlive() && this.isVehicle() && builder.canSteer) {
@@ -572,6 +562,13 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
                 z *= 0.25F;
             }
             this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+            if (this.getControllingPassenger() instanceof Player) {
+                if (ClientModHandler.isJumpKeyPressed() && this.onGround() && this.canJump()) {
+                    this.jump();
+                    onJump();
+                    ForgeHooks.onLivingJump(this);
+                }
+            }
             super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
         }
         if (builder.travel != null) {
