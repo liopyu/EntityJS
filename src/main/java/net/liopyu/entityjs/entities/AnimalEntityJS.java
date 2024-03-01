@@ -544,6 +544,39 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
 
     //(Base LivingEntity/Entity Overrides)
+    @Override
+    public void travel(Vec3 pTravelVector) {
+        if (builder.travel != null) {
+            final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
+            builder.travel.accept(context);
+        }
+        if (builder.travelVector != null) {
+            final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
+            Object obj = builder.travelVector.apply(context);
+            if (obj instanceof Vec3 vec3) {
+                super.travel(new Vec3(vec3.x, vec3.y, vec3.z));
+            } else {
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for travelVector from entity: " + entityName() + ". Value: " + obj + ". Must be a Vec3. Defaulting to super method");
+            }
+        } else super.travel(pTravelVector);
+    }
+
+    @Nullable
+    @Override
+    public Entity getControllingPassenger() {
+        if (builder.setControllingPassenger != null) {
+            Object obj = builder.setControllingPassenger.apply(this);
+            if (obj instanceof Entity entity) return entity;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setControllingPassenger from entity: " + entityName() + ". Value: " + obj + ". Must be an Entity. Defaulting to " + super.getControllingPassenger());
+        }
+        return super.getControllingPassenger();
+    }
+
+    @Override
+    public boolean isControlledByLocalInstance() {
+        return builder.isControlledByLocalInstance;
+    }
+
     @Info(value = """
             Calls a triggerable animation to be played anywhere.
             """)
@@ -1409,7 +1442,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         return super.mayInteract(p_146843_, p_146844_);
     }
-
 
     @Override
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {

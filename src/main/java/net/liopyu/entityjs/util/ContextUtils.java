@@ -664,6 +664,19 @@ public class ContextUtils {
         }
     }
 
+    public static class Vec3Context {
+        @Info("The Travel Vector of the entity.")
+        public final Vec3 vec3;
+
+        @Info("The entity undergoing movement")
+        public final LivingEntity entity;
+
+        public Vec3Context(Vec3 vec3, LivingEntity entity) {
+            this.vec3 = vec3;
+            this.entity = entity;
+        }
+    }
+
 
     public static class EntityBlockPosLevelContext {
         @Info("The block position")
