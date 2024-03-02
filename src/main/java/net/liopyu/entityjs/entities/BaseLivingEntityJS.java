@@ -5,7 +5,6 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
-import net.liopyu.entityjs.client.ClientModHandler;
 import net.minecraftforge.network.PacketDistributor;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.network.GeckoLibNetwork;
@@ -153,9 +152,40 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     //(Base LivingEntity/Entity Overrides)
+    protected boolean thisJumping = false;
+
+    public boolean ableToJump() {
+        return ModKeybinds.mount_jump.isDown() && this.onGround();
+    }
+
+    public void setThisJumping(boolean value) {
+        this.thisJumping = value;
+    }
+
     @Override
     public void travel(Vec3 pTravelVector) {
         if (this.isAlive() && this.isVehicle() && builder.canSteer) {
+            if (this.getControllingPassenger() instanceof Player && builder.mountJumpingEnabled) {
+                if (this.ableToJump()) {
+                    this.setThisJumping(true);
+                }
+                if (this.thisJumping) {
+                    this.setThisJumping(false);
+
+                    double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
+                    Vec3 currentVelocity = this.getDeltaMovement();
+
+                    // Add the jump velocity to the current velocity
+                    double newVelocityX = currentVelocity.x;
+                    double newVelocityY = currentVelocity.y + jumpPower; // Add jump velocity
+                    double newVelocityZ = currentVelocity.z;
+
+                    this.setDeltaMovement(newVelocityX, newVelocityY, newVelocityZ);
+                    onJump();
+                    ForgeHooks.onLivingJump(this);
+                }
+            }
+
             LivingEntity passenger = this.getControllingPassenger();
             this.yRotO = this.getYRot();
             this.xRotO = this.getXRot();
@@ -170,19 +200,17 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
                 z *= 0.25F;
             }
             this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
-            if (this.getControllingPassenger() instanceof Player) {
-                if (ClientModHandler.isJumpKeyPressed() && this.onGround()) {
-                    this.jump();
-                    onJump();
-                    ForgeHooks.onLivingJump(this);
-                }
-            }
+
+
             super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
+
         }
+
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
             builder.travel.accept(context);
         }
+
         if (builder.travel == null && !builder.canSteer) {
             super.travel(pTravelVector);
         }
