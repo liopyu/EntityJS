@@ -5,7 +5,6 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
-import net.liopyu.entityjs.client.ClientModHandler;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.util.*;
@@ -166,7 +165,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
         // Adjust the Y component of the velocity to the calculated jump power
         this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
-
+        this.hasImpulse = true;
         if (this.isSprinting()) {
             // If sprinting, add a horizontal impulse for forward boost
             float yawRadians = this.getYRot() * 0.017453292F;
@@ -382,9 +381,40 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     }
 
     //(Base LivingEntity/Entity Overrides)
+    protected boolean thisJumping = false;
+
+    public boolean ableToJump() {
+        return ModKeybinds.mount_jump.isDown() && this.isOnGround();
+    }
+
+    public void setThisJumping(boolean value) {
+        this.thisJumping = value;
+    }
+
     @Override
     public void travel(Vec3 pTravelVector) {
         if (this.isAlive() && this.isVehicle() && builder.canSteer) {
+            if (this.getControllingPassenger() instanceof Player && builder.mountJumpingEnabled) {
+                if (this.ableToJump()) {
+                    this.setThisJumping(true);
+                }
+                if (this.thisJumping) {
+                    this.setThisJumping(false);
+
+                    double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
+                    Vec3 currentVelocity = this.getDeltaMovement();
+
+                    // Add the jump velocity to the current velocity
+                    double newVelocityX = currentVelocity.x;
+                    double newVelocityY = currentVelocity.y + jumpPower; // Add jump velocity
+                    double newVelocityZ = currentVelocity.z;
+
+                    this.setDeltaMovement(newVelocityX, newVelocityY, newVelocityZ);
+                    onJump();
+                    ForgeHooks.onLivingJump(this);
+                }
+            }
+
             LivingEntity passenger = this.getControllingPassenger();
             this.yRotO = this.getYRot();
             this.xRotO = this.getXRot();
@@ -399,19 +429,17 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
                 z *= 0.25F;
             }
             this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
-            if (this.getControllingPassenger() instanceof Player) {
-                if (ClientModHandler.isJumpKeyPressed() && this.isOnGround() && this.canJump()) {
-                    this.jump();
-                    onJump();
-                    ForgeHooks.onLivingJump(this);
-                }
-            }
+
+
             super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
+
         }
+
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
             builder.travel.accept(context);
         }
+
         if (builder.travel == null && !builder.canSteer) {
             super.travel(pTravelVector);
         }

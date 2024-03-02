@@ -262,6 +262,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.Vec3Context> travel;
     public transient Boolean canSteer;
     public transient Boolean canJump;
+    public transient boolean mountJumpingEnabled;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -295,6 +296,22 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         isControlledByLocalInstance = true;
         canSteer = true;
         canJump = true;
+        mountJumpingEnabled = false;
+
+    }
+
+    @Info(value = """
+            Boolean determining whether the entity can jump while mounted by a player.
+            (Currently experimental jumping logic subject to change in the future)
+            Defaults to false.
+            Example usage:
+            ```javascript
+            entityBuilder.mountJumpingEnabled(true);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> mountJumpingEnabled(boolean mountJumpingEnabled) {
+        this.mountJumpingEnabled = mountJumpingEnabled;
+        return this;
     }
 
     @Info(value = """
