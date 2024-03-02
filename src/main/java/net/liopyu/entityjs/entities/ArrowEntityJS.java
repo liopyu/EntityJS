@@ -54,6 +54,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     private IntOpenHashSet piercingIgnoreEntityIds;
     @Nullable
     private List<Entity> piercedAndKilledEntities;
+    protected boolean isMoving;
 
     public ArrowEntityJS(ArrowEntityJSBuilder builder, EntityType<? extends AbstractArrow> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -99,7 +100,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected SoundEvent getDefaultHitGroundSoundEvent() {
         if (builder != null && builder.defaultHitGroundSoundEvent != null) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue(builder.defaultHitGroundSoundEvent));
+            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.defaultHitGroundSoundEvent));
         }
         return super.getDefaultHitGroundSoundEvent();
     }
@@ -213,9 +214,19 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     public void tick() {
         super.tick();
+        this.isMoving = isArrowStuck();
         if (builder.tick != null) {
             builder.tick.accept(this);
         }
+    }
+
+    private boolean isArrowStuck() {
+        Vec3 motion = this.getDeltaMovement();
+        return motion.lengthSqr() < 0.01;
+    }
+
+    public boolean isMoving() {
+        return this.isMoving;
     }
 
     @Override
@@ -369,12 +380,13 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     protected void onHitBlock(BlockHitResult result) {
-        super.onHitBlock(result);
+        this.setSoundEvent(this.getDefaultHitGroundSoundEvent());
         this.resetPiercedEntities();
         if (builder != null && builder.onHitBlock != null) {
             final ContextUtils.ArrowBlockHitContext context = new ContextUtils.ArrowBlockHitContext(result, this);
             builder.onHitBlock.accept(context);
         }
+        super.onHitBlock(result);
     }
 
     @Override
