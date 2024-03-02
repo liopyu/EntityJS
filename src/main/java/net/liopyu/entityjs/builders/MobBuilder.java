@@ -141,7 +141,6 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
 
     @Info(value = """
             Sets a callback function to be executed when the entity's target changes.
-                        
             @param setTarget A Consumer accepting a ContextUtils.TargetChangeContext parameter,
                              defining the behavior to be executed when the entity's target changes.
                         
