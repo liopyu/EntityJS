@@ -6,7 +6,6 @@ import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.TameableMobJSBuilder;
-import net.liopyu.entityjs.client.ClientModHandler;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
@@ -14,6 +13,7 @@ import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
+import net.liopyu.entityjs.util.ModKeybinds;
 import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
 import net.liopyu.liolib.util.GeckoLibUtil;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -504,9 +504,40 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
 
     //(Base LivingEntity/Entity Overrides)
+    protected boolean thisJumping = false;
+
+    public boolean ableToJump() {
+        return ModKeybinds.mount_jump.isDown() && this.isOnGround();
+    }
+
+    public void setThisJumping(boolean value) {
+        this.thisJumping = value;
+    }
+
     @Override
     public void travel(Vec3 pTravelVector) {
         if (this.isAlive() && this.isVehicle() && builder.canSteer) {
+            if (this.getControllingPassenger() instanceof Player && builder.mountJumpingEnabled) {
+                if (this.ableToJump()) {
+                    this.setThisJumping(true);
+                }
+                if (this.thisJumping) {
+                    this.setThisJumping(false);
+
+                    double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
+                    Vec3 currentVelocity = this.getDeltaMovement();
+
+                    // Add the jump velocity to the current velocity
+                    double newVelocityX = currentVelocity.x;
+                    double newVelocityY = currentVelocity.y + jumpPower; // Add jump velocity
+                    double newVelocityZ = currentVelocity.z;
+
+                    this.setDeltaMovement(newVelocityX, newVelocityY, newVelocityZ);
+                    onJump();
+                    ForgeHooks.onLivingJump(this);
+                }
+            }
+
             LivingEntity passenger = this.getControllingPassenger();
             this.yRotO = this.getYRot();
             this.xRotO = this.getXRot();
@@ -521,19 +552,17 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
                 z *= 0.25F;
             }
             this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
-            if (this.getControllingPassenger() instanceof Player) {
-                if (ClientModHandler.isJumpKeyPressed() && this.isOnGround() && this.canJump()) {
-                    this.jump();
-                    onJump();
-                    ForgeHooks.onLivingJump(this);
-                }
-            }
+
+
             super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
+
         }
+
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
             builder.travel.accept(context);
         }
+
         if (builder.travel == null && !builder.canSteer) {
             super.travel(pTravelVector);
         }
