@@ -13,7 +13,6 @@ public class RegistryUtil {
 
     public static void init(IEventBus modBus) {
         BIOME_MODIFIERS.register(modBus);
-        ModKeybinds.init();
     }
 
     private static final DeferredRegister<Codec<? extends BiomeModifier>> BIOME_MODIFIERS = DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, EntityJSMod.MOD_ID);
