@@ -28,7 +28,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient Consumer<AbstractArrow> tickDespawn;
     public transient Consumer<ContextUtils.ArrowEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ArrowBlockHitContext> onHitBlock;
-    public transient ResourceLocation defaultHitGroundSoundEvent;
+    public transient Object defaultHitGroundSoundEvent;
     public transient Consumer<ContextUtils.ArrowLivingEntityContext> doPostHurtEffects;
     public transient Function<Entity, Object> canHitEntity;
     public transient Function<ContextUtils.ArrowPlayerContext, Object> tryPickup;

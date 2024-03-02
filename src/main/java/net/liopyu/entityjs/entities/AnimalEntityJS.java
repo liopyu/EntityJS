@@ -563,7 +563,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             }
             this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
             if (this.getControllingPassenger() instanceof Player) {
-                if (ClientModHandler.isJumpKeyPressed() && this.onGround() && this.canJump()) {
+                if (ClientModHandler.isJumpKeyPressed() && this.canJump()) {
                     this.jump();
                     onJump();
                     ForgeHooks.onLivingJump(this);

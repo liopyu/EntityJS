@@ -26,7 +26,6 @@ public class ClientModHandler {
             } else {
                 isJumpKeyPressed = false;
             }
-            //LOGGER.debug("Jump key pressed: " + isJumpKeyPressed);
         }
     }
 
