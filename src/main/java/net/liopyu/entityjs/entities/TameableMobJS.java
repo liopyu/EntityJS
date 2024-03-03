@@ -20,10 +20,19 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -32,32 +41,35 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Predicate;
 
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class TameableMobJS extends TamableAnimal implements IAnimatableJS, RangedAttackMob, OwnableEntity {
+public class TameableMobJS extends TamableAnimal implements IAnimatableJS, RangedAttackMob, OwnableEntity, NeutralMob {
 
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
@@ -69,12 +81,39 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         return this.getType().toString();
     }
 
+    //Wolf Velues copied for reference
+    private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID;
+    //private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
+    private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME;
+    public static final Predicate<LivingEntity> PREY_SELECTOR;
+    private static final float START_HEALTH = 8.0F;
+    private static final float TAME_HEALTH = 20.0F;
+    private float interestedAngle;
+    private float interestedAngleO;
+    private boolean isWet;
+    private boolean isShaking;
+    private float shakeAnim;
+    private float shakeAnimO;
+    private static final UniformInt PERSISTENT_ANGER_TIME;
+    @javax.annotation.Nullable
+    private UUID persistentAngerTarget;
+
     public TameableMobJS(TameableMobJSBuilder builder, EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+
     }
 
+    static {
+        DATA_INTERESTED_ID = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.BOOLEAN);
+        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.INT);
+        PREY_SELECTOR = (p_30437_) -> {
+            EntityType<?> entitytype = p_30437_.getType();
+            return entitytype == EntityType.SHEEP || entitytype == EntityType.RABBIT || entitytype == EntityType.FOX;
+        };
+        PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+    }
 
     @Override
     public BaseLivingEntityBuilder<?> getBuilder() {
@@ -123,6 +162,101 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         }
     }
 
+    //Tameable Mob Methods pulled from Wolf
+    public void setTame(boolean pTamed) {
+        super.setTame(pTamed);
+        if (pTamed) {
+            this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20.0);
+            this.setHealth(20.0F);
+        } else {
+            this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(8.0);
+        }
+
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(4.0);
+    }
+
+    // Basic Tameable Overrides
+    @Override
+    public boolean doHurtTarget(Entity pEntity) {
+        boolean flag = pEntity.hurt(DamageSource.mobAttack(this), (float) ((int) this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
+        if (flag) {
+            this.doEnchantDamageEffects(this, pEntity);
+        }
+        return flag;
+    }
+
+    @Override
+    public boolean hurt(DamageSource pSource, float pAmount) {
+        if (this.isInvulnerableTo(pSource)) {
+            return false;
+        } else {
+            if (!this.level.isClientSide) {
+                this.setOrderedToSit(false);
+            }
+            return super.hurt(pSource, pAmount);
+        }
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addPersistentAngerSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readPersistentAngerSaveData(this.level, pCompound);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_INTERESTED_ID, false);
+        this.entityData.define(DATA_REMAINING_ANGER_TIME, 0);
+    }
+
+    @Override
+    protected void spawnTamingParticles(boolean pTamed) {
+        ParticleOptions particleoptions = ParticleTypes.HEART;
+        if (!pTamed) {
+            particleoptions = ParticleTypes.SMOKE;
+        }
+
+        for (int i = 0; i < 7; ++i) {
+            double d0 = this.random.nextGaussian() * 0.02;
+            double d1 = this.random.nextGaussian() * 0.02;
+            double d2 = this.random.nextGaussian() * 0.02;
+            this.level.addParticle(particleoptions, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
+        }
+    }
+
+    //NeutralMob Overrides
+    @Override
+    public int getRemainingPersistentAngerTime() {
+        return 0;
+    }
+
+    @Override
+    public void setRemainingPersistentAngerTime(int i) {
+
+    }
+
+    @Nullable
+    @Override
+    public UUID getPersistentAngerTarget() {
+        return null;
+    }
+
+    @Override
+    public void setPersistentAngerTarget(@Nullable UUID uuid) {
+
+    }
+
+    @Override
+    public void startPersistentAngerTimer() {
+
+    }
 
     //Ageable Mob Overrides
     @Override
@@ -209,36 +343,58 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
-        if (this.isFood(itemstack) || this.isFoodPredicate(itemstack)) {
-            int i = this.getAge();
-            if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
-                this.usePlayerItem(pPlayer, pHand, itemstack);
-                this.setInLove(pPlayer);
+        if (this.level.isClientSide) {
+            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || itemstack.is(Items.BONE) && !this.isTame() && !this.isAngry();
+            return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
+        } else {
+            if (this.isTame()) {
+                if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
+                    this.heal((float) itemstack.getFoodProperties(this).getNutrition());
+                    if (!pPlayer.getAbilities().instabuild) {
+                        itemstack.shrink(1);
+                    }
+
+                    this.gameEvent(GameEvent.EAT, this);
+                    return InteractionResult.SUCCESS;
+                }
+                InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
+                if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(pPlayer)) {
+                    this.setOrderedToSit(!this.isOrderedToSit());
+                    this.jumping = false;
+                    this.navigation.stop();
+                    this.setTarget((LivingEntity) null);
+                    return InteractionResult.SUCCESS;
+                }
+
+                return interactionresult;
+            } else if (itemstack.is(Items.BONE) && !this.isAngry()) {
+                if (!pPlayer.getAbilities().instabuild) {
+                    itemstack.shrink(1);
+                }
+
+                if (this.random.nextInt(3) == 0 && !ForgeEventFactory.onAnimalTame(this, pPlayer)) {
+                    this.tame(pPlayer);
+                    this.navigation.stop();
+                    this.setTarget((LivingEntity) null);
+                    this.setOrderedToSit(true);
+                    this.level.broadcastEntityEvent(this, (byte) 7);
+                } else {
+                    this.level.broadcastEntityEvent(this, (byte) 6);
+                }
+
                 return InteractionResult.SUCCESS;
             }
-
-            if (this.isBaby()) {
-                this.usePlayerItem(pPlayer, pHand, itemstack);
-                this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
+            if (builder.onInteract != null) {
+                final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+                Object obj = builder.onInteract.apply(context);
+                if (obj instanceof InteractionResult) {
+                    return (InteractionResult) obj;
+                }
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.mobInteract(pPlayer, pHand));
             }
-
-            if (this.level.isClientSide) {
-                return InteractionResult.CONSUME;
-            }
+            return super.mobInteract(pPlayer, pHand);
         }
-        if (builder.onInteract != null) {
-            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            Object obj = builder.onInteract.apply(context);
-            if (obj instanceof InteractionResult) {
-                return (InteractionResult) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.mobInteract(pPlayer, pHand));
-        }
-        return super.mobInteract(pPlayer, pHand);
-
     }
 
     //Mob Overrides
@@ -360,6 +516,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
+        if (!this.level.isClientSide) {
+            this.updatePersistentAnger((ServerLevel) this.level, true);
+        }
     }
 
     @Override
@@ -405,6 +564,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         }
         return super.canCutCorner(pathType);
     }
+
 
     @Override
     public void setTarget(@Nullable LivingEntity target) {
