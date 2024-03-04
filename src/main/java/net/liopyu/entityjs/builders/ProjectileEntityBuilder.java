@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile & IProjectileEntityJS> extends BaseEntityBuilder<T> {
-    public transient Function<T, ResourceLocation> textureLocation;
+    public transient Function<T, Object> textureLocation;
     public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;

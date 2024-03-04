@@ -38,7 +38,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
-        return builder.textureResource.apply(entity);
+        return (ResourceLocation) builder.textureResource.apply(entity);
     }
 
     @Override

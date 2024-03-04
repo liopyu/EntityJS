@@ -24,7 +24,7 @@ import java.util.function.*;
 
 public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseEntityBuilder<T> {
     public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
-    public transient Function<T, ResourceLocation> textureLocation;
+    public transient Function<T, Object> textureLocation;
     public transient Consumer<AbstractArrow> tickDespawn;
     public transient Consumer<ContextUtils.ArrowEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ArrowBlockHitContext> onHitBlock;
