@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.entities;
 
 import com.google.common.collect.Lists;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.liopyu.entityjs.builders.*;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -44,7 +45,7 @@ import java.util.Objects;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
-
+    private EntityJSHelperClass.EntityMovementTracker movementTracker;
     public final ArrowEntityJSBuilder builder;
     @NotNull
     protected ItemStack pickUpStack;
@@ -54,13 +55,13 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     private IntOpenHashSet piercingIgnoreEntityIds;
     @Nullable
     private List<Entity> piercedAndKilledEntities;
-    protected boolean isMoving;
 
     public ArrowEntityJS(ArrowEntityJSBuilder builder, EntityType<? extends AbstractArrow> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         pickUpStack = ItemStack.EMPTY;
         this.baseDamage = builder.setBaseDamage;
+        this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
     }
 
     public ArrowEntityJS(Level level, LivingEntity shooter, ArrowEntityJSBuilder builder) {
@@ -68,6 +69,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         this.builder = builder;
         pickUpStack = ItemStack.EMPTY;
         this.baseDamage = builder.setBaseDamage;
+        this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
     }
 
     @Override
@@ -211,23 +213,18 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         }
     }
 
+    public boolean isMoving() {
+        return movementTracker.isMoving(this);
+    }
+
     @Override
     public void tick() {
         super.tick();
-        this.isMoving = isArrowStuck();
         if (builder.tick != null) {
             builder.tick.accept(this);
         }
     }
 
-    private boolean isArrowStuck() {
-        Vec3 motion = this.getDeltaMovement();
-        return motion.lengthSqr() < 0.01;
-    }
-
-    public boolean isMoving() {
-        return this.isMoving;
-    }
 
     @Override
     public void move(MoverType pType, Vec3 pPos) {
