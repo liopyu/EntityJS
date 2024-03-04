@@ -3,6 +3,7 @@ package net.liopyu.entityjs.util;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -133,5 +134,31 @@ public class EntityJSHelperClass {
         }
     }
 
+    public static class EntityMovementTracker {
+        private double prevX;
+        private double prevY;
+        private double prevZ;
+
+        public EntityMovementTracker() {
+            prevX = 0;
+            prevY = 0;
+            prevZ = 0;
+        }
+
+        public boolean isMoving(Entity entity) {
+            double currentX = entity.getX();
+            double currentY = entity.getY();
+            double currentZ = entity.getZ();
+
+            boolean moving = currentX != prevX || currentY != prevY || currentZ != prevZ;
+
+            // Update previous position
+            prevX = currentX;
+            prevY = currentY;
+            prevZ = currentZ;
+
+            return moving;
+        }
+    }
 
 }
