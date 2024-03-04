@@ -258,7 +258,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient Function<ContextUtils.CollidingEntityContext, Object> canCollideWith;
     public transient Boolean defaultDeathPose;
-    public transient Boolean isControlledByLocalInstance;
     public transient Function<ContextUtils.Vec3Context, Object> travelVector;
     public transient Consumer<ContextUtils.Vec3Context> travel;
     public transient Boolean canSteer;
@@ -292,7 +291,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mainArm = HumanoidArm.RIGHT;
         mobType = MobType.UNDEFINED;
         defaultDeathPose = true;
-        isControlledByLocalInstance = true;
         canSteer = true;
         mountJumpingEnabled = false;
     }
@@ -340,20 +338,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-
-    @Info(value = """
-            Boolean determining if the entity is controlled by the local instance.
-            For vehicles to be controlled this must be set to true.
-            Defaults to true.
-            Example usage:
-            ```javascript
-            entityBuilder.isControlledByLocalInstance(false);
-            ```
-            """)
-    public BaseLivingEntityBuilder<T> isControlledByLocalInstance(boolean isControlledByLocalInstance) {
-        this.isControlledByLocalInstance = isControlledByLocalInstance;
-        return this;
-    }
 
     @Info(value = """
             Boolean determining if the entity will turn sideways on death.

@@ -164,7 +164,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     public void travel(Vec3 pTravelVector) {
-        if (this.isAlive() && this.isVehicle() && builder.canSteer) {
+        LivingEntity livingentity = this.getControllingPassenger();
+        if (this.isAlive() && this.isVehicle() && builder.canSteer && livingentity != null) {
             if (this.getControllingPassenger() instanceof Player && builder.mountJumpingEnabled) {
                 if (this.ableToJump()) {
                     this.setThisJumping(true);
@@ -204,15 +205,11 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
             super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
 
-        }
+        } else super.travel(pTravelVector);
 
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
             builder.travel.accept(context);
-        }
-
-        if (builder.travel == null && !builder.canSteer) {
-            super.travel(pTravelVector);
         }
     }
 
@@ -229,10 +226,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         return var10000;
     }
 
-    @Override
-    public boolean isControlledByLocalInstance() {
-        return builder.isControlledByLocalInstance;
-    }
 
     @Info(value = """
             Calls a triggerable animation to be played anywhere.
