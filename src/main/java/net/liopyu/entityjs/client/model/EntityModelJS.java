@@ -20,16 +20,16 @@ public class EntityModelJS<T extends LivingEntity & IAnimatableJS> extends GeoMo
 
     @Override
     public ResourceLocation getModelResource(T object) {
-        return builder.modelResource.apply(object);
+        return (ResourceLocation) builder.modelResource.apply(object);
     }
 
     @Override
     public ResourceLocation getTextureResource(T object) {
-        return builder.textureResource.apply(object);
+        return (ResourceLocation) builder.textureResource.apply(object);
     }
 
     @Override
     public ResourceLocation getAnimationResource(T animatable) {
-        return builder.animationResource.apply(animatable);
+        return (ResourceLocation) builder.animationResource.apply(animatable);
     }
 }

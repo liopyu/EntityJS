@@ -84,7 +84,7 @@ public class KubeJSProjectileEntityRenderer<T extends ThrowableItemProjectile & 
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
-        return builder.textureLocation.apply(entity);
+        return (ResourceLocation) builder.textureLocation.apply(entity);
     }
 
 

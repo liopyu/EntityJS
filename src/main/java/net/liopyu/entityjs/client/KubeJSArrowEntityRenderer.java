@@ -20,7 +20,7 @@ public class KubeJSArrowEntityRenderer<T extends AbstractArrow & IArrowEntityJS>
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
-        return builder.textureLocation.apply(entity);
+        return (ResourceLocation) builder.textureLocation.apply(entity);
     }
 }
 

@@ -100,9 +100,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient int clientTrackingRange;
     public transient int updateInterval;
     public transient MobCategory mobCategory;
-    public transient Function<T, ResourceLocation> modelResource;
-    public transient Function<T, ResourceLocation> textureResource;
-    public transient Function<T, ResourceLocation> animationResource;
+    public transient Function<T, Object> modelResource;
+    public transient Function<T, Object> textureResource;
+    public transient Function<T, Object> animationResource;
     public transient boolean isPushable;
     public transient final List<AnimationControllerSupplier<T>> animationSuppliers;
     public transient Function<LivingEntity, Object> shouldDropLoot;
