@@ -458,10 +458,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         return var10000;
     }
 
-    @Override
-    public boolean isControlledByLocalInstance() {
-        return builder.isControlledByLocalInstance;
-    }
 
     @Info(value = """
             Calls a triggerable animation to be played anywhere.

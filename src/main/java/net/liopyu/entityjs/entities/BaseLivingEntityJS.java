@@ -233,10 +233,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         return var10000;
     }
 
-    @Override
-    public boolean isControlledByLocalInstance() {
-        return builder.isControlledByLocalInstance;
-    }
 
     @Info(value = """
             Calls a triggerable animation to be played anywhere.

@@ -42,7 +42,10 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -177,6 +180,48 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     // Basic Tameable Overrides
     @Override
+    public boolean wantsToAttack(LivingEntity pTarget, LivingEntity pOwner) {
+        if (!(pTarget instanceof Creeper) && !(pTarget instanceof Ghast)) {
+            if (pTarget instanceof TameableMobJS mobjs) {
+                return !mobjs.isTame() || mobjs.getOwner() != pOwner;
+            } else if (pTarget instanceof Player && pOwner instanceof Player && !((Player) pOwner).canHarmPlayer((Player) pTarget)) {
+                return false;
+            } else if (pTarget instanceof AbstractHorse && ((AbstractHorse) pTarget).isTamed()) {
+                return false;
+            } else {
+                return !(pTarget instanceof TamableAnimal) || !((TamableAnimal) pTarget).isTame();
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        if (builder.setBreedOffspring != null) {
+            final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
+            if (obj instanceof ResourceLocation resourceLocation) {
+                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
+                if (breedOffspringType != null) {
+                    Object breedOffspringEntity = breedOffspringType.create(serverLevel);
+                    if (breedOffspringEntity instanceof TamableAnimal animal) {
+                        UUID uuid = this.getOwnerUUID();
+                        if (uuid != null) {
+                            animal.setOwnerUUID(uuid);
+                            animal.setTame(true);
+                        }
+                        return (AgeableMob) breedOffspringEntity;
+                    } else if (breedOffspringEntity instanceof AgeableMob) {
+                        return (AgeableMob) breedOffspringEntity;
+                    }
+                }
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method: " + builder.get());
+            }
+        } else return builder.get().create(serverLevel);
+        return null;
+    }
+
+    @Override
     public boolean doHurtTarget(Entity pEntity) {
         boolean flag = pEntity.hurt(DamageSource.mobAttack(this), (float) ((int) this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
         if (flag) {
@@ -232,51 +277,28 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     }
 
     //NeutralMob Overrides
-    @Override
     public int getRemainingPersistentAngerTime() {
-        return 0;
+        return (Integer) this.entityData.get(DATA_REMAINING_ANGER_TIME);
     }
 
-    @Override
-    public void setRemainingPersistentAngerTime(int i) {
-
+    public void setRemainingPersistentAngerTime(int pTime) {
+        this.entityData.set(DATA_REMAINING_ANGER_TIME, pTime);
     }
 
-    @Nullable
-    @Override
-    public UUID getPersistentAngerTarget() {
-        return null;
-    }
-
-    @Override
-    public void setPersistentAngerTarget(@Nullable UUID uuid) {
-
-    }
-
-    @Override
     public void startPersistentAngerTimer() {
-
+        this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
     }
 
+    @javax.annotation.Nullable
+    public UUID getPersistentAngerTarget() {
+        return this.persistentAngerTarget;
+    }
+
+    public void setPersistentAngerTarget(@javax.annotation.Nullable UUID pTarget) {
+        this.persistentAngerTarget = pTarget;
+    }
     //Ageable Mob Overrides
-    @Override
-    public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        if (builder.setBreedOffspring != null) {
-            final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
-            if (obj instanceof ResourceLocation resourceLocation) {
-                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
-                if (breedOffspringType != null) {
-                    Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
-                    if (breedOffspringEntity instanceof AgeableMob) {
-                        return (AgeableMob) breedOffspringEntity;
-                    }
-                }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
-            }
-        }
-        return null;
-    }
+
 
     @Override
     public boolean isFood(ItemStack pStack) {
@@ -741,10 +763,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         return var10000;
     }
 
-    @Override
-    public boolean isControlledByLocalInstance() {
-        return builder.isControlledByLocalInstance;
-    }
 
     @Info(value = """
             Calls a triggerable animation to be played anywhere.
