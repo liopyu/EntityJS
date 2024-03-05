@@ -381,9 +381,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
         } else {
             if (this.isTame()) {
-                if (builder.interact != null) {
+                if (builder.onInteract != null) {
                     final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                    builder.interact.accept(context);
+                    builder.onInteract.accept(context);
                 }
                 if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
                     if (itemstack.isEdible()) {
@@ -425,9 +425,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
                 return InteractionResult.SUCCESS;
             }
-            if (builder.interact != null) {
+            if (builder.onInteract != null) {
                 final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                builder.interact.accept(context);
+                builder.onInteract.accept(context);
             }
             return super.mobInteract(pPlayer, pHand);
         }

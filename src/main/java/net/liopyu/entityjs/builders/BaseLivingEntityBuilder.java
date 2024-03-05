@@ -2061,24 +2061,22 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Sets a function to handle the interaction with the entity.
-            The provided Function accepts a {@link ContextUtils.MobInteractContext} parameter,
-            representing the context of the interaction, and returns a nullable {@link InteractionResult}.
+            Sets a consumer to handle the interaction with the entity.
+            The provided Consumer accepts a {@link ContextUtils.MobInteractContext} parameter,
+            representing the context of the interaction
                         
             Example usage:
             ```javascript
             entityBuilder.onInteract(context => {
                 // Define custom logic for the interaction with the entity
                 // Use information about the MobInteractContext provided by the context.
-                // InteractionResult is a bound value able to be used without loading the class with Java.loadClass()
-                if (context.player.isShiftKeyDown()) return InteractionResult.FAIL
+                if (context.player.isShiftKeyDown()) return
                 context.player.startRiding(context.entity);
-                return InteractionResult.sidedSuccess(context.entity.level.isClientSide());
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> onInteract(Consumer<ContextUtils.MobInteractContext> f) {
-        onInteract = f;
+    public BaseLivingEntityBuilder<T> onInteract(Consumer<ContextUtils.MobInteractContext> c) {
+        onInteract = c;
         return this;
     }
 
