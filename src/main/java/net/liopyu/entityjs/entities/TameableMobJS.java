@@ -1,81 +1,106 @@
 package net.liopyu.entityjs.entities;
 
-import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
+import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.MobEntityJSBuilder;
+import net.liopyu.entityjs.builders.TameableMobJSBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
-import net.liopyu.entityjs.util.*;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraftforge.network.PacketDistributor;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.network.GeckoLibNetwork;
-import software.bernie.geckolib.network.packet.EntityAnimTriggerPacket;
-import software.bernie.geckolib.util.GeckoLibUtil;
-import net.minecraft.BlockUtil;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.liopyu.entityjs.events.BuildBrainEventJS;
+import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
+import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.EventHandlers;
+import net.liopyu.entityjs.util.ModKeybinds;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.world.Difficulty;
+import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.*;
-import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.pathfinder.Path;
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.UUID;
 
-public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedAttackMob, PlayerRideableJumping {
 
-    private final MobEntityJSBuilder builder;
-    private final AnimatableInstanceCache animationFactory;
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+public class TameableMobJS extends TamableAnimal implements IAnimatableJS, RangedAttackMob, OwnableEntity, NeutralMob {
 
-    public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> p_21368_, Level p_21369_) {
-        super(p_21368_, p_21369_);
+    private final AnimatableInstanceCache getAnimatableInstanceCache;
+
+    protected final TameableMobJSBuilder builder;
+    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
+
+    public String entityName() {
+        return this.getType().toString();
+    }
+
+    private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID;
+    private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME;
+    private static final UniformInt PERSISTENT_ANGER_TIME;
+    @javax.annotation.Nullable
+    private UUID persistentAngerTarget;
+
+    public TameableMobJS(TameableMobJSBuilder builder, EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
+        super(pEntityType, pLevel);
         this.builder = builder;
-        animationFactory = GeckoLibUtil.createInstanceCache(this);
+        this.setTame(false);
+        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+
+    }
+
+    static {
+        DATA_INTERESTED_ID = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.BOOLEAN);
+        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.INT);
+        PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     }
 
     @Override
@@ -83,28 +108,36 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         return builder;
     }
 
+
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return animationFactory;
+        return getAnimatableInstanceCache;
     }
+
 
     //Some logic overrides up here because there are different implementations in the other builders.
 
+
     @Override
-    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-        if (builder.onInteract != null) {
-            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.onInteract.apply(context), "interactionresult");
-            if (obj != null) {
-                return (InteractionResult) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.mobInteract(pPlayer, pHand));
+    protected Brain.Provider<?> brainProvider() {
+        if (EventHandlers.buildBrainProvider.hasListeners()) {
+            final BuildBrainProviderEventJS event = new BuildBrainProviderEventJS();
+            EventHandlers.buildBrainProvider.post(event, getTypeId());
+            return event.provide();
+        } else {
+            return super.brainProvider();
         }
-        return super.mobInteract(pPlayer, pHand);
     }
 
-    public String entityName() {
-        return this.getType().toString();
+    @Override
+    protected Brain<AnimalEntityJS> makeBrain(Dynamic<?> p_21069_) {
+        if (EventHandlers.buildBrain.hasListeners()) {
+            final Brain<AnimalEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
+            return brain;
+        } else {
+            return UtilsJS.cast(super.makeBrain(p_21069_));
+        }
     }
 
     @Override
@@ -117,9 +150,283 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         }
     }
 
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
+    //Tameable Mob Overrides
+    public boolean tamableFood(ItemStack pStack) {
+        if (builder.tamableFood != null) {
+            return builder.tamableFood.test(pStack);
+        }
+        return false;
+    }
 
+    public boolean tamableFoodPredicate(ItemStack pStack) {
+        if (builder.tamableFoodPredicate == null) return false;
+        final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
+        Object obj = builder.tamableFoodPredicate.apply(context);
+        if (obj instanceof Boolean b) {
+            return b;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for tamableFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
+        return false;
+    }
+
+    @Override
+    public void tame(Player pPlayer) {
+        if (builder.tameOverride != null) {
+            this.setTame(true);
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
+            builder.tameOverride.accept(context);
+            if (pPlayer instanceof ServerPlayer) {
+                CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer) pPlayer, this);
+            }
+        } else super.tame(pPlayer);
+        if (builder.onTamed != null) {
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
+            builder.onTamed.accept(context);
+        }
+    }
+
+    // Basic Tameable Overrides
+    @Override
+    public boolean wantsToAttack(LivingEntity pTarget, LivingEntity pOwner) {
+        if (!(pTarget instanceof Creeper) && !(pTarget instanceof Ghast)) {
+            if (pTarget instanceof TameableMobJS mobjs) {
+                return !mobjs.isTame() || mobjs.getOwner() != pOwner;
+            } else if (pTarget instanceof Player && pOwner instanceof Player && !((Player) pOwner).canHarmPlayer((Player) pTarget)) {
+                return false;
+            } else if (pTarget instanceof AbstractHorse && ((AbstractHorse) pTarget).isTamed()) {
+                return false;
+            } else {
+                return !(pTarget instanceof TamableAnimal) || !((TamableAnimal) pTarget).isTame();
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        if (builder.setBreedOffspring != null) {
+            final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
+            if (obj instanceof ResourceLocation resourceLocation) {
+                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
+                if (breedOffspringType != null) {
+                    Object breedOffspringEntity = breedOffspringType.create(serverLevel);
+                    if (breedOffspringEntity instanceof TamableAnimal animal) {
+                        UUID uuid = this.getOwnerUUID();
+                        if (uuid != null) {
+                            animal.setOwnerUUID(uuid);
+                            animal.setTame(true);
+                        }
+                        return (AgeableMob) breedOffspringEntity;
+                    } else if (breedOffspringEntity instanceof AgeableMob) {
+                        return (AgeableMob) breedOffspringEntity;
+                    }
+                }
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method: " + builder.get());
+            }
+        } else return builder.get().create(serverLevel);
+        return null;
+    }
+
+    @Override
+    public boolean doHurtTarget(Entity pEntity) {
+        boolean flag = pEntity.hurt(this.damageSources().mobAttack(this), (float) ((int) this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
+        if (flag) {
+            this.doEnchantDamageEffects(this, pEntity);
+        }
+        return flag;
+    }
+
+    @Override
+    public boolean hurt(DamageSource pSource, float pAmount) {
+        if (this.isInvulnerableTo(pSource)) {
+            return false;
+        } else {
+            if (!this.level().isClientSide) {
+                this.setOrderedToSit(false);
+            }
+            return super.hurt(pSource, pAmount);
+        }
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addPersistentAngerSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readPersistentAngerSaveData(this.level(), pCompound);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_INTERESTED_ID, false);
+        this.entityData.define(DATA_REMAINING_ANGER_TIME, 0);
+    }
+
+    @Override
+    protected void spawnTamingParticles(boolean pTamed) {
+        ParticleOptions particleoptions = ParticleTypes.HEART;
+        if (!pTamed) {
+            particleoptions = ParticleTypes.SMOKE;
+        }
+
+        for (int i = 0; i < 7; ++i) {
+            double d0 = this.random.nextGaussian() * 0.02;
+            double d1 = this.random.nextGaussian() * 0.02;
+            double d2 = this.random.nextGaussian() * 0.02;
+            this.level().addParticle(particleoptions, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
+        }
+    }
+
+
+    //NeutralMob Overrides
+    public int getRemainingPersistentAngerTime() {
+        return (Integer) this.entityData.get(DATA_REMAINING_ANGER_TIME);
+    }
+
+    public void setRemainingPersistentAngerTime(int pTime) {
+        this.entityData.set(DATA_REMAINING_ANGER_TIME, pTime);
+    }
+
+    public void startPersistentAngerTimer() {
+        this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
+    }
+
+    @Nullable
+    public UUID getPersistentAngerTarget() {
+        return this.persistentAngerTarget;
+    }
+
+    public void setPersistentAngerTarget(@javax.annotation.Nullable UUID pTarget) {
+        this.persistentAngerTarget = pTarget;
+    }
+    //Ageable Mob Overrides
+
+    @Override
+    public boolean isFood(ItemStack pStack) {
+        if (builder.isFood != null) {
+            return builder.isFood.test(pStack);
+        }
+        return super.isFood(pStack);
+    }
+
+    public boolean isFoodPredicate(ItemStack pStack) {
+        if (builder.isFoodPredicate == null) {
+            return super.isFood(pStack);
+        }
+        final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
+        Object obj = builder.isFoodPredicate.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
+        return false;
+    }
+
+
+    @Override
+    public boolean canBreed() {
+        if (builder.canBreed == null) {
+            return super.canBreed();
+        }
+        Object obj = builder.canBreed.apply(this);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBreed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super method: " + super.canBreed());
+        return super.canBreed();
+    }
+
+    @Override
+    public boolean canMate(Animal pOtherAnimal) {
+        if (builder.canMate == null) {
+            return super.canMate(pOtherAnimal);
+        }
+        final ContextUtils.EntityAnimalContext context = new ContextUtils.EntityAnimalContext(this, pOtherAnimal);
+        Object obj = builder.canMate.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canMate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canMate(pOtherAnimal));
+        return super.canMate(pOtherAnimal);
+    }
+
+
+    @Override
+    public void spawnChildFromBreeding(ServerLevel pLevel, Animal pMate) {
+        if (builder.onSpawnChildFromBreeding != null) {
+            final ContextUtils.LevelAnimalContext context = new ContextUtils.LevelAnimalContext(pMate, this, pLevel);
+            builder.onSpawnChildFromBreeding.accept(context);
+            super.spawnChildFromBreeding(pLevel, pMate);
+        } else {
+            super.spawnChildFromBreeding(pLevel, pMate);
+        }
+    }
+
+
+    //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
+
+    @Override
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
+
+        if (this.level().isClientSide) {
+            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isTame() && !this.isAngry();
+            return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
+        } else {
+            if (this.isTame()) {
+                if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
+                    this.heal((float) itemstack.getFoodProperties(this).getNutrition());
+                    if (!pPlayer.getAbilities().instabuild) {
+                        itemstack.shrink(1);
+                    }
+
+                    this.gameEvent(GameEvent.EAT, this);
+                    return InteractionResult.SUCCESS;
+                }
+                InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
+                if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(pPlayer)) {
+                    this.setOrderedToSit(!this.isOrderedToSit());
+                    this.jumping = false;
+                    this.navigation.stop();
+                    this.setTarget((LivingEntity) null);
+                    return InteractionResult.SUCCESS;
+                }
+
+                return interactionresult;
+            } else if ((this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isAngry()) {
+                if (!pPlayer.getAbilities().instabuild) {
+                    itemstack.shrink(1);
+                }
+
+                if (this.random.nextInt(3) == 0 && !ForgeEventFactory.onAnimalTame(this, pPlayer)) {
+                    this.tame(pPlayer);
+                    this.navigation.stop();
+                    this.setTarget((LivingEntity) null);
+                    this.setOrderedToSit(true);
+                    this.level().broadcastEntityEvent(this, (byte) 7);
+                } else {
+                    this.level().broadcastEntityEvent(this, (byte) 6);
+                }
+
+                return InteractionResult.SUCCESS;
+            }
+            if (builder.onInteract != null) {
+                final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+                Object obj = builder.onInteract.apply(context);
+                if (obj instanceof InteractionResult) {
+                    return (InteractionResult) obj;
+                }
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.mobInteract(pPlayer, pHand));
+            }
+            return super.mobInteract(pPlayer, pHand);
+        }
+    }
 
     //Mob Overrides
     @Override
@@ -131,6 +438,40 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed(pPlayer));
         }
         return super.canBeLeashed(pPlayer);
+    }
+
+    @Override
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
+        if (builder.removeWhenFarAway == null) {
+            return super.removeWhenFarAway(pDistanceToClosestPlayer);
+        }
+        final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
+        Object obj = builder.removeWhenFarAway.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
+        return super.removeWhenFarAway(pDistanceToClosestPlayer);
+    }
+
+    @Override
+    protected double followLeashSpeed() {
+        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
+    }
+
+    @Override
+    public int getAmbientSoundInterval() {
+        if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
+        return super.getAmbientSoundInterval();
+    }
+
+    @Override
+    public double getMyRidingOffset() {
+        if (builder.myRidingOffset == null) return super.getMyRidingOffset();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.myRidingOffset.apply(this), "double");
+        if (obj != null) return (double) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for myRidingOffset from entity: " + entityName() + ". Value: " + builder.myRidingOffset.apply(this) + ". Must be a double. Defaulting to " + super.getMyRidingOffset());
+        return super.getMyRidingOffset();
     }
 
     @Override
@@ -160,24 +501,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
 
-    @Override
-    public void onPlayerJump(int i) {
-
-    }
-
-    @Override
     public boolean canJump() {
         return Objects.requireNonNullElse(builder.canJump, true);
-    }
-
-    @Override
-    public void handleStartJump(int i) {
-
-    }
-
-    @Override
-    public void handleStopJump() {
-
     }
 
     public void onJump() {
@@ -192,7 +517,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
         // Adjust the Y component of the velocity to the calculated jump power
         this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
-
+        this.hasImpulse = true;
         if (this.isSprinting()) {
             // If sprinting, add a horizontal impulse for forward boost
             float yawRadians = this.getYRot() * 0.017453292F;
@@ -244,6 +569,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     }
 
     @Override
+    protected void tickDeath() {
+        super.tickDeath();
+    }
+
+    @Override
     protected void tickLeash() {
         super.tickLeash();
         if (builder.tickLeash != null) {
@@ -264,7 +594,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     }
 
 
-   /* @Override
+    /*@Override
     public boolean canCutCorner(BlockPathTypes pathType) {
         if (builder.canCutCorner != null) {
             final ContextUtils.EntityBlockPathTypeContext context = new ContextUtils.EntityBlockPathTypeContext(pathType, this);
@@ -364,48 +694,12 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.meleeAttackRangeSqr.apply(this), "double");
             if (obj != null) {
                 return (double) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityName() + ". Value: " + builder.meleeAttackRangeSqr.apply(this) + ". Must be a double. Defaulting to " + super.getMeleeAttackRangeSqr(entity));
-                return super.getMeleeAttackRangeSqr(entity);
             }
-        } else {
-            return super.getMeleeAttackRangeSqr(entity);
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityName() + ". Value: " + builder.meleeAttackRangeSqr.apply(this) + ". Must be a double. Defaulting to " + super.getMeleeAttackRangeSqr(entity));
         }
+        return super.getMeleeAttackRangeSqr(entity);
     }
 
-    @Override
-    public int getAmbientSoundInterval() {
-        if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
-        return super.getAmbientSoundInterval();
-    }
-
-    @Override
-    public double getMyRidingOffset() {
-        if (builder.myRidingOffset == null) return super.getMyRidingOffset();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.myRidingOffset.apply(this), "double");
-        if (obj != null) return (double) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for myRidingOffset from entity: " + entityName() + ". Value: " + builder.myRidingOffset.apply(this) + ". Must be a double. Defaulting to " + super.getMyRidingOffset());
-        return super.getMyRidingOffset();
-    }
-
-    @Override
-    protected double followLeashSpeed() {
-        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
-    }
-
-    @Override
-    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
-        if (builder.removeWhenFarAway == null) {
-            return super.removeWhenFarAway(pDistanceToClosestPlayer);
-        }
-        final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
-        Object obj = builder.removeWhenFarAway.apply(context);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
-        return super.removeWhenFarAway(pDistanceToClosestPlayer);
-    }
 
     //(Base LivingEntity/Entity Overrides)
     protected boolean thisJumping = false;
@@ -469,6 +763,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         }
     }
 
+
     @Override
     public LivingEntity getControllingPassenger() {
         Entity var2 = this.getFirstPassenger();
@@ -481,6 +776,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
         return var10000;
     }
+
 
     @Info(value = """
             Calls a triggerable animation to be played anywhere.
@@ -637,6 +933,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     @Override
     public void tick() {
+
         super.tick();
         if (builder.tick != null) {
             if (!this.level().isClientSide()) {
