@@ -18,11 +18,17 @@ public abstract class TameableMobBuilder<T extends TamableAnimal & IAnimatableJS
     public transient Function<ContextUtils.EntityItemStackContext, Object> tamableFoodPredicate;
     public transient Consumer<ContextUtils.PlayerEntityContext> onTamed;
     public transient Consumer<ContextUtils.PlayerEntityContext> tameOverride;
+    public transient Consumer<ContextUtils.MobInteractContext> interact;
 
     public TameableMobBuilder(ResourceLocation i) {
         super(i);
         canJump = true;
         followLeashSpeed = 1.0D;
+    }
+
+    public MobBuilder<T> interact(Consumer<ContextUtils.MobInteractContext> interact) {
+        this.interact = interact;
+        return this;
     }
 
     @Info(value = """

@@ -249,7 +249,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (this.isFood(itemstack) || this.isFoodPredicate(itemstack)) {
             int i = this.getAge();
@@ -258,27 +257,20 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
                 this.setInLove(pPlayer);
                 return InteractionResult.SUCCESS;
             }
-
             if (this.isBaby()) {
                 this.usePlayerItem(pPlayer, pHand, itemstack);
                 this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
                 return InteractionResult.sidedSuccess(this.level().isClientSide);
             }
-
             if (this.level().isClientSide) {
                 return InteractionResult.CONSUME;
             }
         }
         if (builder.onInteract != null) {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            Object obj = builder.onInteract.apply(context);
-            if (obj instanceof InteractionResult) {
-                return (InteractionResult) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.mobInteract(pPlayer, pHand));
+            builder.onInteract.accept(context);
         }
         return super.mobInteract(pPlayer, pHand);
-
     }
 
     //Mob Overrides

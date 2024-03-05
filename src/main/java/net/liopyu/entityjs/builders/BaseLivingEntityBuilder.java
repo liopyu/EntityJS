@@ -224,7 +224,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<LivingEntity, Object> isCurrentlyGlowing;
     public transient Function<LivingEntity, Object> canDisableShield;
     public transient Function<LivingEntity, Object> setMaxFallDistance;
-    public transient Function<ContextUtils.MobInteractContext, Object> onInteract;
+    public transient Consumer<ContextUtils.MobInteractContext> onInteract;
 
     public transient Consumer<LivingEntity> onClientRemoval;
     public transient Consumer<LivingEntity> onAddedToWorld;
@@ -2077,7 +2077,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> onInteract(Function<ContextUtils.MobInteractContext, Object> f) {
+    public BaseLivingEntityBuilder<T> onInteract(Consumer<ContextUtils.MobInteractContext> f) {
         onInteract = f;
         return this;
     }
