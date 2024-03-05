@@ -129,11 +129,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
         if (builder.onInteract != null) {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.onInteract.apply(context), "interactionresult");
-            if (obj != null) {
-                return (InteractionResult) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.interact(pPlayer, pHand));
+            builder.onInteract.accept(context);
         }
         return super.interact(pPlayer, pHand);
     }

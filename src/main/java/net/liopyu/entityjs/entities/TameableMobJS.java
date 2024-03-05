@@ -382,7 +382,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     }
 
 
-    //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
+    //Mob Interact here because it has special implimentations due to breeding in TamableAnimal classes.
 
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
@@ -393,15 +393,23 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
         } else {
             if (this.isTame()) {
-                if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
-                    this.heal((float) itemstack.getFoodProperties(this).getNutrition());
-                    if (!pPlayer.getAbilities().instabuild) {
-                        itemstack.shrink(1);
-                    }
-
-                    this.gameEvent(GameEvent.EAT, this);
-                    return InteractionResult.SUCCESS;
+                if (builder.onInteract != null) {
+                    final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+                    builder.onInteract.accept(context);
                 }
+                if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
+                    if (itemstack.isEdible()) {
+                        this.heal((float) Objects.requireNonNull(itemstack.getFoodProperties(this)).getNutrition());
+
+                        if (!pPlayer.getAbilities().instabuild) {
+                            itemstack.shrink(1);
+                        }
+
+                        this.gameEvent(GameEvent.EAT, this);
+                        return InteractionResult.SUCCESS;
+                    }
+                }
+
                 InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
                 if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(pPlayer)) {
                     this.setOrderedToSit(!this.isOrderedToSit());
@@ -431,11 +439,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             }
             if (builder.onInteract != null) {
                 final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                Object obj = builder.onInteract.apply(context);
-                if (obj instanceof InteractionResult) {
-                    return (InteractionResult) obj;
-                }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onInteract from entity: " + entityName() + ". Value: " + obj + ". Must be an InteractionResult. Defaulting to " + super.mobInteract(pPlayer, pHand));
+                builder.onInteract.accept(context);
             }
             return super.mobInteract(pPlayer, pHand);
         }
@@ -533,7 +537,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
         // Adjust the Y component of the velocity to the calculated jump power
         this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
-
+        this.hasImpulse = true;
         if (this.isSprinting()) {
             // If sprinting, add a horizontal impulse for forward boost
             float yawRadians = this.getYRot() * 0.017453292F;
