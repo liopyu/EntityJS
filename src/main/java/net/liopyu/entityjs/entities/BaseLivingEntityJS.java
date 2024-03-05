@@ -98,7 +98,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
         // Adjust the Y component of the velocity to the calculated jump power
         this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
-
+        this.hasImpulse = true;
         if (this.isSprinting()) {
             // If sprinting, add a horizontal impulse for forward boost
             float yawRadians = this.getYRot() * 0.017453292F;

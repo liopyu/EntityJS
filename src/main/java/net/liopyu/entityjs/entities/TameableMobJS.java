@@ -599,19 +599,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     }
 
 
-    /*@Override
-    public boolean canCutCorner(BlockPathTypes pathType) {
-        if (builder.canCutCorner != null) {
-            final ContextUtils.EntityBlockPathTypeContext context = new ContextUtils.EntityBlockPathTypeContext(pathType, this);
-            Object value = builder.canCutCorner.apply(context);
-            if (value instanceof Boolean b) {
-                return b;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCutCorner from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.canCutCorner(pathType));
-        }
-        return super.canCutCorner(pathType);
-    }*/
-
     @Override
     public void setTarget(@Nullable LivingEntity target) {
         super.setTarget(target);

@@ -188,7 +188,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
         // Adjust the Y component of the velocity to the calculated jump power
         this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
-
+        this.hasImpulse = true;
         if (this.isSprinting()) {
             // If sprinting, add a horizontal impulse for forward boost
             float yawRadians = this.getYRot() * 0.017453292F;
@@ -259,19 +259,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         return super.shouldStayCloseToLeashHolder();
     }
 
-
-   /* @Override
-    public boolean canCutCorner(BlockPathTypes pathType) {
-        if (builder.canCutCorner != null) {
-            final ContextUtils.EntityBlockPathTypeContext context = new ContextUtils.EntityBlockPathTypeContext(pathType, this);
-            Object value = builder.canCutCorner.apply(context);
-            if (value instanceof Boolean b) {
-                return b;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCutCorner from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.canCutCorner(pathType));
-        }
-        return super.canCutCorner(pathType);
-    }*/
 
     @Override
     public void setTarget(@Nullable LivingEntity target) {
