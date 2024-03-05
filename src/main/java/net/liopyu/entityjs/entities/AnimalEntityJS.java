@@ -1029,6 +1029,13 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
     @Override
+    protected void tickDeath() {
+        if (builder.tickDeath != null) {
+            builder.tickDeath.accept(this);
+        } else super.tickDeath();
+    }
+
+    @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
         return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));

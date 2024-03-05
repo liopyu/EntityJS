@@ -262,6 +262,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Boolean canSteer;
     public transient Boolean canJump;
     public transient boolean mountJumpingEnabled;
+    public transient Consumer<LivingEntity> tickDeath;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -296,6 +297,22 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         canJump = true;
         mountJumpingEnabled = false;
 
+    }
+
+    @Info(value = """
+            Consumer overriding the tickDeath responsible to counting down
+            the ticks it takes to remove the entity when it dies.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.deathTick(entity => {
+                // Override the tickDeath method in the entity
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> tickDeath(Consumer<LivingEntity> tickDeath) {
+        this.tickDeath = tickDeath;
+        return this;
     }
 
     @Info(value = """

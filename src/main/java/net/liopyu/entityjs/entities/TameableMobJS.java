@@ -88,16 +88,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     //Wolf Velues copied for reference
     private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID;
-    //private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
     private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME;
-    private static final float START_HEALTH = 8.0F;
-    private static final float TAME_HEALTH = 20.0F;
-    private float interestedAngle;
-    private float interestedAngleO;
-    private boolean isWet;
-    private boolean isShaking;
-    private float shakeAnim;
-    private float shakeAnimO;
     private static final UniformInt PERSISTENT_ANGER_TIME;
     @javax.annotation.Nullable
     private UUID persistentAngerTarget;
@@ -736,28 +727,25 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     @Override
     public void travel(Vec3 pTravelVector) {
-        if (this.isAlive() && this.isVehicle() && builder.canSteer) {
+        LivingEntity livingentity = this.getControllingPassenger();
+        if (this.isAlive() && this.isVehicle() && builder.canSteer && livingentity != null) {
             if (this.getControllingPassenger() instanceof Player && builder.mountJumpingEnabled) {
                 if (this.ableToJump()) {
                     this.setThisJumping(true);
                 }
                 if (this.thisJumping) {
                     this.setThisJumping(false);
-
                     double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
                     Vec3 currentVelocity = this.getDeltaMovement();
-
                     // Add the jump velocity to the current velocity
                     double newVelocityX = currentVelocity.x;
                     double newVelocityY = currentVelocity.y + jumpPower; // Add jump velocity
                     double newVelocityZ = currentVelocity.z;
-
                     this.setDeltaMovement(newVelocityX, newVelocityY, newVelocityZ);
                     onJump();
                     ForgeHooks.onLivingJump(this);
                 }
             }
-
             LivingEntity passenger = this.getControllingPassenger();
             this.yRotO = this.getYRot();
             this.xRotO = this.getXRot();
@@ -772,19 +760,11 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
                 z *= 0.25F;
             }
             this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
-
-
             super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
-
-        }
-
+        } else super.travel(pTravelVector);
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
             builder.travel.accept(context);
-        }
-
-        if (builder.travel == null && !builder.canSteer) {
-            super.travel(pTravelVector);
         }
     }
 
@@ -800,7 +780,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
         return var10000;
     }
-
 
     @Info(value = """
             Calls a triggerable animation to be played anywhere.
@@ -1211,6 +1190,13 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             final ContextUtils.DeathContext context = new ContextUtils.DeathContext(this, damageSource);
             builder.onDeath.accept(context);
         }
+    }
+
+    @Override
+    protected void tickDeath() {
+        if (builder.tickDeath != null) {
+            builder.tickDeath.accept(this);
+        } else super.tickDeath();
     }
 
     @Override
