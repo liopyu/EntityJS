@@ -17,6 +17,7 @@ import net.liopyu.entityjs.util.ModKeybinds;
 import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
 import net.liopyu.liolib.util.GeckoLibUtil;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -28,6 +29,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -88,7 +90,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID;
     //private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
     private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME;
-    public static final Predicate<LivingEntity> PREY_SELECTOR;
     private static final float START_HEALTH = 8.0F;
     private static final float TAME_HEALTH = 20.0F;
     private float interestedAngle;
@@ -104,6 +105,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public TameableMobJS(TameableMobJSBuilder builder, EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
+        this.setTame(false);
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
 
     }
@@ -111,10 +113,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     static {
         DATA_INTERESTED_ID = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.BOOLEAN);
         DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.INT);
-        PREY_SELECTOR = (p_30437_) -> {
-            EntityType<?> entitytype = p_30437_.getType();
-            return entitytype == EntityType.SHEEP || entitytype == EntityType.RABBIT || entitytype == EntityType.FOX;
-        };
         PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     }
 
@@ -165,17 +163,39 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         }
     }
 
-    //Tameable Mob Methods pulled from Wolf
-    public void setTame(boolean pTamed) {
-        super.setTame(pTamed);
-        if (pTamed) {
-            this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20.0);
-            this.setHealth(20.0F);
-        } else {
-            this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(8.0);
+    //Tameable Mob Overrides
+    public boolean tamableFood(ItemStack pStack) {
+        if (builder.tamableFood != null) {
+            return builder.tamableFood.test(pStack);
         }
+        return false;
+    }
 
-        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(4.0);
+    public boolean tamableFoodPredicate(ItemStack pStack) {
+        if (builder.tamableFoodPredicate == null) return false;
+        final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
+        Object obj = builder.tamableFoodPredicate.apply(context);
+        if (obj instanceof Boolean b) {
+            return b;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for tamableFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
+        return false;
+    }
+
+    @Override
+    public void tame(Player pPlayer) {
+        if (builder.tameOverride != null) {
+            this.setTame(true);
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
+            builder.tameOverride.accept(context);
+            if (pPlayer instanceof ServerPlayer) {
+                CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer) pPlayer, this);
+            }
+        } else super.tame(pPlayer);
+        if (builder.onTamed != null) {
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
+            builder.onTamed.accept(context);
+        }
     }
 
     // Basic Tameable Overrides
@@ -276,6 +296,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         }
     }
 
+
     //NeutralMob Overrides
     public int getRemainingPersistentAngerTime() {
         return (Integer) this.entityData.get(DATA_REMAINING_ANGER_TIME);
@@ -289,7 +310,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
     }
 
-    @javax.annotation.Nullable
+    @Nullable
     public UUID getPersistentAngerTarget() {
         return this.persistentAngerTarget;
     }
@@ -298,7 +319,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         this.persistentAngerTarget = pTarget;
     }
     //Ageable Mob Overrides
-
 
     @Override
     public boolean isFood(ItemStack pStack) {
@@ -363,11 +383,13 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
 
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
+
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
+
         if (this.level.isClientSide) {
-            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || itemstack.is(Items.BONE) && !this.isTame() && !this.isAngry();
+            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isTame() && !this.isAngry();
             return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
         } else {
             if (this.isTame()) {
@@ -390,7 +412,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
                 }
 
                 return interactionresult;
-            } else if (itemstack.is(Items.BONE) && !this.isAngry()) {
+            } else if ((this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isAngry()) {
                 if (!pPlayer.getAbilities().instabuild) {
                     itemstack.shrink(1);
                 }
@@ -420,6 +442,18 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     }
 
     //Mob Overrides
+
+    @Override
+    public boolean canBeLeashed(Player pPlayer) {
+        if (builder.canBeLeashed != null) {
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
+            Object obj = builder.canBeLeashed.apply(context);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed(pPlayer));
+        }
+        return super.canBeLeashed(pPlayer);
+    }
+
     @Override
     public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
         if (builder.removeWhenFarAway == null) {

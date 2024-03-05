@@ -123,6 +123,17 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     //Mob Overrides
     @Override
+    public boolean canBeLeashed(Player pPlayer) {
+        if (builder.canBeLeashed != null) {
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
+            Object obj = builder.canBeLeashed.apply(context);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed(pPlayer));
+        }
+        return super.canBeLeashed(pPlayer);
+    }
+
+    @Override
     public MobType getMobType() {
         return builder.mobType;
     }

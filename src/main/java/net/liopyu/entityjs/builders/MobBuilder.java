@@ -42,6 +42,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Object ambientSoundInterval;
     public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
     public transient Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner;
+    public transient Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
@@ -63,6 +64,23 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         if (eggItem != null) {
             RegistryInfo.ITEM.addBuilder(eggItem);
         }
+    }
+
+    @Info(value = """
+            Sets a function to determine if the entity can be leashed.
+                        
+            @param canBeLeashed A Function accepting a ContextUtils.PlayerEntityContext parameter
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.canBeLeashed(context => {
+                return true // Return true if the entity can be leashed, false otherwise.
+            });
+            ```
+            """)
+    public MobBuilder<T> canBeLeashed(Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed) {
+        this.canBeLeashed = canBeLeashed;
+        return this;
     }
 
     @Info(value = """
