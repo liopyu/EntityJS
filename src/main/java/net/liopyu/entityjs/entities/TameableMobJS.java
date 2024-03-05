@@ -575,8 +575,11 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     @Override
     protected void tickDeath() {
-        super.tickDeath();
+        if (builder.tickDeath != null) {
+            builder.tickDeath.accept(this);
+        } else super.tickDeath();
     }
+
 
     @Override
     protected void tickLeash() {
@@ -1022,7 +1025,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
 
     }
-
 
     @Override
     public boolean canAttackType(@NotNull EntityType<?> entityType) {

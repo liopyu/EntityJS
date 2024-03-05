@@ -415,8 +415,11 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     protected void tickDeath() {
-        super.tickDeath();
+        if (builder.tickDeath != null) {
+            builder.tickDeath.accept(this);
+        } else super.tickDeath();
     }
+
 
     @Override
     protected void tickLeash() {
