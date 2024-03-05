@@ -55,6 +55,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     private IntOpenHashSet piercingIgnoreEntityIds;
     @Nullable
     private List<Entity> piercedAndKilledEntities;
+    private boolean isMoving;
 
     public ArrowEntityJS(ArrowEntityJSBuilder builder, EntityType<? extends AbstractArrow> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -213,18 +214,19 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         }
     }
 
-    public boolean isMoving() {
-        return movementTracker.isMoving(this);
-    }
 
     @Override
     public void tick() {
         super.tick();
+        isMoving = movementTracker.isMoving(this);
         if (builder.tick != null) {
             builder.tick.accept(this);
         }
     }
 
+    public boolean isMoving() {
+        return isMoving;
+    }
 
     @Override
     public void move(MoverType pType, Vec3 pPos) {
