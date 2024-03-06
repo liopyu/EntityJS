@@ -169,7 +169,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     public void jump() {
         double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
         Vec3 currentVelocity = this.getDeltaMovement();
-
         // Adjust the Y component of the velocity to the calculated jump power
         this.setDeltaMovement(currentVelocity.x, jumpPower, currentVelocity.z);
         this.hasImpulse = true;
