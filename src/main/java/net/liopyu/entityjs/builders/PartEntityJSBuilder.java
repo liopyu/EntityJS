@@ -2,6 +2,7 @@ package net.liopyu.entityjs.builders;
 
 import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.BaseLivingEntityJS;
+import net.liopyu.entityjs.entities.MobEntityJS;
 import net.liopyu.entityjs.entities.PartEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityDimensions;
@@ -15,6 +16,9 @@ public class PartEntityJSBuilder extends PartEntityBuilder<PartEntity<PartEntity
 
     @Override
     public EntityType.EntityFactory<PartEntity<PartEntityJS>> factory() {
+        return (type, level) -> new PartEntityJS(this, type, level, size);
+
         return (parentMob, name, size) -> new PartEntityJS(this, parentMob, name, size);
+
     }
 }
