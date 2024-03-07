@@ -5,6 +5,7 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.builders.AnimalEntityBuilder;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
@@ -31,6 +32,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
@@ -52,7 +54,7 @@ import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * The 'basic' implementation of a custom entity, implements most methods through the builder with some
@@ -97,7 +99,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
-    protected final AnimalEntityJSBuilder builder;
+
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
@@ -105,10 +107,41 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return this.getType().toString();
     }
 
+
+    protected final AnimalEntityJSBuilder builder;
+
+    private final List<PartEntityJS> partEntities = new ArrayList<>();
+
     public AnimalEntityJS(AnimalEntityJSBuilder builder, EntityType<? extends Animal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+
+        ConsoleJS.STARTUP.info("AnimalEntityJS constructor called");
+
+        List<String> partNames = new ArrayList<>();
+
+        for (AnimalEntityBuilder.PartEntityParams params : builder.partEntityParamsList) {
+            PartEntityJS partEntity = new PartEntityJS(this, params.name, params.width, params.height);
+            partEntities.add(partEntity);
+            partNames.add(params.name);
+        }
+
+        // Log the list of names
+        ConsoleJS.STARTUP.info("Part names: " + partNames);
+    }
+
+    @Override
+    public void setId(int entityId) {
+        super.setId(entityId);
+
+        // Assign unique IDs to the part entities
+        for (int i = 0; i < partEntities.size(); i++) {
+            PartEntityJS partEntity = partEntities.get(i);
+            if (partEntity != null) {
+                partEntity.setId(entityId + i + 1);
+            }
+        }
     }
 
 

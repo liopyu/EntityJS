@@ -1,6 +1,5 @@
 package net.liopyu.entityjs.entities;
 
-import net.liopyu.entityjs.builders.PartEntityJSBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -11,42 +10,35 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.entity.PartEntity;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
-public class PartEntityJS extends PartEntity<AnimalEntityJS> implements IPartEntityJS {
-    private final PartEntityJSBuilder builder;
+public class PartEntityJS extends PartEntity<AnimalEntityJS> {
     public final AnimalEntityJS parentMob;
     public final String name;
     private final EntityDimensions size;
+    public float width;
+    public float height;
 
-    public PartEntityJS(PartEntityJSBuilder builder, AnimalEntityJS parentMob, String name, EntityDimensions size) {
-        super(parentMob);
-        this.builder = builder;
-        this.parentMob = parentMob;
-        this.name = name;
-        this.size = size;
+    public PartEntityJS(AnimalEntityJS pParentMob, String pName, float pWidth, float pHeight) {
+        super(pParentMob);
+        this.size = EntityDimensions.scalable(pWidth, pHeight);
+        this.refreshDimensions();
+        this.parentMob = pParentMob;
+        this.name = pName;
+        this.width = pWidth;
+        this.height = pHeight;
     }
 
-    @Override
-    public PartEntityJSBuilder getPartEntityBuilder() {
-        return builder;
-    }
-
-    @Override
     protected void defineSynchedData() {
     }
 
-    @Override
-    protected void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
     }
 
-    @Override
-    protected void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
     }
 
-    @Override
     public boolean isPickable() {
         return true;
     }
@@ -56,11 +48,11 @@ public class PartEntityJS extends PartEntity<AnimalEntityJS> implements IPartEnt
         return this.parentMob.getPickResult();
     }
 
-    public boolean hurt(@NotNull DamageSource pSource, float pAmount) {
-        return !this.isInvulnerableTo(pSource) && this.parentMob.hurt(pSource, pAmount);
+    public boolean hurt(DamageSource pSource, float pAmount) {
+        return this.isInvulnerableTo(pSource) ? false : this.parentMob.hurt(pSource, pAmount);
     }
 
-    public boolean is(@NotNull Entity pEntity) {
+    public boolean is(Entity pEntity) {
         return this == pEntity || this.parentMob == pEntity;
     }
 
@@ -68,7 +60,7 @@ public class PartEntityJS extends PartEntity<AnimalEntityJS> implements IPartEnt
         throw new UnsupportedOperationException();
     }
 
-    public @NotNull EntityDimensions getDimensions(Pose pPose) {
+    public EntityDimensions getDimensions(Pose pPose) {
         return this.size;
     }
 
