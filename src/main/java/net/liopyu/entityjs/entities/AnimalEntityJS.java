@@ -20,6 +20,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -47,6 +48,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -55,6 +57,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The 'basic' implementation of a custom entity, implements most methods through the builder with some
@@ -110,38 +113,55 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     protected final AnimalEntityJSBuilder builder;
 
-    private final List<PartEntityJS> partEntities = new ArrayList<>();
+    private final PartEntityJS[] partEntities;
 
     public AnimalEntityJS(AnimalEntityJSBuilder builder, EntityType<? extends Animal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
 
-        ConsoleJS.STARTUP.info("AnimalEntityJS constructor called");
+        List<PartEntityJS> tempPartEntities = new ArrayList<>(); // Create a temporary list
 
-        List<String> partNames = new ArrayList<>();
-
+        // Create and add part entities
         for (AnimalEntityBuilder.PartEntityParams params : builder.partEntityParamsList) {
             PartEntityJS partEntity = new PartEntityJS(this, params.name, params.width, params.height);
-            partEntities.add(partEntity);
-            partNames.add(params.name);
+            tempPartEntities.add(partEntity);
         }
 
-        // Log the list of names
+        // Convert the list to an array
+        partEntities = tempPartEntities.toArray(new PartEntityJS[0]);
+
+        // Log part names (optional)
+        List<String> partNames = tempPartEntities.stream().map(partEntity -> partEntity.name).toList();
         ConsoleJS.STARTUP.info("Part names: " + partNames);
     }
 
     @Override
     public void setId(int entityId) {
         super.setId(entityId);
-
-        // Assign unique IDs to the part entities
-        for (int i = 0; i < partEntities.size(); i++) {
-            PartEntityJS partEntity = partEntities.get(i);
+        for (int i = 0; i < partEntities.length; i++) {
+            PartEntityJS partEntity = partEntities[i];
             if (partEntity != null) {
                 partEntity.setId(entityId + i + 1);
             }
         }
+    }
+
+
+    private void tickPart(PartEntityJS part, double offsetX, double offsetY, double offsetZ) {
+        part.setPos(this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ);
+    }
+
+    public boolean isMultipartEntity() {
+        return true;
+    }
+
+    public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
+        super.recreateFromPacket(pPacket);
+    }
+
+    public PartEntity<?>[] getParts() {
+        return this.partEntities;
     }
 
 
@@ -803,6 +823,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void tick() {
 
         super.tick();
+        for (PartEntityJS part : partEntities) {
+            tickPart(part, 1, 1, 1); // Provide appropriate offset values
+        }
         if (builder.tick != null) {
             if (!this.level().isClientSide()) {
                 builder.tick.accept(this);

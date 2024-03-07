@@ -49,7 +49,11 @@ public class PartEntityJS extends PartEntity<AnimalEntityJS> {
     }
 
     public boolean hurt(DamageSource pSource, float pAmount) {
-        return this.isInvulnerableTo(pSource) ? false : this.parentMob.hurt(pSource, pAmount);
+        if (this.isInvulnerableTo(pSource)) {
+            return false;
+        } else {
+            return super.hurt(pSource, pAmount);
+        }
     }
 
     public boolean is(Entity pEntity) {
