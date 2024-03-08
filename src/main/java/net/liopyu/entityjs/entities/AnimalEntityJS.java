@@ -453,9 +453,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     public void aiStep() {
         super.aiStep();
-        for (AnimalPartEntityJS part : partEntities) {
-            tickPart(part, 1, 1, 1);
-        }
         if (this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
