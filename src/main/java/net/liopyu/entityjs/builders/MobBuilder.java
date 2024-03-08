@@ -77,7 +77,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             ```javascript
             mobBuilder.createNavigation(context => {
                 const {entity, level} = context
-                return EntityJSUtils.createGroundPathNavigation(entity,level) // Return some path navigation
+                return EntityJSUtils.createWallClimberNavigation(entity, level) // Return some path navigation
             });
             ```
             """)

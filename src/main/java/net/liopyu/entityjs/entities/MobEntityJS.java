@@ -1,14 +1,24 @@
 package net.liopyu.entityjs.entities;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
+import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.builders.AnimalEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
+import net.liopyu.entityjs.entities.partentities.MobPartEntityJS;
+import net.liopyu.entityjs.entities.partentities.MobPartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
+import net.liopyu.entityjs.events.BuildBrainEventJS;
+import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.network.PacketDistributor;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.network.GeckoLibNetwork;
@@ -64,6 +74,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -71,13 +83,54 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     private final MobEntityJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
+    protected PathNavigation navigation;
+    private final MobPartEntityJS[] partEntities;
 
     public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> p_21368_, Level p_21369_) {
         super(p_21368_, p_21369_);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createInstanceCache(this);
+        List<MobPartEntityJS> tempPartEntities = new ArrayList<>();
+        for (AnimalEntityBuilder.PartEntityParams params : builder.partEntityParamsList) {
+            MobPartEntityJS partEntity = new MobPartEntityJS(this, params.name, params.width, params.height);
+            tempPartEntities.add(partEntity);
+        }
+        partEntities = tempPartEntities.toArray(new MobPartEntityJS[0]);
+        this.navigation = this.createNavigation(p_21369_);
     }
 
+    // Part Entity Logical Overrides --------------------------------
+    @Override
+    public void setId(int entityId) {
+        super.setId(entityId);
+        for (int i = 0; i < partEntities.length; i++) {
+            MobPartEntityJS partEntity = partEntities[i];
+            if (partEntity != null) {
+                partEntity.setId(entityId + i + 1);
+            }
+        }
+    }
+
+    private void tickPart(MobPartEntityJS part, double offsetX, double offsetY, double offsetZ) {
+        part.setPos(this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ);
+    }
+
+    @Override
+    public boolean isMultipartEntity() {
+        return partEntities != null;
+    }
+
+    @Override
+    public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
+        super.recreateFromPacket(pPacket);
+    }
+
+    @Override
+    public PartEntity<?>[] getParts() {
+        return Objects.requireNonNullElseGet(partEntities, () -> new PartEntity<?>[0]);
+    }
+
+    //Builder and Animatable logic
     @Override
     public BaseLivingEntityBuilder<?> getBuilder() {
         return builder;
@@ -104,6 +157,28 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     }
 
     @Override
+    protected Brain.Provider<?> brainProvider() {
+        if (EventHandlers.buildBrainProvider.hasListeners()) {
+            final BuildBrainProviderEventJS event = new BuildBrainProviderEventJS();
+            EventHandlers.buildBrainProvider.post(event, getTypeId());
+            return event.provide();
+        } else {
+            return super.brainProvider();
+        }
+    }
+
+    @Override
+    protected Brain<MobEntityJS> makeBrain(Dynamic<?> p_21069_) {
+        if (EventHandlers.buildBrain.hasListeners()) {
+            final Brain<MobEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
+            return brain;
+        } else {
+            return UtilsJS.cast(super.makeBrain(p_21069_));
+        }
+    }
+
+    @Override
     protected void registerGoals() {
         if (EventHandlers.addGoalTargets.hasListeners()) {
             EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
@@ -120,7 +195,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     //Mob Overrides
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        if (builder.createNavigation == null) return super.createNavigation(pLevel);
+        if (builder == null || builder.createNavigation == null) return super.createNavigation(pLevel);
         final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
         Object obj = builder.createNavigation.apply(context);
         if (obj instanceof PathNavigation p) return p;

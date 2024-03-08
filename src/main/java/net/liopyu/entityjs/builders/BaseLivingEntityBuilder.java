@@ -263,6 +263,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Boolean canSteer;
     public transient boolean mountJumpingEnabled;
     public transient Consumer<LivingEntity> tickDeath;
+    public final List<AnimalEntityBuilder.PartEntityParams> partEntityParamsList = new ArrayList<>();
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -294,6 +295,23 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         defaultDeathPose = true;
         canSteer = true;
         mountJumpingEnabled = false;
+    }
+
+    public BaseLivingEntityBuilder<T> addPartEntity(String name, float width, float height) {
+        partEntityParamsList.add(new PartEntityParams(name, width, height));
+        return this;
+    }
+
+    public static class PartEntityParams {
+        public final String name;
+        public final float width;
+        public final float height;
+
+        public PartEntityParams(String name, float width, float height) {
+            this.name = name;
+            this.width = width;
+            this.height = height;
+        }
     }
 
     @Info(value = """

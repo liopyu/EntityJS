@@ -3,8 +3,11 @@ package net.liopyu.entityjs.entities;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.builders.TameableMobBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.TameableMobJSBuilder;
+import net.liopyu.entityjs.entities.partentities.TameableMobPartEntityJS;
+import net.liopyu.entityjs.entities.partentities.TameableMobPartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
@@ -21,6 +24,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -59,6 +63,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
@@ -67,6 +72,8 @@ import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -90,13 +97,21 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     private static final UniformInt PERSISTENT_ANGER_TIME;
     @javax.annotation.Nullable
     private UUID persistentAngerTarget;
+    protected PathNavigation navigation;
+    private final TameableMobPartEntityJS[] partEntities;
 
     public TameableMobJS(TameableMobJSBuilder builder, EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         this.setTame(false);
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
-
+        List<TameableMobPartEntityJS> tempPartEntities = new ArrayList<>();
+        for (TameableMobBuilder.PartEntityParams params : builder.partEntityParamsList) {
+            TameableMobPartEntityJS partEntity = new TameableMobPartEntityJS(this, params.name, params.width, params.height);
+            tempPartEntities.add(partEntity);
+        }
+        partEntities = tempPartEntities.toArray(new TameableMobPartEntityJS[0]);
+        this.navigation = this.createNavigation(pLevel);
     }
 
     static {
@@ -105,6 +120,38 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     }
 
+    // Part Entity Logical Overrides --------------------------------
+    @Override
+    public void setId(int entityId) {
+        super.setId(entityId);
+        for (int i = 0; i < partEntities.length; i++) {
+            TameableMobPartEntityJS partEntity = partEntities[i];
+            if (partEntity != null) {
+                partEntity.setId(entityId + i + 1);
+            }
+        }
+    }
+
+    private void tickPart(TameableMobPartEntityJS part, double offsetX, double offsetY, double offsetZ) {
+        part.setPos(this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ);
+    }
+
+    @Override
+    public boolean isMultipartEntity() {
+        return partEntities != null;
+    }
+
+    @Override
+    public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
+        super.recreateFromPacket(pPacket);
+    }
+
+    @Override
+    public PartEntity<?>[] getParts() {
+        return Objects.requireNonNullElseGet(partEntities, () -> new PartEntity<?>[0]);
+    }
+
+    //Builder and Animatable logic
     @Override
     public BaseLivingEntityBuilder<?> getBuilder() {
         return builder;
@@ -132,9 +179,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     }
 
     @Override
-    protected Brain<AnimalEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<TameableMobJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<AnimalEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<TameableMobJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
@@ -437,7 +484,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     //Mob Overrides
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        if (builder.createNavigation == null) return super.createNavigation(pLevel);
+        if (builder == null || builder.createNavigation == null) return super.createNavigation(pLevel);
         final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
         Object obj = builder.createNavigation.apply(context);
         if (obj instanceof PathNavigation p) return p;

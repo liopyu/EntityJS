@@ -1,5 +1,7 @@
-package net.liopyu.entityjs.entities;
+package net.liopyu.entityjs.entities.partentities;
 
+import net.liopyu.entityjs.entities.AnimalEntityJS;
+import net.liopyu.entityjs.entities.BaseLivingEntityJS;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -7,20 +9,19 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.entity.PartEntity;
 
 import javax.annotation.Nullable;
 
-public class PartEntityJS extends PartEntity<AnimalEntityJS> {
-    public final AnimalEntityJS parentMob;
+public class BaseLivingPartEntityJS extends PartEntity<BaseLivingEntityJS> {
+    public final BaseLivingEntityJS parentMob;
     public final String name;
     private final EntityDimensions size;
     public float width;
     public float height;
 
-    public PartEntityJS(AnimalEntityJS pParentMob, String pName, float pWidth, float pHeight) {
+    public BaseLivingPartEntityJS(BaseLivingEntityJS pParentMob, String pName, float pWidth, float pHeight) {
         super(pParentMob);
         this.size = EntityDimensions.scalable(pWidth, pHeight);
         this.refreshDimensions();

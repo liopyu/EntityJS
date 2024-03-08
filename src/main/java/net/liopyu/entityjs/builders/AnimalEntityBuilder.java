@@ -1,21 +1,15 @@
 package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.entities.PartEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -24,11 +18,9 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Ingredient isFood;
     public transient Function<ContextUtils.EntityItemStackContext, Object> isFoodPredicate;
     public transient Function<LivingEntity, Object> canBreed;
-
-
     public transient Function<ContextUtils.EntityAnimalContext, Object> canMate;
     public transient Consumer<ContextUtils.LevelAnimalContext> onSpawnChildFromBreeding;
-    public final List<PartEntityParams> partEntityParamsList = new ArrayList<>();
+
 
     public AnimalEntityBuilder(ResourceLocation i) {
         super(i);
@@ -36,22 +28,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         followLeashSpeed = 1.0D;
     }
 
-    public AnimalEntityBuilder<T> addPartEntity(String name, float width, float height) {
-        partEntityParamsList.add(new PartEntityParams(name, width, height));
-        return this;
-    }
-
-    public static class PartEntityParams {
-        public final String name;
-        public final float width;
-        public final float height;
-
-        public PartEntityParams(String name, float width, float height) {
-            this.name = name;
-            this.width = width;
-            this.height = height;
-        }
-    }
 
     @Info(value = """
             Sets the offspring for the Animal Entity.

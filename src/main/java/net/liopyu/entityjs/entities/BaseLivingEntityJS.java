@@ -1,10 +1,22 @@
 package net.liopyu.entityjs.entities;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
+import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
+import net.liopyu.entityjs.entities.partentities.BaseLivingPartEntityJS;
+import net.liopyu.entityjs.entities.partentities.BaseLivingPartEntityJS;
+import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
+import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
+import net.liopyu.entityjs.events.BuildBrainEventJS;
+import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.network.PacketDistributor;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.network.GeckoLibNetwork;
@@ -54,6 +66,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -68,12 +82,52 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         return this.getType().toString();
     }
 
+    private final BaseLivingPartEntityJS[] partEntities;
+
     public BaseLivingEntityJS(BaseLivingEntityJSBuilder builder, EntityType<? extends LivingEntity> p_21368_, Level p_21369_) {
         super(p_21368_, p_21369_);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+        List<BaseLivingPartEntityJS> tempPartEntities = new ArrayList<>();
+        for (BaseLivingEntityBuilder.PartEntityParams params : builder.partEntityParamsList) {
+            BaseLivingPartEntityJS partEntity = new BaseLivingPartEntityJS(this, params.name, params.width, params.height);
+            tempPartEntities.add(partEntity);
+        }
+        partEntities = tempPartEntities.toArray(new BaseLivingPartEntityJS[0]);
     }
 
+    // Part Entity Logical Overrides --------------------------------
+    @Override
+    public void setId(int entityId) {
+        super.setId(entityId);
+        for (int i = 0; i < partEntities.length; i++) {
+            BaseLivingPartEntityJS partEntity = partEntities[i];
+            if (partEntity != null) {
+                partEntity.setId(entityId + i + 1);
+            }
+        }
+    }
+
+    private void tickPart(BaseLivingPartEntityJS part, double offsetX, double offsetY, double offsetZ) {
+        part.setPos(this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ);
+    }
+
+    @Override
+    public boolean isMultipartEntity() {
+        return partEntities != null;
+    }
+
+    @Override
+    public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
+        super.recreateFromPacket(pPacket);
+    }
+
+    @Override
+    public PartEntity<?>[] getParts() {
+        return Objects.requireNonNullElseGet(partEntities, () -> new PartEntity<?>[0]);
+    }
+
+    //Builder and Animatable logic
     @Override
     public BaseLivingEntityBuilder<?> getBuilder() {
         return builder;
@@ -83,6 +137,29 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return getAnimatableInstanceCache;
     }
+
+    @Override
+    protected Brain.Provider<?> brainProvider() {
+        if (EventHandlers.buildBrainProvider.hasListeners()) {
+            final BuildBrainProviderEventJS event = new BuildBrainProviderEventJS();
+            EventHandlers.buildBrainProvider.post(event, getTypeId());
+            return event.provide();
+        } else {
+            return super.brainProvider();
+        }
+    }
+
+    @Override
+    protected Brain<BaseLivingEntityJS> makeBrain(Dynamic<?> p_21069_) {
+        if (EventHandlers.buildBrain.hasListeners()) {
+            final Brain<BaseLivingEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
+            return brain;
+        } else {
+            return UtilsJS.cast(super.makeBrain(p_21069_));
+        }
+    }
+
 
     //Some logic overrides up here because there are different implementations in the other builders.
     public void onJump() {
