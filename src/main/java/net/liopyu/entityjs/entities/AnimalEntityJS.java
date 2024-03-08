@@ -112,35 +112,19 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return this.getType().toString();
     }
 
-    /*private final PartEntityJS[] subEntities;
-    private final PartEntityJS neck;*/
     protected final AnimalEntityJSBuilder builder;
-
     private final PartEntityJS[] partEntities;
 
     public AnimalEntityJS(AnimalEntityJSBuilder builder, EntityType<? extends Animal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
-        /*this.neck = new PartEntityJS(this, "neck", 3.0F, 3.0F);
-        this.subEntities = new PartEntityJS[]{this.neck};
-        this.setId(ENTITY_COUNTER.getAndAdd(this.subEntities.length + 1) + 1);*/
-
-
         List<PartEntityJS> tempPartEntities = new ArrayList<>();
-
-        // Create and add part entities
         for (AnimalEntityBuilder.PartEntityParams params : builder.partEntityParamsList) {
             PartEntityJS partEntity = new PartEntityJS(this, params.name, params.width, params.height);
             tempPartEntities.add(partEntity);
         }
-
-        // Convert the list to an array
         partEntities = tempPartEntities.toArray(new PartEntityJS[0]);
-
-        /*// Log part names (optional)
-        List<String> partNames = tempPartEntities.stream().map(partEntity -> partEntity.name).toList();
-        ConsoleJS.STARTUP.info("Part names: " + partNames);*/
     }
 
     @Override
@@ -152,16 +136,11 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
                 partEntity.setId(entityId + i + 1);
             }
         }
-        /*for (int i = 0; i < this.subEntities.length; ++i) {
-            this.subEntities[i].setId(entityId + i + 1);
-        }*/
     }
 
-
+    // Part Entity Logical Overrides --------------------------------
     private void tickPart(PartEntityJS part, double offsetX, double offsetY, double offsetZ) {
-        // if (this.level().isClientSide) {
         part.setPos(this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ);
-        // }
     }
 
     @Override
@@ -178,7 +157,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public PartEntity<?>[] getParts() {
         return Objects.requireNonNullElseGet(partEntities, () -> new PartEntity<?>[0]);
     }
-
 
     @Override
     public BaseLivingEntityBuilder<?> getBuilder() {
