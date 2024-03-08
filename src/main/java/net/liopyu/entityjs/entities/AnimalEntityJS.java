@@ -32,6 +32,8 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -110,7 +112,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return this.getType().toString();
     }
 
-
+    /*private final PartEntityJS[] subEntities;
+    private final PartEntityJS neck;*/
     protected final AnimalEntityJSBuilder builder;
 
     private final PartEntityJS[] partEntities;
@@ -119,8 +122,12 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+        /*this.neck = new PartEntityJS(this, "neck", 3.0F, 3.0F);
+        this.subEntities = new PartEntityJS[]{this.neck};
+        this.setId(ENTITY_COUNTER.getAndAdd(this.subEntities.length + 1) + 1);*/
 
-        List<PartEntityJS> tempPartEntities = new ArrayList<>(); // Create a temporary list
+
+        List<PartEntityJS> tempPartEntities = new ArrayList<>();
 
         // Create and add part entities
         for (AnimalEntityBuilder.PartEntityParams params : builder.partEntityParamsList) {
@@ -131,9 +138,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         // Convert the list to an array
         partEntities = tempPartEntities.toArray(new PartEntityJS[0]);
 
-        // Log part names (optional)
+        /*// Log part names (optional)
         List<String> partNames = tempPartEntities.stream().map(partEntity -> partEntity.name).toList();
-        ConsoleJS.STARTUP.info("Part names: " + partNames);
+        ConsoleJS.STARTUP.info("Part names: " + partNames);*/
     }
 
     @Override
@@ -145,23 +152,31 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
                 partEntity.setId(entityId + i + 1);
             }
         }
+        /*for (int i = 0; i < this.subEntities.length; ++i) {
+            this.subEntities[i].setId(entityId + i + 1);
+        }*/
     }
 
 
     private void tickPart(PartEntityJS part, double offsetX, double offsetY, double offsetZ) {
+        // if (this.level().isClientSide) {
         part.setPos(this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ);
+        // }
     }
 
+    @Override
     public boolean isMultipartEntity() {
-        return true;
+        return partEntities != null;
     }
 
+    @Override
     public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
         super.recreateFromPacket(pPacket);
     }
 
+    @Override
     public PartEntity<?>[] getParts() {
-        return this.partEntities;
+        return Objects.requireNonNullElseGet(partEntities, () -> new PartEntity<?>[0]);
     }
 
 
@@ -272,6 +287,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return super.canBreed();
     }
 
+
     @Override
     public boolean canMate(Animal pOtherAnimal) {
         if (builder.canMate == null) {
@@ -327,6 +343,16 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
     //Mob Overrides
+    @Override
+    protected PathNavigation createNavigation(Level pLevel) {
+        if (builder.createNavigation == null) return super.createNavigation(pLevel);
+        final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
+        Object obj = builder.createNavigation.apply(context);
+        if (obj instanceof PathNavigation p) return p;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
+        return super.createNavigation(pLevel);
+    }
+
     @Override
     public boolean canBeLeashed(Player pPlayer) {
         if (builder.canBeLeashed != null) {
@@ -448,11 +474,14 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     public void aiStep() {
         super.aiStep();
-        if (builder.aiStep != null) {
-            builder.aiStep.accept(this);
+        for (PartEntityJS part : partEntities) {
+            tickPart(part, 1, 1, 1);
         }
         if (this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
+        }
+        if (builder.aiStep != null) {
+            builder.aiStep.accept(this);
         }
     }
 
@@ -823,9 +852,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void tick() {
 
         super.tick();
-        for (PartEntityJS part : partEntities) {
-            tickPart(part, 1, 1, 1); // Provide appropriate offset values
-        }
+
         if (builder.tick != null) {
             if (!this.level().isClientSide()) {
                 builder.tick.accept(this);

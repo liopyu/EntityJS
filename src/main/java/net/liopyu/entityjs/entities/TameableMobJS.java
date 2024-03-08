@@ -38,6 +38,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -434,6 +435,16 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     }
 
     //Mob Overrides
+    @Override
+    protected PathNavigation createNavigation(Level pLevel) {
+        if (builder.createNavigation == null) return super.createNavigation(pLevel);
+        final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
+        Object obj = builder.createNavigation.apply(context);
+        if (obj instanceof PathNavigation p) return p;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
+        return super.createNavigation(pLevel);
+    }
+
     @Override
     public boolean canBeLeashed(Player pPlayer) {
         if (builder.canBeLeashed != null) {

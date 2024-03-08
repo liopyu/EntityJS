@@ -2,6 +2,9 @@ package net.liopyu.entityjs.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import dev.latvian.mods.kubejs.typings.Info;
@@ -32,6 +35,7 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.Interface;
 
 public class ContextUtils {
     public static class PlayerEntityContext {
@@ -44,6 +48,19 @@ public class ContextUtils {
         public PlayerEntityContext(Player player, LivingEntity entity) {
             this.entity = entity;
             this.player = player;
+        }
+    }
+
+    public static class EntityLevelContext {
+        @Info("The living entity")
+        public final LivingEntity entity;
+
+        @Info("The level")
+        public final Level level;
+
+        public EntityLevelContext(Level level, LivingEntity entity) {
+            this.entity = entity;
+            this.level = level;
         }
     }
 

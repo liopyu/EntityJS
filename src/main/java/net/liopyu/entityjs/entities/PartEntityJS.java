@@ -30,15 +30,19 @@ public class PartEntityJS extends PartEntity<AnimalEntityJS> {
         this.height = pHeight;
     }
 
+    @Override
     protected void defineSynchedData() {
     }
 
+    @Override
     protected void readAdditionalSaveData(CompoundTag pCompound) {
     }
 
+    @Override
     protected void addAdditionalSaveData(CompoundTag pCompound) {
     }
 
+    @Override
     public boolean isPickable() {
         return true;
     }
@@ -48,6 +52,7 @@ public class PartEntityJS extends PartEntity<AnimalEntityJS> {
         return this.parentMob.getPickResult();
     }
 
+    @Override
     public boolean hurt(DamageSource pSource, float pAmount) {
         if (this.isInvulnerableTo(pSource)) {
             return false;
@@ -56,18 +61,27 @@ public class PartEntityJS extends PartEntity<AnimalEntityJS> {
         }
     }
 
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+    }
+
+    @Override
     public boolean is(Entity pEntity) {
         return this == pEntity || this.parentMob == pEntity;
     }
 
+    @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public EntityDimensions getDimensions(Pose pPose) {
         return this.size;
     }
 
+    @Override
     public boolean shouldBeSaved() {
         return false;
     }

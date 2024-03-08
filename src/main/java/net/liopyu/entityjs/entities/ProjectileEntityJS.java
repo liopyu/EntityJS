@@ -61,6 +61,11 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
         return this.getType().toString();
     }
 
+    @Override
+    public void shootFromRotation(Entity pShooter, float pX, float pY, float pZ, float pVelocity, float pInaccuracy) {
+        super.shootFromRotation(pShooter, pX, pY, pZ, pVelocity, pInaccuracy);
+    }
+
     //Base Entity Overrides
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
