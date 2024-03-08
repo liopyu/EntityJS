@@ -106,7 +106,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         this.setTame(false);
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
         List<TameableMobPartEntityJS> tempPartEntities = new ArrayList<>();
-        for (TameableMobBuilder.PartEntityParams params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams params : builder.partEntityParamsList) {
             TameableMobPartEntityJS partEntity = new TameableMobPartEntityJS(this, params.name, params.width, params.height);
             tempPartEntities.add(partEntity);
         }

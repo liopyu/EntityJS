@@ -118,7 +118,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
         List<AnimalPartEntityJS> tempPartEntities = new ArrayList<>();
-        for (AnimalEntityBuilder.PartEntityParams params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams params : builder.partEntityParamsList) {
             AnimalPartEntityJS partEntity = new AnimalPartEntityJS(this, params.name, params.width, params.height);
             tempPartEntities.add(partEntity);
         }

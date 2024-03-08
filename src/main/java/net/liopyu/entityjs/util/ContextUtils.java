@@ -38,6 +38,18 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Interface;
 
 public class ContextUtils {
+    public static class PartEntityParams {
+        public final String name;
+        public final float width;
+        public final float height;
+
+        public PartEntityParams(String name, float width, float height) {
+            this.name = name;
+            this.width = width;
+            this.height = height;
+        }
+    }
+
     public static class PlayerEntityContext {
         @Info("The living entity associated with the player")
         public final LivingEntity entity;

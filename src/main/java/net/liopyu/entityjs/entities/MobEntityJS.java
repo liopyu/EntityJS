@@ -91,7 +91,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         this.builder = builder;
         animationFactory = GeckoLibUtil.createInstanceCache(this);
         List<MobPartEntityJS> tempPartEntities = new ArrayList<>();
-        for (AnimalEntityBuilder.PartEntityParams params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams params : builder.partEntityParamsList) {
             MobPartEntityJS partEntity = new MobPartEntityJS(this, params.name, params.width, params.height);
             tempPartEntities.add(partEntity);
         }

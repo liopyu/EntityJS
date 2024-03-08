@@ -89,7 +89,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
         List<BaseLivingPartEntityJS> tempPartEntities = new ArrayList<>();
-        for (BaseLivingEntityBuilder.PartEntityParams params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams params : builder.partEntityParamsList) {
             BaseLivingPartEntityJS partEntity = new BaseLivingPartEntityJS(this, params.name, params.width, params.height);
             tempPartEntities.add(partEntity);
         }

@@ -25,7 +25,6 @@ public class EntityJSPlugin extends KubeJSPlugin {
 
     @Override
     public void registerBindings(BindingsEvent event) {
-        event.add("InteractionResult", InteractionResult.class);
         event.add("EntityJSUtils", EntityJSUtils.class);
     }
 
