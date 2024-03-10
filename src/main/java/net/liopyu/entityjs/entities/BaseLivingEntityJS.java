@@ -85,9 +85,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     //Some logic overrides up here because there are different implementations in the other builders.
-    public boolean canJump() {
-        return Objects.requireNonNullElse(builder.canJump, true);
-    }
+
 
     public void onJump() {
         if (builder.onLivingJump != null) {

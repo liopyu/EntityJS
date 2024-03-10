@@ -260,7 +260,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Boolean defaultDeathPose;
     public transient Consumer<ContextUtils.Vec3Context> travel;
     public transient Boolean canSteer;
-    public transient Boolean canJump;
+
     public transient boolean mountJumpingEnabled;
     public transient Consumer<LivingEntity> tickDeath;
 
@@ -294,9 +294,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mobType = MobType.UNDEFINED;
         defaultDeathPose = true;
         canSteer = true;
-        canJump = true;
-        mountJumpingEnabled = false;
-
+        mountJumpingEnabled = true;
     }
 
     @Info(value = """
@@ -329,20 +327,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = """
-            Sets whether the entity can jump when pathfinding.
-                        
-            @param canJump A boolean indicating whether the entity can jump.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.canJump(true);
-            ```
-            """)
-    public BaseLivingEntityBuilder<T> canJump(boolean canJump) {
-        this.canJump = canJump;
-        return this;
-    }
 
     @Info(value = """
             Consumer determining travel logic for the entity.

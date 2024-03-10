@@ -43,6 +43,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
     public transient Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner;
     public transient Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed;
+    public transient Boolean canJump;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
@@ -64,6 +65,21 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         if (eggItem != null) {
             RegistryInfo.ITEM.addBuilder(eggItem);
         }
+    }
+
+    @Info(value = """
+            Sets whether the entity can jump when pathfinding.
+                        
+            @param canJump A boolean indicating whether the entity can jump.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.canJump(true);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> canJump(boolean canJump) {
+        this.canJump = canJump;
+        return this;
     }
 
     @Info(value = """

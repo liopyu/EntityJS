@@ -395,7 +395,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
         }
-        if (this.canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
+        if (canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
     }

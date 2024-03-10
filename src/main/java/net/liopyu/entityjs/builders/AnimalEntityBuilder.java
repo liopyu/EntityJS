@@ -24,7 +24,6 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
 
     public AnimalEntityBuilder(ResourceLocation i) {
         super(i);
-        canJump = true;
         followLeashSpeed = 1.0D;
 
     }
