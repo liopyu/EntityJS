@@ -86,9 +86,7 @@ import java.util.function.*;
  */
 @SuppressWarnings("unused")
 public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatableJS> extends BuilderBase<EntityType<T>> {
-
     public static final List<BaseLivingEntityBuilder<?>> thisList = new ArrayList<>();
-
     public transient float width;
     public transient float height;
     public transient boolean summonable;
@@ -121,120 +119,67 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient RenderType renderType;
     public transient EntityType<?> getType;
     public transient Object mainArm;
-
     public transient Consumer<ContextUtils.AutoAttackContext> doAutoAttackOnTouch;
-
     public transient Function<ContextUtils.EntityPoseDimensionsContext, Object> setStandingEyeHeight;
-
     public transient Consumer<LivingEntity> onDecreaseAirSupply;
     public transient Consumer<LivingEntity> onBlockedByShield;
-
     public transient Boolean repositionEntityAfterLoad;
-
     public transient Function<Entity, Object> nextStep;
-
     public transient Consumer<LivingEntity> onIncreaseAirSupply;
-
     public transient Function<ContextUtils.HurtContext, Object> setHurtSound;
-
     public transient Object setSwimSplashSound;
-
-
     public transient Function<ContextUtils.EntityTypeEntityContext, Object> canAttackType;
-
     public transient Function<LivingEntity, Object> scale;
-
     public transient Function<LivingEntity, Object> shouldDropExperience;
-
     public transient Function<LivingEntity, Object> experienceReward;
-
-
     public transient Consumer<ContextUtils.EntityEquipmentContext> onEquipItem;
-
-
     public transient Function<ContextUtils.VisualContext, Object> visibilityPercent;
-
     public transient Function<ContextUtils.LivingEntityContext, Object> canAttack;
-
     public transient Function<ContextUtils.OnEffectContext, Object> canBeAffected;
-
     public transient Function<LivingEntity, Object> invertedHealAndHarm;
-
     public transient Consumer<ContextUtils.OnEffectContext> onEffectAdded;
-
-
     public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
-
     public transient Consumer<ContextUtils.EntityHealContext> onLivingHeal;
-
-
     public transient Consumer<ContextUtils.EntityDamageContext> onHurt;
-
-
     public transient Consumer<ContextUtils.DeathContext> onDeath;
-
-
     public transient Consumer<ContextUtils.EntityLootContext> dropCustomDeathLoot;
-
-
     public transient LivingEntity.Fallsounds fallSounds;
     public transient Object smallFallSound;
     public transient Object largeFallSound;
-
     public transient Object eatingSound;
-
     public transient Function<LivingEntity, Object> onClimbable;
     public transient Boolean canBreatheUnderwater;
-
     public transient Consumer<ContextUtils.EntityFallDamageContext> onLivingFall;
-
     public transient Consumer<LivingEntity> onSprint;
-
     public transient Function<LivingEntity, Object> jumpBoostPower;
     public transient Function<ContextUtils.EntityFluidStateContext, Object> canStandOnFluid;
-
-
     public transient Function<LivingEntity, Object> isSensitiveToWater;
-
     public transient Consumer<LivingEntity> onStopRiding;
     public transient Consumer<LivingEntity> rideTick;
-
-
     public transient Consumer<ContextUtils.EntityItemEntityContext> onItemPickup;
     public transient Function<ContextUtils.LineOfSightContext, Object> hasLineOfSight;
-
     public transient Consumer<LivingEntity> onEnterCombat;
     public transient Consumer<LivingEntity> onLeaveCombat;
-
     public transient Function<LivingEntity, Object> isAffectedByPotions;
-
     public transient Function<LivingEntity, Object> isAttackable;
-
     public transient Function<ContextUtils.EntityItemLevelContext, Object> canTakeItem;
-
     public transient Function<LivingEntity, Object> isSleeping;
     public transient Consumer<ContextUtils.EntityBlockPosContext> onStartSleeping;
     public transient Consumer<LivingEntity> onStopSleeping;
-
     public transient Consumer<ContextUtils.EntityItemLevelContext> eat;
-
     public transient Function<ContextUtils.PlayerEntityContext, Object> shouldRiderFaceForward;
-
     public transient Function<LivingEntity, Object> canFreeze;
     public transient Function<LivingEntity, Object> isCurrentlyGlowing;
     public transient Function<LivingEntity, Object> canDisableShield;
     public transient Function<LivingEntity, Object> setMaxFallDistance;
     public transient Consumer<ContextUtils.MobInteractContext> onInteract;
-
     public transient Consumer<LivingEntity> onClientRemoval;
     public transient Consumer<LivingEntity> onAddedToWorld;
     public transient Consumer<LivingEntity> lavaHurt;
     public transient Consumer<LivingEntity> onFlap;
     public transient Function<LivingEntity, Object> dampensVibrations;
-
     public transient Consumer<ContextUtils.PlayerEntityContext> playerTouch;
     public transient Function<LivingEntity, Object> showVehicleHealth;
-
     public transient Consumer<ContextUtils.ThunderHitContext> thunderHit;
     public transient Function<ContextUtils.DamageContext, Object> isInvulnerableTo;
     public transient Function<LivingEntity, Object> canChangeDimensions;
@@ -244,18 +189,15 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> onRemovedFromWorld;
     public transient Consumer<LivingEntity> onLivingJump;
     public transient Consumer<LivingEntity> aiStep;
-
     public transient Consumer<AttributeSupplier.Builder> attributes;
     public SpawnPlacements.Type placementType;
     public Heightmap.Types heightMap;
     public SpawnPlacements.SpawnPredicate<? extends Entity> spawnPredicate;
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
     public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
-
     public transient Consumer<ContextUtils.RenderContext> render;
     public transient MobType mobType;
     public transient Function<LivingEntity, Object> isFreezing;
-
     public transient Function<ContextUtils.CollidingEntityContext, Object> canCollideWith;
     public transient Boolean defaultDeathPose;
     public transient Function<ContextUtils.Vec3Context, Object> travelVector;
