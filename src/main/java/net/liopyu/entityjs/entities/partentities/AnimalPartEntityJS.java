@@ -1,13 +1,10 @@
 package net.liopyu.entityjs.entities.partentities;
 
-import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.partbuilders.AnimalEntityPartBuilder;
+import net.liopyu.entityjs.builders.partbuilders.PartBuilder;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -15,17 +12,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
@@ -39,11 +31,9 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
     private final EntityDimensions size;
     public float width;
     public float height;
-    protected final AnimalEntityPartBuilder builder;
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
+    protected final PartBuilder builder;
 
-    public AnimalPartEntityJS(AnimalEntityJS pParentMob, String pName, float pWidth, float pHeight, AnimalEntityPartBuilder builder) {
+    public AnimalPartEntityJS(AnimalEntityJS pParentMob, String pName, float pWidth, float pHeight, PartBuilder builder) {
         super(pParentMob);
         this.builder = builder;
         this.size = EntityDimensions.scalable(pWidth, pHeight);
@@ -52,6 +42,10 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
         this.name = pName;
         this.width = pWidth;
         this.height = pHeight;
+    }
+
+    public String entityName() {
+        return this.name;
     }
 
     @Override
@@ -78,10 +72,6 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
     }
 
     public boolean hurt(DamageSource pSource, float pAmount) {
-        if (builder != null && builder.canBeHurt != null) {
-            final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, pSource, pAmount);
-            return builder.canBeHurt.apply(this);
-        }
         return !this.isInvulnerableTo(pSource) && super.hurt(pSource, pAmount);
     }
 
@@ -193,7 +183,7 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
     @Override
     public boolean canCollideWith(Entity pEntity) {
         if (builder.canCollideWith != null) {
-            final ContextUtils.CollidingEntityContext context = new ContextUtils.CollidingEntityContext(this, pEntity);
+            final ContextUtils.ECollidingEntityContext context = new ContextUtils.ECollidingEntityContext(this, pEntity);
             Object obj = builder.canCollideWith.apply(context);
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
@@ -224,7 +214,7 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
         if (obj != null) {
             return (float) obj;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + builder.get() + ". Value: " + builder.blockSpeedFactor.apply(this) + ". Must be a float, defaulting to " + super.getBlockSpeedFactor());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + entityName() + ". Value: " + builder.blockSpeedFactor.apply(this) + ". Must be a float, defaulting to " + super.getBlockSpeedFactor());
             return super.getBlockSpeedFactor();
         }
     }
@@ -234,7 +224,7 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
         if (builder.canAddPassenger == null) {
             return super.canAddPassenger(entity);
         }
-        final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(entity, this);
+        final ContextUtils.EPassengerEntityContext context = new ContextUtils.EPassengerEntityContext(entity, this);
         Object obj = builder.canAddPassenger.apply(context);
         if (obj instanceof Boolean) {
             return (boolean) obj;
@@ -303,7 +293,7 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
     @Override
     public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
         if (builder.onLivingFall != null) {
-            final ContextUtils.EntityFallDamageContext context = new ContextUtils.EntityFallDamageContext(this, damageMultiplier, distance, damageSource);
+            final ContextUtils.EEntityFallDamageContext context = new ContextUtils.EEntityFallDamageContext(this, damageMultiplier, distance, damageSource);
             builder.onLivingFall.accept(context);
         }
         return super.causeFallDamage(distance, damageMultiplier, damageSource);
@@ -432,7 +422,7 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
     public void thunderHit(ServerLevel p_19927_, LightningBolt p_19928_) {
         if (builder.thunderHit != null) {
             super.thunderHit(p_19927_, p_19928_);
-            final ContextUtils.ThunderHitContext context = new ContextUtils.ThunderHitContext(p_19927_, p_19928_, this);
+            final ContextUtils.EThunderHitContext context = new ContextUtils.EThunderHitContext(p_19927_, p_19928_, this);
             builder.thunderHit.accept(context);
         }
     }
@@ -441,7 +431,7 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
     @Override
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
-            final ContextUtils.DamageContext context = new ContextUtils.DamageContext(this, p_20122_);
+            final ContextUtils.EDamageContext context = new ContextUtils.EDamageContext(this, p_20122_);
             Object obj = builder.isInvulnerableTo.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -468,7 +458,7 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
     @Override
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
         if (builder.mayInteract != null) {
-            final ContextUtils.MayInteractContext context = new ContextUtils.MayInteractContext(p_146843_, p_146844_, this);
+            final ContextUtils.EMayInteractContext context = new ContextUtils.EMayInteractContext(p_146843_, p_146844_, this);
             Object obj = builder.mayInteract.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -483,7 +473,7 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
     @Override
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
-            final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
+            final ContextUtils.ECanTrampleContext context = new ContextUtils.ECanTrampleContext(state, pos, fallDistance, this);
             Object obj = builder.canTrample.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -514,29 +504,4 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
         return super.getMaxFallDistance();
     }
 
-    @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return armorItems;
-    }
-
-    @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return handItems;
-    }
-
-    protected void verifyEquippedItem(ItemStack pStack) {
-        CompoundTag compoundtag = pStack.getTag();
-        if (compoundtag != null) {
-            pStack.getItem().verifyTagAfterLoad(compoundtag);
-        }
-    }
-
-    @Override
-    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
-        verifyEquippedItem(stack);
-        switch (slot.getType()) {
-            case HAND -> onEquipItem(slot, handItems.set(slot.getIndex(), stack), stack);
-            case ARMOR -> onEquipItem(slot, armorItems.set(slot.getIndex(), stack), stack);
-        }
-    }
 }
