@@ -2,8 +2,8 @@ package net.liopyu.entityjs.entities;
 
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.builders.AnimalEntityBuilder;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.entities.partentities.AnimalPartEntityJS;
@@ -110,6 +110,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
     protected final AnimalEntityJSBuilder builder;
+
     protected PathNavigation navigation;
     private final AnimalPartEntityJS[] partEntities;
 
@@ -119,7 +120,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
         List<AnimalPartEntityJS> tempPartEntities = new ArrayList<>();
         for (ContextUtils.PartEntityParams params : builder.partEntityParamsList) {
-            AnimalPartEntityJS partEntity = new AnimalPartEntityJS(this, params.name, params.width, params.height);
+            AnimalPartEntityJS partEntity = new AnimalPartEntityJS(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
         partEntities = tempPartEntities.toArray(new AnimalPartEntityJS[0]);
@@ -139,9 +140,19 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         }
     }
 
-    private void tickPart(AnimalPartEntityJS part, double offsetX, double offsetY, double offsetZ) {
-        part.setPos(this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ);
+    public void tickPart(String partName, double offsetX, double offsetY, double offsetZ) {
+        var x = this.getX();
+        var y = this.getY();
+        var z = this.getZ();
+        for (AnimalPartEntityJS partEntity : partEntities) {
+            if (partEntity.name.equals(partName)) {
+                partEntity.movePart(x + offsetX, y + offsetY, z + offsetZ, partEntity.getYRot(), partEntity.getXRot());
+                return;
+            }
+        }
+        ConsoleJS.STARTUP.info("Part with name " + partName + " not found.");
     }
+
 
     @Override
     public boolean isMultipartEntity() {
@@ -826,9 +837,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public void tick() {
-
         super.tick();
-
         if (builder.tick != null) {
             if (!this.level().isClientSide()) {
                 builder.tick.accept(this);

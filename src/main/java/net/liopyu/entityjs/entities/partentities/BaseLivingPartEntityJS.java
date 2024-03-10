@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.entities.partentities;
 
+import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.entities.BaseLivingEntityJS;
 import net.minecraft.nbt.CompoundTag;

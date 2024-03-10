@@ -297,7 +297,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mountJumpingEnabled = false;
     }
 
-    @Info(value = """
+    /*@Info(value = """
             Adds a part entity to the mob. 
                         
             Example usage:
@@ -312,7 +312,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> addPartEntity(String name, float width, float height) {
         partEntityParamsList.add(new ContextUtils.PartEntityParams(name, width, height));
         return this;
-    }
+    }*/
 
     @Info(value = """
             Consumer overriding the tickDeath responsible to counting down

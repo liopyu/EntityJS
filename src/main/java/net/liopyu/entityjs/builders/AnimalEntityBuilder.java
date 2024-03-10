@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
+import net.liopyu.entityjs.builders.partbuilders.AnimalEntityPartBuilder;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.resources.ResourceLocation;
@@ -20,7 +21,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Function<LivingEntity, Object> canBreed;
     public transient Function<ContextUtils.EntityAnimalContext, Object> canMate;
     public transient Consumer<ContextUtils.LevelAnimalContext> onSpawnChildFromBreeding;
-
+    public final List<ContextUtils.PartEntityParams> partEntityParamsList = new ArrayList<>();
 
     public AnimalEntityBuilder(ResourceLocation i) {
         super(i);
@@ -28,6 +29,12 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
         followLeashSpeed = 1.0D;
     }
 
+    public AnimalEntityBuilder<T> addPartEntity(String name, float width, float height, Consumer<AnimalEntityPartBuilder> builderConsumer) {
+        AnimalEntityPartBuilder partBuilder = new AnimalEntityPartBuilder();
+        builderConsumer.accept(partBuilder);
+        partEntityParamsList.add(new ContextUtils.PartEntityParams(name, width, height, partBuilder));
+        return this;
+    }
 
     @Info(value = """
             Sets the offspring for the Animal Entity.

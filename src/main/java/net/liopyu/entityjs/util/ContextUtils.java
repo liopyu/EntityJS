@@ -1,19 +1,10 @@
 package net.liopyu.entityjs.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
+import net.liopyu.entityjs.builders.partbuilders.AnimalEntityPartBuilder;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.client.KubeJSProjectileEntityRenderer;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.entities.IProjectileEntityJS;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -35,20 +26,22 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.spongepowered.asm.mixin.Interface;
 
 public class ContextUtils {
     public static class PartEntityParams {
         public final String name;
         public final float width;
         public final float height;
+        public final AnimalEntityPartBuilder builder;
 
-        public PartEntityParams(String name, float width, float height) {
+        public PartEntityParams(String name, float width, float height, AnimalEntityPartBuilder builder) {
             this.name = name;
             this.width = width;
             this.height = height;
+            this.builder = builder;
         }
     }
+
 
     public static class PlayerEntityContext {
         @Info("The living entity associated with the player")
@@ -165,13 +158,13 @@ public class ContextUtils {
 
     public static class DamageContext {
         @Info("The living entity that is the target of the damage")
-        public final LivingEntity targetEntity;
+        public final LivingEntity entity;
 
         @Info("The source of the damage")
         public final DamageSource damageSource;
 
-        public DamageContext(LivingEntity targetEntity, DamageSource damageSource) {
-            this.targetEntity = targetEntity;
+        public DamageContext(LivingEntity entity, DamageSource damageSource) {
+            this.entity = entity;
             this.damageSource = damageSource;
         }
     }
