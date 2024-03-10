@@ -52,7 +52,6 @@ public class PartBuilder {
     public transient Object setSwimSound;
     public transient Function<Entity, Object> isFlapping;
     public transient Object setDeathSound;
-    public transient BaseEntityBuilder.RenderType renderType;
     public transient EntityType<?> getType;
     public transient Object mainArm;
 
@@ -88,7 +87,6 @@ public class PartBuilder {
 
     public transient Function<ContextUtils.VisualContext, Object> visibilityPercent;
 
-    public transient Function<ContextUtils.EntityTargetContext, Object> canAttack;
 
     public transient Function<ContextUtils.OnEffectContext, Object> canBeAffected;
 
@@ -288,63 +286,6 @@ public class PartBuilder {
         return this;
     }
 
-    @Info(value = """
-            Consumer overriding the tickDeath responsible to counting down
-            the ticks it takes to remove the entity when it dies.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.deathTick(entity => {
-                // Override the tickDeath method in the entity
-            });
-            ```
-            """)
-    public PartBuilder tickDeath(Consumer<Entity> tickDeath) {
-        this.tickDeath = tickDeath;
-        return this;
-    }
-
-    @Info(value = """
-            Boolean determining whether the entity can jump while mounted by a player.
-            (Currently experimental jumping logic subject to change in the future)
-            Defaults to false.
-            Example usage:
-            ```javascript
-            entityBuilder.mountJumpingEnabled(true);
-            ```
-            """)
-    public PartBuilder mountJumpingEnabled(boolean mountJumpingEnabled) {
-        this.mountJumpingEnabled = mountJumpingEnabled;
-        return this;
-    }
-
-
-    @Info(value = """
-            Boolean determining whether the passenger is able to steer the entity while riding.
-            Defaults to true.
-            Example usage:
-            ```javascript
-            entityBuilder.canSteer(false);
-            ```
-            """)
-    public PartBuilder canSteer(boolean canSteer) {
-        this.canSteer = canSteer;
-        return this;
-    }
-
-
-    @Info(value = """
-            Boolean determining if the entity will turn sideways on death.
-            Defaults to true.
-            Example usage:
-            ```javascript
-            entityBuilder.defaultDeathPose(false);
-            ```
-            """)
-    public PartBuilder defaultDeathPose(boolean defaultDeathPose) {
-        this.defaultDeathPose = defaultDeathPose;
-        return this;
-    }
 
     @Info(value = """
             Function determining if the entity may collide with another entity
@@ -414,24 +355,6 @@ public class PartBuilder {
             """)
     public PartBuilder isFreezing(Function<Entity, Object> isFreezing) {
         this.isFreezing = isFreezing;
-        return this;
-    }
-
-    @Info(value = """
-            Defines logic to render the entity.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.render(context => {
-                // Define logic to render the entity
-                if (context.entity.isBaby()) {
-                    context.poseStack.scale(0.5, 0.5, 0.5);
-                }
-            });
-            ```
-            """)
-    public PartBuilder render(Consumer<ContextUtils.RenderContext> render) {
-        this.render = render;
         return this;
     }
 
@@ -1318,26 +1241,6 @@ public class PartBuilder {
             """)
     public PartBuilder visibilityPercent(Function<ContextUtils.VisualContext, Object> visibilityPercent) {
         this.visibilityPercent = visibilityPercent;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a predicate function to determine whether the entity can attack another entity.
-            The provided Predicate accepts a {@link ContextUtils.EntityContext} parameter,
-            representing the entity that may be attacked.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.canAttack(context => {
-                // Define conditions to check if the entity can attack the targetEntity
-                // Use information about the Entity provided by the context.
-                return // Some boolean condition indicating if the entity can attack the targetEntity;
-            });
-            ```
-            """)
-    public PartBuilder canAttack(Function<ContextUtils.EntityTargetContext, Object> customCanAttack) {
-        this.canAttack = customCanAttack;
         return this;
     }
 

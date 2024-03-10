@@ -155,10 +155,17 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
 
     @Override
     public boolean isAttackable() {
-        return builder.isAttackable != null ? builder.isAttackable : super.isAttackable();
+        if (builder.isAttackable != null) {
+            Object obj = builder.isAttackable.apply(this);
+            if (obj instanceof Boolean) {
+                return (boolean) obj;
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAttackable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAttackable());
+        }
+        return super.isAttackable();
     }
 
-    //(Base LivingEntity/Entity Overrides)
+    //(Base Entity Overrides)
     @Override
     public LivingEntity getControllingPassenger() {
         Entity var2 = this.getFirstPassenger();

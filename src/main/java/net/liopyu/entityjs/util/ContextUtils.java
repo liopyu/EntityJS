@@ -137,18 +137,6 @@ public class ContextUtils {
         }
     }
 
-    public static class EntityTargetContext {
-
-        public final LivingEntity entity;
-
-
-        public final LivingEntity target;
-
-        public EntityTargetContext(LivingEntity entity, LivingEntity target) {
-            this.entity = entity;
-            this.target = target;
-        }
-    }
 
     public static class EntityItemLevelContext {
         @Info("The living entity")
