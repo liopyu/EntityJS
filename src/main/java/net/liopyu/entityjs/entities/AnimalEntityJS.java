@@ -93,7 +93,6 @@ import java.util.Objects;
 @MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
 @ParametersAreNonnullByDefault
 public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttackMob {
-    public boolean mountJumping = false;
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     protected final AnimalEntityJSBuilder builder;
@@ -396,7 +395,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
         }
-        if (this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
+        if (this.canJump() && this.onGround && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
     }

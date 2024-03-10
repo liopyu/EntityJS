@@ -330,7 +330,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Sets whether the entity can jump when mounted.
+            Sets whether the entity can jump when pathfinding.
                         
             @param canJump A boolean indicating whether the entity can jump.
                         
