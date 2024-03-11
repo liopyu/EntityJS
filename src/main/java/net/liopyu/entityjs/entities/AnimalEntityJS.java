@@ -149,7 +149,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
                 return;
             }
         }
-        EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found.");
+        EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found for entity: " + entityName());
     }
 
 

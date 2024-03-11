@@ -115,7 +115,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
                 return;
             }
         }
-        EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found.");
+        EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found for entity: " + entityName());
     }
 
 
