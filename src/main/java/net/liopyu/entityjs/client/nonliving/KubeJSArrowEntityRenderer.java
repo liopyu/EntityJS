@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.client;
+package net.liopyu.entityjs.client.nonliving;
 
 
 import net.liopyu.entityjs.builders.nonliving.ArrowEntityBuilder;

@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.client;
+package net.liopyu.entityjs.client.nonliving;
 
 
 import com.mojang.blaze3d.vertex.PoseStack;

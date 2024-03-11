@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.client.model;
+package net.liopyu.entityjs.client.living.model;
 
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;

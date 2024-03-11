@@ -1,9 +1,9 @@
-package net.liopyu.entityjs.client;
+package net.liopyu.entityjs.client.living;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.client.model.EntityModelJS;
+import net.liopyu.entityjs.client.living.model.EntityModelJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.ChatFormatting;

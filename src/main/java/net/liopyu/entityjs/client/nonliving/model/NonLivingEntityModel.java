@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.client.model;
+package net.liopyu.entityjs.client.nonliving.model;
 
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;

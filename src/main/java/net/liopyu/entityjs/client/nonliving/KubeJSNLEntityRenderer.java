@@ -1,8 +1,8 @@
-package net.liopyu.entityjs.client;
+package net.liopyu.entityjs.client.nonliving;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
-import net.liopyu.entityjs.client.model.NonLivingEntityModel;
+import net.liopyu.entityjs.client.nonliving.model.NonLivingEntityModel;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.client.renderer.MultiBufferSource;
