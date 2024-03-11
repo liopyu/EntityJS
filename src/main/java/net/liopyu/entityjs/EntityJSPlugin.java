@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
 import net.liopyu.entityjs.builders.*;
+import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.world.InteractionResult;
 
@@ -21,7 +22,7 @@ public class EntityJSPlugin extends KubeJSPlugin {
 
     @Override
     public void registerBindings(BindingsEvent event) {
-        event.add("InteractionResult", InteractionResult.class);
+        event.add("EntityJSUtils", EntityJSUtils.class);
     }
 
     @Override
