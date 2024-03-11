@@ -2,9 +2,12 @@ package net.liopyu.entityjs.client;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.EntityJSMod;
-import net.liopyu.entityjs.builders.ArrowEntityBuilder;
-import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.ProjectileEntityBuilder;
+import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
+import net.liopyu.entityjs.client.nonliving.KubeJSArrowEntityRenderer;
+import net.liopyu.entityjs.client.nonliving.KubeJSProjectileEntityRenderer;
 import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;

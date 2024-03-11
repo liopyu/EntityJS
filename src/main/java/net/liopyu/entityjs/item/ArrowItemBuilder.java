@@ -1,10 +1,9 @@
 package net.liopyu.entityjs.item;
 
-import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
-import net.liopyu.entityjs.entities.ArrowEntityJS;
+import net.liopyu.entityjs.builders.nonliving.ArrowEntityJSBuilder;
+import net.liopyu.entityjs.entities.nonliving.entityjs.ArrowEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
