@@ -92,7 +92,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
                 return;
             }
         }
-        ConsoleJS.STARTUP.info("Part with name " + partName + " not found.");
+        EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found for entity: " + entityName());
     }
 
 

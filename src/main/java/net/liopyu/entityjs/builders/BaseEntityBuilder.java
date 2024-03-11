@@ -111,7 +111,7 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
     @Info(value = """
             Sets a consumer to handle lerping (linear interpolation) of the entity's position.
                         
-            @param consumer Consumer accepting a {@link ContextUtils.LerpToContext} parameter,
+            @param lerpTo Consumer accepting a {@link ContextUtils.LerpToContext} parameter,
                             providing information and control over the lerping process.
                         
             Example usage:
@@ -131,7 +131,7 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
     @Info(value = """
             Sets a function to determine whether the entity should render at a squared distance.
                         
-            @param function Function accepting a {@link ContextUtils.EntitySqrDistanceContext} parameter,
+            @param shouldRenderAtSqrDistance Function accepting a {@link ContextUtils.EntitySqrDistanceContext} parameter,
                              defining the conditions under which the entity should render.
                         
             Example usage:
@@ -152,7 +152,7 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
     @Info(value = """
             Sets whether the entity is attackable or not.
                         
-            @param b Boolean value indicating whether the entity is attackable.
+            @param isAttackable Boolean value indicating whether the entity is attackable.
                         
             Example usage:
             ```javascript

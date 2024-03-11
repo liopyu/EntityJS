@@ -10,10 +10,7 @@ import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
-import net.liopyu.entityjs.util.ContextUtils;
-import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.liopyu.entityjs.util.EventHandlers;
-import net.liopyu.entityjs.util.ModKeybinds;
+import net.liopyu.entityjs.util.*;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -151,7 +148,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
                 return;
             }
         }
-        ConsoleJS.STARTUP.info("Part with name " + partName + " not found.");
+        EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found for entity: " + entityName());
     }
 
 

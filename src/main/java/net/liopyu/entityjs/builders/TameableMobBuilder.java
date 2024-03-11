@@ -21,8 +21,6 @@ public abstract class TameableMobBuilder<T extends TamableAnimal & IAnimatableJS
 
     public TameableMobBuilder(ResourceLocation i) {
         super(i);
-        canJump = true;
-        followLeashSpeed = 1.0D;
     }
 
 

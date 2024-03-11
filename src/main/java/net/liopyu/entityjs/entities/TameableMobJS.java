@@ -141,7 +141,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
                 return;
             }
         }
-        ConsoleJS.STARTUP.info("Part with name " + partName + " not found.");
+        EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found for entity: " + entityName());
     }
 
 
