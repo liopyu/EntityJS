@@ -3,13 +3,15 @@ package net.liopyu.entityjs;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
-import net.liopyu.entityjs.builders.*;
-import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.builders.living.AnimalEntityJSBuilder;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityJSBuilder;
+import net.liopyu.entityjs.builders.living.MobEntityJSBuilder;
+import net.liopyu.entityjs.builders.living.TameableMobJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.ArrowEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
 
 public class EntityJSPlugin extends KubeJSPlugin {
 

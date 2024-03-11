@@ -2,7 +2,7 @@ package net.liopyu.entityjs.util.implementation;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.RegistryUtil;
@@ -45,7 +45,7 @@ public class EventBasedSpawnModifier implements BiomeModifier {
                         if (biome.is(rl)) {
                             spawnsBuilder.addSpawn(spawnerData.type.getCategory(), spawnerData);
                         }
-                       return rl;
+                        return rl;
                     }, tag -> {
                         if (biome.is(tag)) {
                             spawnsBuilder.addSpawn(spawnerData.type.getCategory(), spawnerData);
@@ -56,7 +56,7 @@ public class EventBasedSpawnModifier implements BiomeModifier {
             }
 
             if (event != null) {
-                for (BiomeSpawnsEventJS.Addition addition: event.additions) {
+                for (BiomeSpawnsEventJS.Addition addition : event.additions) {
                     for (Either<ResourceLocation, TagKey<Biome>> either : addition.biomes()) {
                         either.map(rl -> {
                             if (biome.is(rl)) {
@@ -106,5 +106,7 @@ public class EventBasedSpawnModifier implements BiomeModifier {
         return RegistryUtil.EVENT_SPAWN_MODIFIER.get();
     }
 
-    public record BiomeSpawn(List<Either<ResourceLocation, TagKey<Biome>>> biomes, Supplier<MobSpawnSettings.SpawnerData> spawnerData) {}
+    public record BiomeSpawn(List<Either<ResourceLocation, TagKey<Biome>>> biomes,
+                             Supplier<MobSpawnSettings.SpawnerData> spawnerData) {
+    }
 }

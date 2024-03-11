@@ -1,11 +1,9 @@
 package net.liopyu.entityjs.item;
 
-import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
 import dev.latvian.mods.kubejs.typings.Info;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
-import net.liopyu.entityjs.builders.ProjectileEntityJSBuilder;
-import net.liopyu.entityjs.entities.ProjectileEntityJS;
+import net.liopyu.entityjs.builders.nonliving.ProjectileEntityJSBuilder;
+import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;

@@ -1,7 +1,7 @@
 package net.liopyu.entityjs.client.model;
 
-import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.entities.IAnimatableJS;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import software.bernie.geckolib.model.GeoModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;

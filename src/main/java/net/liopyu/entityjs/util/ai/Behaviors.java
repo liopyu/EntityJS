@@ -508,7 +508,7 @@ public enum Behaviors {
 
     @Info(value = "Creates a `StayCloseToTarget` behavior", params = {
             @Param(name = "targetPositionTracker", value = "A function that returns the position tracker for the entity, the returned tracker may be null, see `.blockPosTracker()` and `.entityPosTracker()`"),
-            @Param(name = "pPredicate", value = "The predicate to use with the Living Entity as an argument"),
+            @Param(name = "pPredicate", value = "The predicate to use with the living Entity as an argument"),
             @Param(name = "closeEnough", value = "The distance that is close enough to the target"),
             @Param(name = "tooFar", value = "The distance that is too far from the target"),
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")

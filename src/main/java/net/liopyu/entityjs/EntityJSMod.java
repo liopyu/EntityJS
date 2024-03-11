@@ -1,26 +1,15 @@
 package net.liopyu.entityjs;
 
 import com.mojang.logging.LogUtils;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.client.ClientEventHandlers;
-import net.liopyu.entityjs.entities.AnimalEntityJS;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.RegistryUtil;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
-
-import java.util.HashSet;
-import java.util.Set;
 
 
 @Mod(EntityJSMod.MOD_ID)

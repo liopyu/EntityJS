@@ -1,12 +1,9 @@
 package net.liopyu.entityjs.client.model;
 
-import net.liopyu.entityjs.builders.BaseEntityBuilder;
-import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.entities.IAnimatableJSNL;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import software.bernie.geckolib.model.GeoModel;
 
 public class NonLivingEntityModel<T extends Entity & IAnimatableJSNL> extends GeoModel<T> {
