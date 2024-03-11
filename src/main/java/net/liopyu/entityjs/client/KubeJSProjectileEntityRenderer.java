@@ -4,6 +4,7 @@ package net.liopyu.entityjs.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.liopyu.entityjs.entities.IAnimatableJSNL;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -22,7 +23,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class KubeJSProjectileEntityRenderer<T extends ThrowableItemProjectile & IProjectileEntityJS> extends EntityRenderer<T> {
+public class KubeJSProjectileEntityRenderer<T extends ThrowableItemProjectile & IAnimatableJSNL> extends EntityRenderer<T> {
 
     private final ProjectileEntityBuilder<T> builder;
     public static RenderType RENDER_TYPE;

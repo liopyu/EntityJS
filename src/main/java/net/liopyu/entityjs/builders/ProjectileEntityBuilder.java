@@ -2,6 +2,7 @@ package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
+import net.liopyu.entityjs.entities.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.IProjectileEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile & IProjectileEntityJS> extends BaseEntityBuilder<T> {
+public abstract class ProjectileEntityBuilder<T extends ThrowableItemProjectile & IAnimatableJSNL> extends BaseEntityBuilder<T> {
     public transient Function<T, Object> textureLocation;
     public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;

@@ -58,6 +58,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     public final PartEntityJS<?>[] partEntities;
 
+
     public BaseLivingEntityJS(BaseLivingEntityJSBuilder builder, EntityType<? extends LivingEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
@@ -209,6 +210,11 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     //(Base LivingEntity/Entity Overrides)
+    @Override
+    public MobType getMobType() {
+        return builder.mobType;
+    }
+
     protected boolean thisJumping = false;
 
     public boolean ableToJump() {

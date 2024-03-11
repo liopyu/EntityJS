@@ -7,6 +7,7 @@ import net.liopyu.entityjs.entities.ArrowEntityJS;
 import net.liopyu.entityjs.item.ArrowItemBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 
 import java.util.function.Consumer;
 
@@ -26,6 +27,11 @@ public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
     @Override
     public EntityType.EntityFactory<ArrowEntityJS> factory() {
         return (type, level) -> new ArrowEntityJS(this, type, level);
+    }
+
+    @Override
+    public AttributeSupplier.Builder getAttributeBuilder() {
+        return null;
     }
 
     @Info(value = "Indicates that no arrow item should be created for this entity type")

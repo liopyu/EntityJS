@@ -3,6 +3,7 @@ package net.liopyu.entityjs.builders;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.entities.ArrowEntityJS;
+import net.liopyu.entityjs.entities.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.IArrowEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.function.*;
 
 
-public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseEntityBuilder<T> {
+public abstract class ArrowEntityBuilder<T extends AbstractArrow & IAnimatableJSNL> extends BaseEntityBuilder<T> {
     public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Function<T, Object> textureLocation;
     public transient Consumer<AbstractArrow> tickDespawn;

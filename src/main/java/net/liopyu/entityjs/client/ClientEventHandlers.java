@@ -3,6 +3,7 @@ package net.liopyu.entityjs.client;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.builders.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
 import net.liopyu.entityjs.util.ModKeybinds;
@@ -41,6 +42,9 @@ public class ClientEventHandlers {
         }
         for (ProjectileEntityBuilder<?> builder : ProjectileEntityBuilder.thisList) {
             event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSProjectileEntityRenderer<>(renderManager, builder));
+        }
+        for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
+            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSNLEntityRenderer<>(renderManager, builder));
         }
     }
 

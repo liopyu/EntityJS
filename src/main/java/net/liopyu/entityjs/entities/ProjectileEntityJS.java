@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.entities;
 
+import net.liopyu.entityjs.builders.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -23,10 +25,11 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.core.jmx.Server;
 import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 
 import java.util.Objects;
 
-public class ProjectileEntityJS extends ThrowableItemProjectile implements IProjectileEntityJS, ItemSupplier {
+public class ProjectileEntityJS extends ThrowableItemProjectile implements IAnimatableJSNL, ItemSupplier {
 
 
     public ProjectileEntityJSBuilder builder;
@@ -42,8 +45,28 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     }
 
     @Override
+    public BaseEntityBuilder<?> getBuilder() {
+        return null;
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return null;
+    }
+
+    @Override
+    public ArrowEntityBuilder<?> getArrowBuilder() {
+        return null;
+    }
+
+    @Override
     public ProjectileEntityBuilder<?> getProjectileBuilder() {
         return builder;
+    }
+
+    @Override
+    public void setPickUpItem(ItemStack stack) {
+
     }
 
 

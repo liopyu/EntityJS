@@ -8,6 +8,7 @@ import net.liopyu.entityjs.item.ArrowItemBuilder;
 import net.liopyu.entityjs.item.ProjectileItemBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
@@ -31,6 +32,11 @@ public class ProjectileEntityJSBuilder extends ProjectileEntityBuilder<Projectil
     @Override
     public EntityType.EntityFactory<ProjectileEntityJS> factory() {
         return (type, level) -> new ProjectileEntityJS(this, type, level);
+    }
+
+    @Override
+    public AttributeSupplier.Builder getAttributeBuilder() {
+        return null;
     }
 
     @Info(value = "Indicates that no projectile item should be created for this entity type")

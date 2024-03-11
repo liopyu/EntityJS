@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.liopyu.entityjs.builders.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.ArrowEntityJSBuilder;
+import net.liopyu.entityjs.builders.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -31,6 +33,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -40,7 +43,7 @@ import java.util.Objects;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
+public class ArrowEntityJS extends AbstractArrow implements IAnimatableJSNL {
 
     public final ArrowEntityJSBuilder builder;
     @NotNull
@@ -72,8 +75,23 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     @Override
+    public BaseEntityBuilder<?> getBuilder() {
+        return null;
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return null;
+    }
+
+    @Override
     public ArrowEntityBuilder<?> getArrowBuilder() {
         return builder;
+    }
+
+    @Override
+    public ProjectileEntityBuilder<?> getProjectileBuilder() {
+        return null;
     }
 
     @Override

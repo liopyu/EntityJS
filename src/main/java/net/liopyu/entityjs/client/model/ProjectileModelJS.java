@@ -1,13 +1,14 @@
 package net.liopyu.entityjs.client.model;
 
 import net.liopyu.entityjs.builders.ProjectileEntityBuilder;
+import net.liopyu.entityjs.entities.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.IProjectileEntityJS;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 
-public class ProjectileModelJS<T extends ThrowableItemProjectile & IProjectileEntityJS> extends EntityRenderer<T> {
+public class ProjectileModelJS<T extends ThrowableItemProjectile & IAnimatableJSNL> extends EntityRenderer<T> {
     private final ProjectileEntityBuilder<T> builder;
 
 
