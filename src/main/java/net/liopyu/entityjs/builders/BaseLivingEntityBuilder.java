@@ -263,6 +263,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     public transient boolean mountJumpingEnabled;
     public transient Consumer<LivingEntity> tickDeath;
+    public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -295,6 +296,29 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         defaultDeathPose = true;
         canSteer = true;
         mountJumpingEnabled = true;
+    }
+
+    @Info(value = """
+            Adds an extra hitbox to the mob. Aka part-entities.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.addPartEntity("head", 1, 2, builder => {
+                // Can also be null
+                builder.isPickable(true)
+            });
+            ``` 
+            """, params = {
+            @Param(name = "name", value = "The name of the part"),
+            @Param(name = "width", value = "The width of the part"),
+            @Param(name = "height", value = "The height of the part"),
+            @Param(name = "builderConsumer", value = "The builder for the part, very similar to the normal builder callbacks")
+    })
+    public BaseLivingEntityBuilder<T> addPartEntity(String name, float width, float height, Consumer<PartBuilder<T>> builderConsumer) {
+        PartBuilder<T> partBuilder = new PartBuilder<>();
+        builderConsumer.accept(partBuilder);
+        partEntityParamsList.add(new ContextUtils.PartEntityParams<>(name, width, height, partBuilder));
+        return this;
     }
 
     @Info(value = """

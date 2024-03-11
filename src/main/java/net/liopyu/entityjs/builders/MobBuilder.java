@@ -44,6 +44,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner;
     public transient Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed;
     public transient Boolean canJump;
+    public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
@@ -65,6 +66,24 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         if (eggItem != null) {
             RegistryInfo.ITEM.addBuilder(eggItem);
         }
+    }
+
+    @Info(value = """
+            Sets a function to determine the PathNavigation of the entity.
+                        
+            @param createNavigation A Function accepting an EntityLevelContext parameter
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.createNavigation(context => {
+                const {entity, level} = context
+                return EntityJSUtils.createWallClimberNavigation(entity, level) // Return some path navigation
+            });
+            ```
+            """)
+    public MobBuilder<T> createNavigation(Function<ContextUtils.EntityLevelContext, Object> createNavigation) {
+        this.createNavigation = createNavigation;
+        return this;
     }
 
     @Info(value = """

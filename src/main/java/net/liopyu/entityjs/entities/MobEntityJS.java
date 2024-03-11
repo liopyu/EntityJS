@@ -20,6 +20,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -34,6 +35,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
@@ -57,6 +59,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -64,6 +67,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -71,13 +76,65 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     private final MobEntityJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
+    protected PathNavigation navigation;
+    public final PartEntityJS<?>[] partEntities;
 
-    public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> p_21368_, Level p_21369_) {
-        super(p_21368_, p_21369_);
+    public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
+        super(pEntityType, pLevel);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createInstanceCache(this);
+        List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
+        for (ContextUtils.PartEntityParams<MobEntityJS> params : builder.partEntityParamsList) {
+            PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
+            tempPartEntities.add(partEntity);
+        }
+        partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
+        this.navigation = this.createNavigation(pLevel);
     }
 
+
+    // Part Entity Logical Overrides --------------------------------
+    @Override
+    public void setId(int entityId) {
+        super.setId(entityId);
+        for (int i = 0; i < partEntities.length; i++) {
+            PartEntityJS<?> partEntity = partEntities[i];
+            if (partEntity != null) {
+                partEntity.setId(entityId + i + 1);
+            }
+        }
+    }
+
+    public void tickPart(String partName, double offsetX, double offsetY, double offsetZ) {
+        var x = this.getX();
+        var y = this.getY();
+        var z = this.getZ();
+        for (PartEntityJS<?> partEntity : partEntities) {
+            if (partEntity.name.equals(partName)) {
+                partEntity.movePart(x + offsetX, y + offsetY, z + offsetZ, partEntity.getYRot(), partEntity.getXRot());
+                return;
+            }
+        }
+        EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found.");
+    }
+
+
+    @Override
+    public boolean isMultipartEntity() {
+        return partEntities != null;
+    }
+
+    @Override
+    public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
+        super.recreateFromPacket(pPacket);
+    }
+
+    @Override
+    public PartEntity<?>[] getParts() {
+        return Objects.requireNonNullElseGet(partEntities, () -> new PartEntity<?>[0]);
+    }
+
+    //Builder and Animatable logic
     @Override
     public BaseLivingEntityBuilder<?> getBuilder() {
         return builder;
@@ -118,6 +175,16 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
 
     //Mob Overrides
+    @Override
+    protected PathNavigation createNavigation(Level pLevel) {
+        if (builder == null || builder.createNavigation == null) return new GroundPathNavigation(this, pLevel);
+        final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
+        Object obj = builder.createNavigation.apply(context);
+        if (obj instanceof PathNavigation p) return p;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
+        return new GroundPathNavigation(this, pLevel);
+    }
+
     @Override
     public boolean canBeLeashed(Player pPlayer) {
         if (builder.canBeLeashed != null) {

@@ -1,16 +1,10 @@
 package net.liopyu.entityjs.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.client.KubeJSProjectileEntityRenderer;
+import net.liopyu.entityjs.builders.PartBuilder;
 import net.liopyu.entityjs.entities.IAnimatableJS;
-import net.liopyu.entityjs.entities.IProjectileEntityJS;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -32,8 +26,24 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.entity.PartEntity;
 
 public class ContextUtils {
+    public static class PartEntityParams<T extends LivingEntity> {
+        public final String name;
+        public final float width;
+        public final float height;
+        public final PartBuilder<T> builder;
+
+        public PartEntityParams(String name, float width, float height, PartBuilder<T> builder) {
+            this.name = name;
+            this.width = width;
+            this.height = height;
+            this.builder = builder;
+        }
+    }
+
+
     public static class PlayerEntityContext {
         @Info("The living entity associated with the player")
         public final LivingEntity entity;
@@ -44,6 +54,19 @@ public class ContextUtils {
         public PlayerEntityContext(Player player, LivingEntity entity) {
             this.entity = entity;
             this.player = player;
+        }
+    }
+
+    public static class EntityLevelContext {
+        @Info("The living entity")
+        public final LivingEntity entity;
+
+        @Info("The level")
+        public final Level level;
+
+        public EntityLevelContext(Level level, LivingEntity entity) {
+            this.entity = entity;
+            this.level = level;
         }
     }
 
@@ -136,13 +159,13 @@ public class ContextUtils {
 
     public static class DamageContext {
         @Info("The living entity that is the target of the damage")
-        public final LivingEntity targetEntity;
+        public final LivingEntity entity;
 
         @Info("The source of the damage")
         public final DamageSource damageSource;
 
-        public DamageContext(LivingEntity targetEntity, DamageSource damageSource) {
-            this.targetEntity = targetEntity;
+        public DamageContext(LivingEntity entity, DamageSource damageSource) {
+            this.entity = entity;
             this.damageSource = damageSource;
         }
     }
@@ -174,6 +197,39 @@ public class ContextUtils {
         }
     }
 
+    public static class EntityHurtContext {
+        @Info("The living entity that was hurt")
+        public final Entity entity;
+
+        @Info("The source of the damage")
+        public final DamageSource damageSource;
+        @Info("The source of the damage")
+        public final float damageAmount;
+
+        public EntityHurtContext(Entity entity, DamageSource damageSource, float damageAmount) {
+            this.entity = entity;
+            this.damageSource = damageSource;
+            this.damageAmount = damageAmount;
+        }
+    }
+
+    public static class PartHurtContext<T extends LivingEntity> {
+        @Info("The part of the entity that was hurt")
+        public final PartEntity<T> part;
+        @Info("The source of the damage")
+        public final DamageSource source;
+        @Info("The source of the damage")
+        public final float amount;
+        @Info("The parent of the part entity")
+        public final LivingEntity entity;
+
+        public PartHurtContext(PartEntity<T> part, DamageSource source, float amount, LivingEntity entity) {
+            this.part = part;
+            this.source = source;
+            this.amount = amount;
+            this.entity = entity;
+        }
+    }
 
     public static class EntityDamageContext {
         @Info("The source of the damage")
@@ -677,7 +733,6 @@ public class ContextUtils {
         }
     }
 
-
     public static class EntityBlockPosLevelContext {
         @Info("The block position")
         public final BlockPos pos;
@@ -806,6 +861,121 @@ public class ContextUtils {
             this.poseStack = poseStack;
             this.bufferSource = bufferSource;
             this.packedLight = packedLight;
+        }
+    }
+
+    public static class EPassengerEntityContext {
+
+        public final Entity passenger;
+
+
+        public final Entity entity;
+
+        public EPassengerEntityContext(Entity passenger, Entity entity) {
+            this.passenger = passenger;
+            this.entity = entity;
+        }
+    }
+
+    public static class ECollidingEntityContext {
+        @Info("The entity getting collided with")
+        public final Entity entity;
+
+        @Info("The entity colliding")
+        public final Entity collidingEntity;
+
+        public ECollidingEntityContext(Entity entity, Entity collidingEntity) {
+            this.entity = entity;
+            this.collidingEntity = collidingEntity;
+        }
+    }
+
+    public static class ECanTrampleContext {
+        @Info("The block state at the position")
+        public final BlockState state;
+
+        @Info("The position of the block being considered for trampling")
+        public final BlockPos pos;
+
+        @Info("The distance fallen before trampling (if applicable)")
+        public final float fallDistance;
+
+        @Info("The living entity attempting to trample the block")
+        public final Entity entity;
+
+        public ECanTrampleContext(BlockState state, BlockPos pos, float fallDistance, Entity entity) {
+            this.state = state;
+            this.pos = pos;
+            this.fallDistance = fallDistance;
+            this.entity = entity;
+        }
+    }
+
+    public static class EDamageContext {
+        @Info("The living entity that is the target of the damage")
+        public final Entity entity;
+
+        @Info("The source of the damage")
+        public final DamageSource damageSource;
+
+        public EDamageContext(Entity entity, DamageSource damageSource) {
+            this.entity = entity;
+            this.damageSource = damageSource;
+        }
+    }
+
+    public static class EThunderHitContext {
+        @Info("The server level where the lightning strike occurred")
+        public final ServerLevel level;
+
+        @Info("The lightning bolt that struck")
+        public final LightningBolt lightningBolt;
+
+        @Info("The living entity affected by the lightning strike")
+        public final Entity entity;
+
+        public EThunderHitContext(ServerLevel level, LightningBolt lightningBolt, Entity entity) {
+            this.level = level;
+            this.lightningBolt = lightningBolt;
+            this.entity = entity;
+        }
+    }
+
+    public static class EEntityFallDamageContext {
+        @Info("The living entity experiencing fall damage")
+        public final Entity entity;
+
+        @Info("The distance fallen by the living entity")
+        public final float distance;
+
+        @Info("The multiplier applied to calculate fall damage")
+        public final float damageMultiplier;
+
+        @Info("The source of the fall damage")
+        public final DamageSource damageSource;
+
+        public EEntityFallDamageContext(Entity entity, float distance, float damageMultiplier, DamageSource damageSource) {
+            this.entity = entity;
+            this.distance = distance;
+            this.damageMultiplier = damageMultiplier;
+            this.damageSource = damageSource;
+        }
+    }
+
+    public static class EMayInteractContext {
+        @Info("The level where the interaction may occur")
+        public final Level level;
+
+        @Info("The position where the interaction may occur")
+        public final BlockPos pos;
+
+        @Info("The living entity involved in the interaction")
+        public final Entity entity;
+
+        public EMayInteractContext(Level level, BlockPos pos, Entity entity) {
+            this.level = level;
+            this.pos = pos;
+            this.entity = entity;
         }
     }
 }
