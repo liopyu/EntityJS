@@ -1,7 +1,6 @@
-package net.liopyu.entityjs.entities.partentities;
+package net.liopyu.entityjs.entities;
 
-import net.liopyu.entityjs.builders.partbuilders.PartBuilder;
-import net.liopyu.entityjs.entities.AnimalEntityJS;
+import net.liopyu.entityjs.builders.PartBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
@@ -25,15 +24,15 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
-    public final AnimalEntityJS parentMob;
+public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
+    public final T parentMob;
     public final String name;
     private final EntityDimensions size;
     public float width;
     public float height;
-    protected final PartBuilder builder;
+    protected final PartBuilder<T> builder;
 
-    public AnimalPartEntityJS(AnimalEntityJS pParentMob, String pName, float pWidth, float pHeight, PartBuilder builder) {
+    public PartEntityJS(T pParentMob, String pName, float pWidth, float pHeight, PartBuilder<T> builder) {
         super(pParentMob);
         this.builder = builder;
         this.size = EntityDimensions.scalable(pWidth, pHeight);
@@ -71,10 +70,21 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
         return this.parentMob.getPickResult();
     }
 
+    //Base Entity Overrides
     public boolean hurt(DamageSource pSource, float pAmount) {
-        return !this.isInvulnerableTo(pSource) && super.hurt(pSource, pAmount);
+        return !this.isInvulnerableTo(pSource) && this.partHurt(this, pSource, pAmount);
     }
 
+    private boolean partHurt(PartEntityJS<T> partEntity, DamageSource pSource, float pDamage) {
+        if (pDamage <= 0) return false;
+        if (builder.onPartHurt != null) {
+            final ContextUtils.PartHurtContext<T> context = new ContextUtils.PartHurtContext<>(partEntity, pSource, pDamage, this.parentMob);
+            builder.onPartHurt.accept(context);
+            return true;
+        }
+        parentMob.hurt(pSource, pDamage);
+        return true;
+    }
 
     @Override
     public boolean is(Entity pEntity) {
@@ -101,7 +111,7 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
         return false;
     }
 
-    //Base Entity Overrides
+
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
@@ -122,7 +132,7 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
         }
     }
 
-    public AnimalEntityJS getParent() {
+    public T getParent() {
         return this.parentMob;
     }
 
@@ -165,7 +175,7 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
         return super.isAttackable();
     }
 
-    //(Base Entity Overrides)
+
     @Override
     public LivingEntity getControllingPassenger() {
         Entity var2 = this.getFirstPassenger();
@@ -510,5 +520,4 @@ public class AnimalPartEntityJS extends PartEntity<AnimalEntityJS> {
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
         return super.getMaxFallDistance();
     }
-
 }

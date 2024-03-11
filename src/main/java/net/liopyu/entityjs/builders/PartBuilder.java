@@ -1,23 +1,17 @@
-package net.liopyu.entityjs.builders.partbuilders;
+package net.liopyu.entityjs.builders;
 
 import dev.latvian.mods.kubejs.typings.Info;
-import dev.latvian.mods.rhino.util.HideFromJS;
-import net.liopyu.entityjs.builders.BaseEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class PartBuilder {
+public class PartBuilder<T extends LivingEntity> {
     public transient boolean isPickable;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Consumer<ContextUtils.EntityPlayerContext> playerTouch;
@@ -56,23 +50,44 @@ public class PartBuilder {
     public transient Function<ContextUtils.EMayInteractContext, Object> mayInteract;
     public transient Function<ContextUtils.ECanTrampleContext, Object> canTrample;
     public transient Consumer<Entity> onRemovedFromWorld;
-    public transient MobType mobType;
     public transient Function<Entity, Object> isFreezing;
     public transient Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith;
+    public transient Consumer<ContextUtils.PartHurtContext<T>> onPartHurt;
 
     public PartBuilder() {
         isPickable = true;
     }
 
-    public PartBuilder isPickable(boolean isPickable) {
+    public PartBuilder<T> isPickable(boolean isPickable) {
         this.isPickable = isPickable;
+        this.isAttackable = t -> true;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a consumer to handle part entity hurt logic of the entity's parts.
+                        
+            @param onPartHurt Consumer accepting a {@link ContextUtils.PartHurtContext<T>} parameter
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onPartHurt(context => {
+                const { entity, part, source, amount } = context
+                // Custom logic for determining how the parts of the entity should relay damage
+                // For example, hurt the parent entity twice the damage when this part is hit.
+                entity.attack(source, amount * 2)
+            })
+            ```
+            """)
+    public PartBuilder<T> onPartHurt(Consumer<ContextUtils.PartHurtContext<T>> onPartHurt) {
+        this.onPartHurt = onPartHurt;
         return this;
     }
 
     @Info(value = """
             Sets a consumer to handle lerping (linear interpolation) of the entity's position.
                         
-            @param consumer Consumer accepting a {@link ContextUtils.LerpToContext} parameter,
+            @param lerpTo Consumer accepting a {@link ContextUtils.LerpToContext} parameter,
                             providing information and control over the lerping process.
                         
             Example usage:
@@ -83,7 +98,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder lerpTo(Consumer<ContextUtils.LerpToContext> consumer) {
+    public PartBuilder<T> lerpTo(Consumer<ContextUtils.LerpToContext> consumer) {
         lerpTo = consumer;
         return this;
     }
@@ -92,7 +107,7 @@ public class PartBuilder {
     @Info(value = """
             Sets a function to determine whether the entity should render at a squared distance.
                         
-            @param function Function accepting a {@link ContextUtils.EntitySqrDistanceContext} parameter,
+            @param shouldRenderAtSqrDistance Function accepting a {@link ContextUtils.EntitySqrDistanceContext} parameter,
                              defining the conditions under which the entity should render.
                         
             Example usage:
@@ -104,7 +119,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder shouldRenderAtSqrDistance(Function<ContextUtils.EntitySqrDistanceContext, Object> func) {
+    public PartBuilder<T> shouldRenderAtSqrDistance(Function<ContextUtils.EntitySqrDistanceContext, Object> func) {
         shouldRenderAtSqrDistance = func;
         return this;
     }
@@ -122,7 +137,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder playerTouch(Consumer<ContextUtils.EntityPlayerContext> consumer) {
+    public PartBuilder<T> playerTouch(Consumer<ContextUtils.EntityPlayerContext> consumer) {
         playerTouch = consumer;
         return this;
     }
@@ -141,7 +156,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder move(Consumer<ContextUtils.MovementContext> consumer) {
+    public PartBuilder<T> move(Consumer<ContextUtils.MovementContext> consumer) {
         move = consumer;
         return this;
     }
@@ -160,7 +175,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder tick(Consumer<Entity> consumer) {
+    public PartBuilder<T> tick(Consumer<Entity> consumer) {
         tick = consumer;
         return this;
     }
@@ -178,49 +193,11 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder canCollideWith(Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith) {
+    public PartBuilder<T> canCollideWith(Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith) {
         this.canCollideWith = canCollideWith;
         return this;
     }
 
-    @Info(value = """
-            Defines the Mob's Type
-            Examples: 'undead', 'water', 'arthropod', 'undefined', 'illager'
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.mobType('undead');
-            ```
-            """)
-    public PartBuilder mobType(Object mt) {
-        if (mt instanceof String string) {
-            switch (string.toLowerCase()) {
-                case "undead":
-                    this.mobType = MobType.UNDEAD;
-                    break;
-                case "arthropod":
-                    this.mobType = MobType.ARTHROPOD;
-                    break;
-                case "undefined":
-                    this.mobType = MobType.UNDEFINED;
-                    break;
-                case "illager":
-                    this.mobType = MobType.ILLAGER;
-                    break;
-                case "water":
-                    this.mobType = MobType.WATER;
-                    break;
-                default:
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mobType: " + mt + ". Example: \"undead\"");
-                    break;
-            }
-        } else if (mt instanceof MobType type) {
-            this.mobType = type;
-        } else
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mobType: " + mt + ". Example: \"undead\"");
-
-        return this;
-    }
 
     @Info(value = """
             Defines in what condition the entity will start freezing.
@@ -232,7 +209,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder isFreezing(Function<Entity, Object> isFreezing) {
+    public PartBuilder<T> isFreezing(Function<Entity, Object> isFreezing) {
         this.isFreezing = isFreezing;
         return this;
     }
@@ -248,7 +225,7 @@ public class PartBuilder {
             entityBuilder.mainArm("left");
             ```
             """)
-    public PartBuilder mainArm(Object arm) {
+    public PartBuilder<T> mainArm(Object arm) {
         if (arm instanceof HumanoidArm) {
             this.mainArm = (HumanoidArm) arm;
             return this;
@@ -282,7 +259,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder setBlockJumpFactor(Function<Entity, Object> blockJumpFactor) {
+    public PartBuilder<T> setBlockJumpFactor(Function<Entity, Object> blockJumpFactor) {
         setBlockJumpFactor = blockJumpFactor;
         return this;
     }
@@ -304,7 +281,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder modelResource(Function<T, Object> function) {
+    public PartBuilder<T> modelResource(Function<T, Object> function) {
         modelResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
@@ -335,7 +312,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder textureResource(Function<T, Object> function) {
+    public PartBuilder<T> textureResource(Function<T, Object> function) {
         textureResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
@@ -367,7 +344,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder animationResource(Function<T, Object> function) {
+    public PartBuilder<T> animationResource(Function<T, Object> function) {
         animationResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
@@ -391,7 +368,7 @@ public class PartBuilder {
             entityBuilder.isPushable(true);
             ```
             """)
-    public PartBuilder isPushable(boolean b) {
+    public PartBuilder<T> isPushable(boolean b) {
         isPushable = b;
         return this;
     }
@@ -410,7 +387,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder canAddPassenger(Function<ContextUtils.EPassengerEntityContext, Object> predicate) {
+    public PartBuilder<T> canAddPassenger(Function<ContextUtils.EPassengerEntityContext, Object> predicate) {
         canAddPassenger = predicate;
         return this;
     }
@@ -424,7 +401,7 @@ public class PartBuilder {
             entityBuilder.setDeathSound("minecraft:entity.generic.death");
             ```
             """)
-    public PartBuilder setDeathSound(Object sound) {
+    public PartBuilder<T> setDeathSound(Object sound) {
         if (sound instanceof String) setDeathSound = new ResourceLocation((String) sound);
         else if (sound instanceof ResourceLocation) setDeathSound = (ResourceLocation) sound;
         else
@@ -441,7 +418,7 @@ public class PartBuilder {
             entityBuilder.setSwimSound("minecraft:entity.generic.swim");
             ```
             """)
-    public PartBuilder setSwimSound(Object sound) {
+    public PartBuilder<T> setSwimSound(Object sound) {
         if (sound instanceof String) setSwimSound = new ResourceLocation((String) sound);
         else if (sound instanceof ResourceLocation) setSwimSound = (ResourceLocation) sound;
         else {
@@ -461,7 +438,7 @@ public class PartBuilder {
             entityBuilder.setSwimSplashSound("minecraft:entity.generic.splash");
             ```
             """)
-    public PartBuilder setSwimSplashSound(Object sound) {
+    public PartBuilder<T> setSwimSplashSound(Object sound) {
         if (sound instanceof String) {
             setSwimSplashSound = new ResourceLocation((String) sound);
         } else if (sound instanceof ResourceLocation) {
@@ -490,7 +467,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder blockSpeedFactor(Function<Entity, Object> callback) {
+    public PartBuilder<T> blockSpeedFactor(Function<Entity, Object> callback) {
         blockSpeedFactor = callback;
         return this;
     }
@@ -511,7 +488,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder isFlapping(Function<Entity, Object> b) {
+    public PartBuilder<T> isFlapping(Function<Entity, Object> b) {
         this.isFlapping = b;
         return this;
     }
@@ -529,7 +506,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder onAddedToWorld(Consumer<Entity> onAddedToWorldCallback) {
+    public PartBuilder<T> onAddedToWorld(Consumer<Entity> onAddedToWorldCallback) {
         this.onAddedToWorld = onAddedToWorldCallback;
         return this;
     }
@@ -543,7 +520,7 @@ public class PartBuilder {
             entityBuilder.repositionEntityAfterLoad(true);
             ```
             """)
-    public PartBuilder repositionEntityAfterLoad(boolean customRepositionEntityAfterLoad) {
+    public PartBuilder<T> repositionEntityAfterLoad(boolean customRepositionEntityAfterLoad) {
         this.repositionEntityAfterLoad = customRepositionEntityAfterLoad;
         return this;
     }
@@ -564,7 +541,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder nextStep(Function<Entity, Object> nextStep) {
+    public PartBuilder<T> nextStep(Function<Entity, Object> nextStep) {
         this.nextStep = nextStep;
         return this;
     }
@@ -578,7 +555,7 @@ public class PartBuilder {
             entityBuilder.eatingSound("minecraft:entity.zombie.ambient");
             ```
             """)
-    public PartBuilder eatingSound(Object sound) {
+    public PartBuilder<T> eatingSound(Object sound) {
         if (sound instanceof String) {
             this.eatingSound = new ResourceLocation((String) sound);
         } else if (sound instanceof ResourceLocation) {
@@ -604,7 +581,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder onLivingFall(Consumer<ContextUtils.EEntityFallDamageContext> c) {
+    public PartBuilder<T> onLivingFall(Consumer<ContextUtils.EEntityFallDamageContext> c) {
         onLivingFall = c;
         return this;
     }
@@ -623,7 +600,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder onSprint(Consumer<Entity> consumer) {
+    public PartBuilder<T> onSprint(Consumer<Entity> consumer) {
         onSprint = consumer;
         return this;
     }
@@ -642,7 +619,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder onStopRiding(Consumer<Entity> callback) {
+    public PartBuilder<T> onStopRiding(Consumer<Entity> callback) {
         onStopRiding = callback;
         return this;
     }
@@ -661,7 +638,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder rideTick(Consumer<Entity> callback) {
+    public PartBuilder<T> rideTick(Consumer<Entity> callback) {
         rideTick = callback;
         return this;
     }
@@ -681,7 +658,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder isAttackable(Function<Entity, Object> predicate) {
+    public PartBuilder<T> isAttackable(Function<Entity, Object> predicate) {
         isAttackable = predicate;
         return this;
     }
@@ -701,7 +678,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder canFreeze(Function<Entity, Object> predicate) {
+    public PartBuilder<T> canFreeze(Function<Entity, Object> predicate) {
         canFreeze = predicate;
         return this;
     }
@@ -722,7 +699,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder isCurrentlyGlowing(Function<Entity, Object> predicate) {
+    public PartBuilder<T> isCurrentlyGlowing(Function<Entity, Object> predicate) {
         isCurrentlyGlowing = predicate;
         return this;
     }
@@ -740,7 +717,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder setMaxFallDistance(Function<Entity, Object> maxFallDistance) {
+    public PartBuilder<T> setMaxFallDistance(Function<Entity, Object> maxFallDistance) {
         setMaxFallDistance = maxFallDistance;
         return this;
     }
@@ -759,7 +736,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder onClientRemoval(Consumer<Entity> consumer) {
+    public PartBuilder<T> onClientRemoval(Consumer<Entity> consumer) {
         onClientRemoval = consumer;
         return this;
     }
@@ -778,7 +755,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder lavaHurt(Consumer<Entity> consumer) {
+    public PartBuilder<T> lavaHurt(Consumer<Entity> consumer) {
         lavaHurt = consumer;
         return this;
     }
@@ -797,7 +774,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder onFlap(Consumer<Entity> consumer) {
+    public PartBuilder<T> onFlap(Consumer<Entity> consumer) {
         onFlap = consumer;
         return this;
     }
@@ -818,7 +795,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder dampensVibrations(Function<Entity, Object> predicate) {
+    public PartBuilder<T> dampensVibrations(Function<Entity, Object> predicate) {
         this.dampensVibrations = predicate;
         return this;
     }
@@ -839,7 +816,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder showVehicleHealth(Function<Entity, Object> predicate) {
+    public PartBuilder<T> showVehicleHealth(Function<Entity, Object> predicate) {
         this.showVehicleHealth = predicate;
         return this;
     }
@@ -858,7 +835,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder thunderHit(Consumer<ContextUtils.EThunderHitContext> consumer) {
+    public PartBuilder<T> thunderHit(Consumer<ContextUtils.EThunderHitContext> consumer) {
         thunderHit = consumer;
         return this;
     }
@@ -878,7 +855,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder isInvulnerableTo(Function<ContextUtils.EDamageContext, Object> predicate) {
+    public PartBuilder<T> isInvulnerableTo(Function<ContextUtils.EDamageContext, Object> predicate) {
         isInvulnerableTo = predicate;
         return this;
     }
@@ -898,7 +875,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder canChangeDimensions(Function<Entity, Object> supplier) {
+    public PartBuilder<T> canChangeDimensions(Function<Entity, Object> supplier) {
         canChangeDimensions = supplier;
         return this;
     }
@@ -918,7 +895,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder mayInteract(Function<ContextUtils.EMayInteractContext, Object> predicate) {
+    public PartBuilder<T> mayInteract(Function<ContextUtils.EMayInteractContext, Object> predicate) {
         mayInteract = predicate;
         return this;
     }
@@ -938,7 +915,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder canTrample(Function<ContextUtils.ECanTrampleContext, Object> predicate) {
+    public PartBuilder<T> canTrample(Function<ContextUtils.ECanTrampleContext, Object> predicate) {
         canTrample = predicate;
         return this;
     }
@@ -957,7 +934,7 @@ public class PartBuilder {
             });
             ```
             """)
-    public PartBuilder onRemovedFromWorld(Consumer<Entity> consumer) {
+    public PartBuilder<T> onRemovedFromWorld(Consumer<Entity> consumer) {
         onRemovedFromWorld = consumer;
         return this;
     }

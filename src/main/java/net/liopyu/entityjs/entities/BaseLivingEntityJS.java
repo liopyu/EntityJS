@@ -1,41 +1,25 @@
 package net.liopyu.entityjs.entities;
 
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityJSBuilder;
-import net.liopyu.entityjs.entities.partentities.BaseLivingPartEntityJS;
-import net.liopyu.entityjs.entities.partentities.BaseLivingPartEntityJS;
-import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
-import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.network.PacketDistributor;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.network.GeckoLibNetwork;
-import software.bernie.geckolib.network.packet.EntityAnimTriggerPacket;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.EntityType;
 import net.liopyu.entityjs.util.*;
-import net.minecraft.BlockUtil;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
@@ -43,33 +27,23 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -82,18 +56,18 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         return this.getType().toString();
     }
 
-    private final BaseLivingPartEntityJS[] partEntities;
+    public final PartEntityJS<?>[] partEntities;
 
-    public BaseLivingEntityJS(BaseLivingEntityJSBuilder builder, EntityType<? extends LivingEntity> p_21368_, Level p_21369_) {
-        super(p_21368_, p_21369_);
+    public BaseLivingEntityJS(BaseLivingEntityJSBuilder builder, EntityType<? extends LivingEntity> pEntityType, Level pLevel) {
+        super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
-        List<BaseLivingPartEntityJS> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams params : builder.partEntityParamsList) {
-            BaseLivingPartEntityJS partEntity = new BaseLivingPartEntityJS(this, params.name, params.width, params.height);
+        List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
+        for (ContextUtils.PartEntityParams<BaseLivingEntityJS> params : builder.partEntityParamsList) {
+            PartEntityJS<BaseLivingEntityJS> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
-        partEntities = tempPartEntities.toArray(new BaseLivingPartEntityJS[0]);
+        partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
     }
 
     // Part Entity Logical Overrides --------------------------------
@@ -101,16 +75,26 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public void setId(int entityId) {
         super.setId(entityId);
         for (int i = 0; i < partEntities.length; i++) {
-            BaseLivingPartEntityJS partEntity = partEntities[i];
+            PartEntityJS<?> partEntity = partEntities[i];
             if (partEntity != null) {
                 partEntity.setId(entityId + i + 1);
             }
         }
     }
 
-    private void tickPart(BaseLivingPartEntityJS part, double offsetX, double offsetY, double offsetZ) {
-        part.setPos(this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ);
+    public void tickPart(String partName, double offsetX, double offsetY, double offsetZ) {
+        var x = this.getX();
+        var y = this.getY();
+        var z = this.getZ();
+        for (PartEntityJS<?> partEntity : partEntities) {
+            if (partEntity.name.equals(partName)) {
+                partEntity.movePart(x + offsetX, y + offsetY, z + offsetZ, partEntity.getYRot(), partEntity.getXRot());
+                return;
+            }
+        }
+        ConsoleJS.STARTUP.info("Part with name " + partName + " not found.");
     }
+
 
     @Override
     public boolean isMultipartEntity() {

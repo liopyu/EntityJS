@@ -2,7 +2,7 @@ package net.liopyu.entityjs.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.partbuilders.PartBuilder;
+import net.liopyu.entityjs.builders.PartBuilder;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
@@ -26,15 +26,16 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.entity.PartEntity;
 
 public class ContextUtils {
-    public static class PartEntityParams {
+    public static class PartEntityParams<T extends LivingEntity> {
         public final String name;
         public final float width;
         public final float height;
-        public final PartBuilder builder;
+        public final PartBuilder<T> builder;
 
-        public PartEntityParams(String name, float width, float height, PartBuilder builder) {
+        public PartEntityParams(String name, float width, float height, PartBuilder<T> builder) {
             this.name = name;
             this.width = width;
             this.height = height;
@@ -196,6 +197,39 @@ public class ContextUtils {
         }
     }
 
+    public static class EntityHurtContext {
+        @Info("The living entity that was hurt")
+        public final Entity entity;
+
+        @Info("The source of the damage")
+        public final DamageSource damageSource;
+        @Info("The source of the damage")
+        public final float damageAmount;
+
+        public EntityHurtContext(Entity entity, DamageSource damageSource, float damageAmount) {
+            this.entity = entity;
+            this.damageSource = damageSource;
+            this.damageAmount = damageAmount;
+        }
+    }
+
+    public static class PartHurtContext<T extends LivingEntity> {
+        @Info("The part of the entity that was hurt")
+        public final PartEntity<T> part;
+        @Info("The source of the damage")
+        public final DamageSource source;
+        @Info("The source of the damage")
+        public final float amount;
+        @Info("The parent of the part entity")
+        public final LivingEntity entity;
+
+        public PartHurtContext(PartEntity<T> part, DamageSource source, float amount, LivingEntity entity) {
+            this.part = part;
+            this.source = source;
+            this.amount = amount;
+            this.entity = entity;
+        }
+    }
 
     public static class EntityDamageContext {
         @Info("The source of the damage")

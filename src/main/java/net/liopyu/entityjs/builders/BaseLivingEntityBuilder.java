@@ -1,23 +1,15 @@
 package net.liopyu.entityjs.builders;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
-import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
-import dev.latvian.mods.kubejs.util.JsonIO;
 import dev.latvian.mods.rhino.util.HideFromJS;
-import it.unimi.dsi.fastutil.booleans.BooleanPredicate;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.entities.AnimalEntityJS;
-import net.liopyu.entityjs.entities.BaseLivingEntityJS;
 import net.liopyu.entityjs.entities.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
-import net.liopyu.entityjs.events.RegisterMobCategoryEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
 import software.bernie.geckolib.core.animation.*;
@@ -27,50 +19,14 @@ import software.bernie.geckolib.core.keyframe.event.KeyFrameEvent;
 import software.bernie.geckolib.core.keyframe.event.ParticleKeyframeEvent;
 import software.bernie.geckolib.core.keyframe.event.SoundKeyframeEvent;
 import software.bernie.geckolib.core.keyframe.event.data.KeyFrameData;
-import software.bernie.geckolib.core.keyframe.event.data.SoundKeyframeData;
 import software.bernie.geckolib.core.object.DataTicket;
 import software.bernie.geckolib.core.object.PlayState;
-import net.minecraft.BlockUtil;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.ToFloatFunction;
 import net.minecraft.util.random.Weight;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.CombatTracker;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.TriPredicate;
-import org.apache.commons.lang3.function.TriFunction;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -205,7 +161,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Boolean canSteer;
     public transient boolean mountJumpingEnabled;
     public transient Consumer<LivingEntity> tickDeath;
-    public final List<ContextUtils.PartEntityParams> partEntityParamsList = new ArrayList<>();
+    public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -239,22 +195,28 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mountJumpingEnabled = false;
     }
 
-    /*@Info(value = """
-            Adds a part entity to the mob. 
+    @Info(value = """
+            Adds an extra hitbox to the mob. Aka part-entities.
                         
             Example usage:
             ```javascript
-            entityBuilder.addPartEntity("head", 1, 2);
+            entityBuilder.addPartEntity("head", 1, 2, builder => {
+                // Can also be null
+                builder.isPickable(true)
+            });
             ``` 
             """, params = {
             @Param(name = "name", value = "The name of the part"),
             @Param(name = "width", value = "The width of the part"),
-            @Param(name = "height", value = "The height of the part")
+            @Param(name = "height", value = "The height of the part"),
+            @Param(name = "builderConsumer", value = "The builder for the part, very similar to the normal builder callbacks")
     })
-    public BaseLivingEntityBuilder<T> addPartEntity(String name, float width, float height) {
-        partEntityParamsList.add(new ContextUtils.PartEntityParams(name, width, height));
+    public BaseLivingEntityBuilder<T> addPartEntity(String name, float width, float height, Consumer<PartBuilder<T>> builderConsumer) {
+        PartBuilder<T> partBuilder = new PartBuilder<>();
+        builderConsumer.accept(partBuilder);
+        partEntityParamsList.add(new ContextUtils.PartEntityParams<>(name, width, height, partBuilder));
         return this;
-    }*/
+    }
 
     @Info(value = """
             Consumer overriding the tickDeath responsible to counting down

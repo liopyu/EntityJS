@@ -1,15 +1,11 @@
 package net.liopyu.entityjs.entities;
 
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.builders.AnimalEntityBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.MobEntityJSBuilder;
-import net.liopyu.entityjs.entities.partentities.MobPartEntityJS;
-import net.liopyu.entityjs.entities.partentities.MobPartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
@@ -19,101 +15,87 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.network.PacketDistributor;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.network.GeckoLibNetwork;
-import software.bernie.geckolib.network.packet.EntityAnimTriggerPacket;
 import software.bernie.geckolib.util.GeckoLibUtil;
-import net.minecraft.BlockUtil;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.pathfinder.Path;
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedAttackMob, PlayerRideableJumping {
 
     private final MobEntityJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
     protected PathNavigation navigation;
-    private final MobPartEntityJS[] partEntities;
+    public final PartEntityJS<?>[] partEntities;
 
-    public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> p_21368_, Level p_21369_) {
-        super(p_21368_, p_21369_);
+    public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
+        super(pEntityType, pLevel);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createInstanceCache(this);
-        List<MobPartEntityJS> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams params : builder.partEntityParamsList) {
-            MobPartEntityJS partEntity = new MobPartEntityJS(this, params.name, params.width, params.height);
+        List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
+        for (ContextUtils.PartEntityParams<MobEntityJS> params : builder.partEntityParamsList) {
+            PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
-        partEntities = tempPartEntities.toArray(new MobPartEntityJS[0]);
-        this.navigation = this.createNavigation(p_21369_);
+        partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
+        this.navigation = this.createNavigation(pLevel);
     }
+
 
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
         super.setId(entityId);
         for (int i = 0; i < partEntities.length; i++) {
-            MobPartEntityJS partEntity = partEntities[i];
+            PartEntityJS<?> partEntity = partEntities[i];
             if (partEntity != null) {
                 partEntity.setId(entityId + i + 1);
             }
         }
     }
 
-    private void tickPart(MobPartEntityJS part, double offsetX, double offsetY, double offsetZ) {
-        part.setPos(this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ);
+    public void tickPart(String partName, double offsetX, double offsetY, double offsetZ) {
+        var x = this.getX();
+        var y = this.getY();
+        var z = this.getZ();
+        for (PartEntityJS<?> partEntity : partEntities) {
+            if (partEntity.name.equals(partName)) {
+                partEntity.movePart(x + offsetX, y + offsetY, z + offsetZ, partEntity.getYRot(), partEntity.getXRot());
+                return;
+            }
+        }
+        ConsoleJS.STARTUP.info("Part with name " + partName + " not found.");
     }
+
 
     @Override
     public boolean isMultipartEntity() {

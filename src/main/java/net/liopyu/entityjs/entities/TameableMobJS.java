@@ -2,12 +2,10 @@ package net.liopyu.entityjs.entities;
 
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.builders.TameableMobBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.TameableMobJSBuilder;
-import net.liopyu.entityjs.entities.partentities.TameableMobPartEntityJS;
-import net.liopyu.entityjs.entities.partentities.TameableMobPartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
@@ -52,7 +50,6 @@ import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.food.Foods;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -98,21 +95,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @javax.annotation.Nullable
     private UUID persistentAngerTarget;
     protected PathNavigation navigation;
-    private final TameableMobPartEntityJS[] partEntities;
-
-    public TameableMobJS(TameableMobJSBuilder builder, EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
-        super(pEntityType, pLevel);
-        this.builder = builder;
-        this.setTame(false);
-        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
-        List<TameableMobPartEntityJS> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams params : builder.partEntityParamsList) {
-            TameableMobPartEntityJS partEntity = new TameableMobPartEntityJS(this, params.name, params.width, params.height);
-            tempPartEntities.add(partEntity);
-        }
-        partEntities = tempPartEntities.toArray(new TameableMobPartEntityJS[0]);
-        this.navigation = this.createNavigation(pLevel);
-    }
 
     static {
         DATA_INTERESTED_ID = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.BOOLEAN);
@@ -120,21 +102,48 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     }
 
+    private final PartEntityJS<?>[] partEntities;
+
+    public TameableMobJS(TameableMobJSBuilder builder, EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
+        super(pEntityType, pLevel);
+        this.builder = builder;
+        this.setTame(false);
+        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+        List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
+        for (ContextUtils.PartEntityParams<TameableMobJS> params : builder.partEntityParamsList) {
+            PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
+            tempPartEntities.add(partEntity);
+        }
+        partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
+        this.navigation = this.createNavigation(pLevel);
+    }
+
+
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
         super.setId(entityId);
         for (int i = 0; i < partEntities.length; i++) {
-            TameableMobPartEntityJS partEntity = partEntities[i];
+            PartEntityJS<?> partEntity = partEntities[i];
             if (partEntity != null) {
                 partEntity.setId(entityId + i + 1);
             }
         }
     }
 
-    private void tickPart(TameableMobPartEntityJS part, double offsetX, double offsetY, double offsetZ) {
-        part.setPos(this.getX() + offsetX, this.getY() + offsetY, this.getZ() + offsetZ);
+    public void tickPart(String partName, double offsetX, double offsetY, double offsetZ) {
+        var x = this.getX();
+        var y = this.getY();
+        var z = this.getZ();
+        for (PartEntityJS<?> partEntity : partEntities) {
+            if (partEntity.name.equals(partName)) {
+                partEntity.movePart(x + offsetX, y + offsetY, z + offsetZ, partEntity.getYRot(), partEntity.getXRot());
+                return;
+            }
+        }
+        ConsoleJS.STARTUP.info("Part with name " + partName + " not found.");
     }
+
 
     @Override
     public boolean isMultipartEntity() {

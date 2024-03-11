@@ -6,7 +6,6 @@ import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.entities.partentities.AnimalPartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
@@ -56,7 +55,9 @@ import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * The 'basic' implementation of a custom entity, implements most methods through the builder with some
@@ -112,18 +113,18 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     protected final AnimalEntityJSBuilder builder;
 
     protected PathNavigation navigation;
-    private final AnimalPartEntityJS[] partEntities;
+    public final PartEntityJS<?>[] partEntities;
 
     public AnimalEntityJS(AnimalEntityJSBuilder builder, EntityType<? extends Animal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
-        List<AnimalPartEntityJS> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams params : builder.partEntityParamsList) {
-            AnimalPartEntityJS partEntity = new AnimalPartEntityJS(this, params.name, params.width, params.height, params.builder);
+        List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
+        for (ContextUtils.PartEntityParams<AnimalEntityJS> params : builder.partEntityParamsList) {
+            PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
-        partEntities = tempPartEntities.toArray(new AnimalPartEntityJS[0]);
+        partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
     }
 
@@ -133,7 +134,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void setId(int entityId) {
         super.setId(entityId);
         for (int i = 0; i < partEntities.length; i++) {
-            AnimalPartEntityJS partEntity = partEntities[i];
+            PartEntityJS<?> partEntity = partEntities[i];
             if (partEntity != null) {
                 partEntity.setId(entityId + i + 1);
             }
@@ -144,7 +145,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         var x = this.getX();
         var y = this.getY();
         var z = this.getZ();
-        for (AnimalPartEntityJS partEntity : partEntities) {
+        for (PartEntityJS<?> partEntity : partEntities) {
             if (partEntity.name.equals(partName)) {
                 partEntity.movePart(x + offsetX, y + offsetY, z + offsetZ, partEntity.getYRot(), partEntity.getXRot());
                 return;
@@ -1424,7 +1425,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
     @Override
-    protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
+    public void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
         if (builder.onHurt != null) {
             final ContextUtils.EntityDamageContext context = new ContextUtils.EntityDamageContext(pDamageSource, pDamageAmount, this);
             builder.onHurt.accept(context);
