@@ -192,7 +192,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mobType = MobType.UNDEFINED;
         defaultDeathPose = true;
         canSteer = true;
-        mountJumpingEnabled = false;
+        mountJumpingEnabled = true;
     }
 
     @Info(value = """
