@@ -1,24 +1,21 @@
-package net.liopyu.entityjs.builders.living;
+package net.liopyu.entityjs.builders.living.entityjs;
 
-
-import net.liopyu.entityjs.builders.living.TameableMobBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
-import net.liopyu.entityjs.entities.living.entityjs.TameableMobJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-public class TameableMobJSBuilder extends TameableMobBuilder<TameableMobJS> {
+public class MobEntityJSBuilder extends MobBuilder<MobEntityJS> {
 
-    public TameableMobJSBuilder(ResourceLocation i) {
+    public MobEntityJSBuilder(ResourceLocation i) {
         super(i);
-
     }
 
     @Override
-    public EntityType.EntityFactory<TameableMobJS> factory() {
-        return (type, level) -> new TameableMobJS(this, type, level);
+    public EntityType.EntityFactory<MobEntityJS> factory() {
+        return (type, level) -> new MobEntityJS(this, type, level);
     }
 
     @Override

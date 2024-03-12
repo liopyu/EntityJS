@@ -1,6 +1,8 @@
-package net.liopyu.entityjs.builders.nonliving;
+package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.EntityTypeBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;

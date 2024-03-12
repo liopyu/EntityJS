@@ -7,7 +7,8 @@ import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.liopyu.entityjs.builders.nonliving.PartBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
@@ -2503,7 +2504,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**
-     * A wrapper around {@link software.bernie.geckolib.core.controller.AnimationController.IAnimationPredicate IAnimationPredicate}
+     * A wrapper around {@link software.bernie.geckolib.core.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
      * that is easier to work with in js
      */
     @FunctionalInterface
@@ -2536,7 +2537,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     /**
-     * A simple wrapper around a {@link AnimationEvent} that restricts access to certain things
+     * A simple wrapper around a {@link AnimationEventJS} that restricts access to certain things
      * and adds {@link @Info} annotations for script writers
      *
      * @param <E> The entity being animated in the event

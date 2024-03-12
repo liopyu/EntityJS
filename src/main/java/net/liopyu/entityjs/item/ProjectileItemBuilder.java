@@ -2,7 +2,7 @@ package net.liopyu.entityjs.item;
 
 import dev.latvian.mods.kubejs.item.ItemBuilder;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.nonliving.ProjectileEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;

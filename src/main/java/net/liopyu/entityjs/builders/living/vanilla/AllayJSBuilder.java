@@ -1,21 +1,25 @@
-package net.liopyu.entityjs.builders.living;
+package net.liopyu.entityjs.builders.living.vanilla;
 
-import net.liopyu.entityjs.builders.living.MobBuilder;
+import dev.latvian.mods.kubejs.typings.Info;
+import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
+import net.liopyu.entityjs.entities.living.vanilla.AllayEntityJS;
+import net.liopyu.entityjs.entities.living.vanilla.CreeperEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-public class MobEntityJSBuilder extends MobBuilder<MobEntityJS> {
+public class AllayJSBuilder extends MobBuilder<AllayEntityJS> {
 
-    public MobEntityJSBuilder(ResourceLocation i) {
+    public AllayJSBuilder(ResourceLocation i) {
         super(i);
     }
 
+
     @Override
-    public EntityType.EntityFactory<MobEntityJS> factory() {
-        return (type, level) -> new MobEntityJS(this, type, level);
+    public EntityType.EntityFactory<AllayEntityJS> factory() {
+        return (type, level) -> new AllayEntityJS(this, type, level);
     }
 
     @Override
@@ -29,6 +33,7 @@ public class MobEntityJSBuilder extends MobBuilder<MobEntityJS> {
                 .add(Attributes.ATTACK_SPEED)
                 .add(Attributes.ATTACK_KNOCKBACK)
                 .add(Attributes.LUCK)
+                .add(Attributes.FLYING_SPEED)
                 .add(Attributes.MOVEMENT_SPEED);
     }
 }

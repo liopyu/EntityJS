@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.builders.living;
+package net.liopyu.entityjs.builders.living.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;

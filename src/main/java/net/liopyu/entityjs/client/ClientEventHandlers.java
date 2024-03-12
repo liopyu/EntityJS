@@ -2,10 +2,10 @@ package net.liopyu.entityjs.client;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.EntityJSMod;
-import net.liopyu.entityjs.builders.nonliving.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.client.nonliving.KubeJSArrowEntityRenderer;
 import net.liopyu.entityjs.client.nonliving.KubeJSNLEntityRenderer;

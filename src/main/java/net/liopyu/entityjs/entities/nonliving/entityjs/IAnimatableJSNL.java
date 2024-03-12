@@ -1,9 +1,9 @@
 package net.liopyu.entityjs.entities.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.builders.nonliving.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;

@@ -1,9 +1,10 @@
-package net.liopyu.entityjs.builders.living;
+package net.liopyu.entityjs.builders.living.entityjs;
 
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;

@@ -7,6 +7,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.animal.allay.Allay;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.List;
                 
         This is only posted for entities made through a builder
         """)
-public class BuildBrainProviderEventJS extends EventJS {
+public class BuildBrainProviderEventJS<T extends LivingEntity> extends EventJS {
 
     private final List<MemoryModuleType<?>> memories;
     private final List<SensorType<? extends Sensor<? super LivingEntity>>> sensors;
@@ -38,7 +39,7 @@ public class BuildBrainProviderEventJS extends EventJS {
         sensors.add(sensor);
     }
 
-    public Brain.Provider<?> provide() {
+    public Brain.Provider<T> provide() {
         return Brain.provider(memories, sensors);
     }
 }

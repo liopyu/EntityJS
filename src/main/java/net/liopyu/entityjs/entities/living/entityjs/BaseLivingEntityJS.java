@@ -4,7 +4,7 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.BaseLivingEntityJSBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.BaseLivingEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
@@ -126,7 +126,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS event = new BuildBrainProviderEventJS();
+            final BuildBrainProviderEventJS<BaseLivingEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {

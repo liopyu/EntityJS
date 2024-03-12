@@ -1,7 +1,7 @@
-package net.liopyu.entityjs.builders.living;
+package net.liopyu.entityjs.builders.living.entityjs;
 
 
-import net.liopyu.entityjs.builders.living.AnimalEntityBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.minecraft.resources.ResourceLocation;

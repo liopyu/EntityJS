@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.builders.nonliving;
+package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;

@@ -1,7 +1,7 @@
 package net.liopyu.entityjs.client.nonliving;
 
 
-import net.liopyu.entityjs.builders.nonliving.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.minecraft.client.renderer.entity.ArrowRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;

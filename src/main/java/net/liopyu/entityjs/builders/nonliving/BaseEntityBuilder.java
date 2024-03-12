@@ -7,7 +7,7 @@ import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.liopyu.entityjs.builders.living.AnimalEntityJSBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -53,7 +53,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient BaseEntityBuilder.RenderType renderType;
     public transient final List<BaseEntityBuilder.AnimationControllerSupplier<T>> animationSuppliers;
     public static final List<BaseEntityBuilder<?>> thisList = new ArrayList<>();
-    public transient Consumer<ContextUtils.NLRenderContext> render;
+    public transient Consumer<ContextUtils.NLRenderContext<T>> render;
     //New Base Overrides
     public transient boolean isPickable;
 
@@ -63,12 +63,9 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient Function<Entity, Object> blockSpeedFactor;
     public transient Object setSwimSound;
     public transient Function<Entity, Object> isFlapping;
-    public transient Object setDeathSound;
-    public transient Object mainArm;
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
     public transient Object setSwimSplashSound;
-    public transient Object eatingSound;
     public transient Consumer<ContextUtils.EEntityFallDamageContext> onLivingFall;
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
@@ -94,7 +91,6 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient boolean summonable;
     public transient boolean save;
     public transient boolean fireImmune;
-    public transient boolean canSpawnFarFromPlayer;
     public transient ResourceLocation[] immuneTo;
     public transient boolean spawnFarFromPlayer;
 
@@ -159,7 +155,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> render(Consumer<ContextUtils.NLRenderContext> render) {
+    public BaseEntityBuilder<T> render(Consumer<ContextUtils.NLRenderContext<T>> render) {
         this.render = render;
         return this;
     }
@@ -685,7 +681,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**
-     * A wrapper around {@link software.bernie.geckolib.core.controller.AnimationController.IAnimationPredicate IAnimationPredicate}
+     * A wrapper around {@link software.bernie.geckolib.core.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
      * that is easier to work with in js
      */
     @FunctionalInterface
@@ -718,7 +714,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
 
 
     /**
-     * A simple wrapper around a {@link AnimationEvent} that restricts access to certain things
+     * A simple wrapper around a {@link AnimationEventJS} that restricts access to certain things
      * and adds {@link @Info} annotations for script writers
      *
      * @param <E> The entity being animated in the event

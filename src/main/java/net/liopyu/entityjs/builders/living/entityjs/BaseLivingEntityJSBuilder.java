@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.builders.living;
+package net.liopyu.entityjs.builders.living.entityjs;
 
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.BaseLivingEntityJS;

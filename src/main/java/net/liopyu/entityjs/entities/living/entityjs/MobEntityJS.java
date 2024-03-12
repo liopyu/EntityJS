@@ -4,13 +4,14 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.MobEntityJSBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -46,14 +47,22 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedAttackMob, PlayerRideableJumping {
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedAttackMob {
 
     private final MobEntityJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
+
+    public String entityName() {
+        return this.getType().toString();
+    }
+
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
@@ -134,14 +143,11 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         return super.mobInteract(pPlayer, pHand);
     }
 
-    public String entityName() {
-        return this.getType().toString();
-    }
 
     @Override
     protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS event = new BuildBrainProviderEventJS();
+            final BuildBrainProviderEventJS<MobEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -223,25 +229,10 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
 
-    @Override
-    public void onPlayerJump(int i) {
-
-    }
-
-    @Override
     public boolean canJump() {
         return Objects.requireNonNullElse(builder.canJump, true);
     }
 
-    @Override
-    public void handleStartJump(int i) {
-
-    }
-
-    @Override
-    public void handleStopJump() {
-
-    }
 
     public void onJump() {
         if (builder.onLivingJump != null) {
@@ -291,7 +282,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
         }
-        if (this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
+        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
     }

@@ -1,8 +1,9 @@
-package net.liopyu.entityjs.builders.nonliving;
+package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileEntityJS;
 import net.liopyu.entityjs.item.ProjectileItemBuilder;
 import net.minecraft.resources.ResourceLocation;

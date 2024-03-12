@@ -7,7 +7,7 @@ import com.mojang.math.Axis;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-import net.liopyu.entityjs.builders.nonliving.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;

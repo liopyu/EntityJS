@@ -1,9 +1,9 @@
 package net.liopyu.entityjs.entities.nonliving.entityjs;
 
-import net.liopyu.entityjs.builders.nonliving.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.BaseEntityJSBuilder;
-import net.liopyu.entityjs.builders.nonliving.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.BaseEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;

@@ -4,7 +4,7 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.TameableMobJSBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.TameableMobJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -179,7 +179,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS event = new BuildBrainProviderEventJS();
+            final BuildBrainProviderEventJS<TameableMobJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -625,7 +625,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
         }
-        if (this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
+        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
     }

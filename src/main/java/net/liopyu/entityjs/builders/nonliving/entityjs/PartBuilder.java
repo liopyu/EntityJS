@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.builders.nonliving;
+package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -25,12 +25,9 @@ public class PartBuilder<T extends LivingEntity> {
     public transient Function<Entity, Object> blockSpeedFactor;
     public transient Object setSwimSound;
     public transient Function<Entity, Object> isFlapping;
-    public transient Object setDeathSound;
-    public transient Object mainArm;
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
     public transient Object setSwimSplashSound;
-    public transient Object eatingSound;
     public transient Consumer<ContextUtils.EEntityFallDamageContext> onLivingFall;
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
@@ -216,39 +213,6 @@ public class PartBuilder<T extends LivingEntity> {
 
 
     @Info(value = """
-            Sets the main arm of the entity. Defaults to 'right'.
-                        
-            @param arm The main arm of the entity. Accepts values "left" or "right".
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.mainArm("left");
-            ```
-            """)
-    public PartBuilder<T> mainArm(Object arm) {
-        if (arm instanceof HumanoidArm) {
-            this.mainArm = (HumanoidArm) arm;
-            return this;
-        } else if (arm instanceof String string) {
-            switch (string.toLowerCase()) {
-                case "left":
-                    this.mainArm = HumanoidArm.LEFT;
-                    break;
-                case "right":
-                    this.mainArm = HumanoidArm.RIGHT;
-                    break;
-                default:
-                    break;
-            }
-        } else {
-            this.mainArm = HumanoidArm.RIGHT;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mainArm: " + arm + ". Example: \"left\"");
-        }
-        return this;
-    }
-
-
-    @Info(value = """
             Sets the block jump factor for the entity.
                         
             Example usage:
@@ -394,23 +358,6 @@ public class PartBuilder<T extends LivingEntity> {
 
 
     @Info(value = """
-            Sets the death sound for the entity.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.setDeathSound("minecraft:entity.generic.death");
-            ```
-            """)
-    public PartBuilder<T> setDeathSound(Object sound) {
-        if (sound instanceof String) setDeathSound = new ResourceLocation((String) sound);
-        else if (sound instanceof ResourceLocation) setDeathSound = (ResourceLocation) sound;
-        else
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound. Value: " + sound + ". Must be a ResourceLocation. Example: \"minecraft:entity.generic.death\"");
-        return this;
-    }
-
-
-    @Info(value = """
             Sets the swim sound for the entity using a string representation.
                         
             Example usage:
@@ -543,27 +490,6 @@ public class PartBuilder<T extends LivingEntity> {
             """)
     public PartBuilder<T> nextStep(Function<Entity, Object> nextStep) {
         this.nextStep = nextStep;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets the sound resource location for the entity's eating sound using either a string representation or a ResourceLocation object.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.eatingSound("minecraft:entity.zombie.ambient");
-            ```
-            """)
-    public PartBuilder<T> eatingSound(Object sound) {
-        if (sound instanceof String) {
-            this.eatingSound = new ResourceLocation((String) sound);
-        } else if (sound instanceof ResourceLocation) {
-            this.eatingSound = (ResourceLocation) sound;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
-            this.eatingSound = new ResourceLocation("minecraft", "entity/zombie/ambient");
-        }
         return this;
     }
 

@@ -2,7 +2,7 @@ package net.liopyu.entityjs.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.nonliving.PartBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.minecraft.client.renderer.MultiBufferSource;
