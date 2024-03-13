@@ -2,7 +2,6 @@ package net.liopyu.entityjs;
 
 import com.mojang.logging.LogUtils;
 import net.liopyu.entityjs.client.ClientEventHandlers;
-import net.liopyu.entityjs.util.DynamicClassGenerator;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.RegistryUtil;
 import net.minecraft.resources.ResourceLocation;
@@ -30,18 +29,8 @@ public class EntityJSMod {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ClientEventHandlers.init();
         }
-        generateDynamicClass();
     }
 
-    private void generateDynamicClass() {
-        LOGGER.info("Generating dynamic class...");
-        try {
-            DynamicClassGenerator.main(new String[0]); // Call the main method of DynamicClassGenerator
-            LOGGER.info("Dynamic class generated successfully!");
-        } catch (IOException e) {
-            LOGGER.error("Failed to generate dynamic class", e);
-        }
-    }
 
     public static ResourceLocation identifier(String path) {
         return new ResourceLocation(MOD_ID, path);
