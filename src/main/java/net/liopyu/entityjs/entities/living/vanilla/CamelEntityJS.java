@@ -298,6 +298,15 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
     //Mob Overrides
     @Override
+    public boolean doHurtTarget(Entity pEntity) {
+        if (builder != null && builder.onHurtTarget != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            builder.onHurtTarget.accept(context);
+        }
+        return super.doHurtTarget(pEntity);
+    }
+
+    @Override
     protected PathNavigation createNavigation(Level pLevel) {
         if (builder == null || builder.createNavigation == null) return new GroundPathNavigation(this, pLevel);
         final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);

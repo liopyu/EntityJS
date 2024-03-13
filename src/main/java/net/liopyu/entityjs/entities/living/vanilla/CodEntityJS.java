@@ -4,7 +4,8 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.ZombieJSBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.CodJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
@@ -16,7 +17,6 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -33,8 +33,8 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.animal.Cod;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -54,16 +54,13 @@ import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
-public class ZombieEntityJS extends Zombie implements IAnimatableJS {
-    private final ZombieJSBuilder builder;
-    private final AnimatableInstanceCache getAnimatableInstanceCache;
+public class CodEntityJS extends Cod implements IAnimatableJS {
+    private final CodJSBuilder builder;
+    private final AnimatableInstanceCache animationFactory;
 
     public String entityName() {
         return this.getType().toString();
@@ -72,18 +69,19 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
-    public ZombieEntityJS(ZombieJSBuilder builder, EntityType<? extends Zombie> pEntityType, Level pLevel) {
+    public CodEntityJS(CodJSBuilder builder, EntityType<? extends Cod> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
-        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+        animationFactory = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<ZombieEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<CodEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
     }
+
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -134,9 +132,10 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return getAnimatableInstanceCache;
+        return animationFactory;
     }
-//Some logic overrides up here because there are different implementations in the other builders.
+
+    //Some logic overrides up here because there are different implementations in the other builders.
 
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
@@ -151,7 +150,7 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     @Override
     protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<ZombieEntityJS> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<MobEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -179,7 +178,6 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }
-
 
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
@@ -246,6 +244,7 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     public boolean canJump() {
         return Objects.requireNonNullElse(builder.canJump, true);
     }
+
 
     public void onJump() {
         if (builder.onLivingJump != null) {
@@ -702,12 +701,6 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder != null && builder.defaultBehaviourGoals) {
-            super.addBehaviourGoals();
-        }
-        if (builder != null && builder.defaultGoals) {
-            super.registerGoals();
-        }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
@@ -1488,3 +1481,4 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
         }
     }
 }
+

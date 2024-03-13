@@ -288,6 +288,10 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     @Override
     public boolean doHurtTarget(Entity pEntity) {
+        if (builder != null && builder.onHurtTarget != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            builder.onHurtTarget.accept(context);
+        }
         boolean flag = pEntity.hurt(this.damageSources().mobAttack(this), (float) ((int) this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
         if (flag) {
             this.doEnchantDamageEffects(this, pEntity);
@@ -491,6 +495,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     }
 
     //Mob Overrides
+
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
         if (builder == null || builder.createNavigation == null) return super.createNavigation(pLevel);

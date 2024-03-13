@@ -5,7 +5,6 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.vanilla.AllayJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.CreeperJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
@@ -19,7 +18,6 @@ import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -35,7 +33,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -179,6 +176,15 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     }
 
     //Mob Overrides
+    @Override
+    public boolean doHurtTarget(Entity pEntity) {
+        if (builder != null && builder.onHurtTarget != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            builder.onHurtTarget.accept(context);
+        }
+        return super.doHurtTarget(pEntity);
+    }
+
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
         if (builder == null || builder.createNavigation == null) return super.createNavigation(pLevel);

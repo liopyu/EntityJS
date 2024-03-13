@@ -4,6 +4,7 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.CaveSpiderJSBuilder;
 import net.liopyu.entityjs.builders.living.vanilla.ZombieJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
@@ -16,7 +17,6 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -34,6 +34,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.CaveSpider;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -54,15 +55,12 @@ import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
-public class ZombieEntityJS extends Zombie implements IAnimatableJS {
-    private final ZombieJSBuilder builder;
+public class CaveSpiderEntityJS extends CaveSpider implements IAnimatableJS {
+    private final CaveSpiderJSBuilder builder;
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     public String entityName() {
@@ -72,12 +70,12 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
-    public ZombieEntityJS(ZombieJSBuilder builder, EntityType<? extends Zombie> pEntityType, Level pLevel) {
+    public CaveSpiderEntityJS(CaveSpiderJSBuilder builder, EntityType<? extends CaveSpider> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<ZombieEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<CaveSpiderEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
@@ -96,6 +94,7 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
             }
         }
     }
+
 
     public void tickPart(String partName, double offsetX, double offsetY, double offsetZ) {
         var x = this.getX();
@@ -702,9 +701,6 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder != null && builder.defaultBehaviourGoals) {
-            super.addBehaviourGoals();
-        }
         if (builder != null && builder.defaultGoals) {
             super.registerGoals();
         }

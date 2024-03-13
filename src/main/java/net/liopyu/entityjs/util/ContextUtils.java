@@ -597,7 +597,7 @@ public class ContextUtils {
         @Info("The target entity")
         public final Entity targetEntity;
 
-        @Info("The entity looking at the target entity")
+        @Info("The living entity associated with the target entity")
         public final LivingEntity entity;
 
         public LineOfSightContext(Entity targetEntity, LivingEntity entity) {
@@ -931,7 +931,7 @@ public class ContextUtils {
         @Info("The distance fallen before trampling (if applicable)")
         public final float fallDistance;
 
-        @Info("The living entity attempting to trample the block")
+        @Info("The entity attempting to trample the block")
         public final Entity entity;
 
         public ECanTrampleContext(BlockState state, BlockPos pos, float fallDistance, Entity entity) {
@@ -943,7 +943,7 @@ public class ContextUtils {
     }
 
     public static class EDamageContext {
-        @Info("The living entity that is the target of the damage")
+        @Info("The entity that is the target of the damage")
         public final Entity entity;
 
         @Info("The source of the damage")
@@ -962,7 +962,7 @@ public class ContextUtils {
         @Info("The lightning bolt that struck")
         public final LightningBolt lightningBolt;
 
-        @Info("The living entity affected by the lightning strike")
+        @Info("The entity affected by the lightning strike")
         public final Entity entity;
 
         public EThunderHitContext(ServerLevel level, LightningBolt lightningBolt, Entity entity) {
@@ -973,7 +973,7 @@ public class ContextUtils {
     }
 
     public static class EEntityFallDamageContext {
-        @Info("The living entity experiencing fall damage")
+        @Info("The entity experiencing fall damage")
         public final Entity entity;
 
         @Info("The distance fallen by the living entity")
@@ -1000,7 +1000,7 @@ public class ContextUtils {
         @Info("The position where the interaction may occur")
         public final BlockPos pos;
 
-        @Info("The living entity involved in the interaction")
+        @Info("The entity involved in the interaction")
         public final Entity entity;
 
         public EMayInteractContext(Level level, BlockPos pos, Entity entity) {
