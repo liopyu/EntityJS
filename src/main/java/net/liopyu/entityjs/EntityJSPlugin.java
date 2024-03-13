@@ -15,13 +15,17 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.BaseEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
+import net.liopyu.entityjs.util.DynamicClassGenerator;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
+
+import java.io.IOException;
 
 public class EntityJSPlugin extends KubeJSPlugin {
 
     @Override
     public void init() {
+        ;
         RegistryInfo.ENTITY_TYPE.addType("entityjs:living", BaseLivingEntityJSBuilder.class, BaseLivingEntityJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:animal", AnimalEntityJSBuilder.class, AnimalEntityJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:tamable", TameableMobJSBuilder.class, TameableMobJSBuilder::new);
