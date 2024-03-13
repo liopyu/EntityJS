@@ -11,7 +11,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> extends MobBuilder<T> {
+public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> extends PathfinderMobBuilder<T> {
     public transient Function<ContextUtils.BreedableEntityContext, Object> setBreedOffspring;
     public transient Ingredient isFood;
     public transient Function<ContextUtils.EntityItemStackContext, Object> isFoodPredicate;

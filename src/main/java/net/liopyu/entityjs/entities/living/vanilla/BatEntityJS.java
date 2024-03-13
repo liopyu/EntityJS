@@ -1,14 +1,11 @@
 package net.liopyu.entityjs.entities.living.vanilla;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.AxolotlJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.ZombieJSBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.BatJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
@@ -24,9 +21,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -38,22 +32,15 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.sensing.Sensor;
-import net.minecraft.world.entity.ai.sensing.SensorType;
-import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -64,19 +51,16 @@ import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
-public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
-    protected static final ImmutableList<? extends SensorType<? extends Sensor<? super AxolotlEntityJS>>> SENSOR_TYPES;
-    private final AxolotlJSBuilder builder;
-    private final AnimatableInstanceCache getAnimatableInstanceCache;
+public class BatEntityJS extends Bat implements IAnimatableJS {
+    private final BatJSBuilder builder;
+    private final AnimatableInstanceCache animationFactory;
 
     public String entityName() {
         return this.getType().toString();
@@ -85,49 +69,19 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
-    public AxolotlEntityJS(AxolotlJSBuilder builder, EntityType<? extends Axolotl> pEntityType, Level pLevel) {
+    public BatEntityJS(BatJSBuilder builder, EntityType<? extends Bat> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
-        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+        animationFactory = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<AxolotlEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<BatEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
-        this.moveControl = new AxolotlMoveControlJS(this);
     }
 
-    static class AxolotlMoveControlJS extends SmoothSwimmingMoveControl {
-        private final AxolotlEntityJS axolotl;
-
-        public AxolotlMoveControlJS(AxolotlEntityJS pAxolotl) {
-            super(pAxolotl, 85, 10, 0.1F, 0.5F, false);
-            this.axolotl = pAxolotl;
-        }
-
-        public void tick() {
-            if (!this.axolotl.isPlayingDead()) {
-                super.tick();
-            }
-
-        }
-    }
-
-    static {
-        SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_ADULT, SensorType.HURT_BY, SensorType.AXOLOTL_ATTACKABLES, SensorType.AXOLOTL_TEMPTATIONS);
-    }
-
-    @Override
-    public ItemStack getBucketItemStack() {
-        if (builder.bucketItemStack != null) {
-            Object obj = builder.bucketItemStack.apply(this);
-            if (obj instanceof ItemStack i) return i;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for bucketItemStack from entity: " + entityName() + ". Value: " + obj + ". Must be an ItemStack. Defaulting to super: " + super.getBucketItemStack());
-        }
-        return super.getBucketItemStack();
-    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -178,9 +132,10 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return getAnimatableInstanceCache;
+        return animationFactory;
     }
-//Some logic overrides up here because there are different implementations in the other builders.
+
+    //Some logic overrides up here because there are different implementations in the other builders.
 
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
@@ -193,9 +148,9 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<Axolotl> brainProvider() {
+    protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<Axolotl> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<MobEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -223,7 +178,6 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }
-
 
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
@@ -282,6 +236,7 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
         return Objects.requireNonNullElse(builder.canJump, true);
     }
 
+
     public void onJump() {
         if (builder.onLivingJump != null) {
             builder.onLivingJump.accept(this);
@@ -335,15 +290,6 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
         }
     }
 
-    @Override
-    public float getWalkTargetValue(BlockPos pos, LevelReader levelReader) {
-        if (builder.walkTargetValue == null) return super.getWalkTargetValue(pos, levelReader);
-        final ContextUtils.EntityBlockPosLevelContext context = new ContextUtils.EntityBlockPosLevelContext(pos, levelReader, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.walkTargetValue.apply(context), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for walkTargetValue from entity: " + entityName() + ". Value: " + builder.walkTargetValue.apply(context) + ". Must be a float. Defaulting to " + super.getWalkTargetValue(pos, levelReader));
-        return super.getWalkTargetValue(pos, levelReader);
-    }
 
     @Override
     protected void tickLeash() {
@@ -353,16 +299,6 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, this);
             builder.tickLeash.accept(context);
         }
-    }
-
-    @Override
-    protected boolean shouldStayCloseToLeashHolder() {
-        if (builder.shouldStayCloseToLeashHolder == null) return super.shouldStayCloseToLeashHolder();
-        Object value = builder.shouldStayCloseToLeashHolder.apply(this);
-        if (value instanceof Boolean b)
-            return b;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.shouldStayCloseToLeashHolder());
-        return super.shouldStayCloseToLeashHolder();
     }
 
 
@@ -414,7 +350,7 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
 
     @Nullable
     @Override
-    protected SoundEvent getAmbientSound() {
+    public SoundEvent getAmbientSound() {
         if (builder.setAmbientSound != null) {
             return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setAmbientSound);
         } else {
@@ -477,10 +413,6 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
         return super.getMyRidingOffset();
     }
 
-    @Override
-    protected double followLeashSpeed() {
-        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
-    }
 
     @Override
     public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
@@ -700,7 +632,7 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
 
 
     @Override
-    protected boolean isFlapping() {
+    public boolean isFlapping() {
         if (builder.isFlapping != null) {
             Object obj = builder.isFlapping.apply(this);
             if (obj instanceof Boolean) {

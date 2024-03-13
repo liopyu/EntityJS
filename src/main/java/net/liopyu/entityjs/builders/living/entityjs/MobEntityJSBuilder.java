@@ -1,13 +1,12 @@
 package net.liopyu.entityjs.builders.living.entityjs;
 
-import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-public class MobEntityJSBuilder extends MobBuilder<MobEntityJS> {
+public class MobEntityJSBuilder extends PathfinderMobBuilder<MobEntityJS> {
 
     public MobEntityJSBuilder(ResourceLocation i) {
         super(i);

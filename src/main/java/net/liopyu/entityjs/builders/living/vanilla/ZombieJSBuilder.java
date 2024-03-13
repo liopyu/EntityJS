@@ -2,6 +2,7 @@ package net.liopyu.entityjs.builders.living.vanilla;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.ZombieEntityJS;
 import net.minecraft.resources.ResourceLocation;
@@ -10,7 +11,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 
-public class ZombieJSBuilder extends MobBuilder<ZombieEntityJS> {
+public class ZombieJSBuilder extends PathfinderMobBuilder<ZombieEntityJS> {
     public transient Boolean defaultBehaviourGoals;
     public transient Boolean defaultGoals;
 

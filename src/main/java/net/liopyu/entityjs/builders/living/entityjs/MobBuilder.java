@@ -23,11 +23,9 @@ import java.util.function.*;
  * Has methods for spawn eggs, goal selectors, goal targets, and anything else
  * in {@link Mob} that is not present in/related to {@link net.minecraft.world.entity.LivingEntity LivignEntity}
  */
-public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
+public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
+
     public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
-    public transient Function<PathfinderMob, Object> shouldStayCloseToLeashHolder;
-    public transient Double followLeashSpeed;
-    public transient Function<ContextUtils.EntityBlockPosLevelContext, Object> walkTargetValue;
     public transient SpawnEggItemBuilder eggItem;
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Ingredient canFireProjectileWeapon;
@@ -36,9 +34,9 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     public transient Object setAmbientSound;
     public transient Function<ContextUtils.EntityItemStackContext, Object> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
-    public transient Function<PathfinderMob, Object> canPickUpLoot;
+    public transient Function<Mob, Object> canPickUpLoot;
     public transient Boolean isPersistenceRequired;
-    public transient Function<PathfinderMob, Object> meleeAttackRangeSqr;
+    public transient Function<Mob, Object> meleeAttackRangeSqr;
     public transient Boolean canJump;
     public transient Function<LivingEntity, Object> myRidingOffset;
     public transient Object ambientSoundInterval;
@@ -306,7 +304,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     @Info(value = """
             Sets the function to determine whether the entity can pick up loot.
                         
-            @param canPickUpLoot A Function accepting a {@link PathfinderMob} parameter,
+            @param canPickUpLoot A Function accepting a {@link Mob} parameter,
                                  defining the condition for the entity to pick up loot.
                         
             Example usage:
@@ -317,7 +315,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             });
             ```
             """)
-    public MobBuilder<T> canPickUpLoot(Function<PathfinderMob, Object> canPickUpLoot) {
+    public MobBuilder<T> canPickUpLoot(Function<Mob, Object> canPickUpLoot) {
         this.canPickUpLoot = canPickUpLoot;
         return this;
     }
@@ -340,7 +338,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
     @Info(value = """
             Sets the function to determine the squared melee attack range for the entity.
                         
-            @param meleeAttackRangeSqr A Function accepting a {@link PathfinderMob} parameter,
+            @param meleeAttackRangeSqr A Function accepting a {@link Mob} parameter,
                                       defining the squared melee attack range based on the entity's state.
                                       Returns a 'Double' value representing the squared melee attack range.
             Example usage:
@@ -351,7 +349,7 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
             });
             ```
             """)
-    public MobBuilder<T> meleeAttackRangeSqr(Function<PathfinderMob, Object> meleeAttackRangeSqr) {
+    public MobBuilder<T> meleeAttackRangeSqr(Function<Mob, Object> meleeAttackRangeSqr) {
         this.meleeAttackRangeSqr = meleeAttackRangeSqr;
         return this;
     }
@@ -375,57 +373,5 @@ public abstract class MobBuilder<T extends PathfinderMob & IAnimatableJS> extend
         return this;
     }
 
-    @Info(value = """
-            Sets the function to determine whether the entity should stay close to its leash holder.
-                        
-            @param predicate A Function accepting a {@link PathfinderMob} parameter,
-                             defining the condition for the entity to stay close to its leash holder.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.shouldStayCloseToLeashHolder(entity => {
-                // Custom logic to determine whether the entity should stay close to its leash holder.
-                return true;
-            });
-            ```
-            """)
-    public MobBuilder<T> shouldStayCloseToLeashHolder(Function<PathfinderMob, Object> predicate) {
-        this.shouldStayCloseToLeashHolder = predicate;
-        return this;
-    }
 
-    @Info(value = """
-            Sets the follow leash speed for the entity.
-                        
-            @param speed The follow leash speed.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.followLeashSpeed(1.5);
-            ```
-            """)
-    public MobBuilder<T> followLeashSpeed(double speed) {
-        this.followLeashSpeed = speed;
-        return this;
-    }
-
-    @Info(value = """
-            Sets the walk target value function for the entity.
-                        
-            @param function A Function accepting a {@link ContextUtils.EntityBlockPosLevelContext} parameter,
-                            defining the walk target value based on the entity's interaction with a specific block.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.walkTargetValue(context => {
-                // Custom logic to calculate the walk target value based on the provided context.
-                // Access information about the block position and level using the provided context.
-                return 10;
-            });
-            ```
-            """)
-    public MobBuilder<T> walkTargetValue(Function<ContextUtils.EntityBlockPosLevelContext, Object> function) {
-        this.walkTargetValue = function;
-        return this;
-    }
 }

@@ -358,9 +358,9 @@ public class ContextUtils {
         public final LivingEntity target;
 
         @Info("The entity whose target is changing")
-        public final PathfinderMob entity;
+        public final Mob entity;
 
-        public TargetChangeContext(LivingEntity target, PathfinderMob entity) {
+        public TargetChangeContext(LivingEntity target, Mob entity) {
             this.target = target;
             this.entity = entity;
         }

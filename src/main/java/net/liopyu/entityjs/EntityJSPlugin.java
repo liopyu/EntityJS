@@ -7,15 +7,11 @@ import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.BaseLivingEntityJSBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.TameableMobJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.AllayJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.AxolotlJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.CreeperJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.ZombieJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.*;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.BaseEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
-import net.liopyu.entityjs.util.DynamicClassGenerator;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
 
@@ -38,6 +34,7 @@ public class EntityJSPlugin extends KubeJSPlugin {
         RegistryInfo.ENTITY_TYPE.addType("minecraft:zombie", ZombieJSBuilder.class, ZombieJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:allay", AllayJSBuilder.class, AllayJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:axolotl", AxolotlJSBuilder.class, AxolotlJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("minecraft:bat", BatJSBuilder.class, BatJSBuilder::new);
     }
 
     @Override
