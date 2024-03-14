@@ -42,6 +42,8 @@ import java.util.function.*;
  * @param <T> The entity class that the built entity type is for, this should be a custom class
  *            that extends {@link LivingEntity} or a subclass and {@link IAnimatableJS}
  */
+
+
 @SuppressWarnings("unused")
 public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatableJS> extends BuilderBase<EntityType<T>> {
     public static final List<BaseLivingEntityBuilder<?>> thisList = new ArrayList<>();
@@ -70,6 +72,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<LivingEntity, Object> setBlockJumpFactor;
     public transient Function<LivingEntity, Object> blockSpeedFactor;
     public transient Float setSoundVolume;
+
+    /*@FunctionalInterface
+    public interface SoundVolumeFunction {
+        Float calculateVolume(LivingEntity entity);
+    }
+
+    public transient SoundVolumeFunction setSoundVolume1;*/
     public transient Float setWaterSlowDown;
     public transient Object setSwimSound;
     public transient Function<LivingEntity, Object> isFlapping;
