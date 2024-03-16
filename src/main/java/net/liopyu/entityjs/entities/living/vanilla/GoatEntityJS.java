@@ -4,8 +4,7 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.CamelJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.GoatJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
@@ -35,7 +34,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.camel.Camel;
+import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -60,7 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CamelEntityJS extends Camel implements IAnimatableJS {
+public class GoatEntityJS extends Goat implements IAnimatableJS {
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
 
@@ -71,17 +70,17 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         return this.getType().toString();
     }
 
-    protected final CamelJSBuilder builder;
+    protected final GoatJSBuilder builder;
 
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
-    public CamelEntityJS(CamelJSBuilder builder, EntityType<? extends Camel> pEntityType, Level pLevel) {
+    public GoatEntityJS(GoatJSBuilder builder, EntityType<? extends Goat> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<CamelEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<GoatEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
@@ -146,9 +145,9 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<Camel> brainProvider() {
+    protected Brain.Provider<Goat> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<Camel> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<Goat> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -180,7 +179,7 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
     //Ageable Mob Overrides
     @Override
-    public Camel getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+    public Goat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         if (builder.setBreedOffspring != null) {
             final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
@@ -200,6 +199,7 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         }
         return null;
     }
+
 
     @Override
     public boolean canBeCollidedWith() {
@@ -771,7 +771,7 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
 
     @Override
-    public boolean isImmobile() {
+    protected boolean isImmobile() {
         if (builder.isImmobile != null) {
             Object obj = builder.isImmobile.apply(this);
             if (obj instanceof Boolean) {
@@ -821,9 +821,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder != null && builder.defaultGoals) {
-            super.registerGoals();
-        }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
@@ -1597,3 +1594,4 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         }
     }
 }
+

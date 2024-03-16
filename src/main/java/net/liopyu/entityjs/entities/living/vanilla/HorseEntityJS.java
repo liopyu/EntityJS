@@ -4,10 +4,10 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.CamelJSBuilder;
-import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
+import net.liopyu.entityjs.builders.living.entityjs.TameableMobJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.HorseJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.entities.living.entityjs.TameableMobJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -17,14 +17,24 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -32,11 +42,13 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.camel.Camel;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -46,10 +58,12 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.entity.PartEntity;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,11 +73,13 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
-public class CamelEntityJS extends Camel implements IAnimatableJS {
+public class HorseEntityJS extends Horse implements IAnimatableJS {
+
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
-
+    protected final HorseJSBuilder builder;
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
@@ -71,17 +87,20 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         return this.getType().toString();
     }
 
-    protected final CamelJSBuilder builder;
-
+    @javax.annotation.Nullable
+    private UUID persistentAngerTarget;
     protected PathNavigation navigation;
-    public final PartEntityJS<?>[] partEntities;
 
-    public CamelEntityJS(CamelJSBuilder builder, EntityType<? extends Camel> pEntityType, Level pLevel) {
+
+    private final PartEntityJS<?>[] partEntities;
+
+    public HorseEntityJS(HorseJSBuilder builder, EntityType<? extends Horse> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
+        this.setTamed(false);
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<CamelEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<HorseEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
@@ -137,18 +156,20 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         return builder;
     }
 
+
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return getAnimatableInstanceCache;
     }
 
+
     //Some logic overrides up here because there are different implementations in the other builders.
 
 
     @Override
-    protected Brain.Provider<Camel> brainProvider() {
+    protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<Camel> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<TameableMobJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -157,9 +178,9 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     }
 
     @Override
-    protected Brain<AnimalEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<TameableMobJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<AnimalEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<TameableMobJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
@@ -177,34 +198,102 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         }
     }
 
+    //Tameable Mob Overrides
 
-    //Ageable Mob Overrides
     @Override
-    public Camel getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+    public boolean tameWithName(Player pPlayer) {
+        if (builder.tameOverride != null) {
+            this.setTamed(true);
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
+            builder.tameOverride.accept(context);
+            if (pPlayer instanceof ServerPlayer) {
+                CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer) pPlayer, this);
+            }
+            this.level().broadcastEntityEvent(this, (byte) 7);
+        } else super.tameWithName(pPlayer);
+        if (builder.onTamed != null) {
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
+            builder.onTamed.accept(context);
+        }
+        return true;
+    }
+
+    // Basic Tameable Overrides
+
+
+    public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         if (builder.setBreedOffspring != null) {
             final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
             if (obj instanceof ResourceLocation resourceLocation) {
                 EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
                 if (breedOffspringType != null) {
-                    Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
-                    if (breedOffspringEntity instanceof AgeableMob) {
-                        breedOffspringType.create(serverLevel);
-                        return null;
+                    Object breedOffspringEntity = breedOffspringType.create(serverLevel);
+                    if (breedOffspringEntity instanceof TamableAnimal animal) {
+                        UUID uuid = this.getOwnerUUID();
+                        if (uuid != null) {
+                            animal.setOwnerUUID(uuid);
+                            animal.setTame(true);
+                        }
+                        return (AgeableMob) breedOffspringEntity;
+                    } else if (breedOffspringEntity instanceof AgeableMob) {
+                        return (AgeableMob) breedOffspringEntity;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
-                builder.get().create(serverLevel);
-                return null;
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method.");
             }
-        }
+        } else return super.getBreedOffspring(serverLevel, ageableMob);
         return null;
     }
 
     @Override
-    public boolean canBeCollidedWith() {
-        return super.canBeCollidedWith();
+    public boolean doHurtTarget(Entity pEntity) {
+        if (builder != null && builder.onHurtTarget != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            builder.onHurtTarget.accept(context);
+        }
+        boolean flag = pEntity.hurt(this.damageSources().mobAttack(this), (float) ((int) this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
+        if (flag) {
+            this.doEnchantDamageEffects(this, pEntity);
+        }
+        return flag;
     }
+
+    @Override
+    public boolean hurt(DamageSource pSource, float pAmount) {
+        if (this.isInvulnerableTo(pSource)) {
+            return false;
+        } else {
+            return super.hurt(pSource, pAmount);
+        }
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+    }
+
+
+    @Override
+    protected void spawnTamingParticles(boolean pTamed) {
+        ParticleOptions particleoptions = ParticleTypes.HEART;
+        if (!pTamed) {
+            particleoptions = ParticleTypes.SMOKE;
+        }
+
+        for (int i = 0; i < 7; ++i) {
+            double d0 = this.random.nextGaussian() * 0.02;
+            double d1 = this.random.nextGaussian() * 0.02;
+            double d2 = this.random.nextGaussian() * 0.02;
+            this.level().addParticle(particleoptions, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
+        }
+    }
+    //Ageable Mob Overrides
 
     @Override
     public boolean isFood(ItemStack pStack) {
@@ -241,7 +330,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         return super.canBreed();
     }
 
-
     @Override
     public boolean canMate(Animal pOtherAnimal) {
         if (builder.canMate == null) {
@@ -272,48 +360,40 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-        ItemStack itemstack = pPlayer.getItemInHand(pHand);
-        if (this.isFood(itemstack) || this.isFoodPredicate(itemstack)) {
-            int i = this.getAge();
-            if (!this.level().isClientSide && i == 0 && this.canFallInLove()) {
-                this.usePlayerItem(pPlayer, pHand, itemstack);
-                this.setInLove(pPlayer);
-                return InteractionResult.SUCCESS;
-            }
-            if (this.isBaby()) {
-                this.usePlayerItem(pPlayer, pHand, itemstack);
-                this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
-                return InteractionResult.sidedSuccess(this.level().isClientSide);
-            }
-            if (this.level().isClientSide) {
-                return InteractionResult.CONSUME;
-            }
-        }
         if (builder.onInteract != null) {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
             builder.onInteract.accept(context);
         }
-        return super.mobInteract(pPlayer, pHand);
+        boolean flag = !this.isBaby() && this.isTamed() && pPlayer.isSecondaryUseActive();
+        if (!this.isVehicle() && !flag) {
+            ItemStack itemstack = pPlayer.getItemInHand(pHand);
+            if (!itemstack.isEmpty()) {
+                if (this.isFood(itemstack)) {
+                    return this.fedFood(pPlayer, itemstack);
+                }
+
+                if (!this.isTamed()) {
+                    this.makeMad();
+                    return InteractionResult.sidedSuccess(this.level().isClientSide);
+                }
+            }
+
+            return super.mobInteract(pPlayer, pHand);
+        } else {
+            return super.mobInteract(pPlayer, pHand);
+        }
     }
 
     //Mob Overrides
-    @Override
-    public boolean doHurtTarget(Entity pEntity) {
-        if (builder != null && builder.onHurtTarget != null) {
-            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            builder.onHurtTarget.accept(context);
-        }
-        return super.doHurtTarget(pEntity);
-    }
 
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        if (builder == null || builder.createNavigation == null) return new GroundPathNavigation(this, pLevel);
+        if (builder == null || builder.createNavigation == null) return super.createNavigation(pLevel);
         final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
         Object obj = builder.createNavigation.apply(context);
         if (obj instanceof PathNavigation p) return p;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
-        return new GroundPathNavigation(this, pLevel);
+        return super.createNavigation(pLevel);
     }
 
     @Override
@@ -437,11 +517,11 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
-            jump();
-        }
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
+        }
+        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
+            jump();
         }
     }
 
@@ -810,6 +890,7 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
     @Override
     public void tick() {
+
         super.tick();
         if (builder.tick != null) {
             if (!this.level().isClientSide()) {
@@ -821,9 +902,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder != null && builder.defaultGoals) {
-            super.registerGoals();
-        }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
@@ -909,7 +987,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
 
     }
-
 
     @Override
     public boolean canAttackType(@NotNull EntityType<?> entityType) {
@@ -1400,7 +1477,7 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     }
 
     @Override
-    public void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
+    protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
         if (builder.onHurt != null) {
             final ContextUtils.EntityDamageContext context = new ContextUtils.EntityDamageContext(pDamageSource, pDamageAmount, this);
             builder.onHurt.accept(context);

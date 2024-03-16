@@ -3,21 +3,20 @@ package net.liopyu.entityjs.builders.living.vanilla;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
-import net.liopyu.entityjs.entities.living.vanilla.BatEntityJS;
-import net.liopyu.entityjs.entities.living.vanilla.CamelEntityJS;
+import net.liopyu.entityjs.entities.living.vanilla.EvokerEntityJS;
+import net.liopyu.entityjs.entities.living.vanilla.GoatEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-public class CamelJSBuilder extends AnimalEntityBuilder<CamelEntityJS> {
-    public transient boolean defaultGoals;
+public class GoatJSBuilder extends AnimalEntityBuilder<GoatEntityJS> {
+    public transient Boolean defaultGoals;
 
-    public CamelJSBuilder(ResourceLocation i) {
+    public GoatJSBuilder(ResourceLocation i) {
         super(i);
-        this.defaultGoals = true;
+        defaultGoals = true;
     }
-
 
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
@@ -28,14 +27,15 @@ public class CamelJSBuilder extends AnimalEntityBuilder<CamelEntityJS> {
             builder.defaultGoals(false);
             ```
             """)
-    public CamelJSBuilder defaultGoals(boolean defaultGoals) {
+    public GoatJSBuilder defaultGoals(boolean defaultGoals) {
         this.defaultGoals = defaultGoals;
         return this;
     }
 
+
     @Override
-    public EntityType.EntityFactory<CamelEntityJS> factory() {
-        return (type, level) -> new CamelEntityJS(this, type, level);
+    public EntityType.EntityFactory<GoatEntityJS> factory() {
+        return (type, level) -> new GoatEntityJS(this, type, level);
     }
 
     @Override
@@ -52,3 +52,4 @@ public class CamelJSBuilder extends AnimalEntityBuilder<CamelEntityJS> {
                 .add(Attributes.MOVEMENT_SPEED);
     }
 }
+

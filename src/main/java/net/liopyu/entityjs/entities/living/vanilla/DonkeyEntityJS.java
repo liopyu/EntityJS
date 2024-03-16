@@ -4,8 +4,8 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.living.vanilla.CamelJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.DonkeyJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
@@ -36,6 +36,7 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.camel.Camel;
+import net.minecraft.world.entity.animal.horse.Donkey;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -60,7 +61,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CamelEntityJS extends Camel implements IAnimatableJS {
+public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
 
@@ -71,17 +72,17 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         return this.getType().toString();
     }
 
-    protected final CamelJSBuilder builder;
+    protected final DonkeyJSBuilder builder;
 
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
-    public CamelEntityJS(CamelJSBuilder builder, EntityType<? extends Camel> pEntityType, Level pLevel) {
+    public DonkeyEntityJS(DonkeyJSBuilder builder, EntityType<? extends Donkey> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<CamelEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<DonkeyEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
@@ -146,9 +147,9 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<Camel> brainProvider() {
+    protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<Camel> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<Donkey> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -1597,3 +1598,4 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         }
     }
 }
+

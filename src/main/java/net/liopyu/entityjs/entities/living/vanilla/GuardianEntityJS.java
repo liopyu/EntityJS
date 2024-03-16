@@ -1,13 +1,14 @@
 package net.liopyu.entityjs.entities.living.vanilla;
 
+import com.google.common.util.concurrent.Monitor;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.CamelJSBuilder;
-import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
+import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.GuardianJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -32,11 +33,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.camel.Camel;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -60,28 +59,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CamelEntityJS extends Camel implements IAnimatableJS {
-    private final AnimatableInstanceCache getAnimatableInstanceCache;
-
-
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
+public class GuardianEntityJS extends Guardian implements IAnimatableJS {
+    private final GuardianJSBuilder builder;
+    private final AnimatableInstanceCache animationFactory;
 
     public String entityName() {
         return this.getType().toString();
     }
 
-    protected final CamelJSBuilder builder;
-
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
-    public CamelEntityJS(CamelJSBuilder builder, EntityType<? extends Camel> pEntityType, Level pLevel) {
+    public GuardianEntityJS(GuardianJSBuilder builder, EntityType<? extends Guardian> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
-        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+        animationFactory = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<CamelEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<GuardianEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
@@ -139,16 +133,25 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return getAnimatableInstanceCache;
+        return animationFactory;
     }
 
     //Some logic overrides up here because there are different implementations in the other builders.
 
+    @Override
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        if (builder.onInteract != null) {
+            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+            builder.onInteract.accept(context);
+        }
+        return super.mobInteract(pPlayer, pHand);
+    }
+
 
     @Override
-    protected Brain.Provider<Camel> brainProvider() {
+    protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<Camel> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<MobEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -157,9 +160,9 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     }
 
     @Override
-    protected Brain<AnimalEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<MobEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<AnimalEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<MobEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
@@ -177,124 +180,9 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         }
     }
 
+    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
-    //Ageable Mob Overrides
-    @Override
-    public Camel getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        if (builder.setBreedOffspring != null) {
-            final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
-            if (obj instanceof ResourceLocation resourceLocation) {
-                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
-                if (breedOffspringType != null) {
-                    Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
-                    if (breedOffspringEntity instanceof AgeableMob) {
-                        breedOffspringType.create(serverLevel);
-                        return null;
-                    }
-                }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
-                builder.get().create(serverLevel);
-                return null;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public boolean canBeCollidedWith() {
-        return super.canBeCollidedWith();
-    }
-
-    @Override
-    public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return super.isFood(pStack);
-    }
-
-    public boolean isFoodPredicate(ItemStack pStack) {
-        if (builder.isFoodPredicate == null) {
-            return super.isFood(pStack);
-        }
-        final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = builder.isFoodPredicate.apply(context);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
-    }
-
-
-    @Override
-    public boolean canBreed() {
-        if (builder.canBreed == null) {
-            return super.canBreed();
-        }
-        Object obj = builder.canBreed.apply(this);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBreed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super method: " + super.canBreed());
-        return super.canBreed();
-    }
-
-
-    @Override
-    public boolean canMate(Animal pOtherAnimal) {
-        if (builder.canMate == null) {
-            return super.canMate(pOtherAnimal);
-        }
-        final ContextUtils.EntityAnimalContext context = new ContextUtils.EntityAnimalContext(this, pOtherAnimal);
-        Object obj = builder.canMate.apply(context);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canMate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canMate(pOtherAnimal));
-        return super.canMate(pOtherAnimal);
-    }
-
-
-    @Override
-    public void spawnChildFromBreeding(ServerLevel pLevel, Animal pMate) {
-        if (builder.onSpawnChildFromBreeding != null) {
-            final ContextUtils.LevelAnimalContext context = new ContextUtils.LevelAnimalContext(pMate, this, pLevel);
-            builder.onSpawnChildFromBreeding.accept(context);
-            super.spawnChildFromBreeding(pLevel, pMate);
-        } else {
-            super.spawnChildFromBreeding(pLevel, pMate);
-        }
-    }
-
-
-    //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
-    @Override
-    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-        ItemStack itemstack = pPlayer.getItemInHand(pHand);
-        if (this.isFood(itemstack) || this.isFoodPredicate(itemstack)) {
-            int i = this.getAge();
-            if (!this.level().isClientSide && i == 0 && this.canFallInLove()) {
-                this.usePlayerItem(pPlayer, pHand, itemstack);
-                this.setInLove(pPlayer);
-                return InteractionResult.SUCCESS;
-            }
-            if (this.isBaby()) {
-                this.usePlayerItem(pPlayer, pHand, itemstack);
-                this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
-                return InteractionResult.sidedSuccess(this.level().isClientSide);
-            }
-            if (this.level().isClientSide) {
-                return InteractionResult.CONSUME;
-            }
-        }
-        if (builder.onInteract != null) {
-            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            builder.onInteract.accept(context);
-        }
-        return super.mobInteract(pPlayer, pHand);
-    }
 
     //Mob Overrides
     @Override
@@ -308,12 +196,12 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        if (builder == null || builder.createNavigation == null) return new GroundPathNavigation(this, pLevel);
+        if (builder == null || builder.createNavigation == null) return super.createNavigation(pLevel);
         final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
         Object obj = builder.createNavigation.apply(context);
         if (obj instanceof PathNavigation p) return p;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
-        return new GroundPathNavigation(this, pLevel);
+        return super.createNavigation(pLevel);
     }
 
     @Override
@@ -325,40 +213,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed(pPlayer));
         }
         return super.canBeLeashed(pPlayer);
-    }
-
-    @Override
-    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
-        if (builder.removeWhenFarAway == null) {
-            return super.removeWhenFarAway(pDistanceToClosestPlayer);
-        }
-        final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
-        Object obj = builder.removeWhenFarAway.apply(context);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
-        return super.removeWhenFarAway(pDistanceToClosestPlayer);
-    }
-
-    @Override
-    protected double followLeashSpeed() {
-        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
-    }
-
-    @Override
-    public int getAmbientSoundInterval() {
-        if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
-        return super.getAmbientSoundInterval();
-    }
-
-    @Override
-    public double getMyRidingOffset() {
-        if (builder.myRidingOffset == null) return super.getMyRidingOffset();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.myRidingOffset.apply(this), "double");
-        if (obj != null) return (double) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for myRidingOffset from entity: " + entityName() + ". Value: " + builder.myRidingOffset.apply(this) + ". Must be a double. Defaulting to " + super.getMyRidingOffset());
-        return super.getMyRidingOffset();
     }
 
     @Override
@@ -391,6 +245,7 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     public boolean canJump() {
         return Objects.requireNonNullElse(builder.canJump, true);
     }
+
 
     public void onJump() {
         if (builder.onLivingJump != null) {
@@ -437,11 +292,11 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
-            jump();
-        }
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
+        }
+        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
+            jump();
         }
     }
 
@@ -454,14 +309,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for walkTargetValue from entity: " + entityName() + ". Value: " + builder.walkTargetValue.apply(context) + ". Must be a float. Defaulting to " + super.getWalkTargetValue(pos, levelReader));
         return super.getWalkTargetValue(pos, levelReader);
     }
-
-    @Override
-    protected void tickDeath() {
-        if (builder.tickDeath != null) {
-            builder.tickDeath.accept(this);
-        } else super.tickDeath();
-    }
-
 
     @Override
     protected void tickLeash() {
@@ -571,12 +418,48 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.meleeAttackRangeSqr.apply(this), "double");
             if (obj != null) {
                 return (double) obj;
+            } else {
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityName() + ". Value: " + builder.meleeAttackRangeSqr.apply(this) + ". Must be a double. Defaulting to " + super.getMeleeAttackRangeSqr(entity));
+                return super.getMeleeAttackRangeSqr(entity);
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityName() + ". Value: " + builder.meleeAttackRangeSqr.apply(this) + ". Must be a double. Defaulting to " + super.getMeleeAttackRangeSqr(entity));
+        } else {
+            return super.getMeleeAttackRangeSqr(entity);
         }
-        return super.getMeleeAttackRangeSqr(entity);
     }
 
+    @Override
+    public int getAmbientSoundInterval() {
+        if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
+        return super.getAmbientSoundInterval();
+    }
+
+    @Override
+    public double getMyRidingOffset() {
+        if (builder.myRidingOffset == null) return super.getMyRidingOffset();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.myRidingOffset.apply(this), "double");
+        if (obj != null) return (double) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for myRidingOffset from entity: " + entityName() + ". Value: " + builder.myRidingOffset.apply(this) + ". Must be a double. Defaulting to " + super.getMyRidingOffset());
+        return super.getMyRidingOffset();
+    }
+
+    @Override
+    protected double followLeashSpeed() {
+        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
+    }
+
+    @Override
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
+        if (builder.removeWhenFarAway == null) {
+            return super.removeWhenFarAway(pDistanceToClosestPlayer);
+        }
+        final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
+        Object obj = builder.removeWhenFarAway.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
+        return super.removeWhenFarAway(pDistanceToClosestPlayer);
+    }
 
     //(Base LivingEntity/Entity Overrides)
     protected boolean thisJumping = false;
@@ -640,7 +523,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         }
     }
 
-
     @Override
     public LivingEntity getControllingPassenger() {
         Entity var2 = this.getFirstPassenger();
@@ -653,7 +535,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
         return var10000;
     }
-
 
     @Info(value = """
             Calls a triggerable animation to be played anywhere.
@@ -771,7 +652,7 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
 
     @Override
-    public boolean isImmobile() {
+    protected boolean isImmobile() {
         if (builder.isImmobile != null) {
             Object obj = builder.isImmobile.apply(this);
             if (obj instanceof Boolean) {
@@ -821,9 +702,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder != null && builder.defaultGoals) {
-            super.registerGoals();
-        }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
@@ -1067,6 +945,13 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
             final ContextUtils.DeathContext context = new ContextUtils.DeathContext(this, damageSource);
             builder.onDeath.accept(context);
         }
+    }
+
+    @Override
+    protected void tickDeath() {
+        if (builder.tickDeath != null) {
+            builder.tickDeath.accept(this);
+        } else super.tickDeath();
     }
 
     @Override
@@ -1400,7 +1285,7 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     }
 
     @Override
-    public void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
+    protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
         if (builder.onHurt != null) {
             final ContextUtils.EntityDamageContext context = new ContextUtils.EntityDamageContext(pDamageSource, pDamageAmount, this);
             builder.onHurt.accept(context);
@@ -1597,3 +1482,4 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         }
     }
 }
+

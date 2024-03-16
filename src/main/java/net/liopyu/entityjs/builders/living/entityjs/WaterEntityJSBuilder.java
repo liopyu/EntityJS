@@ -1,7 +1,6 @@
-package net.liopyu.entityjs.builders.living.vanilla;
+package net.liopyu.entityjs.builders.living.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.WaterEntityJS;
 import net.minecraft.resources.ResourceLocation;
