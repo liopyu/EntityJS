@@ -1,12 +1,10 @@
 package net.liopyu.entityjs.entities.living.vanilla;
 
-import com.google.common.util.concurrent.Monitor;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.GuardianJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.IronGolemJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
@@ -34,8 +32,8 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -59,8 +57,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class GuardianEntityJS extends Guardian implements IAnimatableJS {
-    private final GuardianJSBuilder builder;
+public class IronGolemEntityJS extends IronGolem implements IAnimatableJS {
+    private final IronGolemJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
 
     public String entityName() {
@@ -70,12 +68,12 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
-    public GuardianEntityJS(GuardianJSBuilder builder, EntityType<? extends Guardian> pEntityType, Level pLevel) {
+    public IronGolemEntityJS(IronGolemJSBuilder builder, EntityType<? extends IronGolem> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<GuardianEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<IronGolemEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
@@ -1485,4 +1483,3 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         }
     }
 }
-

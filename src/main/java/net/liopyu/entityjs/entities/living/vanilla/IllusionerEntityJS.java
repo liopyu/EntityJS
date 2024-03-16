@@ -701,6 +701,9 @@ public class IllusionerEntityJS extends Illusioner implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
+        if (builder != null && builder.defaultGoals) {
+            super.registerGoals();
+        }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }

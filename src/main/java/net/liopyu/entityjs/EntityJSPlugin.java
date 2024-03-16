@@ -45,6 +45,8 @@ public class EntityJSPlugin extends KubeJSPlugin {
         RegistryInfo.ENTITY_TYPE.addType("minecraft:guardian", GuardianJSBuilder.class, GuardianJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:horse", HorseJSBuilder.class, HorseJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:illusioner", IllusionerJSBuilder.class, IllusionerJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("minecraft:iron_golem", IronGolemJSBuilder.class, IronGolemJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("minecraft:panda", PandaJSBuilder.class, PandaJSBuilder::new);
     }
 
     @Override
