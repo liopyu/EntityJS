@@ -15,17 +15,15 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
 
-import java.io.IOException;
-
 public class EntityJSPlugin extends KubeJSPlugin {
 
     @Override
     public void init() {
-        ;
         RegistryInfo.ENTITY_TYPE.addType("entityjs:nonliving", BaseEntityJSBuilder.class, BaseEntityJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:living", BaseLivingEntityJSBuilder.class, BaseLivingEntityJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:mob", MobEntityJSBuilder.class, MobEntityJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:animal", AnimalEntityJSBuilder.class, AnimalEntityJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("entityjs:watercreature", WaterEntityJSBuilder.class, WaterEntityJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:tamable", TameableMobJSBuilder.class, TameableMobJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:arrow", ArrowEntityJSBuilder.class, ArrowEntityJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("entityjs:projectile", ProjectileEntityJSBuilder.class, ProjectileEntityJSBuilder::new);
@@ -40,7 +38,7 @@ public class EntityJSPlugin extends KubeJSPlugin {
         RegistryInfo.ENTITY_TYPE.addType("minecraft:camel", CamelJSBuilder.class, CamelJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:cat", CatJSBuilder.class, CatJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:chicken", ChickenJSBuilder.class, ChickenJSBuilder::new);
-        RegistryInfo.ENTITY_TYPE.addType("minecraft:cod", CodJSBuilder.class, CodJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("minecraft:cow", CowJSBuilder.class, CowJSBuilder::new);
     }
 
     @Override

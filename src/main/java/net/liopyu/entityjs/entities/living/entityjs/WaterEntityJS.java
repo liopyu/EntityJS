@@ -1,13 +1,10 @@
-package net.liopyu.entityjs.entities.living.vanilla;
+package net.liopyu.entityjs.entities.living.entityjs;
 
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.CodJSBuilder;
-import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
-import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
+import net.liopyu.entityjs.builders.living.vanilla.WaterEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -25,6 +22,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -32,8 +31,12 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.ai.goal.RandomSwimmingGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.animal.Cod;
+import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -58,9 +61,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CodEntityJS extends Cod implements IAnimatableJS {
-    private final CodJSBuilder builder;
-    private final AnimatableInstanceCache animationFactory;
+public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
+    private final WaterEntityJSBuilder builder;
+    private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     public String entityName() {
         return this.getType().toString();
@@ -69,17 +72,28 @@ public class CodEntityJS extends Cod implements IAnimatableJS {
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
-    public CodEntityJS(CodJSBuilder builder, EntityType<? extends Cod> pEntityType, Level pLevel) {
+    public WaterEntityJS(WaterEntityJSBuilder builder, EntityType<? extends AbstractFish> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
-        animationFactory = GeckoLibUtil.createInstanceCache(this);
+        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<CodEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<WaterEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
+        //this.moveControl = new FishMoveControl(this);
         this.navigation = this.createNavigation(pLevel);
+    }
+
+    @Override
+    public ItemStack getBucketItemStack() {
+        if (builder.bucketItemStack != null) {
+            Object obj = builder.bucketItemStack.apply(this);
+            if (obj instanceof ItemStack i) return i;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for bucketItemStack from entity: " + entityName() + ". Value: " + obj + ". Must be an ItemStack. Defaulting to super: null");
+        }
+        return null;
     }
 
 
@@ -124,16 +138,23 @@ public class CodEntityJS extends Cod implements IAnimatableJS {
         return Objects.requireNonNullElseGet(partEntities, () -> new PartEntity<?>[0]);
     }
 
+    @Override
+    protected SoundEvent getFlopSound() {
+        return null;
+    }
+
     //Builder and Animatable logic
     @Override
     public BaseLivingEntityBuilder<?> getBuilder() {
         return builder;
     }
 
+
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return animationFactory;
+        return getAnimatableInstanceCache;
     }
+
 
     //Some logic overrides up here because there are different implementations in the other builders.
 
@@ -171,6 +192,7 @@ public class CodEntityJS extends Cod implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
+        super.registerGoals();
         if (EventHandlers.addGoalTargets.hasListeners()) {
             EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
         }
@@ -701,11 +723,11 @@ public class CodEntityJS extends Cod implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
+        super.registerGoals();
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
     }
-
 
     @Override
     protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {

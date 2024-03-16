@@ -1,22 +1,21 @@
 package net.liopyu.entityjs.builders.living.vanilla;
 
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
-import net.liopyu.entityjs.entities.living.vanilla.CodEntityJS;
+import net.liopyu.entityjs.entities.living.vanilla.CowEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.ZombieEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
-public class CodJSBuilder extends PathfinderMobBuilder<CodEntityJS> {
-    public transient Boolean defaultBehaviourGoals;
+public class CowJSBuilder extends AnimalEntityBuilder<CowEntityJS> {
     public transient Boolean defaultGoals;
 
-    public CodJSBuilder(ResourceLocation i) {
+    public CowJSBuilder(ResourceLocation i) {
         super(i);
-        defaultBehaviourGoals = true;
         defaultGoals = true;
     }
 
@@ -29,28 +28,15 @@ public class CodJSBuilder extends PathfinderMobBuilder<CodEntityJS> {
             builder.defaultGoals(false);
             ```
             """)
-    public CodJSBuilder defaultGoals(boolean defaultGoals) {
+    public CowJSBuilder defaultGoals(boolean defaultGoals) {
         this.defaultGoals = defaultGoals;
         return this;
     }
 
-    @Info(value = """  
-            @param defaultBehaviourGoals Sets whether the mob should inherit it's goal behavior from it's superclass
-            Defaults to true.
-                        
-            Example usage:
-            ```javascript
-            builder.defaultBehaviourGoals(false);
-            ```
-            """)
-    public CodJSBuilder defaultBehaviourGoals(boolean defaultBehaviourGoals) {
-        this.defaultBehaviourGoals = defaultBehaviourGoals;
-        return this;
-    }
 
     @Override
-    public EntityType.EntityFactory<CodEntityJS> factory() {
-        return (type, level) -> new CodEntityJS(this, type, level);
+    public EntityType.EntityFactory<CowEntityJS> factory() {
+        return (type, level) -> new CowEntityJS(this, type, level);
     }
 
     @Override
