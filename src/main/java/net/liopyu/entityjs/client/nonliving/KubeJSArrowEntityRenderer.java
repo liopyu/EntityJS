@@ -1,8 +1,8 @@
 package net.liopyu.entityjs.client.nonliving;
 
 
-import net.liopyu.entityjs.builders.nonliving.ArrowEntityBuilder;
-import net.liopyu.entityjs.entities.IArrowEntityJS;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
+import net.liopyu.entityjs.entities.nonliving.entityjs.IArrowEntityJS;
 import net.minecraft.client.renderer.entity.ArrowRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;

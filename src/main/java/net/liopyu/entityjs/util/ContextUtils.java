@@ -2,7 +2,7 @@ package net.liopyu.entityjs.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.nonliving.PartBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
@@ -43,6 +43,23 @@ public class ContextUtils {
         }
     }
 
+
+    public static class ItemUseContext {
+        @Info("The level of the entity using the item")
+        public final Level level;
+
+        @Info("The player interacting with the item")
+        public final Player player;
+
+        @Info("The hand used for interaction")
+        public final InteractionHand hand;
+
+        public ItemUseContext(Level level, Player player, InteractionHand hand) {
+            this.level = level;
+            this.player = player;
+            this.hand = hand;
+        }
+    }
 
     public static class PlayerEntityContext {
         @Info("The living entity associated with the player")

@@ -1,8 +1,7 @@
 package net.liopyu.entityjs.entities.nonliving.entityjs;
 
-import net.liopyu.entityjs.builders.nonliving.ProjectileEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.ProjectileEntityJSBuilder;
-import net.liopyu.entityjs.entities.IProjectileEntityJS;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.world.entity.Entity;

@@ -1,6 +1,6 @@
 package net.liopyu.entityjs.entities.nonliving.entityjs;
 
-import net.liopyu.entityjs.builders.nonliving.PartBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;

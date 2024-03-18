@@ -2,9 +2,8 @@ package net.liopyu.entityjs.entities.nonliving.entityjs;
 
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import net.liopyu.entityjs.builders.nonliving.ArrowEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.ArrowEntityJSBuilder;
-import net.liopyu.entityjs.entities.IArrowEntityJS;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.MethodsReturnNonnullByDefault;

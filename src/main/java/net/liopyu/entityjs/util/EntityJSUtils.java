@@ -18,17 +18,17 @@ public interface EntityJSUtils {
         return new FlyingPathNavigation(pMob, pLevel);
     }
 
-    @Info("Flying entity path navigation")
+    @Info("Amphibious entity path navigation")
     static AmphibiousPathNavigation createAmphibiousPathNavigation(Mob pMob, Level pLevel) {
         return new AmphibiousPathNavigation(pMob, pLevel);
     }
 
-    @Info("Flying entity path navigation")
+    @Info("Wall climbing entity path navigation")
     static WallClimberNavigation createWallClimberNavigation(Mob pMob, Level pLevel) {
         return new WallClimberNavigation(pMob, pLevel);
     }
 
-    @Info("Flying entity path navigation")
+    @Info("Water bound entity path navigation")
     static WaterBoundPathNavigation createWaterBoundPathNavigation(Mob pMob, Level pLevel) {
         return new WaterBoundPathNavigation(pMob, pLevel);
     }

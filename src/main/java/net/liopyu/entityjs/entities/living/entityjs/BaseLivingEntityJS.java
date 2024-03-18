@@ -2,7 +2,7 @@ package net.liopyu.entityjs.entities.living.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.BaseLivingEntityJSBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.BaseLivingEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
 import net.liopyu.liolib.util.GeckoLibUtil;
