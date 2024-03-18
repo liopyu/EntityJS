@@ -104,10 +104,4 @@ public interface IAnimatableJSNL extends GeoAnimatable, GeoEntity {
     }
 
     EntityType<?> getType();
-
-    ArrowEntityBuilder<?> getArrowBuilder();
-
-    ProjectileEntityBuilder<?> getProjectileBuilder();
-
-    void setPickUpItem(ItemStack stack);
 }

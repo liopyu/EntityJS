@@ -51,7 +51,6 @@ public class BaseEntityJS extends Entity implements IAnimatableJSNL {
 
     }
 
-
     @Override
     public BaseEntityBuilder<?> getBuilder() {
         return builder;
@@ -62,20 +61,6 @@ public class BaseEntityJS extends Entity implements IAnimatableJSNL {
         return getAnimatableInstanceCache;
     }
 
-    @Override
-    public ArrowEntityBuilder<?> getArrowBuilder() {
-        return null;
-    }
-
-    @Override
-    public ProjectileEntityBuilder<?> getProjectileBuilder() {
-        return null;
-    }
-
-    @Override
-    public void setPickUpItem(ItemStack stack) {
-
-    }
 
     public String entityName() {
         return this.getType().toString();

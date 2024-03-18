@@ -21,7 +21,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 
-public class ProjectileEntityJS extends ThrowableItemProjectile implements IAnimatableJSNL, ItemSupplier {
+public class ProjectileEntityJS extends ThrowableItemProjectile implements IProjectileEntityJS, ItemSupplier {
 
 
     public ProjectileEntityJSBuilder builder;
@@ -37,30 +37,9 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IAnim
     }
 
     @Override
-    public BaseEntityBuilder<?> getBuilder() {
-        return null;
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return null;
-    }
-
-    @Override
-    public ArrowEntityBuilder<?> getArrowBuilder() {
-        return null;
-    }
-
-    @Override
     public ProjectileEntityBuilder<?> getProjectileBuilder() {
         return builder;
     }
-
-    @Override
-    public void setPickUpItem(ItemStack stack) {
-
-    }
-
 
     @Override
     protected Item getDefaultItem() {

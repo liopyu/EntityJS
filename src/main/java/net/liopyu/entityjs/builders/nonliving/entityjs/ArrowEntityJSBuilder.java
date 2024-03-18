@@ -29,10 +29,6 @@ public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
         return (type, level) -> new ArrowEntityJS(this, type, level);
     }
 
-    @Override
-    public AttributeSupplier.Builder getAttributeBuilder() {
-        return null;
-    }
 
     @Info(value = "Indicates that no arrow item should be created for this entity type")
     public ArrowEntityJSBuilder noItem() {

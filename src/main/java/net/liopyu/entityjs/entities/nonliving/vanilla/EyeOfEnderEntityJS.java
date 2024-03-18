@@ -1,12 +1,16 @@
 package net.liopyu.entityjs.entities.nonliving.vanilla;
 
-import net.liopyu.entityjs.builders.nonliving.*;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
+import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.EntityJSUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -14,6 +18,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.EyeOfEnder;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -26,24 +31,28 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Objects;
 
-public class BoatEntityJS extends Boat implements IAnimatableJSNL {
-    protected final BoatJSBuilder builder;
-    private final AnimatableInstanceCache getAnimatableInstanceCache;
+public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJS {
+    protected final EyeOfEnderJSBuilder builder;
 
-    public BoatEntityJS(BoatJSBuilder builder, EntityType<? extends Boat> pEntityType, Level pLevel) {
+    public EyeOfEnderEntityJS(EyeOfEnderJSBuilder builder, EntityType<? extends EyeOfEnder> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
-        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+    }
+
+    public EyeOfEnderEntityJS(EyeOfEnderJSBuilder builder, Level pLevel, EntityType<? extends EyeOfEnder> pEntityType, double pX, double pY, double pZ) {
+        super(pEntityType, pLevel);
+        this.builder = builder;
+        this.setPos(pX, pY, pZ);
     }
 
     @Override
-    public BaseEntityBuilder<?> getBuilder() {
-        return builder;
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return getAnimatableInstanceCache;
+    public ItemStack getItem() {
+        if (builder.getItem != null) {
+            Object obj = builder.getItem.apply(this);
+            if (obj instanceof ItemStack i) return i;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getItem in builder: " + obj + ". Must be an ItemStack. Defaulting to super method: " + super.getItem());
+        }
+        return super.getItem();
     }
 
     public String entityName() {
@@ -467,5 +476,10 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
             return (int) obj;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
         return super.getMaxFallDistance();
+    }
+
+    @Override
+    public BaseNonAnimatableEntityBuilder<?> getProjectileBuilder() {
+        return builder;
     }
 }

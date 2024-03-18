@@ -34,10 +34,6 @@ public class ProjectileEntityJSBuilder extends ProjectileEntityBuilder<Projectil
         return (type, level) -> new ProjectileEntityJS(this, type, level);
     }
 
-    @Override
-    public AttributeSupplier.Builder getAttributeBuilder() {
-        return null;
-    }
 
     @Info(value = "Indicates that no projectile item should be created for this entity type")
     public ProjectileEntityJSBuilder noItem() {

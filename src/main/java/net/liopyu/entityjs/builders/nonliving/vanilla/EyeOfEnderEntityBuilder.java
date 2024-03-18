@@ -1,30 +1,23 @@
-package net.liopyu.entityjs.builders.nonliving.entityjs;
+package net.liopyu.entityjs.builders.nonliving.vanilla;
 
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.EntityTypeBuilder;
 import net.liopyu.entityjs.builders.nonliving.NonAnimatableEntityTypeBuilder;
-import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEntityJS> extends BaseNonAnimatableEntityBuilder<T> {
+public abstract class EyeOfEnderEntityBuilder<T extends Entity & IProjectileEntityJS> extends BaseNonAnimatableEntityBuilder<T> {
     public transient Function<T, Object> textureLocation;
-    public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
-    public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
-    public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
-    public transient Function<Entity, Object> canHitEntity;
+    public static final List<EyeOfEnderEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Float pX;
     public transient Float pY;
     public transient Float pZ;
@@ -32,7 +25,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
     public transient Float vY;
     public transient Float vZ;
 
-    public ProjectileEntityBuilder(ResourceLocation i) {
+    public EyeOfEnderEntityBuilder(ResourceLocation i) {
         super(i);
         textureLocation = t -> t.getProjectileBuilder().newID("textures/entity/projectiles/", ".png");
         thisList.add(this);
@@ -58,7 +51,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
             projectileEntityBuilder.renderScale(1.5, 1.5, 1.5);
             ```
             """)
-    public ProjectileEntityBuilder<T> renderScale(Float pX, Float pY, Float pZ) {
+    public EyeOfEnderEntityBuilder<T> renderScale(Float pX, Float pY, Float pZ) {
         this.pX = pX;
         this.pY = pY;
         this.pZ = pZ;
@@ -80,7 +73,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
             projectileEntityBuilder.renderOffset(0.5, 1.0, -0.5);
             ```
             """)
-    public ProjectileEntityBuilder<T> renderOffset(Float vX, Float vY, Float vZ) {
+    public EyeOfEnderEntityBuilder<T> renderOffset(Float vX, Float vY, Float vZ) {
         this.vX = vX;
         this.vY = vY;
         this.vZ = vZ;
@@ -102,7 +95,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
             });
             ```
             """)
-    public ProjectileEntityBuilder<T> textureLocation(Function<T, Object> function) {
+    public EyeOfEnderEntityBuilder<T> textureLocation(Function<T, Object> function) {
         textureLocation = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String) {
@@ -116,64 +109,4 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
         };
         return this;
     }
-
-    //Projectile Overrides
-
-
-    @Info(value = """
-            Sets a callback function to be executed when the projectile hits an entity.
-            The provided Consumer accepts a {@link ContextUtils.ProjectileEntityHitContext} parameter,
-            representing the context of the projectile's interaction with a specific entity.
-                        
-            Example usage:
-            ```javascript
-            projectileBuilder.onHitEntity(context -> {
-                // Custom logic to handle the projectile hitting an entity.
-                // Access information about the entity and projectile using the provided context.
-            });
-            ```
-            """)
-    public ProjectileEntityBuilder<T> onHitEntity(Consumer<ContextUtils.ProjectileEntityHitContext> consumer) {
-        onHitEntity = consumer;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a callback function to be executed when the projectile hits a block.
-            The provided Consumer accepts a {@link ContextUtils.ProjectileBlockHitContext} parameter,
-            representing the context of the projectile's interaction with a specific block.
-                        
-            Example usage:
-            ```javascript
-            projectileBuilder.onHitBlock(context -> {
-                // Custom logic to handle the projectile hitting a block.
-                // Access information about the block and projectile using the provided context.
-            });
-            ```
-            """)
-    public ProjectileEntityBuilder<T> onHitBlock(Consumer<ContextUtils.ProjectileBlockHitContext> consumer) {
-        onHitBlock = consumer;
-        return this;
-    }
-
-    @Info(value = """
-            Sets a function to determine if the projectile entity can hit a specific entity.
-                        
-            @param canHitEntity The predicate to check if the arrow can hit the entity.
-                        
-            Example usage:
-            ```javascript
-            projectileEntityBuilder.canHitEntity(entity -> {
-                // Custom logic to determine if the projectile can hit the specified entity
-                // Return true if the arrow can hit, false otherwise.
-            });
-            ```
-            """)
-    public ProjectileEntityBuilder<T> canHitEntity(Function<Entity, Object> function) {
-        canHitEntity = function;
-        return this;
-    }
-
-
 }

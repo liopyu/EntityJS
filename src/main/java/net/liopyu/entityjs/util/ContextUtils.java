@@ -289,6 +289,22 @@ public class ContextUtils {
         }
     }
 
+    public static class ItemUseContext {
+        @Info("The level of the entity using the item")
+        public final Level level;
+
+        @Info("The player interacting with the item")
+        public final Player player;
+
+        @Info("The hand used for interaction")
+        public final InteractionHand hand;
+
+        public ItemUseContext(Level level, Player player, InteractionHand hand) {
+            this.level = level;
+            this.player = player;
+            this.hand = hand;
+        }
+    }
 
     public static class MobInteractContext {
         @Info("The living entity being interacted with")
@@ -865,7 +881,7 @@ public class ContextUtils {
         }
     }
 
-    public static class NLRenderContext<T extends Entity & IAnimatableJSNL> {
+    public static class NLRenderContext<T extends Entity> {
         @Info("The animatable entity being rendered")
         public final T entity;
 

@@ -43,7 +43,7 @@ import java.util.Objects;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class ArrowEntityJS extends AbstractArrow implements IAnimatableJSNL {
+public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     public final ArrowEntityJSBuilder builder;
     @NotNull
@@ -75,23 +75,8 @@ public class ArrowEntityJS extends AbstractArrow implements IAnimatableJSNL {
     }
 
     @Override
-    public BaseEntityBuilder<?> getBuilder() {
-        return null;
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return null;
-    }
-
-    @Override
     public ArrowEntityBuilder<?> getArrowBuilder() {
         return builder;
-    }
-
-    @Override
-    public ProjectileEntityBuilder<?> getProjectileBuilder() {
-        return null;
     }
 
     @Override

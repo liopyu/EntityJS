@@ -9,6 +9,7 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.BaseEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
 
@@ -47,6 +48,8 @@ public class EntityJSPlugin extends KubeJSPlugin {
         RegistryInfo.ENTITY_TYPE.addType("minecraft:illusioner", IllusionerJSBuilder.class, IllusionerJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:iron_golem", IronGolemJSBuilder.class, IronGolemJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:panda", PandaJSBuilder.class, PandaJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("minecraft:parrot", ParrotJSBuilder.class, ParrotJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("minecraft:eye_of_ender", EyeOfEnderJSBuilder.class, EyeOfEnderJSBuilder::new);
     }
 
     @Override

@@ -2,8 +2,11 @@ package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.EntityTypeBuilder;
+import net.liopyu.entityjs.builders.nonliving.NonAnimatableEntityTypeBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
+import net.liopyu.entityjs.entities.nonliving.entityjs.IArrowEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +19,7 @@ import java.util.List;
 import java.util.function.*;
 
 
-public abstract class ArrowEntityBuilder<T extends AbstractArrow & IAnimatableJSNL> extends BaseEntityBuilder<T> {
+public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseNonAnimatableEntityBuilder<T> {
     public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Function<T, Object> textureLocation;
     public transient Consumer<AbstractArrow> tickDespawn;
@@ -42,7 +45,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IAnimatableJS
 
     @Override
     public EntityType<T> createObject() {
-        return new EntityTypeBuilder<>(this).get();
+        return new NonAnimatableEntityTypeBuilder<>(this).get();
     }
 
     @Info(value = """
