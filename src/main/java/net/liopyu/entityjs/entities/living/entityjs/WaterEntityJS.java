@@ -42,6 +42,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.entity.PartEntity;
@@ -199,6 +200,19 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
 
     //Mob Overrides
     @Override
+    public boolean canCutCorner(BlockPathTypes pathType) {
+        if (builder.canCutCorner != null) {
+            final ContextUtils.EntityBlockPathTypeContext context = new ContextUtils.EntityBlockPathTypeContext(pathType, this);
+            Object value = builder.canCutCorner.apply(context);
+            if (value instanceof Boolean b) {
+                return b;
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCutCorner from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.canCutCorner(pathType));
+        }
+        return super.canCutCorner(pathType);
+    }
+
+    @Override
     public boolean doHurtTarget(Entity pEntity) {
         if (builder != null && builder.onHurtTarget != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
@@ -246,9 +260,9 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
         double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
         double d2 = pTarget.getZ() - this.getZ();
         double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level().getDifficulty().getId() * 4));
+        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level.getDifficulty().getId() * 4));
         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-        this.level().addFreshEntity(abstractarrow);
+        this.level.addFreshEntity(abstractarrow);
     }
 
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
@@ -292,7 +306,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
 
     public boolean shouldJump() {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
+        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -308,7 +322,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
         }
-        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
+        if (canJump() && this.isOnGround() && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
     }
@@ -478,7 +492,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
     protected boolean thisJumping = false;
 
     public boolean ableToJump() {
-        return ModKeybinds.mount_jump.isDown() && this.onGround();
+        return ModKeybinds.mount_jump.isDown() && this.isOnGround();
     }
 
     public void setThisJumping(boolean value) {
@@ -706,7 +720,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            if (!this.level().isClientSide()) {
+            if (!this.level.isClientSide()) {
                 builder.tick.accept(this);
             }
         }
@@ -715,7 +729,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
     }
@@ -1042,14 +1056,13 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
 
 
     @Override
-    public float getJumpBoostPower() {
+    public double getJumpBoostPower() {
         if (builder.jumpBoostPower == null) return super.getJumpBoostPower();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "double");
+        if (obj != null) return (double) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a double. Defaulting to " + super.getJumpBoostPower());
         return super.getJumpBoostPower();
     }
-
 
     @Override
     public boolean canStandOnFluid(@NotNull FluidState fluidState) {
@@ -1167,7 +1180,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
     @Override
     public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
+            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level);
             Object obj = builder.canTakeItem.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -1264,7 +1277,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;

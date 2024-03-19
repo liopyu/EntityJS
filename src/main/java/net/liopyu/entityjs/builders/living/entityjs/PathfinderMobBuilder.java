@@ -13,9 +13,29 @@ public abstract class PathfinderMobBuilder<T extends PathfinderMob & IAnimatable
     public transient Function<Mob, Object> shouldStayCloseToLeashHolder;
     public transient Double followLeashSpeed;
     public transient Function<ContextUtils.EntityBlockPosLevelContext, Object> walkTargetValue;
+    public transient Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner;
 
     public PathfinderMobBuilder(ResourceLocation i) {
         super(i);
+    }
+
+    @Info(value = """
+            Sets a function to determine if the entity can cut corners when navigating paths.
+                        
+            @param canCutCorner A Function accepting a ContextUtils.EntityBlockPathTypeContext parameter,
+                                defining the logic to determine if the entity can cut corners.
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.canCutCorner(context => {
+                // Custom logic to determine if the entity can cut corners based on the provided context.
+                // Return true if the entity can cut corners, false otherwise.
+            });
+            ```
+            """)
+    public MobBuilder<T> canCutCorner(Function<ContextUtils.EntityBlockPathTypeContext, Object> canCutCorner) {
+        this.canCutCorner = canCutCorner;
+        return this;
     }
 
     @Info(value = """

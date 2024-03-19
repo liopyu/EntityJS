@@ -45,6 +45,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Cat;
+import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
@@ -61,6 +62,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.entity.PartEntity;
@@ -95,8 +97,8 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob, 
     protected PathNavigation navigation;
 
     static {
-        DATA_INTERESTED_ID = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.BOOLEAN);
-        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.INT);
+        DATA_INTERESTED_ID = SynchedEntityData.defineId(CatEntityJS.class, EntityDataSerializers.BOOLEAN);
+        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(CatEntityJS.class, EntityDataSerializers.INT);
         PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     }
 
@@ -116,6 +118,15 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob, 
         this.navigation = this.createNavigation(pLevel);
     }
 
+    @Override
+    public void setCatVariant(CatVariant pVariant) {
+        super.setCatVariant(pVariant);
+    }
+
+    @Override
+    public CatVariant getCatVariant() {
+        return super.getCatVariant();
+    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -490,6 +501,18 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob, 
     }
 
     //Mob Overrides
+    @Override
+    public boolean canCutCorner(BlockPathTypes pathType) {
+        if (builder.canCutCorner != null) {
+            final ContextUtils.EntityBlockPathTypeContext context = new ContextUtils.EntityBlockPathTypeContext(pathType, this);
+            Object value = builder.canCutCorner.apply(context);
+            if (value instanceof Boolean b) {
+                return b;
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCutCorner from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.canCutCorner(pathType));
+        }
+        return super.canCutCorner(pathType);
+    }
 
     @Override
     protected PathNavigation createNavigation(Level pLevel) {

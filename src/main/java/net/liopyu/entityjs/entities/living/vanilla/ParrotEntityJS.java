@@ -59,6 +59,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.entity.PartEntity;
@@ -286,7 +287,7 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
             builder.onHurtTarget.accept(context);
         }
-        boolean flag = pEntity.hurt(this.damageSources().mobAttack(this), (float) ((int) this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
+        boolean flag = pEntity.hurt(DamageSource.mobAttack(this), (float) ((int) this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
         if (flag) {
             this.doEnchantDamageEffects(this, pEntity);
         }
@@ -433,7 +434,7 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
 
             this.addEffect(new MobEffectInstance(MobEffects.POISON, 900));
             if (pPlayer.isCreative() || !this.isInvulnerable()) {
-                this.hurt(this.damageSources().playerAttack(pPlayer), Float.MAX_VALUE);
+                this.hurt(DamageSource.playerAttack(pPlayer), Float.MAX_VALUE);
             }
 
             return InteractionResult.sidedSuccess(this.level.isClientSide);
@@ -449,6 +450,18 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
     }
 
     //Mob Overrides
+    @Override
+    public boolean canCutCorner(BlockPathTypes pathType) {
+        if (builder.canCutCorner != null) {
+            final ContextUtils.EntityBlockPathTypeContext context = new ContextUtils.EntityBlockPathTypeContext(pathType, this);
+            Object value = builder.canCutCorner.apply(context);
+            if (value instanceof Boolean b) {
+                return b;
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCutCorner from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.canCutCorner(pathType));
+        }
+        return super.canCutCorner(pathType);
+    }
 
     @Override
     protected PathNavigation createNavigation(Level pLevel) {

@@ -20,7 +20,6 @@ import net.minecraft.world.phys.Vec3;
 
 public class ProjectileEntityJS extends ThrowableItemProjectile implements IProjectileEntityJS, ItemSupplier {
 
-
     public ProjectileEntityJSBuilder builder;
 
     public ProjectileEntityJS(ProjectileEntityJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, Level pLevel) {

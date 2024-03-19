@@ -33,11 +33,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<EntityType<T>> {
-
+public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> extends BuilderBase<EntityType<T>> {
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Consumer<ContextUtils.EntityPlayerContext> playerTouch;
     public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
@@ -683,7 +683,7 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**
-     * A wrapper around {@link software.bernie.geckolib.core.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
+     * A wrapper around {@link net.liopyu.liolib.core.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
      * that is easier to work with in js
      */
     @FunctionalInterface
@@ -723,7 +723,7 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
      */
     public static class AnimationEventJS<E extends Entity & IAnimatableJSNL> {
         private final List<RawAnimation.Stage> animationList = new ObjectArrayList();
-        private final software.bernie.geckolib.core.animation.AnimationState<E> parent;
+        private final net.liopyu.liolib.core.animation.AnimationState<E> parent;
 
         public AnimationEventJS(AnimationState<E> parent) {
             this.parent = parent;
@@ -899,4 +899,5 @@ public abstract class BaseEntityBuilder<T extends Entity> extends BuilderBase<En
         CUTOUT,
         TRANSLUCENT
     }
+
 }

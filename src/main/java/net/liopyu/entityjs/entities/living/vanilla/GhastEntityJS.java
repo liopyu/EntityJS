@@ -187,6 +187,7 @@ public class GhastEntityJS extends Ghast implements IAnimatableJS {
 
 
     //Mob Overrides
+
     @Override
     public boolean doHurtTarget(Entity pEntity) {
         if (builder != null && builder.onHurtTarget != null) {

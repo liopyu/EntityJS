@@ -15,6 +15,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -50,6 +51,15 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
         return this.getType().toString();
     }
 
+    @Override
+    public Item getDropItem() {
+        if (builder.getItem != null) {
+            Object obj = builder.getItem.apply(this);
+            if (obj instanceof Item i) return i;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getItem in builder: " + obj + ". Must be an Item. Defaulting to super method: " + super.getDropItem());
+        }
+        return super.getDropItem();
+    }
 
     //Base Entity Overrides
     public boolean hurt(DamageSource pSource, float pAmount) {
