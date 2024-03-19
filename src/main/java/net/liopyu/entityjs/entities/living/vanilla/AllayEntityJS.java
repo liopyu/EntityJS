@@ -49,8 +49,8 @@ import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
+import net.liopyu.liolib.util.GeckoLibUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,9 +155,9 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     }
 
     @Override
-    protected Brain<MobEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<AllayEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<MobEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<AllayEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
@@ -224,9 +224,9 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
         double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
         double d2 = pTarget.getZ() - this.getZ();
         double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level().getDifficulty().getId() * 4));
+        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level.getDifficulty().getId() * 4));
         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-        this.level().addFreshEntity(abstractarrow);
+        this.level.addFreshEntity(abstractarrow);
     }
 
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
@@ -269,7 +269,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
 
     public boolean shouldJump() {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
+        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -285,7 +285,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
         }
-        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
+        if (canJump() && this.isOnGround() && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
     }
@@ -455,7 +455,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     protected boolean thisJumping = false;
 
     public boolean ableToJump() {
-        return ModKeybinds.mount_jump.isDown() && this.onGround();
+        return ModKeybinds.mount_jump.isDown() && this.isOnGround();
     }
 
     public void setThisJumping(boolean value) {
@@ -683,7 +683,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            if (!this.level().isClientSide()) {
+            if (!this.level.isClientSide()) {
                 builder.tick.accept(this);
             }
         }
@@ -692,7 +692,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
     }
@@ -1020,11 +1020,11 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
 
 
     @Override
-    public float getJumpBoostPower() {
+    public double getJumpBoostPower() {
         if (builder.jumpBoostPower == null) return super.getJumpBoostPower();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "double");
+        if (obj != null) return (double) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a double. Defaulting to " + super.getJumpBoostPower());
         return super.getJumpBoostPower();
     }
 
@@ -1145,7 +1145,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     @Override
     public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
+            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level);
             Object obj = builder.canTakeItem.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -1242,7 +1242,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;

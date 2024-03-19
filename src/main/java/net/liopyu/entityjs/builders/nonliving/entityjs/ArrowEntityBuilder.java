@@ -2,7 +2,9 @@ package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.EntityTypeBuilder;
+import net.liopyu.entityjs.builders.nonliving.NonAnimatableEntityTypeBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IArrowEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.function.*;
 
 
-public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseEntityBuilder<T> {
+public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJS> extends BaseNonAnimatableEntityBuilder<T> {
     public static final List<ArrowEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Function<T, Object> textureLocation;
     public transient Consumer<AbstractArrow> tickDespawn;
@@ -37,11 +39,12 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         textureLocation = t -> t.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
         setBaseDamage = 2;
         setKnockback = 1;
+
     }
 
     @Override
     public EntityType<T> createObject() {
-        return new EntityTypeBuilder<>(this).get();
+        return new NonAnimatableEntityTypeBuilder<>(this).get();
     }
 
     @Info(value = """
@@ -268,3 +271,5 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         return this;
     }
 }
+
+

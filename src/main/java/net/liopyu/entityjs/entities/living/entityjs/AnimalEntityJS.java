@@ -186,7 +186,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS event = new BuildBrainProviderEventJS();
+            final BuildBrainProviderEventJS<AnimalEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {

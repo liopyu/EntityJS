@@ -1,11 +1,15 @@
 package net.liopyu.entityjs.entities.living.entityjs;
 
+import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
+import net.liopyu.entityjs.events.BuildBrainEventJS;
+import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
 import net.liopyu.liolib.util.GeckoLibUtil;
@@ -22,6 +26,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -133,6 +138,28 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     public String entityName() {
         return this.getType().toString();
+    }
+
+    @Override
+    protected Brain.Provider<?> brainProvider() {
+        if (EventHandlers.buildBrainProvider.hasListeners()) {
+            final BuildBrainProviderEventJS<MobEntityJS> event = new BuildBrainProviderEventJS<>();
+            EventHandlers.buildBrainProvider.post(event, getTypeId());
+            return event.provide();
+        } else {
+            return super.brainProvider();
+        }
+    }
+
+    @Override
+    protected Brain<MobEntityJS> makeBrain(Dynamic<?> p_21069_) {
+        if (EventHandlers.buildBrain.hasListeners()) {
+            final Brain<MobEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
+            return brain;
+        } else {
+            return UtilsJS.cast(super.makeBrain(p_21069_));
+        }
     }
 
     @Override

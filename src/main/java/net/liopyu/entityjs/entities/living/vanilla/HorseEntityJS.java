@@ -67,8 +67,8 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
+import net.liopyu.liolib.util.GeckoLibUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -169,7 +169,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
     @Override
     protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<TameableMobJS> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<HorseEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -178,9 +178,9 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
     }
 
     @Override
-    protected Brain<TameableMobJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<HorseEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<TameableMobJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<HorseEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
@@ -209,7 +209,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
             if (pPlayer instanceof ServerPlayer) {
                 CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer) pPlayer, this);
             }
-            this.level().broadcastEntityEvent(this, (byte) 7);
+            this.level.broadcastEntityEvent(this, (byte) 7);
         } else super.tameWithName(pPlayer);
         if (builder.onTamed != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
@@ -290,7 +290,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
             double d0 = this.random.nextGaussian() * 0.02;
             double d1 = this.random.nextGaussian() * 0.02;
             double d2 = this.random.nextGaussian() * 0.02;
-            this.level().addParticle(particleoptions, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
+            this.level.addParticle(particleoptions, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
         }
     }
     //Ageable Mob Overrides
@@ -374,7 +374,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
 
                 if (!this.isTamed()) {
                     this.makeMad();
-                    return InteractionResult.sidedSuccess(this.level().isClientSide);
+                    return InteractionResult.sidedSuccess(this.level.isClientSide);
                 }
             }
 
@@ -459,9 +459,9 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
         double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
         double d2 = pTarget.getZ() - this.getZ();
         double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level().getDifficulty().getId() * 4));
+        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level.getDifficulty().getId() * 4));
         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-        this.level().addFreshEntity(abstractarrow);
+        this.level.addFreshEntity(abstractarrow);
     }
 
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
@@ -504,7 +504,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
 
     public boolean shouldJump() {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
+        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -520,7 +520,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
         if (builder.aiStep != null) {
             builder.aiStep.accept(this);
         }
-        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
+        if (canJump() && this.isOnGround() && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
     }
@@ -662,7 +662,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
     protected boolean thisJumping = false;
 
     public boolean ableToJump() {
-        return ModKeybinds.mount_jump.isDown() && this.onGround();
+        return ModKeybinds.mount_jump.isDown() && this.isOnGround();
     }
 
     public void setThisJumping(boolean value) {
@@ -893,7 +893,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
 
         super.tick();
         if (builder.tick != null) {
-            if (!this.level().isClientSide()) {
+            if (!this.level.isClientSide()) {
                 builder.tick.accept(this);
             }
         }
@@ -905,7 +905,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
         if (builder != null && builder.defaultGoals) {
             super.registerGoals();
         }
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
     }
@@ -1225,14 +1225,13 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
 
 
     @Override
-    public float getJumpBoostPower() {
+    public double getJumpBoostPower() {
         if (builder.jumpBoostPower == null) return super.getJumpBoostPower();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "double");
+        if (obj != null) return (double) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a double. Defaulting to " + super.getJumpBoostPower());
         return super.getJumpBoostPower();
     }
-
 
     @Override
     public boolean canStandOnFluid(@NotNull FluidState fluidState) {
@@ -1350,7 +1349,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
     @Override
     public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
+            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level);
             Object obj = builder.canTakeItem.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -1447,7 +1446,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
