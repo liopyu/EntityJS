@@ -44,23 +44,6 @@ public class ContextUtils {
     }
 
 
-    public static class ItemUseContext {
-        @Info("The level of the entity using the item")
-        public final Level level;
-
-        @Info("The player interacting with the item")
-        public final Player player;
-
-        @Info("The hand used for interaction")
-        public final InteractionHand hand;
-
-        public ItemUseContext(Level level, Player player, InteractionHand hand) {
-            this.level = level;
-            this.player = player;
-            this.hand = hand;
-        }
-    }
-
     public static class PlayerEntityContext {
         @Info("The living entity associated with the player")
         public final LivingEntity entity;
@@ -215,7 +198,7 @@ public class ContextUtils {
     }
 
     public static class EntityHurtContext {
-        @Info("The living entity that was hurt")
+        @Info("The entity that was hurt")
         public final Entity entity;
 
         @Info("The source of the damage")
@@ -305,6 +288,22 @@ public class ContextUtils {
         }
     }
 
+    public static class ItemUseContext {
+        @Info("The level of the entity using the item")
+        public final Level level;
+
+        @Info("The player interacting with the item")
+        public final Player player;
+
+        @Info("The hand used for interaction")
+        public final InteractionHand hand;
+
+        public ItemUseContext(Level level, Player player, InteractionHand hand) {
+            this.level = level;
+            this.player = player;
+            this.hand = hand;
+        }
+    }
 
     public static class MobInteractContext {
         @Info("The living entity being interacted with")
@@ -374,9 +373,9 @@ public class ContextUtils {
         public final LivingEntity target;
 
         @Info("The entity whose target is changing")
-        public final PathfinderMob entity;
+        public final Mob entity;
 
-        public TargetChangeContext(LivingEntity target, PathfinderMob entity) {
+        public TargetChangeContext(LivingEntity target, Mob entity) {
             this.target = target;
             this.entity = entity;
         }
@@ -613,7 +612,7 @@ public class ContextUtils {
         @Info("The target entity")
         public final Entity targetEntity;
 
-        @Info("The entity looking at the target entity")
+        @Info("The living entity associated with the target entity")
         public final LivingEntity entity;
 
         public LineOfSightContext(Entity targetEntity, LivingEntity entity) {
@@ -881,6 +880,36 @@ public class ContextUtils {
         }
     }
 
+    public static class NLRenderContext<T extends Entity> {
+        @Info("The animatable entity being rendered")
+        public final T entity;
+
+        @Info("The yaw of the entity")
+        public final float entityYaw;
+
+        @Info("The partial tick")
+        public final float partialTick;
+
+        @Info("The pose stack for transformations")
+        public final PoseStack poseStack;
+
+        @Info("The buffer source for rendering")
+        public final MultiBufferSource bufferSource;
+
+        @Info("The packed light information")
+        public final int packedLight;
+
+        public NLRenderContext(T entity, float entityYaw, float partialTick,
+                               PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+            this.entity = entity;
+            this.entityYaw = entityYaw;
+            this.partialTick = partialTick;
+            this.poseStack = poseStack;
+            this.bufferSource = bufferSource;
+            this.packedLight = packedLight;
+        }
+    }
+
     public static class EPassengerEntityContext {
 
         public final Entity passenger;
@@ -917,7 +946,7 @@ public class ContextUtils {
         @Info("The distance fallen before trampling (if applicable)")
         public final float fallDistance;
 
-        @Info("The living entity attempting to trample the block")
+        @Info("The entity attempting to trample the block")
         public final Entity entity;
 
         public ECanTrampleContext(BlockState state, BlockPos pos, float fallDistance, Entity entity) {
@@ -929,7 +958,7 @@ public class ContextUtils {
     }
 
     public static class EDamageContext {
-        @Info("The living entity that is the target of the damage")
+        @Info("The entity that is the target of the damage")
         public final Entity entity;
 
         @Info("The source of the damage")
@@ -948,7 +977,7 @@ public class ContextUtils {
         @Info("The lightning bolt that struck")
         public final LightningBolt lightningBolt;
 
-        @Info("The living entity affected by the lightning strike")
+        @Info("The entity affected by the lightning strike")
         public final Entity entity;
 
         public EThunderHitContext(ServerLevel level, LightningBolt lightningBolt, Entity entity) {
@@ -959,7 +988,7 @@ public class ContextUtils {
     }
 
     public static class EEntityFallDamageContext {
-        @Info("The living entity experiencing fall damage")
+        @Info("The entity experiencing fall damage")
         public final Entity entity;
 
         @Info("The distance fallen by the living entity")
@@ -986,7 +1015,7 @@ public class ContextUtils {
         @Info("The position where the interaction may occur")
         public final BlockPos pos;
 
-        @Info("The living entity involved in the interaction")
+        @Info("The entity involved in the interaction")
         public final Entity entity;
 
         public EMayInteractContext(Level level, BlockPos pos, Entity entity) {
