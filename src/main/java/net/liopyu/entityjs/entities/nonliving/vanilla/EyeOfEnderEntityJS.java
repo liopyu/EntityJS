@@ -1,16 +1,10 @@
 package net.liopyu.entityjs.entities.nonliving.vanilla;
 
-import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
-import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.liopyu.entityjs.util.EntityJSUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -19,15 +13,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Objects;
 

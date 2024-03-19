@@ -1,8 +1,7 @@
 package net.liopyu.entityjs.entities.nonliving.vanilla;
 
 import net.liopyu.entityjs.builders.nonliving.*;
-import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.vanilla.BoatEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -11,11 +10,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -50,6 +50,28 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
         return this.getType().toString();
     }
 
+    /*public void onPassengerTurned(Entity pEntityToUpdate) {
+        this.clampRotation(pEntityToUpdate);
+    }
+
+    protected void clampRotation(Entity pEntityToUpdate) {
+        pEntityToUpdate.setYBodyRot(this.getYRot());
+        float f = Mth.wrapDegrees(pEntityToUpdate.getYRot() - this.getYRot());
+        float f1 = Mth.clamp(f, -105.0F, 105.0F);
+        pEntityToUpdate.yRotO += f1 - f;
+        pEntityToUpdate.setYRot(pEntityToUpdate.getYRot() + f1 - f);
+        pEntityToUpdate.setYHeadRot(pEntityToUpdate.getYRot());
+    }*/
+
+    @Override
+    public Item getDropItem() {
+        if (builder.getDropItem != null) {
+            Object obj = builder.getDropItem.apply(this);
+            if (obj instanceof Item i) return i;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getDropItem in builder: " + obj + ". Must be an Item. Defaulting to super method: " + super.getDropItem());
+        }
+        return super.getDropItem();
+    }
 
     //Base Entity Overrides
     public boolean hurt(DamageSource pSource, float pAmount) {
