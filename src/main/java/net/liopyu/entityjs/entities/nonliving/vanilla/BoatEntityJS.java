@@ -53,10 +53,10 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
 
     @Override
     public Item getDropItem() {
-        if (builder.getItem != null) {
-            Object obj = builder.getItem.apply(this);
+        if (builder.getDropItem != null) {
+            Object obj = builder.getDropItem.apply(this);
             if (obj instanceof Item i) return i;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getItem in builder: " + obj + ". Must be an Item. Defaulting to super method: " + super.getDropItem());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getDropItem in builder: " + obj + ". Must be an Item. Defaulting to super method: " + super.getDropItem());
         }
         return super.getDropItem();
     }
