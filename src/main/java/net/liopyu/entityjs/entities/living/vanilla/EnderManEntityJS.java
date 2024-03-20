@@ -149,7 +149,7 @@ public class EnderManEntityJS extends EnderMan implements IAnimatableJS {
     @Override
     protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<ZombieEntityJS> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<EnderManEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -158,9 +158,9 @@ public class EnderManEntityJS extends EnderMan implements IAnimatableJS {
     }
 
     @Override
-    protected Brain<MobEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<EnderManEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<MobEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<EnderManEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {

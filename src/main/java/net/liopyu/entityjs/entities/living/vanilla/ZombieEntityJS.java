@@ -160,9 +160,9 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     }
 
     @Override
-    protected Brain<MobEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<ZombieEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<MobEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<ZombieEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {

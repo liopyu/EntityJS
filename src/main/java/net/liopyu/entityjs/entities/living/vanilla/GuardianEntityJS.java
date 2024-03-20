@@ -151,7 +151,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     @Override
     protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<MobEntityJS> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<GuardianEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -160,9 +160,9 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     }
 
     @Override
-    protected Brain<MobEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<GuardianEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<MobEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<GuardianEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {

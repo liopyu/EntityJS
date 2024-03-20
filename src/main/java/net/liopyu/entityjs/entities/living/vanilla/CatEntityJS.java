@@ -178,7 +178,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob, 
     @Override
     protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<TameableMobJS> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<CatEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -187,9 +187,9 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob, 
     }
 
     @Override
-    protected Brain<TameableMobJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<CatEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<TameableMobJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<CatEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {

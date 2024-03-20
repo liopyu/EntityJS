@@ -158,9 +158,9 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     }
 
     @Override
-    protected Brain<AnimalEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<DonkeyEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<AnimalEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<DonkeyEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
