@@ -19,11 +19,59 @@ public abstract class BoatEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient Function<Boat, Object> getDropItem;
     public transient float setShadowRadius;
     public static final List<BoatEntityBuilder<?>> thisList = new ArrayList<>();
+    public transient Function<Boat, Object> turningBoatSpeed;
+    public transient Function<Boat, Object> forwardBoatSpeed;
+    public transient Function<Boat, Object> backwardsBoatSpeed;
 
     public BoatEntityBuilder(ResourceLocation i) {
         super(i);
         thisList.add(this);
         this.setShadowRadius = 0.3F;
+    }
+
+    @Info(value = """
+            Sets a function to determine the speed of the boat when it turns.
+            Example usage:
+            ```javascript
+            builder.turningBoatSpeed(entity => {
+                // Use information about the entity provided by the context.
+                return 1 // Some Float
+            });
+            ```
+            """)
+    public BoatEntityBuilder<T> turningBoatSpeed(Function<Boat, Object> function) {
+        this.turningBoatSpeed = function;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a function to determine the speed of the boat when going forward.
+            Example usage:
+            ```javascript
+            builder.forwardBoatSpeed(entity => {
+                // Use information about the entity provided by the context.
+                return 1 // Some Float
+            });
+            ```
+            """)
+    public BoatEntityBuilder<T> forwardBoatSpeed(Function<Boat, Object> function) {
+        this.forwardBoatSpeed = function;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a function to determine the speed of the boat when in reverse.
+            Example usage:
+            ```javascript
+            builder.backwardsBoatSpeed(entity => {
+                // Use information about the entity provided by the context.
+                return 1 // Some Float
+            });
+            ```
+            """)
+    public BoatEntityBuilder<T> backwardsBoatSpeed(Function<Boat, Object> function) {
+        this.backwardsBoatSpeed = function;
+        return this;
     }
 
     @Info(value = """
