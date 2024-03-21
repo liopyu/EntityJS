@@ -890,7 +890,6 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
 
     @Override
     public void tick() {
-
         super.tick();
         if (builder.tick != null) {
             if (!this.level().isClientSide()) {

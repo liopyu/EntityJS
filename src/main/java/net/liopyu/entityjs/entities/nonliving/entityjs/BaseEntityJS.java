@@ -184,7 +184,6 @@ public class BaseEntityJS extends Entity implements IAnimatableJSNL {
     protected float getBlockSpeedFactor() {
         if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
-        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         if (obj != null) {
             return (float) obj;
         } else {

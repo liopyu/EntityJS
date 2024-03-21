@@ -92,6 +92,14 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
         return this.getType().toString();
     }
 
+    @Override
+    public void setInput(boolean pInputLeft, boolean pInputRight, boolean pInputUp, boolean pInputDown) {
+        this.inputLeft = pInputLeft;
+        this.inputRight = pInputRight;
+        this.inputUp = pInputUp;
+        this.inputDown = pInputDown;
+    }
+
     public void controlBoat() {
         if (this.isVehicle()) {
             float f = 0.0F;
@@ -132,12 +140,12 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
                 if (builder.backwardsBoatSpeed != null) {
                     Object obj = EntityJSHelperClass.convertObjectToDesired(builder.backwardsBoatSpeed.apply(this), "float");
                     if (obj != null) {
-                        f += (float) obj;
+                        f -= (float) obj;
                     } else {
                         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for backwardsBoatSpeed from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to 0.005");
-                        f += 0.005F;
+                        f -= 0.005F;
                     }
-                } else f += 0.005F;
+                } else f -= 0.005F;
             }
 
             this.setDeltaMovement(this.getDeltaMovement().add((double) (Mth.sin(-this.getYRot() * 0.017453292F) * f), 0.0, (double) (Mth.cos(this.getYRot() * 0.017453292F) * f)));
@@ -323,7 +331,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
 
             Vec3 vec3 = this.getDeltaMovement();
             this.setDeltaMovement(vec3.x * (double) this.invFriction, vec3.y + d1, vec3.z * (double) this.invFriction);
-            this.deltaRotation *= this.invFriction;
+            this.deltaRotation *= (int) this.invFriction;
             if (d2 > 0.0) {
                 Vec3 vec31 = this.getDeltaMovement();
                 this.setDeltaMovement(vec31.x, (vec31.y + d2 * 0.06153846016296973) * 0.75, vec31.z);
@@ -385,7 +393,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
     public void tick() {
         this.oldStatus = this.status;
         this.status = this.getStatus();
-        if (this.status != Boat.Status.UNDER_WATER && this.status != Boat.Status.UNDER_FLOWING_WATER) {
+        if (this.status != BoatEntityJS.Status.UNDER_WATER && this.status != BoatEntityJS.Status.UNDER_FLOWING_WATER) {
             this.outOfControlTicks = 0.0F;
         } else {
             ++this.outOfControlTicks;
@@ -403,7 +411,10 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
             this.setDamage(this.getDamage() - 1.0F);
         }
 
-        super.tick();
+        if (builder.tick != null) {
+            builder.tick.accept(this);
+        }
+        super.baseTick();
         this.tickLerp();
         if (this.isControlledByLocalInstance()) {
             if (!(this.getFirstPassenger() instanceof Player)) {
@@ -516,7 +527,6 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
     protected float getBlockSpeedFactor() {
         if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
-        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         if (obj != null) {
             return (float) obj;
         } else {

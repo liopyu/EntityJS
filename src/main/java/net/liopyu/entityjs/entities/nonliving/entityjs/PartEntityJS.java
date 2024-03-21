@@ -227,7 +227,6 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     protected float getBlockSpeedFactor() {
         if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
-        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         if (obj != null) {
             return (float) obj;
         } else {
