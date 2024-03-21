@@ -23,7 +23,7 @@ public class TameableMobJSBuilder extends TameableMobBuilder<TameableMobJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return MobEntityJS.createMobAttributes()
+        return TameableMobJS.createMobAttributes()
                 .add(Attributes.MAX_HEALTH)
                 .add(Attributes.FOLLOW_RANGE)
                 .add(Attributes.ATTACK_DAMAGE)
@@ -31,7 +31,6 @@ public class TameableMobJSBuilder extends TameableMobBuilder<TameableMobJS> {
                 .add(Attributes.ARMOR_TOUGHNESS)
                 .add(Attributes.ATTACK_SPEED)
                 .add(Attributes.ATTACK_KNOCKBACK)
-                .add(Attributes.LUCK)
-                .add(Attributes.MOVEMENT_SPEED);
+                .add(Attributes.LUCK);
     }
 }

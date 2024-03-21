@@ -41,16 +41,6 @@ public class BeeJSBuilder extends AnimalEntityBuilder<BeeEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return MobEntityJS.createMobAttributes()
-                .add(Attributes.MAX_HEALTH)
-                .add(Attributes.FOLLOW_RANGE)
-                .add(Attributes.ATTACK_DAMAGE)
-                .add(Attributes.ARMOR)
-                .add(Attributes.ARMOR_TOUGHNESS)
-                .add(Attributes.ATTACK_SPEED)
-                .add(Attributes.ATTACK_KNOCKBACK)
-                .add(Attributes.LUCK)
-                .add(Attributes.FLYING_SPEED)
-                .add(Attributes.MOVEMENT_SPEED);
+        return BeeEntityJS.createAttributes();
     }
 }

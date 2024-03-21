@@ -240,7 +240,8 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
                         return (AgeableMob) breedOffspringEntity;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method.");
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a AgeableMob ResourceLocation. Defaulting to super method.");
+                return super.getBreedOffspring(serverLevel, ageableMob);
             }
         } else return super.getBreedOffspring(serverLevel, ageableMob);
         return null;
@@ -671,48 +672,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
 
     @Override
     public void travel(Vec3 pTravelVector) {
-        LivingEntity livingentity = this.getControllingPassenger();
-        if (this.isAlive() && this.isVehicle() && builder.canSteer && livingentity != null) {
-            if (this.getControllingPassenger() instanceof Player && builder.mountJumpingEnabled) {
-                if (this.ableToJump()) {
-                    this.setThisJumping(true);
-                }
-                if (this.thisJumping) {
-                    this.setThisJumping(false);
-
-                    double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
-                    Vec3 currentVelocity = this.getDeltaMovement();
-
-                    // Add the jump velocity to the current velocity
-                    double newVelocityX = currentVelocity.x;
-                    double newVelocityY = currentVelocity.y + jumpPower; // Add jump velocity
-                    double newVelocityZ = currentVelocity.z;
-
-                    this.setDeltaMovement(newVelocityX, newVelocityY, newVelocityZ);
-                    onJump();
-                    ForgeHooks.onLivingJump(this);
-                }
-            }
-
-            LivingEntity passenger = this.getControllingPassenger();
-            this.yRotO = this.getYRot();
-            this.xRotO = this.getXRot();
-            this.setYRot(passenger.getYRot());
-            this.setXRot(passenger.getXRot() * 0.5F);
-            this.setRot(this.getYRot(), this.getXRot());
-            this.yBodyRot = this.getYRot();
-            this.yHeadRot = this.yBodyRot;
-            float x = passenger.xxa * 0.5F;
-            float z = passenger.zza;
-            if (z <= 0.0F) {
-                z *= 0.25F;
-            }
-            this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
-
-
-            super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
-
-        } else super.travel(pTravelVector);
+        super.travel(pTravelVector);
 
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
@@ -721,17 +681,21 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
     }
 
 
-    @Override
+    @javax.annotation.Nullable
     public LivingEntity getControllingPassenger() {
-        Entity var2 = this.getFirstPassenger();
-        LivingEntity var10000;
-        if (var2 instanceof LivingEntity entity) {
-            var10000 = entity;
+        Entity entity = this.getFirstPassenger();
+        if (entity instanceof Mob) {
+            return (Mob) entity;
         } else {
-            var10000 = null;
-        }
+            if (this.isSaddled() && builder.canSteer) {
+                entity = this.getFirstPassenger();
+                if (entity instanceof Player) {
+                    return (Player) entity;
+                }
+            }
 
-        return var10000;
+            return null;
+        }
     }
 
 

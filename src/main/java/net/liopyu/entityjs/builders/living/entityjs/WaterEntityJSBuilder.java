@@ -41,7 +41,7 @@ public class WaterEntityJSBuilder extends PathfinderMobBuilder<WaterEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return MobEntityJS.createMobAttributes()
+        return WaterEntityJS.createAttributes()
                 .add(Attributes.MAX_HEALTH, 3)
                 .add(Attributes.FOLLOW_RANGE)
                 .add(Attributes.ATTACK_DAMAGE)
