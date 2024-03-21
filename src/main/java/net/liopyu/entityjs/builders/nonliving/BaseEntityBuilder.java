@@ -54,7 +54,6 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient final List<BaseEntityBuilder.AnimationControllerSupplier<T>> animationSuppliers;
     public static final List<BaseEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Consumer<ContextUtils.NLRenderContext<T>> render;
-    //New Base Overrides
     public transient boolean isPickable;
 
     public transient boolean isPushable;

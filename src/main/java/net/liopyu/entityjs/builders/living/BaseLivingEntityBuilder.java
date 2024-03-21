@@ -162,7 +162,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public SpawnPlacements.SpawnPredicate<? extends Entity> spawnPredicate;
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
     public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
-    public transient Consumer<ContextUtils.RenderContext> render;
+    public transient Consumer<ContextUtils.RenderContext<T>> render;
     public transient MobType mobType;
     public transient Function<LivingEntity, Object> isFreezing;
     public transient Function<ContextUtils.CollidingEntityContext, Object> canCollideWith;
@@ -386,7 +386,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> render(Consumer<ContextUtils.RenderContext> render) {
+    public BaseLivingEntityBuilder<T> render(Consumer<ContextUtils.RenderContext<T>> render) {
         this.render = render;
         return this;
     }
