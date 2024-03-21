@@ -69,15 +69,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     }
 
-    static {
-        DATA_ID_BUBBLE_TIME = SynchedEntityData.defineId(BoatEntityJS.class, EntityDataSerializers.INT);
-    }
-
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(DATA_ID_BUBBLE_TIME, 0);
-    }
-
+    //Builder overrides
     @Override
     public BaseEntityBuilder<?> getBuilder() {
         return builder;
@@ -92,114 +84,17 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
         return this.getType().toString();
     }
 
-    @Override
-    public void setInput(boolean pInputLeft, boolean pInputRight, boolean pInputUp, boolean pInputDown) {
-        this.inputLeft = pInputLeft;
-        this.inputRight = pInputRight;
-        this.inputUp = pInputUp;
-        this.inputDown = pInputDown;
+    //Boat builder logic
+
+    static {
+        DATA_ID_BUBBLE_TIME = SynchedEntityData.defineId(BoatEntityJS.class, EntityDataSerializers.INT);
     }
 
-    public void controlBoat() {
-        if (this.isVehicle()) {
-            float f = 0.0F;
-            if (this.inputLeft) {
-                --this.deltaRotation;
-            }
-
-            if (this.inputRight) {
-                ++this.deltaRotation;
-            }
-
-            if (this.inputRight != this.inputLeft && !this.inputUp && !this.inputDown) {
-                if (builder.turningBoatSpeed != null) {
-                    Object obj = EntityJSHelperClass.convertObjectToDesired(builder.turningBoatSpeed.apply(this), "float");
-                    if (obj != null) {
-                        f += (float) obj;
-                    } else {
-                        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for turningBoatSpeed from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to 0.005");
-                        f += 0.005F;
-                    }
-                } else f += 0.005F;
-            }
-
-            this.setYRot(this.getYRot() + this.deltaRotation);
-            if (this.inputUp) {
-                if (builder.forwardBoatSpeed != null) {
-                    Object obj = EntityJSHelperClass.convertObjectToDesired(builder.forwardBoatSpeed.apply(this), "float");
-                    if (obj != null) {
-                        f += (float) obj;
-                    } else {
-                        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for forwardBoatSpeed from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to 0.04");
-                        f += 0.04F;
-                    }
-                } else f += 0.04F;
-            }
-
-            if (this.inputDown) {
-                if (builder.backwardsBoatSpeed != null) {
-                    Object obj = EntityJSHelperClass.convertObjectToDesired(builder.backwardsBoatSpeed.apply(this), "float");
-                    if (obj != null) {
-                        f -= (float) obj;
-                    } else {
-                        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for backwardsBoatSpeed from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to 0.005");
-                        f -= 0.005F;
-                    }
-                } else f -= 0.005F;
-            }
-
-            this.setDeltaMovement(this.getDeltaMovement().add((double) (Mth.sin(-this.getYRot() * 0.017453292F) * f), 0.0, (double) (Mth.cos(this.getYRot() * 0.017453292F) * f)));
-            this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp);
-        }
-
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_ID_BUBBLE_TIME, 0);
     }
 
-    @Override
-    public Item getDropItem() {
-        if (builder.getDropItem != null) {
-            Object obj = builder.getDropItem.apply(this);
-            if (obj instanceof Item i) return i;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getDropItem in builder: " + obj + ". Must be an Item. Defaulting to super method: " + super.getDropItem());
-        }
-        return super.getDropItem();
-    }
-
-    //Base Entity Overrides
-    public boolean hurt(DamageSource pSource, float pAmount) {
-        if (builder.onHurt != null) {
-            final ContextUtils.EntityHurtContext context = new ContextUtils.EntityHurtContext(this, pSource, pAmount);
-            builder.onHurt.accept(context);
-        }
-        return super.hurt(pSource, pAmount);
-    }
-
-    @Override
-    public boolean shouldRenderAtSqrDistance(double distance) {
-        if (builder.shouldRenderAtSqrDistance != null) {
-            final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-            Object obj = builder.shouldRenderAtSqrDistance.apply(context);
-            if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for arrow builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
-        }
-        return super.shouldRenderAtSqrDistance(distance);
-    }
-
-    @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
-        if (builder.lerpTo != null) {
-            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
-            builder.lerpTo.accept(context);
-        }
-    }
-
-    /*@Override
-    public void tick() {
-        super.tick();
-        if (builder.tick != null) {
-            builder.tick.accept(this);
-        }
-    }*/
     private boolean checkInWater() {
         AABB aabb = this.getBoundingBox();
         int i = Mth.floor(aabb.minX);
@@ -450,6 +345,117 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
         }
 
     }
+
+
+    @Override
+    public void setInput(boolean pInputLeft, boolean pInputRight, boolean pInputUp, boolean pInputDown) {
+        this.inputLeft = pInputLeft;
+        this.inputRight = pInputRight;
+        this.inputUp = pInputUp;
+        this.inputDown = pInputDown;
+    }
+
+    public void controlBoat() {
+        if (this.isVehicle()) {
+            float f = 0.0F;
+            if (this.inputLeft) {
+                --this.deltaRotation;
+            }
+
+            if (this.inputRight) {
+                ++this.deltaRotation;
+            }
+
+            if (this.inputRight != this.inputLeft && !this.inputUp && !this.inputDown) {
+                if (builder.turningBoatSpeed != null) {
+                    Object obj = EntityJSHelperClass.convertObjectToDesired(builder.turningBoatSpeed.apply(this), "float");
+                    if (obj != null) {
+                        f += (float) obj;
+                    } else {
+                        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for turningBoatSpeed from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to 0.005");
+                        f += 0.005F;
+                    }
+                } else f += 0.005F;
+            }
+
+            this.setYRot(this.getYRot() + this.deltaRotation);
+            if (this.inputUp) {
+                if (builder.forwardBoatSpeed != null) {
+                    Object obj = EntityJSHelperClass.convertObjectToDesired(builder.forwardBoatSpeed.apply(this), "float");
+                    if (obj != null) {
+                        f += (float) obj;
+                    } else {
+                        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for forwardBoatSpeed from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to 0.04");
+                        f += 0.04F;
+                    }
+                } else f += 0.04F;
+            }
+
+            if (this.inputDown) {
+                if (builder.backwardsBoatSpeed != null) {
+                    Object obj = EntityJSHelperClass.convertObjectToDesired(builder.backwardsBoatSpeed.apply(this), "float");
+                    if (obj != null) {
+                        f -= (float) obj;
+                    } else {
+                        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for backwardsBoatSpeed from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to 0.005");
+                        f -= 0.005F;
+                    }
+                } else f -= 0.005F;
+            }
+
+            this.setDeltaMovement(this.getDeltaMovement().add((double) (Mth.sin(-this.getYRot() * 0.017453292F) * f), 0.0, (double) (Mth.cos(this.getYRot() * 0.017453292F) * f)));
+            this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp);
+        }
+
+    }
+
+    @Override
+    public Item getDropItem() {
+        if (builder.getDropItem != null) {
+            Object obj = builder.getDropItem.apply(this);
+            if (obj instanceof Item i) return i;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getDropItem in builder: " + obj + ". Must be an Item. Defaulting to super method: " + super.getDropItem());
+        }
+        return super.getDropItem();
+    }
+
+    //Base Entity Overrides
+    public boolean hurt(DamageSource pSource, float pAmount) {
+        if (builder.onHurt != null) {
+            final ContextUtils.EntityHurtContext context = new ContextUtils.EntityHurtContext(this, pSource, pAmount);
+            builder.onHurt.accept(context);
+        }
+        return super.hurt(pSource, pAmount);
+    }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        if (builder.shouldRenderAtSqrDistance != null) {
+            final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
+            Object obj = builder.shouldRenderAtSqrDistance.apply(context);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for arrow builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
+        }
+        return super.shouldRenderAtSqrDistance(distance);
+    }
+
+    @Override
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+        if (builder.lerpTo != null) {
+            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
+            builder.lerpTo.accept(context);
+        }
+    }
+
+    /*@Override
+    public void tick() {
+        super.tick();
+        if (builder.tick != null) {
+            builder.tick.accept(this);
+        }
+    }*/
+
 
     @Override
     public void move(MoverType pType, Vec3 pPos) {
