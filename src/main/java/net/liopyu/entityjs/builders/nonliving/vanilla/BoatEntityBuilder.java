@@ -103,5 +103,4 @@ public abstract class BoatEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         this.getDropItem = function;
         return this;
     }
-
 }

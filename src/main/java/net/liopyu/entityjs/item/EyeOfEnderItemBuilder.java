@@ -80,7 +80,7 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
 
     @Info(value = """
             Sets the sound to play when the eye item is thrown
-                        
+                       
             @param sPlayer The player to play the sound to, can be null.
             @param soundX The x coordinate to play the sound at.
             @param soundY The y coordinate to play the sound at.
