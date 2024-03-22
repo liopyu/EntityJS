@@ -80,7 +80,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.AutoAttackContext> doAutoAttackOnTouch;
     public transient Function<ContextUtils.EntityPoseDimensionsContext, Object> setStandingEyeHeight;
     public transient Consumer<LivingEntity> onDecreaseAirSupply;
-    public transient Consumer<LivingEntity> onBlockedByShield;
+    public transient Consumer<ContextUtils.LivingEntityContext> onBlockedByShield;
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
     public transient Consumer<LivingEntity> onIncreaseAirSupply;
@@ -1106,18 +1106,18 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a callback function to be executed when the entity is blocked by a shield.
-            The provided Consumer accepts a {@link LivingEntity} parameter,
+            The provided Consumer accepts a {@link ContextUtils.LivingEntityContext} parameter,
             representing the entity that is blocked by a shield.
                         
             Example usage:
             ```javascript
-            entityBuilder.onBlockedByShield(entity => {
+            entityBuilder.onBlockedByShield(context => {
                 // Define custom logic for handling when the entity is blocked by a shield
                 // Use information about the LivingEntity provided by the context.
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> onBlockedByShield(Consumer<LivingEntity> onBlockedByShield) {
+    public BaseLivingEntityBuilder<T> onBlockedByShield(Consumer<ContextUtils.LivingEntityContext> onBlockedByShield) {
         this.onBlockedByShield = onBlockedByShield;
         return this;
     }
