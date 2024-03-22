@@ -855,7 +855,8 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     protected void blockedByShield(@NotNull LivingEntity p_21246_) {
         super.blockedByShield(p_21246_);
         if (builder.onBlockedByShield != null) {
-            builder.onBlockedByShield.accept(p_21246_);
+            var context = new ContextUtils.LivingEntityContext(this, p_21246_);
+            EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
         }
     }
 

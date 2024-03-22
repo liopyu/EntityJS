@@ -190,8 +190,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
                 if (breedOffspringType != null) {
                     Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
                     if (breedOffspringEntity instanceof AgeableMob) {
-                        breedOffspringType.create(serverLevel);
-                        return null;
+                        return (AgeableMob) breedOffspringEntity;
                     }
                 }
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return an AgeableMob ResourceLocation. Defaulting to super method.");
@@ -823,7 +822,8 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     protected void blockedByShield(@NotNull LivingEntity p_21246_) {
         super.blockedByShield(p_21246_);
         if (builder.onBlockedByShield != null) {
-            builder.onBlockedByShield.accept(p_21246_);
+            var context = new ContextUtils.LivingEntityContext(this, p_21246_);
+            EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
         }
     }
 

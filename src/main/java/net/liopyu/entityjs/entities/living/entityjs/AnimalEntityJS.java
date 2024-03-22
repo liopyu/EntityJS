@@ -295,7 +295,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void spawnChildFromBreeding(ServerLevel pLevel, Animal pMate) {
         if (builder.onSpawnChildFromBreeding != null) {
             final ContextUtils.LevelAnimalContext context = new ContextUtils.LevelAnimalContext(pMate, this, pLevel);
-            builder.onSpawnChildFromBreeding.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onSpawnChildFromBreeding, context, "[EntityJS]: Error in " + entityName() + "builder for field: onSpawnChildFromBreeding.");
+
             super.spawnChildFromBreeding(pLevel, pMate);
         } else {
             super.spawnChildFromBreeding(pLevel, pMate);
@@ -325,7 +326,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         }
         if (builder.onInteract != null) {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            builder.onInteract.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
+
         }
         return super.mobInteract(pPlayer, pHand);
     }
@@ -335,7 +337,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public boolean doHurtTarget(Entity pEntity) {
         if (builder != null && builder.onHurtTarget != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            builder.onHurtTarget.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget.");
+
         }
         return super.doHurtTarget(pEntity);
     }
@@ -428,7 +431,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     public void onJump() {
         if (builder.onLivingJump != null) {
-            builder.onLivingJump.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onLivingJump, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingJump.");
+
         }
     }
 
@@ -475,7 +479,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             jump();
         }
         if (builder.aiStep != null) {
-            builder.aiStep.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.aiStep, this, "[EntityJS]: Error in " + entityName() + "builder for field: aiStep.");
+
         }
     }
 
@@ -492,7 +497,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     protected void tickDeath() {
         if (builder.tickDeath != null) {
-            builder.tickDeath.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.tickDeath, this, "[EntityJS]: Error in " + entityName() + "builder for field: tickDeath.");
+
         } else super.tickDeath();
     }
 
@@ -503,7 +509,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         if (builder.tickLeash != null) {
             Player $$0 = (Player) this.getLeashHolder();
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, this);
-            builder.tickLeash.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.tickLeash, context, "[EntityJS]: Error in " + entityName() + "builder for field: tickLeash.");
+
         }
     }
 
@@ -523,7 +530,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         super.setTarget(target);
         if (builder.onTargetChanged != null) {
             final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(target, this);
-            builder.onTargetChanged.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onTargetChanged, context, "[EntityJS]: Error in " + entityName() + "builder for field: onTargetChanged.");
+
         }
     }
 
@@ -559,7 +567,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void ate() {
         super.ate();
         if (builder.ate != null) {
-            builder.ate.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.ate, this, "[EntityJS]: Error in " + entityName() + "builder for field: ate.");
+
         }
     }
 
@@ -670,7 +679,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
-            builder.travel.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.travel, context, "[EntityJS]: Error in " + entityName() + "builder for field: travel.");
+
         }
     }
 
@@ -847,7 +857,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         super.tick();
         if (builder.tick != null) {
             if (!this.level().isClientSide()) {
-                builder.tick.accept(this);
+                EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
+
             }
         }
     }
@@ -856,7 +867,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void onAddedToWorld() {
         super.onAddedToWorld();
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
-            builder.onAddedToWorld.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
+
         }
     }
 
@@ -866,7 +878,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         super.doAutoAttackOnTouch(target);
         if (builder.doAutoAttackOnTouch != null) {
             final ContextUtils.AutoAttackContext context = new ContextUtils.AutoAttackContext(this, target);
-            builder.doAutoAttackOnTouch.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.doAutoAttackOnTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: doAutoAttackOnTouch.");
         }
     }
 
@@ -874,7 +886,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     protected int decreaseAirSupply(int p_21303_) {
         if (builder.onDecreaseAirSupply != null) {
-            builder.onDecreaseAirSupply.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onDecreaseAirSupply, this, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
         }
         return super.decreaseAirSupply(p_21303_);
     }
@@ -882,7 +894,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     protected int increaseAirSupply(int p_21307_) {
         if (builder.onIncreaseAirSupply != null) {
-            builder.onIncreaseAirSupply.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onIncreaseAirSupply, this, "[EntityJS]: Error in " + entityName() + "builder for field: onIncreaseAirSupply.");
+
         }
         return super.increaseAirSupply(p_21307_);
     }
@@ -891,7 +904,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     protected void blockedByShield(@NotNull LivingEntity p_21246_) {
         super.blockedByShield(p_21246_);
         if (builder.onBlockedByShield != null) {
-            builder.onBlockedByShield.accept(p_21246_);
+            var context = new ContextUtils.LivingEntityContext(this, p_21246_);
+            EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
         }
     }
 
@@ -993,7 +1007,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         super.onEquipItem(slot, previous, current);
         if (builder.onEquipItem != null) {
             final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, this);
-            builder.onEquipItem.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEquipItem.");
+
         }
     }
 
@@ -1062,7 +1077,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
         if (builder.onEffectAdded != null) {
             final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-            builder.onEffectAdded.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onEffectAdded, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectAdded.");
+
         } else {
             super.onEffectAdded(effectInstance, entity);
         }
@@ -1074,7 +1090,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         if (builder.onEffectRemoved != null) {
             final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-            builder.onEffectRemoved.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onEffectRemoved, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectRemoved.");
         } else {
             super.onEffectRemoved(effectInstance);
         }
@@ -1086,7 +1102,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         super.heal(amount);
         if (builder.onLivingHeal != null) {
             final ContextUtils.EntityHealContext context = new ContextUtils.EntityHealContext(this, amount);
-            builder.onLivingHeal.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onLivingHeal, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingHeal.");
+
         }
     }
 
@@ -1096,7 +1113,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         super.die(damageSource);
         if (builder.onDeath != null) {
             final ContextUtils.DeathContext context = new ContextUtils.DeathContext(this, damageSource);
-            builder.onDeath.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onDeath, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDeath.");
+
         }
     }
 
@@ -1111,7 +1129,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
         if (builder.dropCustomDeathLoot != null) {
             final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, this);
-            builder.dropCustomDeathLoot.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityName() + "builder for field: dropCustomDeathLoot.");
+
         } else {
             super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
         }
@@ -1160,7 +1179,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
         if (builder.onLivingFall != null) {
             final ContextUtils.EntityFallDamageContext context = new ContextUtils.EntityFallDamageContext(this, damageMultiplier, distance, damageSource);
-            builder.onLivingFall.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onLivingFall, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingFall.");
+
         }
         return super.causeFallDamage(distance, damageMultiplier, damageSource);
     }
@@ -1169,7 +1189,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     public void setSprinting(boolean sprinting) {
         if (builder.onSprint != null) {
-            builder.onSprint.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onSprint, this, "[EntityJS]: Error in " + entityName() + "builder for field: onSprint.");
+
         }
         super.setSprinting(sprinting);
     }
@@ -1216,7 +1237,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void stopRiding() {
         super.stopRiding();
         if (builder.onStopRiding != null) {
-            builder.onStopRiding.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
+
         }
     }
 
@@ -1225,7 +1247,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void rideTick() {
         super.rideTick();
         if (builder.rideTick != null) {
-            builder.rideTick.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.rideTick, this, "[EntityJS]: Error in " + entityName() + "builder for field: rideTick.");
+
         }
     }
 
@@ -1235,7 +1258,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         super.onItemPickup(p_21054_);
         if (builder.onItemPickup != null) {
             final ContextUtils.EntityItemEntityContext context = new ContextUtils.EntityItemEntityContext(this, p_21054_);
-            builder.onItemPickup.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onItemPickup, context, "[EntityJS]: Error in " + entityName() + "builder for field: onItemPickup.");
+
         }
     }
 
@@ -1257,7 +1281,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     public void onEnterCombat() {
         if (builder.onEnterCombat != null) {
-            builder.onEnterCombat.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onEnterCombat, this, "[EntityJS]: Error in " + entityName() + "builder for field: onEnterCombat.");
+
         } else {
             super.onEnterCombat();
         }
@@ -1267,7 +1292,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     public void onLeaveCombat() {
         if (builder.onLeaveCombat != null) {
-            builder.onLeaveCombat.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onLeaveCombat, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLeaveCombat.");
+
         }
         super.onLeaveCombat();
     }
@@ -1330,7 +1356,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         if (builder.onStartSleeping != null) {
             final ContextUtils.EntityBlockPosContext context = new ContextUtils.EntityBlockPosContext(this, blockPos);
-            builder.onStartSleeping.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onStartSleeping, context, "[EntityJS]: Error in " + entityName() + "builder for field: onStartSleeping.");
+
         }
         super.startSleeping(blockPos);
     }
@@ -1339,7 +1366,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     public void stopSleeping() {
         if (builder.onStopSleeping != null) {
-            builder.onStopSleeping.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onStopSleeping, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopSleeping.");
         }
         super.stopSleeping();
     }
@@ -1349,7 +1376,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public @NotNull ItemStack eat(@NotNull Level level, @NotNull ItemStack itemStack) {
         if (builder.eat != null) {
             final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, level);
-            builder.eat.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityName() + "builder for field: eat.");
             return itemStack;
         }
         return super.eat(level, itemStack);
@@ -1425,7 +1452,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     public void onClientRemoval() {
         if (builder.onClientRemoval != null) {
-            builder.onClientRemoval.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onClientRemoval, this, "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval.");
+
         }
         super.onClientRemoval();
     }
@@ -1434,7 +1462,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
         if (builder.onHurt != null) {
             final ContextUtils.EntityDamageContext context = new ContextUtils.EntityDamageContext(pDamageSource, pDamageAmount, this);
-            builder.onHurt.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurt.");
+
         }
         super.actuallyHurt(pDamageSource, pDamageAmount);
     }
@@ -1442,7 +1471,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     public void lavaHurt() {
         if (builder.lavaHurt != null) {
-            builder.lavaHurt.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.lavaHurt, this, "[EntityJS]: Error in " + entityName() + "builder for field: lavaHurt.");
+
         }
         super.lavaHurt();
     }
@@ -1451,7 +1481,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     @Override
     protected void onFlap() {
         if (builder.onFlap != null) {
-            builder.onFlap.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onFlap, this, "[EntityJS]: Error in " + entityName() + "builder for field: onFlap.");
+
         }
         super.onFlap();
     }
@@ -1486,7 +1517,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void playerTouch(Player p_20081_) {
         if (builder.playerTouch != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
-            builder.playerTouch.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
         }
     }
 
@@ -1509,7 +1540,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         if (builder.thunderHit != null) {
             super.thunderHit(p_19927_, p_19928_);
             final ContextUtils.ThunderHitContext context = new ContextUtils.ThunderHitContext(p_19927_, p_19928_, this);
-            builder.thunderHit.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.thunderHit, context, "[EntityJS]: Error in " + entityName() + "builder for field: thunderHit.");
+
         }
     }
 
@@ -1575,7 +1607,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void onRemovedFromWorld() {
         super.onRemovedFromWorld();
         if (builder.onRemovedFromWorld != null) {
-            builder.onRemovedFromWorld.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
+
         }
     }
 
@@ -1596,7 +1629,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
         if (builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
-            builder.lerpTo.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
     }
 

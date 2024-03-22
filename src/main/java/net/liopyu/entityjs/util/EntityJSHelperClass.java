@@ -11,6 +11,7 @@ import software.bernie.geckolib.core.animation.Animation;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class EntityJSHelperClass {
     public static final Set<String> errorMessagesLogged = new HashSet<>();
@@ -30,6 +31,15 @@ public class EntityJSHelperClass {
         }
     }
 
+    public static <T> boolean consumerCallback(Consumer<T> consumer, T value, String errorMessage) {
+        try {
+            consumer.accept(value);
+        } catch (Throwable e) {
+            ConsoleJS.STARTUP.error(errorMessage, e);
+            return false;
+        }
+        return true;
+    }
 
     public static Object convertObjectToDesired(Object input, String outputType) {
         return switch (outputType.toLowerCase()) {
