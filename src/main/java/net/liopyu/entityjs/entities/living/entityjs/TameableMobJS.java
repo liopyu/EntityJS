@@ -287,19 +287,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     }
 
     @Override
-    public boolean doHurtTarget(Entity pEntity) {
-        if (builder != null && builder.onHurtTarget != null) {
-            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            builder.onHurtTarget.accept(context);
-        }
-        boolean flag = pEntity.hurt(this.damageSources().mobAttack(this), (float) ((int) this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
-        if (flag) {
-            this.doEnchantDamageEffects(this, pEntity);
-        }
-        return flag;
-    }
-
-    @Override
     public boolean hurt(DamageSource pSource, float pAmount) {
         if (this.isInvulnerableTo(pSource)) {
             return false;
@@ -423,7 +410,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public void spawnChildFromBreeding(ServerLevel pLevel, Animal pMate) {
         if (builder.onSpawnChildFromBreeding != null) {
             final ContextUtils.LevelAnimalContext context = new ContextUtils.LevelAnimalContext(pMate, this, pLevel);
-            builder.onSpawnChildFromBreeding.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onSpawnChildFromBreeding, context, "[EntityJS]: Error in " + entityName() + "builder for field: onSpawnChildFromBreeding.");
+
             super.spawnChildFromBreeding(pLevel, pMate);
         } else {
             super.spawnChildFromBreeding(pLevel, pMate);
@@ -444,7 +432,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             if (this.isTame()) {
                 if (builder.onInteract != null) {
                     final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                    builder.onInteract.accept(context);
+                    EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
+
                 }
                 if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
                     if (itemstack.isEdible()) {
@@ -488,13 +477,81 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             }
             if (builder.onInteract != null) {
                 final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                builder.onInteract.accept(context);
+                EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
+
             }
             return super.mobInteract(pPlayer, pHand);
         }
     }
 
     //Mob Overrides
+    @Override
+    public boolean doHurtTarget(Entity pEntity) {
+        if (builder != null && builder.onHurtTarget != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget.");
+
+        }
+        return super.doHurtTarget(pEntity);
+    }
+
+    public void onJump() {
+        if (builder.onLivingJump != null) {
+            EntityJSHelperClass.consumerCallback(builder.onLivingJump, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingJump.");
+
+        }
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
+            jump();
+        }
+        if (builder.aiStep != null) {
+            EntityJSHelperClass.consumerCallback(builder.aiStep, this, "[EntityJS]: Error in " + entityName() + "builder for field: aiStep.");
+
+        }
+    }
+
+    @Override
+    protected void tickDeath() {
+        if (builder.tickDeath != null) {
+            EntityJSHelperClass.consumerCallback(builder.tickDeath, this, "[EntityJS]: Error in " + entityName() + "builder for field: tickDeath.");
+
+        } else super.tickDeath();
+    }
+
+
+    @Override
+    protected void tickLeash() {
+        super.tickLeash();
+        if (builder.tickLeash != null) {
+            Player $$0 = (Player) this.getLeashHolder();
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, this);
+            EntityJSHelperClass.consumerCallback(builder.tickLeash, context, "[EntityJS]: Error in " + entityName() + "builder for field: tickLeash.");
+
+        }
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        super.setTarget(target);
+        if (builder.onTargetChanged != null) {
+            final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(target, this);
+            EntityJSHelperClass.consumerCallback(builder.onTargetChanged, context, "[EntityJS]: Error in " + entityName() + "builder for field: onTargetChanged.");
+
+        }
+    }
+
+    @Override
+    public void ate() {
+        super.ate();
+        if (builder.ate != null) {
+            EntityJSHelperClass.consumerCallback(builder.ate, this, "[EntityJS]: Error in " + entityName() + "builder for field: ate.");
+
+        }
+    }
 
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
@@ -582,11 +639,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         return Objects.requireNonNullElse(builder.canJump, true);
     }
 
-    public void onJump() {
-        if (builder.onLivingJump != null) {
-            builder.onLivingJump.accept(this);
-        }
-    }
 
     public void jump() {
         double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
@@ -625,17 +677,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
 
     @Override
-    public void aiStep() {
-        super.aiStep();
-        if (builder.aiStep != null) {
-            builder.aiStep.accept(this);
-        }
-        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
-            jump();
-        }
-    }
-
-    @Override
     public float getWalkTargetValue(BlockPos pos, LevelReader levelReader) {
         if (builder.walkTargetValue == null) return super.getWalkTargetValue(pos, levelReader);
         final ContextUtils.EntityBlockPosLevelContext context = new ContextUtils.EntityBlockPosLevelContext(pos, levelReader, this);
@@ -645,23 +686,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         return super.getWalkTargetValue(pos, levelReader);
     }
 
-    @Override
-    protected void tickDeath() {
-        if (builder.tickDeath != null) {
-            builder.tickDeath.accept(this);
-        } else super.tickDeath();
-    }
-
-
-    @Override
-    protected void tickLeash() {
-        super.tickLeash();
-        if (builder.tickLeash != null) {
-            Player $$0 = (Player) this.getLeashHolder();
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, this);
-            builder.tickLeash.accept(context);
-        }
-    }
 
     @Override
     protected boolean shouldStayCloseToLeashHolder() {
@@ -673,15 +697,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         return super.shouldStayCloseToLeashHolder();
     }
 
-
-    @Override
-    public void setTarget(@Nullable LivingEntity target) {
-        super.setTarget(target);
-        if (builder.onTargetChanged != null) {
-            final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(target, this);
-            builder.onTargetChanged.accept(context);
-        }
-    }
 
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeaponPredicate != null) {
@@ -709,14 +724,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             return canFireProjectileWeapons(projectileWeapon) && canFireProjectileWeaponPredicate(projectileWeapon);
         }
         return super.canFireProjectileWeapon(projectileWeapon);
-    }
-
-    @Override
-    public void ate() {
-        super.ate();
-        if (builder.ate != null) {
-            builder.ate.accept(this);
-        }
     }
 
 
@@ -769,16 +776,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
 
     //(Base LivingEntity/Entity Overrides)
-    protected boolean thisJumping = false;
-
-    public boolean ableToJump() {
-        return ModKeybinds.mount_jump.isDown() && this.onGround();
-    }
-
-    public void setThisJumping(boolean value) {
-        this.thisJumping = value;
-    }
-
     @Override
     public void travel(Vec3 pTravelVector) {
         LivingEntity livingentity = this.getControllingPassenger();
@@ -826,8 +823,150 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
-            builder.travel.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.travel, context, "[EntityJS]: Error in " + entityName() + "builder for field: travel.");
+
         }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (builder.tick != null) {
+            if (!this.level().isClientSide()) {
+                EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
+
+            }
+        }
+    }
+
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+            EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
+
+        }
+    }
+
+
+    @Override
+    protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {
+        super.doAutoAttackOnTouch(target);
+        if (builder.doAutoAttackOnTouch != null) {
+            final ContextUtils.AutoAttackContext context = new ContextUtils.AutoAttackContext(this, target);
+            EntityJSHelperClass.consumerCallback(builder.doAutoAttackOnTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: doAutoAttackOnTouch.");
+        }
+    }
+
+
+    @Override
+    protected int decreaseAirSupply(int p_21303_) {
+        if (builder.onDecreaseAirSupply != null) {
+            EntityJSHelperClass.consumerCallback(builder.onDecreaseAirSupply, this, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
+        }
+        return super.decreaseAirSupply(p_21303_);
+    }
+
+    @Override
+    protected int increaseAirSupply(int p_21307_) {
+        if (builder.onIncreaseAirSupply != null) {
+            EntityJSHelperClass.consumerCallback(builder.onIncreaseAirSupply, this, "[EntityJS]: Error in " + entityName() + "builder for field: onIncreaseAirSupply.");
+
+        }
+        return super.increaseAirSupply(p_21307_);
+    }
+
+    @Override
+    protected void blockedByShield(@NotNull LivingEntity p_21246_) {
+        super.blockedByShield(p_21246_);
+        if (builder.onBlockedByShield != null) {
+            var context = new ContextUtils.LivingEntityContext(this, p_21246_);
+            EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
+        }
+    }
+
+    @Override
+    public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
+        super.onEquipItem(slot, previous, current);
+        if (builder.onEquipItem != null) {
+            final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, this);
+            EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEquipItem.");
+
+        }
+    }
+
+    @Override
+    public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
+        if (builder.onEffectAdded != null) {
+            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
+            EntityJSHelperClass.consumerCallback(builder.onEffectAdded, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectAdded.");
+
+        } else {
+            super.onEffectAdded(effectInstance, entity);
+        }
+    }
+
+
+    @Override
+    protected void onEffectRemoved(@NotNull MobEffectInstance effectInstance) {
+
+        if (builder.onEffectRemoved != null) {
+            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
+            EntityJSHelperClass.consumerCallback(builder.onEffectRemoved, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectRemoved.");
+        } else {
+            super.onEffectRemoved(effectInstance);
+        }
+    }
+
+
+    @Override
+    public void heal(float amount) {
+        super.heal(amount);
+        if (builder.onLivingHeal != null) {
+            final ContextUtils.EntityHealContext context = new ContextUtils.EntityHealContext(this, amount);
+            EntityJSHelperClass.consumerCallback(builder.onLivingHeal, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingHeal.");
+
+        }
+    }
+
+    @Override
+    public void die(@NotNull DamageSource damageSource) {
+        super.die(damageSource);
+        if (builder.onDeath != null) {
+            final ContextUtils.DeathContext context = new ContextUtils.DeathContext(this, damageSource);
+            EntityJSHelperClass.consumerCallback(builder.onDeath, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDeath.");
+
+        }
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
+        if (builder.dropCustomDeathLoot != null) {
+            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, this);
+            EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityName() + "builder for field: dropCustomDeathLoot.");
+
+        } else {
+            super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
+        }
+    }
+
+    @Override
+    protected void onFlap() {
+        if (builder.onFlap != null) {
+            EntityJSHelperClass.consumerCallback(builder.onFlap, this, "[EntityJS]: Error in " + entityName() + "builder for field: onFlap.");
+
+        }
+        super.onFlap();
+    }
+
+    protected boolean thisJumping = false;
+
+    public boolean ableToJump() {
+        return ModKeybinds.mount_jump.isDown() && this.onGround();
+    }
+
+    public void setThisJumping(boolean value) {
+        this.thisJumping = value;
     }
 
 
@@ -998,61 +1137,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         return super.calculateFallDamage(fallDistance, pDamageMultiplier);
     }
 
-    @Override
-    public void tick() {
-
-        super.tick();
-        if (builder.tick != null) {
-            if (!this.level().isClientSide()) {
-                builder.tick.accept(this);
-            }
-        }
-    }
-
-    @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
-            builder.onAddedToWorld.accept(this);
-        }
-    }
-
-
-    @Override
-    protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {
-        super.doAutoAttackOnTouch(target);
-        if (builder.doAutoAttackOnTouch != null) {
-            final ContextUtils.AutoAttackContext context = new ContextUtils.AutoAttackContext(this, target);
-            builder.doAutoAttackOnTouch.accept(context);
-        }
-    }
-
-
-    @Override
-    protected int decreaseAirSupply(int p_21303_) {
-        if (builder.onDecreaseAirSupply != null) {
-            builder.onDecreaseAirSupply.accept(this);
-        }
-        return super.decreaseAirSupply(p_21303_);
-    }
-
-    @Override
-    protected int increaseAirSupply(int p_21307_) {
-        if (builder.onIncreaseAirSupply != null) {
-            builder.onIncreaseAirSupply.accept(this);
-        }
-        return super.increaseAirSupply(p_21307_);
-    }
-
-    @Override
-    protected void blockedByShield(@NotNull LivingEntity p_21246_) {
-        super.blockedByShield(p_21246_);
-        if (builder.onBlockedByShield != null) {
-            var context = new ContextUtils.LivingEntityContext(this, p_21246_);
-            EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
-        }
-    }
-
 
     @Override
     protected boolean repositionEntityAfterLoad() {
@@ -1146,16 +1230,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
 
     @Override
-    public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
-        super.onEquipItem(slot, previous, current);
-        if (builder.onEquipItem != null) {
-            final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, this);
-            builder.onEquipItem.accept(context);
-        }
-    }
-
-
-    @Override
     public double getVisibilityPercent(@Nullable Entity p_20969_) {
         if (builder.visibilityPercent != null) {
             final ContextUtils.VisualContext context = new ContextUtils.VisualContext(p_20969_, this);
@@ -1216,62 +1290,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
 
     @Override
-    public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
-        if (builder.onEffectAdded != null) {
-            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-            builder.onEffectAdded.accept(context);
-        } else {
-            super.onEffectAdded(effectInstance, entity);
-        }
-    }
-
-
-    @Override
-    protected void onEffectRemoved(@NotNull MobEffectInstance effectInstance) {
-
-        if (builder.onEffectRemoved != null) {
-            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-            builder.onEffectRemoved.accept(context);
-        } else {
-            super.onEffectRemoved(effectInstance);
-        }
-    }
-
-
-    @Override
-    public void heal(float amount) {
-        super.heal(amount);
-        if (builder.onLivingHeal != null) {
-            final ContextUtils.EntityHealContext context = new ContextUtils.EntityHealContext(this, amount);
-            builder.onLivingHeal.accept(context);
-        }
-    }
-
-
-    @Override
-    public void die(@NotNull DamageSource damageSource) {
-        super.die(damageSource);
-        if (builder.onDeath != null) {
-            final ContextUtils.DeathContext context = new ContextUtils.DeathContext(this, damageSource);
-            builder.onDeath.accept(context);
-        }
-    }
-
-    @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
         return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));
-    }
-
-
-    @Override
-    protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
-        if (builder.dropCustomDeathLoot != null) {
-            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, this);
-            builder.dropCustomDeathLoot.accept(context);
-        } else {
-            super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
-        }
     }
 
 
@@ -1604,14 +1625,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         super.lavaHurt();
     }
 
-
-    @Override
-    protected void onFlap() {
-        if (builder.onFlap != null) {
-            builder.onFlap.accept(this);
-        }
-        super.onFlap();
-    }
 
     @Override
     public int getExperienceReward() {
