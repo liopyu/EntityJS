@@ -43,10 +43,6 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
     public transient final EyeOfEnderJSBuilder parent;
     public transient boolean triggersCriteria;
     public transient Player sPlayer;
-
-    public transient double soundX;
-    public transient double soundY;
-    public transient double soundZ;
     public transient SoundEvent soundEvent;
     public transient SoundSource soundSource;
     public transient float soundVolume;
@@ -79,23 +75,17 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
     }
 
     @Info(value = """
-            Sets the sound to play when the eye item is thrown
+            Sets the sound to play when the eye item is thrown at the coordinates of the player
                        
             @param sPlayer The player to play the sound to, can be null.
-            @param soundX The x coordinate to play the sound at.
-            @param soundY The y coordinate to play the sound at.
-            @param soundZ The z coordinate to play the sound at.
             @param soundEvent The sound to play when the eye item is thrown
             @param soundSource The source of the sound in the mixer.
             @param soundVolume The volume of the sound.
             @param soundPitch The pitch of the sound.
                         
             """)
-    public EyeOfEnderItemBuilder playSoundOverride(@Nullable Player player, double x, double y, double z, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch) {
+    public EyeOfEnderItemBuilder playSoundOverride(@Nullable Player player, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch) {
         this.sPlayer = player;
-        this.soundX = x;
-        this.soundY = y;
-        this.soundZ = z;
         this.soundEvent = soundEvent;
         this.soundSource = soundSource;
         this.soundVolume = volume;
@@ -143,7 +133,7 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
                                 }
                             }
                             if (overrideSound) {
-                                pLevel.playSound(sPlayer, soundX, soundY, soundZ, soundEvent, soundSource, soundVolume, soundPitch);
+                                pLevel.playSound(sPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), soundEvent, soundSource, soundVolume, soundPitch);
                             } else {
                                 pLevel.playSound((Player) null, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 0.5F, 0.4F / (pLevel.getRandom().nextFloat() * 0.4F + 0.8F));
                             }
@@ -166,7 +156,7 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
                                 }
                             }
                             if (overrideSound) {
-                                pLevel.playSound(sPlayer, soundX, soundY, soundZ, soundEvent, soundSource, soundVolume, soundPitch);
+                                pLevel.playSound(sPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), soundEvent, soundSource, soundVolume, soundPitch);
                             } else {
                                 pLevel.playSound((Player) null, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 0.5F, 0.4F / (pLevel.getRandom().nextFloat() * 0.4F + 0.8F));
                             }

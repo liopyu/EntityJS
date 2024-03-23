@@ -31,7 +31,7 @@ public class PartBuilder<T extends LivingEntity> {
     public transient Function<Entity, Object> nextStep;
     public transient Object setSwimSplashSound;
     public transient Object eatingSound;
-    public transient Consumer<ContextUtils.EEntityFallDamageContext> onLivingFall;
+    public transient Consumer<ContextUtils.EEntityFallDamageContext> onFall;
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
     public transient Consumer<Entity> rideTick;
@@ -569,20 +569,20 @@ public class PartBuilder<T extends LivingEntity> {
 
 
     @Info(value = """
-            Sets a callback function to be executed when the living entity falls and takes damage.
-            The provided Consumer accepts a {@link ContextUtils.EntityFallDamageContext} parameter,
+            Sets a callback function to be executed when the entity falls and takes damage.
+            The provided Consumer accepts a {@link ContextUtils.EEntityFallDamageContext} parameter,
             representing the context of the entity falling and taking fall damage.
                         
             Example usage:
             ```javascript
-            entityBuilder.onLivingFall(context => {
-                // Define custom logic for handling when the living entity falls and takes damage
-                // Use information about the EntityFallDamageContext provided by the context.
+            entityBuilder.onFall(context => {
+                // Define custom logic for handling when the entity falls and takes damage
+                // Use information about the EEntityFallDamageContext provided by the context.
             });
             ```
             """)
-    public PartBuilder<T> onLivingFall(Consumer<ContextUtils.EEntityFallDamageContext> c) {
-        onLivingFall = c;
+    public PartBuilder<T> onFall(Consumer<ContextUtils.EEntityFallDamageContext> c) {
+        onFall = c;
         return this;
     }
 

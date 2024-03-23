@@ -8,6 +8,7 @@ import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -68,7 +69,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
     public transient Object setSwimSplashSound;
-    public transient Consumer<ContextUtils.EEntityFallDamageContext> onLivingFall;
+    public transient Consumer<ContextUtils.EEntityFallDamageContext> onFall;
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
     public transient Consumer<Entity> rideTick;
@@ -115,6 +116,24 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         modelResource = t -> newID("geo/entity/", ".geo.json");
         textureResource = t -> newID("textures/entity/", ".png");
         animationResource = t -> newID("animations/entity/", ".animation.json");
+    }
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity falls and takes damage.
+            The provided Consumer accepts a {@link ContextUtils.EEntityFallDamageContext} parameter,
+            representing the context of the entity falling and taking fall damage.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onFall(context => {
+                // Define custom logic for handling when the entity falls and takes damage
+                // Use information about the EEntityFallDamageContext provided by the context.
+            });
+            ```
+            """)
+    public BaseEntityBuilder<T> onFall(Consumer<ContextUtils.EEntityFallDamageContext> c) {
+        onFall = c;
+        return this;
     }
 
     @Info(value = """

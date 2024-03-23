@@ -42,7 +42,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
     public transient Object setSwimSplashSound;
-    public transient Consumer<ContextUtils.EEntityFallDamageContext> onLivingFall;
+    public transient Consumer<ContextUtils.EEntityFallDamageContext> onFall;
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
     public transient Consumer<Entity> rideTick;
@@ -84,6 +84,24 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         updateInterval = 1;
         mobCategory = MobCategory.MISC;
         isAttackable = true;
+    }
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity falls and takes damage.
+            The provided Consumer accepts a {@link ContextUtils.EEntityFallDamageContext} parameter,
+            representing the context of the entity falling and taking fall damage.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onFall(context => {
+                // Define custom logic for handling when the entity falls and takes damage
+                // Use information about the EEntityFallDamageContext provided by the context.
+            });
+            ```
+            """)
+    public BaseNonAnimatableEntityBuilder<T> onFall(Consumer<ContextUtils.EEntityFallDamageContext> c) {
+        onFall = c;
+        return this;
     }
 
     @Info(value = """
