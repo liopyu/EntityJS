@@ -142,7 +142,7 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         if (builder.onInteract != null) {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            builder.onInteract.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
         }
         return super.mobInteract(pPlayer, pHand);
     }
@@ -185,11 +185,69 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
 
 
     //Mob Overrides
+    public void onJump() {
+        if (builder.onLivingJump != null) {
+            EntityJSHelperClass.consumerCallback(builder.onLivingJump, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingJump.");
+
+        }
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (canJump() && this.isOnGround() && this.getNavigation().isInProgress() && shouldJump()) {
+            jump();
+        }
+        if (builder.aiStep != null) {
+            EntityJSHelperClass.consumerCallback(builder.aiStep, this, "[EntityJS]: Error in " + entityName() + "builder for field: aiStep.");
+
+        }
+    }
+
+    @Override
+    protected void tickDeath() {
+        if (builder.tickDeath != null) {
+            EntityJSHelperClass.consumerCallback(builder.tickDeath, this, "[EntityJS]: Error in " + entityName() + "builder for field: tickDeath.");
+
+        } else super.tickDeath();
+    }
+
+
+    @Override
+    protected void tickLeash() {
+        super.tickLeash();
+        if (builder.tickLeash != null) {
+            Player $$0 = (Player) this.getLeashHolder();
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, this);
+            EntityJSHelperClass.consumerCallback(builder.tickLeash, context, "[EntityJS]: Error in " + entityName() + "builder for field: tickLeash.");
+
+        }
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        super.setTarget(target);
+        if (builder.onTargetChanged != null) {
+            final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(target, this);
+            EntityJSHelperClass.consumerCallback(builder.onTargetChanged, context, "[EntityJS]: Error in " + entityName() + "builder for field: onTargetChanged.");
+
+        }
+    }
+
+    @Override
+    public void ate() {
+        super.ate();
+        if (builder.ate != null) {
+            EntityJSHelperClass.consumerCallback(builder.ate, this, "[EntityJS]: Error in " + entityName() + "builder for field: ate.");
+
+        }
+    }
+
     @Override
     public boolean doHurtTarget(Entity pEntity) {
         if (builder != null && builder.onHurtTarget != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            builder.onHurtTarget.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget.");
         }
         return super.doHurtTarget(pEntity);
     }
@@ -247,12 +305,6 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     }
 
 
-    public void onJump() {
-        if (builder.onLivingJump != null) {
-            builder.onLivingJump.accept(this);
-        }
-    }
-
     public void jump() {
         double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
         Vec3 currentVelocity = this.getDeltaMovement();
@@ -288,39 +340,6 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
         return super.getMainArm();
     }
 
-
-    @Override
-    public void aiStep() {
-        super.aiStep();
-        if (builder.aiStep != null) {
-            builder.aiStep.accept(this);
-        }
-        if (canJump() && this.isOnGround() && this.getNavigation().isInProgress() && shouldJump()) {
-            jump();
-        }
-    }
-
-
-    @Override
-    protected void tickLeash() {
-        super.tickLeash();
-        if (builder.tickLeash != null) {
-            Player $$0 = (Player) this.getLeashHolder();
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, this);
-            builder.tickLeash.accept(context);
-        }
-    }
-
-
-    @Override
-    public void setTarget(@Nullable LivingEntity target) {
-        super.setTarget(target);
-        if (builder.onTargetChanged != null) {
-            final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(target, this);
-            builder.onTargetChanged.accept(context);
-        }
-    }
-
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeaponPredicate != null) {
             final ContextUtils.EntityProjectileWeaponContext context = new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this);
@@ -348,15 +367,6 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
         }
         return super.canFireProjectileWeapon(projectileWeapon);
     }
-
-    @Override
-    public void ate() {
-        super.ate();
-        if (builder.ate != null) {
-            builder.ate.accept(this);
-        }
-    }
-
 
     @Nullable
     @Override
@@ -439,16 +449,6 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     }
 
     //(Base LivingEntity/Entity Overrides)
-    protected boolean thisJumping = false;
-
-    public boolean ableToJump() {
-        return ModKeybinds.mount_jump.isDown() && this.isOnGround();
-    }
-
-    public void setThisJumping(boolean value) {
-        this.thisJumping = value;
-    }
-
     @Override
     public void travel(Vec3 pTravelVector) {
         LivingEntity livingentity = this.getControllingPassenger();
@@ -496,9 +496,152 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
 
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
-            builder.travel.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.travel, context, "[EntityJS]: Error in " + entityName() + "builder for field: travel.");
+
         }
     }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (builder.tick != null) {
+            if (!this.level.isClientSide()) {
+                EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
+
+            }
+        }
+    }
+
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
+            EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
+
+        }
+    }
+
+
+    @Override
+    protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {
+        super.doAutoAttackOnTouch(target);
+        if (builder.doAutoAttackOnTouch != null) {
+            final ContextUtils.AutoAttackContext context = new ContextUtils.AutoAttackContext(this, target);
+            EntityJSHelperClass.consumerCallback(builder.doAutoAttackOnTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: doAutoAttackOnTouch.");
+        }
+    }
+
+
+    @Override
+    protected int decreaseAirSupply(int p_21303_) {
+        if (builder.onDecreaseAirSupply != null) {
+            EntityJSHelperClass.consumerCallback(builder.onDecreaseAirSupply, this, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
+        }
+        return super.decreaseAirSupply(p_21303_);
+    }
+
+    @Override
+    protected int increaseAirSupply(int p_21307_) {
+        if (builder.onIncreaseAirSupply != null) {
+            EntityJSHelperClass.consumerCallback(builder.onIncreaseAirSupply, this, "[EntityJS]: Error in " + entityName() + "builder for field: onIncreaseAirSupply.");
+
+        }
+        return super.increaseAirSupply(p_21307_);
+    }
+
+    @Override
+    protected void blockedByShield(@NotNull LivingEntity p_21246_) {
+        super.blockedByShield(p_21246_);
+        if (builder.onBlockedByShield != null) {
+            var context = new ContextUtils.LivingEntityContext(this, p_21246_);
+            EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
+        }
+    }
+
+    @Override
+    public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
+        super.onEquipItem(slot, previous, current);
+        if (builder.onEquipItem != null) {
+            final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, this);
+            EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEquipItem.");
+
+        }
+    }
+
+    @Override
+    public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
+        if (builder.onEffectAdded != null) {
+            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
+            EntityJSHelperClass.consumerCallback(builder.onEffectAdded, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectAdded.");
+
+        } else {
+            super.onEffectAdded(effectInstance, entity);
+        }
+    }
+
+
+    @Override
+    protected void onEffectRemoved(@NotNull MobEffectInstance effectInstance) {
+
+        if (builder.onEffectRemoved != null) {
+            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
+            EntityJSHelperClass.consumerCallback(builder.onEffectRemoved, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectRemoved.");
+        } else {
+            super.onEffectRemoved(effectInstance);
+        }
+    }
+
+
+    @Override
+    public void heal(float amount) {
+        super.heal(amount);
+        if (builder.onLivingHeal != null) {
+            final ContextUtils.EntityHealContext context = new ContextUtils.EntityHealContext(this, amount);
+            EntityJSHelperClass.consumerCallback(builder.onLivingHeal, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingHeal.");
+
+        }
+    }
+
+    @Override
+    public void die(@NotNull DamageSource damageSource) {
+        super.die(damageSource);
+        if (builder.onDeath != null) {
+            final ContextUtils.DeathContext context = new ContextUtils.DeathContext(this, damageSource);
+            EntityJSHelperClass.consumerCallback(builder.onDeath, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDeath.");
+
+        }
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
+        if (builder.dropCustomDeathLoot != null) {
+            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, this);
+            EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityName() + "builder for field: dropCustomDeathLoot.");
+
+        } else {
+            super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
+        }
+    }
+
+    @Override
+    protected void onFlap() {
+        if (builder.onFlap != null) {
+            EntityJSHelperClass.consumerCallback(builder.onFlap, this, "[EntityJS]: Error in " + entityName() + "builder for field: onFlap.");
+
+        }
+        super.onFlap();
+    }
+
+    protected boolean thisJumping = false;
+
+    public boolean ableToJump() {
+        return ModKeybinds.mount_jump.isDown() && this.isOnGround();
+    }
+
+    public void setThisJumping(boolean value) {
+        this.thisJumping = value;
+    }
+
 
     @Override
     public LivingEntity getControllingPassenger() {
@@ -513,12 +656,14 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
         return var10000;
     }
 
+
     @Info(value = """
             Calls a triggerable animation to be played anywhere.
             """)
     public void triggerAnimation(String controllerName, String animName) {
         triggerAnim(controllerName, animName);
     }
+
 
     @Override
     public boolean canCollideWith(Entity pEntity) {
@@ -666,59 +811,6 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
         return super.calculateFallDamage(fallDistance, pDamageMultiplier);
     }
 
-    @Override
-    public void tick() {
-        super.tick();
-        if (builder.tick != null) {
-            if (!this.level.isClientSide()) {
-                builder.tick.accept(this);
-            }
-        }
-    }
-
-    @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
-        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
-            builder.onAddedToWorld.accept(this);
-        }
-    }
-
-
-    @Override
-    protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {
-        super.doAutoAttackOnTouch(target);
-        if (builder.doAutoAttackOnTouch != null) {
-            final ContextUtils.AutoAttackContext context = new ContextUtils.AutoAttackContext(this, target);
-            builder.doAutoAttackOnTouch.accept(context);
-        }
-    }
-
-
-    @Override
-    protected int decreaseAirSupply(int p_21303_) {
-        if (builder.onDecreaseAirSupply != null) {
-            builder.onDecreaseAirSupply.accept(this);
-        }
-        return super.decreaseAirSupply(p_21303_);
-    }
-
-    @Override
-    protected int increaseAirSupply(int p_21307_) {
-        if (builder.onIncreaseAirSupply != null) {
-            builder.onIncreaseAirSupply.accept(this);
-        }
-        return super.increaseAirSupply(p_21307_);
-    }
-
-    @Override
-    protected void blockedByShield(@NotNull LivingEntity p_21246_) {
-        super.blockedByShield(p_21246_);
-        if (builder.onBlockedByShield != null) {
-            builder.onBlockedByShield.accept(p_21246_);
-        }
-    }
-
 
     @Override
     protected boolean repositionEntityAfterLoad() {
@@ -813,16 +905,6 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
 
 
     @Override
-    public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
-        super.onEquipItem(slot, previous, current);
-        if (builder.onEquipItem != null) {
-            final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, this);
-            builder.onEquipItem.accept(context);
-        }
-    }
-
-
-    @Override
     public double getVisibilityPercent(@Nullable Entity p_20969_) {
         if (builder.visibilityPercent != null) {
             final ContextUtils.VisualContext context = new ContextUtils.VisualContext(p_20969_, this);
@@ -883,69 +965,9 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
 
 
     @Override
-    public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
-        if (builder.onEffectAdded != null) {
-            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-            builder.onEffectAdded.accept(context);
-        } else {
-            super.onEffectAdded(effectInstance, entity);
-        }
-    }
-
-
-    @Override
-    protected void onEffectRemoved(@NotNull MobEffectInstance effectInstance) {
-
-        if (builder.onEffectRemoved != null) {
-            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-            builder.onEffectRemoved.accept(context);
-        } else {
-            super.onEffectRemoved(effectInstance);
-        }
-    }
-
-
-    @Override
-    public void heal(float amount) {
-        super.heal(amount);
-        if (builder.onLivingHeal != null) {
-            final ContextUtils.EntityHealContext context = new ContextUtils.EntityHealContext(this, amount);
-            builder.onLivingHeal.accept(context);
-        }
-    }
-
-
-    @Override
-    public void die(@NotNull DamageSource damageSource) {
-        super.die(damageSource);
-        if (builder.onDeath != null) {
-            final ContextUtils.DeathContext context = new ContextUtils.DeathContext(this, damageSource);
-            builder.onDeath.accept(context);
-        }
-    }
-
-    @Override
-    protected void tickDeath() {
-        if (builder.tickDeath != null) {
-            builder.tickDeath.accept(this);
-        } else super.tickDeath();
-    }
-
-    @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
         return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));
-    }
-
-
-    @Override
-    protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
-        if (builder.dropCustomDeathLoot != null) {
-            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, this);
-            builder.dropCustomDeathLoot.accept(context);
-        } else {
-            super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
-        }
     }
 
 
@@ -991,7 +1013,8 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
         if (builder.onLivingFall != null) {
             final ContextUtils.EntityFallDamageContext context = new ContextUtils.EntityFallDamageContext(this, damageMultiplier, distance, damageSource);
-            builder.onLivingFall.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onLivingFall, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingFall.");
+
         }
         return super.causeFallDamage(distance, damageMultiplier, damageSource);
     }
@@ -1000,7 +1023,8 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     @Override
     public void setSprinting(boolean sprinting) {
         if (builder.onSprint != null) {
-            builder.onSprint.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onSprint, this, "[EntityJS]: Error in " + entityName() + "builder for field: onSprint.");
+
         }
         super.setSprinting(sprinting);
     }
@@ -1047,7 +1071,8 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     public void stopRiding() {
         super.stopRiding();
         if (builder.onStopRiding != null) {
-            builder.onStopRiding.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
+
         }
     }
 
@@ -1056,7 +1081,8 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     public void rideTick() {
         super.rideTick();
         if (builder.rideTick != null) {
-            builder.rideTick.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.rideTick, this, "[EntityJS]: Error in " + entityName() + "builder for field: rideTick.");
+
         }
     }
 
@@ -1066,7 +1092,8 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
         super.onItemPickup(p_21054_);
         if (builder.onItemPickup != null) {
             final ContextUtils.EntityItemEntityContext context = new ContextUtils.EntityItemEntityContext(this, p_21054_);
-            builder.onItemPickup.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onItemPickup, context, "[EntityJS]: Error in " + entityName() + "builder for field: onItemPickup.");
+
         }
     }
 
@@ -1088,7 +1115,8 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     @Override
     public void onEnterCombat() {
         if (builder.onEnterCombat != null) {
-            builder.onEnterCombat.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onEnterCombat, this, "[EntityJS]: Error in " + entityName() + "builder for field: onEnterCombat.");
+
         } else {
             super.onEnterCombat();
         }
@@ -1098,7 +1126,8 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     @Override
     public void onLeaveCombat() {
         if (builder.onLeaveCombat != null) {
-            builder.onLeaveCombat.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onLeaveCombat, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLeaveCombat.");
+
         }
         super.onLeaveCombat();
     }
@@ -1161,7 +1190,8 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
 
         if (builder.onStartSleeping != null) {
             final ContextUtils.EntityBlockPosContext context = new ContextUtils.EntityBlockPosContext(this, blockPos);
-            builder.onStartSleeping.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onStartSleeping, context, "[EntityJS]: Error in " + entityName() + "builder for field: onStartSleeping.");
+
         }
         super.startSleeping(blockPos);
     }
@@ -1170,7 +1200,7 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     @Override
     public void stopSleeping() {
         if (builder.onStopSleeping != null) {
-            builder.onStopSleeping.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onStopSleeping, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopSleeping.");
         }
         super.stopSleeping();
     }
@@ -1180,7 +1210,7 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     public @NotNull ItemStack eat(@NotNull Level level, @NotNull ItemStack itemStack) {
         if (builder.eat != null) {
             final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, level);
-            builder.eat.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityName() + "builder for field: eat.");
             return itemStack;
         }
         return super.eat(level, itemStack);
@@ -1256,16 +1286,18 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     @Override
     public void onClientRemoval() {
         if (builder.onClientRemoval != null) {
-            builder.onClientRemoval.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onClientRemoval, this, "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval.");
+
         }
         super.onClientRemoval();
     }
 
     @Override
-    protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
+    public void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
         if (builder.onHurt != null) {
             final ContextUtils.EntityDamageContext context = new ContextUtils.EntityDamageContext(pDamageSource, pDamageAmount, this);
-            builder.onHurt.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurt.");
+
         }
         super.actuallyHurt(pDamageSource, pDamageAmount);
     }
@@ -1273,19 +1305,12 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     @Override
     public void lavaHurt() {
         if (builder.lavaHurt != null) {
-            builder.lavaHurt.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.lavaHurt, this, "[EntityJS]: Error in " + entityName() + "builder for field: lavaHurt.");
+
         }
         super.lavaHurt();
     }
 
-
-    @Override
-    protected void onFlap() {
-        if (builder.onFlap != null) {
-            builder.onFlap.accept(this);
-        }
-        super.onFlap();
-    }
 
     @Override
     public int getExperienceReward() {
@@ -1317,7 +1342,7 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     public void playerTouch(Player p_20081_) {
         if (builder.playerTouch != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
-            builder.playerTouch.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
         }
     }
 
@@ -1340,7 +1365,8 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
         if (builder.thunderHit != null) {
             super.thunderHit(p_19927_, p_19928_);
             final ContextUtils.ThunderHitContext context = new ContextUtils.ThunderHitContext(p_19927_, p_19928_, this);
-            builder.thunderHit.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.thunderHit, context, "[EntityJS]: Error in " + entityName() + "builder for field: thunderHit.");
+
         }
     }
 
@@ -1406,7 +1432,8 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     public void onRemovedFromWorld() {
         super.onRemovedFromWorld();
         if (builder.onRemovedFromWorld != null) {
-            builder.onRemovedFromWorld.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
+
         }
     }
 
@@ -1427,7 +1454,7 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
         super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
         if (builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
-            builder.lerpTo.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
     }
 

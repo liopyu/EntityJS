@@ -335,16 +335,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
     //Mob Overrides
-    @Override
-    public boolean doHurtTarget(Entity pEntity) {
-        if (builder != null && builder.onHurtTarget != null) {
-            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget.");
-
-        }
-        return super.doHurtTarget(pEntity);
-    }
-
     public void onJump() {
         if (builder.onLivingJump != null) {
             EntityJSHelperClass.consumerCallback(builder.onLivingJump, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingJump.");
@@ -839,6 +829,16 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             """)
     public void triggerAnimation(String controllerName, String animName) {
         triggerAnim(controllerName, animName);
+    }
+
+    @Override
+    public boolean doHurtTarget(Entity pEntity) {
+        if (builder != null && builder.onHurtTarget != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget.");
+
+        }
+        return super.doHurtTarget(pEntity);
     }
 
     @Override

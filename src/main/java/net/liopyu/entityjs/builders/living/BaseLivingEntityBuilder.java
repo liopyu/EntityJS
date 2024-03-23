@@ -8,6 +8,7 @@ import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
@@ -165,6 +166,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean mountJumpingEnabled;
     public transient Consumer<LivingEntity> tickDeath;
     public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
+    public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -1329,6 +1331,21 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
+    @Info(value = """
+            @param onHurtTarget A Consumer to execute when the mob attacks its target
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.onHurtTarget(context => {
+                const {entity, targetEntity} = context
+                //Execute code when the target is hurt
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> onHurtTarget(Consumer<ContextUtils.LineOfSightContext> onHurtTarget) {
+        this.onHurtTarget = onHurtTarget;
+        return this;
+    }
 
     @Info(value = """
             Sets a predicate function to determine whether the entity can attack another entity.
