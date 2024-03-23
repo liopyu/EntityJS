@@ -8,15 +8,17 @@ import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
-import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
-import net.liopyu.entityjs.util.*;
+import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
-import net.liopyu.liolib.core.animation.*;
+import net.liopyu.liolib.core.animation.Animation;
+import net.liopyu.liolib.core.animation.AnimationController;
 import net.liopyu.liolib.core.animation.AnimationState;
+import net.liopyu.liolib.core.animation.RawAnimation;
 import net.liopyu.liolib.core.keyframe.event.CustomInstructionKeyframeEvent;
 import net.liopyu.liolib.core.keyframe.event.KeyFrameEvent;
 import net.liopyu.liolib.core.keyframe.event.ParticleKeyframeEvent;
@@ -32,8 +34,12 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.function.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * The base builder for all Living Entity types that EntityJS can handle, has methods to allow overriding
@@ -89,7 +95,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Object setSwimSplashSound;
     public transient Function<ContextUtils.EntityTypeEntityContext, Object> canAttackType;
     public transient Function<LivingEntity, Object> scale;
-    public transient Boolean rideableUnderWater;
     public transient Function<LivingEntity, Object> shouldDropExperience;
     public transient Function<LivingEntity, Object> experienceReward;
     public transient Consumer<ContextUtils.EntityEquipmentContext> onEquipItem;
@@ -191,7 +196,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         setSoundVolume = 1.0f;
         setWaterSlowDown = 0.8f;
         repositionEntityAfterLoad = true;
-        rideableUnderWater = false;
         canBreatheUnderwater = false;
         renderType = RenderType.CUTOUT;
         mainArm = HumanoidArm.RIGHT;
@@ -314,18 +318,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = """
-            Sets whether the entity is rideable underwater.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.rideableUnderWater(true);
-            ```
-            """)
-    public BaseLivingEntityBuilder<T> rideableUnderWater(boolean rideableUnderWater) {
-        this.rideableUnderWater = rideableUnderWater;
-        return this;
-    }
 
     @Info(value = """
             Defines the Mob's Type
@@ -2498,7 +2490,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**
-     * A wrapper around {@link net.liopyu.liolib.core.controller.AnimationController.IAnimationPredicate IAnimationPredicate}
+     * A wrapper around {@link net.liopyu.liolib.core.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
      * that is easier to work with in js
      */
     @FunctionalInterface
@@ -2531,7 +2523,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     /**
-     * A simple wrapper around a {@link AnimationEvent} that restricts access to certain things
+     * A simple wrapper around a {@link AnimationEventJS} that restricts access to certain things
      * and adds {@link @Info} annotations for script writers
      *
      * @param <E> The entity being animated in the event
