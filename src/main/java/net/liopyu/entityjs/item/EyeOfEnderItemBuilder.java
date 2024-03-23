@@ -83,6 +83,9 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
             @param soundVolume The volume of the sound.
             @param soundPitch The pitch of the sound.
                         
+            ```javascript
+            item.playSoundOverride(null,"ambient.basalt_deltas.additions","ambient",1,1)
+            ```
             """)
     public EyeOfEnderItemBuilder playSoundOverride(@Nullable Player player, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch) {
         this.sPlayer = player;
