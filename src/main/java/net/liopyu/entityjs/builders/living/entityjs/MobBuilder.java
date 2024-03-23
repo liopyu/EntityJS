@@ -24,7 +24,6 @@ import java.util.function.*;
  * in {@link Mob} that is not present in/related to {@link net.minecraft.world.entity.LivingEntity LivignEntity}
  */
 public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
-    public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
 
     public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
     public transient SpawnEggItemBuilder eggItem;
@@ -65,22 +64,6 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         if (eggItem != null) {
             RegistryInfo.ITEM.addBuilder(eggItem);
         }
-    }
-
-    @Info(value = """
-            @param onHurtTarget A Consumer to execute when the mob attacks its target
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.onHurtTarget(context => {
-                const {entity, targetEntity} = context
-                //Execute code when the target is hurt
-            });
-            ```
-            """)
-    public MobBuilder<T> onHurtTarget(Consumer<ContextUtils.LineOfSightContext> onHurtTarget) {
-        this.onHurtTarget = onHurtTarget;
-        return this;
     }
 
     @Info(value = """

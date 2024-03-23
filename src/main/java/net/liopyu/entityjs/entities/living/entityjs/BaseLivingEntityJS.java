@@ -211,6 +211,16 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     //(Base LivingEntity/Entity Overrides)
     @Override
+    public boolean doHurtTarget(Entity pEntity) {
+        if (builder != null && builder.onHurtTarget != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget.");
+
+        }
+        return super.doHurtTarget(pEntity);
+    }
+
+    @Override
     public void travel(Vec3 pTravelVector) {
         LivingEntity livingentity = this.getControllingPassenger();
         if (this.isAlive() && this.isVehicle() && builder.canSteer && livingentity != null) {
@@ -393,11 +403,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         super.onFlap();
     }
 
-    @Override
-    public MobType getMobType() {
-        return builder.mobType;
-    }
-
     protected boolean thisJumping = false;
 
     public boolean ableToJump() {
@@ -407,6 +412,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public void setThisJumping(boolean value) {
         this.thisJumping = value;
     }
+
 
     @Override
     public LivingEntity getControllingPassenger() {
@@ -649,11 +655,11 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
 
-   /* @Override
+    /*@Override
     public boolean rideableUnderWater() {
         return Objects.requireNonNullElseGet(builder.rideableUnderWater, super::rideableUnderWater);
-    }
-*/
+    }*/
+
 
     @Override
     public boolean shouldDropExperience() {
@@ -729,13 +735,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
 
     @Override
-    protected void tickDeath() {
-        if (builder.tickDeath != null) {
-            builder.tickDeath.accept(this);
-        } else super.tickDeath();
-    }
-
-    @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
         return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));
@@ -784,7 +783,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
         if (builder.onLivingFall != null) {
             final ContextUtils.EntityFallDamageContext context = new ContextUtils.EntityFallDamageContext(this, damageMultiplier, distance, damageSource);
-            builder.onLivingFall.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onLivingFall, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingFall.");
+
         }
         return super.causeFallDamage(distance, damageMultiplier, damageSource);
     }
@@ -793,7 +793,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public void setSprinting(boolean sprinting) {
         if (builder.onSprint != null) {
-            builder.onSprint.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onSprint, this, "[EntityJS]: Error in " + entityName() + "builder for field: onSprint.");
+
         }
         super.setSprinting(sprinting);
     }
@@ -840,7 +841,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public void stopRiding() {
         super.stopRiding();
         if (builder.onStopRiding != null) {
-            builder.onStopRiding.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
+
         }
     }
 
@@ -849,7 +851,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public void rideTick() {
         super.rideTick();
         if (builder.rideTick != null) {
-            builder.rideTick.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.rideTick, this, "[EntityJS]: Error in " + entityName() + "builder for field: rideTick.");
+
         }
     }
 
@@ -859,7 +862,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         super.onItemPickup(p_21054_);
         if (builder.onItemPickup != null) {
             final ContextUtils.EntityItemEntityContext context = new ContextUtils.EntityItemEntityContext(this, p_21054_);
-            builder.onItemPickup.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onItemPickup, context, "[EntityJS]: Error in " + entityName() + "builder for field: onItemPickup.");
+
         }
     }
 
@@ -881,7 +885,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public void onEnterCombat() {
         if (builder.onEnterCombat != null) {
-            builder.onEnterCombat.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onEnterCombat, this, "[EntityJS]: Error in " + entityName() + "builder for field: onEnterCombat.");
+
         } else {
             super.onEnterCombat();
         }
@@ -891,7 +896,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public void onLeaveCombat() {
         if (builder.onLeaveCombat != null) {
-            builder.onLeaveCombat.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onLeaveCombat, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLeaveCombat.");
+
         }
         super.onLeaveCombat();
     }
@@ -954,7 +960,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
         if (builder.onStartSleeping != null) {
             final ContextUtils.EntityBlockPosContext context = new ContextUtils.EntityBlockPosContext(this, blockPos);
-            builder.onStartSleeping.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onStartSleeping, context, "[EntityJS]: Error in " + entityName() + "builder for field: onStartSleeping.");
+
         }
         super.startSleeping(blockPos);
     }
@@ -963,7 +970,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public void stopSleeping() {
         if (builder.onStopSleeping != null) {
-            builder.onStopSleeping.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onStopSleeping, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopSleeping.");
         }
         super.stopSleeping();
     }
@@ -973,7 +980,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public @NotNull ItemStack eat(@NotNull Level level, @NotNull ItemStack itemStack) {
         if (builder.eat != null) {
             final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, level);
-            builder.eat.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityName() + "builder for field: eat.");
             return itemStack;
         }
         return super.eat(level, itemStack);
@@ -1049,16 +1056,18 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public void onClientRemoval() {
         if (builder.onClientRemoval != null) {
-            builder.onClientRemoval.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onClientRemoval, this, "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval.");
+
         }
         super.onClientRemoval();
     }
 
     @Override
-    protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
+    public void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
         if (builder.onHurt != null) {
             final ContextUtils.EntityDamageContext context = new ContextUtils.EntityDamageContext(pDamageSource, pDamageAmount, this);
-            builder.onHurt.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurt.");
+
         }
         super.actuallyHurt(pDamageSource, pDamageAmount);
     }
@@ -1066,7 +1075,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public void lavaHurt() {
         if (builder.lavaHurt != null) {
-            builder.lavaHurt.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.lavaHurt, this, "[EntityJS]: Error in " + entityName() + "builder for field: lavaHurt.");
+
         }
         super.lavaHurt();
     }
@@ -1102,7 +1112,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public void playerTouch(Player p_20081_) {
         if (builder.playerTouch != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
-            builder.playerTouch.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
         }
     }
 
@@ -1125,7 +1135,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         if (builder.thunderHit != null) {
             super.thunderHit(p_19927_, p_19928_);
             final ContextUtils.ThunderHitContext context = new ContextUtils.ThunderHitContext(p_19927_, p_19928_, this);
-            builder.thunderHit.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.thunderHit, context, "[EntityJS]: Error in " + entityName() + "builder for field: thunderHit.");
+
         }
     }
 
@@ -1191,7 +1202,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public void onRemovedFromWorld() {
         super.onRemovedFromWorld();
         if (builder.onRemovedFromWorld != null) {
-            builder.onRemovedFromWorld.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
+
         }
     }
 
@@ -1212,7 +1224,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
         if (builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
-            builder.lerpTo.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
     }
 

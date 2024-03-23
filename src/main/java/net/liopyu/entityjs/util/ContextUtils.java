@@ -498,7 +498,7 @@ public class ContextUtils {
         @Info("The source of the fall damage")
         public final DamageSource damageSource;
 
-        public EntityFallDamageContext(LivingEntity entity, float distance, float damageMultiplier, DamageSource damageSource) {
+        public EntityFallDamageContext(LivingEntity entity, float damageMultiplier, float distance, DamageSource damageSource) {
             this.entity = entity;
             this.distance = distance;
             this.damageMultiplier = damageMultiplier;
@@ -1001,7 +1001,7 @@ public class ContextUtils {
         @Info("The source of the fall damage")
         public final DamageSource damageSource;
 
-        public EEntityFallDamageContext(Entity entity, float distance, float damageMultiplier, DamageSource damageSource) {
+        public EEntityFallDamageContext(Entity entity, float damageMultiplier, float distance, DamageSource damageSource) {
             this.entity = entity;
             this.distance = distance;
             this.damageMultiplier = damageMultiplier;

@@ -173,6 +173,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean mountJumpingEnabled;
     public transient Consumer<LivingEntity> tickDeath;
     public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
+    public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -204,6 +205,22 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         defaultDeathPose = true;
         canSteer = true;
         mountJumpingEnabled = true;
+    }
+
+    @Info(value = """
+            @param onHurtTarget A Consumer to execute when the mob attacks its target
+                        
+            Example usage:
+            ```javascript
+            mobBuilder.onHurtTarget(context => {
+                const {entity, targetEntity} = context
+                //Execute code when the target is hurt
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> onHurtTarget(Consumer<ContextUtils.LineOfSightContext> onHurtTarget) {
+        this.onHurtTarget = onHurtTarget;
+        return this;
     }
 
     @Info(value = """

@@ -308,9 +308,9 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
     @Override
     public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
-        if (builder.onLivingFall != null) {
+        if (builder.onFall != null) {
             final ContextUtils.EEntityFallDamageContext context = new ContextUtils.EEntityFallDamageContext(this, damageMultiplier, distance, damageSource);
-            builder.onLivingFall.accept(context);
+            builder.onFall.accept(context);
         }
         return super.causeFallDamage(distance, damageMultiplier, damageSource);
     }

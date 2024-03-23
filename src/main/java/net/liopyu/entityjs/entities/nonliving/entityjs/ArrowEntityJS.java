@@ -13,14 +13,12 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -97,8 +95,20 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected void tickDespawn() {
         if (builder.tickDespawn != null) {
-            builder.tickDespawn.accept(this);
+            EntityJSHelperClass.consumerCallback(builder.tickDespawn, this, "[EntityJS]: Error in " + entityName() + "builder for field: tickDespawn.");
+
         } else super.tickDespawn();
+    }
+
+    @Override
+    protected void doPostHurtEffects(LivingEntity target) {
+        if (builder.doPostHurtEffects != null) {
+            final ContextUtils.ArrowLivingEntityContext context = new ContextUtils.ArrowLivingEntityContext(this, target);
+            EntityJSHelperClass.consumerCallback(builder.doPostHurtEffects, context, "[EntityJS]: Error in " + entityName() + "builder for field: doPostHurtEffects.");
+
+        } else {
+            super.doPostHurtEffects(target);
+        }
     }
 
     @Override
@@ -109,16 +119,6 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         return super.getDefaultHitGroundSoundEvent();
     }
 
-
-    @Override
-    protected void doPostHurtEffects(LivingEntity target) {
-        if (builder.doPostHurtEffects != null) {
-            final ContextUtils.ArrowLivingEntityContext context = new ContextUtils.ArrowLivingEntityContext(this, target);
-            builder.doPostHurtEffects.accept(context);
-        } else {
-            super.doPostHurtEffects(target);
-        }
-    }
 
     @Override
     protected float getWaterInertia() {
@@ -194,7 +194,138 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     }
 
-    //base entity overrides
+    //Base Entity Overrides
+    public boolean hurt(DamageSource pSource, float pAmount) {
+        if (builder.onHurt != null) {
+            final ContextUtils.EntityHurtContext context = new ContextUtils.EntityHurtContext(this, pSource, pAmount);
+            EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurt.");
+
+        }
+        return super.hurt(pSource, pAmount);
+    }
+
+    @Override
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+        if (builder.lerpTo != null) {
+            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
+            EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
+        }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (builder.tick != null) {
+            EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
+        }
+    }
+
+    @Override
+    public void move(MoverType pType, Vec3 pPos) {
+        super.move(pType, pPos);
+        if (builder.move != null) {
+            final ContextUtils.MovementContext context = new ContextUtils.MovementContext(pType, pPos, this);
+            EntityJSHelperClass.consumerCallback(builder.move, context, "[EntityJS]: Error in " + entityName() + "builder for field: move.");
+        }
+    }
+
+    @Override
+    public void playerTouch(Player player) {
+        if (builder != null && builder.playerTouch != null) {
+            final ContextUtils.EntityPlayerContext context = new ContextUtils.EntityPlayerContext(player, this);
+            EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
+        } else {
+            super.playerTouch(player);
+        }
+    }
+
+    @Override
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
+        if (builder.onRemovedFromWorld != null) {
+            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
+        }
+    }
+
+    @Override
+    public void thunderHit(ServerLevel p_19927_, LightningBolt p_19928_) {
+        if (builder.thunderHit != null) {
+            super.thunderHit(p_19927_, p_19928_);
+            final ContextUtils.EThunderHitContext context = new ContextUtils.EThunderHitContext(p_19927_, p_19928_, this);
+            EntityJSHelperClass.consumerCallback(builder.thunderHit, context, "[EntityJS]: Error in " + entityName() + "builder for field: thunderHit.");
+        }
+    }
+
+    @Override
+    public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
+        if (builder.onFall != null) {
+            final ContextUtils.EEntityFallDamageContext context = new ContextUtils.EEntityFallDamageContext(this, damageMultiplier, distance, damageSource);
+            EntityJSHelperClass.consumerCallback(builder.onFall, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingFall.");
+        }
+        return super.causeFallDamage(distance, damageMultiplier, damageSource);
+    }
+
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+            EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
+        }
+    }
+
+    @Override
+    public void setSprinting(boolean sprinting) {
+        if (builder.onSprint != null) {
+            EntityJSHelperClass.consumerCallback(builder.onSprint, this, "[EntityJS]: Error in " + entityName() + "builder for field: onSprint.");
+        }
+        super.setSprinting(sprinting);
+    }
+
+
+    @Override
+    public void stopRiding() {
+        super.stopRiding();
+        if (builder.onStopRiding != null) {
+            EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
+        }
+    }
+
+
+    @Override
+    public void rideTick() {
+        super.rideTick();
+        if (builder.rideTick != null) {
+            EntityJSHelperClass.consumerCallback(builder.rideTick, this, "[EntityJS]: Error in " + entityName() + "builder for field: rideTick.");
+        }
+    }
+
+    @Override
+    public void onClientRemoval() {
+        if (builder.onClientRemoval != null) {
+            EntityJSHelperClass.consumerCallback(builder.onClientRemoval, this, "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval.");
+        }
+        super.onClientRemoval();
+    }
+
+
+    @Override
+    public void lavaHurt() {
+        if (builder.lavaHurt != null) {
+            EntityJSHelperClass.consumerCallback(builder.lavaHurt, this, "[EntityJS]: Error in " + entityName() + "builder for field: lavaHurt.");
+        }
+        super.lavaHurt();
+    }
+
+
+    @Override
+    protected void onFlap() {
+        if (builder.onFlap != null) {
+            EntityJSHelperClass.consumerCallback(builder.onFlap, this, "[EntityJS]: Error in " + entityName() + "builder for field: onFlap.");
+        }
+        super.onFlap();
+    }
+
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
@@ -206,46 +337,9 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         return super.shouldRenderAtSqrDistance(distance);
     }
 
-    @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
-        if (builder.lerpTo != null) {
-            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
-            builder.lerpTo.accept(context);
-        }
-    }
-
-
-    @Override
-    public void tick() {
-        super.tick();
-        isMoving = movementTracker.isMoving(this);
-        if (builder.tick != null) {
-            builder.tick.accept(this);
-        }
-    }
 
     public boolean isMoving() {
         return isMoving;
-    }
-
-    @Override
-    public void move(MoverType pType, Vec3 pPos) {
-        super.move(pType, pPos);
-        if (builder.move != null) {
-            final ContextUtils.MovementContext context = new ContextUtils.MovementContext(pType, pPos, this);
-            builder.move.accept(context);
-        }
-    }
-
-    @Override
-    public void playerTouch(Player player) {
-        if (builder != null && builder.playerTouch != null) {
-            final ContextUtils.EntityPlayerContext context = new ContextUtils.EntityPlayerContext(player, this);
-            builder.playerTouch.accept(context);
-        } else {
-            super.playerTouch(player);
-        }
     }
 
     @Override
@@ -360,7 +454,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         }
         if (builder != null && builder.onHitEntity != null) {
             final ContextUtils.ArrowEntityHitContext context = new ContextUtils.ArrowEntityHitContext(pResult, this);
-            builder.onHitEntity.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onHitEntity, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHitEntity.");
         }
     }
 
@@ -383,7 +477,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         this.resetPiercedEntities();
         if (builder != null && builder.onHitBlock != null) {
             final ContextUtils.ArrowBlockHitContext context = new ContextUtils.ArrowBlockHitContext(result, this);
-            builder.onHitBlock.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onHitBlock, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHitBlock.");
         }
         super.onHitBlock(result);
     }
