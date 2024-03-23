@@ -17,12 +17,14 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -177,6 +179,24 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         }
     }
 
+    //Tameable mob overrides
+    @Override
+    public boolean tameWithName(Player pPlayer) {
+        if (builder.tameOverride != null) {
+            this.setTamed(true);
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
+            EntityJSHelperClass.consumerCallback(builder.tameOverride, context, "[EntityJS]: Error in " + entityName() + "builder for field: tameOverride.");
+            if (pPlayer instanceof ServerPlayer) {
+                CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer) pPlayer, this);
+            }
+            this.level().broadcastEntityEvent(this, (byte) 7);
+        } else super.tameWithName(pPlayer);
+        if (builder.onTamed != null) {
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
+            EntityJSHelperClass.consumerCallback(builder.onTamed, context, "[EntityJS]: Error in " + entityName() + "builder for field: onTamed.");
+        }
+        return true;
+    }
 
     //Ageable Mob Overrides
     @Override

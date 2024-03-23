@@ -96,8 +96,8 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob, 
     protected PathNavigation navigation;
 
     static {
-        DATA_INTERESTED_ID = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.BOOLEAN);
-        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.INT);
+        DATA_INTERESTED_ID = SynchedEntityData.defineId(CatEntityJS.class, EntityDataSerializers.BOOLEAN);
+        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(CatEntityJS.class, EntityDataSerializers.INT);
         PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     }
 
@@ -231,16 +231,17 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob, 
         if (builder.tameOverride != null) {
             this.setTame(true);
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            builder.tameOverride.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.tameOverride, context, "[EntityJS]: Error in " + entityName() + "builder for field: tameOverride.");
             if (pPlayer instanceof ServerPlayer) {
                 CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer) pPlayer, this);
             }
         } else super.tame(pPlayer);
         if (builder.onTamed != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            builder.onTamed.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onTamed, context, "[EntityJS]: Error in " + entityName() + "builder for field: onTamed.");
         }
     }
+
 
     // Basic Tameable Overrides
     @Override

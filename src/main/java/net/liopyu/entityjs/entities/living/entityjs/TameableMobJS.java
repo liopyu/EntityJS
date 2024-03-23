@@ -232,14 +232,14 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (builder.tameOverride != null) {
             this.setTame(true);
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            builder.tameOverride.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.tameOverride, context, "[EntityJS]: Error in " + entityName() + "builder for field: tameOverride.");
             if (pPlayer instanceof ServerPlayer) {
                 CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer) pPlayer, this);
             }
         } else super.tame(pPlayer);
         if (builder.onTamed != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            builder.onTamed.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.onTamed, context, "[EntityJS]: Error in " + entityName() + "builder for field: onTamed.");
         }
     }
 
