@@ -17,10 +17,26 @@ public class CamelJSBuilder extends AnimalEntityBuilder<CamelEntityJS> {
     public transient boolean defaultGoals;
     public transient Consumer<ContextUtils.PlayerEntityContext> onTamed;
     public transient Consumer<ContextUtils.PlayerEntityContext> tameOverride;
+    public transient Boolean defaultBehaviourGoals;
 
     public CamelJSBuilder(ResourceLocation i) {
         super(i);
         this.defaultGoals = true;
+        defaultBehaviourGoals = true;
+    }
+
+    @Info(value = """  
+            @param defaultBehaviourGoals Sets whether the mob should inherit it's goal behavior from it's superclass
+            Defaults to true.
+                        
+            Example usage:
+            ```javascript
+            builder.defaultBehaviourGoals(false);
+            ```
+            """)
+    public CamelJSBuilder defaultBehaviourGoals(boolean defaultBehaviourGoals) {
+        this.defaultBehaviourGoals = defaultBehaviourGoals;
+        return this;
     }
 
     @Info(value = """

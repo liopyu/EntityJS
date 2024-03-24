@@ -679,6 +679,12 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
+        if (builder.defaultGoals) {
+            super.registerGoals();
+        }
+        if (builder.defaultBehaviourGoals) {
+            super.addBehaviourGoals();
+        }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 

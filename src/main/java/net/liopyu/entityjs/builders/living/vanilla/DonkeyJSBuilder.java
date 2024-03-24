@@ -12,10 +12,26 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class DonkeyJSBuilder extends AnimalEntityBuilder<DonkeyEntityJS> {
     public transient boolean defaultGoals;
+    public transient Boolean defaultBehaviourGoals;
 
     public DonkeyJSBuilder(ResourceLocation i) {
         super(i);
         this.defaultGoals = true;
+        defaultBehaviourGoals = true;
+    }
+
+    @Info(value = """  
+            @param defaultBehaviourGoals Sets whether the mob should inherit it's goal behavior from it's superclass
+            Defaults to true.
+                        
+            Example usage:
+            ```javascript
+            builder.defaultBehaviourGoals(false);
+            ```
+            """)
+    public DonkeyJSBuilder defaultBehaviourGoals(boolean defaultBehaviourGoals) {
+        this.defaultBehaviourGoals = defaultBehaviourGoals;
+        return this;
     }
 
     @Info(value = """  
