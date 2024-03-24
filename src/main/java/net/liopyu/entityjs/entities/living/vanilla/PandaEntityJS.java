@@ -447,7 +447,6 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     }
 
 
-
     public void jump() {
         double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
         Vec3 currentVelocity = this.getDeltaMovement();
@@ -484,8 +483,6 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     }
 
 
-
-
     @Override
     public float getWalkTargetValue(BlockPos pos, LevelReader levelReader) {
         if (builder.walkTargetValue == null) return super.getWalkTargetValue(pos, levelReader);
@@ -497,7 +494,6 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     }
 
 
-
     @Override
     protected boolean shouldStayCloseToLeashHolder() {
         if (builder.shouldStayCloseToLeashHolder == null) return super.shouldStayCloseToLeashHolder();
@@ -507,8 +503,6 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.shouldStayCloseToLeashHolder());
         return super.shouldStayCloseToLeashHolder();
     }
-
-
 
 
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
@@ -538,7 +532,6 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
         }
         return super.canFireProjectileWeapon(projectileWeapon);
     }
-
 
 
     @Nullable
@@ -656,6 +649,9 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
+        if (builder.defaultGoals) {
+            super.registerGoals();
+        }
         if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 

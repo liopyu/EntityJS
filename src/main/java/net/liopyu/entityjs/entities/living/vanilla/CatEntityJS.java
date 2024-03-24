@@ -848,6 +848,9 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob, 
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
+        if (builder.defaultGoals) {
+            super.registerGoals();
+        }
         if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
