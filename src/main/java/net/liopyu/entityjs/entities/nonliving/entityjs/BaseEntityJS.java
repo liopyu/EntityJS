@@ -67,10 +67,10 @@ public class BaseEntityJS extends Entity implements IAnimatableJSNL {
         return this.getType().toString();
     }
 
-    @Override
+    /*@Override
     public boolean isPickable() {
         return builder.isPickable;
-    }
+    }*/
 
     //Base Entity Overrides
     public boolean hurt(DamageSource pSource, float pAmount) {
