@@ -241,10 +241,10 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
                         return (AgeableMob) breedOffspringEntity;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method.");
             }
-        } else return super.getBreedOffspring(serverLevel, ageableMob);
-        return null;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method: " + entityName());
+        }
+        return builder.get().create(serverLevel);
     }
 
     @Override

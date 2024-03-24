@@ -199,23 +199,16 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
                 EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
                 if (breedOffspringType != null) {
                     Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
-                    if (breedOffspringEntity instanceof AgeableMob) {
-                        breedOffspringType.create(serverLevel);
-                        return null;
+                    if (breedOffspringEntity instanceof Chicken c) {
+                        return c;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
-                builder.get().create(serverLevel);
-                return null;
             }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + obj + ". Must return an instance of Chicken ResourceLocation. Defaulting to super method: " + entityName());
         }
-        return null;
+        return builder.get().create(serverLevel);
     }
 
-    @Override
-    public boolean canBeCollidedWith() {
-        return super.canBeCollidedWith();
-    }
 
     @Override
     public boolean isFood(ItemStack pStack) {

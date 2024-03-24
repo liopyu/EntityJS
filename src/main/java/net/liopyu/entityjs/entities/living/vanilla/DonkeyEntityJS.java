@@ -180,7 +180,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     //Ageable Mob Overrides
     @Override
-    public Donkey getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+    public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         if (builder.setBreedOffspring != null) {
             final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
@@ -188,17 +188,14 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
                 EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
                 if (breedOffspringType != null) {
                     Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
-                    if (breedOffspringEntity instanceof AgeableMob) {
-                        breedOffspringType.create(serverLevel);
-                        return null;
+                    if (breedOffspringEntity instanceof AgeableMob a) {
+                        return a;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
-                builder.get().create(serverLevel);
-                return null;
             }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + obj + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + entityName());
         }
-        return null;
+        return builder.get().create(serverLevel);
     }
 
     @Override

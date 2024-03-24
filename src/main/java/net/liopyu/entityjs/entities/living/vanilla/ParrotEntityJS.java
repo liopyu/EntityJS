@@ -275,10 +275,10 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
                         return (AgeableMob) breedOffspringEntity;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method: " + builder.get());
             }
-        } else return builder.get().create(serverLevel);
-        return null;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + obj + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method: " + builder.get());
+        }
+        return builder.get().create(serverLevel);
     }
 
     @Override

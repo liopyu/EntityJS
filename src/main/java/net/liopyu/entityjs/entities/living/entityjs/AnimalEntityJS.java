@@ -230,11 +230,10 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
                         return (AgeableMob) breedOffspringEntity;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
-                return builder.get().create(serverLevel);
             }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + obj + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
         }
-        return null;
+        return builder.get().create(serverLevel);
     }
 
     @Override

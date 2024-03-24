@@ -19,7 +19,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.function.Function;
 
-public class AxolotlJSBuilder extends PathfinderMobBuilder<AxolotlEntityJS> {
+public class AxolotlJSBuilder extends AnimalEntityBuilder<AxolotlEntityJS> {
     public transient Function<LivingEntity, Object> bucketItemStack;
 
     public AxolotlJSBuilder(ResourceLocation i) {
