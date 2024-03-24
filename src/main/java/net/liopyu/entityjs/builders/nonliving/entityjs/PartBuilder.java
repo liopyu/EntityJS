@@ -53,11 +53,11 @@ public class PartBuilder<T extends LivingEntity> {
 
     public PartBuilder() {
         isPickable = true;
+        this.isAttackable = t -> true;
     }
 
     public PartBuilder<T> isPickable(boolean isPickable) {
         this.isPickable = isPickable;
-        this.isAttackable = t -> true;
         return this;
     }
 
