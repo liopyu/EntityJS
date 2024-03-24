@@ -228,11 +228,10 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
                         return (AgeableMob) breedOffspringEntity;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
-                return builder.get().create(serverLevel);
             }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + obj + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
         }
-        return null;
+        return builder.get().create(serverLevel);
     }
 
     @Override
@@ -342,12 +341,14 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         }
         return super.doHurtTarget(pEntity);
     }
+
     public void onJump() {
         if (builder.onLivingJump != null) {
             EntityJSHelperClass.consumerCallback(builder.onLivingJump, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingJump.");
 
         }
     }
+
     @Override
     public void aiStep() {
         super.aiStep();
@@ -359,6 +360,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         }
     }
+
     @Override
     protected void tickDeath() {
         if (builder.tickDeath != null) {
@@ -378,6 +380,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         }
     }
+
     @Override
     public void setTarget(@Nullable LivingEntity target) {
         super.setTarget(target);
@@ -387,6 +390,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         }
     }
+
     @Override
     public void ate() {
         super.ate();
@@ -395,6 +399,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         }
     }
+
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
         if (builder == null || builder.createNavigation == null) return new GroundPathNavigation(this, pLevel);
@@ -518,7 +523,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
 
-
     @Override
     public float getWalkTargetValue(BlockPos pos, LevelReader levelReader) {
         if (builder.walkTargetValue == null) return super.getWalkTargetValue(pos, levelReader);
@@ -539,7 +543,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.shouldStayCloseToLeashHolder());
         return super.shouldStayCloseToLeashHolder();
     }
-
 
 
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
@@ -569,8 +572,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         }
         return super.canFireProjectileWeapon(projectileWeapon);
     }
-
-
 
 
     @Nullable
@@ -673,6 +674,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         }
     }
+
     @Override
     public void tick() {
         super.tick();
@@ -729,6 +731,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
         }
     }
+
     @Override
     public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
         super.onEquipItem(slot, previous, current);
@@ -738,6 +741,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         }
     }
+
     @Override
     public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
         if (builder.onEffectAdded != null) {
@@ -771,6 +775,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         }
     }
+
     @Override
     public void die(@NotNull DamageSource damageSource) {
         super.die(damageSource);
@@ -780,6 +785,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
         }
     }
+
     @Override
     protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
         if (builder.dropCustomDeathLoot != null) {
@@ -790,6 +796,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
         }
     }
+
     @Override
     protected void onFlap() {
         if (builder.onFlap != null) {
@@ -798,6 +805,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         }
         super.onFlap();
     }
+
     protected boolean thisJumping = false;
 
     public boolean ableToJump() {
@@ -807,7 +815,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public void setThisJumping(boolean value) {
         this.thisJumping = value;
     }
-
 
 
     @Override
@@ -978,7 +985,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
 
-
     @Override
     protected boolean repositionEntityAfterLoad() {
         return Objects.requireNonNullElseGet(builder.repositionEntityAfterLoad, super::repositionEntityAfterLoad);
@@ -1071,8 +1077,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
 
-
-
     @Override
     public double getVisibilityPercent(@Nullable Entity p_20969_) {
         if (builder.visibilityPercent != null) {
@@ -1133,16 +1137,11 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
 
-
-
-
     @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
         return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));
     }
-
-
 
 
     @Override
@@ -1484,8 +1483,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         }
         super.lavaHurt();
     }
-
-
 
 
     @Override

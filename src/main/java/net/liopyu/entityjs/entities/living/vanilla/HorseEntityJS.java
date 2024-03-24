@@ -223,8 +223,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
     }
 
     // Basic Tameable Overrides
-
-
+    @Override
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         if (builder.setBreedOffspring != null) {
             final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
@@ -244,11 +243,10 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
                         return (AgeableMob) breedOffspringEntity;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a AgeableMob ResourceLocation. Defaulting to super method.");
-                return super.getBreedOffspring(serverLevel, ageableMob);
             }
-        } else return super.getBreedOffspring(serverLevel, ageableMob);
-        return null;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method: " + entityName());
+        }
+        return builder.get().create(serverLevel);
     }
 
     @Override

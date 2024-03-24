@@ -45,6 +45,7 @@ import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Zombie;
@@ -222,6 +223,93 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
+    //Ageable Mob Overrides
+    @Override
+    public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+        if (builder.setBreedOffspring != null) {
+            final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
+            if (obj instanceof ResourceLocation resourceLocation) {
+                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
+                if (breedOffspringType != null) {
+                    Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
+                    if (breedOffspringEntity instanceof AgeableMob) {
+                        return (AgeableMob) breedOffspringEntity;
+                    }
+                }
+            }
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + obj + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + entityName());
+        }
+        return builder.get().create(serverLevel);
+    }
+
+    @Override
+    public boolean canBeCollidedWith() {
+        return super.canBeCollidedWith();
+    }
+
+    @Override
+    public boolean isFood(ItemStack pStack) {
+        if (builder.isFood != null) {
+            return builder.isFood.test(pStack);
+        }
+        return super.isFood(pStack);
+    }
+
+    public boolean isFoodPredicate(ItemStack pStack) {
+        if (builder.isFoodPredicate == null) {
+            return super.isFood(pStack);
+        }
+        final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
+        Object obj = builder.isFoodPredicate.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
+        return false;
+    }
+
+
+    @Override
+    public boolean canBreed() {
+        if (builder.canBreed == null) {
+            return super.canBreed();
+        }
+        Object obj = builder.canBreed.apply(this);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBreed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super method: " + super.canBreed());
+        return super.canBreed();
+    }
+
+
+    @Override
+    public boolean canMate(Animal pOtherAnimal) {
+        if (builder.canMate == null) {
+            return super.canMate(pOtherAnimal);
+        }
+        final ContextUtils.EntityAnimalContext context = new ContextUtils.EntityAnimalContext(this, pOtherAnimal);
+        Object obj = builder.canMate.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canMate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canMate(pOtherAnimal));
+        return super.canMate(pOtherAnimal);
+    }
+
+
+    @Override
+    public void spawnChildFromBreeding(ServerLevel pLevel, Animal pMate) {
+        if (builder.onSpawnChildFromBreeding != null) {
+            final ContextUtils.LevelAnimalContext context = new ContextUtils.LevelAnimalContext(pMate, this, pLevel);
+            EntityJSHelperClass.consumerCallback(builder.onSpawnChildFromBreeding, context, "[EntityJS]: Error in " + entityName() + "builder for field: onSpawnChildFromBreeding.");
+
+            super.spawnChildFromBreeding(pLevel, pMate);
+        } else {
+            super.spawnChildFromBreeding(pLevel, pMate);
+        }
+    }
 
     //Mob Overrides
     @Override

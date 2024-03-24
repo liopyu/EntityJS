@@ -193,15 +193,14 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
                 EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
                 if (breedOffspringType != null) {
                     Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
-                    if (breedOffspringEntity instanceof AgeableMob) {
-                        return (AgeableMob) breedOffspringEntity;
+                    if (breedOffspringEntity instanceof AgeableMob a) {
+                        return a;
                     }
                 }
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return an AgeableMob ResourceLocation. Defaulting to super method.");
-                return super.getBreedOffspring(serverLevel, ageableMob);
             }
-        } else return super.getBreedOffspring(serverLevel, ageableMob);
-        return null;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + obj + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + entityName());
+        }
+        return builder.get().create(serverLevel);
     }
 
     @Override
