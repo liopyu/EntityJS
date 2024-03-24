@@ -19,10 +19,26 @@ public class HorseJSBuilder extends AnimalEntityBuilder<HorseEntityJS> {
     public transient Consumer<ContextUtils.PlayerEntityContext> onTamed;
     public transient Consumer<ContextUtils.PlayerEntityContext> tameOverride;
     public transient Boolean defaultGoals;
+    public transient Boolean defaultBehaviourGoals;
 
     public HorseJSBuilder(ResourceLocation i) {
         super(i);
         defaultGoals = true;
+        defaultBehaviourGoals = true;
+    }
+
+    @Info(value = """  
+            @param defaultBehaviourGoals Sets whether the mob should inherit it's goal behavior from it's superclass
+            Defaults to true.
+                        
+            Example usage:
+            ```javascript
+            builder.defaultBehaviourGoals(false);
+            ```
+            """)
+    public HorseJSBuilder defaultBehaviourGoals(boolean defaultBehaviourGoals) {
+        this.defaultBehaviourGoals = defaultBehaviourGoals;
+        return this;
     }
 
     @Info(value = """
