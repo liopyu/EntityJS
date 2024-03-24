@@ -6,7 +6,6 @@ import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.vanilla.ZombieJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
-import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;

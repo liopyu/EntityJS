@@ -18,6 +18,7 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -57,10 +58,13 @@ import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
+@ParametersAreNonnullByDefault
 public class GhastEntityJS extends Ghast implements IAnimatableJS {
     private final GhastJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
