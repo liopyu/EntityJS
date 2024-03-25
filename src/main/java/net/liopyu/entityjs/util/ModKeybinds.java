@@ -4,5 +4,6 @@ import net.minecraft.client.KeyMapping;
 
 public class ModKeybinds {
     public static final KeyMapping mount_jump = new KeyMapping("key.mount_jump", 296, "key.categories.misc");
+    public static final KeyMapping mount_inventory = new KeyMapping("key.mount_inventory", 296, "key.categories.misc");
     //Call where needed with ModKeybinds.mount_jump.isDown()
 }

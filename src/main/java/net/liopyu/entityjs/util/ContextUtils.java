@@ -6,7 +6,9 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -20,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -29,6 +32,24 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
 
 public class ContextUtils {
+    public static class EntitySpawnContext {
+        public final LivingEntity livingEntity;
+        public final ServerLevelAccessor level;
+        public final DifficultyInstance difficulty;
+        public final MobSpawnType reason;
+        public final SpawnGroupData spawnData;
+        public final CompoundTag dataTag;
+
+        public EntitySpawnContext(LivingEntity livingEntity, ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, SpawnGroupData spawnData, CompoundTag dataTag) {
+            this.level = level;
+            this.difficulty = difficulty;
+            this.reason = reason;
+            this.livingEntity = livingEntity;
+            this.spawnData = spawnData;
+            this.dataTag = dataTag;
+        }
+    }
+
     public static class PartEntityParams<T extends LivingEntity> {
         public final String name;
         public final float width;

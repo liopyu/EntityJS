@@ -172,6 +172,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> tickDeath;
     public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
+    public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -203,6 +204,22 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         defaultDeathPose = true;
         canSteer = true;
         mountJumpingEnabled = true;
+    }
+
+    @Info(value = """
+            Function determining if the entity is allied with a potential target.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isAlliedTo(context => {
+                const {entity, target} = context
+                return target.type == 'minecraft:blaze'
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> isAlliedTo(Function<ContextUtils.LineOfSightContext, Object> isAlliedTo) {
+        this.isAlliedTo = isAlliedTo;
+        return this;
     }
 
     @Info(value = """

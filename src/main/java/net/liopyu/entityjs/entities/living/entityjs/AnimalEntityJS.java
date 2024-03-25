@@ -48,6 +48,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.entity.PartEntity;
@@ -615,6 +616,19 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
 
     //(Base LivingEntity/Entity Overrides)
+
+    @Override
+    public boolean isAlliedTo(Entity pEntity) {
+        if (builder.isAlliedTo != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            Object obj = builder.isAlliedTo.apply(context);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
+        }
+        return super.isAlliedTo(pEntity);
+    }
+
+
     @Override
     public void travel(Vec3 pTravelVector) {
         LivingEntity livingentity = this.getControllingPassenger();

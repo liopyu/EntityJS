@@ -12,13 +12,46 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 
 
 public class ZombieJSBuilder extends PathfinderMobBuilder<ZombieEntityJS> {
-    public transient Boolean defaultBehaviourGoals;
-    public transient Boolean defaultGoals;
+    public transient boolean defaultBehaviourGoals;
+    public transient boolean defaultGoals;
+    public transient boolean isSunSensitive;
+    public transient boolean convertsInWater;
+
 
     public ZombieJSBuilder(ResourceLocation i) {
         super(i);
         defaultBehaviourGoals = true;
         defaultGoals = true;
+        isSunSensitive = true;
+        convertsInWater = true;
+    }
+
+    @Info(value = """  
+            @param isSunSensitive Sets whether the mob should convert in water to another mob
+            Defaults to true.
+                        
+            Example usage:
+            ```javascript
+            builder.convertsInWater(false);
+            ```
+            """)
+    public ZombieJSBuilder convertsInWater(boolean convertsInWater) {
+        this.convertsInWater = convertsInWater;
+        return this;
+    }
+
+    @Info(value = """  
+            @param isSunSensitive Sets whether the mob should burn in daylight
+            Defaults to true.
+                        
+            Example usage:
+            ```javascript
+            builder.isSunSensitive(false);
+            ```
+            """)
+    public ZombieJSBuilder isSunSensitive(boolean isSunSensitive) {
+        this.isSunSensitive = isSunSensitive;
+        return this;
     }
 
     @Info(value = """  

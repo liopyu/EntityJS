@@ -20,11 +20,13 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -43,6 +45,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -84,6 +87,23 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
+    }
+    // Basic Zombie Overrides
+
+    @Override
+    protected boolean isSunSensitive() {
+        return builder.isSunSensitive;
+    }
+
+    @Override
+    protected boolean convertsInWater() {
+        return builder.convertsInWater;
+    }
+
+    @Override
+    public void setBaby(boolean pChildZombie) {
+
+        super.setBaby(pChildZombie);
     }
 
     // Part Entity Logical Overrides --------------------------------
@@ -479,6 +499,17 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     }
 
     //(Base LivingEntity/Entity Overrides)
+    @Override
+    public boolean isAlliedTo(Entity pEntity) {
+        if (builder.isAlliedTo != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            Object obj = builder.isAlliedTo.apply(context);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
+        }
+        return super.isAlliedTo(pEntity);
+    }
+
     @Override
     public void travel(Vec3 pTravelVector) {
         LivingEntity livingentity = this.getControllingPassenger();
