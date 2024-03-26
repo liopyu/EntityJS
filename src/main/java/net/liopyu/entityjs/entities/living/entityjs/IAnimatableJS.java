@@ -2,6 +2,7 @@ package net.liopyu.entityjs.entities.living.entityjs;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.BaseLivingEntityJS;
 import net.liopyu.liolib.animatable.GeoEntity;
@@ -32,6 +33,8 @@ public interface IAnimatableJS extends GeoAnimatable, GeoEntity {
      * about animations and anything the builder defines
      */
     BaseLivingEntityBuilder<?> getBuilder();
+
+    //KubeJSEntityRenderer<?> getRenderer();
 
 
     /**

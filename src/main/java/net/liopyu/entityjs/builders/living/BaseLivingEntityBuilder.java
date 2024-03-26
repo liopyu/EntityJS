@@ -9,6 +9,8 @@ import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
+import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
+import net.liopyu.entityjs.client.living.model.CustomGeoRenderLayer;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
@@ -26,6 +28,7 @@ import net.liopyu.liolib.core.keyframe.event.SoundKeyframeEvent;
 import net.liopyu.liolib.core.keyframe.event.data.KeyFrameData;
 import net.liopyu.liolib.core.object.DataTicket;
 import net.liopyu.liolib.core.object.PlayState;
+import net.liopyu.liolib.renderer.GeoEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.random.Weight;
 import net.minecraft.world.entity.*;
@@ -173,6 +176,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
     public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
+    public final List<CustomGeoRenderLayer<T>> renderLayers = new ArrayList<>();
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -205,6 +209,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         canSteer = true;
         mountJumpingEnabled = true;
     }
+
+    private GeoEntityRenderer<T> renderer;
+
+    public GeoEntityRenderer<T> getRenderer() {
+        return renderer;
+    }
+
+    public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<CustomGeoRenderLayer.Builder<T>> consumer) {
+        CustomGeoRenderLayer.Builder<T> builder = new CustomGeoRenderLayer.Builder<>(this);
+        consumer.accept(builder);
+        this.renderLayers.add(builder.build(renderer));
+        return this;
+    }
+
 
     @Info(value = """
             Function determining if the entity is allied with a potential target.
@@ -2507,7 +2525,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**
-     * A wrapper around {@link net.liopyu.liolib.core.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
+     * A wrapper around {@link AnimationController.AnimationStateHandler IAnimationPredicate}
      * that is easier to work with in js
      */
     @FunctionalInterface

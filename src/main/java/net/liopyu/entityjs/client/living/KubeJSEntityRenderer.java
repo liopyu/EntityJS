@@ -2,11 +2,14 @@ package net.liopyu.entityjs.client.living;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.client.living.model.CustomGeoRenderLayer;
 import net.liopyu.entityjs.client.living.model.EntityModelJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.liolib.renderer.GeoEntityRenderer;
+import net.liopyu.liolib.renderer.layer.GeoRenderLayer;
 import net.liopyu.liolib.util.RenderUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -21,6 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * The default implementation of GeckoLib's {@link GeoEntityRenderer} which delegates to the entity
@@ -33,6 +37,13 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     public KubeJSEntityRenderer(EntityRendererProvider.Context renderManager, BaseLivingEntityBuilder<T> builder) {
         super(renderManager, new EntityModelJS<>(builder));
         this.builder = builder;
+        addRenderLayer(new CustomGeoRenderLayer<>(this, builder));
+    }
+
+
+    @Override
+    public GeoEntityRenderer<T> addRenderLayer(GeoRenderLayer<T> renderLayer) {
+        return super.addRenderLayer(renderLayer);
     }
 
     @Override
@@ -53,6 +64,9 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     @Override
     public void render(T animatable, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        if (animatable.hurtTime > 0) {
+            ConsoleJS.STARTUP.info(getRenderLayers());
+        }
         if (builder.render != null) {
             final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
             builder.render.accept(context);

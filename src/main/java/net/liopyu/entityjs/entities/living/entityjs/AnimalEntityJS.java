@@ -5,6 +5,8 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
+import net.liopyu.entityjs.client.living.model.EntityModelJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -103,6 +105,7 @@ import java.util.Objects;
 public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttackMob {
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
+
     protected final AnimalEntityJSBuilder builder;
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
@@ -126,7 +129,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
     }
-
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -174,6 +176,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     public BaseLivingEntityBuilder<?> getBuilder() {
         return builder;
     }
+
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
