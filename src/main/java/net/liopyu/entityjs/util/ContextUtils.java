@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.liolib.cache.object.BakedGeoModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -32,6 +33,30 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
 
 public class ContextUtils {
+    public static class ScaleModelRenderContext<T extends LivingEntity> {
+        public final float widthScale;
+        public final float heightScale;
+        public final PoseStack poseStack;
+        public final T entity;
+        public final BakedGeoModel model;
+        public final boolean isReRender;
+        public final float partialTick;
+        public final int packedLight;
+        public final int packedOverlay;
+
+        public ScaleModelRenderContext(float widthScale, float heightScale, PoseStack poseStack, T entity, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
+            this.widthScale = widthScale;
+            this.heightScale = heightScale;
+            this.poseStack = poseStack;
+            this.entity = entity;
+            this.model = model;
+            this.isReRender = isReRender;
+            this.partialTick = partialTick;
+            this.packedLight = packedLight;
+            this.packedOverlay = packedOverlay;
+        }
+    }
+
     public static class EntitySpawnContext {
         public final LivingEntity livingEntity;
         public final ServerLevelAccessor level;

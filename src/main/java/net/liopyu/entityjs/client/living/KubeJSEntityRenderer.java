@@ -8,6 +8,7 @@ import net.liopyu.entityjs.client.living.model.CustomGeoRenderLayer;
 import net.liopyu.entityjs.client.living.model.EntityModelJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.liolib.cache.object.BakedGeoModel;
 import net.liopyu.liolib.renderer.GeoEntityRenderer;
 import net.liopyu.liolib.renderer.layer.GeoRenderLayer;
 import net.liopyu.liolib.util.RenderUtils;
@@ -37,12 +38,37 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     public KubeJSEntityRenderer(EntityRendererProvider.Context renderManager, BaseLivingEntityBuilder<T> builder) {
         super(renderManager, new EntityModelJS<>(builder));
         this.builder = builder;
+        this.scaleHeight = getScaleHeight();
+        this.scaleWidth = getScaleWidth();
+/*
         CustomGeoRenderLayer.Builder<T> renderLayerBuilder = new CustomGeoRenderLayer.Builder<>(this, builder);
+*/
 /*
         addRenderLayer(renderLayerBuilder.build());
 */
+/*
         addRenderLayer(new CustomGeoRenderLayer<>(this));
+*/
     }
+
+    public float getScaleHeight() {
+        return builder.scaleHeight;
+    }
+
+    public float getScaleWidth() {
+        return builder.scaleWidth;
+    }
+
+    /*@Override
+    public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
+        if (builder.scaleModelForRender != null) {
+            final ContextUtils.ScaleModelRenderContext<T> context = new ContextUtils.ScaleModelRenderContext<>(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+            builder.scaleModelForRender.accept(context);
+            super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+        } else
+            super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+
+    }*/
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
@@ -62,19 +88,16 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     @Override
     public void render(T animatable, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-        if (animatable.hurtTime > 0) {
+        /*if (animatable.hurtTime > 0) {
             ConsoleJS.STARTUP.info(getRenderLayers());
             RenderType renderType = this.getRenderType(animatable, new ResourceLocation("kubejs:textures/entity/sasuke.png"), bufferSource, partialTick);
             applyRenderLayers(poseStack, animatable, this.getGeoModel().getBakedModel(new ResourceLocation("kubejs:geo/entity/sasuke.geo.json")), renderType, bufferSource, bufferSource.getBuffer(renderType), partialTick, packedLight, getPackedOverlay(animatable, 1.0F));
-        }
+        }*/
         if (builder.render != null) {
             final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
             builder.render.accept(context);
             super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         } else {
-            if (animatable.isBaby()) {
-                poseStack.scale(0.5F, 0.5F, 0.5F);
-            }
             super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         }
     }

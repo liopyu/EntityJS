@@ -176,6 +176,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
     public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
+    public transient float scaleHeight;
+    public transient float scaleWidth;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -207,14 +209,30 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         defaultDeathPose = true;
         canSteer = true;
         mountJumpingEnabled = true;
+        scaleHeight = 1F;
+        scaleWidth = 1F;
     }
 
-    public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<CustomGeoRenderLayer.Builder<T>> consumer) {
+    /*public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<CustomGeoRenderLayer.Builder<T>> consumer) {
         CustomGeoRenderLayer.Builder<T> builder = new CustomGeoRenderLayer.Builder<>(null, this);
         consumer.accept(builder);
         return this;
     }
+*/
 
+    @Info(value = """
+            Sets the scale of the model.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.modelSize(2,2);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> modelSize(float scaleHeight, float scaleWidth) {
+        this.scaleHeight = scaleHeight;
+        this.scaleWidth = scaleWidth;
+        return this;
+    }
 
     @Info(value = """
             Function determining if the entity is allied with a potential target.
