@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 import javax.annotation.Nullable;
@@ -23,10 +24,30 @@ public class KubeJSNLEntityRenderer<T extends Entity & IAnimatableJSNL> extends 
     public KubeJSNLEntityRenderer(EntityRendererProvider.Context renderManager, BaseEntityBuilder<T> builder) {
         super(renderManager, new NonLivingEntityModel<>(builder));
         this.builder = builder;
+        this.scaleHeight = getScaleHeight();
+        this.scaleWidth = getScaleWidth();
     }
 
     public String entityName() {
         return this.animatable.getType().toString();
+    }
+
+    public float getScaleHeight() {
+        return builder.scaleHeight;
+    }
+
+    public float getScaleWidth() {
+        return builder.scaleWidth;
+    }
+
+    @Override
+    public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
+        if (builder.scaleModelForRender != null) {
+            final ContextUtils.ScaleModelRenderContextNL<T> context = new ContextUtils.ScaleModelRenderContextNL<>(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+            EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: scaleModelForRender.");
+            super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+        } else
+            super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
     }
 
     @Override
