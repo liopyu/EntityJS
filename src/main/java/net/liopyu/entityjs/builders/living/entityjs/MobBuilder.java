@@ -109,7 +109,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
                         
             Example usage:
             ```javascript
-            animalBuilder.removeWhenFarAway(context => {
+            mobBuilder.removeWhenFarAway(context => {
                 // Custom logic to determine if the entity should be removed when far away
                 // Return true if the entity should be removed based on the provided context.
             });
@@ -128,7 +128,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
                         
             Example usage:
             ```javascript
-            animalBuilder.ambientSoundInterval(100);
+            mobBuilder.ambientSoundInterval(100);
             ```
             """)
     public MobBuilder<T> ambientSoundInterval(int ambientSoundInterval) {
@@ -144,7 +144,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
                         
             Example usage:
             ```javascript
-            animalBuilder.myRidingOffset(entity => {
+            mobBuilder.myRidingOffset(entity => {
                 //Use the provided context about the entity to determine the riding offset of the passengers
                 return 5 //Some double value;
             })
