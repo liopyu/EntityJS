@@ -42,7 +42,7 @@ public class KubeJSNLEntityRenderer<T extends Entity & IAnimatableJSNL> extends 
 
     @Override
     public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
-        if (builder.scaleModelForRender != null) {
+        if (builder.scaleModelForRender != null && this.animatable != null) {
             final ContextUtils.ScaleModelRenderContextNL<T> context = new ContextUtils.ScaleModelRenderContextNL<>(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
             EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: scaleModelForRender.");
             super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
@@ -68,7 +68,7 @@ public class KubeJSNLEntityRenderer<T extends Entity & IAnimatableJSNL> extends 
     @Override
     public void render(T animatable, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-        if (builder.render != null) {
+        if (builder.render != null && this.animatable != null) {
             final ContextUtils.NLRenderContext<T> context = new ContextUtils.NLRenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
             EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");
             super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);

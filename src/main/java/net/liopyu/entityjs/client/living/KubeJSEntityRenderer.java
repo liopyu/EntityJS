@@ -66,7 +66,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
 
     @Override
     public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
-        if (builder.scaleModelForRender != null) {
+        if (builder.scaleModelForRender != null && this.animatable != null) {
             final ContextUtils.ScaleModelRenderContext<T> context = new ContextUtils.ScaleModelRenderContext<>(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
             EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: scaleModelForRender.");
             super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
@@ -97,7 +97,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
             RenderType renderType = this.getRenderType(animatable, new ResourceLocation("kubejs:textures/entity/sasuke.png"), bufferSource, partialTick);
             applyRenderLayers(poseStack, animatable, this.getGeoModel().getBakedModel(new ResourceLocation("kubejs:geo/entity/sasuke.geo.json")), renderType, bufferSource, bufferSource.getBuffer(renderType), partialTick, packedLight, getPackedOverlay(animatable, 1.0F));
         }*/
-        if (builder.render != null) {
+        if (builder.render != null && this.animatable != null) {
             final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
             EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");
             super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
