@@ -174,6 +174,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> tickDeath;
     public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
+    public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
+    public transient float scaleHeight;
+    public transient float scaleWidth;
+    public transient Consumer<ContextUtils.ScaleModelRenderContext<T>> scaleModelForRender;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -205,6 +209,57 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         defaultDeathPose = true;
         canSteer = true;
         mountJumpingEnabled = true;
+        scaleHeight = 1F;
+        scaleWidth = 1F;
+    }
+
+    @Info(value = """
+            Sets the scale of the model.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.modelSize(2,2);
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> modelSize(float scaleHeight, float scaleWidth) {
+        this.scaleHeight = scaleHeight;
+        this.scaleWidth = scaleWidth;
+        return this;
+    }
+
+    @Info(value = """
+            @param scaleModelForRender A Consumer to determing logic for model scaling and rendering
+                without affecting core logic such as hitbox sizing.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.scaleModelForRender(context => {
+                const { entity, widthScale, heightScale, poseStack, model, isReRender, partialTick, packedLight, packedOverlay } = context
+                if (entity.isBaby()) {
+                    poseStack.scale(0.5, 0.5, 0.5)
+                }
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> scaleModelForRender(Consumer<ContextUtils.ScaleModelRenderContext<T>> scaleModelForRender) {
+        this.scaleModelForRender = scaleModelForRender;
+        return this;
+    }
+
+    @Info(value = """
+            Function determining if the entity is allied with a potential target.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.isAlliedTo(context => {
+                const {entity, target} = context
+                return target.type == 'minecraft:blaze'
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> isAlliedTo(Function<ContextUtils.LineOfSightContext, Object> isAlliedTo) {
+        this.isAlliedTo = isAlliedTo;
+        return this;
     }
 
     @Info(value = """

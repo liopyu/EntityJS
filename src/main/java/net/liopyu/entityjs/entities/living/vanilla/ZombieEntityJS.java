@@ -84,6 +84,16 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
         this.navigation = this.createNavigation(pLevel);
     }
 
+    @Override
+    protected boolean isSunSensitive() {
+        return builder.isSunSensitive;
+    }
+
+    @Override
+    protected boolean convertsInWater() {
+        return builder.convertsInWater;
+    }
+
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
@@ -475,6 +485,17 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     }
 
     //(Base LivingEntity/Entity Overrides)
+    @Override
+    public boolean isAlliedTo(Entity pEntity) {
+        if (builder.isAlliedTo != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            Object obj = builder.isAlliedTo.apply(context);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
+        }
+        return super.isAlliedTo(pEntity);
+    }
+
     @Override
     public void travel(Vec3 pTravelVector) {
         LivingEntity livingentity = this.getControllingPassenger();

@@ -1,17 +1,20 @@
 package net.liopyu.entityjs.client.living;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.model.EntityModelJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -33,6 +36,30 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     public KubeJSEntityRenderer(EntityRendererProvider.Context renderManager, BaseLivingEntityBuilder<T> builder) {
         super(renderManager, new EntityModelJS<>(builder));
         this.builder = builder;
+        this.scaleHeight = getScaleHeight();
+        this.scaleWidth = getScaleWidth();
+    }
+
+    public String entityName() {
+        return this.animatable.getType().toString();
+    }
+
+    public float getScaleHeight() {
+        return builder.scaleHeight;
+    }
+
+    public float getScaleWidth() {
+        return builder.scaleWidth;
+    }
+
+    @Override
+    public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
+        if (builder.scaleModelForRender != null) {
+            final ContextUtils.ScaleModelRenderContext<T> context = new ContextUtils.ScaleModelRenderContext<>(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+            EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: scaleModelForRender.");
+            super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+        } else
+            super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
     }
 
     @Override
@@ -50,17 +77,16 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         };
     }
 
+
     @Override
     public void render(T animatable, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+
         if (builder.render != null) {
             final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
-            builder.render.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");
             super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         } else {
-            if (animatable.isBaby()) {
-                poseStack.scale(0.5F, 0.5F, 0.5F);
-            }
             super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         }
     }

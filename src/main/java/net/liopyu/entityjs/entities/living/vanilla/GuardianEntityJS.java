@@ -481,6 +481,17 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
 
     //(Base LivingEntity/Entity Overrides)
     @Override
+    public boolean isAlliedTo(Entity pEntity) {
+        if (builder.isAlliedTo != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            Object obj = builder.isAlliedTo.apply(context);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
+        }
+        return super.isAlliedTo(pEntity);
+    }
+
+    @Override
     public void travel(Vec3 pTravelVector) {
         LivingEntity livingentity = this.getControllingPassenger();
         if (this.isAlive() && this.isVehicle() && builder.canSteer && livingentity != null) {
