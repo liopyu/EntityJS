@@ -8,6 +8,7 @@ import net.liopyu.entityjs.client.living.model.CustomGeoRenderLayer;
 import net.liopyu.entityjs.client.living.model.EntityModelJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.liolib.cache.object.BakedGeoModel;
 import net.liopyu.liolib.renderer.GeoEntityRenderer;
 import net.liopyu.liolib.renderer.layer.GeoRenderLayer;
@@ -51,6 +52,10 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
 */
     }
 
+    public String entityName() {
+        return this.animatable.getType().toString();
+    }
+
     public float getScaleHeight() {
         return builder.scaleHeight;
     }
@@ -59,16 +64,15 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         return builder.scaleWidth;
     }
 
-    /*@Override
+    @Override
     public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
         if (builder.scaleModelForRender != null) {
             final ContextUtils.ScaleModelRenderContext<T> context = new ContextUtils.ScaleModelRenderContext<>(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
-            builder.scaleModelForRender.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: scaleModelForRender.");
             super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
         } else
             super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
-
-    }*/
+    }
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
@@ -95,7 +99,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         }*/
         if (builder.render != null) {
             final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
-            builder.render.accept(context);
+            EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");
             super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         } else {
             super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);

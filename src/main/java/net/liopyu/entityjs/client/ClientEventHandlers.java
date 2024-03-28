@@ -25,7 +25,7 @@ public class ClientEventHandlers {
         @SubscribeEvent
         public static void onKeyRegister(RegisterKeyMappingsEvent event) {
             event.register(ModKeybinds.mount_jump);
-            event.register(ModKeybinds.mount_inventory);
+            //event.register(ModKeybinds.mount_inventory);
         }
     }
 

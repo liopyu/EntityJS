@@ -178,6 +178,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
     public transient float scaleHeight;
     public transient float scaleWidth;
+    public transient Consumer<ContextUtils.ScaleModelRenderContext<T>> scaleModelForRender;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -219,6 +220,24 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 */
+    @Info(value = """
+            @param scaleModelForRender A Consumer to determing logic for model scaling and rendering
+                without affecting core logic such as hitbox sizing.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.scaleModelForRender(context => {
+                const { entity, widthScale, heightScale, poseStack, model, isReRender, partialTick, packedLight, packedOverlay } = context
+                if (entity.isBaby()) {
+                    poseStack.scale(0.5, 0.5, 0.5)
+                }
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> scaleModelForRender(Consumer<ContextUtils.ScaleModelRenderContext<T>> scaleModelForRender) {
+        this.scaleModelForRender = scaleModelForRender;
+        return this;
+    }
 
     @Info(value = """
             Sets the scale of the model.

@@ -46,12 +46,12 @@ public class ContainerTameableEntityJS extends TamableAnimal implements Containe
     @Override
     public void tick() {
         super.tick();
-        if (ModKeybinds.mount_inventory.consumeClick()) {
+        /*if (ModKeybinds.mount_inventory.consumeClick()) {
             Player player = Minecraft.getInstance().player;
             if (player != null && player.isPassenger() && player.getVehicle() == this) {
                 openCustomInventoryScreen(player);
             }
-        }
+        }*/
     }
 
     @Override
