@@ -96,6 +96,9 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient boolean fireImmune;
     public transient ResourceLocation[] immuneTo;
     public transient boolean spawnFarFromPlayer;
+    public transient float scaleHeight;
+    public transient float scaleWidth;
+    public transient Consumer<ContextUtils.ScaleModelRenderContextNL<T>> scaleModelForRender;
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
@@ -116,6 +119,39 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         modelResource = t -> newID("geo/entity/", ".geo.json");
         textureResource = t -> newID("textures/entity/", ".png");
         animationResource = t -> newID("animations/entity/", ".animation.json");
+        scaleHeight = 1F;
+        scaleWidth = 1F;
+    }
+
+    @Info(value = """
+            Sets the scale of the model.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.modelSize(2,2);
+            ```
+            """)
+    public BaseEntityBuilder<T> modelSize(float scaleHeight, float scaleWidth) {
+        this.scaleHeight = scaleHeight;
+        this.scaleWidth = scaleWidth;
+        return this;
+    }
+
+    @Info(value = """
+            @param scaleModelForRender A Consumer to determing logic for model scaling and rendering
+                without affecting core logic such as hitbox sizing.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.scaleModelForRender(context => {
+                const { entity, widthScale, heightScale, poseStack, model, isReRender, partialTick, packedLight, packedOverlay } = context
+                poseStack.scale(0.5, 0.5, 0.5)
+            });
+            ```
+            """)
+    public BaseEntityBuilder<T> scaleModelForRender(Consumer<ContextUtils.ScaleModelRenderContextNL<T>> scaleModelForRender) {
+        this.scaleModelForRender = scaleModelForRender;
+        return this;
     }
 
     @Info(value = """
