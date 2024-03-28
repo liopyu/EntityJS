@@ -95,7 +95,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     private static final UniformInt PERSISTENT_ANGER_TIME;
     @javax.annotation.Nullable
     private UUID persistentAngerTarget;
-    protected PathNavigation navigation;
+
 
     static {
         DATA_INTERESTED_ID = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.BOOLEAN);
@@ -104,6 +104,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     }
 
     private final PartEntityJS<?>[] partEntities;
+    protected PathNavigation navigation;
 
     public TameableMobJS(TameableMobJSBuilder builder, EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);

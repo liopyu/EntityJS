@@ -176,7 +176,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
     public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
-    public final List<CustomGeoRenderLayer<T>> renderLayers = new ArrayList<>();
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -210,16 +209,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mountJumpingEnabled = true;
     }
 
-    private GeoEntityRenderer<T> renderer;
-
-    public GeoEntityRenderer<T> getRenderer() {
-        return renderer;
-    }
-
     public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<CustomGeoRenderLayer.Builder<T>> consumer) {
-        CustomGeoRenderLayer.Builder<T> builder = new CustomGeoRenderLayer.Builder<>(this);
+        CustomGeoRenderLayer.Builder<T> builder = new CustomGeoRenderLayer.Builder<>(null, this);
         consumer.accept(builder);
-        this.renderLayers.add(builder.build(renderer));
         return this;
     }
 

@@ -17,18 +17,25 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class CustomGeoRenderLayer<T extends LivingEntity & IAnimatableJS> extends GeoRenderLayer<T> {
 
-    public final BaseLivingEntityBuilder<T> parent;
+    /*
+        public final BaseLivingEntityBuilder<T> parent;
+    */
     public transient Function<T, ResourceLocation> textureResource;
     public final KubeJSEntityRenderer<T> renderer;
+/*
+    public final CustomGeoRenderLayer.Builder<T> renderBuilder;
+*/
 
-    public CustomGeoRenderLayer(GeoRenderer<T> renderer, BaseLivingEntityBuilder<T> parent) {
+    public CustomGeoRenderLayer(KubeJSEntityRenderer<T> renderer) {
         super(renderer);
-        this.parent = parent;
-        this.renderer = (KubeJSEntityRenderer<T>) renderer;
+        /*this.parent = parent;
+        this.renderBuilder = renderBuilder;*/
+        this.renderer = renderer;
         textureResource = t -> new ResourceLocation("kubejs:textures/entity/sasuke.png");
     }
 
@@ -37,10 +44,10 @@ public class CustomGeoRenderLayer<T extends LivingEntity & IAnimatableJS> extend
         return this.renderer.getGeoModel();
     }
 
-    @Override
+    /*@Override
     protected ResourceLocation getTextureResource(T animatable) {
-        return new ResourceLocation("kubejs:textures/entity/sasuke.png");
-    }
+        return renderBuilder.textureResource.apply(animatable);
+    }*/
 
 
     @Override
@@ -53,9 +60,11 @@ public class CustomGeoRenderLayer<T extends LivingEntity & IAnimatableJS> extend
     public static class Builder<T extends LivingEntity & IAnimatableJS> {
         private final BaseLivingEntityBuilder<T> parent;
         public transient Function<T, ResourceLocation> textureResource;
+        public final KubeJSEntityRenderer<T> renderer;
 
-        public Builder(BaseLivingEntityBuilder<T> parent) {
+        public Builder(KubeJSEntityRenderer<T> renderer, BaseLivingEntityBuilder<T> parent) {
             this.parent = parent;
+            this.renderer = renderer;
         }
 
         public Builder<T> textureResource(Function<T, ResourceLocation> textureResource) {
@@ -63,9 +72,9 @@ public class CustomGeoRenderLayer<T extends LivingEntity & IAnimatableJS> extend
             return this;
         }
 
-        public CustomGeoRenderLayer<T> build(GeoRenderer<T> renderer) {
-            return new CustomGeoRenderLayer<>(renderer, parent);
-        }
+       /* public CustomGeoRenderLayer<T> build() {
+            return new CustomGeoRenderLayer<>(renderer, parent, this);
+        }*/
     }
 }
 

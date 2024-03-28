@@ -37,13 +37,11 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     public KubeJSEntityRenderer(EntityRendererProvider.Context renderManager, BaseLivingEntityBuilder<T> builder) {
         super(renderManager, new EntityModelJS<>(builder));
         this.builder = builder;
-        addRenderLayer(new CustomGeoRenderLayer<>(this, builder));
-    }
-
-
-    @Override
-    public GeoEntityRenderer<T> addRenderLayer(GeoRenderLayer<T> renderLayer) {
-        return super.addRenderLayer(renderLayer);
+        CustomGeoRenderLayer.Builder<T> renderLayerBuilder = new CustomGeoRenderLayer.Builder<>(this, builder);
+/*
+        addRenderLayer(renderLayerBuilder.build());
+*/
+        addRenderLayer(new CustomGeoRenderLayer<>(this));
     }
 
     @Override
@@ -66,6 +64,8 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         if (animatable.hurtTime > 0) {
             ConsoleJS.STARTUP.info(getRenderLayers());
+            RenderType renderType = this.getRenderType(animatable, new ResourceLocation("kubejs:textures/entity/sasuke.png"), bufferSource, partialTick);
+            applyRenderLayers(poseStack, animatable, this.getGeoModel().getBakedModel(new ResourceLocation("kubejs:geo/entity/sasuke.geo.json")), renderType, bufferSource, bufferSource.getBuffer(renderType), partialTick, packedLight, getPackedOverlay(animatable, 1.0F));
         }
         if (builder.render != null) {
             final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
