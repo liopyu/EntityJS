@@ -10,7 +10,8 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
-import net.liopyu.entityjs.client.living.model.CustomGeoRenderLayer;
+import net.liopyu.entityjs.client.living.model.GeoLayerJS;
+import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
@@ -29,6 +30,8 @@ import net.liopyu.liolib.core.keyframe.event.data.KeyFrameData;
 import net.liopyu.liolib.core.object.DataTicket;
 import net.liopyu.liolib.core.object.PlayState;
 import net.liopyu.liolib.renderer.GeoEntityRenderer;
+import net.liopyu.liolib.renderer.GeoRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.random.Weight;
 import net.minecraft.world.entity.*;
@@ -179,6 +182,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient float scaleHeight;
     public transient float scaleWidth;
     public transient Consumer<ContextUtils.ScaleModelRenderContext<T>> scaleModelForRender;
+    private GeoLayerJSBuilder<T> layerBuilder;
+    //private GeoRenderer<T> renderer;
+    public final List<GeoLayerJSBuilder<T>> layerList = new ArrayList<>();
+    public GeoRenderer<T> renderer;
+    public T entity;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -220,6 +228,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 */
+    public T getEntity() {
+        return entity;
+    }
+
+    public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
+        GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(renderer, this);
+        builderConsumer.accept(layerBuild);
+        layerList.add(new GeoLayerJSBuilder<>(renderer, this));
+        return this;
+    }
+
     @Info(value = """
             @param scaleModelForRender A Consumer to determing logic for model scaling and rendering
                 without affecting core logic such as hitbox sizing.

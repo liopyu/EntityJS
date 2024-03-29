@@ -2,16 +2,15 @@ package net.liopyu.entityjs.client.living;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.client.living.model.CustomGeoRenderLayer;
 import net.liopyu.entityjs.client.living.model.EntityModelJS;
+import net.liopyu.entityjs.client.living.model.GeoLayerJS;
+import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.liolib.cache.object.BakedGeoModel;
 import net.liopyu.liolib.renderer.GeoEntityRenderer;
-import net.liopyu.liolib.renderer.layer.GeoRenderLayer;
 import net.liopyu.liolib.util.RenderUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -26,7 +25,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * The default implementation of GeckoLib's {@link GeoEntityRenderer} which delegates to the entity
@@ -41,15 +39,10 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         this.builder = builder;
         this.scaleHeight = getScaleHeight();
         this.scaleWidth = getScaleWidth();
-/*
-        CustomGeoRenderLayer.Builder<T> renderLayerBuilder = new CustomGeoRenderLayer.Builder<>(this, builder);
-*/
-/*
-        addRenderLayer(renderLayerBuilder.build());
-*/
-/*
-        addRenderLayer(new CustomGeoRenderLayer<>(this));
-*/
+        for (GeoLayerJSBuilder<T> params : builder.layerList) {
+            GeoLayerJS<T> layerPart = new GeoLayerJS<>(this, params, builder);
+            addRenderLayer(layerPart);
+        }
     }
 
     public String entityName() {
@@ -92,11 +85,6 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     @Override
     public void render(T animatable, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-        /*if (animatable.hurtTime > 0) {
-            ConsoleJS.STARTUP.info(getRenderLayers());
-            RenderType renderType = this.getRenderType(animatable, new ResourceLocation("kubejs:textures/entity/sasuke.png"), bufferSource, partialTick);
-            applyRenderLayers(poseStack, animatable, this.getGeoModel().getBakedModel(new ResourceLocation("kubejs:geo/entity/sasuke.geo.json")), renderType, bufferSource, bufferSource.getBuffer(renderType), partialTick, packedLight, getPackedOverlay(animatable, 1.0F));
-        }*/
         if (builder.render != null && this.animatable != null) {
             final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
             EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");

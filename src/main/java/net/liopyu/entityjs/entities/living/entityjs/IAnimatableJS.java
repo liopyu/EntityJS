@@ -3,6 +3,7 @@ package net.liopyu.entityjs.entities.living.entityjs;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
+import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.BaseLivingEntityJS;
 import net.liopyu.liolib.animatable.GeoEntity;
@@ -11,6 +12,7 @@ import net.liopyu.liolib.core.animation.AnimatableManager;
 import net.liopyu.liolib.network.GeckoLibNetwork;
 import net.liopyu.liolib.network.packet.AnimTriggerPacket;
 import net.liopyu.liolib.network.packet.EntityAnimTriggerPacket;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.Registry;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -34,8 +36,7 @@ public interface IAnimatableJS extends GeoAnimatable, GeoEntity {
      */
     BaseLivingEntityBuilder<?> getBuilder();
 
-    //KubeJSEntityRenderer<?> getRenderer();
-
+    // EntityRendererProvider.Context getContext();
 
     /**
      * Note for implementors: by default this casts {@code this} to {@code <E extends LivingEntity & IAnimatableJS>},

@@ -128,6 +128,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
+
     }
 
     // Part Entity Logical Overrides --------------------------------
