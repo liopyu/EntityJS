@@ -10,6 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
 import java.util.HashSet;
@@ -31,6 +32,7 @@ public class EntityJSMod {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ClientEventHandlers.init();
         }
+
     }
 
 

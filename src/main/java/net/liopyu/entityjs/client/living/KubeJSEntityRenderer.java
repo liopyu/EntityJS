@@ -39,10 +39,11 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         this.builder = builder;
         this.scaleHeight = getScaleHeight();
         this.scaleWidth = getScaleWidth();
-        for (GeoLayerJSBuilder<T> params : builder.layerList) {
-            GeoLayerJS<T> layerPart = new GeoLayerJS<>(this, params, builder);
+        for (GeoLayerJSBuilder<T> geoBuilder : builder.layerList) {
+            GeoLayerJS<T> layerPart = geoBuilder.build(this, builder);
             addRenderLayer(layerPart);
         }
+
     }
 
     public String entityName() {

@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.client.living.model;
 
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
@@ -13,15 +14,21 @@ import net.minecraft.world.entity.LivingEntity;
 import java.util.function.Function;
 
 public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
-    public transient Function<T, Object> textureResource;
-    public final GeoRenderer<T> renderer;
-    public final T animatable;
+    public transient ResourceLocation texture;
+    public BaseLivingEntityBuilder<T> builder;
 
-    public GeoLayerJSBuilder(GeoRenderer<T> renderer, BaseLivingEntityBuilder<T> builder) {
-        this.renderer = renderer;
-        this.animatable = builder.getEntity();
+    public GeoLayerJSBuilder(BaseLivingEntityBuilder<T> builder) {
+        this.builder = builder;
+        //this.textureResource = t -> new ResourceLocation("kubejs:textures/entity/wyrm.png");
     }
 
+    public GeoLayerJS<T> build(KubeJSEntityRenderer<T> entityRendererIn, BaseLivingEntityBuilder<T> builder) {
+        return new GeoLayerJS<>(entityRendererIn, this, builder);
+    }
+
+    public BaseLivingEntityBuilder<T> getBuilder() {
+        return builder;
+    }
 
     @Info(value = """
             Sets a function to determine the texture resource for the entity.
@@ -38,18 +45,8 @@ public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
             });
             ```
             """)
-    public GeoLayerJSBuilder<T> textureResource(Function<T, Object> function) {
-        textureResource = entity -> {
-            Object obj = function.apply(entity);
-            if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
-            } else if (obj instanceof ResourceLocation) {
-                return (ResourceLocation) obj;
-            } else {
-                EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource: " + obj + "Defaulting to " + entity.getBuilder().newID("textures/entity/", ".png"));
-                return entity.getBuilder().newID("textures/entity/", ".png");
-            }
-        };
+    public GeoLayerJSBuilder<T> texture(ResourceLocation function) {
+        texture = function;
         return this;
     }
 }

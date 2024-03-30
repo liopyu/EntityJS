@@ -182,11 +182,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient float scaleHeight;
     public transient float scaleWidth;
     public transient Consumer<ContextUtils.ScaleModelRenderContext<T>> scaleModelForRender;
-    private GeoLayerJSBuilder<T> layerBuilder;
-    //private GeoRenderer<T> renderer;
     public final List<GeoLayerJSBuilder<T>> layerList = new ArrayList<>();
-    public GeoRenderer<T> renderer;
-    public T entity;
+    public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -228,14 +225,35 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 */
-    public T getEntity() {
-        return entity;
-    }
+
 
     public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
-        GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(renderer, this);
+        GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
         builderConsumer.accept(layerBuild);
-        layerList.add(new GeoLayerJSBuilder<>(renderer, this));
+        layerList.add(new GeoLayerJSBuilder<>(this));
+        return this;
+    }
+
+    @Info(value = """
+            Adds an extra hitbox to the mob. Aka part-entities.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.addPartEntity("head", 1, 2, builder => {
+                // Can also be null
+                builder.isPickable(true)
+            });
+            ```
+            """, params = {
+            @Param(name = "name", value = "The name of the part"),
+            @Param(name = "width", value = "The width of the part"),
+            @Param(name = "height", value = "The height of the part"),
+            @Param(name = "builderConsumer", value = "The builder for the part, very similar to the normal builder callbacks")
+    })
+    public BaseLivingEntityBuilder<T> addPartEntity(String name, float width, float height, Consumer<PartBuilder<T>> builderConsumer) {
+        PartBuilder<T> partBuilder = new PartBuilder<>();
+        builderConsumer.accept(partBuilder);
+        partEntityParamsList.add(new ContextUtils.PartEntityParams<>(name, width, height, partBuilder));
         return this;
     }
 
@@ -288,28 +306,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = """
-            Adds an extra hitbox to the mob. Aka part-entities.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.addPartEntity("head", 1, 2, builder => {
-                // Can also be null
-                builder.isPickable(true)
-            });
-            ``` 
-            """, params = {
-            @Param(name = "name", value = "The name of the part"),
-            @Param(name = "width", value = "The width of the part"),
-            @Param(name = "height", value = "The height of the part"),
-            @Param(name = "builderConsumer", value = "The builder for the part, very similar to the normal builder callbacks")
-    })
-    public BaseLivingEntityBuilder<T> addPartEntity(String name, float width, float height, Consumer<PartBuilder<T>> builderConsumer) {
-        PartBuilder<T> partBuilder = new PartBuilder<>();
-        builderConsumer.accept(partBuilder);
-        partEntityParamsList.add(new ContextUtils.PartEntityParams<>(name, width, height, partBuilder));
-        return this;
-    }
 
     @Info(value = """
             Consumer overriding the tickDeath responsible to counting down

@@ -16,8 +16,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRenderLayer<T> {
+    public T entity;
     public final GeoLayerJSBuilder<T> geoBuilder;
     public final KubeJSEntityRenderer<T> renderer;
     public final BaseLivingEntityBuilder<T> builder;
@@ -29,18 +31,17 @@ public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRende
         this.builder = builder;
     }
 
-    public GeoLayerJSBuilder<?> getLayerBuilder() {
-        return geoBuilder;
-    }
-
     public ResourceLocation getLocation(T object) {
-        if (this.builder.textureResource == null) {
-            ConsoleJS.STARTUP.info("this.builder.textureResource is null" + builder.getEntity());
-            return new ResourceLocation(KubeJS.MOD_ID, "textures/entity/wyrm.png");
+        /*if (geoBuilder.texture != null) {
+            return geoBuilder.texture;
         }
-        return (ResourceLocation) builder.textureResource.apply(object);
+        if (geoBuilder.getBuilder() != null) {
+            ConsoleJS.STARTUP.info(geoBuilder.getBuilder());
+        }*/
+        return new ResourceLocation(KubeJS.MOD_ID, "textures/entity/wyrm.png");
     }
 
+    //new ResourceLocation(KubeJS.MOD_ID, "textures/entity/wyrm.png");
     //new ResourceLocation(KubeJS.MOD_ID, "textures/entity/sasuke.png");
     @Override
     public void render(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, RenderType renderType,
