@@ -10,8 +10,10 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class EntityJSHelperClass {
     public static final Set<String> errorMessagesLogged = new HashSet<>();
@@ -20,6 +22,13 @@ public class EntityJSHelperClass {
     public static void logErrorMessageOnce(String errorMessage) {
         if (!errorMessagesLogged.contains(errorMessage)) {
             ConsoleJS.STARTUP.error(errorMessage);
+            errorMessagesLogged.add(errorMessage);
+        }
+    }
+
+    public static void logErrorMessageOnceCatchable(String errorMessage, Throwable e) {
+        if (!errorMessagesLogged.contains(errorMessage)) {
+            ConsoleJS.STARTUP.error(errorMessage, e);
             errorMessagesLogged.add(errorMessage);
         }
     }
@@ -35,11 +44,12 @@ public class EntityJSHelperClass {
         try {
             consumer.accept(value);
         } catch (Throwable e) {
-            ConsoleJS.STARTUP.error(errorMessage, e);
+            logErrorMessageOnceCatchable(errorMessage, e);
             return false;
         }
         return true;
     }
+
 
     public static Object convertObjectToDesired(Object input, String outputType) {
         return switch (outputType.toLowerCase()) {

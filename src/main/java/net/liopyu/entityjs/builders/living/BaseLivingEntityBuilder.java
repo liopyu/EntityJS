@@ -219,14 +219,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         scaleWidth = 1F;
     }
 
-    /*public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<CustomGeoRenderLayer.Builder<T>> consumer) {
-        CustomGeoRenderLayer.Builder<T> builder = new CustomGeoRenderLayer.Builder<>(null, this);
-        consumer.accept(builder);
-        return this;
-    }
-*/
-
-
+    @Info(value = """
+            Adds an extra render layer to the mob.
+            @param newGeoLayer The builder Consumer for the new render layer.
+                            
+                Example usage:
+                ```javascript
+                entityBuilder.newGeoLayer(builder => {
+                    builder.texture(entity => {
+                        return "kubejs:textures/entity/sasuke.png"
+                    })
+                });
+                ```
+            """)
     public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
         GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
         builderConsumer.accept(layerBuild);
@@ -236,8 +241,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Adds an extra hitbox to the mob. Aka part-entities.
+            Vanilla ticks extra hitboxes(for example the ender dragon's) with the
+            .tickPart method which specifies which hitbox to move to the entity and
+            its offset. This method is available off of the parent entity anywhere
+            including non EntityJS callbacks. (Usually used in the entity's aiStep method)
+            For example: `entity.tickPart("head", 0, 1, 0)`
                         
-            Example usage:
+            Creation of the hitbox:
             ```javascript
             entityBuilder.addPartEntity("head", 1, 2, builder => {
                 // Can also be null
@@ -782,7 +792,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                EntityJSHelperClass.logWarningMessageOnce("Invalid model resource: " + obj + "Defaulting to " + entity.getBuilder().newID("geo/entity/", ".geo.json"));
+                EntityJSHelperClass.logWarningMessageOnce("Invalid model resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("geo/entity/", ".geo.json"));
                 return entity.getBuilder().newID("geo/entity/", ".geo.json");
             }
         };
@@ -813,7 +823,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource: " + obj + "Defaulting to " + entity.getBuilder().newID("textures/entity/", ".png"));
+                EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("textures/entity/", ".png"));
                 return entity.getBuilder().newID("textures/entity/", ".png");
             }
         };

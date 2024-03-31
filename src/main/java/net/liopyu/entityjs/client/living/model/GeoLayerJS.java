@@ -2,21 +2,19 @@ package net.liopyu.entityjs.client.living.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.latvian.mods.kubejs.KubeJS;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.liolib.cache.object.BakedGeoModel;
-import net.liopyu.liolib.core.animatable.GeoAnimatable;
-import net.liopyu.liolib.renderer.GeoRenderer;
 import net.liopyu.liolib.renderer.layer.GeoRenderLayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.function.Function;
 
 public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRenderLayer<T> {
     public T entity;
@@ -32,20 +30,21 @@ public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRende
         //this.entity = entityRendererIn.getAnimatable();
     }
 
-    public ResourceLocation getLocation(T object) {
-        if (geoBuilder.texture != null) {
-            return geoBuilder.texture;
+    @Override
+    protected ResourceLocation getTextureResource(T animatable) {
+        if (geoBuilder.textureResource != null) {
+            Object obj = geoBuilder.textureResource.apply(animatable);
+            if (obj instanceof ResourceLocation r) return r;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for textureResource in newGeoLayer builder. Value: " + obj + ". Must be a ResourceLocation. Defaulting to " + super.getTextureResource(animatable));
         }
-        return new ResourceLocation(KubeJS.MOD_ID, "textures/entity/wyrm.png");
+        return super.getTextureResource(animatable);
     }
 
-    //new ResourceLocation(KubeJS.MOD_ID, "textures/entity/wyrm.png");
-    //new ResourceLocation(KubeJS.MOD_ID, "textures/entity/sasuke.png");
     @Override
     public void render(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, RenderType renderType,
                        MultiBufferSource bufferSource, VertexConsumer buffer, float partialTicks,
                        int packedLightIn, int packedOverlay) {
-        RenderType renderLayer = RenderType.entityCutoutNoCull(getLocation(animatable));
+        RenderType renderLayer = RenderType.entityCutoutNoCull(getTextureResource(animatable));
         getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, packedLightIn, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
     }
 }
