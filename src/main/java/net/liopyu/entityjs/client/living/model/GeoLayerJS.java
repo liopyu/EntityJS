@@ -29,15 +29,13 @@ public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRende
         this.geoBuilder = geoBuilder;
         this.renderer = entityRendererIn;
         this.builder = builder;
+        //this.entity = entityRendererIn.getAnimatable();
     }
 
     public ResourceLocation getLocation(T object) {
-        /*if (geoBuilder.texture != null) {
+        if (geoBuilder.texture != null) {
             return geoBuilder.texture;
         }
-        if (geoBuilder.getBuilder() != null) {
-            ConsoleJS.STARTUP.info(geoBuilder.getBuilder());
-        }*/
         return new ResourceLocation(KubeJS.MOD_ID, "textures/entity/wyrm.png");
     }
 

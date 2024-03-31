@@ -230,7 +230,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
         GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
         builderConsumer.accept(layerBuild);
-        layerList.add(new GeoLayerJSBuilder<>(this));
+        layerList.add(layerBuild);
         return this;
     }
 

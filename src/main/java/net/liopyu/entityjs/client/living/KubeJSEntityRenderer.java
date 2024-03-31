@@ -2,6 +2,7 @@ package net.liopyu.entityjs.client.living;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.model.EntityModelJS;
 import net.liopyu.entityjs.client.living.model.GeoLayerJS;
@@ -43,7 +44,6 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
             GeoLayerJS<T> layerPart = geoBuilder.build(this, builder);
             addRenderLayer(layerPart);
         }
-
     }
 
     public String entityName() {

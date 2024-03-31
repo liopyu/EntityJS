@@ -30,23 +30,9 @@ public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
         return builder;
     }
 
-    @Info(value = """
-            Sets a function to determine the texture resource for the entity.
-            The provided Function accepts a parameter of type T (the entity),
-            allowing changing the texture based on information about the entity.
-            The default behavior returns <namespace>:textures/entity/<path>.png.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.textureResource(entity => {
-                // Define logic to determine the texture resource for the entity
-                // Use information about the entity provided by the context.
-                return "kubejs:textures/entity/wyrm.png" // Some ResourceLocation representing the texture resource;
-            });
-            ```
-            """)
-    public GeoLayerJSBuilder<T> texture(ResourceLocation function) {
-        texture = function;
+
+    public GeoLayerJSBuilder<T> texture(ResourceLocation r) {
+        texture = r;
         return this;
     }
 }
