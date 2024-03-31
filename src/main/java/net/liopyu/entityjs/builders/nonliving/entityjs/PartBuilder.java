@@ -59,6 +59,14 @@ public class PartBuilder<T extends LivingEntity> {
         this.isAttackable = t -> true;
     }
 
+    @Info(value = """
+            Boolean determining if the part entity is pickable.
+                                                
+            Example usage:
+            ```javascript
+            entityBuilder.isPickable(true)
+            ```
+            """)
     public PartBuilder<T> isPickable(boolean isPickable) {
         this.isPickable = isPickable;
         return this;
