@@ -9,6 +9,7 @@ import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
+import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
@@ -178,6 +179,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient float scaleHeight;
     public transient float scaleWidth;
     public transient Consumer<ContextUtils.ScaleModelRenderContext<T>> scaleModelForRender;
+    public final List<GeoLayerJSBuilder<T>> layerList = new ArrayList<>();
+    public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -211,6 +214,54 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mountJumpingEnabled = true;
         scaleHeight = 1F;
         scaleWidth = 1F;
+    }
+
+    @Info(value = """
+            Adds an extra render layer to the mob.
+            @param newGeoLayer The builder Consumer for the new render layer.
+                            
+                Example usage:
+                ```javascript
+                entityBuilder.newGeoLayer(builder => {
+                    builder.texture(entity => {
+                        return "kubejs:textures/entity/sasuke.png"
+                    })
+                });
+                ```
+            """)
+    public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
+        GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
+        builderConsumer.accept(layerBuild);
+        layerList.add(layerBuild);
+        return this;
+    }
+
+    @Info(value = """
+            Adds an extra hitbox to the mob. Aka part-entities.
+            Vanilla ticks extra hitboxes(for example the ender dragon's) with the
+            .tickPart method which specifies which hitbox to move to the entity and
+            its offset. This method is available off of the parent entity anywhere
+            including non EntityJS callbacks. (Usually used in the entity's aiStep method)
+            For example: `entity.tickPart("head", 0, 1, 0)`
+                        
+            Creation of the hitbox:
+            ```javascript
+            entityBuilder.addPartEntity("head", 1, 2, builder => {
+                // Can also be null
+                builder.isPickable(true)
+            });
+            ```
+            """, params = {
+            @Param(name = "name", value = "The name of the part"),
+            @Param(name = "width", value = "The width of the part"),
+            @Param(name = "height", value = "The height of the part"),
+            @Param(name = "builderConsumer", value = "The builder for the part, very similar to the normal builder callbacks")
+    })
+    public BaseLivingEntityBuilder<T> addPartEntity(String name, float width, float height, Consumer<PartBuilder<T>> builderConsumer) {
+        PartBuilder<T> partBuilder = new PartBuilder<>();
+        builderConsumer.accept(partBuilder);
+        partEntityParamsList.add(new ContextUtils.PartEntityParams<>(name, width, height, partBuilder));
+        return this;
     }
 
     @Info(value = """
@@ -275,29 +326,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> onHurtTarget(Consumer<ContextUtils.LineOfSightContext> onHurtTarget) {
         this.onHurtTarget = onHurtTarget;
-        return this;
-    }
-
-    @Info(value = """
-            Adds an extra hitbox to the mob. Aka part-entities.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.addPartEntity("head", 1, 2, builder => {
-                // Can also be null
-                builder.isPickable(true)
-            });
-            ``` 
-            """, params = {
-            @Param(name = "name", value = "The name of the part"),
-            @Param(name = "width", value = "The width of the part"),
-            @Param(name = "height", value = "The height of the part"),
-            @Param(name = "builderConsumer", value = "The builder for the part, very similar to the normal builder callbacks")
-    })
-    public BaseLivingEntityBuilder<T> addPartEntity(String name, float width, float height, Consumer<PartBuilder<T>> builderConsumer) {
-        PartBuilder<T> partBuilder = new PartBuilder<>();
-        builderConsumer.accept(partBuilder);
-        partEntityParamsList.add(new ContextUtils.PartEntityParams<>(name, width, height, partBuilder));
         return this;
     }
 
@@ -775,7 +803,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                EntityJSHelperClass.logWarningMessageOnce("Invalid model resource: " + obj + "Defaulting to " + entity.getBuilder().newID("geo/entity/", ".geo.json"));
+                EntityJSHelperClass.logWarningMessageOnce("Invalid model resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("geo/entity/", ".geo.json"));
                 return entity.getBuilder().newID("geo/entity/", ".geo.json");
             }
         };
@@ -806,7 +834,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
-                EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource: " + obj + "Defaulting to " + entity.getBuilder().newID("textures/entity/", ".png"));
+                EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("textures/entity/", ".png"));
                 return entity.getBuilder().newID("textures/entity/", ".png");
             }
         };

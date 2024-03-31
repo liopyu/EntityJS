@@ -31,11 +31,18 @@ public class EntityJSHelperClass {
         }
     }
 
+    public static void logErrorMessageOnceCatchable(String errorMessage, Throwable e) {
+        if (!errorMessagesLogged.contains(errorMessage)) {
+            ConsoleJS.STARTUP.error(errorMessage, e);
+            errorMessagesLogged.add(errorMessage);
+        }
+    }
+
     public static <T> boolean consumerCallback(Consumer<T> consumer, T value, String errorMessage) {
         try {
             consumer.accept(value);
         } catch (Throwable e) {
-            ConsoleJS.STARTUP.error(errorMessage, e);
+            logErrorMessageOnceCatchable(errorMessage, e);
             return false;
         }
         return true;

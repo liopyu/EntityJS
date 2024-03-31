@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.model.EntityModelJS;
+import net.liopyu.entityjs.client.living.model.GeoLayerJS;
+import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -38,6 +40,10 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         this.builder = builder;
         this.scaleHeight = getScaleHeight();
         this.scaleWidth = getScaleWidth();
+        for (GeoLayerJSBuilder<T> geoBuilder : builder.layerList) {
+            GeoLayerJS<T> layerPart = geoBuilder.build(this, builder);
+            addRenderLayer(layerPart);
+        }
     }
 
     public String entityName() {
