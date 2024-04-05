@@ -223,7 +223,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 Example usage:
                 ```javascript
                 entityBuilder.newGeoLayer(builder => {
-                    builder.texture(entity => {
+                    builder.textureResource(entity => {
                         return "kubejs:textures/entity/sasuke.png"
                     })
                 });
