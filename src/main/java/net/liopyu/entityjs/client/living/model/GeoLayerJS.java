@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.liolib.cache.object.BakedGeoModel;
 import net.liopyu.liolib.renderer.layer.GeoRenderLayer;
@@ -27,7 +28,6 @@ public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRende
         this.geoBuilder = geoBuilder;
         this.renderer = entityRendererIn;
         this.builder = builder;
-        //this.entity = entityRendererIn.getAnimatable();
     }
 
     @Override
@@ -38,6 +38,17 @@ public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRende
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for textureResource in newGeoLayer builder. Value: " + obj + ". Must be a ResourceLocation. Defaulting to " + super.getTextureResource(animatable));
         }
         return super.getTextureResource(animatable);
+    }
+
+    @Override
+    public void preRender(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
+        if (builder.render != null && this.animatable != null) {
+            final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+            EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");
+            super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+        } else {
+            super.preRender(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
+        }
     }
 
     @Override
