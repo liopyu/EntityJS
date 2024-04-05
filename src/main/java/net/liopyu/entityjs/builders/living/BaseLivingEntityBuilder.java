@@ -335,7 +335,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                         
             Example usage:
             ```javascript
-            entityBuilder.deathTick(entity => {
+            entityBuilder.tickDeath(entity => {
                 // Override the tickDeath method in the entity
             });
             ```
