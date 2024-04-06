@@ -17,6 +17,7 @@ public class NonAnimatableEntityTypeBuilder<B extends Entity> {
         var js = this.builder;
         var builder = EntityType.Builder.of(js.factory(), js.mobCategory);
         builder
+
                 .sized(js.width, js.height)
                 .clientTrackingRange(js.clientTrackingRange)
                 .updateInterval(js.updateInterval);
@@ -39,6 +40,7 @@ public class NonAnimatableEntityTypeBuilder<B extends Entity> {
         if (!js.summonable) {
             builder.noSummon();
         }
+
         return UtilsJS.cast(builder.build(js.id.toString())); // If this fails, uh... do better?
     }
 
