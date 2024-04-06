@@ -86,6 +86,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         updateInterval = 1;
         mobCategory = MobCategory.MISC;
         isAttackable = true;
+        isPushable = false;
     }
 
     @Info(value = """
