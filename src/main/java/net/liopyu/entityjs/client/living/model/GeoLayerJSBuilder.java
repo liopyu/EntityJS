@@ -54,6 +54,9 @@ public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
 
     @Info(value = """
             Defines logic to render the newGeoLayer.
+            By default this will render the flat texture set in textureResource
+            onto the entity as an overlay. This method overrides the render method completely
+            allowing scripters to define their own render logic.
                         
             Example usage:
             ```javascript
