@@ -135,6 +135,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
+        if (builder == null) return;
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
