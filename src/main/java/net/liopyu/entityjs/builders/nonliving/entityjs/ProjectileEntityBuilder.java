@@ -31,7 +31,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
     public transient Float vX;
     public transient Float vY;
     public transient Float vZ;
-    public transient Consumer<Projectile> onEntityCollision;
+    public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
 
     public ProjectileEntityBuilder(ResourceLocation i) {
         super(i);
@@ -121,17 +121,17 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
     //Projectile Overrides
     @Info(value = """
             Sets a callback function to be executed when the projectile
-            calculates whether or not it can collide with an entity.
-            Does not decide whether or not the projectile can collide with an entity.
+            collides with an entity.
                         
             Example usage:
             ```javascript
-            projectileBuilder.onEntityCollision(entity => {
+            arrowEntityBuilder.onEntityCollision(context => {
+                const { entity, target } = context
                 console.log(entity)
             });
             ```
             """)
-    public ProjectileEntityBuilder<T> onEntityCollision(Consumer<Projectile> consumer) {
+    public ProjectileEntityBuilder<T> onEntityCollision(Consumer<ContextUtils.CollidingProjectileEntityContext> consumer) {
         onEntityCollision = consumer;
         return this;
     }

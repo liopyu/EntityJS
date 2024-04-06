@@ -33,7 +33,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient Function<Entity, Object> setDamageFunction;
     public transient Integer setKnockback;
     public transient Float setWaterInertia;
-    public transient Consumer<Projectile> onEntityCollision;
+    public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
 
     public ArrowEntityBuilder(ResourceLocation i) {
         super(i);
@@ -51,17 +51,17 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets a callback function to be executed when the arrow
-            calculates whether or not it can collide with an entity.
-            Does not decide whether or not the arrow can collide with an entity.
+            collides with an entity.
                         
             Example usage:
             ```javascript
-            arrowEntityBuilder.onEntityCollision(entity => {
+            arrowEntityBuilder.onEntityCollision(context => {
+                const { entity, target } = context
                 console.log(entity)
             });
             ```
             """)
-    public ArrowEntityBuilder<T> onEntityCollision(Consumer<Projectile> consumer) {
+    public ArrowEntityBuilder<T> onEntityCollision(Consumer<ContextUtils.CollidingProjectileEntityContext> consumer) {
         onEntityCollision = consumer;
         return this;
     }

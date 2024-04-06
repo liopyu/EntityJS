@@ -245,10 +245,6 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
         return super.getBlockJumpFactor();
     }
 
-    @Override
-    public boolean isPushable() {
-        return builder.isPushable;
-    }
 
     @Override
     protected float getBlockSpeedFactor() {
@@ -458,11 +454,18 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     //Projectile overrides
 
+    @Override
+    public boolean isPushable() {
+        return true;
+    }
 
     @Override
-    public boolean canBeCollidedWith() {
-        EntityJSHelperClass.consumerCallback(builder.onEntityCollision, this, "[EntityJS]: Error in " + entityName() + "builder for field: onEntityCollision.");
-        return super.canBeCollidedWith();
+    public void push(Entity pEntity) {
+        final ContextUtils.CollidingProjectileEntityContext context = new ContextUtils.CollidingProjectileEntityContext(this, pEntity);
+        EntityJSHelperClass.consumerCallback(builder.onEntityCollision, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEntityCollision.");
+        if (builder.isPushable) {
+            super.push(pEntity);
+        }
     }
 
     @Override

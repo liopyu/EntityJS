@@ -35,6 +35,19 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
 
 public class ContextUtils {
+    public static class CollidingProjectileEntityContext {
+        @Info("The colliding entity")
+        public final Entity entity;
+
+        @Info("The the target being collided with")
+        public final Entity target;
+
+        public CollidingProjectileEntityContext(Entity entity, Entity target) {
+            this.entity = entity;
+            this.target = target;
+        }
+    }
+
     public static class PreRenderContext<T> {
         @Info("The PoseStack")
         public final PoseStack poseStack;

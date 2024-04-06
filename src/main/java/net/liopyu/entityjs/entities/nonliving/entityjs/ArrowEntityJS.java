@@ -96,9 +96,17 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     @Override
-    public boolean canBeCollidedWith() {
-        EntityJSHelperClass.consumerCallback(builder.onEntityCollision, this, "[EntityJS]: Error in " + entityName() + "builder for field: onEntityCollision.");
-        return super.canBeCollidedWith();
+    public boolean isPushable() {
+        return true;
+    }
+
+    @Override
+    public void push(Entity pEntity) {
+        final ContextUtils.CollidingProjectileEntityContext context = new ContextUtils.CollidingProjectileEntityContext(this, pEntity);
+        EntityJSHelperClass.consumerCallback(builder.onEntityCollision, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEntityCollision.");
+        if (builder.isPushable) {
+            super.push(pEntity);
+        }
     }
 
     @Override
@@ -385,11 +393,6 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         if (obj != null) return (float) obj;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
         return super.getBlockJumpFactor();
-    }
-
-    @Override
-    public boolean isPushable() {
-        return builder.isPushable;
     }
 
     @Override
