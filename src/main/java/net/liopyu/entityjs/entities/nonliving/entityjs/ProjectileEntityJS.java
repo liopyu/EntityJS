@@ -210,6 +210,18 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     }
 
     //Projectile overrides
+
+    @Override
+    public boolean isPushable() {
+        return true;
+    }
+
+    @Override
+    public void push(Entity pEntity) {
+        final ContextUtils.CollidingProjectileEntityContext context = new ContextUtils.CollidingProjectileEntityContext(this, pEntity);
+        EntityJSHelperClass.consumerCallback(builder.onEntityCollision, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEntityCollision.");
+    }
+
     @Override
     protected void onHitEntity(EntityHitResult result) {
         if (builder != null && builder.onHitEntity != null) {

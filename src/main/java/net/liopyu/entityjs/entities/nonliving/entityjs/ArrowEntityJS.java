@@ -93,6 +93,17 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     //Arrow Overrides
     @Override
+    public boolean isPushable() {
+        return true;
+    }
+
+    @Override
+    public void push(Entity pEntity) {
+        final ContextUtils.CollidingProjectileEntityContext context = new ContextUtils.CollidingProjectileEntityContext(this, pEntity);
+        EntityJSHelperClass.consumerCallback(builder.onEntityCollision, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEntityCollision.");
+    }
+
+    @Override
     protected void tickDespawn() {
         if (builder.tickDespawn != null) {
             EntityJSHelperClass.consumerCallback(builder.tickDespawn, this, "[EntityJS]: Error in " + entityName() + "builder for field: tickDespawn.");

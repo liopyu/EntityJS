@@ -165,6 +165,19 @@ public class ContextUtils {
         }
     }
 
+    public static class CollidingProjectileEntityContext {
+        @Info("The colliding entity")
+        public final Entity entity;
+
+        @Info("The the target being collided with")
+        public final Entity target;
+
+        public CollidingProjectileEntityContext(Entity entity, Entity target) {
+            this.entity = entity;
+            this.target = target;
+        }
+    }
+
     public static class CollidingEntityContext {
         @Info("The entity getting collided with")
         public final LivingEntity entity;
