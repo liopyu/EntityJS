@@ -35,9 +35,9 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
         this.builder = builder;
     }
 
-    public ProjectileEntityJS(EntityType<? extends ThrowableItemProjectile> pEntityType, LivingEntity pShooter, Level pLevel) {
+    public ProjectileEntityJS(ProjectileEntityJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, LivingEntity pShooter, Level pLevel) {
         super(pEntityType, pShooter, pLevel);
-
+        this.builder = builder;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     //Base Entity Overrides
     public boolean hurt(DamageSource pSource, float pAmount) {
-        if (builder.onHurt != null) {
+        if (builder != null && builder.onHurt != null) {
             final ContextUtils.EntityHurtContext context = new ContextUtils.EntityHurtContext(this, pSource, pAmount);
             EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurt.");
 
@@ -73,7 +73,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
         super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
-        if (builder.lerpTo != null) {
+        if (builder != null && builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
             EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
@@ -82,7 +82,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     public void tick() {
         super.tick();
-        if (builder.tick != null) {
+        if (builder != null && builder.tick != null) {
             EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
         }
     }
@@ -90,7 +90,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     public void move(MoverType pType, Vec3 pPos) {
         super.move(pType, pPos);
-        if (builder.move != null) {
+        if (builder != null && builder.move != null) {
             final ContextUtils.MovementContext context = new ContextUtils.MovementContext(pType, pPos, this);
             EntityJSHelperClass.consumerCallback(builder.move, context, "[EntityJS]: Error in " + entityName() + "builder for field: move.");
         }
@@ -109,14 +109,14 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     public void onRemovedFromWorld() {
         super.onRemovedFromWorld();
-        if (builder.onRemovedFromWorld != null) {
+        if (builder != null && builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
         }
     }
 
     @Override
     public void thunderHit(ServerLevel p_19927_, LightningBolt p_19928_) {
-        if (builder.thunderHit != null) {
+        if (builder != null && builder.thunderHit != null) {
             super.thunderHit(p_19927_, p_19928_);
             final ContextUtils.EThunderHitContext context = new ContextUtils.EThunderHitContext(p_19927_, p_19928_, this);
             EntityJSHelperClass.consumerCallback(builder.thunderHit, context, "[EntityJS]: Error in " + entityName() + "builder for field: thunderHit.");
@@ -125,7 +125,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
-        if (builder.onFall != null) {
+        if (builder != null && builder.onFall != null) {
             final ContextUtils.EEntityFallDamageContext context = new ContextUtils.EEntityFallDamageContext(this, damageMultiplier, distance, damageSource);
             EntityJSHelperClass.consumerCallback(builder.onFall, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingFall.");
         }
@@ -135,14 +135,14 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
+        if (builder != null && builder.onAddedToWorld != null && !this.level.isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
     }
 
     @Override
     public void setSprinting(boolean sprinting) {
-        if (builder.onSprint != null) {
+        if (builder != null && builder.onSprint != null) {
             EntityJSHelperClass.consumerCallback(builder.onSprint, this, "[EntityJS]: Error in " + entityName() + "builder for field: onSprint.");
         }
         super.setSprinting(sprinting);
@@ -152,7 +152,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     public void stopRiding() {
         super.stopRiding();
-        if (builder.onStopRiding != null) {
+        if (builder != null && builder.onStopRiding != null) {
             EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
         }
     }
@@ -161,14 +161,14 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     public void rideTick() {
         super.rideTick();
-        if (builder.rideTick != null) {
+        if (builder != null && builder.rideTick != null) {
             EntityJSHelperClass.consumerCallback(builder.rideTick, this, "[EntityJS]: Error in " + entityName() + "builder for field: rideTick.");
         }
     }
 
     @Override
     public void onClientRemoval() {
-        if (builder.onClientRemoval != null) {
+        if (builder != null && builder.onClientRemoval != null) {
             EntityJSHelperClass.consumerCallback(builder.onClientRemoval, this, "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval.");
         }
         super.onClientRemoval();
@@ -177,7 +177,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public void lavaHurt() {
-        if (builder.lavaHurt != null) {
+        if (builder != null && builder.lavaHurt != null) {
             EntityJSHelperClass.consumerCallback(builder.lavaHurt, this, "[EntityJS]: Error in " + entityName() + "builder for field: lavaHurt.");
         }
         super.lavaHurt();
@@ -186,7 +186,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected void onFlap() {
-        if (builder.onFlap != null) {
+        if (builder != null && builder.onFlap != null) {
             EntityJSHelperClass.consumerCallback(builder.onFlap, this, "[EntityJS]: Error in " + entityName() + "builder for field: onFlap.");
         }
         super.onFlap();
@@ -194,7 +194,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
-        if (builder.shouldRenderAtSqrDistance != null) {
+        if (builder != null && builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
             Object obj = builder.shouldRenderAtSqrDistance.apply(context);
             if (obj instanceof Boolean b) return b;
@@ -225,7 +225,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean canCollideWith(Entity pEntity) {
-        if (builder.canCollideWith != null) {
+        if (builder != null && builder.canCollideWith != null) {
             final ContextUtils.ECollidingEntityContext context = new ContextUtils.ECollidingEntityContext(this, pEntity);
             Object obj = builder.canCollideWith.apply(context);
             if (obj instanceof Boolean b) return b;
@@ -237,7 +237,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected float getBlockJumpFactor() {
-        if (builder.setBlockJumpFactor == null) return super.getBlockJumpFactor();
+        if (builder != null && builder.setBlockJumpFactor == null) return super.getBlockJumpFactor();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor.apply(this), "float");
         if (obj != null) return (float) obj;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
@@ -251,9 +251,9 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected float getBlockSpeedFactor() {
-        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
+        if (builder != null && builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
-        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
+        if (builder != null && builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         if (obj != null) {
             return (float) obj;
         } else {
@@ -264,7 +264,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected boolean canAddPassenger(@NotNull Entity entity) {
-        if (builder.canAddPassenger == null) {
+        if (builder != null && builder.canAddPassenger == null) {
             return super.canAddPassenger(entity);
         }
         final ContextUtils.EPassengerEntityContext context = new ContextUtils.EPassengerEntityContext(entity, this);
@@ -279,7 +279,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected boolean isFlapping() {
-        if (builder.isFlapping != null) {
+        if (builder != null && builder.isFlapping != null) {
             Object obj = builder.isFlapping.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -297,7 +297,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected float nextStep() {
-        if (builder.nextStep != null) {
+        if (builder != null && builder.nextStep != null) {
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.nextStep.apply(this), "float");
             if (obj != null) {
                 return (float) obj;
@@ -311,14 +311,14 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected SoundEvent getSwimSplashSound() {
-        if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
+        if (builder != null && builder.setSwimSplashSound == null) return super.getSwimSplashSound();
         return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
-        if (builder.setSwimSound == null) return super.getSwimSound();
+        if (builder != null && builder.setSwimSound == null) return super.getSwimSound();
         return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
 
     }
@@ -326,7 +326,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean canFreeze() {
-        if (builder.canFreeze != null) {
+        if (builder != null && builder.canFreeze != null) {
             Object obj = builder.canFreeze.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -339,7 +339,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean isFreezing() {
-        if (builder.isFreezing != null) {
+        if (builder != null && builder.isFreezing != null) {
             Object obj = builder.isFreezing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -352,7 +352,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
+        if (builder != null && builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -365,7 +365,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean dampensVibrations() {
-        if (builder.dampensVibrations != null) {
+        if (builder != null && builder.dampensVibrations != null) {
             Object obj = builder.dampensVibrations.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -377,7 +377,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean showVehicleHealth() {
-        if (builder.showVehicleHealth != null) {
+        if (builder != null && builder.showVehicleHealth != null) {
             Object obj = builder.showVehicleHealth.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -390,7 +390,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean isInvulnerableTo(DamageSource p_20122_) {
-        if (builder.isInvulnerableTo != null) {
+        if (builder != null && builder.isInvulnerableTo != null) {
             final ContextUtils.EDamageContext context = new ContextUtils.EDamageContext(this, p_20122_);
             Object obj = builder.isInvulnerableTo.apply(context);
             if (obj instanceof Boolean) {
@@ -404,7 +404,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean canChangeDimensions() {
-        if (builder.canChangeDimensions != null) {
+        if (builder != null && builder.canChangeDimensions != null) {
             Object obj = builder.canChangeDimensions.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -417,7 +417,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
-        if (builder.mayInteract != null) {
+        if (builder != null && builder.mayInteract != null) {
             final ContextUtils.EMayInteractContext context = new ContextUtils.EMayInteractContext(p_146843_, p_146844_, this);
             Object obj = builder.mayInteract.apply(context);
             if (obj instanceof Boolean) {
@@ -432,7 +432,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
-        if (builder.canTrample != null) {
+        if (builder != null && builder.canTrample != null) {
             final ContextUtils.ECanTrampleContext context = new ContextUtils.ECanTrampleContext(state, pos, fallDistance, this);
             Object obj = builder.canTrample.apply(context);
             if (obj instanceof Boolean) {
@@ -447,7 +447,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public int getMaxFallDistance() {
-        if (builder.setMaxFallDistance == null) return super.getMaxFallDistance();
+        if (builder != null && builder.setMaxFallDistance == null) return super.getMaxFallDistance();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setMaxFallDistance.apply(this), "integer");
         if (obj != null)
             return (int) obj;

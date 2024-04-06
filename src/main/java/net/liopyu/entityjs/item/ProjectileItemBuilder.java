@@ -42,7 +42,7 @@ public class ProjectileItemBuilder extends ItemBuilder {
                         float pZ = projectileZ;
                         float pVelocity = projectileVelocity;
                         float pInaccuracy = projectileInaccuracy;
-                        ProjectileEntityJS $$4 = new ProjectileEntityJS(parent.get(), pPlayer, pLevel);
+                        ProjectileEntityJS $$4 = new ProjectileEntityJS(parent, parent.get(), pPlayer, pLevel);
                         $$4.setItem($$3);
                         $$4.shootFromRotation(pPlayer, pPlayer.getXRot(), pPlayer.getYRot(), pZ, pVelocity, pInaccuracy);
                         pLevel.addFreshEntity($$4);
