@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient Function<Entity, Object> setDamageFunction;
     public transient Integer setKnockback;
     public transient Float setWaterInertia;
+    public transient Consumer<Projectile> onEntityCollision;
 
     public ArrowEntityBuilder(ResourceLocation i) {
         super(i);
@@ -45,6 +47,23 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     @Override
     public EntityType<T> createObject() {
         return new NonAnimatableEntityTypeBuilder<>(this).get();
+    }
+
+    @Info(value = """
+            Sets a callback function to be executed when the arrow
+            calculates whether or not it can collide with an entity.
+            Does not decide whether or not the arrow can collide with an entity.
+                        
+            Example usage:
+            ```javascript
+            arrowEntityBuilder.onEntityCollision(entity => {
+                console.log(entity)
+            });
+            ```
+            """)
+    public ArrowEntityBuilder<T> onEntityCollision(Consumer<Projectile> consumer) {
+        onEntityCollision = consumer;
+        return this;
     }
 
     @Info(value = """

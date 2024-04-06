@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.entities.nonliving.entityjs;
 
 import com.google.common.collect.Lists;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
@@ -94,6 +95,11 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         return isMoving;
     }
 
+    @Override
+    public boolean canBeCollidedWith() {
+        EntityJSHelperClass.consumerCallback(builder.onEntityCollision, this, "[EntityJS]: Error in " + entityName() + "builder for field: onEntityCollision.");
+        return super.canBeCollidedWith();
+    }
 
     @Override
     protected void tickDespawn() {

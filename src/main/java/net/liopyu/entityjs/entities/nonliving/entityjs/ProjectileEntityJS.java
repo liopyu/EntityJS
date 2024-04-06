@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.entities.nonliving.entityjs;
 
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -456,6 +457,14 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     }
 
     //Projectile overrides
+
+
+    @Override
+    public boolean canBeCollidedWith() {
+        EntityJSHelperClass.consumerCallback(builder.onEntityCollision, this, "[EntityJS]: Error in " + entityName() + "builder for field: onEntityCollision.");
+        return super.canBeCollidedWith();
+    }
+
     @Override
     protected void onHitEntity(EntityHitResult result) {
         if (builder != null && builder.onHitEntity != null) {
