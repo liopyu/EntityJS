@@ -52,8 +52,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets a callback function to be executed when the arrow
-            calculates whether or not it can collide with an entity.
-            Does not decide whether or not the arrow can collide with an entity.
+            collides with an entity.
                         
             Example usage:
             ```javascript

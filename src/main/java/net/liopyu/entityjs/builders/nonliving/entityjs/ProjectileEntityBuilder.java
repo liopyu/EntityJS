@@ -123,8 +123,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
 
     @Info(value = """
             Sets a callback function to be executed when the projectile
-            calculates whether or not it can collide with an entity.
-            Does not decide whether or not the projectile can collide with an entity.
+            collides with an entity.
                         
             Example usage:
             ```javascript
