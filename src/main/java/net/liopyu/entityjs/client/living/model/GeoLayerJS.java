@@ -30,6 +30,10 @@ public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRende
         this.builder = builder;
     }
 
+    public String entityName() {
+        return builder.get().toString();
+    }
+
     @Override
     protected ResourceLocation getTextureResource(T animatable) {
         if (geoBuilder.textureResource != null) {
@@ -42,10 +46,10 @@ public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRende
 
     @Override
     public void preRender(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-        if (builder.render != null && this.animatable != null) {
-            final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
-            EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");
-            super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+        if (geoBuilder.preRender != null && animatable != null) {
+            final ContextUtils.PreRenderContext<T> context = new ContextUtils.PreRenderContext<>(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
+            EntityJSHelperClass.consumerCallback(geoBuilder.preRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");
+            super.preRender(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
         } else {
             super.preRender(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
         }
@@ -55,7 +59,13 @@ public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRende
     public void render(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, RenderType renderType,
                        MultiBufferSource bufferSource, VertexConsumer buffer, float partialTicks,
                        int packedLightIn, int packedOverlay) {
-        RenderType renderLayer = RenderType.entityCutoutNoCull(getTextureResource(animatable));
-        getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, packedLightIn, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+        if (geoBuilder.render != null && animatable != null) {
+            final ContextUtils.PreRenderContext<T> context = new ContextUtils.PreRenderContext<>(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTicks, packedLightIn, packedOverlay);
+            EntityJSHelperClass.consumerCallback(geoBuilder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");
+            super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTicks, packedLightIn, packedOverlay);
+        } else {
+            RenderType renderLayer = RenderType.entityCutoutNoCull(getTextureResource(animatable));
+            getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, packedLightIn, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+        }
     }
 }

@@ -1,11 +1,13 @@
 package net.liopyu.entityjs.util;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.liolib.cache.object.BakedGeoModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -33,6 +35,49 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
 
 public class ContextUtils {
+    public static class PreRenderContext<T> {
+        @Info("The PoseStack")
+        public final PoseStack poseStack;
+
+        @Info("The animatable entity")
+        public final T entity;
+
+        @Info("The baked model")
+        public final BakedGeoModel bakedModel;
+
+        @Info("The render type")
+        public final RenderType renderType;
+
+        @Info("The buffer source")
+        public final MultiBufferSource bufferSource;
+
+        @Info("The vertex consumer buffer")
+        public final VertexConsumer buffer;
+
+        @Info("The partial tick")
+        public final float partialTick;
+
+        @Info("The packed light")
+        public final int packedLight;
+
+        @Info("The packed overlay")
+        public final int packedOverlay;
+
+        public PreRenderContext(PoseStack poseStack, T entity, BakedGeoModel bakedModel, RenderType renderType,
+                                MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick,
+                                int packedLight, int packedOverlay) {
+            this.poseStack = poseStack;
+            this.entity = entity;
+            this.bakedModel = bakedModel;
+            this.renderType = renderType;
+            this.bufferSource = bufferSource;
+            this.buffer = buffer;
+            this.partialTick = partialTick;
+            this.packedLight = packedLight;
+            this.packedOverlay = packedOverlay;
+        }
+    }
+
     public static class ScaleModelRenderContextNL<T extends Entity> {
         public final float widthScale;
         public final float heightScale;

@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.client.living;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
