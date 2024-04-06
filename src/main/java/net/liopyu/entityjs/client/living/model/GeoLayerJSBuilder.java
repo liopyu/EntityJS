@@ -4,15 +4,20 @@ import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
     public transient Function<T, Object> textureResource;
     public BaseLivingEntityBuilder<T> builder;
+
+    public transient Consumer<ContextUtils.PreRenderContext<T>> render;
+    public transient Consumer<ContextUtils.PreRenderContext<T>> preRender;
 
     public GeoLayerJSBuilder(BaseLivingEntityBuilder<T> builder) {
         this.builder = builder;
@@ -24,6 +29,45 @@ public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
 
     public BaseLivingEntityBuilder<T> getBuilder() {
         return builder;
+    }
+
+    @Info(value = """
+            Defines logic to preRender the newGeoLayer.
+                        
+            Example usage:
+            ```javascript
+            geoBuilder.preRender(context => {
+                // Define logic to render the newGeoLayer
+                if (context.entity.isBaby()) {
+                    context.poseStack.scale(0.5, 0.5, 0.5);
+                }
+            });
+            ```
+            """)
+    public GeoLayerJSBuilder<T> preRender(Consumer<ContextUtils.PreRenderContext<T>> preRender) {
+        this.preRender = preRender;
+        return this;
+    }
+
+    @Info(value = """
+            Defines logic to render the newGeoLayer.
+            By default this will render the flat texture set in textureResource
+            onto the entity as an overlay. This method overrides the render method completely
+            allowing scripters to define their own render logic.
+                        
+            Example usage:
+            ```javascript
+            geoBuilder.render(context => {
+                // Define logic to render the newGeoLayer
+                if (context.entity.isBaby()) {
+                    context.poseStack.scale(0.5, 0.5, 0.5);
+                }
+            });
+            ```
+            """)
+    public GeoLayerJSBuilder<T> render(Consumer<ContextUtils.PreRenderContext<T>> render) {
+        this.render = render;
+        return this;
     }
 
     @Info(value = """
