@@ -1,5 +1,7 @@
 package net.liopyu.entityjs;
 
+import com.mojang.logging.LogUtils;
+import dev.architectury.platform.Platform;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
@@ -8,12 +10,15 @@ import net.liopyu.entityjs.builders.living.vanilla.*;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.BaseEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.modded.CGMProjectileEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
+import org.slf4j.Logger;
 
 public class EntityJSPlugin extends KubeJSPlugin {
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     @Override
     public void init() {
@@ -49,6 +54,10 @@ public class EntityJSPlugin extends KubeJSPlugin {
         RegistryInfo.ENTITY_TYPE.addType("minecraft:panda", PandaJSBuilder.class, PandaJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:parrot", ParrotJSBuilder.class, ParrotJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:eye_of_ender", EyeOfEnderJSBuilder.class, EyeOfEnderJSBuilder::new);
+        if (Platform.isModLoaded("cgm") && Platform.isModLoaded("framework")) {
+            LOGGER.info("Loading CGM EntityJS Compatibility");
+            RegistryInfo.ENTITY_TYPE.addType("cgm:missile", CGMProjectileEntityJSBuilder.class, CGMProjectileEntityJSBuilder::new);
+        }
     }
 
     @Override

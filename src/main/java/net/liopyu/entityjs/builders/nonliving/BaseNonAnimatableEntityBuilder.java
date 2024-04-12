@@ -1071,4 +1071,8 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     @HideFromJS
     abstract public EntityType.EntityFactory<T> factory();
 
+    @Override
+    public EntityType<T> createObject() {
+        return new NonAnimatableEntityTypeBuilder<>(this).get();
+    }
 }

@@ -110,10 +110,23 @@ repositories {
     //     dir 'libs'
     // }
     maven { url 'https://dl.cloudsmith.io/public/lio/liolib/maven/' }
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:1.19.2-43.2.0"
+
+    compileOnly fg.deobf("curse.maven:framework-549225:4718247")
+    compileOnly fg.deobf("curse.maven:mrcrayfishs-gun-mod-289479:4718583")
+
+    /*implementation fg.deobf("curse.maven:mrcrayfishs-gun-mod-289479:4718583")
+    implementation fg.deobf("curse.maven:framework-549225:4718247")*/
+
 
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:1902.6.2-build.45")
     implementation fg.deobf("dev.latvian.mods:rhino-forge:1902.2.3-build.284")
