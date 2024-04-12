@@ -60,7 +60,7 @@ public class EntityJSPlugin extends KubeJSPlugin {
         RegistryInfo.ENTITY_TYPE.addType("minecraft:eye_of_ender", EyeOfEnderJSBuilder.class, EyeOfEnderJSBuilder::new);
 
         if (Platform.isModLoaded("cgm") && Platform.isModLoaded("framework")) {
-            LOGGER.info("Loading CGM");
+            LOGGER.info("Loading CGM-EntityJS compatibility");
             RegistryInfo.ENTITY_TYPE.addType("cgm:missile", CGMProjectileEntityJSBuilder.class, CGMProjectileEntityJSBuilder::new);
         }
     }
