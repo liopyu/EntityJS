@@ -106,6 +106,12 @@ repositories {
             includeGroup "dev.latvian.mods"
         }
     }
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
     maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
     // flatDir {
@@ -116,6 +122,12 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    compileOnly fg.deobf("curse.maven:framework-549225:5180972")
+    compileOnly fg.deobf("curse.maven:mrcrayfishs-gun-mod-unofficial-945471:5212457")
+
+
+    /* implementation fg.deobf("curse.maven:framework-549225:5180972")
+     implementation fg.deobf("curse.maven:mrcrayfishs-gun-mod-unofficial-945471:5212457")*/
 
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:2001.6.4-build.99")
     implementation fg.deobf("dev.latvian.mods:rhino-forge:2001.2.2-build.18")

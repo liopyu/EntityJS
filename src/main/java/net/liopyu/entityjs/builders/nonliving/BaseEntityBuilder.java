@@ -1204,7 +1204,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     @Info(value = """
             Sets a callback function to be executed on each tick for the entity.
                         
-            @param consumer A Consumer accepting a {@link Entity} parameter, defining the behavior to be executed on each tick.
+            @param tick A Consumer accepting a {@link Entity} parameter, defining the behavior to be executed on each tick.
                         
             Example usage:
             ```javascript

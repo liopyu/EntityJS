@@ -1,7 +1,9 @@
 package net.liopyu.entityjs;
 
 import com.mojang.logging.LogUtils;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.client.ClientEventHandlers;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.RegistryUtil;
 import net.minecraft.resources.ResourceLocation;
@@ -11,6 +13,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
+import javax.swing.text.html.parser.Entity;
 import java.io.IOException;
 
 

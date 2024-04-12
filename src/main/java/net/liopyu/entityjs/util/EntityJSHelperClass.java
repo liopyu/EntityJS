@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.apache.commons.lang3.NotImplementedException;
 import software.bernie.geckolib.core.animation.Animation;
 
 import java.util.HashSet;
@@ -177,5 +178,4 @@ public class EntityJSHelperClass {
             return moving;
         }
     }
-
 }
