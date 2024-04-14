@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.nonliving.modded;
 
+import com.mrcrayfish.guns.common.ProjectileManager;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
@@ -8,13 +9,16 @@ import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.EntityTypeBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileEntityJS;
 import net.liopyu.entityjs.entities.nonliving.modded.CGMProjectileEntityJS;
+import net.liopyu.entityjs.item.CGMProjectileItemBuilder;
 import net.liopyu.entityjs.item.ProjectileItemBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -24,7 +28,9 @@ import java.util.function.Consumer;
 
 
 public class CGMProjectileEntityJSBuilder extends BaseEntityBuilder<CGMProjectileEntityJS> {
-
+    public transient CGMProjectileItemBuilder item;
+    public transient Item stack;
+    public transient boolean noItem;
 
     public transient ItemStack setItem;
     public transient ItemStack setWeapon;
@@ -37,7 +43,38 @@ public class CGMProjectileEntityJSBuilder extends BaseEntityBuilder<CGMProjectil
     public CGMProjectileEntityJSBuilder(ResourceLocation i) {
         super(i);
         explosionEnabled = false;
+        noItem = false;
+        this.item = (CGMProjectileItemBuilder) new CGMProjectileItemBuilder(id, this)
+                .canThrow(true)
+                .texture(i.getNamespace() + ":item/" + i.getPath());
+        this.stack = this.item.get();
+        ProjectileManager.getInstance().registerFactory(stack, (worldIn, entity, weapon, item, modifiedGun) -> new CGMProjectileEntityJS(this, this.get(), worldIn, entity, weapon, item, modifiedGun));
     }
+
+    public transient Level level;
+
+    @Info(value = "Indicates that no projectile item should be created for this entity type")
+    public CGMProjectileEntityJSBuilder noItem() {
+        this.noItem = true;
+        return this;
+    }
+
+    @Info(value = "Creates the projectile item for this entity type")
+    public CGMProjectileEntityJSBuilder item(Consumer<CGMProjectileItemBuilder> item) {
+
+        this.item = new CGMProjectileItemBuilder(id, this);
+        item.accept(this.item);
+
+        return this;
+    }
+
+    @Override
+    public void createAdditionalObjects() {
+        if (!noItem) {
+            RegistryInfo.ITEM.addBuilder(item);
+        }
+    }
+
 
     @Info(value = """       
             @param explosionEnabled A boolean deciding whether or not default explosion behavior is enabled.

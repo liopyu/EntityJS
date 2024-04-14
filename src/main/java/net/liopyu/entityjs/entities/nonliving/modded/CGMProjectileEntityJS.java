@@ -16,29 +16,40 @@ import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
 import net.liopyu.liolib.util.GeckoLibUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJSNL {
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     public CGMProjectileEntityJSBuilder builder;
+    //private ItemStack item;
+    //protected Gun.Projectile projectile;
 
-    public CGMProjectileEntityJS(CGMProjectileEntityJSBuilder builder, EntityType<? extends ProjectileEntity> entityType, Level worldIn) {
+    public CGMProjectileEntityJS(CGMProjectileEntityJSBuilder builder, EntityType<? extends MissileEntity> entityType, Level worldIn) {
         super(entityType, worldIn);
+        //this.setItem(Items.DIAMOND.getDefaultInstance());
+        //this.projectile = modifiedGun.getProjectile();
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     }
 
-    public CGMProjectileEntityJS(CGMProjectileEntityJSBuilder builder, EntityType<? extends ProjectileEntity> entityType, Level worldIn, LivingEntity shooter, ItemStack weapon, GunItem item, Gun modifiedGun, AnimatableInstanceCache getAnimatableInstanceCache) {
+    public CGMProjectileEntityJS(CGMProjectileEntityJSBuilder builder, EntityType<? extends MissileEntity> entityType, Level worldIn, LivingEntity shooter, ItemStack weapon, GunItem item, Gun modifiedGun) {
         super(entityType, worldIn, shooter, weapon, item, modifiedGun);
-        this.getAnimatableInstanceCache = getAnimatableInstanceCache;
+        //this.setItem(Items.DIAMOND.getDefaultInstance());
+        //this.projectile = modifiedGun.getProjectile();
+        this.builder = builder;
+        this.getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     }
 
 
@@ -172,6 +183,26 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
             return builder.setWeapon;
         }
         return super.getWeapon();
+    }
+
+    //Self implimented throwing logic
+    public void shoot(double pX, double pY, double pZ, float pVelocity, float pInaccuracy) {
+        Vec3 vec3 = (new Vec3(pX, pY, pZ)).normalize().add(this.random.triangle(0.0, 0.0172275 * (double) pInaccuracy), this.random.triangle(0.0, 0.0172275 * (double) pInaccuracy), this.random.triangle(0.0, 0.0172275 * (double) pInaccuracy)).scale((double) pVelocity);
+        this.setDeltaMovement(vec3);
+        double d0 = vec3.horizontalDistance();
+        this.setYRot((float) (Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
+        this.setXRot((float) (Mth.atan2(vec3.y, d0) * 57.2957763671875));
+        this.yRotO = this.getYRot();
+        this.xRotO = this.getXRot();
+    }
+
+    public void shootFromRotation(Entity pShooter, float pX, float pY, float pZ, float pVelocity, float pInaccuracy) {
+        float f = -Mth.sin(pY * 0.017453292F) * Mth.cos(pX * 0.017453292F);
+        float f1 = -Mth.sin((pX + pZ) * 0.017453292F);
+        float f2 = Mth.cos(pY * 0.017453292F) * Mth.cos(pX * 0.017453292F);
+        this.shoot((double) f, (double) f1, (double) f2, pVelocity, pInaccuracy);
+        Vec3 vec3 = pShooter.getDeltaMovement();
+        this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, pShooter.isOnGround() ? 0.0 : vec3.y, vec3.z));
     }
 
     //Base Entity Overrides

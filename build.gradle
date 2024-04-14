@@ -124,8 +124,8 @@ dependencies {
     compileOnly fg.deobf("curse.maven:framework-549225:4718247")
     compileOnly fg.deobf("curse.maven:mrcrayfishs-gun-mod-289479:4718583")
 
-    /*implementation fg.deobf("curse.maven:mrcrayfishs-gun-mod-289479:4718583")
-    implementation fg.deobf("curse.maven:framework-549225:4718247")*/
+    implementation fg.deobf("curse.maven:mrcrayfishs-gun-mod-289479:4718583")
+    implementation fg.deobf("curse.maven:framework-549225:4718247")
 
 
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:1902.6.2-build.45")
