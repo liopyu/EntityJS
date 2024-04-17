@@ -61,7 +61,7 @@ public class EntityJSPlugin extends KubeJSPlugin {
 
         if (Platform.isModLoaded("cgm") && Platform.isModLoaded("framework")) {
             LOGGER.info("Loading CGM-EntityJS compatibility");
-            RegistryInfo.ENTITY_TYPE.addType("cgm:missile", CGMProjectileEntityJSBuilder.class, CGMProjectileEntityJSBuilder::new);
+            RegistryInfo.ENTITY_TYPE.addType("cgm:ammo", CGMProjectileEntityJSBuilder.class, CGMProjectileEntityJSBuilder::new);
         }
     }
 
