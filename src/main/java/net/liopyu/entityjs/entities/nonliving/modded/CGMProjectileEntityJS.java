@@ -33,21 +33,15 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     public CGMProjectileEntityJSBuilder builder;
-    //private ItemStack item;
-    //protected Gun.Projectile projectile;
 
     public CGMProjectileEntityJS(CGMProjectileEntityJSBuilder builder, EntityType<? extends MissileEntity> entityType, Level worldIn) {
         super(entityType, worldIn);
-        //this.setItem(Items.DIAMOND.getDefaultInstance());
-        //this.projectile = modifiedGun.getProjectile();
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     }
 
     public CGMProjectileEntityJS(CGMProjectileEntityJSBuilder builder, EntityType<? extends MissileEntity> entityType, Level worldIn, LivingEntity shooter, ItemStack weapon, GunItem item, Gun modifiedGun) {
         super(entityType, worldIn, shooter, weapon, item, modifiedGun);
-        //this.setItem(Items.DIAMOND.getDefaultInstance());
-        //this.projectile = modifiedGun.getProjectile();
         this.builder = builder;
         this.getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     }
@@ -139,15 +133,6 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
 
 
     @Override
-    public ItemStack getItem() {
-        if (builder.setItem != null) {
-            return builder.setItem;
-        }
-
-        return super.getItem();
-    }
-
-    @Override
     public void onExpired() {
         if (builder.explosionEnabled) {
             super.onExpired();
@@ -177,13 +162,6 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
         }
     }
 
-    @Override
-    public ItemStack getWeapon() {
-        if (builder.setWeapon != null) {
-            return builder.setWeapon;
-        }
-        return super.getWeapon();
-    }
 
     //Self implimented throwing logic
     public void shoot(double pX, double pY, double pZ, float pVelocity, float pInaccuracy) {
