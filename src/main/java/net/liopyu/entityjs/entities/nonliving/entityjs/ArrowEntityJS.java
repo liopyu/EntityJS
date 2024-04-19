@@ -230,6 +230,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     public void tick() {
         super.tick();
+        isMoving = movementTracker.isMoving(this);
         if (builder.tick != null) {
             EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
         }
