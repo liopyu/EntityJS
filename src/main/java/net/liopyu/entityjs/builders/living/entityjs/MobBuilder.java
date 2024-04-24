@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.function.*;
@@ -48,6 +49,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         super(i);
         canJump = true;
         ambientSoundInterval = 120;
+        canFireProjectileWeaponPredicate = t -> t.projectileWeapon instanceof ProjectileWeaponItem;
     }
 
     @Info(value = "Creates a spawn egg item for this entity type")

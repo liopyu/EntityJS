@@ -58,6 +58,7 @@ public class EntityJSPlugin extends KubeJSPlugin {
         RegistryInfo.ENTITY_TYPE.addType("minecraft:panda", PandaJSBuilder.class, PandaJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:parrot", ParrotJSBuilder.class, ParrotJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:eye_of_ender", EyeOfEnderJSBuilder.class, EyeOfEnderJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("minecraft:piglin", PiglinJSBuilder.class, PiglinJSBuilder::new);
 
         if (Platform.isModLoaded("cgm") && Platform.isModLoaded("framework")) {
             LOGGER.info("Loading CGM-EntityJS compatibility");

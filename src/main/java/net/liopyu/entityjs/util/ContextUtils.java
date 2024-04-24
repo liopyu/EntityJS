@@ -457,6 +457,18 @@ public class ContextUtils {
         }
     }
 
+    public static class EntityServerLevelContext {
+        @Info("The server level of the entity")
+        public final ServerLevel level;
+
+        @Info("The living entity")
+        public final LivingEntity entity;
+
+        public EntityServerLevelContext(ServerLevel level, LivingEntity entity) {
+            this.level = level;
+            this.entity = entity;
+        }
+    }
 
     public static class ThunderHitContext {
         @Info("The server level where the lightning strike occurred")
