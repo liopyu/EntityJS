@@ -1,13 +1,12 @@
 package net.liopyu.entityjs.entities.living.vanilla;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
 import net.liopyu.entityjs.builders.living.vanilla.PiglinJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
-import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -19,26 +18,29 @@ import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -58,6 +60,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 public class PiglinEntityJS extends Piglin implements IAnimatableJS {
@@ -71,6 +74,21 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
+    private static final EntityDataAccessor<Boolean> DATA_BABY_ID;
+    private static final EntityDataAccessor<Boolean> DATA_IS_CHARGING_CROSSBOW;
+    private static final EntityDataAccessor<Boolean> DATA_IS_DANCING;
+    private static final UUID SPEED_MODIFIER_BABY_UUID;
+    private static final AttributeModifier SPEED_MODIFIER_BABY;
+    protected static final ImmutableList<SensorType<? extends Sensor<? super Piglin>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.HURT_BY, SensorType.PIGLIN_SPECIFIC_SENSOR);
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.DOORS_TO_CLOSE, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS, MemoryModuleType.NEARBY_ADULT_PIGLINS, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.PATH, MemoryModuleType.ANGRY_AT, MemoryModuleType.UNIVERSAL_ANGER, MemoryModuleType.AVOID_TARGET, MemoryModuleType.ADMIRING_ITEM, MemoryModuleType.TIME_TRYING_TO_REACH_ADMIRE_ITEM, MemoryModuleType.ADMIRING_DISABLED, MemoryModuleType.DISABLE_WALK_TO_ADMIRE_ITEM, MemoryModuleType.CELEBRATE_LOCATION, MemoryModuleType.DANCING, MemoryModuleType.HUNTED_RECENTLY, MemoryModuleType.NEAREST_VISIBLE_BABY_HOGLIN, MemoryModuleType.NEAREST_VISIBLE_NEMESIS, MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED, MemoryModuleType.RIDE_TARGET, MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT, MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, MemoryModuleType.NEAREST_VISIBLE_HUNTABLE_HOGLIN, MemoryModuleType.NEAREST_TARGETABLE_PLAYER_NOT_WEARING_GOLD, MemoryModuleType.NEAREST_PLAYER_HOLDING_WANTED_ITEM, MemoryModuleType.ATE_RECENTLY, MemoryModuleType.NEAREST_REPELLENT);
+
+    static {
+        SPEED_MODIFIER_BABY_UUID = UUID.fromString("766bfa64-11f3-11ea-8d71-362b9e144667");
+        SPEED_MODIFIER_BABY = new AttributeModifier(SPEED_MODIFIER_BABY_UUID, "Baby speed boost", 0.20000000298023224, AttributeModifier.Operation.MULTIPLY_BASE);
+        DATA_BABY_ID = SynchedEntityData.defineId(PiglinEntityJS.class, EntityDataSerializers.BOOLEAN);
+        DATA_IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(PiglinEntityJS.class, EntityDataSerializers.BOOLEAN);
+        DATA_IS_DANCING = SynchedEntityData.defineId(PiglinEntityJS.class, EntityDataSerializers.BOOLEAN);
+    }
 
     public PiglinEntityJS(PiglinJSBuilder builder, EntityType<? extends Piglin> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -85,6 +103,60 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         this.navigation = this.createNavigation(pLevel);
     }
 
+    //Default Piglin behavior
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_BABY_ID, false);
+        this.entityData.define(DATA_IS_CHARGING_CROSSBOW, false);
+        this.entityData.define(DATA_IS_DANCING, false);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        super.onSyncedDataUpdated(pKey);
+        if (DATA_BABY_ID.equals(pKey)) {
+            this.refreshDimensions();
+        }
+
+    }
+
+    private boolean isChargingCrossbow() {
+        return (Boolean) this.entityData.get(DATA_IS_CHARGING_CROSSBOW);
+    }
+
+    @Override
+    public boolean isDancing() {
+        return (Boolean) this.entityData.get(DATA_IS_DANCING);
+    }
+
+    @Override
+    public void setDancing(boolean pDancing) {
+        this.entityData.set(DATA_IS_DANCING, pDancing);
+    }
+
+    @Override
+    public void setChargingCrossbow(boolean pIsCharging) {
+        this.entityData.set(DATA_IS_CHARGING_CROSSBOW, pIsCharging);
+    }
+
+    @Override
+    public void setBaby(boolean pChildZombie) {
+        this.getEntityData().set(DATA_BABY_ID, pChildZombie);
+        if (!this.level().isClientSide) {
+            AttributeInstance attributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
+            attributeinstance.removeModifier(SPEED_MODIFIER_BABY);
+            if (pChildZombie) {
+                attributeinstance.addTransientModifier(SPEED_MODIFIER_BABY);
+            }
+        }
+
+    }
+
+    @Override
+    public boolean isBaby() {
+        return (Boolean) this.getEntityData().get(DATA_BABY_ID);
+    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -148,7 +220,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
-            return super.brainProvider();
+            return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
         }
     }
 
