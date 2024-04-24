@@ -4,10 +4,8 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.PiglinJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.WitherJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
-import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -20,11 +18,17 @@ import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.world.BossEvent;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -33,14 +37,13 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -49,6 +52,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.entity.PartEntity;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -60,9 +64,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public class PiglinEntityJS extends Piglin implements IAnimatableJS {
-
-    private final PiglinJSBuilder builder;
+public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
+    private int destroyBlocksTick;
+    private final int[] nextHeadUpdate = new int[2];
+    private final int[] idleHeadUpdates = new int[2];
+    private final ServerBossEvent bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
+    private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = (p_31504_) -> {
+        return p_31504_.getMobType() != MobType.UNDEAD && p_31504_.attackable();
+    };
+    private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0D).selector(LIVING_ENTITY_SELECTOR);
+    private final WitherJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
 
     public String entityName() {
@@ -72,12 +83,12 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
-    public PiglinEntityJS(PiglinJSBuilder builder, EntityType<? extends Piglin> pEntityType, Level pLevel) {
+    public WitherEntityJS(WitherJSBuilder builder, EntityType<? extends WitherBoss> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         animationFactory = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<PiglinEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<WitherEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
@@ -142,9 +153,9 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<Piglin> brainProvider() {
+    protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<Piglin> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<WitherEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -153,9 +164,9 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     }
 
     @Override
-    protected Brain<PiglinEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<WitherEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<PiglinEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<WitherEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
@@ -172,6 +183,10 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }
+
+    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
+
 
     //Mob Overrides
     @Override
@@ -279,36 +294,212 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     }
 
     @Override
-    public boolean isConverting() {
-        if (builder.isConverting != null) {
-            Object obj = builder.isConverting.apply(this);
-            if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isConverting from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isConverting());
-        }
-        return super.isConverting();
+    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
+        this.performRangedAttack2(0, pTarget);
     }
 
-    @Override
-    protected void finishConversion(ServerLevel pServerLevel) {
-        if (builder.finishConversion != null) {
-            final ContextUtils.EntityServerLevelContext context = new ContextUtils.EntityServerLevelContext(pServerLevel, this);
-            EntityJSHelperClass.consumerCallback(builder.finishConversion, context, "[EntityJS]: Error in " + entityName() + "builder for field: finishConversion.");
-        }
-        super.finishConversion(pServerLevel);
+    private void performRangedAttack2(int pHead, LivingEntity pTarget) {
+        this.performRangedAttack(pHead, pTarget.getX(), pTarget.getY() + (double) pTarget.getEyeHeight() * 0.5D, pTarget.getZ(), pHead == 0 && this.random.nextFloat() < 0.001F);
     }
 
-    @Override
-    public ItemStack getProjectile(ItemStack pShootable) {
-        if (pShootable.getItem() instanceof ProjectileWeaponItem item) {
-            if (canFireProjectileWeapon(item)) {
-                Predicate<ItemStack> predicate = ((ProjectileWeaponItem) pShootable.getItem()).getSupportedHeldProjectiles();
-                ItemStack itemstack = ProjectileWeaponItem.getHeldProjectile(this, predicate);
-                return net.minecraftforge.common.ForgeHooks.getProjectile(this, pShootable, itemstack.isEmpty() ? new ItemStack(Items.ARROW) : itemstack);
+    double xPower;
+    double yPower;
+    double zPower;
+
+    /**
+     * Launches a Wither skull toward (par2, par4, par6)
+     */
+    private void performRangedAttack(int pHead, double pX, double pY, double pZ, boolean pIsDangerous) {
+        if (!this.isSilent()) {
+            this.level().levelEvent((Player) null, 1024, this.blockPosition(), 0);
+        }
+
+        double d0 = this.getHeadX(pHead);
+        double d1 = this.getHeadY(pHead);
+        double d2 = this.getHeadZ(pHead);
+        double d3 = pX - d0;
+        double d4 = pY - d1;
+        double d5 = pZ - d2;
+
+        if (builder.attackProjectile != null) {
+            try {
+                Projectile entity = (Projectile) ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(builder.attackProjectile)).create(this.level());
+                xPower = d3 * 0.1D;
+                yPower = d4 * 0.1D;
+                zPower = d5 * 0.1D;
+
+                entity.setOwner(this);
+                Vec3 vec3 = this.getDeltaMovement();
+                entity.setDeltaMovement(vec3.add(xPower, yPower, zPower).scale(0.75));
+                entity.setPosRaw(d0, d1, d2);
+                this.level().addFreshEntity(entity);
+            } catch (ClassCastException e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Invalid value in attackProjectile field from entity: " + entityName() + ". Value: " + builder.attackProjectile + ". Must be a projectile entity", e);
             }
-            return net.minecraftforge.common.ForgeHooks.getProjectile(this, pShootable, ItemStack.EMPTY);
         } else {
-            return net.minecraftforge.common.ForgeHooks.getProjectile(this, pShootable, ItemStack.EMPTY);
+            WitherSkull witherskull = new WitherSkull(this.level(), this, d3, d4, d5);
+            witherskull.setOwner(this);
+            if (pIsDangerous) {
+                witherskull.setDangerous(true);
+            }
+
+            witherskull.setPosRaw(d0, d1, d2);
+            this.level().addFreshEntity(witherskull);
         }
+    }
+
+    private double getHeadX(int pHead) {
+        if (pHead <= 0) {
+            return this.getX();
+        } else {
+            float f = (this.yBodyRot + (float) (180 * (pHead - 1))) * ((float) Math.PI / 180F);
+            float f1 = Mth.cos(f);
+            return this.getX() + (double) f1 * 1.3D;
+        }
+    }
+
+    private double getHeadY(int pHead) {
+        return pHead <= 0 ? this.getY() + 3.0D : this.getY() + 2.2D;
+    }
+
+    private double getHeadZ(int pHead) {
+        if (pHead <= 0) {
+            return this.getZ();
+        } else {
+            float f = (this.yBodyRot + (float) (180 * (pHead - 1))) * ((float) Math.PI / 180F);
+            float f1 = Mth.sin(f);
+            return this.getZ() + (double) f1 * 1.3D;
+        }
+    }
+
+    @Override
+    public void makeInvulnerable() {
+        this.setInvulnerableTicks(220);
+        this.bossEvent.setProgress(0.0F);
+        this.setHealth(this.getMaxHealth() / 3.0F);
+    }
+
+    @Override
+    public void startSeenByPlayer(ServerPlayer pPlayer) {
+        this.bossEvent.addPlayer(pPlayer);
+    }
+
+
+    @Override
+    public void stopSeenByPlayer(ServerPlayer pPlayer) {
+        this.bossEvent.removePlayer(pPlayer);
+    }
+
+    @Override
+    public void setCustomName(@javax.annotation.Nullable Component pName) {
+        super.setCustomName(pName);
+        this.bossEvent.setName(this.getDisplayName());
+    }
+
+    @Override
+    protected void customServerAiStep() {
+        if (builder.customServerAiStep) {
+            if (this.getInvulnerableTicks() > 0) {
+                int k1 = this.getInvulnerableTicks() - 1;
+                this.bossEvent.setProgress(1.0F - (float) k1 / 220.0F);
+                if (k1 <= 0) {
+                    this.level().explode(this, this.getX(), this.getEyeY(), this.getZ(), 7.0F, false, Level.ExplosionInteraction.MOB);
+                    if (!this.isSilent()) {
+                        this.level().globalLevelEvent(1023, this.blockPosition(), 0);
+                    }
+                }
+
+                this.setInvulnerableTicks(k1);
+                if (this.tickCount % 10 == 0) {
+                    this.heal(10.0F);
+                }
+
+            } else {
+
+                for (int i = 1; i < 3; ++i) {
+                    if (this.tickCount >= this.nextHeadUpdate[i - 1]) {
+                        this.nextHeadUpdate[i - 1] = this.tickCount + 10 + this.random.nextInt(10);
+                        if (this.level().getDifficulty() == Difficulty.NORMAL || this.level().getDifficulty() == Difficulty.HARD) {
+                            int i3 = i - 1;
+                            int j3 = this.idleHeadUpdates[i - 1];
+                            this.idleHeadUpdates[i3] = this.idleHeadUpdates[i - 1] + 1;
+                            if (j3 > 15) {
+                                float f = 10.0F;
+                                float f1 = 5.0F;
+                                double d0 = Mth.nextDouble(this.random, this.getX() - 10.0D, this.getX() + 10.0D);
+                                double d1 = Mth.nextDouble(this.random, this.getY() - 5.0D, this.getY() + 5.0D);
+                                double d2 = Mth.nextDouble(this.random, this.getZ() - 10.0D, this.getZ() + 10.0D);
+                                this.performRangedAttack(i + 1, d0, d1, d2, true);
+                                this.idleHeadUpdates[i - 1] = 0;
+                            }
+                        }
+
+                        int l1 = this.getAlternativeTarget(i);
+                        if (l1 > 0) {
+                            LivingEntity livingentity = (LivingEntity) this.level().getEntity(l1);
+                            if (livingentity != null && this.canAttack(livingentity) && !(this.distanceToSqr(livingentity) > 900.0D) && this.hasLineOfSight(livingentity)) {
+                                this.performRangedAttack2(i + 1, livingentity);
+                                this.nextHeadUpdate[i - 1] = this.tickCount + 40 + this.random.nextInt(20);
+                                this.idleHeadUpdates[i - 1] = 0;
+                            } else {
+                                this.setAlternativeTarget(i, 0);
+                            }
+                        } else {
+                            List<LivingEntity> list = this.level().getNearbyEntities(LivingEntity.class, TARGETING_CONDITIONS, this, this.getBoundingBox().inflate(20.0D, 8.0D, 20.0D));
+                            if (!list.isEmpty()) {
+                                LivingEntity livingentity1 = list.get(this.random.nextInt(list.size()));
+                                this.setAlternativeTarget(i, livingentity1.getId());
+                            }
+                        }
+                    }
+                }
+
+                if (this.getTarget() != null) {
+                    this.setAlternativeTarget(0, this.getTarget().getId());
+                } else {
+                    this.setAlternativeTarget(0, 0);
+                }
+
+                if (this.destroyBlocksTick > 0) {
+                    --this.destroyBlocksTick;
+                    if (this.destroyBlocksTick == 0 && ForgeEventFactory.getMobGriefingEvent(this.level(), this)) {
+                        int j1 = Mth.floor(this.getY());
+                        int i2 = Mth.floor(this.getX());
+                        int j2 = Mth.floor(this.getZ());
+                        boolean flag = false;
+
+                        for (int j = -1; j <= 1; ++j) {
+                            for (int k2 = -1; k2 <= 1; ++k2) {
+                                for (int k = 0; k <= 3; ++k) {
+                                    int l2 = i2 + j;
+                                    int l = j1 + k;
+                                    int i1 = j2 + k2;
+                                    BlockPos blockpos = new BlockPos(l2, l, i1);
+                                    BlockState blockstate = this.level().getBlockState(blockpos);
+                                    if (blockstate.canEntityDestroy(this.level(), blockpos, this) && ForgeEventFactory.onEntityDestroyBlock(this, blockpos, blockstate)) {
+                                        flag = this.level().destroyBlock(blockpos, true, this) || flag;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (flag) {
+                            this.level().levelEvent((Player) null, 1022, this.blockPosition(), 0);
+                        }
+                    }
+                }
+
+                if (this.tickCount % 20 == 0) {
+                    this.heal(1.0F);
+                }
+
+                this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+            }
+        }
+    }
+
+    protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
+        return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
 
     public boolean canJump() {
