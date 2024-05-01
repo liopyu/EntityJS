@@ -120,7 +120,7 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:1.19.2-43.2.0"
-
+    runtimeOnly fg.deobf("curse.maven:probejs-585406:5002340")
     compileOnly fg.deobf("curse.maven:framework-549225:4718247")
     compileOnly fg.deobf("curse.maven:mrcrayfishs-gun-mod-289479:4718583")
 
