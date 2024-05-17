@@ -35,6 +35,19 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
 
 public class ContextUtils {
+    public static class PositionRiderContext {
+        @Info("The vehicle entity")
+        public final Entity entity;
+
+        @Info("The passenger")
+        public final Entity passenger;
+
+        public PositionRiderContext(Entity entity, Entity passenger) {
+            this.entity = entity;
+            this.passenger = passenger;
+        }
+    }
+
     public static class CollidingProjectileEntityContext {
         @Info("The colliding entity")
         public final Entity entity;

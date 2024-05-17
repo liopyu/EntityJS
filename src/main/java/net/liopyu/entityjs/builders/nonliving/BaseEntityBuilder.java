@@ -99,6 +99,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient float scaleHeight;
     public transient float scaleWidth;
     public transient Consumer<ContextUtils.ScaleModelRenderContextNL<T>> scaleModelForRender;
+    public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
@@ -121,6 +122,21 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         animationResource = t -> newID("animations/entity/", ".animation.json");
         scaleHeight = 1F;
         scaleWidth = 1F;
+    }
+
+    @Info(value = """
+            @param positionRider A consumer determining the position of rider/riders.
+                            
+                Example usage:
+                ```javascript
+                entityBuilder.positionRider(context => {
+                    const {entity, passenger} = context
+                });
+                ```
+            """)
+    public BaseEntityBuilder<T> positionRider(Consumer<ContextUtils.PositionRiderContext> builderConsumer) {
+        this.positionRider = builderConsumer;
+        return this;
     }
 
     @Info(value = """

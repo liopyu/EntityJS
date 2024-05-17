@@ -184,6 +184,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.ScaleModelRenderContext<T>> scaleModelForRender;
     public final List<GeoLayerJSBuilder<T>> layerList = new ArrayList<>();
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
+    public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -217,6 +218,21 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mountJumpingEnabled = true;
         scaleHeight = 1F;
         scaleWidth = 1F;
+    }
+
+    @Info(value = """
+            @param positionRider A consumer determining the position of rider/riders.
+                            
+                Example usage:
+                ```javascript
+                entityBuilder.positionRider(context => {
+                    const { entity, passenger } = context
+                });
+                ```
+            """)
+    public BaseLivingEntityBuilder<T> positionRider(Consumer<ContextUtils.PositionRiderContext> builderConsumer) {
+        this.positionRider = builderConsumer;
+        return this;
     }
 
     @Info(value = """

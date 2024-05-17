@@ -19,7 +19,8 @@ public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
         super(i);
         this.item = (ArrowItemBuilder) new ArrowItemBuilder(id, this)
                 .canBePickedup(true)
-                .texture(i.getNamespace() + ":item/" + i.getPath());
+                .texture(i.getNamespace() + ":item/" + i.getPath())
+                .tag(new ResourceLocation("minecraft:arrows"));
     }
 
 

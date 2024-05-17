@@ -770,6 +770,16 @@ public class CaveSpiderEntityJS extends CaveSpider implements IAnimatableJS {
     }
 
     @Override
+    public void positionRider(Entity pPassenger) {
+        if (builder.positionRider != null) {
+            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger);
+            EntityJSHelperClass.consumerCallback(builder.positionRider, context, "[EntityJS]: Error in " + entityName() + "builder for field: positionRider.");
+            return;
+        }
+        super.positionRider(pPassenger);
+    }
+
+    @Override
     protected boolean canAddPassenger(@NotNull Entity entity) {
         if (builder.canAddPassenger == null) {
             return super.canAddPassenger(entity);
