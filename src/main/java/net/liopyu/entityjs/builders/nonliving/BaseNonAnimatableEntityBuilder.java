@@ -71,6 +71,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public transient boolean fireImmune;
     public transient ResourceLocation[] immuneTo;
     public transient boolean spawnFarFromPlayer;
+    public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
 
     public BaseNonAnimatableEntityBuilder(ResourceLocation i) {
         super(i);
@@ -261,6 +262,20 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         return this;
     }
 
+    @Info(value = """
+            @param positionRider A consumer determining the position of rider/riders.
+                            
+                Example usage:
+                ```javascript
+                entityBuilder.positionRider(context => {
+                    const {entity, passenger, moveFunction} = context
+                });
+                ```
+            """)
+    public BaseNonAnimatableEntityBuilder<T> positionRider(Consumer<ContextUtils.PositionRiderContext> builderConsumer) {
+        this.positionRider = builderConsumer;
+        return this;
+    }
 
     @Info(value = """
             Sets a predicate to determine if a passenger can be added to the entity.

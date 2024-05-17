@@ -28,6 +28,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
@@ -253,6 +254,30 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
             final ContextUtils.MovementContext context = new ContextUtils.MovementContext(pType, pPos, this);
             EntityJSHelperClass.consumerCallback(builder.move, context, "[EntityJS]: Error in " + entityName() + "builder for field: move.");
         }
+    }
+
+    @Override
+    protected void positionRider(Entity pPassenger, MoveFunction pCallback) {
+        if (builder.positionRider != null) {
+            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger, pCallback);
+            EntityJSHelperClass.consumerCallback(builder.positionRider, context, "[EntityJS]: Error in " + entityName() + "builder for field: positionRider.");
+            return;
+        }
+        super.positionRider(pPassenger, pCallback);
+    }
+
+    @Override
+    protected boolean canAddPassenger(@NotNull Entity entity) {
+        if (builder.canAddPassenger == null) {
+            return super.canAddPassenger(entity);
+        }
+        final ContextUtils.EPassengerEntityContext context = new ContextUtils.EPassengerEntityContext(entity, this);
+        Object obj = builder.canAddPassenger.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAddPassenger from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean, defaulting to " + super.canAddPassenger(entity));
+        return super.canAddPassenger(entity);
     }
 
     @Override

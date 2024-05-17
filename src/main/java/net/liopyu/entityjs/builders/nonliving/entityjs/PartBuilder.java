@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
+import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
@@ -50,10 +51,26 @@ public class PartBuilder<T extends LivingEntity> {
     public transient Function<Entity, Object> isFreezing;
     public transient Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith;
     public transient Consumer<ContextUtils.PartHurtContext<T>> onPartHurt;
+    public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
 
     public PartBuilder() {
         isPickable = true;
         this.isAttackable = t -> true;
+    }
+
+    @Info(value = """
+            @param positionRider A consumer determining the position of rider/riders.
+                            
+                Example usage:
+                ```javascript
+                entityBuilder.positionRider(context => {
+                    const {entity, passenger, moveFunction} = context
+                });
+                ```
+            """)
+    public PartBuilder<T> positionRider(Consumer<ContextUtils.PositionRiderContext> builderConsumer) {
+        this.positionRider = builderConsumer;
+        return this;
     }
 
     @Info(value = """

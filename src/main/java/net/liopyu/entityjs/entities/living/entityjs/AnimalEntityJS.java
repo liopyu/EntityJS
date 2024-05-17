@@ -911,6 +911,16 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
     }
 
     @Override
+    protected void positionRider(Entity pPassenger, MoveFunction pCallback) {
+        if (builder.positionRider != null) {
+            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger, pCallback);
+            EntityJSHelperClass.consumerCallback(builder.positionRider, context, "[EntityJS]: Error in " + entityName() + "builder for field: positionRider.");
+            return;
+        }
+        super.positionRider(pPassenger, pCallback);
+    }
+
+    @Override
     protected boolean canAddPassenger(@NotNull Entity entity) {
         if (builder.canAddPassenger == null) {
             return super.canAddPassenger(entity);
