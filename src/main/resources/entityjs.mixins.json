@@ -7,6 +7,8 @@
     "KubeJSCommandsMixin",
     "ServerScriptManagerMixin"
   ],
-  "client": [],
+  "client": [
+    "MinecraftClientMixin"
+  ],
   "refmap": "entityjs.refmap.json"
 }
