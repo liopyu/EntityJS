@@ -8,6 +8,7 @@ import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.living.vanilla.ChickenJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -21,6 +22,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -32,6 +34,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -50,21 +53,17 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
-@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class ChickenEntityJS extends Chicken implements IAnimatableJS {
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
@@ -103,7 +102,14 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
         }
         return this.random.nextInt(6000) + 6000;
     }
-
+    @Override
+    public AttributeMap getAttributes() {
+        if (builder != null) {
+            var attributeSupplier = builder.getAttributeBuilder().build();
+            return new AttributeMap(attributeSupplier);
+        }
+        return new AttributeMap(MobEntityJS.createMobAttributes().build());
+    }
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
@@ -130,7 +136,6 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
     }
 
 
-    @Override
     public boolean isMultipartEntity() {
         return partEntities != null;
     }
@@ -140,7 +145,6 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
         super.recreateFromPacket(pPacket);
     }
 
-    @Override
     public PartEntity<?>[] getParts() {
         return Objects.requireNonNullElseGet(partEntities, () -> new PartEntity<?>[0]);
     }
@@ -199,7 +203,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
             final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
             if (obj instanceof ResourceLocation resourceLocation) {
-                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
+                EntityType<?> breedOffspringType = BuiltInRegistries.ENTITY_TYPE.get(resourceLocation);
                 if (breedOffspringType != null) {
                     Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
                     if (breedOffspringEntity instanceof Chicken c) {
@@ -437,23 +441,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
         return builder.mobType;
     }
 
-    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
-        ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, (item) -> {
-            return item instanceof BowItem;
-        })));
-        AbstractArrow abstractarrow = this.getArrow(itemstack, pDistanceFactor);
-        if (this.getMainHandItem().getItem() instanceof BowItem) {
-            abstractarrow = ((BowItem) this.getMainHandItem().getItem()).customArrow(abstractarrow);
-        }
 
-        double d0 = pTarget.getX() - this.getX();
-        double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
-        double d2 = pTarget.getZ() - this.getZ();
-        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level().getDifficulty().getId() * 4));
-        this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-        this.level().addFreshEntity(abstractarrow);
-    }
 
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
         return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
@@ -462,6 +450,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
     public boolean canJump() {
         return Objects.requireNonNullElse(builder.canJump, true);
     }
+
 
     public void jump() {
         double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
@@ -484,12 +473,11 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
 
         this.hasImpulse = true;
         onJump();
-        ForgeHooks.onLivingJump(this);
     }
 
     public boolean shouldJump() {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
+        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.maxUpStep() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -554,7 +542,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
     @Override
     protected SoundEvent getAmbientSound() {
         if (builder.setAmbientSound != null) {
-            return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setAmbientSound);
+            return BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setAmbientSound);
         } else {
             return super.getAmbientSound();
         }
@@ -631,7 +619,6 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
 
                     this.setDeltaMovement(newVelocityX, newVelocityY, newVelocityZ);
                     onJump();
-                    ForgeHooks.onLivingJump(this);
                 }
             }
 
@@ -662,8 +649,19 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
         }
     }
 
+    private boolean isRemovedFromWorld = false;
+    private boolean isAddedToWorld = false;
     @Override
     public void tick() {
+        if (!isAddedToWorld && !this.isRemoved()) {
+            onAddedToWorld();
+            isAddedToWorld = true;
+            isRemovedFromWorld = false;
+        } else if (this.isRemoved() && !isRemovedFromWorld) {
+            onRemovedFromWorld();
+            isAddedToWorld = false;
+            isRemovedFromWorld = true;
+        }
         super.tick();
         if (builder.tick != null) {
             if (!this.level().isClientSide()) {
@@ -673,12 +671,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
         }
     }
 
-    @Override
     public void onAddedToWorld() {
-        super.onAddedToWorld();
-        if (builder.defaultGoals) {
-            super.registerGoals();
-        }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
@@ -1010,7 +1003,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
         if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
         final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, p_21239_);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
-        if (obj != null) return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        if (obj != null) return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
         return super.getHurtSound(p_21239_);
     }
@@ -1019,14 +1012,14 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -1140,7 +1133,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
     @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setDeathSound));
     }
 
 
@@ -1148,8 +1141,8 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
     public @NotNull Fallsounds getFallSounds() {
         if (builder.fallSounds != null)
             return new Fallsounds(
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.smallFallSound)),
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.largeFallSound))
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.smallFallSound)),
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.largeFallSound))
             );
         return super.getFallSounds();
     }
@@ -1157,7 +1150,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null)
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.eatingSound));
+            return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.eatingSound));
         return super.getEatingSound(itemStack);
     }
 
@@ -1389,21 +1382,6 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
         return super.eat(level, itemStack);
     }
 
-
-    @Override
-    public boolean shouldRiderFaceForward(@NotNull Player player) {
-        if (builder.shouldRiderFaceForward != null) {
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, this);
-            Object obj = builder.shouldRiderFaceForward.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldRiderFaceForward from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.shouldRiderFaceForward(player));
-        }
-        return super.shouldRiderFaceForward(player);
-    }
-
-
     @Override
     public boolean canFreeze() {
         if (builder.canFreeze != null) {
@@ -1586,24 +1564,9 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
     }
 
 
-    @Override
-    public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
-        if (builder.canTrample != null) {
-            final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
-            Object obj = builder.canTrample.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTrample from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTrample(state, pos, fallDistance));
-        }
-
-        return super.canTrample(state, pos, fallDistance);
-    }
 
 
-    @Override
     public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
         if (builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
 

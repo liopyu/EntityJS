@@ -3,6 +3,8 @@ package net.liopyu.entityjs.client.living;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.model.EntityModelJS;
 import net.liopyu.entityjs.client.living.model.GeoLayerJS;
@@ -25,12 +27,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import software.bernie.geckolib.util.RenderUtils;
 
-import javax.annotation.Nullable;
 
 /**
  * The default implementation of GeckoLib's {@link GeoEntityRenderer} which delegates to the entity
  * type builder and {@link EntityModelJS} where it makes sense
  */
+@Environment(EnvType.CLIENT)
 public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extends GeoEntityRenderer<T> {
 
     private final BaseLivingEntityBuilder<T> builder;
@@ -74,7 +76,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     }
 
     @Override
-    public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
+    public RenderType getRenderType(T animatable, ResourceLocation texture,  MultiBufferSource bufferSource, float partialTick) {
         return switch (animatable.getBuilder().renderType) {
             case SOLID -> RenderType.entitySolid(texture);
             case CUTOUT -> RenderType.entityCutout(texture);

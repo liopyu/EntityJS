@@ -6,6 +6,7 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -17,7 +18,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -70,8 +70,19 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         }
     }
 
+    private boolean isRemovedFromWorld = false;
+    private boolean isAddedToWorld = false;
     @Override
     public void tick() {
+        if (!isAddedToWorld && !this.isRemoved()) {
+            onAddedToWorld();
+            isAddedToWorld = true;
+            isRemovedFromWorld = false;
+        } else if (this.isRemoved() && !isRemovedFromWorld) {
+            onRemovedFromWorld();
+            isAddedToWorld = false;
+            isRemovedFromWorld = true;
+        }
         super.tick();
         if (builder.tick != null) {
             EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
@@ -97,9 +108,8 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         }
     }
 
-    @Override
+
     public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
         if (builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
         }
@@ -123,9 +133,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         return super.causeFallDamage(distance, damageMultiplier, damageSource);
     }
 
-    @Override
     public void onAddedToWorld() {
-        super.onAddedToWorld();
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
@@ -320,14 +328,14 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -448,20 +456,6 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         return super.mayInteract(p_146843_, p_146844_);
     }
 
-
-    @Override
-    public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
-        if (builder.canTrample != null) {
-            final ContextUtils.ECanTrampleContext context = new ContextUtils.ECanTrampleContext(state, pos, fallDistance, this);
-            Object obj = builder.canTrample.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTrample from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTrample(state, pos, fallDistance));
-        }
-
-        return super.canTrample(state, pos, fallDistance);
-    }
 
 
     @Override

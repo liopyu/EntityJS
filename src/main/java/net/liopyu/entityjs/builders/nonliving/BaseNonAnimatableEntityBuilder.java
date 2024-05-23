@@ -61,7 +61,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public transient Function<ContextUtils.EDamageContext, Object> isInvulnerableTo;
     public transient Function<Entity, Object> canChangeDimensions;
     public transient Function<ContextUtils.EMayInteractContext, Object> mayInteract;
-    public transient Function<ContextUtils.ECanTrampleContext, Object> canTrample;
+   // public transient Function<ContextUtils.ECanTrampleContext, Object> canTrample;
     public transient Consumer<Entity> onRemovedFromWorld;
     public transient Function<Entity, Object> isFreezing;
     public transient Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith;
@@ -747,7 +747,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     }
 
 
-    @Info(value = """
+   /* @Info(value = """
             Sets a predicate function to determine whether the entity can trample or step on something.
             The provided Predicate accepts a {@link ContextUtils.CanTrampleContext} parameter,
             representing the context of the potential trampling action, and returns a boolean.
@@ -764,7 +764,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public BaseNonAnimatableEntityBuilder<T> canTrample(Function<ContextUtils.ECanTrampleContext, Object> predicate) {
         canTrample = predicate;
         return this;
-    }
+    }*/
 
 
     @Info(value = """

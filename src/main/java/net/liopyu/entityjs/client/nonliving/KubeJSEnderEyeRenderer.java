@@ -3,6 +3,8 @@ package net.liopyu.entityjs.client.nonliving;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
@@ -14,12 +16,10 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class KubeJSEnderEyeRenderer<T extends Entity & IProjectileEntityJS> extends EntityRenderer<T> {
 
     private final EyeOfEnderEntityBuilder<T> builder;

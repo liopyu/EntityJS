@@ -1,61 +1,66 @@
 package net.liopyu.entityjs.client;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.EntityJSMod;
-import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderEntityBuilder;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.client.nonliving.*;
 import net.liopyu.entityjs.util.ModKeybinds;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 
-public class ClientEventHandlers {
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-
-    @Mod.EventBusSubscriber(modid = EntityJSMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
-    public static class ClientModBusEvents {
-        @SubscribeEvent
-        public static void onKeyRegister(RegisterKeyMappingsEvent event) {
-            event.register(ModKeybinds.mount_jump);
-        }
+public class ClientEventHandlers implements ClientModInitializer {
+    /**
+     * Initializes client-specific features of the mod.
+     * <p>
+     * This method registers key bindings immediately and delays the registration of entity renderers by 5 seconds.
+     * The delay is necessary due to the random registration order of entity types in KubeJS, where sometimes
+     * entity types register after the renderers resulting in a null entity type/failed renderer registry.
+     * </p>
+     */
+    @Override
+    public void onInitializeClient() {
+        registerKeyBindings();
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.schedule(this::registerEntityRenderers, 2, TimeUnit.SECONDS);
     }
 
-    public static void init() {
 
-        final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modBus.addListener(ClientEventHandlers::registerEntityRenders);
-    }
-
-    private static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
+    private void registerEntityRenderers() {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSEntityRenderer<>(renderManager, builder));
+            EntityRendererRegistry.register(UtilsJS.cast(builder.get()), (dispatcher) -> new KubeJSEntityRenderer<>(dispatcher, builder));
         }
         for (ArrowEntityBuilder<?> builder : ArrowEntityBuilder.thisList) {
-            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSArrowEntityRenderer<>(renderManager, builder));
+            EntityRendererRegistry.register(UtilsJS.cast(builder.get()), (dispatcher) -> new KubeJSArrowEntityRenderer<>(dispatcher, builder));
         }
         for (ProjectileEntityBuilder<?> builder : ProjectileEntityBuilder.thisList) {
-            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSProjectileEntityRenderer<>(renderManager, builder));
+            EntityRendererRegistry.register(UtilsJS.cast(builder.get()), (dispatcher) -> new KubeJSProjectileEntityRenderer<>(dispatcher, builder));
         }
         for (EyeOfEnderEntityBuilder<?> builder : EyeOfEnderEntityBuilder.thisList) {
-            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSEnderEyeRenderer<>(renderManager, builder));
+            EntityRendererRegistry.register(UtilsJS.cast(builder.get()), (dispatcher) -> new KubeJSEnderEyeRenderer<>(dispatcher, builder));
         }
         for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
-            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSNLEntityRenderer<>(renderManager, builder));
+            EntityRendererRegistry.register(UtilsJS.cast(builder.get()), (dispatcher) -> new KubeJSNLEntityRenderer<>(dispatcher, builder));
         }
         for (BoatEntityBuilder<?> builder : BoatEntityBuilder.thisList) {
-            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSBoatRenderer<>(renderManager, builder));
+            EntityRendererRegistry.register(UtilsJS.cast(builder.get()), (dispatcher) -> new KubeJSBoatRenderer<>(dispatcher, builder));
         }
-
     }
 
+    private void registerKeyBindings() {
+        KeyMapping mountJumpKey = ModKeybinds.mount_jump;
+        KeyBindingHelper.registerKeyBinding(mountJumpKey);
+    }
 }

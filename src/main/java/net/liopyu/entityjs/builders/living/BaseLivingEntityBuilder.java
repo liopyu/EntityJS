@@ -135,7 +135,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.EntityBlockPosContext> onStartSleeping;
     public transient Consumer<LivingEntity> onStopSleeping;
     public transient Consumer<ContextUtils.EntityItemLevelContext> eat;
-    public transient Function<ContextUtils.PlayerEntityContext, Object> shouldRiderFaceForward;
+    //public transient Function<ContextUtils.PlayerEntityContext, Object> shouldRiderFaceForward;
     public transient Function<LivingEntity, Object> canFreeze;
     public transient Function<LivingEntity, Object> isCurrentlyGlowing;
     public transient Function<LivingEntity, Object> canDisableShield;
@@ -153,7 +153,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<LivingEntity, Object> canChangeDimensions;
     public transient Function<ContextUtils.CalculateFallDamageContext, Object> calculateFallDamage;
     public transient Function<ContextUtils.MayInteractContext, Object> mayInteract;
-    public transient Function<ContextUtils.CanTrampleContext, Object> canTrample;
+    //public transient Function<ContextUtils.CanTrampleContext, Object> canTrample;
     public transient Consumer<LivingEntity> onRemovedFromWorld;
     public transient Consumer<LivingEntity> onLivingJump;
     public transient Consumer<LivingEntity> aiStep;
@@ -162,7 +162,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public Heightmap.Types heightMap;
     public SpawnPlacements.SpawnPredicate<? extends Entity> spawnPredicate;
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
-    public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
+    //public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
     public transient Consumer<ContextUtils.RenderContext<T>> render;
     public transient MobType mobType;
     public transient Function<LivingEntity, Object> isFreezing;
@@ -2047,7 +2047,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
 
-    @Info(value = """
+    /*@Info(value = """
             Sets a predicate function to determine whether the rider of the entity should face forward.
             The provided Predicate accepts a {@link ContextUtils.PlayerEntityContext} parameter,
             representing the context of the player entity riding the main entity.
@@ -2064,7 +2064,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> shouldRiderFaceForward(Function<ContextUtils.PlayerEntityContext, Object> predicate) {
         shouldRiderFaceForward = predicate;
         return this;
-    }
+    }*/
 
 
     @Info(value = """
@@ -2362,7 +2362,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
 
-    @Info(value = """
+    /*@Info(value = """
             Sets a predicate function to determine whether the entity can trample or step on something.
             The provided Predicate accepts a {@link ContextUtils.CanTrampleContext} parameter,
             representing the context of the potential trampling action, and returns a boolean.
@@ -2379,7 +2379,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> canTrample(Function<ContextUtils.CanTrampleContext, Object> predicate) {
         canTrample = predicate;
         return this;
-    }
+    }*/
 
 
     @Info(value = """
@@ -2407,7 +2407,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.spawnPlacement('on_ground', 'world_surface', (entitypredicate, levelaccessor, spawntype, blockpos, randomsource) => {
                 if (levelaccessor.getLevel().getBiome(blockpos) == 'minecraft:plains') return true;
                 return false
-            })  
+            })
             """, params = {
             @Param(name = "placementType", value = "The placement type of the spawn, accepts 'on_ground', 'in_water', 'no_restrictions', 'in_lava'"),
             @Param(name = "heightMap", value = "The height map used for the spawner"),
@@ -2421,7 +2421,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    @Info(value = "Adds a spawner for this entity to the provided biome(s)", params = {
+    /*@Info(value = "Adds a spawner for this entity to the provided biome(s)", params = {
             @Param(name = "biomes", value = "A list of biomes that the entity should spawn in. If using a tag, only one value may be provided"),
             @Param(name = "weight", value = "The spawn weight the entity should have"),
             @Param(name = "minCount", value = "The minimum number of entities that can spawn at a time"),
@@ -2430,7 +2430,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> biomeSpawn(List<String> biomes, int weight, int minCount, int maxCount) {
         biomeSpawnList.add(new EventBasedSpawnModifier.BiomeSpawn(BiomeSpawnsEventJS.processBiomes(biomes), () -> new MobSpawnSettings.SpawnerData(get(), Weight.of(weight), minCount, maxCount)));
         return this;
-    }
+    }*/
 
     @Info(value = """
             Adds an animation controller to the entity with the specified parameters.

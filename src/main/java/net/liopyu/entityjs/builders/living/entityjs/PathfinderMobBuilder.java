@@ -18,24 +18,7 @@ public abstract class PathfinderMobBuilder<T extends PathfinderMob & IAnimatable
         super(i);
     }
 
-    @Info(value = """
-            Sets the function to determine whether the entity should stay close to its leash holder.
-                        
-            @param predicate A Function accepting a {@link Mob} parameter,
-                             defining the condition for the entity to stay close to its leash holder.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.shouldStayCloseToLeashHolder(entity => {
-                // Custom logic to determine whether the entity should stay close to its leash holder.
-                return true;
-            });
-            ```
-            """)
-    public PathfinderMobBuilder<T> shouldStayCloseToLeashHolder(Function<Mob, Object> predicate) {
-        this.shouldStayCloseToLeashHolder = predicate;
-        return this;
-    }
+
 
     @Info(value = """
             Sets the follow leash speed for the entity.

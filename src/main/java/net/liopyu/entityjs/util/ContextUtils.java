@@ -6,6 +6,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
+import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
@@ -29,7 +30,6 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.entity.PartEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 
 public class ContextUtils {

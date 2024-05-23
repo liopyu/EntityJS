@@ -1,19 +1,18 @@
 package net.liopyu.entityjs.util;
 
+import dev.architectury.registry.level.entity.SpawnPlacementsRegistry;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
 import dev.latvian.mods.kubejs.event.Extra;
 import dev.latvian.mods.kubejs.script.data.VirtualKubeJSDataPack;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.fabricmc.fabric.mixin.object.builder.DefaultAttributeRegistryAccessor;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.events.*;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 
 public class EventHandlers {
 
@@ -23,38 +22,35 @@ public class EventHandlers {
     public static final EventHandler addGoalSelectors = EntityJSEvents.server("addGoalSelectors", () -> AddGoalSelectorsEventJS.class).extra(Extra.REQUIRES_ID);
     public static final EventHandler buildBrain = EntityJSEvents.server("buildBrain", () -> BuildBrainEventJS.class).extra(Extra.REQUIRES_ID);
     public static final EventHandler buildBrainProvider = EntityJSEvents.server("buildBrainProvider", () -> BuildBrainProviderEventJS.class).extra(Extra.REQUIRES_ID);
-    public static final EventHandler biomeSpawns = EntityJSEvents.server("biomeSpawns", () -> BiomeSpawnsEventJS.class);
+    //public static final EventHandler biomeSpawns = EntityJSEvents.server("biomeSpawns", () -> BiomeSpawnsEventJS.class);
 
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
 
     public static void init() {
 
-        final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modBus.addListener(EventHandlers::attributeCreation);
-        modBus.addListener(EventHandlers::attributeModification);
-        modBus.addListener(EventPriority.LOW, EventHandlers::registerSpawnPlacements); // Low to allow REPLACE to work and addons to effect the result
-
+        //attributeModification();
+        registerSpawnPlacements();
     }
 
-    private static void attributeCreation(EntityAttributeCreationEvent event) {
+    public static void attributeCreation() {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-            event.put(builder.get(), builder.getAttributeBuilder().build());
+            FabricDefaultAttributeRegistry.register(builder.get(), builder.getAttributeBuilder());
         }
     }
 
-    private static void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
+    private static void registerSpawnPlacements() {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.spawnList) {
-            event.register(UtilsJS.cast(builder.get()), builder.placementType, builder.heightMap, builder.spawnPredicate, SpawnPlacementRegisterEvent.Operation.REPLACE); // Cast because the '?' generics makes the event unhappy
+            SpawnPlacementsRegistry.register(() -> UtilsJS.cast(builder.get()), builder.placementType, builder.heightMap, UtilsJS.cast(builder.spawnPredicate)); // Cast because the '?' generics makes the event unhappy
         }
         if (spawnPlacement.hasListeners()) {
-            spawnPlacement.post(new RegisterSpawnPlacementsEventJS(event));
+            spawnPlacement.post(new RegisterSpawnPlacementsEventJS());
         }
     }
 
-    private static void attributeModification(EntityAttributeModificationEvent event) {
+    private static void attributeModification() {
         if (editAttributes.hasListeners()) {
-            editAttributes.post(new ModifyAttributeEventJS(event));
+            editAttributes.post(new ModifyAttributeEventJS());
         }
     }
 

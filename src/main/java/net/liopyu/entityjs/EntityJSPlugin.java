@@ -5,20 +5,18 @@ import dev.architectury.platform.Platform;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.living.entityjs.*;
 import net.liopyu.entityjs.builders.living.vanilla.*;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.BaseEntityJSBuilder;
-import net.liopyu.entityjs.builders.nonliving.modded.CGMProjectileEntityJSBuilder;
-import net.liopyu.entityjs.builders.nonliving.vanilla.BoatEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
-import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
 import org.slf4j.Logger;
+
+import static net.liopyu.entityjs.util.EventHandlers.attributeCreation;
 
 public class EntityJSPlugin extends KubeJSPlugin {
     public static final Logger LOGGER = LogUtils.getLogger();
@@ -60,11 +58,7 @@ public class EntityJSPlugin extends KubeJSPlugin {
         RegistryInfo.ENTITY_TYPE.addType("minecraft:eye_of_ender", EyeOfEnderJSBuilder.class, EyeOfEnderJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:piglin", PiglinJSBuilder.class, PiglinJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:wither", WitherJSBuilder.class, WitherJSBuilder::new);
-        
-        if (Platform.isModLoaded("cgm") && Platform.isModLoaded("framework")) {
-            LOGGER.info("Loading CGM-EntityJS compatibility");
-            RegistryInfo.ENTITY_TYPE.addType("cgm:ammo", CGMProjectileEntityJSBuilder.class, CGMProjectileEntityJSBuilder::new);
-        }
+
     }
 
     @Override

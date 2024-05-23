@@ -2,6 +2,8 @@ package net.liopyu.entityjs.client.nonliving;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatEntityBuilder;
 import net.liopyu.entityjs.client.nonliving.model.BoatEntityModel;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
@@ -12,11 +14,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
-import javax.annotation.Nullable;
-
+@Environment(EnvType.CLIENT)
 public class KubeJSBoatRenderer<T extends Boat & IAnimatableJSNL> extends GeoEntityRenderer<T> {
     private final BoatEntityBuilder<T> builder;
 

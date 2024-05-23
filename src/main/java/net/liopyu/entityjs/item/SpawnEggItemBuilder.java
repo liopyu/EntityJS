@@ -1,12 +1,14 @@
 package net.liopyu.entityjs.item;
 
+import dev.architectury.core.item.ArchitecturySpawnEggItem;
 import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.ForgeSpawnEggItem;
+import net.minecraft.world.item.SpawnEggItem;
 
 
 public class SpawnEggItemBuilder extends ItemBuilder {
@@ -36,7 +38,7 @@ public class SpawnEggItemBuilder extends ItemBuilder {
 
     @Override
     public Item createObject() {
-        return new ForgeSpawnEggItem(parent, backgroundColor, highlightColor, createItemProperties());
+        return new SpawnEggItem(parent.get(), backgroundColor, highlightColor, createItemProperties());
     }
 
     @Override

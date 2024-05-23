@@ -1,8 +1,6 @@
 package net.liopyu.entityjs.util;
 
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import org.apache.commons.lang3.ArrayUtils;
 
 public class ModKeybinds {
     //public static final KeyMapping mount_jump;

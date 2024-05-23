@@ -1,6 +1,8 @@
 package net.liopyu.entityjs.client.nonliving;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.client.nonliving.model.NonLivingEntityModel;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
@@ -11,12 +13,12 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
-import javax.annotation.Nullable;
 
-
+@Environment(EnvType.CLIENT)
 public class KubeJSNLEntityRenderer<T extends Entity & IAnimatableJSNL> extends GeoEntityRenderer<T> {
 
     private final BaseEntityBuilder<T> builder;

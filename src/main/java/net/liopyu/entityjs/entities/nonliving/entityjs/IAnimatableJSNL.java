@@ -1,15 +1,12 @@
 package net.liopyu.entityjs.entities.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
@@ -18,7 +15,6 @@ import software.bernie.geckolib.network.GeckoLibNetwork;
 import software.bernie.geckolib.network.packet.AnimTriggerPacket;
 import software.bernie.geckolib.network.packet.EntityAnimTriggerPacket;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
@@ -61,7 +57,7 @@ public interface IAnimatableJSNL extends GeoAnimatable, GeoEntity {
         if (entity.level().isClientSide()) {
             getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
         } else {
-            GeckoLibNetwork.send(new EntityAnimTriggerPacket<>(entity.getId(), controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
+            GeckoLibNetwork.sendToTrackingEntityAndSelf(new EntityAnimTriggerPacket(entity.getId(), controllerName, animName), entity);
         }
     }
 
@@ -88,7 +84,7 @@ public interface IAnimatableJSNL extends GeoAnimatable, GeoEntity {
         if (relatedEntity.level().isClientSide()) {
             getAnimatableInstanceCache().getManagerForId(instanceId).tryTriggerAnimation(controllerName, animName);
         } else {
-            GeckoLibNetwork.send(new AnimTriggerPacket<>(getClass().toString(), instanceId, controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> relatedEntity));
+            GeckoLibNetwork.sendToTrackingEntityAndSelf(new AnimTriggerPacket(getClass().toString(), instanceId, controllerName, animName), relatedEntity);
         }
     }
 
@@ -100,7 +96,7 @@ public interface IAnimatableJSNL extends GeoAnimatable, GeoEntity {
      * Gets the id of the entity's entity type
      */
     default String getTypeId() {
-        return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(getType())).toString();
+        return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.getKey(getType())).toString();
     }
 
     EntityType<?> getType();

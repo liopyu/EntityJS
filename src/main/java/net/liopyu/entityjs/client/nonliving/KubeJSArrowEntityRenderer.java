@@ -1,6 +1,8 @@
 package net.liopyu.entityjs.client.nonliving;
 
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IArrowEntityJS;
@@ -9,7 +11,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 
-
+@Environment(EnvType.CLIENT)
 public class KubeJSArrowEntityRenderer<T extends AbstractArrow & IArrowEntityJS> extends ArrowRenderer<T> {
 
     private final ArrowEntityBuilder<T> builder;

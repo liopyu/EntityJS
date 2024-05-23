@@ -6,6 +6,8 @@ import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.random.Weight;
@@ -13,7 +15,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +52,7 @@ public class BiomeSpawnsEventJS extends EventJS {
         final List<Either<ResourceLocation, TagKey<Biome>>> biomeList = new ArrayList<>();
         for (String biome : biomes) {
             if (biome.charAt(0) == '#') {
-                biomeList.add(Either.right(TagKey.create(ForgeRegistries.Keys.BIOMES, new ResourceLocation(biome.substring(1)))));
+                biomeList.add(Either.right(TagKey.create(Registries.BIOME, new ResourceLocation(biome.substring(1)))));
             } else {
                 biomeList.add(Either.left(new ResourceLocation(biome)));
             }

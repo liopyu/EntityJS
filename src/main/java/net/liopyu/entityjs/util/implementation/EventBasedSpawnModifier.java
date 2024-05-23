@@ -12,17 +12,14 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraftforge.common.world.BiomeModifier;
-import net.minecraftforge.common.world.MobSpawnSettingsBuilder;
-import net.minecraftforge.common.world.ModifiableBiomeInfo;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class EventBasedSpawnModifier implements BiomeModifier {
+public class EventBasedSpawnModifier /*implements BiomeModifier*/ {
 
-    private final BiomeSpawnsEventJS event;
+   /* private final BiomeSpawnsEventJS event;
 
     public EventBasedSpawnModifier() {
         if (EventHandlers.biomeSpawns.hasListeners()) {
@@ -108,5 +105,5 @@ public class EventBasedSpawnModifier implements BiomeModifier {
 
     public record BiomeSpawn(List<Either<ResourceLocation, TagKey<Biome>>> biomes,
                              Supplier<MobSpawnSettings.SpawnerData> spawnerData) {
-    }
+    }*/
 }

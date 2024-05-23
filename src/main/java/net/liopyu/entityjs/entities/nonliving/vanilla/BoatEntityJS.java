@@ -7,6 +7,7 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ServerboundPaddleBoatPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -14,6 +15,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
@@ -23,15 +25,16 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
@@ -112,7 +115,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     blockpos$mutableblockpos.set(k1, l1, i2);
                     FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
-                    if (this.canBoatInFluid(fluidstate)) {
+                    if (fluidstate.is(FluidTags.WATER)) {
                         float f = (float) l1 + fluidstate.getHeight(this.level(), blockpos$mutableblockpos);
                         this.waterLevel = Math.max((double) f, this.waterLevel);
                         flag |= aabb.minY < (double) f;
@@ -142,7 +145,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     blockpos$mutableblockpos.set(k1, l1, i2);
                     FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
-                    if (this.canBoatInFluid(fluidstate) && d0 < (double) ((float) blockpos$mutableblockpos.getY() + fluidstate.getHeight(this.level(), blockpos$mutableblockpos))) {
+                    if (fluidstate.is(Fluids.WATER) && d0 < (double) ((float) blockpos$mutableblockpos.getY() + fluidstate.getHeight(this.level(), blockpos$mutableblockpos))) {
                         if (!fluidstate.isSource()) {
                             return Boat.Status.UNDER_FLOWING_WATER;
                         }
@@ -285,7 +288,19 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
 
     }
 
+    private boolean isRemovedFromWorld = false;
+    private boolean isAddedToWorld = false;
+
     public void tick() {
+        if (!isAddedToWorld && !this.isRemoved()) {
+            onAddedToWorld();
+            isAddedToWorld = true;
+            isRemovedFromWorld = false;
+        } else if (this.isRemoved() && !isRemovedFromWorld) {
+            onRemovedFromWorld();
+            isAddedToWorld = false;
+            isRemovedFromWorld = true;
+        }
         this.oldStatus = this.status;
         this.status = this.getStatus();
         if (this.status != BoatEntityJS.Status.UNDER_WATER && this.status != BoatEntityJS.Status.UNDER_FLOWING_WATER) {
@@ -457,9 +472,8 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
         }
     }
 
-    @Override
+
     public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
         if (builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
         }
@@ -483,9 +497,8 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
         return super.causeFallDamage(distance, damageMultiplier, damageSource);
     }
 
-    @Override
+
     public void onAddedToWorld() {
-        super.onAddedToWorld();
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
@@ -691,14 +704,14 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -819,19 +832,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
     }
 
 
-    @Override
-    public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
-        if (builder.canTrample != null) {
-            final ContextUtils.ECanTrampleContext context = new ContextUtils.ECanTrampleContext(state, pos, fallDistance, this);
-            Object obj = builder.canTrample.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTrample from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTrample(state, pos, fallDistance));
-        }
-
-        return super.canTrample(state, pos, fallDistance);
-    }
+   
 
     @Override
     public int getMaxFallDistance() {

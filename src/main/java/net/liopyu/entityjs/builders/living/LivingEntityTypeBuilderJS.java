@@ -3,10 +3,10 @@ package net.liopyu.entityjs.builders.living;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class LivingEntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
     private final BaseLivingEntityBuilder<?> builder;
@@ -36,7 +36,7 @@ public class LivingEntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
         if (js.immuneTo.length > 0) {
             final Block[] blocks = new Block[js.immuneTo.length];
             for (int i = 0; i < js.immuneTo.length; i++) {
-                blocks[i] = ForgeRegistries.BLOCKS.getValue(js.immuneTo[i]);
+                blocks[i] = BuiltInRegistries.BLOCK.get(js.immuneTo[i]);
             }
             builder.immuneTo(blocks);
         }

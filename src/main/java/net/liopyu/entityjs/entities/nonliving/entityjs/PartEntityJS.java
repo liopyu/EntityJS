@@ -4,6 +4,7 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -17,11 +18,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
@@ -135,9 +134,19 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public T getParent() {
         return this.parentMob;
     }
-
+    private boolean isRemovedFromWorld = false;
+    private boolean isAddedToWorld = false;
     @Override
     public void tick() {
+        if (!isAddedToWorld && !this.isRemoved()) {
+            onAddedToWorld();
+            isAddedToWorld = true;
+            isRemovedFromWorld = false;
+        } else if (this.isRemoved() && !isRemovedFromWorld) {
+            onRemovedFromWorld();
+            isAddedToWorld = false;
+            isRemovedFromWorld = true;
+        }
         super.tick();
         if (builder.tick != null) {
             builder.tick.accept(this);
@@ -273,9 +282,8 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     }
 
 
-    @Override
+
     public void onAddedToWorld() {
-        super.onAddedToWorld();
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
@@ -304,14 +312,14 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -496,7 +504,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     }
 
 
-    @Override
+    /*@Override
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
             final ContextUtils.ECanTrampleContext context = new ContextUtils.ECanTrampleContext(state, pos, fallDistance, this);
@@ -508,12 +516,12 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         }
 
         return super.canTrample(state, pos, fallDistance);
-    }
+    }*/
 
 
-    @Override
+
+
     public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
         if (builder.onRemovedFromWorld != null) {
             builder.onRemovedFromWorld.accept(this);
         }

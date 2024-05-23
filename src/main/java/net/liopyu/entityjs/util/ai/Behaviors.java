@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
@@ -17,9 +18,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -251,7 +249,7 @@ public enum Behaviors {
                 maxJumpWidth,
                 maxJumpVelocity,
                 jumpSound,
-                TagKey.create(ForgeRegistries.BLOCKS.getRegistryKey(), preferredBlockTag),
+                TagKey.create(BuiltInRegistries.BLOCK.key(), preferredBlockTag),
                 preferredBlockChance,
                 acceptableLandingSpot
         );

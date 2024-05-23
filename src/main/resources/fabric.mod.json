@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "entityjs",
+  "version": "${version}",
+  "name": "Entity JS",
+  "description": "",
+  "authors": [],
+  "contact": {
+    "repo": "https://github.com/subli/untitled"
+  },
+  "license": "AGPL-3.0",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.liopyu.entityjs.client.ClientEventHandlers"
+    ],
+    "main": [
+      "net.liopyu.entityjs.EntityJSMod"
+    ]
+  },
+  "mixins": [
+    "entityjs.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

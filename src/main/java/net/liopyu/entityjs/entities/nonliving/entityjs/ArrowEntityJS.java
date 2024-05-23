@@ -11,6 +11,7 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -31,18 +32,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 @MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
 public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     public final ArrowEntityJSBuilder builder;
@@ -132,7 +129,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected SoundEvent getDefaultHitGroundSoundEvent() {
         if (builder != null && builder.defaultHitGroundSoundEvent != null) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.defaultHitGroundSoundEvent));
+            return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.defaultHitGroundSoundEvent));
         }
         return super.getDefaultHitGroundSoundEvent();
     }
@@ -231,8 +228,19 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         }
     }
 
+    private boolean isRemovedFromWorld = false;
+    private boolean isAddedToWorld = false;
     @Override
     public void tick() {
+        if (!isAddedToWorld && !this.isRemoved()) {
+            onAddedToWorld();
+            isAddedToWorld = true;
+            isRemovedFromWorld = false;
+        } else if (this.isRemoved() && !isRemovedFromWorld) {
+            onRemovedFromWorld();
+            isAddedToWorld = false;
+            isRemovedFromWorld = true;
+        }
         super.tick();
         isMoving = movementTracker.isMoving(this);
         if (builder.tick != null) {
@@ -259,9 +267,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         }
     }
 
-    @Override
+
     public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
         if (builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
         }
@@ -285,9 +292,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         return super.causeFallDamage(distance, damageMultiplier, damageSource);
     }
 
-    @Override
+
     public void onAddedToWorld() {
-        super.onAddedToWorld();
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
@@ -618,14 +624,14 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -736,19 +742,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
 
-    @Override
-    public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
-        if (builder.canTrample != null) {
-            final ContextUtils.ECanTrampleContext context = new ContextUtils.ECanTrampleContext(state, pos, fallDistance, this);
-            Object obj = builder.canTrample.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTrample from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTrample(state, pos, fallDistance));
-        }
-
-        return super.canTrample(state, pos, fallDistance);
-    }
+    
 
     @Override
     public int getMaxFallDistance() {

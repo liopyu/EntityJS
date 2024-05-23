@@ -1,10 +1,10 @@
 package net.liopyu.entityjs.builders.nonliving;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class NonAnimatableEntityTypeBuilder<B extends Entity> {
     private final BaseNonAnimatableEntityBuilder<?> builder;
@@ -33,7 +33,7 @@ public class NonAnimatableEntityTypeBuilder<B extends Entity> {
         if (js.immuneTo.length > 0) {
             final Block[] blocks = new Block[js.immuneTo.length];
             for (int i = 0; i < js.immuneTo.length; i++) {
-                blocks[i] = ForgeRegistries.BLOCKS.getValue(js.immuneTo[i]);
+                blocks[i] = BuiltInRegistries.BLOCK.get(js.immuneTo[i]);
             }
             builder.immuneTo(blocks);
         }
