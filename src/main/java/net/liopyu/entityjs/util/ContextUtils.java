@@ -30,7 +30,7 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
+import net.liopyu.liolib.cache.object.BakedGeoModel;
 
 public class ContextUtils {
 
@@ -40,13 +40,10 @@ public class ContextUtils {
 
         @Info("The passenger")
         public final Entity passenger;
-        @Info("The move function")
-        public final Entity.MoveFunction moveFunction;
 
-        public PositionRiderContext(Entity entity, Entity passenger, Entity.MoveFunction moveFunction) {
+        public PositionRiderContext(Entity entity, Entity passenger) {
             this.entity = entity;
             this.passenger = passenger;
-            this.moveFunction = moveFunction;
         }
     }
 

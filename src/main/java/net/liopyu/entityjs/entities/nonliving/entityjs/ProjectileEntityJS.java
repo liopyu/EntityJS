@@ -5,7 +5,7 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -85,6 +85,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -121,7 +122,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
         }
     }
 
- 
+
     public void onRemovedFromWorld() {
         if (builder != null && builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
@@ -147,9 +148,8 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     }
 
 
-
     public void onAddedToWorld() {
-        if (builder != null && builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder != null && builder.onAddedToWorld != null && !this.level.isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
     }
@@ -318,13 +318,13 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     }
 
     @Override
-    protected void positionRider(Entity pPassenger, MoveFunction pCallback) {
+    public void positionRider(Entity pPassenger) {
         if (builder.positionRider != null) {
-            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger, pCallback);
+            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger);
             EntityJSHelperClass.consumerCallback(builder.positionRider, context, "[EntityJS]: Error in " + entityName() + "builder for field: positionRider.");
             return;
         }
-        super.positionRider(pPassenger, pCallback);
+        super.positionRider(pPassenger);
     }
 
     @Override
@@ -377,14 +377,14 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -417,7 +417,7 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -493,7 +493,6 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
         return super.mayInteract(p_146843_, p_146844_);
     }
-
 
 
     @Override

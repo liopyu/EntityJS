@@ -14,8 +14,8 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import net.liopyu.liolib.cache.object.BakedGeoModel;
+import net.liopyu.liolib.renderer.GeoEntityRenderer;
 
 
 @Environment(EnvType.CLIENT)

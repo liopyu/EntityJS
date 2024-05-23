@@ -4,7 +4,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.util.ai.CustomGoal;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.LivingEntity;
@@ -136,7 +136,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
     })
     public void removeBlock(int priority, ResourceLocation block, double speedModifier, int verticalSearchRange) {
         if (isPathFinder) {
-            selector.addGoal(priority, new RemoveBlockGoal(Objects.requireNonNull(BuiltInRegistries.BLOCK.get(block)), (PathfinderMob) mob, speedModifier, verticalSearchRange));
+            selector.addGoal(priority, new RemoveBlockGoal(Objects.requireNonNull(Registry.BLOCK.get(block)), (PathfinderMob) mob, speedModifier, verticalSearchRange));
         }
     }
 
@@ -144,7 +144,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "priority", value = "The priority of the goal")
     })
     public void climbOnTopOfPowderedSnow(int priority) {
-        selector.addGoal(priority, new ClimbOnTopOfPowderSnowGoal(mob, mob.level()));
+        selector.addGoal(priority, new ClimbOnTopOfPowderSnowGoal(mob, mob.level));
     }
 
     @Info(value = "Adds a `EatBlockGoal` to the entity", params = {
@@ -431,7 +431,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "canUseSelector", value = "Determines when the item may be used")
     })
     public void useItem(int priority, ItemStack itemToUse, @Nullable ResourceLocation soundEvent, Predicate<T> canUseSelector) {
-        selector.addGoal(priority, new UseItemGoal<>(mob, itemToUse, soundEvent == null ? null : BuiltInRegistries.SOUND_EVENT.get(soundEvent), canUseSelector)); // I like this one, interesting function and not stupidly restricted, Mojang please more of these :)
+        selector.addGoal(priority, new UseItemGoal<>(mob, itemToUse, soundEvent == null ? null : Registry.SOUND_EVENT.get(soundEvent), canUseSelector)); // I like this one, interesting function and not stupidly restricted, Mojang please more of these :)
     }
 
     @Info(value = "Adds a `WaterAvoidingRandomFlyingGoal` to the entity, only applicable to **pathfinder** mobs", params = {

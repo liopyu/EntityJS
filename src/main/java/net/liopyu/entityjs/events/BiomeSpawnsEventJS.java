@@ -6,8 +6,8 @@ import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.random.Weight;
@@ -52,7 +52,7 @@ public class BiomeSpawnsEventJS extends EventJS {
         final List<Either<ResourceLocation, TagKey<Biome>>> biomeList = new ArrayList<>();
         for (String biome : biomes) {
             if (biome.charAt(0) == '#') {
-                biomeList.add(Either.right(TagKey.create(Registries.BIOME, new ResourceLocation(biome.substring(1)))));
+                biomeList.add(Either.right(TagKey.create(BuiltinRegistries.BIOME.key(), new ResourceLocation(biome.substring(1)))));
             } else {
                 biomeList.add(Either.left(new ResourceLocation(biome)));
             }
@@ -60,7 +60,10 @@ public class BiomeSpawnsEventJS extends EventJS {
         return biomeList;
     }
 
-    public record Addition(EntityType<?> entityType, MobSpawnSettings.SpawnerData spawnData, List<Either<ResourceLocation, TagKey<Biome>>> biomes) {}
+    public record Addition(EntityType<?> entityType, MobSpawnSettings.SpawnerData spawnData,
+                           List<Either<ResourceLocation, TagKey<Biome>>> biomes) {
+    }
 
-    public record Removal(EntityType<?> entityType, List<Either<ResourceLocation, TagKey<Biome>>> biomes) {}
+    public record Removal(EntityType<?> entityType, List<Either<ResourceLocation, TagKey<Biome>>> biomes) {
+    }
 }

@@ -20,9 +20,9 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -65,8 +65,8 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
+import net.liopyu.liolib.util.GeckoLibUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +124,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
         }
         return new AttributeMap(MobEntityJS.createMobAttributes().build());
     }
+
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
@@ -270,7 +271,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
             final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
             if (obj instanceof ResourceLocation resourceLocation) {
-                EntityType<?> breedOffspringType = BuiltInRegistries.ENTITY_TYPE.get(resourceLocation);
+                EntityType<?> breedOffspringType = Registry.ENTITY_TYPE.get(resourceLocation);
                 if (breedOffspringType != null) {
                     Object breedOffspringEntity = breedOffspringType.create(serverLevel);
                     if (breedOffspringEntity instanceof TamableAnimal animal) {
@@ -295,7 +296,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
         if (this.isInvulnerableTo(pSource)) {
             return false;
         } else {
-            if (!this.level().isClientSide) {
+            if (!this.level.isClientSide) {
                 this.setOrderedToSit(false);
             }
             return super.hurt(pSource, pAmount);
@@ -311,7 +312,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     @Override
     public void readAdditionalSaveData(CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
-        this.readPersistentAngerSaveData(this.level(), pCompound);
+        this.readPersistentAngerSaveData(this.level, pCompound);
     }
 
     @Override
@@ -332,7 +333,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
             double d0 = this.random.nextGaussian() * 0.02;
             double d1 = this.random.nextGaussian() * 0.02;
             double d2 = this.random.nextGaussian() * 0.02;
-            this.level().addParticle(particleoptions, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
+            this.level.addParticle(particleoptions, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
         }
     }
 
@@ -429,7 +430,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
 
-        if (this.level().isClientSide) {
+        if (this.level.isClientSide) {
             boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isTame() && !this.isAngry();
             return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
         } else {
@@ -472,9 +473,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
                     this.navigation.stop();
                     this.setTarget((LivingEntity) null);
                     this.setOrderedToSit(true);
-                    this.level().broadcastEntityEvent(this, (byte) 7);
+                    this.level.broadcastEntityEvent(this, (byte) 7);
                 } else {
-                    this.level().broadcastEntityEvent(this, (byte) 6);
+                    this.level.broadcastEntityEvent(this, (byte) 6);
                 }
 
                 return InteractionResult.SUCCESS;
@@ -509,7 +510,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     @Override
     public void aiStep() {
         super.aiStep();
-        if (canJump() && this.onGround() && this.getNavigation().isInProgress() && shouldJump()) {
+        if (canJump() && this.isOnGround() && this.getNavigation().isInProgress() && shouldJump()) {
             jump();
         }
         if (builder.aiStep != null) {
@@ -618,7 +619,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     }
 
 
-
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
         return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
@@ -653,7 +653,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
 
     public boolean shouldJump() {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.maxUpStep() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
+        return this.level.loadedAndEntityCanStandOn(forwardPos, this) && this.maxUpStep < this.level.getBlockState(forwardPos).getShape(this.level, forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -718,7 +718,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     @Override
     protected SoundEvent getAmbientSound() {
         if (builder.setAmbientSound != null) {
-            return BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setAmbientSound);
+            return Registry.SOUND_EVENT.get((ResourceLocation) builder.setAmbientSound);
         } else {
             return super.getAmbientSound();
         }
@@ -827,6 +827,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
 
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -840,7 +841,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
         }
         super.tick();
         if (builder.tick != null) {
-            if (!this.level().isClientSide()) {
+            if (!this.level.isClientSide()) {
                 EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
 
             }
@@ -848,7 +849,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     }
 
     public void onAddedToWorld() {
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
         }
@@ -968,7 +969,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     protected boolean thisJumping = false;
 
     public boolean ableToJump() {
-        return ModKeybinds.mount_jump.isDown() && this.onGround();
+        return ModKeybinds.mount_jump.isDown() && this.isOnGround();
     }
 
     public void setThisJumping(boolean value) {
@@ -1059,13 +1060,13 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     }
 
     @Override
-    protected void positionRider(Entity pPassenger, MoveFunction pCallback) {
+    public void positionRider(Entity pPassenger) {
         if (builder.positionRider != null) {
-            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger, pCallback);
+            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger);
             EntityJSHelperClass.consumerCallback(builder.positionRider, context, "[EntityJS]: Error in " + entityName() + "builder for field: positionRider.");
             return;
         }
-        super.positionRider(pPassenger, pCallback);
+        super.positionRider(pPassenger);
     }
 
     @Override
@@ -1179,7 +1180,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
         if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
         final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, p_21239_);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
-        if (obj != null) return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
+        if (obj != null) return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) obj));
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
         return super.getHurtSound(p_21239_);
     }
@@ -1188,14 +1189,14 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -1309,7 +1310,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setDeathSound));
+        return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.setDeathSound));
     }
 
 
@@ -1317,8 +1318,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     public @NotNull Fallsounds getFallSounds() {
         if (builder.fallSounds != null)
             return new Fallsounds(
-                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.smallFallSound)),
-                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.largeFallSound))
+                    Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.smallFallSound)),
+                    Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.largeFallSound))
             );
         return super.getFallSounds();
     }
@@ -1326,7 +1327,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null)
-            return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.eatingSound));
+            return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.eatingSound));
         return super.getEatingSound(itemStack);
     }
 
@@ -1373,11 +1374,11 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
 
 
     @Override
-    public float getJumpBoostPower() {
+    public double getJumpBoostPower() {
         if (builder.jumpBoostPower == null) return super.getJumpBoostPower();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
+        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "double");
+        if (obj != null) return (double) obj;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a double. Defaulting to " + super.getJumpBoostPower());
         return super.getJumpBoostPower();
     }
 
@@ -1503,7 +1504,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     @Override
     public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
+            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level);
             Object obj = builder.canTakeItem.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -1586,7 +1587,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -1738,8 +1739,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
 
         return super.mayInteract(p_146843_, p_146844_);
     }
-
-
 
 
     public void onRemovedFromWorld() {

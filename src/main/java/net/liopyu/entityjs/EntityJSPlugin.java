@@ -38,7 +38,6 @@ public class EntityJSPlugin extends KubeJSPlugin {
         RegistryInfo.ENTITY_TYPE.addType("minecraft:bee", BeeJSBuilder.class, BeeJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:blaze", BlazeJSBuilder.class, BlazeJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:boat", BoatJSBuilder.class, BoatJSBuilder::new);
-        RegistryInfo.ENTITY_TYPE.addType("minecraft:camel", CamelJSBuilder.class, CamelJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:cat", CatJSBuilder.class, CatJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:chicken", ChickenJSBuilder.class, ChickenJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:cow", CowJSBuilder.class, CowJSBuilder::new);

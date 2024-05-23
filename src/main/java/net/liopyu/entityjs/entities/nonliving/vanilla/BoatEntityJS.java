@@ -7,7 +7,7 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.network.protocol.game.ServerboundPaddleBoatPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -32,8 +32,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import net.liopyu.liolib.core.animatable.instance.AnimatableInstanceCache;
+import net.liopyu.liolib.util.GeckoLibUtil;
 
 import java.util.List;
 import java.util.Objects;
@@ -114,9 +114,9 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     blockpos$mutableblockpos.set(k1, l1, i2);
-                    FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
+                    FluidState fluidstate = this.level.getFluidState(blockpos$mutableblockpos);
                     if (fluidstate.is(FluidTags.WATER)) {
-                        float f = (float) l1 + fluidstate.getHeight(this.level(), blockpos$mutableblockpos);
+                        float f = (float) l1 + fluidstate.getHeight(this.level, blockpos$mutableblockpos);
                         this.waterLevel = Math.max((double) f, this.waterLevel);
                         flag |= aabb.minY < (double) f;
                     }
@@ -144,8 +144,8 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     blockpos$mutableblockpos.set(k1, l1, i2);
-                    FluidState fluidstate = this.level().getFluidState(blockpos$mutableblockpos);
-                    if (fluidstate.is(Fluids.WATER) && d0 < (double) ((float) blockpos$mutableblockpos.getY() + fluidstate.getHeight(this.level(), blockpos$mutableblockpos))) {
+                    FluidState fluidstate = this.level.getFluidState(blockpos$mutableblockpos);
+                    if (fluidstate.is(Fluids.WATER) && d0 < (double) ((float) blockpos$mutableblockpos.getY() + fluidstate.getHeight(this.level, blockpos$mutableblockpos))) {
                         if (!fluidstate.isSource()) {
                             return Boat.Status.UNDER_FLOWING_WATER;
                         }
@@ -248,7 +248,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
 
     private void tickBubbleColumn() {
         int k;
-        if (this.level().isClientSide) {
+        if (this.level.isClientSide) {
             k = this.getBubbleTime();
             if (k > 0) {
                 this.bubbleMultiplier += 0.05F;
@@ -258,7 +258,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
 
             this.bubbleMultiplier = Mth.clamp(this.bubbleMultiplier, 0.0F, 1.0F);
             this.bubbleAngleO = this.bubbleAngle;
-            this.bubbleAngle = 10.0F * (float) Math.sin((double) (0.5F * (float) this.level().getGameTime())) * this.bubbleMultiplier;
+            this.bubbleAngle = 10.0F * (float) Math.sin((double) (0.5F * (float) this.level.getGameTime())) * this.bubbleMultiplier;
         } else {
             if (!this.isAboveBubbleColumn) {
                 this.setBubbleTime(0);
@@ -309,7 +309,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
             ++this.outOfControlTicks;
         }
 
-        if (!this.level().isClientSide && this.outOfControlTicks >= 60.0F) {
+        if (!this.level.isClientSide && this.outOfControlTicks >= 60.0F) {
             this.ejectPassengers();
         }
 
@@ -332,9 +332,9 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
             }
 
             this.floatBoat();
-            if (this.level().isClientSide) {
+            if (this.level.isClientSide) {
                 this.controlBoat();
-                this.level().sendPacketToServer(new ServerboundPaddleBoatPacket(this.getPaddleState(0), this.getPaddleState(1)));
+                this.level.sendPacketToServer(new ServerboundPaddleBoatPacket(this.getPaddleState(0), this.getPaddleState(1)));
             }
 
             this.move(MoverType.SELF, this.getDeltaMovement());
@@ -343,17 +343,16 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
         }
         this.tickBubbleColumn();
         this.checkInsideBlocks();
-        List<Entity> list = this.level().getEntities(this, this.getBoundingBox().inflate(0.20000000298023224, -0.009999999776482582, 0.20000000298023224), EntitySelector.pushableBy(this));
+        List<Entity> list = this.level.getEntities(this, this.getBoundingBox().inflate(0.20000000298023224, -0.009999999776482582, 0.20000000298023224), EntitySelector.pushableBy(this));
         if (!list.isEmpty()) {
-            boolean flag = !this.level().isClientSide && !(this.getControllingPassenger() instanceof Player);
+            boolean flag = !this.level.isClientSide && !(this.getControllingPassenger() instanceof Player);
 
-            for (int j = 0; j < list.size(); ++j) {
-                Entity entity = (Entity) list.get(j);
-                if (!entity.hasPassenger(this)) {
-                    if (flag && this.getPassengers().size() < this.getMaxPassengers() && !entity.isPassenger() && this.hasEnoughSpaceFor(entity) && entity instanceof LivingEntity && !(entity instanceof WaterAnimal) && !(entity instanceof Player)) {
-                        entity.startRiding(this);
+            for (Entity value : list) {
+                if (!value.hasPassenger(this)) {
+                    if (flag && this.getPassengers().size() < this.getMaxPassengers() && !value.isPassenger() && value.getBbWidth() < this.getBbWidth() && value instanceof LivingEntity && !(value instanceof WaterAnimal) && !(value instanceof Player)) {
+                        value.startRiding(this);
                     } else {
-                        this.push(entity);
+                        this.push(value);
                     }
                 }
             }
@@ -499,7 +498,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
 
 
     public void onAddedToWorld() {
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
     }
@@ -645,13 +644,13 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
     }
 
     @Override
-    protected void positionRider(Entity pPassenger, MoveFunction pCallback) {
+    public void positionRider(Entity pPassenger) {
         if (builder.positionRider != null) {
-            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger, pCallback);
+            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger);
             EntityJSHelperClass.consumerCallback(builder.positionRider, context, "[EntityJS]: Error in " + entityName() + "builder for field: positionRider.");
             return;
         }
-        super.positionRider(pPassenger, pCallback);
+        super.positionRider(pPassenger);
     }
 
     @Override
@@ -704,14 +703,14 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -743,7 +742,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -809,7 +808,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
         if (pPlayer.isSecondaryUseActive()) {
             return InteractionResult.PASS;
         } else {
-            if (!this.level().isClientSide) {
+            if (!this.level.isClientSide) {
                 return pPlayer.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
             } else {
                 return InteractionResult.SUCCESS;
@@ -831,8 +830,6 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
         return super.mayInteract(p_146843_, p_146844_);
     }
 
-
-   
 
     @Override
     public int getMaxFallDistance() {

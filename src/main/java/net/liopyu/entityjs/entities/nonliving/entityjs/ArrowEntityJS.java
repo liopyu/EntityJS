@@ -11,7 +11,7 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -129,7 +129,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected SoundEvent getDefaultHitGroundSoundEvent() {
         if (builder != null && builder.defaultHitGroundSoundEvent != null) {
-            return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.defaultHitGroundSoundEvent));
+            return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.defaultHitGroundSoundEvent));
         }
         return super.getDefaultHitGroundSoundEvent();
     }
@@ -194,7 +194,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     public void setEnchantmentEffectsFromEntity(LivingEntity pShooter, float pVelocity) {
         int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.POWER_ARROWS, pShooter);
         int j = EnchantmentHelper.getEnchantmentLevel(Enchantments.PUNCH_ARROWS, pShooter);
-        this.setBaseDamage((double) (pVelocity * 2.0F) + this.random.triangle((double) this.level().getDifficulty().getId() * 0.11, 0.57425));
+        this.setBaseDamage((double) (pVelocity * 2.0F) + this.random.triangle((double) this.level.getDifficulty().getId() * 0.11, 0.57425));
         if (i > 0) {
             this.setBaseDamage(this.getBaseDamage() + (double) i * 0.5 + 0.5);
         }
@@ -230,6 +230,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -294,7 +295,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
 
     public void onAddedToWorld() {
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
     }
@@ -404,9 +405,9 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         Entity entity1 = this.getOwner();
         DamageSource damagesource;
         if (entity1 == null) {
-            damagesource = this.damageSources().arrow(this, this);
+            damagesource = DamageSource.arrow(this, this);
         } else {
-            damagesource = this.damageSources().arrow(this, entity1);
+            damagesource = DamageSource.arrow(this, entity1);
             if (entity1 instanceof LivingEntity) {
                 ((LivingEntity) entity1).setLastHurtMob(entity);
             }
@@ -425,7 +426,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
             if (entity instanceof LivingEntity) {
                 LivingEntity livingentity = (LivingEntity) entity;
-                if (!this.level().isClientSide && this.getPierceLevel() <= 0) {
+                if (!this.level.isClientSide && this.getPierceLevel() <= 0) {
                     livingentity.setArrowCount(livingentity.getArrowCount() + 1);
                 }
 
@@ -437,7 +438,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
                     }
                 }
 
-                if (!this.level().isClientSide && entity1 instanceof LivingEntity) {
+                if (!this.level.isClientSide && entity1 instanceof LivingEntity) {
                     EnchantmentHelper.doPostHurtEffects(livingentity, entity1);
                     EnchantmentHelper.doPostDamageEffects((LivingEntity) entity1, livingentity);
                 }
@@ -451,7 +452,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
                     this.piercedAndKilledEntities.add(livingentity);
                 }
 
-                if (!this.level().isClientSide && entity1 instanceof ServerPlayer) {
+                if (!this.level.isClientSide && entity1 instanceof ServerPlayer) {
                     ServerPlayer serverplayer = (ServerPlayer) entity1;
                     if (this.piercedAndKilledEntities != null && this.shotFromCrossbow()) {
                         CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverplayer, this.piercedAndKilledEntities);
@@ -470,7 +471,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
             this.setDeltaMovement(this.getDeltaMovement().scale(-0.1));
             this.setYRot(this.getYRot() + 180.0F);
             this.yRotO += 180.0F;
-            if (!this.level().isClientSide && this.getDeltaMovement().lengthSqr() < 1.0E-7) {
+            if (!this.level.isClientSide && this.getDeltaMovement().lengthSqr() < 1.0E-7) {
                 if (this.pickup == AbstractArrow.Pickup.ALLOWED) {
                     this.spawnAtLocation(this.getPickupItem(), 0.1F);
                 }
@@ -565,13 +566,13 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     @Override
-    protected void positionRider(Entity pPassenger, MoveFunction pCallback) {
+    public void positionRider(Entity pPassenger) {
         if (builder.positionRider != null) {
-            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger, pCallback);
+            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger);
             EntityJSHelperClass.consumerCallback(builder.positionRider, context, "[EntityJS]: Error in " + entityName() + "builder for field: positionRider.");
             return;
         }
-        super.positionRider(pPassenger, pCallback);
+        super.positionRider(pPassenger);
     }
 
     @Override
@@ -624,14 +625,14 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -664,7 +665,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -741,8 +742,6 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         return super.mayInteract(p_146843_, p_146844_);
     }
 
-
-    
 
     @Override
     public int getMaxFallDistance() {

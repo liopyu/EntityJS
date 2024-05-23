@@ -35,9 +35,9 @@ public abstract class ServerScriptManagerMixin {
     @Unique
     private VirtualKubeJSDataPack entityjs$VirtualDataPack;
 
-    @WrapOperation(method = "wrapResourceManager", at = @At(value = "INVOKE", target = "Ldev/latvian/mods/kubejs/server/ServerScriptManager;reload(Lnet/minecraft/server/packs/resources/ResourceManager;)V"), remap = false)
+    @WrapOperation(method = "wrapResourceManager", at = @At(value = "INVOKE", target = "Ldev/latvian/mods/kubejs/server/ServerScriptManager;reloadScriptManager(Lnet/minecraft/server/packs/resources/ResourceManager;)V"), remap = false)
     private void entityjs$captureMultiManager(ServerScriptManager instance, ResourceManager resourceManager, Operation<Void> original) {
-        if (original instanceof MultiPackResourceManager multiManager) {
+        if (resourceManager instanceof MultiPackResourceManager multiManager) {
             entityjs$WrappedManager = multiManager;
         }
         original.call(instance, resourceManager);

@@ -4,7 +4,7 @@ import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import software.bernie.geckolib.model.GeoModel;
+import net.liopyu.liolib.model.GeoModel;
 
 public class NonLivingEntityModel<T extends Entity & IAnimatableJSNL> extends GeoModel<T> {
     private final BaseEntityBuilder<T> builder;

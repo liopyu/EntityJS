@@ -2,7 +2,9 @@ package net.liopyu.entityjs.client.nonliving;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
@@ -16,8 +18,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class KubeJSEnderEyeRenderer<T extends Entity & IProjectileEntityJS> extends EntityRenderer<T> {
@@ -44,7 +44,7 @@ public class KubeJSEnderEyeRenderer<T extends Entity & IProjectileEntityJS> exte
             pMatrixStack.scale(2.0F, 2.0F, 2.0F);
         }
         pMatrixStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-        pMatrixStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+        pMatrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
         PoseStack.Pose $$6 = pMatrixStack.last();
         Matrix4f $$7 = $$6.pose();
         Matrix3f $$8 = $$6.normal();

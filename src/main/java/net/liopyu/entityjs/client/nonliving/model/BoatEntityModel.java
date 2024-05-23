@@ -4,7 +4,7 @@ import net.liopyu.entityjs.builders.nonliving.vanilla.BoatEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.vehicle.Boat;
-import software.bernie.geckolib.model.GeoModel;
+import net.liopyu.liolib.model.GeoModel;
 
 public class BoatEntityModel<T extends Boat & IAnimatableJSNL> extends GeoModel<T> {
     private final BoatEntityBuilder<T> builder;

@@ -5,8 +5,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -37,7 +36,7 @@ public class ModifyAttributeEventJS extends EventJS {
 
     @Info(value = "Returns a list of all entity types that can have their attributes modified by this event")
     public List<EntityType<? extends LivingEntity>> getAllTypes() {
-        return BuiltInRegistries.ENTITY_TYPE.stream()
+        return Registry.ENTITY_TYPE.stream()
                 .filter(DefaultAttributes::hasSupplier)
                 .map(entityType -> (EntityType<? extends LivingEntity>) entityType)
                 .collect(Collectors.toList());
@@ -72,7 +71,7 @@ public class ModifyAttributeEventJS extends EventJS {
         public void add(Object attribute, double defaultValue) {
             if (attribute instanceof String string) {
                 ResourceLocation id = new ResourceLocation(string.toLowerCase());
-                Attribute att = BuiltInRegistries.ATTRIBUTE.get(id);
+                Attribute att = Registry.ATTRIBUTE.get(id);
                 if (att != null) {
                     modifyAttribute(att, defaultValue);
                 } else {

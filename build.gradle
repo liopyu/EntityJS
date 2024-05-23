@@ -37,12 +37,12 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-    maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+    //maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
     // flatDir {
     //     dir 'libs'
     // }
-    //maven { url 'https://dl.cloudsmith.io/public/lio/liolib/maven/' }
+    maven { url 'https://dl.cloudsmith.io/public/lio/liolib/maven/' }
 }
 
 dependencies {
@@ -62,7 +62,7 @@ dependencies {
     modImplementation "dev.latvian.mods:kubejs-$loader:$kubejs_version"
     modImplementation "dev.latvian.mods:rhino-$loader:$rhino_version"
     modImplementation "dev.architectury:architectury-$loader:$architectury_version"
-    modImplementation "software.bernie.geckolib:geckolib-$loader-$geckolib_version"
+    modImplementation "net.liopyu.liolib:liolib-fabric-$minecraft_version:$project.liolib_Version"
     // Use kube's jij'd version
     implementation "io.github.llamalad7:mixinextras-common:0.2.1"
 

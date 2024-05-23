@@ -17,17 +17,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animation.Animation;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.AnimationState;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.keyframe.event.CustomInstructionKeyframeEvent;
-import software.bernie.geckolib.core.keyframe.event.KeyFrameEvent;
-import software.bernie.geckolib.core.keyframe.event.ParticleKeyframeEvent;
-import software.bernie.geckolib.core.keyframe.event.SoundKeyframeEvent;
-import software.bernie.geckolib.core.keyframe.event.data.KeyFrameData;
-import software.bernie.geckolib.core.object.DataTicket;
-import software.bernie.geckolib.core.object.PlayState;
+import net.liopyu.liolib.core.animation.Animation;
+import net.liopyu.liolib.core.animation.AnimationController;
+import net.liopyu.liolib.core.animation.AnimationState;
+import net.liopyu.liolib.core.animation.RawAnimation;
+import net.liopyu.liolib.core.keyframe.event.CustomInstructionKeyframeEvent;
+import net.liopyu.liolib.core.keyframe.event.KeyFrameEvent;
+import net.liopyu.liolib.core.keyframe.event.ParticleKeyframeEvent;
+import net.liopyu.liolib.core.keyframe.event.SoundKeyframeEvent;
+import net.liopyu.liolib.core.keyframe.event.data.KeyFrameData;
+import net.liopyu.liolib.core.object.DataTicket;
+import net.liopyu.liolib.core.object.PlayState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1431,7 +1431,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**
-     * A wrapper around {@link software.bernie.geckolib.core.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
+     * A wrapper around {@link net.liopyu.liolib.core.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
      * that is easier to work with in js
      */
     @FunctionalInterface
@@ -1471,7 +1471,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
      */
     public static class AnimationEventJS<E extends Entity & IAnimatableJSNL> {
         private final List<RawAnimation.Stage> animationList = new ObjectArrayList();
-        private final software.bernie.geckolib.core.animation.AnimationState<E> parent;
+        private final net.liopyu.liolib.core.animation.AnimationState<E> parent;
 
         public AnimationEventJS(AnimationState<E> parent) {
             this.parent = parent;

@@ -8,7 +8,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.apache.commons.lang3.NotImplementedException;
-import software.bernie.geckolib.core.animation.Animation;
+import net.liopyu.liolib.core.animation.Animation;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -4,7 +4,7 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -134,8 +134,10 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public T getParent() {
         return this.parentMob;
     }
+
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -245,13 +247,13 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     }
 
     @Override
-    protected void positionRider(Entity pPassenger, MoveFunction pCallback) {
+    public void positionRider(Entity pPassenger) {
         if (builder.positionRider != null) {
-            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger, pCallback);
+            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger);
             EntityJSHelperClass.consumerCallback(builder.positionRider, context, "[EntityJS]: Error in " + entityName() + "builder for field: positionRider.");
             return;
         }
-        super.positionRider(pPassenger, pCallback);
+        super.positionRider(pPassenger);
     }
 
     @Override
@@ -282,9 +284,8 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     }
 
 
-
     public void onAddedToWorld() {
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             builder.onAddedToWorld.accept(this);
         }
     }
@@ -312,14 +313,14 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(Registry.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -389,7 +390,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
@@ -517,8 +518,6 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
         return super.canTrample(state, pos, fallDistance);
     }*/
-
-
 
 
     public void onRemovedFromWorld() {
