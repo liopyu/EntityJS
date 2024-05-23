@@ -33,12 +33,10 @@ public class ClientEventHandlers implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         registerKeyBindings();
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.schedule(this::registerEntityRenderers, 2, TimeUnit.SECONDS);
     }
 
 
-    private void registerEntityRenderers() {
+    public static void registerEntityRenderers() {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
             EntityRendererRegistry.register(UtilsJS.cast(builder.get()), (dispatcher) -> new KubeJSEntityRenderer<>(dispatcher, builder));
         }
