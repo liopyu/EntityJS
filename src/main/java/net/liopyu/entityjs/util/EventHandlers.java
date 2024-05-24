@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.util;
 
+import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import dev.architectury.registry.level.entity.SpawnPlacementsRegistry;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
@@ -7,11 +8,14 @@ import dev.latvian.mods.kubejs.event.Extra;
 import dev.latvian.mods.kubejs.script.data.VirtualKubeJSDataPack;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.mixin.object.builder.DefaultAttributeRegistryAccessor;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.events.*;
+import net.minecraft.core.Registry;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 
 public class EventHandlers {
@@ -26,10 +30,15 @@ public class EventHandlers {
 
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
+    public static boolean registeredAttributes = false;
 
     public static void init() {
-
-        //attributeModification();
+        RegistryEntryAddedCallback.event(Registry.ENTITY_TYPE).register((rawId, id, entityType) -> {
+            if (!registeredAttributes) {
+                attributeModification();
+                registeredAttributes = true;
+            }
+        });
         registerSpawnPlacements();
     }
 

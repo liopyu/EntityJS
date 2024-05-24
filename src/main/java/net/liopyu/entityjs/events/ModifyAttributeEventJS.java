@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.events;
 
+import com.google.common.collect.ImmutableList;
+import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
@@ -10,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 
 import java.util.ArrayList;
@@ -19,10 +21,15 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ModifyAttributeEventJS extends EventJS {
-
-    public static final List<Consumer<ModifyAttributeEventJS>> HANDLERS = new ArrayList<>();
+    private final List<EntityType<? extends LivingEntity>> entityTypes;
 
     public ModifyAttributeEventJS() {
+        this.entityTypes = ImmutableList.copyOf(
+                Registry.ENTITY_TYPE.stream()
+                        .filter(DefaultAttributes::hasSupplier)
+                        .map(entityType -> (EntityType<? extends LivingEntity>) entityType)
+                        .collect(Collectors.toList())
+        );
     }
 
     @Info(value = "Modifies the given entity type's attributes", params = {
@@ -36,62 +43,53 @@ public class ModifyAttributeEventJS extends EventJS {
 
     @Info(value = "Returns a list of all entity types that can have their attributes modified by this event")
     public List<EntityType<? extends LivingEntity>> getAllTypes() {
-        return Registry.ENTITY_TYPE.stream()
-                .filter(DefaultAttributes::hasSupplier)
-                .map(entityType -> (EntityType<? extends LivingEntity>) entityType)
-                .collect(Collectors.toList());
+        return entityTypes;
     }
 
     @Info(value = "Returns a list of all attributes the given entity type has by default")
     public List<Attribute> getAttributes(EntityType<? extends LivingEntity> entityType) {
-        final List<Attribute> present = new ArrayList<>();
-        LivingEntity entity = entityType.create(null);
-        if (entity != null) {
-            entity.getAttributes().getSyncableAttributes().forEach(attributeInstance -> present.add(attributeInstance.getAttribute()));
+        AttributeSupplier defaultAttributeSupplier = DefaultAttributes.getSupplier(entityType);
+        List<Attribute> defaultAttributes = new ArrayList<>();
+        for (Attribute attribute : Registry.ATTRIBUTE) {
+            if (defaultAttributeSupplier.hasAttribute(attribute)) {
+                defaultAttributes.add(attribute);
+            }
         }
-        return present;
+        return defaultAttributes;
     }
 
-    public static class AttributeModificationHelper {
-        private final EntityType<? extends LivingEntity> type;
+    public record AttributeModificationHelper(@HideFromJS EntityType<? extends LivingEntity> type) {
 
-        public AttributeModificationHelper(EntityType<? extends LivingEntity> type) {
-            this.type = type;
-        }
-
-        @Info(value = "Adds the given attribute to the entity type, using its default value")
+        @Info(value = """
+                Adds the given attribute to the entity type, using its default value
+                                
+                It is safe to add an attribute that an entity type already has
+                """)
         public void add(Attribute attribute) {
-            modifyAttribute(attribute, attribute.getDefaultValue());
+            EntityAttributeRegistry.register(() -> type, () -> AttributeSupplier.builder().add(attribute));
         }
 
-        @Info(value = "Adds the given attribute to the entity type, using the provided default value", params = {
+        @Info(value = """
+                Adds the given attribute to the entity type, using the provided default value
+                                
+                It is safe to add an attribute that an entity type already has
+                """, params = {
                 @Param(name = "attribute", value = "The attribute to add"),
                 @Param(name = "defaultValue", value = "The default value of the attribute")
         })
         public void add(Object attribute, double defaultValue) {
             if (attribute instanceof String string) {
-                ResourceLocation id = new ResourceLocation(string.toLowerCase());
-                Attribute att = Registry.ATTRIBUTE.get(id);
+                ResourceLocation stringLocation = new ResourceLocation(string.toLowerCase());
+                Attribute att = Registry.ATTRIBUTE.get(stringLocation);
                 if (att != null) {
-                    modifyAttribute(att, defaultValue);
+                    EntityAttributeRegistry.register(() -> type, () -> AttributeSupplier.builder().add(att, defaultValue));
                 } else {
                     EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Unable to add attribute, attribute " + attribute + " does not exist");
                 }
             } else if (attribute instanceof Attribute att) {
-                modifyAttribute(att, defaultValue);
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Unable to add attribute, attribute: " + attribute + ". Must be of type EntityAttribute or resource location. Example: \"minecraft:generic.max_health\"");
-            }
-        }
-
-        private void modifyAttribute(Attribute attribute, double defaultValue) {
-            LivingEntity entity = type.create(null);
-            if (entity != null) {
-                AttributeInstance instance = entity.getAttributes().getInstance(attribute);
-                if (instance != null) {
-                    instance.setBaseValue(defaultValue);
-                }
-            }
+                EntityAttributeRegistry.register(() -> type, () -> AttributeSupplier.builder().add(att, defaultValue));
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Unable to add attribute, attribute: " + attribute + ". Must be of type Attribute or resource location. Example: \"minecraft:generic.max_health\"");
         }
     }
 }
