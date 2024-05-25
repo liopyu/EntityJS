@@ -52,7 +52,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    //modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     modImplementation "curse.maven:probejs-585406:5227391"
 
@@ -62,7 +62,7 @@ dependencies {
     modImplementation "dev.latvian.mods:kubejs-$loader:$kubejs_version"
     modImplementation "dev.latvian.mods:rhino-$loader:$rhino_version"
     modImplementation "dev.architectury:architectury-$loader:$architectury_version"
-    modImplementation "software.bernie.geckolib:geckolib-$loader-$geckolib_version"
+    modImplementation "software.bernie.geckolib:geckolib-$loader-$minecraft_version:$geckolib_version"
     // Use kube's jij'd version
     implementation "io.github.llamalad7:mixinextras-common:0.2.1"
 
@@ -72,12 +72,14 @@ processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
     inputs.property "loader_version", project.loader_version
+    inputs.property "geckolib_version", project.geckolib_version
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
                 "minecraft_version": project.minecraft_version,
-                "loader_version": project.loader_version
+                "loader_version": project.loader_version,
+                "geckolib_version": project.geckolib_version
     }
 }
 
