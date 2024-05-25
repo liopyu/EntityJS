@@ -135,7 +135,7 @@ public class ModifyAttributeEventJS extends EventJS {
         @Info(value = """
                 Gets a list of all default attribute values.
                 """)
-        public Map<Attribute, Double> getDefaultValues() {
+        private Map<Attribute, Double> getDefaultValues() {
             return defaultValues;
         }
     }
