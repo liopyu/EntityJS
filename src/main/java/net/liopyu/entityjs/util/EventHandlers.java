@@ -37,7 +37,6 @@ public class EventHandlers {
                     customEntities++;
                 }
             }
-            ConsoleJS.STARTUP.info(customEntities + " out of total: " + BaseLivingEntityBuilder.thisList.size());
             if (customEntities == BaseLivingEntityBuilder.thisList.size() && !modifiedAttributes) {
                 attributeModification();
                 modifiedAttributes = true;

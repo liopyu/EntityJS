@@ -18,7 +18,6 @@ import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
 import org.slf4j.Logger;
 
-import static net.liopyu.entityjs.util.EventHandlers.attributeCreation;
 
 public class EntityJSPlugin extends KubeJSPlugin {
     public static final Logger LOGGER = LogUtils.getLogger();
