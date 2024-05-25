@@ -158,9 +158,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> onLivingJump;
     public transient Consumer<LivingEntity> aiStep;
     public transient Consumer<AttributeSupplier.Builder> attributes;
-    public SpawnPlacements.Type placementType;
+    //public SpawnPlacements.Type placementType;
     public Heightmap.Types heightMap;
-    public SpawnPlacements.SpawnPredicate<? extends Entity> spawnPredicate;
+    //public SpawnPlacements.SpawnPredicate<? extends Entity> spawnPredicate;
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
     //public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
     public transient Consumer<ContextUtils.RenderContext<T>> render;
@@ -2410,7 +2410,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     //STUFF
-    @Info(value = """
+    /*@Info(value = """
             Sets the spawn placement of the entity type
             entityBuilder.spawnPlacement('on_ground', 'world_surface', (entitypredicate, levelaccessor, spawntype, blockpos, randomsource) => {
                 if (levelaccessor.getLevel().getBiome(blockpos) == 'minecraft:plains') return true;
@@ -2427,7 +2427,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         this.placementType = placementType;
         this.heightMap = heightMap;
         return this;
-    }
+    }*/
 
     /*@Info(value = "Adds a spawner for this entity to the provided biome(s)", params = {
             @Param(name = "biomes", value = "A list of biomes that the entity should spawn in. If using a tag, only one value may be provided"),

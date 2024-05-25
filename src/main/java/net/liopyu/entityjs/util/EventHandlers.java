@@ -25,9 +25,10 @@ public class EventHandlers {
     //public static final EventHandler biomeSpawns = EntityJSEvents.server("biomeSpawns", () -> BiomeSpawnsEventJS.class);
 
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
-    public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
+    //public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
     public static int customEntities = 0;
     public static boolean modifiedAttributes = false;
+    //public static boolean registeredSpawnPlacements = false;
 
     public static void init() {
         RegistryEntryAddedCallback.event(Registry.ENTITY_TYPE).register((rawId, id, entityType) -> {
@@ -41,8 +42,13 @@ public class EventHandlers {
                 attributeModification();
                 modifiedAttributes = true;
             }
+            //registerSpawnPlacements();
         });
-        registerSpawnPlacements();
+        /*RegistryEntryAddedCallback.event(Registry.PLACEMENT_MODIFIERS).register((rawId, id, placementModifierType) -> {
+            registerSpawnPlacements();
+
+        });*/
+
     }
 
     private static void attributeModification() {
@@ -51,14 +57,14 @@ public class EventHandlers {
         }
     }
 
-    private static void registerSpawnPlacements() {
+    /*private static void registerSpawnPlacements() {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.spawnList) {
             SpawnPlacementsRegistry.register(() -> UtilsJS.cast(builder.get()), builder.placementType, builder.heightMap, UtilsJS.cast(builder.spawnPredicate)); // Cast because the '?' generics makes the event unhappy
         }
         if (spawnPlacement.hasListeners()) {
             spawnPlacement.post(new RegisterSpawnPlacementsEventJS());
         }
-    }
+    }*/
 
     public static void postDataEvent(VirtualKubeJSDataPack pack, MultiPackResourceManager multiManager) {
         if (pack != null && multiManager != null) {
