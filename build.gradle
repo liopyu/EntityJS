@@ -54,7 +54,7 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    //runtimeOnly("curse.maven:probejs-585406:5227391")
+    modImplementation "curse.maven:probejs-585406:5227391"
 
     /*implementation fg.deobf("curse.maven:framework-549225:5180972")
     implementation fg.deobf("curse.maven:mrcrayfishs-gun-mod-unofficial-945471:5212457")*/

@@ -1,6 +1,5 @@
 package net.liopyu.entityjs.builders.living;
 
-import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Info;
@@ -13,12 +12,17 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
-import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
-import net.liopyu.entityjs.util.*;
-import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import software.bernie.geckolib.core.animation.*;
+import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.level.levelgen.Heightmap;
+import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.core.animation.Animation;
+import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.keyframe.event.CustomInstructionKeyframeEvent;
 import software.bernie.geckolib.core.keyframe.event.KeyFrameEvent;
 import software.bernie.geckolib.core.keyframe.event.ParticleKeyframeEvent;
@@ -26,16 +30,13 @@ import software.bernie.geckolib.core.keyframe.event.SoundKeyframeEvent;
 import software.bernie.geckolib.core.keyframe.event.data.KeyFrameData;
 import software.bernie.geckolib.core.object.DataTicket;
 import software.bernie.geckolib.core.object.PlayState;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.random.Weight;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraft.world.level.levelgen.Heightmap;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.function.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * The base builder for all living Entity types that EntityJS can handle, has methods to allow overriding
@@ -220,6 +221,15 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         scaleWidth = 1F;
         //attributeBuilder = t -> this.getAttributeBuilder();
 
+    }
+
+
+    @HideFromJS
+    public BaseLivingEntityBuilder<?> getBuilderForEntityType(EntityType<?> entityType) {
+        if (entityType == this.get()) {
+            return this;
+        }
+        return null;
     }
 
     @Info(value = """

@@ -128,12 +128,12 @@ public class ModifyAttributeEventJS extends EventJS {
         @Info(value = """
                 Gets a list of all attributes post-modification
                 """)
-        public List<Attribute> getNewAttributes() {
+        private List<Attribute> getNewAttributes() {
             return newAttributes;
         }
 
         @Info(value = """
-                Gets a list of all attributes pre-modification
+                Gets a list of all default attribute values.
                 """)
         public Map<Attribute, Double> getDefaultValues() {
             return defaultValues;

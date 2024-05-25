@@ -19,7 +19,7 @@ public class MobEntityJSBuilder extends PathfinderMobBuilder<MobEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return AttributeSupplier.builder()
+        return MobEntityJS.createMobAttributes()
                 .add(Attributes.MAX_HEALTH)
                 .add(Attributes.FOLLOW_RANGE)
                 .add(Attributes.ATTACK_DAMAGE)
