@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ModifyAttributeEventJS extends EventJS {
+    public static final Map<EntityType<? extends LivingEntity>, List<Attribute>> modifiedAttributesMap = new HashMap<>();
     private final List<EntityType<? extends LivingEntity>> entityTypes;
 
     public ModifyAttributeEventJS() {
@@ -38,6 +39,7 @@ public class ModifyAttributeEventJS extends EventJS {
     public void modify(EntityType<? extends LivingEntity> entityType, Consumer<AttributeModificationHelper> attributes) {
         final AttributeModificationHelper helper = new AttributeModificationHelper(entityType);
         attributes.accept(helper);
+
         AttributeSupplier defaultAttributeSupplier = DefaultAttributes.getSupplier(entityType);
         List<Attribute> existingAttributes = new ArrayList<>();
         Map<Attribute, Double> defaultValues = new HashMap<>();
@@ -47,10 +49,12 @@ public class ModifyAttributeEventJS extends EventJS {
                 defaultValues.put(attribute, defaultAttributeSupplier.getValue(attribute));
             }
         }
+
         List<Attribute> newAttributes = helper.getNewAttributes();
         Map<Attribute, Double> newAttributeDefaultValues = helper.getDefaultValues();
         List<Attribute> mergedAttributes = new ArrayList<>(existingAttributes);
         mergedAttributes.addAll(newAttributes);
+
         EntityAttributeRegistry.register(() -> entityType, () -> {
             AttributeSupplier.Builder builder = AttributeSupplier.builder();
             for (Attribute attribute : mergedAttributes) {
@@ -62,6 +66,7 @@ public class ModifyAttributeEventJS extends EventJS {
                     builder.add(attribute);
                 }
             }
+
             return builder;
         });
     }
@@ -84,6 +89,7 @@ public class ModifyAttributeEventJS extends EventJS {
     }
 
     public static class AttributeModificationHelper {
+
         private final EntityType<? extends LivingEntity> entityType;
         private final List<Attribute> newAttributes = new ArrayList<>();
         private final Map<Attribute, Double> defaultValues = new HashMap<>();
@@ -99,6 +105,7 @@ public class ModifyAttributeEventJS extends EventJS {
                 """)
         public void add(Attribute attribute) {
             newAttributes.add(attribute);
+            modifiedAttributesMap.put(entityType, ImmutableList.copyOf(newAttributes));
         }
 
         @Info(value = """
@@ -112,6 +119,7 @@ public class ModifyAttributeEventJS extends EventJS {
         public void add(Attribute attribute, double defaultValue) {
             newAttributes.add(attribute);
             defaultValues.put(attribute, defaultValue);
+            modifiedAttributesMap.put(entityType, ImmutableList.copyOf(newAttributes));
         }
 
         @Info(value = """
@@ -124,7 +132,7 @@ public class ModifyAttributeEventJS extends EventJS {
         @Info(value = """
                 Gets a list of all default attribute values.
                 """)
-        private Map<Attribute, Double> getDefaultValues() {
+        public Map<Attribute, Double> getDefaultValues() {
             return defaultValues;
         }
     }
