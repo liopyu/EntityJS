@@ -6,6 +6,7 @@ import dev.latvian.mods.kubejs.event.Extra;
 import dev.latvian.mods.kubejs.script.data.VirtualKubeJSDataPack;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.living.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.events.*;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -27,6 +28,7 @@ public class EventHandlers {
 
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
+    public static final EventHandler modifyEntity = EntityJSEvents.startup("modifyEntity", () -> ModifyLivingEntityBuilder.class);
 
     public static void init() {
 
@@ -34,7 +36,6 @@ public class EventHandlers {
         modBus.addListener(EventHandlers::attributeCreation);
         modBus.addListener(EventHandlers::attributeModification);
         modBus.addListener(EventPriority.LOW, EventHandlers::registerSpawnPlacements); // Low to allow REPLACE to work and addons to effect the result
-
     }
 
     private static void attributeCreation(EntityAttributeCreationEvent event) {
