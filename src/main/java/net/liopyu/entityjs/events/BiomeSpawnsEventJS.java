@@ -6,6 +6,10 @@ import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import net.fabricmc.fabric.api.biome.v1.BiomeModification;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
+import net.liopyu.entityjs.EntityJSMod;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -25,6 +29,7 @@ public class BiomeSpawnsEventJS extends EventJS {
     public final List<Addition> additions = new ArrayList<>();
     @HideFromJS
     public final List<Removal> removals = new ArrayList<>();
+    public final BiomeModification event = BiomeModifications.create(new ResourceLocation(EntityJSMod.MOD_ID, "biome_modifiers"));
 
     @Info(value = "Adds a spawn to the given entity type in the given biomes", params = {
             @Param(name = "entityType", value = "The entity type to add a spawn to"),
@@ -35,6 +40,9 @@ public class BiomeSpawnsEventJS extends EventJS {
     })
     @Generics(value = {Entity.class, String.class})
     public void addSpawn(EntityType<?> entityType, List<String> biomes, int weight, int minCount, int maxCount) {
+        event.add(ModificationPhase.ADDITIONS, (biomeSelectionContext) -> true, biomeModificationContext -> {
+            //biomeModificationContext.
+        });
         additions.add(new Addition(entityType, new MobSpawnSettings.SpawnerData(entityType, Weight.of(weight), minCount, maxCount), processBiomes(biomes)));
     }
 
@@ -60,7 +68,10 @@ public class BiomeSpawnsEventJS extends EventJS {
         return biomeList;
     }
 
-    public record Addition(EntityType<?> entityType, MobSpawnSettings.SpawnerData spawnData, List<Either<ResourceLocation, TagKey<Biome>>> biomes) {}
+    public record Addition(EntityType<?> entityType, MobSpawnSettings.SpawnerData spawnData,
+                           List<Either<ResourceLocation, TagKey<Biome>>> biomes) {
+    }
 
-    public record Removal(EntityType<?> entityType, List<Either<ResourceLocation, TagKey<Biome>>> biomes) {}
+    public record Removal(EntityType<?> entityType, List<Either<ResourceLocation, TagKey<Biome>>> biomes) {
+    }
 }

@@ -7,18 +7,18 @@ import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntity;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
-import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
-import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
-import net.liopyu.entityjs.events.BuildBrainEventJS;
-import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
+import net.liopyu.entityjs.events.*;
 import net.liopyu.entityjs.util.*;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import org.spongepowered.asm.mixin.injection.At;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import net.minecraft.core.BlockPos;
@@ -45,6 +45,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,6 +61,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
+    public final ModifyAttributeEventJS.AttributeModificationHelper helper;
 
     public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -72,16 +74,55 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
+        this.helper = new ModifyAttributeEventJS.AttributeModificationHelper((EntityType<? extends LivingEntity>) this.getType());
+
     }
 
     @Override
     public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
+        // Get the modified attributes for the entity type
+        List<Attribute> modifiedAttributes = ModifyAttributeEventJS.modifiedAttributesMap.get(this.getType());
+
+        // Create a list to store default attributes
+        List<Attribute> defaultAttributes = new ArrayList<>();
+        defaultAttributes.add(Attributes.MAX_HEALTH);
+        defaultAttributes.add(Attributes.FOLLOW_RANGE);
+        //defaultAttributes.add(Attributes.ATTACK_DAMAGE);
+        defaultAttributes.add(Attributes.ARMOR);
+        defaultAttributes.add(Attributes.ARMOR_TOUGHNESS);
+        defaultAttributes.add(Attributes.ATTACK_SPEED);
+        defaultAttributes.add(Attributes.ATTACK_KNOCKBACK);
+        defaultAttributes.add(Attributes.LUCK);
+        defaultAttributes.add(Attributes.MOVEMENT_SPEED);
+
+        // If modified attributes exist, exclude them from the default attributes list
+        if (modifiedAttributes != null && !modifiedAttributes.isEmpty()) {
+            defaultAttributes.removeAll(modifiedAttributes);
         }
-        return new AttributeMap(MobEntityJS.createMobAttributes().build());
+
+        // Create an AttributeSupplier.Builder with attributes
+        AttributeSupplier.Builder builder = AttributeSupplier.builder();
+        for (Attribute defaultAttribute : defaultAttributes) {
+            // Check if the default attribute is being modified
+            if (modifiedAttributes != null && modifiedAttributes.contains(defaultAttribute)) {
+                // Get the modified attribute from the modified attributes list
+                Attribute modifiedAttribute = modifiedAttributes.stream()
+                        .filter(attr -> attr.equals(defaultAttribute))
+                        .findFirst()
+                        .orElse(null);
+                if (modifiedAttribute != null) {
+                    builder.add(modifiedAttribute); // Add the modified attribute instead of the default one
+                }
+            } else {
+                builder.add(defaultAttribute); // Add the default attribute
+            }
+        }
+
+        // Create and return an AttributeMap with the final attributes
+        return new AttributeMap(builder.build());
     }
+
+
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
@@ -301,7 +342,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
 
-
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
         return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
@@ -510,6 +550,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -1421,8 +1462,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
         return super.mayInteract(p_146843_, p_146844_);
     }
-
-
 
 
     public void onRemovedFromWorld() {

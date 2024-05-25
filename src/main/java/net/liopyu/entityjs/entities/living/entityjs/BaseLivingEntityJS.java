@@ -68,14 +68,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
     }
-    @Override
-    public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
-        }
-        return new AttributeMap(createLivingAttributes().build());
-    }
+
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
@@ -286,6 +279,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -1018,9 +1012,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
 
-    
-
-
     @Override
     public boolean canFreeze() {
         if (builder.canFreeze != null) {
@@ -1202,8 +1193,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         return super.mayInteract(p_146843_, p_146844_);
     }
 
-
-    
 
     public void onRemovedFromWorld() {
         if (builder.onRemovedFromWorld != null) {

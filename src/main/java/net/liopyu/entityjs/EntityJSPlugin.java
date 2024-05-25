@@ -1,7 +1,6 @@
 package net.liopyu.entityjs;
 
 import com.mojang.logging.LogUtils;
-import dev.architectury.platform.Platform;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
@@ -15,8 +14,6 @@ import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
 import org.slf4j.Logger;
-
-import static net.liopyu.entityjs.util.EventHandlers.attributeCreation;
 
 public class EntityJSPlugin extends KubeJSPlugin {
     public static final Logger LOGGER = LogUtils.getLogger();

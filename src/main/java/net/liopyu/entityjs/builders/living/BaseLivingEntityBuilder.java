@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.living;
 
+import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Info;
@@ -15,6 +16,7 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.keyframe.event.CustomInstructionKeyframeEvent;
@@ -182,6 +184,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public final List<GeoLayerJSBuilder<T>> layerList = new ArrayList<>();
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
+    //public transient Consumer<AttributeSupplier.Builder> attributeBuilder;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -215,6 +218,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mountJumpingEnabled = true;
         scaleHeight = 1F;
         scaleWidth = 1F;
+        //attributeBuilder = t -> this.getAttributeBuilder();
+
     }
 
     @Info(value = """
