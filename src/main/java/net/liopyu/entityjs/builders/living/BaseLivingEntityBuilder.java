@@ -217,6 +217,14 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         scaleWidth = 1F;
     }
 
+    @HideFromJS
+    public BaseLivingEntityBuilder<?> getBuilderForEntityType(EntityType<?> entityType) {
+        if (entityType == this.get()) {
+            return this;
+        }
+        return null;
+    }
+
     @Info(value = """
             @param positionRider A consumer determining the position of rider/riders.
                             

@@ -94,14 +94,6 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
         return builder.convertsInWater;
     }
 
-    @Override
-    public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
-        }
-        return new AttributeMap(MobEntityJS.createMobAttributes().build());
-    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override

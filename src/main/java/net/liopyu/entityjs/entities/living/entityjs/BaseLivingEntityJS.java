@@ -69,14 +69,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
     }
 
-    @Override
-    public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
-        }
-        return new AttributeMap(createLivingAttributes().build());
-    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override

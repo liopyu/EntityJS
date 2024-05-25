@@ -103,14 +103,6 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
         return this.random.nextInt(6000) + 6000;
     }
 
-    @Override
-    public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
-        }
-        return new AttributeMap(MobEntityJS.createMobAttributes().build());
-    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override

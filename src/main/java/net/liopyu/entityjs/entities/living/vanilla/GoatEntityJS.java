@@ -91,14 +91,6 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
         this.navigation = this.createNavigation(pLevel);
     }
 
-    @Override
-    public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
-        }
-        return new AttributeMap(MobEntityJS.createMobAttributes().build());
-    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override

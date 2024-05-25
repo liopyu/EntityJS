@@ -85,14 +85,6 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
         return null;
     }
 
-    @Override
-    public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
-        }
-        return new AttributeMap(MobEntityJS.createMobAttributes().build());
-    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override
