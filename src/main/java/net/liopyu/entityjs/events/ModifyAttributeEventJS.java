@@ -5,8 +5,10 @@ import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -40,6 +42,7 @@ public class ModifyAttributeEventJS extends EventJS {
     public void modify(EntityType<? extends LivingEntity> entityType, Consumer<AttributeModificationHelper> attributes) {
         final AttributeModificationHelper helper = new AttributeModificationHelper(entityType);
         attributes.accept(helper);
+
         AttributeSupplier defaultAttributeSupplier = DefaultAttributes.getSupplier(entityType);
         List<Attribute> existingAttributes = new ArrayList<>();
         Map<Attribute, Double> defaultValues = new HashMap<>();
@@ -49,10 +52,12 @@ public class ModifyAttributeEventJS extends EventJS {
                 defaultValues.put(attribute, defaultAttributeSupplier.getValue(attribute));
             }
         }
+
         List<Attribute> newAttributes = helper.getNewAttributes();
         Map<Attribute, Double> newAttributeDefaultValues = helper.getDefaultValues();
         List<Attribute> mergedAttributes = new ArrayList<>(existingAttributes);
         mergedAttributes.addAll(newAttributes);
+
         EntityAttributeRegistry.register(() -> entityType, () -> {
             AttributeSupplier.Builder builder = AttributeSupplier.builder();
             for (Attribute attribute : mergedAttributes) {
@@ -64,10 +69,9 @@ public class ModifyAttributeEventJS extends EventJS {
                     builder.add(attribute);
                 }
             }
+
             return builder;
         });
-        modifiedAttributesMap.put(entityType, ImmutableList.copyOf(mergedAttributes));
-
     }
 
     @Info(value = "Returns a list of all entity types that can have their attributes modified by this event")
@@ -104,6 +108,7 @@ public class ModifyAttributeEventJS extends EventJS {
                 """)
         public void add(Attribute attribute) {
             newAttributes.add(attribute);
+            modifiedAttributesMap.put(entityType, ImmutableList.copyOf(newAttributes));
         }
 
         @Info(value = """
@@ -117,6 +122,7 @@ public class ModifyAttributeEventJS extends EventJS {
         public void add(Attribute attribute, double defaultValue) {
             newAttributes.add(attribute);
             defaultValues.put(attribute, defaultValue);
+            modifiedAttributesMap.put(entityType, ImmutableList.copyOf(newAttributes));
         }
 
         @Info(value = """

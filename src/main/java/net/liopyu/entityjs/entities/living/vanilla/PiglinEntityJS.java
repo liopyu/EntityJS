@@ -106,14 +106,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
     }
-    @Override
-    public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
-        }
-        return new AttributeMap(MobEntityJS.createMobAttributes().build());
-    }
+
     //Default Piglin behavior
     @Override
     protected void defineSynchedData() {
@@ -384,7 +377,6 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     }
 
 
-
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
         return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
@@ -593,6 +585,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -1504,8 +1497,6 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
         return super.mayInteract(p_146843_, p_146844_);
     }
-
-
 
 
     public void onRemovedFromWorld() {

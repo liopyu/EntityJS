@@ -88,14 +88,7 @@ public class GhastEntityJS extends Ghast implements IAnimatableJS {
         this.navigation = this.createNavigation(pLevel);
     }
 
-    @Override
-    public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
-        }
-        return new AttributeMap(MobEntityJS.createMobAttributes().build());
-    }
+
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
@@ -289,7 +282,6 @@ public class GhastEntityJS extends Ghast implements IAnimatableJS {
     }
 
 
-
     @Override
     public int getAmbientSoundInterval() {
         if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
@@ -309,7 +301,6 @@ public class GhastEntityJS extends Ghast implements IAnimatableJS {
     public MobType getMobType() {
         return builder.mobType;
     }
-
 
 
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
@@ -354,11 +345,6 @@ public class GhastEntityJS extends Ghast implements IAnimatableJS {
         if (builder.mainArm != null) return (HumanoidArm) builder.mainArm;
         return super.getMainArm();
     }
-
-
-
-
-
 
 
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
@@ -503,6 +489,7 @@ public class GhastEntityJS extends Ghast implements IAnimatableJS {
 
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -1414,8 +1401,6 @@ public class GhastEntityJS extends Ghast implements IAnimatableJS {
 
         return super.mayInteract(p_146843_, p_146844_);
     }
-
-
 
 
     public void onRemovedFromWorld() {

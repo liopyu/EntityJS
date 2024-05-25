@@ -74,7 +74,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @MethodsReturnNonnullByDefault
-public class CatEntityJS extends Cat implements IAnimatableJS,  OwnableEntity, NeutralMob {
+public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, NeutralMob {
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     protected final CatJSBuilder builder;
@@ -113,14 +113,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS,  OwnableEntity, N
         this.navigation = this.createNavigation(pLevel);
     }
 
-    @Override
-    public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
-        }
-        return new AttributeMap(MobEntityJS.createMobAttributes().build());
-    }
+
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
@@ -145,7 +138,6 @@ public class CatEntityJS extends Cat implements IAnimatableJS,  OwnableEntity, N
         }
         EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found for entity: " + entityName());
     }
-
 
 
     public boolean isMultipartEntity() {
@@ -360,7 +352,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS,  OwnableEntity, N
         return this.persistentAngerTarget;
     }
 
-    public void setPersistentAngerTarget( UUID pTarget) {
+    public void setPersistentAngerTarget(UUID pTarget) {
         this.persistentAngerTarget = pTarget;
     }
     //Ageable Mob Overrides
@@ -612,7 +604,6 @@ public class CatEntityJS extends Cat implements IAnimatableJS,  OwnableEntity, N
     }
 
 
-
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
         return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
@@ -821,6 +812,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS,  OwnableEntity, N
 
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -1732,8 +1724,6 @@ public class CatEntityJS extends Cat implements IAnimatableJS,  OwnableEntity, N
 
         return super.mayInteract(p_146843_, p_146844_);
     }
-
-
 
 
     public void onRemovedFromWorld() {

@@ -31,10 +31,12 @@ public class EventHandlers {
     public static void init() {
         RegistryEntryAddedCallback.event(BuiltInRegistries.ENTITY_TYPE).register((rawId, id, entityType) -> {
             attributeCreation();
-            if (!modifiedAttributes) {
+            attributeModification();
+            /*if (!modifiedAttributes) {
+                attributeCreation();
                 attributeModification();
                 modifiedAttributes = true;
-            }
+            }*/
         });
 
         registerSpawnPlacements();

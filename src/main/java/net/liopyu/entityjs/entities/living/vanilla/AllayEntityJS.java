@@ -77,14 +77,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
     }
-    @Override
-    public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
-        }
-        return new AttributeMap(MobEntityJS.createMobAttributes().build());
-    }
+
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
@@ -109,7 +102,6 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
         }
         EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found for entity: " + entityName());
     }
-
 
 
     public boolean isMultipartEntity() {
@@ -298,7 +290,6 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     public MobType getMobType() {
         return builder.mobType;
     }
-
 
 
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
@@ -509,6 +500,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
 
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -1420,8 +1412,6 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
 
         return super.mayInteract(p_146843_, p_146844_);
     }
-
-
 
 
     public void onRemovedFromWorld() {

@@ -78,51 +78,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     }
 
-    @Override
-    public AttributeMap getAttributes() {
-        // Get the modified attributes for the entity type
-        List<Attribute> modifiedAttributes = ModifyAttributeEventJS.modifiedAttributesMap.get(this.getType());
-
-        // Create a list to store default attributes
-        List<Attribute> defaultAttributes = new ArrayList<>();
-        defaultAttributes.add(Attributes.MAX_HEALTH);
-        defaultAttributes.add(Attributes.FOLLOW_RANGE);
-        //defaultAttributes.add(Attributes.ATTACK_DAMAGE);
-        defaultAttributes.add(Attributes.ARMOR);
-        defaultAttributes.add(Attributes.ARMOR_TOUGHNESS);
-        defaultAttributes.add(Attributes.ATTACK_SPEED);
-        defaultAttributes.add(Attributes.ATTACK_KNOCKBACK);
-        defaultAttributes.add(Attributes.LUCK);
-        defaultAttributes.add(Attributes.MOVEMENT_SPEED);
-
-        // If modified attributes exist, exclude them from the default attributes list
-        if (modifiedAttributes != null && !modifiedAttributes.isEmpty()) {
-            defaultAttributes.removeAll(modifiedAttributes);
-        }
-
-        // Create an AttributeSupplier.Builder with attributes
-        AttributeSupplier.Builder builder = AttributeSupplier.builder();
-        for (Attribute defaultAttribute : defaultAttributes) {
-            // Check if the default attribute is being modified
-            if (modifiedAttributes != null && modifiedAttributes.contains(defaultAttribute)) {
-                // Get the modified attribute from the modified attributes list
-                Attribute modifiedAttribute = modifiedAttributes.stream()
-                        .filter(attr -> attr.equals(defaultAttribute))
-                        .findFirst()
-                        .orElse(null);
-                if (modifiedAttribute != null) {
-                    builder.add(modifiedAttribute); // Add the modified attribute instead of the default one
-                }
-            } else {
-                builder.add(defaultAttribute); // Add the default attribute
-            }
-        }
-
-        // Create and return an AttributeMap with the final attributes
-        return new AttributeMap(builder.build());
-    }
-
-
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {

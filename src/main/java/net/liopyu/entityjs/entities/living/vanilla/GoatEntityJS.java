@@ -91,14 +91,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
         this.navigation = this.createNavigation(pLevel);
     }
 
-    @Override
-    public AttributeMap getAttributes() {
-        if (builder != null) {
-            var attributeSupplier = builder.getAttributeBuilder().build();
-            return new AttributeMap(attributeSupplier);
-        }
-        return new AttributeMap(MobEntityJS.createMobAttributes().build());
-    }
+
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
@@ -432,7 +425,6 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
     }
 
 
-
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
         return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
@@ -641,6 +633,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
 
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -1552,8 +1545,6 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
 
         return super.mayInteract(p_146843_, p_146844_);
     }
-
-
 
 
     public void onRemovedFromWorld() {
