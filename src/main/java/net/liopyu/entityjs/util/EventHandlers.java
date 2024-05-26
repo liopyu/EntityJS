@@ -3,19 +3,24 @@ package net.liopyu.entityjs.util;
 import com.google.common.collect.ImmutableList;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import dev.architectury.registry.level.entity.SpawnPlacementsRegistry;
-import dev.latvian.mods.kubejs.event.EventGroup;
-import dev.latvian.mods.kubejs.event.EventHandler;
-import dev.latvian.mods.kubejs.event.Extra;
+import dev.latvian.mods.kubejs.bindings.event.StartupEvents;
+import dev.latvian.mods.kubejs.event.*;
+import dev.latvian.mods.kubejs.registry.RegistryCallback;
+import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.script.data.VirtualKubeJSDataPack;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.BaseLivingEntityJSBuilder;
 import net.liopyu.entityjs.events.*;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -44,21 +49,16 @@ public class EventHandlers {
     public static boolean modifiedAttributes = false;
 
     public static void init() {
-        RegistryEntryAddedCallback.event(BuiltInRegistries.ENTITY_TYPE).register((rawId, id, entityType) -> {
+        DynamicRegistrySetupCallback.EVENT.register(Event.DEFAULT_PHASE, listener -> {
             for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-                if (builder.getBuilderForEntityType(entityType) == builder) {
-                    EntityAttributeRegistry.register(builder::get, builder::getAttributeBuilder);
-                    customEntities++;
-                }
+                EntityAttributeRegistry.register(builder::get, builder::getAttributeBuilder);
             }
-            if (customEntities == BaseLivingEntityBuilder.thisList.size() && !modifiedAttributes) {
-                attributeModification();
-                modifiedAttributes = true;
-            }
+            EventHandlers.attributeModification();
+
         });
     }
 
-    private static void attributeModification() {
+    public static void attributeModification() {
         if (editAttributes.hasListeners()) {
             editAttributes.post(new ModifyAttributeEventJS());
         }

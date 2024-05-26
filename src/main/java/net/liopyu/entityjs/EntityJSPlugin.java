@@ -1,9 +1,15 @@
 package net.liopyu.entityjs;
 
 import com.mojang.logging.LogUtils;
+import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
+import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.*;
 import net.liopyu.entityjs.builders.living.vanilla.*;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
@@ -13,10 +19,14 @@ import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
 public class EntityJSPlugin extends KubeJSPlugin {
     public static final Logger LOGGER = LogUtils.getLogger();
+    public static int customEntities = 0;
+    public static boolean modifiedAttributes = false;
 
     @Override
     public void init() {
