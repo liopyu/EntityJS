@@ -82,7 +82,9 @@ processResources {
                 "liolib_Version": project.liolib_Version
     }
 }
-
+loom {
+    accessWidenerPath = file("src/main/resources/entityjs.aw")
+}
 def targetJavaVersion = 17
 tasks.withType(JavaCompile).configureEach {
     // ensure that the encoding is set to UTF-8, no matter what the system default is
