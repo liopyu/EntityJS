@@ -8,6 +8,8 @@ import dev.latvian.mods.kubejs.event.Extra;
 import dev.latvian.mods.kubejs.script.data.VirtualKubeJSDataPack;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.events.*;
@@ -26,29 +28,16 @@ public class EventHandlers {
 
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     //public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
-    public static int customEntities = 0;
-    public static boolean modifiedAttributes = false;
-    //public static boolean registeredSpawnPlacements = false;
+
 
     public static void init() {
-        RegistryEntryAddedCallback.event(Registry.ENTITY_TYPE).register((rawId, id, entityType) -> {
+        DynamicRegistrySetupCallback.EVENT.register(Event.DEFAULT_PHASE, listener -> {
             for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-                if (builder.getBuilderForEntityType(entityType) == builder) {
-                    EntityAttributeRegistry.register(builder::get, builder::getAttributeBuilder);
-                    customEntities++;
-                }
+                EntityAttributeRegistry.register(builder::get, builder::getAttributeBuilder);
             }
-            if (customEntities == BaseLivingEntityBuilder.thisList.size() && !modifiedAttributes) {
-                attributeModification();
-                modifiedAttributes = true;
-            }
-            //registerSpawnPlacements();
+            EventHandlers.attributeModification();
+
         });
-        /*RegistryEntryAddedCallback.event(Registry.PLACEMENT_MODIFIERS).register((rawId, id, placementModifierType) -> {
-            registerSpawnPlacements();
-
-        });*/
-
     }
 
     private static void attributeModification() {
