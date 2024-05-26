@@ -45,8 +45,6 @@ public class EventHandlers {
 
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     //public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
-    public static int customEntities = 0;
-    public static boolean modifiedAttributes = false;
 
     public static void init() {
         DynamicRegistrySetupCallback.EVENT.register(Event.DEFAULT_PHASE, listener -> {

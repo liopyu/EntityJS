@@ -25,8 +25,6 @@ import org.slf4j.Logger;
 
 public class EntityJSPlugin extends KubeJSPlugin {
     public static final Logger LOGGER = LogUtils.getLogger();
-    public static int customEntities = 0;
-    public static boolean modifiedAttributes = false;
 
     @Override
     public void init() {
