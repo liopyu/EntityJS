@@ -79,7 +79,7 @@ public abstract class LivingEntityMixin {
         }
     }
 
-
+    @Inject(method = "interact", at = @At(value = "HEAD", ordinal = 0), remap = false)
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
         if (builder.onInteract != null) {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(entityJs$getLivingEntity(), pPlayer, pHand);
@@ -669,7 +669,6 @@ public abstract class LivingEntityMixin {
             }
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
         }
-        return super.hasLineOfSight(entity);
     }
 
 
@@ -677,8 +676,6 @@ public abstract class LivingEntityMixin {
         if (builder.onEnterCombat != null) {
             EntityJSHelperClass.consumerCallback(builder.onEnterCombat, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onEnterCombat.");
 
-        } else {
-            super.onEnterCombat();
         }
     }
 
@@ -688,7 +685,6 @@ public abstract class LivingEntityMixin {
             EntityJSHelperClass.consumerCallback(builder.onLeaveCombat, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onLeaveCombat.");
 
         }
-        super.onLeaveCombat();
     }
 
 
@@ -700,7 +696,6 @@ public abstract class LivingEntityMixin {
             }
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByPotions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAffectedByPotions());
         }
-        return super.isAffectedByPotions();
     }
 
 
@@ -712,7 +707,6 @@ public abstract class LivingEntityMixin {
             }
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAttackable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.attackable());
         }
-        return super.attackable();
     }
 
 
@@ -725,7 +719,6 @@ public abstract class LivingEntityMixin {
             }
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTakeItem from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTakeItem(itemStack));
         }
-        return super.canTakeItem(itemStack);
     }
 
 
@@ -737,7 +730,6 @@ public abstract class LivingEntityMixin {
             }
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSleeping from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isSleeping());
         }
-        return super.isSleeping();
     }
 
 
@@ -748,7 +740,6 @@ public abstract class LivingEntityMixin {
             EntityJSHelperClass.consumerCallback(builder.onStartSleeping, context, "[EntityJS]: Error in " + entityName() + "builder for field: onStartSleeping.");
 
         }
-        super.startSleeping(blockPos);
     }
 
 
@@ -756,7 +747,6 @@ public abstract class LivingEntityMixin {
         if (builder.onStopSleeping != null) {
             EntityJSHelperClass.consumerCallback(builder.onStopSleeping, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onStopSleeping.");
         }
-        super.stopSleeping();
     }
 
 
@@ -766,7 +756,6 @@ public abstract class LivingEntityMixin {
             EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityName() + "builder for field: eat.");
             return itemStack;
         }
-        return super.eat(level, itemStack);
     }
 
 
@@ -779,7 +768,6 @@ public abstract class LivingEntityMixin {
             }
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldRiderFaceForward from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.shouldRiderFaceForward(player));
         }
-        return super.shouldRiderFaceForward(player);
     }
 
 
@@ -791,7 +779,6 @@ public abstract class LivingEntityMixin {
             }
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canFreeze());
         }
-        return super.canFreeze();
     }
 
 
@@ -803,7 +790,6 @@ public abstract class LivingEntityMixin {
             }
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFreezing());
         }
-        return super.isFreezing();
     }
 
 
