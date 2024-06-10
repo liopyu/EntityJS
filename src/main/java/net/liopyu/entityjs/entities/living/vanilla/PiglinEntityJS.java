@@ -607,6 +607,9 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     }
 
     public void onAddedToWorld() {
+        if (builder.defaultGoals) {
+            super.registerGoals();
+        }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
