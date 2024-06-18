@@ -37,7 +37,7 @@ import java.util.Objects;
 @Mixin(value = LivingEntity.class, remap = false)
 public abstract class LivingEntityMixin {
 
-    @Unique
+   /* @Unique
     private Object entityJs$entityObject = this;
 
     @Unique
@@ -61,10 +61,7 @@ public abstract class LivingEntityMixin {
             EventHandlers.modifyEntity.post(builder);
         }
     }
-    /*@Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false)
-    private void entityjs$tick(CallbackInfo ci) {
 
-    }*/
 
     @Inject(method = "hurt", at = @At(value = "HEAD", ordinal = 0), remap = false)
     private void entityjs$hurt(DamageSource pSource, float pAmount, CallbackInfoReturnable<Boolean> cir) {
@@ -461,11 +458,6 @@ public abstract class LivingEntityMixin {
         }
     }
 
-
-    /*
-    public boolean rideableUnderWater() {
-        return Objects.requireNonNullElseGet(builder.rideableUnderWater, super::rideableUnderWater);
-    }*/
 
 
     public boolean shouldDropExperience() {
@@ -977,5 +969,5 @@ public abstract class LivingEntityMixin {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, entityJs$getLivingEntity());
             EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
-    }
+    }*/
 }
