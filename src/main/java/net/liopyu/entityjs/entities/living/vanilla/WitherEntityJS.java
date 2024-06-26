@@ -290,7 +290,10 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
 
     @Override
     public MobType getMobType() {
-        return builder.mobType;
+        if (builder != null) {
+            return builder.mobType;
+        }
+        return super.getMobType();
     }
 
     @Override

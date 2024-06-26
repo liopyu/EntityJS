@@ -129,7 +129,7 @@ dependencies {
 
     /*implementation fg.deobf("curse.maven:framework-549225:5180972")
     implementation fg.deobf("curse.maven:mrcrayfishs-gun-mod-unofficial-945471:5212457")*/
-
+    //implementation fg.deobf("curse.maven:corail-tombstone-243707:5395076")
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:2001.6.4-build.120")
     implementation fg.deobf("dev.latvian.mods:rhino-forge:2001.2.2-build.18")
     implementation fg.deobf("dev.architectury:architectury-forge:9.1.13")

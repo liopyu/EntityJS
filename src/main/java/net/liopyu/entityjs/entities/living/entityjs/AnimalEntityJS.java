@@ -457,7 +457,10 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public MobType getMobType() {
-        return builder.mobType;
+        if (builder != null) {
+            return builder.mobType;
+        }
+        return super.getMobType();
     }
 
     public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
