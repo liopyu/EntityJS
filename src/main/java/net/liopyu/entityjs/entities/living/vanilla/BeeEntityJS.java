@@ -379,7 +379,10 @@ public class BeeEntityJS extends Bee implements IAnimatableJS {
 
     @Override
     public MobType getMobType() {
-        return builder.mobType;
+        if (builder != null) {
+            return builder.mobType;
+        }
+        return super.getMobType();
     }
 
     public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
@@ -1586,11 +1589,10 @@ public class BeeEntityJS extends Bee implements IAnimatableJS {
 
     @Override
     public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
         if (builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
-
         }
+        super.onRemovedFromWorld();
     }
 
 
