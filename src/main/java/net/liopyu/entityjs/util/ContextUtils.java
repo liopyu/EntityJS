@@ -650,16 +650,16 @@ public class ContextUtils {
         @Info("The looting multiplier for the loot")
         public final int lootingMultiplier;
 
-        @Info("Whether drops are allowed")
-        public final boolean allowDrops;
+        @Info("Whether the entity was hit by a player or not")
+        public final boolean hitByPlayer;
 
         @Info("The living entity involved")
         public final LivingEntity entity;
 
-        public EntityLootContext(DamageSource damageSource, int lootingMultiplier, boolean allowDrops, LivingEntity entity) {
+        public EntityLootContext(DamageSource damageSource, int lootingMultiplier, boolean hitByPlayer, LivingEntity entity) {
             this.damageSource = damageSource;
             this.lootingMultiplier = lootingMultiplier;
-            this.allowDrops = allowDrops;
+            this.hitByPlayer = hitByPlayer;
             this.entity = entity;
         }
     }

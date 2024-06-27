@@ -8,6 +8,7 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
@@ -17,11 +18,11 @@ import java.util.function.Function;
 public class ModifyLivingEntityBuilder extends LevelEventJS {
     private final LivingEntity entity;
     public transient Consumer<ContextUtils.EntityHurtContext> modifyHurt;
-    public transient boolean isPushable;
+    public transient Boolean isPushable;
     public transient Function<LivingEntity, Object> shouldDropLoot;
     public transient Function<ContextUtils.PassengerEntityContext, Object> canAddPassenger;
     public transient Function<LivingEntity, Object> isAffectedByFluids;
-    public transient boolean isAlwaysExperienceDropper;
+    public transient Boolean isAlwaysExperienceDropper;
     public transient Function<LivingEntity, Object> isImmobile;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Function<LivingEntity, Object> setBlockJumpFactor;
@@ -109,34 +110,54 @@ public class ModifyLivingEntityBuilder extends LevelEventJS {
     public transient Function<ContextUtils.CollidingEntityContext, Object> canCollideWith;
     public transient Consumer<ContextUtils.Vec3Context> travel;
     public transient Boolean canSteer;
-    public transient boolean mountJumpingEnabled;
+    public transient Boolean mountJumpingEnabled;
     public transient Consumer<LivingEntity> tickDeath;
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
     public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
 
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
 
+    public enum EntityModificationType {
+        ENTITY,
+        LIVING_ENTITY,
+        MOB,
+        PATHFINDER_MOB,
+        ANIMAL,
+        AGEABLEMOB,
+        TAMABLE
+    }
+
+    protected final EntityModificationType modificationType;
+
     public ModifyLivingEntityBuilder(LivingEntity entity) {
         this.entity = entity;
-        /*isPushable = true;
-        isAlwaysExperienceDropper = false;
-        setSoundVolume = 1.0f;
-        setWaterSlowDown = 0.8f;
-        repositionEntityAfterLoad = true;
-        canBreatheUnderwater = false;
-        mainArm = HumanoidArm.RIGHT;
-        mobType = MobType.UNDEFINED;
-        canSteer = true;
-        mountJumpingEnabled = true;*/
+        this.modificationType = determineModificationType(entity);
+    }
+
+    public EntityModificationType getModificationType() {
+        return modificationType;
+    }
+
+    private EntityModificationType determineModificationType(LivingEntity entity) {
+        if (entity instanceof TamableAnimal) {
+            return EntityModificationType.TAMABLE;
+        } else if (entity instanceof Animal) {
+            return EntityModificationType.ANIMAL;
+        } else if (entity instanceof AgeableMob) {
+            return EntityModificationType.AGEABLEMOB;
+        } else if (entity instanceof PathfinderMob) {
+            return EntityModificationType.PATHFINDER_MOB;
+        } else if (entity instanceof Mob) {
+            return EntityModificationType.MOB;
+        } else if (entity instanceof LivingEntity) {
+            return EntityModificationType.LIVING_ENTITY;
+        } else {
+            return EntityModificationType.ENTITY;
+        }
     }
 
     public LivingEntity getEntity() {
         return entity;
-    }
-
-    public ModifyLivingEntityBuilder modifyHurt(Consumer<ContextUtils.EntityHurtContext> context) {
-        this.modifyHurt = context;
-        return this;
     }
 
 

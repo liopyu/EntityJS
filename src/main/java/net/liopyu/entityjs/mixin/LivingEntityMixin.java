@@ -1,30 +1,20 @@
 package net.liopyu.entityjs.mixin;
 
-import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.util.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,9 +25,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Objects;
 
 @Mixin(value = LivingEntity.class, remap = false)
-public abstract class LivingEntityMixin {
+public abstract class LivingEntityMixin implements IModifyEntityJS {
 
-   /* @Unique
+    @Unique
     private Object entityJs$entityObject = this;
 
     @Unique
@@ -45,929 +35,628 @@ public abstract class LivingEntityMixin {
         return (LivingEntity) entityJs$entityObject;
     }
 
-    public String entityName() {
+    @Unique
+    private String entityJs$entityName() {
         return entityJs$getLivingEntity().getType().toString();
     }
 
-    public ModifyLivingEntityBuilder builder;
+    @Unique
+    public ModifyLivingEntityBuilder entityJs$builder;
 
-    public LivingEntityMixin() {
+    @Override
+    public ModifyLivingEntityBuilder entityJs$getBuilder() {
+        return entityJs$builder;
     }
+
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onEntityInit(EntityType<LivingEntity> pEntityType, Level pLevel, CallbackInfo ci) {
-        builder = new ModifyLivingEntityBuilder(entityJs$getLivingEntity());
+        entityJs$builder = new ModifyLivingEntityBuilder(entityJs$getLivingEntity());
         if (EventHandlers.modifyEntity.hasListeners()) {
-            EventHandlers.modifyEntity.post(builder);
+            EventHandlers.modifyEntity.post(entityJs$builder);
         }
     }
 
-
-    @Inject(method = "hurt", at = @At(value = "HEAD", ordinal = 0), remap = false)
-    private void entityjs$hurt(DamageSource pSource, float pAmount, CallbackInfoReturnable<Boolean> cir) {
-        if (builder.modifyHurt != null) {
-            ContextUtils.EntityHurtContext context = new ContextUtils.EntityHurtContext(entityJs$getLivingEntity(), pSource, pAmount);
-            try {
-                builder.modifyHurt.accept(context);
-            } catch (Exception e) {
-                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in entityjs$hurt.", e);
-            }
-
-        }
-    }
-
-    @Inject(method = "interact", at = @At(value = "HEAD", ordinal = 0), remap = false)
-    public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
-        if (builder.onInteract != null) {
-            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(entityJs$getLivingEntity(), pPlayer, pHand);
-            builder.onInteract.accept(context);
-        }
-    }
-
-
-    public void aiStep() {
-        if (builder.aiStep != null) {
-            builder.aiStep.accept(entityJs$getLivingEntity());
+    @Inject(method = "aiStep", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$aiStep(CallbackInfo ci) {
+        if (entityJs$builder.aiStep != null) {
+            entityJs$builder.aiStep.accept(entityJs$getLivingEntity());
         }
     }
 
     //(Base LivingEntity/Entity Overrides)
-
-    public boolean isAlliedTo(Entity pEntity) {
-        if (builder.isAlliedTo != null) {
-            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, entityJs$getLivingEntity());
-            Object obj = builder.isAlliedTo.apply(context);
-            if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
+    @Inject(method = "doHurtTarget", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$isAlliedTo(Entity pTarget, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder != null && entityJs$builder.onHurtTarget != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entityJs$getLivingEntity(), entityJs$getLivingEntity());
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onHurtTarget, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHurtTarget.");
         }
     }
 
-
-    public boolean doHurtTarget(Entity pEntity) {
-        if (builder != null && builder.onHurtTarget != null) {
-            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget.");
-
-        }
-    }
-
-
-    public void travel(Vec3 pTravelVector) {
-        if (builder.travel != null) {
+    @Inject(method = "travel", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$travel(Vec3 pTravelVector, CallbackInfo ci) {
+        if (entityJs$builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(builder.travel, context, "[EntityJS]: Error in " + entityName() + "builder for field: travel.");
+            EntityJSHelperClass.consumerCallback(entityJs$builder.travel, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: travel.");
 
         }
     }
 
-
-    public void tick() {
-        if (builder.tick != null) {
+    @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$tick(CallbackInfo ci) {
+        if (entityJs$builder.tick != null) {
             if (!entityJs$getLivingEntity().level().isClientSide()) {
-                EntityJSHelperClass.consumerCallback(builder.tick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
-
+                EntityJSHelperClass.consumerCallback(entityJs$builder.tick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tick.");
             }
         }
     }
 
+    @Inject(method = "doAutoAttackOnTouch", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$doAutoAttackOnTouch(LivingEntity pTarget, CallbackInfo ci) {
+        if (entityJs$builder.doAutoAttackOnTouch != null) {
+            final ContextUtils.AutoAttackContext context = new ContextUtils.AutoAttackContext(entityJs$getLivingEntity(), pTarget);
+            EntityJSHelperClass.consumerCallback(entityJs$builder.doAutoAttackOnTouch, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: doAutoAttackOnTouch.");
+        }
+    }
 
-    public void onAddedToWorld() {
-        if (builder.onAddedToWorld != null && !entityJs$getLivingEntity().level().isClientSide()) {
-            EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
+    @Inject(method = "decreaseAirSupply", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$decreaseAirSupply(int pCurrentAir, CallbackInfoReturnable<Integer> cir) {
+        if (entityJs$builder.onDecreaseAirSupply != null) {
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onDecreaseAirSupply, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onDecreaseAirSupply.");
+        }
+    }
+
+    @Inject(method = "increaseAirSupply", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$increaseAirSupply(int pCurrentAir, CallbackInfoReturnable<Integer> cir) {
+        if (entityJs$builder.onIncreaseAirSupply != null) {
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onIncreaseAirSupply, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onIncreaseAirSupply.");
+
+        }
+    }
+
+    @Inject(method = "blockedByShield", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$blockedByShield(LivingEntity pDefender, CallbackInfo ci) {
+        if (entityJs$builder.onBlockedByShield != null) {
+            var context = new ContextUtils.LivingEntityContext(entityJs$getLivingEntity(), pDefender);
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onDecreaseAirSupply.");
+        }
+    }
+
+    @Inject(method = "onEquipItem", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$onEquipItem(EquipmentSlot pSlot, ItemStack pOldItem, ItemStack pNewItem, CallbackInfo ci) {
+        if (entityJs$builder.onEquipItem != null) {
+            final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(pSlot, pOldItem, pNewItem, entityJs$getLivingEntity());
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onEquipItem, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEquipItem.");
+
+        }
+    }
+
+    @Inject(method = "onEffectAdded", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$onEffectAdded(MobEffectInstance pEffectInstance, Entity pEntity, CallbackInfo ci) {
+        if (entityJs$builder.onEffectAdded != null) {
+            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(pEffectInstance, entityJs$getLivingEntity());
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onEffectAdded, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEffectAdded.");
+
+        }
+    }
+
+    @Inject(method = "onEffectRemoved", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$onEffectRemoved(MobEffectInstance pEffectInstance, CallbackInfo ci) {
+        if (entityJs$builder.onEffectRemoved != null) {
+            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(pEffectInstance, entityJs$getLivingEntity());
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onEffectRemoved, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEffectRemoved.");
+        }
+    }
+
+    @Inject(method = "heal", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$heal(float pHealAmount, CallbackInfo ci) {
+        if (entityJs$builder.onLivingHeal != null) {
+            final ContextUtils.EntityHealContext context = new ContextUtils.EntityHealContext(entityJs$getLivingEntity(), pHealAmount);
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onLivingHeal, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onLivingHeal.");
+
+        }
+    }
+
+    @Inject(method = "die", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$die(DamageSource pDamageSource, CallbackInfo ci) {
+        if (entityJs$builder.onDeath != null) {
+            final ContextUtils.DeathContext context = new ContextUtils.DeathContext(entityJs$getLivingEntity(), pDamageSource);
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onDeath, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onDeath.");
+        }
+    }
+
+    @Inject(method = "dropCustomDeathLoot", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    private void entityjs$dropCustomDeathLoot(DamageSource pDamageSource, int pLooting, boolean pHitByPlayer, CallbackInfo ci) {
+        if (entityJs$builder.dropCustomDeathLoot != null) {
+            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(pDamageSource, pLooting, pHitByPlayer, entityJs$getLivingEntity());
+            EntityJSHelperClass.consumerCallback(entityJs$builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: dropCustomDeathLoot.");
 
         }
     }
 
 
-    protected void doAutoAttackOnTouch(@NotNull LivingEntity target) {
-        if (builder.doAutoAttackOnTouch != null) {
-            final ContextUtils.AutoAttackContext context = new ContextUtils.AutoAttackContext(entityJs$getLivingEntity(), target);
-            EntityJSHelperClass.consumerCallback(builder.doAutoAttackOnTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: doAutoAttackOnTouch.");
+    @Inject(method = "getSoundVolume", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getSoundVolume(CallbackInfoReturnable<Float> cir) {
+        if (entityJs$builder.setSoundVolume != null) {
+            cir.setReturnValue(entityJs$builder.setSoundVolume);
+        }
+    }
+
+    @Inject(method = "getWaterSlowDown", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getWaterSlowDown(CallbackInfoReturnable<Float> cir) {
+        if (entityJs$builder.setWaterSlowDown != null) {
+            cir.setReturnValue(entityJs$builder.setWaterSlowDown);
         }
     }
 
 
-    protected int decreaseAirSupply(int p_21303_) {
-        if (builder.onDecreaseAirSupply != null) {
-            EntityJSHelperClass.consumerCallback(builder.onDecreaseAirSupply, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
-        }
-    }
-
-
-    protected int increaseAirSupply(int p_21307_) {
-        if (builder.onIncreaseAirSupply != null) {
-            EntityJSHelperClass.consumerCallback(builder.onIncreaseAirSupply, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onIncreaseAirSupply.");
-
-        }
-    }
-
-
-    protected void blockedByShield(@NotNull LivingEntity p_21246_) {
-        if (builder.onBlockedByShield != null) {
-            var context = new ContextUtils.LivingEntityContext(entityJs$getLivingEntity(), p_21246_);
-            EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
-        }
-    }
-
-
-    public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
-
-        if (builder.onEquipItem != null) {
-            final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEquipItem.");
-
-        }
-    }
-
-
-    public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
-        if (builder.onEffectAdded != null) {
-            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(builder.onEffectAdded, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectAdded.");
-
-        }
-    }
-
-
-    protected void onEffectRemoved(@NotNull MobEffectInstance effectInstance) {
-
-        if (builder.onEffectRemoved != null) {
-            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(builder.onEffectRemoved, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectRemoved.");
-        }
-    }
-
-
-    public void heal(float amount) {
-        if (builder.onLivingHeal != null) {
-            final ContextUtils.EntityHealContext context = new ContextUtils.EntityHealContext(entityJs$getLivingEntity(), amount);
-            EntityJSHelperClass.consumerCallback(builder.onLivingHeal, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingHeal.");
-
-        }
-    }
-
-
-    public void die(@NotNull DamageSource damageSource) {
-        if (builder.onDeath != null) {
-            final ContextUtils.DeathContext context = new ContextUtils.DeathContext(entityJs$getLivingEntity(), damageSource);
-            EntityJSHelperClass.consumerCallback(builder.onDeath, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDeath.");
-        }
-    }
-
-
-    protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
-        if (builder.dropCustomDeathLoot != null) {
-            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityName() + "builder for field: dropCustomDeathLoot.");
-
-        }
-    }
-
-
-    protected void onFlap() {
-        if (builder.onFlap != null) {
-            EntityJSHelperClass.consumerCallback(builder.onFlap, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onFlap.");
-
-        }
-    }
-
-    public LivingEntity getControllingPassenger() {
-        Entity var2 = entityJs$getLivingEntity().getFirstPassenger();
-        LivingEntity var10000;
-        if (var2 instanceof LivingEntity entity) {
-            var10000 = entity;
-        } else {
-            var10000 = null;
-        }
-
-        return var10000;
-    }
-
-
-    public boolean canCollideWith(Entity pEntity) {
-        if (builder.canCollideWith != null) {
-            final ContextUtils.CollidingEntityContext context = new ContextUtils.CollidingEntityContext(entityJs$getLivingEntity(), pEntity);
-            Object obj = builder.canCollideWith.apply(context);
-            if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
-        }
-    }
-
-
-    protected float getSoundVolume() {
-        return Objects.requireNonNullElseGet(builder.setSoundVolume, super::getSoundVolume);
-    }
-
-
-    protected float getWaterSlowDown() {
-        return Objects.requireNonNullElseGet(builder.setWaterSlowDown, super::getWaterSlowDown);
-    }
-
-
-    protected float getBlockJumpFactor() {
-        if (builder.setBlockJumpFactor == null) return super.getBlockJumpFactor();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor.apply(entityJs$getLivingEntity()), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(entityJs$getLivingEntity()) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
-        return super.getBlockJumpFactor();
-    }
-
-
-    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
-        if (builder == null || builder.setStandingEyeHeight == null)
-            return super.getStandingEyeHeight(pPose, pDimensions);
+    @Inject(method = "getStandingEyeHeight", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions, CallbackInfoReturnable<Float> cir) {
         final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, entityJs$getLivingEntity());
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setStandingEyeHeight from entity: " + entityName() + ". Value: " + builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + super.getStandingEyeHeight(pPose, pDimensions));
-        return super.getStandingEyeHeight(pPose, pDimensions);
-    }
-
-
-    public boolean isPushable() {
-        return builder.isPushable;
-    }
-
-
-    protected float getBlockSpeedFactor() {
-        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(entityJs$getLivingEntity()), "float");
-        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
+        Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$builder.setStandingEyeHeight.apply(context), "float");
         if (obj != null) {
-            return (float) obj;
+            cir.setReturnValue((float) obj);
+        } else
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setStandingEyeHeight from entity: " + entityJs$entityName() + ". Value: " + entityJs$builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + cir.getReturnValue());
+    }
+
+    @Inject(method = "isPushable", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$isPushable(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.isPushable != null) {
+            cir.setReturnValue(entityJs$builder.isPushable);
+        }
+    }
+
+    @Inject(method = "getBlockSpeedFactor", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getBlockSpeedFactor(CallbackInfoReturnable<Float> cir) {
+        if (entityJs$builder.blockSpeedFactor == null) return;
+        Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$builder.blockSpeedFactor.apply(entityJs$getLivingEntity()), "float");
+        if (obj != null) {
+            cir.setReturnValue((float) obj);
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + builder.get() + ". Value: " + builder.blockSpeedFactor.apply(entityJs$getLivingEntity()) + ". Must be a float, defaulting to " + super.getBlockSpeedFactor());
-            return super.getBlockSpeedFactor();
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + entityJs$getLivingEntity().getType() + ". Value: " + entityJs$builder.blockSpeedFactor.apply(entityJs$getLivingEntity()) + ". Must be a float, defaulting to " + cir.getReturnValue());
         }
     }
 
 
-    protected void positionRider(Entity pPassenger, Entity.MoveFunction pCallback) {
-        if (builder.positionRider != null) {
-            final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(entityJs$getLivingEntity(), pPassenger, pCallback);
-            EntityJSHelperClass.consumerCallback(builder.positionRider, context, "[EntityJS]: Error in " + entityName() + "builder for field: positionRider.");
+    @Inject(method = "shouldDropLoot", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$shouldDropLoot(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.shouldDropLoot != null) {
+            Object obj = entityJs$builder.shouldDropLoot.apply(entityJs$getLivingEntity());
+            if (obj instanceof Boolean) {
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropLoot from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean, defaulting to " + cir.getReturnValue());
+        }
+    }
+
+    @Inject(method = "isAffectedByFluids", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$isAffectedByFluids(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.isAffectedByFluids != null) {
+            Object obj = entityJs$builder.isAffectedByFluids.apply(entityJs$getLivingEntity());
+            if (obj instanceof Boolean) {
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByFluids from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+        }
+    }
+
+    @Inject(method = "isAlwaysExperienceDropper", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$isAlwaysExperienceDropper(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.isAlwaysExperienceDropper != null) {
+            cir.setReturnValue(entityJs$builder.isAlwaysExperienceDropper);
+        }
+    }
+
+    @Inject(method = "isImmobile", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$isImmobile(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.isImmobile != null) {
+            Object obj = entityJs$builder.isImmobile.apply(entityJs$getLivingEntity());
+            if (obj instanceof Boolean) {
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isImmobile from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+        }
+    }
+
+
+    @Inject(method = "calculateFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$calculateFallDamage(float pFallDistance, float pDamageMultiplier, CallbackInfoReturnable<Integer> cir) {
+        if (entityJs$builder.calculateFallDamage == null) return;
+        final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(pFallDistance, pDamageMultiplier, entityJs$getLivingEntity());
+        Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$builder.calculateFallDamage.apply(context), "integer");
+        if (obj != null) {
+            cir.setReturnValue((int) obj);
+        } else
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for calculateFallDamage from entity: " + entityJs$entityName() + ". Value: " + entityJs$builder.calculateFallDamage.apply(context) + ". Must be an int, defaulting to " + cir.getReturnValue());
+    }
+
+
+    @Inject(method = "getHurtSound", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getHurtSound(DamageSource pDamageSource, CallbackInfoReturnable<SoundEvent> cir) {
+        if (entityJs$builder.setHurtSound == null) return;
+        final ContextUtils.HurtContext context = new ContextUtils.HurtContext(entityJs$getLivingEntity(), pDamageSource);
+        Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$builder.setHurtSound.apply(context), "resourcelocation");
+        if (obj != null)
+            cir.setReturnValue(Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj)));
+        else
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityJs$entityName() + ". Value: " + entityJs$builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
+    }
+
+
+    @Inject(method = "canAttackType", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$canAttackType(EntityType<?> pEntityType, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.canAttackType != null) {
+            final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(entityJs$getLivingEntity(), pEntityType);
+            Object obj = entityJs$builder.canAttackType.apply(context);
+            if (obj instanceof Boolean) {
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttackType from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+        }
+    }
+
+    @Inject(method = "getScale", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getScale(CallbackInfoReturnable<Float> cir) {
+        if (entityJs$builder.scale == null) return;
+        Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$builder.scale.apply(entityJs$getLivingEntity()), "float");
+        if (obj != null) {
+            cir.setReturnValue((float) obj);
+        } else {
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for scale from entity: " + entityJs$entityName() + ". Value: " + entityJs$builder.scale.apply(entityJs$getLivingEntity()) + ". Must be a float. Defaulting to " + cir.getReturnValue());
+        }
+    }
+
+    @Inject(method = "shouldDropExperience", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$shouldDropExperience(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.shouldDropExperience != null) {
+            Object obj = entityJs$builder.shouldDropExperience.apply(entityJs$getLivingEntity());
+            if (obj instanceof Boolean) {
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropExperience from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+        }
+    }
+
+    @Inject(method = "getVisibilityPercent", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getVisibilityPercent(Entity pLookingEntity, CallbackInfoReturnable<Double> cir) {
+        if (entityJs$builder.visibilityPercent != null) {
+            final ContextUtils.VisualContext context = new ContextUtils.VisualContext(pLookingEntity, entityJs$getLivingEntity());
+            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$builder.visibilityPercent.apply(context), "double");
+            if (obj != null) {
+                cir.setReturnValue((double) obj);
+            } else {
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityJs$entityName() + ". Value: " + entityJs$builder.visibilityPercent.apply(context) + ". Must be a double. Defaulting to " + cir.getReturnValue());
+            }
+        }
+    }
+
+    @Inject(method = "canAttack(Lnet/minecraft/world/entity/LivingEntity;)Z", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$canAttack(LivingEntity pTarget, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.canAttack != null) {
+            final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(entityJs$getLivingEntity(), pTarget);
+            Object obj = entityJs$builder.canAttack.apply(context);
+            if (obj instanceof Boolean b) {
+                boolean bool = b && cir.getReturnValue();
+                cir.setReturnValue(bool);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttack from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+        }
+    }
+
+    @Inject(method = "canBeAffected", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$canBeAffected(MobEffectInstance pEffectInstance, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.canBeAffected == null) {
             return;
         }
-        super.positionRider(pPassenger, pCallback);
-    }
-
-
-    protected boolean canAddPassenger(@NotNull Entity entity) {
-        if (builder.canAddPassenger == null) {
-            return super.canAddPassenger(entity);
-        }
-        final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(entity, entityJs$getLivingEntity());
-        Object obj = builder.canAddPassenger.apply(context);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAddPassenger from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean, defaulting to " + super.canAddPassenger(entity));
-        return super.canAddPassenger(entity);
-    }
-
-
-    protected boolean shouldDropLoot() {
-        if (builder.shouldDropLoot != null) {
-            Object obj = builder.shouldDropLoot.apply(entityJs$getLivingEntity());
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropLoot from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean, defaulting to " + super.shouldDropLoot());
-        }
-        return super.shouldDropLoot();
-    }
-
-
-    protected boolean isAffectedByFluids() {
-        if (builder.isAffectedByFluids != null) {
-            Object obj = builder.isAffectedByFluids.apply(entityJs$getLivingEntity());
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByFluids from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAffectedByFluids());
-        }
-        return super.isAffectedByFluids();
-    }
-
-
-    protected boolean isAlwaysExperienceDropper() {
-        return builder.isAlwaysExperienceDropper;
-    }
-
-
-    protected boolean isImmobile() {
-        if (builder.isImmobile != null) {
-            Object obj = builder.isImmobile.apply(entityJs$getLivingEntity());
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isImmobile from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isImmobile());
-        }
-        return super.isImmobile();
-    }
-
-
-    protected boolean isFlapping() {
-        if (builder.isFlapping != null) {
-            Object obj = builder.isFlapping.apply(entityJs$getLivingEntity());
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFlapping from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFlapping());
-        }
-        return super.isFlapping();
-    }
-
-
-    public int calculateFallDamage(float fallDistance, float pDamageMultiplier) {
-        if (builder.calculateFallDamage == null) return super.calculateFallDamage(fallDistance, pDamageMultiplier);
-        final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(fallDistance, pDamageMultiplier, entityJs$getLivingEntity());
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.calculateFallDamage.apply(context), "integer");
-        if (obj != null) {
-            return (int) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for calculateFallDamage from entity: " + entityName() + ". Value: " + builder.calculateFallDamage.apply(context) + ". Must be an int, defaulting to " + super.calculateFallDamage(fallDistance, pDamageMultiplier));
-        return super.calculateFallDamage(fallDistance, pDamageMultiplier);
-    }
-
-
-    protected boolean repositionEntityAfterLoad() {
-        return Objects.requireNonNullElseGet(builder.repositionEntityAfterLoad, super::repositionEntityAfterLoad);
-    }
-
-
-    protected float nextStep() {
-        if (builder.nextStep != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.nextStep.apply(entityJs$getLivingEntity()), "float");
-            if (obj != null) {
-                return (float) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityName() + ". Value: " + builder.nextStep.apply(entityJs$getLivingEntity()) + ". Must be a float, defaulting to " + super.nextStep());
-            }
-        }
-        return super.nextStep();
-    }
-
-
-    @Nullable
-
-    protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
-        if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
-        final ContextUtils.HurtContext context = new ContextUtils.HurtContext(entityJs$getLivingEntity(), p_21239_);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
-        if (obj != null) return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
-        return super.getHurtSound(p_21239_);
-    }
-
-
-    protected SoundEvent getSwimSplashSound() {
-        if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
-    }
-
-
-    protected SoundEvent getSwimSound() {
-        if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
-
-    }
-
-
-    public boolean canAttackType(@NotNull EntityType<?> entityType) {
-        if (builder.canAttackType != null) {
-            final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(entityJs$getLivingEntity(), entityType);
-            Object obj = builder.canAttackType.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttackType from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canAttackType(entityType));
-        }
-        return super.canAttackType(entityType);
-    }
-
-
-    public float getScale() {
-        if (builder.scale == null) return super.getScale();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.scale.apply(entityJs$getLivingEntity()), "float");
-        if (obj != null) {
-            return (float) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for scale from entity: " + entityName() + ". Value: " + builder.scale.apply(entityJs$getLivingEntity()) + ". Must be a float. Defaulting to " + super.getScale());
-            return super.getScale();
-        }
-    }
-
-
-
-    public boolean shouldDropExperience() {
-        if (builder.shouldDropExperience != null) {
-            Object obj = builder.shouldDropExperience.apply(entityJs$getLivingEntity());
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropExperience from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.shouldDropExperience());
-        }
-        return super.shouldDropExperience();
-    }
-
-
-    public double getVisibilityPercent(@Nullable Entity p_20969_) {
-        if (builder.visibilityPercent != null) {
-            final ContextUtils.VisualContext context = new ContextUtils.VisualContext(p_20969_, entityJs$getLivingEntity());
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.visibilityPercent.apply(context), "double");
-            if (obj != null) {
-                return (double) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityName() + ". Value: " + builder.visibilityPercent.apply(context) + ". Must be a double. Defaulting to " + super.getVisibilityPercent(p_20969_));
-                return super.getVisibilityPercent(p_20969_);
-            }
-        } else {
-            return super.getVisibilityPercent(p_20969_);
-        }
-    }
-
-
-    public boolean canAttack(@NotNull LivingEntity entity) {
-        if (builder.canAttack != null) {
-            final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(entityJs$getLivingEntity(), entity);
-            Object obj = builder.canAttack.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj && super.canAttack(entity);
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttack from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canAttack(entity));
-        }
-        return super.canAttack(entity);
-    }
-
-
-    public boolean canBeAffected(@NotNull MobEffectInstance effectInstance) {
-        if (builder.canBeAffected == null) {
-            return super.canBeAffected(effectInstance);
-        }
-        final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, entityJs$getLivingEntity());
-        Object result = builder.canBeAffected.apply(context);
+        final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(pEffectInstance, entityJs$getLivingEntity());
+        Object result = entityJs$builder.canBeAffected.apply(context);
         if (result instanceof Boolean) {
-            return (boolean) result;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeAffected from entity: " + entityName() + ". Value: " + result + ". Must be a boolean. Defaulting to " + super.canBeAffected(effectInstance));
-        return super.canBeAffected(effectInstance);
+            cir.setReturnValue((boolean) result);
+        } else
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeAffected from entity: " + entityJs$entityName() + ". Value: " + result + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
     }
 
-
-    public boolean isInvertedHealAndHarm() {
-        if (builder.invertedHealAndHarm == null) {
-            return super.isInvertedHealAndHarm();
+    @Inject(method = "isInvertedHealAndHarm", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$isInvertedHealAndHarm(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.invertedHealAndHarm == null) {
+            return;
         }
-        Object obj = builder.invertedHealAndHarm.apply(entityJs$getLivingEntity());
+        Object obj = entityJs$builder.invertedHealAndHarm.apply(entityJs$getLivingEntity());
         if (obj instanceof Boolean) {
-            return (boolean) obj;
+            cir.setReturnValue((boolean) obj);
+        } else
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for invertedHealAndHarm from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+    }
+
+    @Inject(method = "getDeathSound", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getDeathSound(CallbackInfoReturnable<SoundEvent> cir) {
+        if (entityJs$builder.setDeathSound == null) return;
+        cir.setReturnValue(Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) entityJs$builder.setDeathSound)));
+    }
+
+    @Inject(method = "getFallSounds", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getFallSounds(CallbackInfoReturnable<LivingEntity.Fallsounds> cir) {
+        if (entityJs$builder.fallSounds != null)
+            cir.setReturnValue(new LivingEntity.Fallsounds(
+                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) entityJs$builder.smallFallSound)),
+                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) entityJs$builder.largeFallSound))
+            ));
+    }
+
+    @Inject(method = "getEatingSound", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getEatingSound(ItemStack pStack, CallbackInfoReturnable<SoundEvent> cir) {
+        if (entityJs$builder.eatingSound != null)
+            cir.setReturnValue(Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) entityJs$builder.eatingSound)));
+    }
+
+    @Inject(method = "onClimbable", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$onClimbable(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.onClimbable == null) {
+            return;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for invertedHealAndHarm from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isInvertedHealAndHarm());
-        return super.isInvertedHealAndHarm();
-    }
-
-
-    protected SoundEvent getDeathSound() {
-        if (builder.setDeathSound == null) return super.getDeathSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));
-    }
-
-
-    public @NotNull LivingEntity.Fallsounds getFallSounds() {
-        if (builder.fallSounds != null)
-            return new LivingEntity.Fallsounds(
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.smallFallSound)),
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.largeFallSound))
-            );
-        return super.getFallSounds();
-    }
-
-
-    public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
-        if (builder.eatingSound != null)
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.eatingSound));
-        return super.getEatingSound(itemStack);
-    }
-
-
-    public boolean onClimbable() {
-        if (builder.onClimbable == null) {
-            return super.onClimbable();
-        }
-        Object obj = builder.onClimbable.apply(entityJs$getLivingEntity());
+        Object obj = entityJs$builder.onClimbable.apply(entityJs$getLivingEntity());
         if (obj instanceof Boolean) {
-            return (boolean) obj;
+            cir.setReturnValue((boolean) obj);
+        } else
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onClimbable from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super.onClimbable(): " + cir.getReturnValue());
+    }
+
+
+    @Inject(method = "canBreatheUnderwater", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$canBreatheUnderwater(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.canBreatheUnderwater != null) {
+            cir.setReturnValue(entityJs$builder.canBreatheUnderwater);
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onClimbable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super.onClimbable(): " + super.onClimbable());
-        return super.onClimbable();
     }
 
-
-    //Deprecated but still works for 1.20.4 :shrug:
-
-    public boolean canBreatheUnderwater() {
-        return Objects.requireNonNullElseGet(builder.canBreatheUnderwater, super::canBreatheUnderwater);
-    }
-
-
-    public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
-        if (builder.onLivingFall != null) {
-            final ContextUtils.EntityFallDamageContext context = new ContextUtils.EntityFallDamageContext(entityJs$getLivingEntity(), damageMultiplier, distance, damageSource);
-            EntityJSHelperClass.consumerCallback(builder.onLivingFall, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingFall.");
-
+    @Inject(method = "causeFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.onLivingFall != null) {
+            final ContextUtils.EntityFallDamageContext context = new ContextUtils.EntityFallDamageContext(entityJs$getLivingEntity(), pMultiplier, pFallDistance, pSource);
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onLivingFall, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onLivingFall.");
         }
-        return super.causeFallDamage(distance, damageMultiplier, damageSource);
     }
 
-
-    public void setSprinting(boolean sprinting) {
-        if (builder.onSprint != null) {
-            EntityJSHelperClass.consumerCallback(builder.onSprint, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onSprint.");
-
+    @Inject(method = "setSprinting", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$setSprinting(boolean pSprinting, CallbackInfo ci) {
+        if (entityJs$builder.onSprint != null) {
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onSprint, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onSprint.");
         }
-        super.setSprinting(sprinting);
     }
 
-
-    public float getJumpBoostPower() {
-        if (builder.jumpBoostPower == null) return super.getJumpBoostPower();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(entityJs$getLivingEntity()), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(entityJs$getLivingEntity()) + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
-        return super.getJumpBoostPower();
+    @Inject(method = "getJumpBoostPower", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getJumpBoostPower(CallbackInfoReturnable<Float> cir) {
+        if (entityJs$builder.jumpBoostPower == null) return;
+        Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$builder.jumpBoostPower.apply(entityJs$getLivingEntity()), "float");
+        if (obj != null) cir.setReturnValue((float) obj);
+        else
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityJs$entityName() + ". Value: " + entityJs$builder.jumpBoostPower.apply(entityJs$getLivingEntity()) + ". Must be a float. Defaulting to " + cir.getReturnValue());
     }
 
-
-    public boolean canStandOnFluid(@NotNull FluidState fluidState) {
-        if (builder.canStandOnFluid != null) {
-            final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(entityJs$getLivingEntity(), fluidState);
-            Object obj = builder.canStandOnFluid.apply(context);
+    @Inject(method = "canStandOnFluid", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$canStandOnFluid(FluidState pFluidState, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.canStandOnFluid != null) {
+            final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(entityJs$getLivingEntity(), pFluidState);
+            Object obj = entityJs$builder.canStandOnFluid.apply(context);
             if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canStandOnFluid from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canStandOnFluid(fluidState));
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canStandOnFluid from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
-        return super.canStandOnFluid(fluidState);
     }
 
-
-    public boolean isSensitiveToWater() {
-        if (builder.isSensitiveToWater != null) {
-            Object obj = builder.isSensitiveToWater.apply(entityJs$getLivingEntity());
+    @Inject(method = "isSensitiveToWater", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$isSensitiveToWater(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.isSensitiveToWater != null) {
+            Object obj = entityJs$builder.isSensitiveToWater.apply(entityJs$getLivingEntity());
             if (obj instanceof Boolean) {
-                return (boolean) obj;
+                cir.setReturnValue((boolean) obj);
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSensitiveToWater from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isSensitiveToWater());
-        }
-        return super.isSensitiveToWater();
-    }
-
-
-    public void stopRiding() {
-        super.stopRiding();
-        if (builder.onStopRiding != null) {
-            EntityJSHelperClass.consumerCallback(builder.onStopRiding, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
-
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSensitiveToWater from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
     }
 
+    @Inject(method = "stopRiding", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$stopRiding(CallbackInfo ci) {
+        if (entityJs$builder.onStopRiding != null) {
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onStopRiding, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onStopRiding.");
+        }
+    }
 
-    public void rideTick() {
-        super.rideTick();
-        if (builder.rideTick != null) {
-            EntityJSHelperClass.consumerCallback(builder.rideTick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: rideTick.");
+    @Inject(method = "rideTick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$rideTick(CallbackInfo ci) {
+        if (entityJs$builder.rideTick != null) {
+            EntityJSHelperClass.consumerCallback(entityJs$builder.rideTick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: rideTick.");
 
         }
     }
 
-
-    public void onItemPickup(@NotNull ItemEntity p_21054_) {
-        super.onItemPickup(p_21054_);
-        if (builder.onItemPickup != null) {
-            final ContextUtils.EntityItemEntityContext context = new ContextUtils.EntityItemEntityContext(entityJs$getLivingEntity(), p_21054_);
-            EntityJSHelperClass.consumerCallback(builder.onItemPickup, context, "[EntityJS]: Error in " + entityName() + "builder for field: onItemPickup.");
-
+    @Inject(method = "onItemPickup", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$onItemPickup(ItemEntity pItemEntity, CallbackInfo ci) {
+        if (entityJs$builder.onItemPickup != null) {
+            final ContextUtils.EntityItemEntityContext context = new ContextUtils.EntityItemEntityContext(entityJs$getLivingEntity(), pItemEntity);
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onItemPickup, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onItemPickup.");
         }
     }
 
-
-    public boolean hasLineOfSight(@NotNull Entity entity) {
-        if (builder.hasLineOfSight != null) {
-            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entity, entityJs$getLivingEntity());
-            Object obj = builder.hasLineOfSight.apply(context);
+    @Inject(method = "hasLineOfSight", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$hasLineOfSight(Entity pEntity, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.hasLineOfSight != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, entityJs$getLivingEntity());
+            Object obj = entityJs$builder.hasLineOfSight.apply(context);
             if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
     }
 
+    @Inject(method = "onEnterCombat", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$onEnterCombat(CallbackInfo ci) {
+        if (entityJs$builder.onEnterCombat != null) {
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onEnterCombat, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEnterCombat.");
+        }
+    }
 
-    public void onEnterCombat() {
-        if (builder.onEnterCombat != null) {
-            EntityJSHelperClass.consumerCallback(builder.onEnterCombat, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onEnterCombat.");
+    @Inject(method = "onLeaveCombat", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$onLeaveCombat(CallbackInfo ci) {
+        if (entityJs$builder.onLeaveCombat != null) {
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onLeaveCombat, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onLeaveCombat.");
 
         }
     }
 
-
-    public void onLeaveCombat() {
-        if (builder.onLeaveCombat != null) {
-            EntityJSHelperClass.consumerCallback(builder.onLeaveCombat, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onLeaveCombat.");
-
-        }
-    }
-
-
-    public boolean isAffectedByPotions() {
-        if (builder.isAffectedByPotions != null) {
-            Object obj = builder.isAffectedByPotions.apply(entityJs$getLivingEntity());
+    @Inject(method = "isAffectedByPotions", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$isAffectedByPotions(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.isAffectedByPotions != null) {
+            Object obj = entityJs$builder.isAffectedByPotions.apply(entityJs$getLivingEntity());
             if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByPotions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAffectedByPotions());
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByPotions from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
     }
 
-
-    public boolean attackable() {
-        if (builder.isAttackable != null) {
-            Object obj = builder.isAttackable.apply(entityJs$getLivingEntity());
+    @Inject(method = "attackable", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$attackable(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.isAttackable != null) {
+            Object obj = entityJs$builder.isAttackable.apply(entityJs$getLivingEntity());
             if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAttackable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.attackable());
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAttackable from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
     }
 
-
-    public boolean canTakeItem(@NotNull ItemStack itemStack) {
-        if (builder.canTakeItem != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(entityJs$getLivingEntity(), itemStack, entityJs$getLivingEntity().level());
-            Object obj = builder.canTakeItem.apply(context);
+    @Inject(method = "canTakeItem", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$canTakeItem(ItemStack pStack, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.canTakeItem != null) {
+            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(entityJs$getLivingEntity(), pStack, entityJs$getLivingEntity().level());
+            Object obj = entityJs$builder.canTakeItem.apply(context);
             if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTakeItem from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTakeItem(itemStack));
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTakeItem from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
     }
 
-
-    public boolean isSleeping() {
-        if (builder.isSleeping != null) {
-            Object obj = builder.isSleeping.apply(entityJs$getLivingEntity());
+    @Inject(method = "isSleeping", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$isSleeping(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.isSleeping != null) {
+            Object obj = entityJs$builder.isSleeping.apply(entityJs$getLivingEntity());
             if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSleeping from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isSleeping());
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSleeping from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
     }
 
-
-    public void startSleeping(@NotNull BlockPos blockPos) {
-
-        if (builder.onStartSleeping != null) {
-            final ContextUtils.EntityBlockPosContext context = new ContextUtils.EntityBlockPosContext(entityJs$getLivingEntity(), blockPos);
-            EntityJSHelperClass.consumerCallback(builder.onStartSleeping, context, "[EntityJS]: Error in " + entityName() + "builder for field: onStartSleeping.");
-
+    @Inject(method = "startSleeping", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$startSleeping(BlockPos pPos, CallbackInfo ci) {
+        if (entityJs$builder.onStartSleeping != null) {
+            final ContextUtils.EntityBlockPosContext context = new ContextUtils.EntityBlockPosContext(entityJs$getLivingEntity(), pPos);
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onStartSleeping, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onStartSleeping.");
         }
     }
 
-
-    public void stopSleeping() {
-        if (builder.onStopSleeping != null) {
-            EntityJSHelperClass.consumerCallback(builder.onStopSleeping, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onStopSleeping.");
+    @Inject(method = "stopSleeping", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$stopSleeping(CallbackInfo ci) {
+        if (entityJs$builder.onStopSleeping != null) {
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onStopSleeping, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onStopSleeping.");
         }
     }
 
-
-    public @NotNull ItemStack eat(@NotNull Level level, @NotNull ItemStack itemStack) {
-        if (builder.eat != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(entityJs$getLivingEntity(), itemStack, level);
-            EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityName() + "builder for field: eat.");
-            return itemStack;
+    @Inject(method = "eat", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$eat(Level pLevel, ItemStack pFood, CallbackInfoReturnable<ItemStack> cir) {
+        if (entityJs$builder.eat != null) {
+            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(entityJs$getLivingEntity(), pFood, pLevel);
+            EntityJSHelperClass.consumerCallback(entityJs$builder.eat, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: eat.");
         }
     }
 
-
-    public boolean shouldRiderFaceForward(@NotNull Player player) {
-        if (builder.shouldRiderFaceForward != null) {
+    @Inject(method = "shouldRiderFaceForward", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$shouldRiderFaceForward(Player player, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.shouldRiderFaceForward != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, entityJs$getLivingEntity());
-            Object obj = builder.shouldRiderFaceForward.apply(context);
+            Object obj = entityJs$builder.shouldRiderFaceForward.apply(context);
             if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldRiderFaceForward from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.shouldRiderFaceForward(player));
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldRiderFaceForward from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
     }
 
-
-    public boolean canFreeze() {
-        if (builder.canFreeze != null) {
-            Object obj = builder.canFreeze.apply(entityJs$getLivingEntity());
+    @Inject(method = "canFreeze", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$canFreeze(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.canFreeze != null) {
+            Object obj = entityJs$builder.canFreeze.apply(entityJs$getLivingEntity());
             if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canFreeze());
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
     }
 
 
-    public boolean isFreezing() {
-        if (builder.isFreezing != null) {
-            Object obj = builder.isFreezing.apply(entityJs$getLivingEntity());
+    @Inject(method = "isCurrentlyGlowing", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.isCurrentlyGlowing != null && !entityJs$getLivingEntity().level().isClientSide()) {
+            Object obj = entityJs$builder.isCurrentlyGlowing.apply(entityJs$getLivingEntity());
             if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFreezing());
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isCurrentlyGlowing from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
     }
 
-
-    public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !entityJs$getLivingEntity().level().isClientSide()) {
-            Object obj = builder.isCurrentlyGlowing.apply(entityJs$getLivingEntity());
+    @Inject(method = "canDisableShield", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$canDisableShield(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.canDisableShield != null) {
+            Object obj = entityJs$builder.canDisableShield.apply(entityJs$getLivingEntity());
             if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isCurrentlyGlowing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isCurrentlyGlowing());
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canDisableShield from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
-        return super.isCurrentlyGlowing();
     }
 
-
-    public boolean canDisableShield() {
-        if (builder.canDisableShield != null) {
-            Object obj = builder.canDisableShield.apply(entityJs$getLivingEntity());
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canDisableShield from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canDisableShield());
-        }
-        return super.canDisableShield();
-    }
-
-
-    public void onClientRemoval() {
-        if (builder.onClientRemoval != null) {
-            EntityJSHelperClass.consumerCallback(builder.onClientRemoval, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval.");
-
-        }
-        super.onClientRemoval();
-    }
-
-
-    public void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
-        if (builder.onHurt != null) {
+    @Inject(method = "actuallyHurt", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$actuallyHurt(DamageSource pDamageSource, float pDamageAmount, CallbackInfo ci) {
+        if (entityJs$builder.onHurt != null) {
             final ContextUtils.EntityDamageContext context = new ContextUtils.EntityDamageContext(pDamageSource, pDamageAmount, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurt.");
-
+            EntityJSHelperClass.consumerCallback(entityJs$builder.onHurt, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHurt.");
         }
-        super.actuallyHurt(pDamageSource, pDamageAmount);
     }
 
-
-    public void lavaHurt() {
-        if (builder.lavaHurt != null) {
-            EntityJSHelperClass.consumerCallback(builder.lavaHurt, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: lavaHurt.");
-
-        }
-        super.lavaHurt();
-    }
-
-
-    public int getExperienceReward() {
-        if (builder.experienceReward != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.experienceReward.apply(entityJs$getLivingEntity()), "integer");
+    @Inject(method = "getExperienceReward", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$getExperienceReward(CallbackInfoReturnable<Integer> cir) {
+        if (entityJs$builder.experienceReward != null) {
+            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$builder.experienceReward.apply(entityJs$getLivingEntity()), "integer");
             if (obj != null) {
-                return (int) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(entityJs$getLivingEntity()) + ". Must be an integer. Defaulting to " + super.getExperienceReward());
+                cir.setReturnValue((int) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityJs$entityName() + ". Value: " + entityJs$builder.experienceReward.apply(entityJs$getLivingEntity()) + ". Must be an integer. Defaulting to " + cir.getReturnValue());
         }
-        return super.getExperienceReward();
     }
 
 
-    public boolean dampensVibrations() {
-        if (builder.dampensVibrations != null) {
-            Object obj = builder.dampensVibrations.apply(entityJs$getLivingEntity());
+    @Inject(method = "canChangeDimensions", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$canChangeDimensions(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder.canChangeDimensions != null) {
+            Object obj = entityJs$builder.canChangeDimensions.apply(entityJs$getLivingEntity());
             if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for dampensVibrations from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.dampensVibrations());
-        }
-        return super.dampensVibrations();
-    }
-
-
-    public void playerTouch(Player p_20081_) {
-        if (builder.playerTouch != null) {
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
         }
     }
 
-
-    public boolean showVehicleHealth() {
-        if (builder.showVehicleHealth != null) {
-            Object obj = builder.showVehicleHealth.apply(entityJs$getLivingEntity());
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for showVehicleHealth from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.showVehicleHealth());
-        }
-        return super.showVehicleHealth();
-    }
-
-
-    public void thunderHit(ServerLevel p_19927_, LightningBolt p_19928_) {
-        if (builder.thunderHit != null) {
-            super.thunderHit(p_19927_, p_19928_);
-            final ContextUtils.ThunderHitContext context = new ContextUtils.ThunderHitContext(p_19927_, p_19928_, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(builder.thunderHit, context, "[EntityJS]: Error in " + entityName() + "builder for field: thunderHit.");
-
+    @Inject(method = "lerpTo", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    private void entityjs$lerpTo(double pX, double pY, double pZ, float pYaw, float pPitch, int pPosRotationIncrements, boolean pTeleport, CallbackInfo ci) {
+        if (entityJs$builder.lerpTo != null) {
+            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(pX, pY, pZ, pYaw, pPitch, pPosRotationIncrements, pTeleport, entityJs$getLivingEntity());
+            EntityJSHelperClass.consumerCallback(entityJs$builder.lerpTo, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: lerpTo.");
         }
     }
-
-
-    public boolean isInvulnerableTo(DamageSource p_20122_) {
-        if (builder.isInvulnerableTo != null) {
-            final ContextUtils.DamageContext context = new ContextUtils.DamageContext(entityJs$getLivingEntity(), p_20122_);
-            Object obj = builder.isInvulnerableTo.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isInvulnerableTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isInvulnerableTo(p_20122_));
-        }
-        return super.isInvulnerableTo(p_20122_);
-    }
-
-
-    public boolean canChangeDimensions() {
-        if (builder.canChangeDimensions != null) {
-            Object obj = builder.canChangeDimensions.apply(entityJs$getLivingEntity());
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions());
-        }
-        return super.canChangeDimensions();
-    }
-
-
-    public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
-        if (builder.mayInteract != null) {
-            final ContextUtils.MayInteractContext context = new ContextUtils.MayInteractContext(p_146843_, p_146844_, entityJs$getLivingEntity());
-            Object obj = builder.mayInteract.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for mayInteract from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.mayInteract(p_146843_, p_146844_));
-        }
-
-        return super.mayInteract(p_146843_, p_146844_);
-    }
-
-
-    public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
-        if (builder.canTrample != null) {
-            final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, entityJs$getLivingEntity());
-            Object obj = builder.canTrample.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTrample from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTrample(state, pos, fallDistance));
-        }
-
-        return super.canTrample(state, pos, fallDistance);
-    }
-
-
-    public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
-        if (builder.onRemovedFromWorld != null) {
-            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
-
-        }
-    }
-
-
-    public int getMaxFallDistance() {
-        if (builder.setMaxFallDistance == null) return super.getMaxFallDistance();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setMaxFallDistance.apply(entityJs$getLivingEntity()), "integer");
-        if (obj != null)
-            return (int) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(entityJs$getLivingEntity()) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
-        return super.getMaxFallDistance();
-    }
-
-
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
-        if (builder.lerpTo != null) {
-            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
-        }
-    }*/
 }
