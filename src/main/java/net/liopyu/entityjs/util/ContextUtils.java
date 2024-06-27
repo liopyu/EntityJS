@@ -18,7 +18,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
@@ -920,12 +920,12 @@ public class ContextUtils {
 
     public static class ProjectileEntityHitContext {
         @Info("The projectile that was thrown")
-        public final ThrowableItemProjectile entity;
+        public final Projectile entity;
 
         @Info("The result of the hit")
         public final EntityHitResult result;
 
-        public ProjectileEntityHitContext(EntityHitResult result, ThrowableItemProjectile entity) {
+        public ProjectileEntityHitContext(EntityHitResult result, Projectile entity) {
             this.entity = entity;
             this.result = result;
         }
@@ -934,12 +934,12 @@ public class ContextUtils {
 
     public static class ProjectileBlockHitContext {
         @Info("The throwable item projectile that hit the block")
-        public final ThrowableItemProjectile entity;
+        public final Projectile entity;
 
         @Info("The result of the hit on the block")
         public final BlockHitResult result;
 
-        public ProjectileBlockHitContext(BlockHitResult result, ThrowableItemProjectile entity) {
+        public ProjectileBlockHitContext(BlockHitResult result, Projectile entity) {
             this.entity = entity;
             this.result = result;
         }
