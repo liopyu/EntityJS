@@ -25,6 +25,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 
 import java.util.Objects;
@@ -116,11 +117,12 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
         if (builder != null && builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
         }
+        super.onRemovedFromWorld();
     }
+
 
     @Override
     public void thunderHit(ServerLevel p_19927_, LightningBolt p_19928_) {

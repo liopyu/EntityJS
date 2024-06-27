@@ -1680,13 +1680,11 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
 
     @Override
     public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
-        if (builder.onRemovedFromWorld != null) {
+        if (builder != null && builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
-
         }
+        super.onRemovedFromWorld();
     }
-
 
     @Override
     public int getMaxFallDistance() {

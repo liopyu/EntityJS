@@ -513,12 +513,11 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
     @Override
     public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
-        if (builder.onRemovedFromWorld != null) {
-            builder.onRemovedFromWorld.accept(this);
+        if (builder != null && builder.onRemovedFromWorld != null) {
+            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
         }
+        super.onRemovedFromWorld();
     }
-
 
     @Override
     public int getMaxFallDistance() {
