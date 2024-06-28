@@ -1,8 +1,10 @@
 package net.liopyu.entityjs.builders.living.modification;
 
+import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.level.LevelEventJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
@@ -15,34 +17,36 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ModifyLivingEntityBuilder extends LevelEventJS {
-    private final LivingEntity entity;
-    public transient Consumer<ContextUtils.EntityHurtContext> modifyHurt;
+public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
+
+    public transient Boolean repositionEntityAfterLoad;
+    public transient Object mainArm;
+    public transient Function<ContextUtils.PassengerEntityContext, Object> canAddPassenger;
+    public transient Function<LivingEntity, Object> setBlockJumpFactor;
+    public transient Object setSwimSound;
+    public transient Function<LivingEntity, Object> isFlapping;
+    public transient EntityType<?> getType;
+    public transient Function<Entity, Object> nextStep;
+    public transient Object setSwimSplashSound;
+    public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
+
+
     public transient Boolean isPushable;
     public transient Function<LivingEntity, Object> shouldDropLoot;
-    public transient Function<ContextUtils.PassengerEntityContext, Object> canAddPassenger;
     public transient Function<LivingEntity, Object> isAffectedByFluids;
     public transient Boolean isAlwaysExperienceDropper;
     public transient Function<LivingEntity, Object> isImmobile;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
-    public transient Function<LivingEntity, Object> setBlockJumpFactor;
     public transient Function<LivingEntity, Object> blockSpeedFactor;
     public transient Float setSoundVolume;
     public transient Float setWaterSlowDown;
-    public transient Object setSwimSound;
-    public transient Function<LivingEntity, Object> isFlapping;
     public transient Object setDeathSound;
-    public transient EntityType<?> getType;
-    public transient Object mainArm;
     public transient Consumer<ContextUtils.AutoAttackContext> doAutoAttackOnTouch;
     public transient Function<ContextUtils.EntityPoseDimensionsContext, Object> setStandingEyeHeight;
     public transient Consumer<LivingEntity> onDecreaseAirSupply;
     public transient Consumer<ContextUtils.LivingEntityContext> onBlockedByShield;
-    public transient Boolean repositionEntityAfterLoad;
-    public transient Function<Entity, Object> nextStep;
     public transient Consumer<LivingEntity> onIncreaseAirSupply;
     public transient Function<ContextUtils.HurtContext, Object> setHurtSound;
-    public transient Object setSwimSplashSound;
     public transient Function<ContextUtils.EntityTypeEntityContext, Object> canAttackType;
     public transient Function<LivingEntity, Object> scale;
     public transient Function<LivingEntity, Object> shouldDropExperience;
@@ -53,7 +57,6 @@ public class ModifyLivingEntityBuilder extends LevelEventJS {
     public transient Function<ContextUtils.OnEffectContext, Object> canBeAffected;
     public transient Function<LivingEntity, Object> invertedHealAndHarm;
     public transient Consumer<ContextUtils.OnEffectContext> onEffectAdded;
-    public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
     public transient Consumer<ContextUtils.EntityHealContext> onLivingHeal;
     public transient Consumer<ContextUtils.EntityDamageContext> onHurt;
     public transient Consumer<ContextUtils.DeathContext> onDeath;
@@ -114,59 +117,12 @@ public class ModifyLivingEntityBuilder extends LevelEventJS {
     public transient Consumer<LivingEntity> tickDeath;
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
     public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
-
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
 
-    public enum EntityModificationType {
-        ENTITY,
-        LIVING_ENTITY,
-        MOB,
-        PATHFINDER_MOB,
-        ANIMAL,
-        AGEABLEMOB,
-        TAMABLE
+    public ModifyLivingEntityBuilder(Entity entity) {
+        super(entity);
     }
-
-    protected final EntityModificationType modificationType;
-
-    public ModifyLivingEntityBuilder(LivingEntity entity) {
-        this.entity = entity;
-        this.modificationType = determineModificationType(entity);
-    }
-
-    public EntityModificationType getModificationType() {
-        return modificationType;
-    }
-
-    private EntityModificationType determineModificationType(LivingEntity entity) {
-        if (entity instanceof TamableAnimal) {
-            return EntityModificationType.TAMABLE;
-        } else if (entity instanceof Animal) {
-            return EntityModificationType.ANIMAL;
-        } else if (entity instanceof AgeableMob) {
-            return EntityModificationType.AGEABLEMOB;
-        } else if (entity instanceof PathfinderMob) {
-            return EntityModificationType.PATHFINDER_MOB;
-        } else if (entity instanceof Mob) {
-            return EntityModificationType.MOB;
-        } else if (entity instanceof LivingEntity) {
-            return EntityModificationType.LIVING_ENTITY;
-        } else {
-            return EntityModificationType.ENTITY;
-        }
-    }
-
-    public LivingEntity getEntity() {
-        return entity;
-    }
-
-
-    @Override
-    public Level getLevel() {
-        return entity.level();
-    }
-
-    @Info(value = """
+   /* @Info(value = """
             Sets the block jump factor for the entity.
                         
             Example usage:
@@ -1975,5 +1931,5 @@ public class ModifyLivingEntityBuilder extends LevelEventJS {
     public ModifyLivingEntityBuilder positionRider(Consumer<ContextUtils.PositionRiderContext> builderConsumer) {
         this.positionRider = builderConsumer;
         return this;
-    }
+    }*/
 }

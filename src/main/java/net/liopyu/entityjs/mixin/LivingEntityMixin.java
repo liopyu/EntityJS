@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.mixin;
 
 import net.liopyu.entityjs.builders.living.modification.ModifyLivingEntityBuilder;
+import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -44,14 +45,14 @@ public abstract class LivingEntityMixin implements IModifyEntityJS {
     public ModifyLivingEntityBuilder entityJs$builder;
 
     @Override
-    public ModifyLivingEntityBuilder entityJs$getBuilder() {
+    public EntityModificationEventJS entityJs$getBuilder() {
         return entityJs$builder;
     }
 
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onEntityInit(EntityType<LivingEntity> pEntityType, Level pLevel, CallbackInfo ci) {
-        entityJs$builder = new ModifyLivingEntityBuilder(entityJs$getLivingEntity());
+        entityJs$builder = new EntityModificationEventJS(entityJs$getLivingEntity());
         if (EventHandlers.modifyEntity.hasListeners()) {
             EventHandlers.modifyEntity.post(entityJs$builder);
         }

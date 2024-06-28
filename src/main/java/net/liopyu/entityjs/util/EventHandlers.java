@@ -28,7 +28,7 @@ public class EventHandlers {
 
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
-    public static final EventHandler modifyEntity = EntityJSEvents.startup("modifyEntity", () -> ModifyLivingEntityBuilder.class);
+    public static final EventHandler modifyEntity = EntityJSEvents.startup("modifyEntity", () -> EntityModificationEventJS.class);
 
     public static void init() {
 
