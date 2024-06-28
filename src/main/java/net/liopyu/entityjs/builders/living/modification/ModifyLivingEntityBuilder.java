@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.level.LevelEventJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -19,19 +20,10 @@ import java.util.function.Function;
 
 public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
 
-    public transient Boolean repositionEntityAfterLoad;
-    public transient Object mainArm;
-    public transient Function<ContextUtils.PassengerEntityContext, Object> canAddPassenger;
-    public transient Function<LivingEntity, Object> setBlockJumpFactor;
-    public transient Object setSwimSound;
-    public transient Function<LivingEntity, Object> isFlapping;
-    public transient EntityType<?> getType;
-    public transient Function<Entity, Object> nextStep;
-    public transient Object setSwimSplashSound;
-    public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
-
 
     public transient Boolean isPushable;
+    public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
+    public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
     public transient Function<LivingEntity, Object> shouldDropLoot;
     public transient Function<LivingEntity, Object> isAffectedByFluids;
     public transient Boolean isAlwaysExperienceDropper;
@@ -89,53 +81,16 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public transient Function<LivingEntity, Object> canFreeze;
     public transient Function<LivingEntity, Object> isCurrentlyGlowing;
     public transient Function<LivingEntity, Object> canDisableShield;
-    public transient Function<LivingEntity, Object> setMaxFallDistance;
-    public transient Consumer<ContextUtils.MobInteractContext> onInteract;
-    public transient Consumer<LivingEntity> onClientRemoval;
-    public transient Consumer<LivingEntity> onAddedToWorld;
-    public transient Consumer<LivingEntity> lavaHurt;
-    public transient Consumer<LivingEntity> onFlap;
-    public transient Function<LivingEntity, Object> dampensVibrations;
-    public transient Consumer<ContextUtils.PlayerEntityContext> playerTouch;
-    public transient Function<LivingEntity, Object> showVehicleHealth;
-    public transient Consumer<ContextUtils.ThunderHitContext> thunderHit;
-    public transient Function<ContextUtils.DamageContext, Object> isInvulnerableTo;
     public transient Function<LivingEntity, Object> canChangeDimensions;
     public transient Function<ContextUtils.CalculateFallDamageContext, Object> calculateFallDamage;
-    public transient Function<ContextUtils.MayInteractContext, Object> mayInteract;
-    public transient Function<ContextUtils.CanTrampleContext, Object> canTrample;
-    public transient Consumer<LivingEntity> onRemovedFromWorld;
-    public transient Consumer<LivingEntity> onLivingJump;
     public transient Consumer<LivingEntity> aiStep;
-    public transient Consumer<AttributeSupplier.Builder> attributes;
-    public transient MobType mobType;
-    public transient Function<LivingEntity, Object> isFreezing;
-    public transient Function<ContextUtils.CollidingEntityContext, Object> canCollideWith;
     public transient Consumer<ContextUtils.Vec3Context> travel;
-    public transient Boolean canSteer;
-    public transient Boolean mountJumpingEnabled;
+    public transient Consumer<LivingEntity> tick;
     public transient Consumer<LivingEntity> tickDeath;
-    public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
-    public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
-    public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
+    public transient MobType mobType;
 
     public ModifyLivingEntityBuilder(Entity entity) {
         super(entity);
-    }
-   /* @Info(value = """
-            Sets the block jump factor for the entity.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.setBlockJumpFactor(entity => {
-                //Set the jump factor for the entity through context
-                return 1 //some float value;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder setBlockJumpFactor(Function<LivingEntity, Object> blockJumpFactor) {
-        setBlockJumpFactor = blockJumpFactor;
-        return this;
     }
 
 
@@ -207,22 +162,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     }
 
 
-    @Info(value = """
-            Sets a callback function to be executed when the entity jumps.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.onLivingJump(entity => {
-                // Custom logic to handle the entity's jump action
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder onLivingJump(Consumer<LivingEntity> onJump) {
-        this.onLivingJump = onJump;
-        return this;
-    }
-
-
     @HideFromJS
     public static MobCategory stringToMobCategory(String category) {
         return switch (category) {
@@ -246,25 +185,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             """)
     public ModifyLivingEntityBuilder isPushable(boolean b) {
         isPushable = b;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a predicate to determine if a passenger can be added to the entity.
-                        
-            @param predicate The predicate to check if a passenger can be added.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.canAddPassenger(context => {
-                // Custom logic to determine if a passenger can be added to the entity
-                return true; 
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder canAddPassenger(Function<ContextUtils.PassengerEntityContext, Object> predicate) {
-        canAddPassenger = predicate;
         return this;
     }
 
@@ -403,89 +323,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
         }
         return this;
     }
-
-
-    @Info(value = """
-            Sets a function to determine the block speed factor of the entity.
-            The provided Function accepts a {@link LivingEntity} parameter,
-            representing the entity whose block speed factor is being determined.
-            It returns a Float representing the block speed factor.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.blockSpeedFactor(entity => {
-                // Define logic to calculate and return the block speed factor for the entity
-                // Use information about the LivingEntity provided by the context.
-                return // Some Float value representing the block speed factor;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder blockSpeedFactor(Function<LivingEntity, Object> callback) {
-        blockSpeedFactor = callback;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a function to determine whether the entity is currently flapping.
-            The provided Function accepts a {@link LivingEntity} parameter,
-            representing the entity whose flapping status is being determined.
-            It returns a Boolean indicating whether the entity is flapping.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.isFlapping(entity => {
-                // Define logic to determine whether the entity is currently flapping
-                // Use information about the LivingEntity provided by the context.
-                return // Some Boolean value indicating whether the entity is flapping;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder isFlapping(Function<LivingEntity, Object> b) {
-        this.isFlapping = b;
-        return this;
-    }
-
-
-    public transient Consumer<LivingEntity> tick;
-
-    @Info(value = """
-            Sets a callback function to be executed during each tick of the entity.
-            The provided Consumer accepts a {@link LivingEntity} parameter,
-            representing the entity that is being ticked.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.tick(entity => {
-                // Define custom logic for handling during each tick of the entity
-                // Use information about the LivingEntity provided by the context.
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder tick(Consumer<LivingEntity> tickCallback) {
-        this.tick = tickCallback;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a callback function to be executed when the entity is added to the world.
-            The provided Consumer accepts a {@link LivingEntity} parameter,
-            representing the entity that is added to the world.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.onAddedToWorld(entity => {
-                // Define custom logic for handling when the entity is added to the world
-                // Use information about the LivingEntity provided by the context.
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder onAddedToWorld(Consumer<LivingEntity> onAddedToWorldCallback) {
-        this.onAddedToWorld = onAddedToWorldCallback;
-        return this;
-    }
-
 
     @Info(value = """
             Sets a callback function to be executed when the entity automatically attacks on touch.
@@ -1053,25 +890,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
 
 
     @Info(value = """
-            Sets a callback function to be executed when the entity starts sprinting.
-            The provided Consumer accepts a {@link LivingEntity} parameter,
-            representing the entity that has started sprinting.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.onSprint(entity => {
-                // Define custom logic for handling when the entity starts sprinting
-                // Use information about the LivingEntity provided by the context.
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder onSprint(Consumer<LivingEntity> consumer) {
-        onSprint = consumer;
-        return this;
-    }
-
-
-    @Info(value = """
             Sets the jump boost power for the entity.
                         
             Example usage:
@@ -1123,44 +941,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             """)
     public ModifyLivingEntityBuilder isSensitiveToWater(Function<LivingEntity, Object> predicate) {
         isSensitiveToWater = predicate;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a callback function to be executed when the entity stops riding.
-            The provided Consumer accepts a {@link LivingEntity} parameter,
-            representing the entity that has stopped being ridden.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.onStopRiding(entity => {
-                // Define custom logic for handling when the entity stops being ridden
-                // Use information about the LivingEntity provided by the context.
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder onStopRiding(Consumer<LivingEntity> callback) {
-        onStopRiding = callback;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a callback function to be executed during each tick when the entity is being ridden.
-            The provided Consumer accepts a {@link LivingEntity} parameter,
-            representing the entity that is being ridden.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.rideTick(entity => {
-                // Define custom logic for handling each tick when the entity is being ridden
-                // Use information about the LivingEntity provided by the context.
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder rideTick(Consumer<LivingEntity> callback) {
-        rideTick = callback;
         return this;
     }
 
@@ -1400,47 +1180,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
 
 
     @Info(value = """
-            Sets a predicate function to determine whether the entity can undergo freezing.
-            The provided Predicate accepts a {@link LivingEntity} parameter,
-            representing the entity that may be subjected to freezing.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.canFreeze(entity => {
-                // Define the conditions for the entity to be able to freeze
-                // Use information about the LivingEntity provided by the context.
-                return true //someBoolean;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder canFreeze(Function<LivingEntity, Object> predicate) {
-        canFreeze = predicate;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a predicate function to determine whether the entity is currently glowing.
-            The provided Predicate accepts a {@link LivingEntity} parameter,
-            representing the entity that may be checked for its glowing state.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.isCurrentlyGlowing(entity => {
-                // Define the conditions to check if the entity is currently glowing
-                // Use information about the LivingEntity provided by the context.
-                const isGlowing = // Some boolean condition to check if the entity is glowing;
-                return isGlowing;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder isCurrentlyGlowing(Function<LivingEntity, Object> predicate) {
-        isCurrentlyGlowing = predicate;
-        return this;
-    }
-
-
-    @Info(value = """
             Sets a function to determine whether the entity can disable its target's shield.
             The provided Predicate accepts a {@link LivingEntity} parameter.
                         
@@ -1478,259 +1217,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
         return this;
     }
 
-
-    @Info(value = """
-            Sets the minimum fall distance for the entity before taking damage.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.setMaxFallDistance(entity => {
-                // Define custom logic to determine the maximum fall distance
-                // Use information about the LivingEntity provided by the context.
-                return 3;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder setMaxFallDistance(Function<LivingEntity, Object> maxFallDistance) {
-        setMaxFallDistance = maxFallDistance;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a callback function to be executed when the entity is removed on the client side.
-            The provided Consumer accepts a {@link LivingEntity} parameter,
-            representing the entity that is being removed on the client side.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.onClientRemoval(entity => {
-                // Define custom logic for handling the removal of the entity on the client side
-                // Use information about the LivingEntity provided by the context.
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder onClientRemoval(Consumer<LivingEntity> consumer) {
-        onClientRemoval = consumer;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a callback function to be executed when the entity is hurt by lava.
-            The provided Consumer accepts a {@link LivingEntity} parameter,
-            representing the entity that is affected by lava.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.lavaHurt(entity => {
-                // Define custom logic for handling the entity being hurt by lava
-                // Use information about the LivingEntity provided by the context.
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder lavaHurt(Consumer<LivingEntity> consumer) {
-        lavaHurt = consumer;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a callback function to be executed when the entity performs a flap action.
-            The provided Consumer accepts a {@link LivingEntity} parameter,
-            representing the entity that is flapping.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.onFlap(entity => {
-                // Define custom logic for handling the entity's flap action
-                // Use information about the LivingEntity provided by the context.
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder onFlap(Consumer<LivingEntity> consumer) {
-        onFlap = consumer;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a predicate to determine whether the living entity dampens vibrations.
-                
-            @param predicate The predicate to determine whether the living entity dampens vibrations.
-                
-            The predicate should take a LivingEntity as a parameter and return a boolean value indicating whether the living entity dampens vibrations.
-                
-            Example usage:
-            ```javascript
-            ModifyLivingEntityBuilder.dampensVibrations(entity => {
-                // Determine whether the living entity dampens vibrations
-                // Return true if the entity dampens vibrations, false otherwise
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder dampensVibrations(Function<LivingEntity, Object> predicate) {
-        this.dampensVibrations = predicate;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a callback function to be executed when a player interacts with the entity.
-            The provided Consumer accepts a {@link ContextUtils.PlayerEntityContext} parameter,
-            representing the context of the player's interaction with the entity.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.playerTouch(context => {
-                // Define custom logic for handling player interaction with the entity
-                // Use information about the PlayerEntityContext provided by the context.
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder playerTouch(Consumer<ContextUtils.PlayerEntityContext> consumer) {
-        playerTouch = consumer;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a predicate to determine whether to show the vehicle health for the living entity.
-                
-            @param predicate The predicate to determine whether to show the vehicle health.
-                
-            The predicate should take a LivingEntity as a parameter and return a boolean value indicating whether to show the vehicle health.
-                
-            Example usage:
-            ```javascript
-            ModifyLivingEntityBuilder.showVehicleHealth(entity => {
-                // Determine whether to show the vehicle health for the living entity
-                // Return true to show the vehicle health, false otherwise
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder showVehicleHealth(Function<LivingEntity, Object> predicate) {
-        this.showVehicleHealth = predicate;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a callback function to be executed when the entity is hit by thunder.
-            The provided Consumer accepts a {@link ContextUtils.ThunderHitContext} parameter,
-            representing the context of the entity being hit by thunder.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.thunderHit(context => {
-                // Define custom logic for handling the entity being hit by thunder
-                // Use information about the ThunderHitContext provided by the context.
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder thunderHit(Consumer<ContextUtils.ThunderHitContext> consumer) {
-        thunderHit = consumer;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a predicate function to determine whether the entity is invulnerable to a specific type of damage.
-            The provided Predicate accepts a {@link ContextUtils.DamageContext} parameter,
-            representing the context of the damage, and returns a boolean indicating invulnerability.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.isInvulnerableTo(context => {
-                // Define conditions for the entity to be invulnerable to the specific type of damage
-                // Use information about the DamageContext provided by the context.
-                return true // Some boolean condition indicating if the entity has invulnerability to the damage type;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder isInvulnerableTo(Function<ContextUtils.DamageContext, Object> predicate) {
-        isInvulnerableTo = predicate;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a predicate function to determine whether the entity can change dimensions.
-            The provided Predicate accepts a {@link LivingEntity} parameter,
-            representing the entity that may attempt to change dimensions.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.canChangeDimensions(entity => {
-                // Define the conditions for the entity to be able to change dimensions
-                // Use information about the LivingEntity provided by the context.
-                return false // Some boolean condition indicating if the entity can change dimensions;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder canChangeDimensions(Function<LivingEntity, Object> supplier) {
-        canChangeDimensions = supplier;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a predicate function to determine whether the entity may interact with something.
-            The provided Predicate accepts a {@link ContextUtils.MayInteractContext} parameter,
-            representing the context of the potential interaction, and returns a boolean.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.mayInteract(context => {
-                // Define conditions for the entity to be allowed to interact
-                // Use information about the MayInteractContext provided by the context.
-                return false // Some boolean condition indicating if the entity may interact;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder mayInteract(Function<ContextUtils.MayInteractContext, Object> predicate) {
-        mayInteract = predicate;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a predicate function to determine whether the entity can trample or step on something.
-            The provided Predicate accepts a {@link ContextUtils.CanTrampleContext} parameter,
-            representing the context of the potential trampling action, and returns a boolean.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.canTrample(context => {
-                // Define conditions for the entity to be allowed to trample
-                // Use information about the CanTrampleContext provided by the context.
-                return false // Some boolean condition indicating if the entity can trample;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder canTrample(Function<ContextUtils.CanTrampleContext, Object> predicate) {
-        canTrample = predicate;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a callback function to be executed when the entity is removed from the world.
-            The provided Consumer accepts a {@link LivingEntity} parameter,
-            representing the entity that is being removed from the world.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.onRemovedFromWorld(entity => {
-                // Define custom logic for handling the removal of the entity from the world
-                // Use information about the LivingEntity provided by the context.
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder onRemovedFromWorld(Consumer<LivingEntity> consumer) {
-        onRemovedFromWorld = consumer;
-        return this;
-    }
 
     @Info(value = """
             Sets a consumer to handle custom lerping logic for the living entity.
@@ -1803,7 +1289,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
         return this;
     }
 
-    @Info(value = """
+    /*@Info(value = """
             Boolean determining whether the entity can jump while mounted by a player.
             (Currently experimental jumping logic subject to change in the future)
             Defaults to false.
@@ -1815,7 +1301,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public ModifyLivingEntityBuilder mountJumpingEnabled(boolean mountJumpingEnabled) {
         this.mountJumpingEnabled = mountJumpingEnabled;
         return this;
-    }
+    }*/
 
     @Info(value = """
             Consumer determining travel logic for the entity.
@@ -1833,7 +1319,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
         return this;
     }
 
-    @Info(value = """
+    /*@Info(value = """
             Boolean determining whether the passenger is able to steer the entity while riding.
             Defaults to true.
             Example usage:
@@ -1844,25 +1330,8 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public ModifyLivingEntityBuilder canSteer(boolean canSteer) {
         this.canSteer = canSteer;
         return this;
-    }
+    }*/
 
-
-    @Info(value = """
-            Function determining if the entity may collide with another entity
-            using the ContextUtils.CollidingEntityContext which has this entity and the
-            one colliding with this entity.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.canCollideWith(context => {
-                return true //Some Boolean value determining whether the entity may collide with another
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder canCollideWith(Function<ContextUtils.CollidingEntityContext, Object> canCollideWith) {
-        this.canCollideWith = canCollideWith;
-        return this;
-    }
 
     @Info(value = """
             Defines the Mob's Type
@@ -1904,21 +1373,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     }
 
     @Info(value = """
-            Defines in what condition the entity will start freezing.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.isFreezing(entity => {
-                return true;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder isFreezing(Function<LivingEntity, Object> isFreezing) {
-        this.isFreezing = isFreezing;
-        return this;
-    }
-
-    @Info(value = """
             @param positionRider A consumer determining the position of rider/riders.
                             
                 Example usage:
@@ -1931,5 +1385,5 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public ModifyLivingEntityBuilder positionRider(Consumer<ContextUtils.PositionRiderContext> builderConsumer) {
         this.positionRider = builderConsumer;
         return this;
-    }*/
+    }
 }

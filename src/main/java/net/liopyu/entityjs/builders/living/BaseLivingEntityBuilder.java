@@ -73,7 +73,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<LivingEntity, Object> setBlockJumpFactor;
     public transient Function<LivingEntity, Object> blockSpeedFactor;
     public transient Float setSoundVolume;
-
+    public transient Consumer<LivingEntity> tick;
     /*@FunctionalInterface
     public interface SoundVolumeFunction {
         Float calculateVolume(LivingEntity entity);
@@ -1114,8 +1114,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-
-    public transient Consumer<LivingEntity> tick;
 
     @Info(value = """
             Sets a callback function to be executed during each tick of the entity.

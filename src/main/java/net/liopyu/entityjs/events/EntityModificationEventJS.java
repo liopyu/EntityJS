@@ -5,16 +5,31 @@ import net.liopyu.entityjs.builders.living.modification.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+
 public class EntityModificationEventJS extends EventJS {
-    public final Entity entity;
     private final ModifyEntityBuilder event;
+    public static final Map<EntityType<?>, EntityModificationEventJS> events = new HashMap<>();
 
     public EntityModificationEventJS(Entity entity) {
-        this.entity = entity;
         event = determineModificationType(entity);
     }
 
-    public static ModifyEntityBuilder determineModificationType(Entity entity) {
+    public static EntityModificationEventJS create(Entity entity) {
+        return new EntityModificationEventJS(entity);
+    }
+
+    public ModifyEntityBuilder getEvent() {
+        return event;
+    }
+
+    public EntityModificationEventJS modify(EntityType<?> entityType, Consumer<ModifyEntityBuilder> consumer) {
+        events.put(entityType, consumer);
+    }
+
+    public ModifyEntityBuilder determineModificationType(Entity entity) {
         if (entity instanceof TamableAnimal) {
             return new ModifyTamableAnimalBuilder(entity);
         } else if (entity instanceof Animal) {
@@ -30,15 +45,5 @@ public class EntityModificationEventJS extends EventJS {
         } else {
             return new ModifyEntityBuilder(entity);
         }
-    }
-
-    public enum EntityModificationType {
-        ENTITY,
-        LIVING_ENTITY,
-        MOB,
-        PATHFINDER_MOB,
-        ANIMAL,
-        AGEABLEMOB,
-        TAMABLE
     }
 }

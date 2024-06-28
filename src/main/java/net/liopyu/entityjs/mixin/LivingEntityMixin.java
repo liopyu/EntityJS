@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.mixin;
 
+import net.liopyu.entityjs.builders.living.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.living.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.*;
@@ -45,16 +46,32 @@ public abstract class LivingEntityMixin implements IModifyEntityJS {
     public ModifyLivingEntityBuilder entityJs$builder;
 
     @Override
-    public EntityModificationEventJS entityJs$getBuilder() {
+    public ModifyEntityBuilder entityJs$getBuilder() {
         return entityJs$builder;
     }
 
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onEntityInit(EntityType<LivingEntity> pEntityType, Level pLevel, CallbackInfo ci) {
-        entityJs$builder = new EntityModificationEventJS(entityJs$getLivingEntity());
+        EntityModificationEventJS event = EntityModificationEventJS.create(entityJs$getLivingEntity());
+        entityJs$builder = (ModifyLivingEntityBuilder) event.getEvent();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            EventHandlers.modifyEntity.post(entityJs$builder);
+            EventHandlers.modifyEntity.post(event);
+        }
+    }
+
+    @Inject(method = "getMobType", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    public void getMobType(CallbackInfoReturnable<MobType> cir) {
+        if (entityJs$builder != null && entityJs$builder.mobType != null) {
+            cir.setReturnValue(entityJs$builder.mobType);
+        }
+    }
+
+    @Inject(method = "tickDeath", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    protected void tickDeath(CallbackInfo ci) {
+        if (entityJs$builder.tickDeath != null) {
+            EntityJSHelperClass.consumerCallback(entityJs$builder.tickDeath, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tickDeath.");
+
         }
     }
 
