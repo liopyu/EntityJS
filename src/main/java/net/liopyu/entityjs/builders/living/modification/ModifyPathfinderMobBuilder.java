@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 
@@ -14,7 +15,7 @@ public class ModifyPathfinderMobBuilder extends ModifyMobBuilder {
     public transient Double followLeashSpeed;
     public transient Function<ContextUtils.EntityBlockPosLevelContext, Object> walkTargetValue;
 
-    public ModifyPathfinderMobBuilder(Entity entity) {
+    public ModifyPathfinderMobBuilder(EntityType<?> entity) {
         super(entity);
     }
 

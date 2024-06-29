@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ModifyEntityBuilder {
-    public final Entity entity;
+    public final EntityType<?> entity;
     public transient Boolean repositionEntityAfterLoad;
     public transient Object mainArm;
     public transient Function<ContextUtils.EPassengerEntityContext, Object> canAddPassenger;
@@ -65,17 +65,14 @@ public class ModifyEntityBuilder {
     public transient Function<Entity, Object> myRidingOffset;
     public transient Boolean controlledByFirstPassenger;
 
-    public ModifyEntityBuilder(Entity entity) {
-        this.entity = entity;
+    public ModifyEntityBuilder(EntityType<?> entityType) {
+        this.entity = entityType;
     }
 
-    public Entity getEntity() {
+    public EntityType<?> getEntity() {
         return entity;
     }
 
-    public Level getLevel() {
-        return entity.level();
-    }
 
     @Info(value = """
             Boolean determining if the entity is controlled by the first passenger

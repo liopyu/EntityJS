@@ -1,16 +1,14 @@
 package net.liopyu.entityjs.mixin;
 
-import net.liopyu.entityjs.builders.living.modification.ModifyEntityBuilder;
-import net.liopyu.entityjs.builders.living.modification.ModifyPathfinderMobBuilder;
+import net.liopyu.entityjs.builders.living.modification.*;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.IModifyEntityJS;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,14 +20,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
 
+import static net.liopyu.entityjs.events.EntityModificationEventJS.eventMap;
+import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
+
 @Mixin(value = PathfinderMob.class, remap = false)
 public class PathfinderMobMixin implements IModifyEntityJS {
     @Unique
-    private ModifyPathfinderMobBuilder entityJs$builder;
+    public Object entityJs$builder;
 
     @Override
     public ModifyEntityBuilder entityJs$getBuilder() {
-        return entityJs$builder;
+        return null;//(ModifyEntityBuilder) entityJs$builder;
     }
 
     @Unique
@@ -46,16 +47,28 @@ public class PathfinderMobMixin implements IModifyEntityJS {
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void entityjs$onMobInit(EntityType<LivingEntity> pEntityType, Level pLevel, CallbackInfo ci) {
-        EntityModificationEventJS event = EntityModificationEventJS.create(entityJs$getLivingEntity());
-        entityJs$builder = (ModifyPathfinderMobBuilder) event.getEvent();
-        if (EventHandlers.modifyEntity.hasListeners()) {
-            EventHandlers.modifyEntity.post(event);
+    private void entityjs$onMobInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
+        Object entity = entityJs$getLivingEntity();
+        if (EventHandlers.modifyEntity.hasListeners() && eventMap.containsKey(entityJs$getLivingEntity().getType())) {
+            EventHandlers.modifyEntity.post(getOrCreate(entityJs$getLivingEntity().getType()));
+        }
+        if (eventMap.containsKey(entityJs$getLivingEntity().getType())) {
+            Object builder = EntityModificationEventJS.getOrCreate(entityJs$getLivingEntity().getType()).getBuilder();
+            if (entity instanceof TamableAnimal) {
+                entityJs$builder = builder;
+            } else if (entity instanceof Animal) {
+                entityJs$builder = builder;
+            } else if (entity instanceof AgeableMob) {
+                entityJs$builder = builder;
+            } else if (entity instanceof PathfinderMob) {
+                entityJs$builder = builder;
+            } else throw new IllegalStateException("Unknown builder in EntityMixin: " + builder.getClass());
         }
     }
 
-    @Inject(method = "getWalkTargetValue(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/LevelReader;)F", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    /*@Inject(method = "getWalkTargetValue(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/LevelReader;)F", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void getWalkTargetValue(BlockPos pPos, LevelReader pLevel, CallbackInfoReturnable<Float> cir) {
+        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
         if (entityJs$builder.walkTargetValue == null) return;
         final ContextUtils.EntityBlockPosLevelContext context = new ContextUtils.EntityBlockPosLevelContext(pPos, pLevel, entityJs$getLivingEntity());
         Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$builder.walkTargetValue.apply(context), "float");
@@ -67,6 +80,7 @@ public class PathfinderMobMixin implements IModifyEntityJS {
 
     @Inject(method = "shouldStayCloseToLeashHolder", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void shouldStayCloseToLeashHolder(CallbackInfoReturnable<Boolean> cir) {
+        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
         if (entityJs$builder.shouldStayCloseToLeashHolder == null) return;
         Object value = entityJs$builder.shouldStayCloseToLeashHolder.apply(entityJs$getLivingEntity());
         if (value instanceof Boolean b) {
@@ -77,6 +91,7 @@ public class PathfinderMobMixin implements IModifyEntityJS {
 
     @Inject(method = "followLeashSpeed", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void followLeashSpeed(CallbackInfoReturnable<Double> cir) {
+        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
         cir.setReturnValue(entityJs$builder.followLeashSpeed == null ? cir.getReturnValue() : entityJs$builder.followLeashSpeed);
-    }
+    }*/
 }

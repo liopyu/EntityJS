@@ -7,6 +7,7 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -32,7 +33,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
     public transient Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
 
-    public ModifyMobBuilder(Entity entity) {
+    public ModifyMobBuilder(EntityType<?> entity) {
         super(entity);
     }
 
