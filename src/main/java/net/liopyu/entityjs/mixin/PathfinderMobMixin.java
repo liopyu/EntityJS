@@ -24,14 +24,14 @@ import static net.liopyu.entityjs.events.EntityModificationEventJS.eventMap;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
 
 @Mixin(value = PathfinderMob.class, remap = false)
-public class PathfinderMobMixin implements IModifyEntityJS {
+public class PathfinderMobMixin /*implements IModifyEntityJS*/ {
     @Unique
     public Object entityJs$builder;
 
-    @Override
-    public ModifyEntityBuilder entityJs$getBuilder() {
-        return null;//(ModifyEntityBuilder) entityJs$builder;
-    }
+   /* @Override
+    public ModifyPathfinderMobBuilder entityJs$getBuilder() {
+        return entityJs$builder instanceof ModifyPathfinderMobBuilder ? (ModifyPathfinderMobBuilder) entityJs$builder : null;
+    }*/
 
     @Unique
     private Object entityJs$entityObject = this;
@@ -48,22 +48,11 @@ public class PathfinderMobMixin implements IModifyEntityJS {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onMobInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
-        Object entity = entityJs$getLivingEntity();
-        if (EventHandlers.modifyEntity.hasListeners() && eventMap.containsKey(entityJs$getLivingEntity().getType())) {
-            EventHandlers.modifyEntity.post(getOrCreate(entityJs$getLivingEntity().getType()));
+        if (EventHandlers.modifyEntity.hasListeners()) {
+            EventHandlers.modifyEntity.post(getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()));
         }
-        if (eventMap.containsKey(entityJs$getLivingEntity().getType())) {
-            Object builder = EntityModificationEventJS.getOrCreate(entityJs$getLivingEntity().getType()).getBuilder();
-            if (entity instanceof TamableAnimal) {
-                entityJs$builder = builder;
-            } else if (entity instanceof Animal) {
-                entityJs$builder = builder;
-            } else if (entity instanceof AgeableMob) {
-                entityJs$builder = builder;
-            } else if (entity instanceof PathfinderMob) {
-                entityJs$builder = builder;
-            } else throw new IllegalStateException("Unknown builder in EntityMixin: " + builder.getClass());
-        }
+        Object builder = EntityModificationEventJS.getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()).getBuilder();
+        entityJs$builder = builder;
     }
 
     /*@Inject(method = "getWalkTargetValue(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/LevelReader;)F", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)

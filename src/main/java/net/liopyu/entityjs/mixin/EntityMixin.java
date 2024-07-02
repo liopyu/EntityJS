@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.mixin;
 
+import dev.latvian.mods.kubejs.script.ScriptType;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.modification.*;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
@@ -29,17 +30,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
 
+
+import static net.liopyu.entityjs.builders.living.modification.TestModifyEntityBuilder.builderMap;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.eventMap;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
 
 @Mixin(value = Entity.class, remap = false)
 public class EntityMixin implements IModifyEntityJS {
     @Unique
-    private Object entityJs$builder;
+    private TestModifyEntityBuilder entityJs$builder;
 
     @Override
-    public ModifyEntityBuilder entityJs$getBuilder() {
-        return null;//(ModifyEntityBuilder) entityJs$builder;
+    public TestModifyEntityBuilder entityJs$getBuilder() {
+        return entityJs$builder;
     }
 
     @Unique
@@ -57,34 +60,10 @@ public class EntityMixin implements IModifyEntityJS {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
-        Object entity = entityJs$getLivingEntity();
-        if (EventHandlers.modifyEntity.hasListeners()) {
-            EventHandlers.modifyEntity.post(getOrCreate(entityJs$getLivingEntity().getType()));
-        }
-        if (eventMap.containsKey(entityJs$getLivingEntity().getType())) {
-            Object builder = EntityModificationEventJS.getOrCreate(entityJs$getLivingEntity().getType()).getBuilder();
-            if (entity instanceof TamableAnimal) {
-                EntityJSHelperClass.logWarningMessageOnce("ModifyTamableAnimal Builder Chosen");
-                entityJs$builder = builder;
-            } else if (entity instanceof Animal) {
-                EntityJSHelperClass.logWarningMessageOnce("ModifyAnimal Builder Chosen");
-                entityJs$builder = builder;
-            } else if (entity instanceof AgeableMob) {
-                EntityJSHelperClass.logWarningMessageOnce("ModifyAgeableMob Builder Chosen");
-                entityJs$builder = builder;
-            } else if (entity instanceof PathfinderMob) {
-                EntityJSHelperClass.logWarningMessageOnce("ModifyPathfinderMob Builder Chosen");
-                entityJs$builder = builder;
-            } else if (entity instanceof Mob) {
-                EntityJSHelperClass.logWarningMessageOnce("ModifyMob Builder Chosen");
-                entityJs$builder = builder;
-            } else if (entity instanceof LivingEntity) {
-                EntityJSHelperClass.logWarningMessageOnce("ModifyLivingEntity Builder Chosen");
-                entityJs$builder = builder;
-            } else if (entity instanceof Entity) {
-                EntityJSHelperClass.logWarningMessageOnce("ModifyEntity Builder Chosen");
-                entityJs$builder = builder;
-            } else throw new IllegalStateException("Unknown builder in EntityMixin: " + builder.getClass());
+        var entity = entityJs$getLivingEntity();
+        this.entityJs$builder = TestModifyEntityBuilder.getOrCreate(entity.getType(), entity);
+        if (EventHandlers.modifyNonLivingEntity.hasListeners()) {
+            EventHandlers.modifyNonLivingEntity.post(this.entityJs$builder);
         }
     }
 
@@ -112,11 +91,10 @@ public class EntityMixin implements IModifyEntityJS {
 
     @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void tick(CallbackInfo ci) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
-            if (builder.tick != null) {
+        if (entityJs$builder != null) {
+            if (entityJs$builder.tick != null) {
                 EntityJSHelperClass.logWarningMessageOnce("tick is not null");
-                EntityJSHelperClass.consumerCallback(builder.tick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tick.");
+                EntityJSHelperClass.consumerCallback(entityJs$builder.tick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tick.");
             }
         }
     }

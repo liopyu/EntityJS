@@ -30,7 +30,7 @@ import static net.liopyu.entityjs.events.EntityModificationEventJS.eventMap;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
 
 @Mixin(value = LivingEntity.class, remap = false)
-public abstract class LivingEntityMixin implements IModifyEntityJS {
+public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
 
     @Unique
     private Object entityJs$entityObject = this;
@@ -48,34 +48,19 @@ public abstract class LivingEntityMixin implements IModifyEntityJS {
     @Unique
     public Object entityJs$builder;
 
-    @Override
+    /*@Override
     public ModifyLivingEntityBuilder entityJs$getBuilder() {
-        return null;//(ModifyLivingEntityBuilder) entityJs$builder;
-    }
+        return entityJs$builder instanceof ModifyLivingEntityBuilder ? (ModifyLivingEntityBuilder) entityJs$builder : null;//(ModifyEntityBuilder) entityJs$builder;
+    }*/
 
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
-        Object entity = entityJs$getLivingEntity();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            EventHandlers.modifyEntity.post(getOrCreate(entityJs$getLivingEntity().getType()));
+            EventHandlers.modifyEntity.post(getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()));
         }
-        if (eventMap.containsKey(entityJs$getLivingEntity().getType())) {
-            Object builder = EntityModificationEventJS.getOrCreate(entityJs$getLivingEntity().getType()).getBuilder();
-            if (entity instanceof TamableAnimal) {
-                entityJs$builder = builder;
-            } else if (entity instanceof Animal) {
-                entityJs$builder = builder;
-            } else if (entity instanceof AgeableMob) {
-                entityJs$builder = builder;
-            } else if (entity instanceof PathfinderMob) {
-                entityJs$builder = builder;
-            } else if (entity instanceof Mob) {
-                entityJs$builder = builder;
-            } else if (entity instanceof LivingEntity) {
-                entityJs$builder = builder;
-            } else throw new IllegalStateException("Unknown builder in EntityMixin: " + builder.getClass());
-        }
+        Object builder = EntityModificationEventJS.getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()).getBuilder();
+        entityJs$builder = builder;
     }
 
     /*@Inject(method = "getMobType", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)

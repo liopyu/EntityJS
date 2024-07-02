@@ -7,6 +7,7 @@ import dev.latvian.mods.kubejs.script.data.VirtualKubeJSDataPack;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.modification.ModifyLivingEntityBuilder;
+import net.liopyu.entityjs.builders.living.modification.TestModifyEntityBuilder;
 import net.liopyu.entityjs.events.*;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -29,6 +30,8 @@ public class EventHandlers {
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
     public static final EventHandler modifyEntity = EntityJSEvents.startup("modifyEntity", () -> EntityModificationEventJS.class);
+    public static final EventHandler modifyNonLivingEntity = EntityJSEvents.startup("modifyNonLivingEntity", () -> TestModifyEntityBuilder.class);
+
 
     public static void init() {
 
