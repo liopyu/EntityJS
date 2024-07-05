@@ -8,5 +8,5 @@ import net.liopyu.entityjs.events.EntityModificationEventJS;
 
 @RemapPrefixForJS("entityJs$")
 public interface IModifyEntityJS {
-    TestModifyEntityBuilder entityJs$getBuilder();
+    ModifyEntityBuilder entityJs$getBuilder();
 }

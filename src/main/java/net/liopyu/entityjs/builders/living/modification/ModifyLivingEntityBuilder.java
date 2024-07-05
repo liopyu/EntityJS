@@ -89,8 +89,8 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public transient Consumer<LivingEntity> tickDeath;
     public transient MobType mobType;
 
-    public ModifyLivingEntityBuilder(EntityType<?> entity) {
-        super(entity);
+    public ModifyLivingEntityBuilder(EntityType<?> entityType) {
+        super(entityType);
     }
 
 

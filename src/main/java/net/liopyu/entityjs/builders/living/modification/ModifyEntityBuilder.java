@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.living.modification;
 
+import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
@@ -12,14 +13,12 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.level.Level;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ModifyEntityBuilder {
-    public final EntityType<?> entity;
+public class ModifyEntityBuilder extends EventJS {
+    public final EntityType<?> entityType;
     public transient Boolean repositionEntityAfterLoad;
     public transient Object mainArm;
     public transient Function<ContextUtils.EPassengerEntityContext, Object> canAddPassenger;
@@ -64,13 +63,23 @@ public class ModifyEntityBuilder {
     public transient Boolean isPushable;
     public transient Function<Entity, Object> myRidingOffset;
     public transient Boolean controlledByFirstPassenger;
+    public static Map<EntityType<?>, ModifyEntityBuilder> builderMap = new HashMap<>();
 
     public ModifyEntityBuilder(EntityType<?> entityType) {
-        this.entity = entityType;
+        this.entityType = entityType;
+
     }
 
-    public EntityType<?> getEntity() {
-        return entity;
+    public static ModifyEntityBuilder getOrCreate(EntityType<?> type) {
+        if (!builderMap.containsKey(type)) {
+            var builder = new ModifyEntityBuilder(type);
+            builderMap.put(type, builder);
+        }
+        return builderMap.get(type);
+    }
+
+    public EntityType<?> getEntityType() {
+        return this.entityType;
     }
 
 

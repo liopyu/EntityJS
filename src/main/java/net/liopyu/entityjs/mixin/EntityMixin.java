@@ -36,14 +36,14 @@ import static net.liopyu.entityjs.events.EntityModificationEventJS.eventMap;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
 
 @Mixin(value = Entity.class, remap = false)
-public class EntityMixin implements IModifyEntityJS {
+public class EntityMixin/* implements IModifyEntityJS*/ {
     @Unique
-    private TestModifyEntityBuilder entityJs$builder;
+    private Object entityJs$builder;
 
-    @Override
-    public TestModifyEntityBuilder entityJs$getBuilder() {
+   /* @Override
+    public ModifyEntityBuilder entityJs$getBuilder() {
         return entityJs$builder;
-    }
+    }*/
 
     @Unique
     private Object entityJs$entityObject = this;
@@ -60,11 +60,10 @@ public class EntityMixin implements IModifyEntityJS {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
-        var entity = entityJs$getLivingEntity();
-        this.entityJs$builder = TestModifyEntityBuilder.getOrCreate(entity.getType(), entity);
-        if (EventHandlers.modifyNonLivingEntity.hasListeners()) {
-            EventHandlers.modifyNonLivingEntity.post(this.entityJs$builder);
+        if (EventHandlers.modifyEntity.hasListeners()) {
+            EventHandlers.modifyEntity.post(getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()));
         }
+        entityJs$builder = EntityModificationEventJS.getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()).getBuilder();
     }
 
     /*@Inject(method = "getMyRidingOffset", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
@@ -91,12 +90,13 @@ public class EntityMixin implements IModifyEntityJS {
 
     @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void tick(CallbackInfo ci) {
-        if (entityJs$builder != null) {
-            if (entityJs$builder.tick != null) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.tick != null) {
                 EntityJSHelperClass.logWarningMessageOnce("tick is not null");
-                EntityJSHelperClass.consumerCallback(entityJs$builder.tick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tick.");
+                EntityJSHelperClass.consumerCallback(builder.tick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tick.");
             }
         }
+
     }
 
     /*@Inject(method = "move", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)

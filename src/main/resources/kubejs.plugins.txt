@@ -1,1 +1,3 @@
 net.liopyu.entityjs.EntityJSPlugin
+net.liopyu.entityjs.events.DynamicEntityEventsPlugin
+net.liopyu.entityjs.events.DynamicEntityEventsPlugin
