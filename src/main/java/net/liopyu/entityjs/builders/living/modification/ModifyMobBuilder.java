@@ -210,7 +210,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             """)
     public ModifyMobBuilder setAmbientSound(Object ambientSound) {
         if (ambientSound instanceof String) {
-            this.setAmbientSound = new ResourceLocation((String) ambientSound);
+            this.setAmbientSound = ResourceLocation.parse((String) ambientSound);
         } else if (ambientSound instanceof ResourceLocation resourceLocation) {
             this.setAmbientSound = resourceLocation;
         } else {

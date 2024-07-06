@@ -245,12 +245,12 @@ public class TestModifyEntityBuilder extends EventJS {
             ```
             """)
     public TestModifyEntityBuilder setSwimSound(Object sound) {
-        if (sound instanceof String) setSwimSound = new ResourceLocation((String) sound);
+        if (sound instanceof String) setSwimSound = ResourceLocation.parse((String) sound);
         else if (sound instanceof ResourceLocation) setSwimSound = (ResourceLocation) sound;
         else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.swim\"");
 
-            setSwimSound = new ResourceLocation("minecraft:entity.generic.swim");
+            setSwimSound = ResourceLocation.parse("minecraft:entity.generic.swim");
         }
         return this;
     }
@@ -266,13 +266,13 @@ public class TestModifyEntityBuilder extends EventJS {
             """)
     public TestModifyEntityBuilder setSwimSplashSound(Object sound) {
         if (sound instanceof String) {
-            setSwimSplashSound = new ResourceLocation((String) sound);
+            setSwimSplashSound = ResourceLocation.parse((String) sound);
         } else if (sound instanceof ResourceLocation) {
             setSwimSplashSound = (ResourceLocation) sound;
         } else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.splash\"");
 
-            setSwimSplashSound = new ResourceLocation("minecraft", "entity/generic/splash");
+            setSwimSplashSound = ResourceLocation.parse("minecraft", "entity/generic/splash");
         }
         return this;
     }

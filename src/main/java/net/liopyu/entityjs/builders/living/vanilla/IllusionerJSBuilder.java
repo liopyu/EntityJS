@@ -30,7 +30,7 @@ public class IllusionerJSBuilder extends PathfinderMobBuilder<IllusionerEntityJS
             """)
     public IllusionerJSBuilder setCelebrateSound(Object ambientSound) {
         if (ambientSound instanceof String) {
-            this.setCelebrateSound = new ResourceLocation((String) ambientSound);
+            this.setCelebrateSound = ResourceLocation.parse((String) ambientSound);
         } else if (ambientSound instanceof ResourceLocation resourceLocation) {
             this.setCelebrateSound = resourceLocation;
         } else {

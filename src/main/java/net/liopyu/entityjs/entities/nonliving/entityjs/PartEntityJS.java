@@ -4,10 +4,13 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -17,8 +20,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.entity.PartEntity;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -50,10 +53,6 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public boolean isPickable() {
         return builder.isPickable;
-    }
-
-    @Override
-    protected void defineSynchedData() {
     }
 
     @Override
@@ -92,10 +91,9 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity entity) {
         throw new UnsupportedOperationException();
     }
-
 
     public void movePart(double pX, double pY, double pZ, float pYRot, float pXRot) {
         super.moveTo(pX, pY, pZ, pYRot, pXRot);
@@ -304,14 +302,14 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -393,6 +391,11 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
 
     @Override
+    protected void defineSynchedData(SynchedEntityData.Builder p_326003_) {
+
+    }
+
+    @Override
     public void onClientRemoval() {
         if (builder.onClientRemoval != null) {
             builder.onClientRemoval.accept(this);
@@ -469,7 +472,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
 
     @Override
-    public boolean canChangeDimensions() {
+    public boolean canChangeDimensions(Level p_352904_, Level p_352909_) {
         if (builder.canChangeDimensions != null) {
             Object obj = builder.canChangeDimensions.apply(this);
             if (obj instanceof Boolean) {
@@ -477,7 +480,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
             }
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions());
         }
-        return super.canChangeDimensions();
+        return super.canChangeDimensions(p_352904_, p_352909_);
     }
 
 

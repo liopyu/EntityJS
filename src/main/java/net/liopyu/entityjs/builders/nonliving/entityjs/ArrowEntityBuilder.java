@@ -86,7 +86,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         textureLocation = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
@@ -212,7 +212,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             ```
             """)
     public ArrowEntityBuilder<T> defaultHitGroundSoundEvent(Object sound) {
-        if (sound instanceof String) defaultHitGroundSoundEvent = new ResourceLocation((String) sound);
+        if (sound instanceof String) defaultHitGroundSoundEvent = ResourceLocation.parse((String) sound);
         else if (sound instanceof ResourceLocation) defaultHitGroundSoundEvent = (ResourceLocation) sound;
         else
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for defaultHitGroundSoundEvent. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.arrow.hit\"");

@@ -1,7 +1,6 @@
 package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
-import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ArrowEntityJS;
 import net.liopyu.entityjs.item.ArrowItemBuilder;
@@ -21,8 +20,8 @@ public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
         this.item = (ArrowItemBuilder) new ArrowItemBuilder(id, this)
                 .canBePickedup(true)
                 .texture(i.getNamespace() + ":item/" + i.getPath())
-                .tag(new ResourceLocation("minecraft:arrows"));
-        
+                .tag(new ResourceLocation[]{ResourceLocation.parse("minecraft:arrows")});
+
     }
 
 
@@ -39,7 +38,6 @@ public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
     }
 
     @Info(value = "Creates the arrow item for this entity type")
-    @Generics(value = ArrowEntityBuilder.class)
     public ArrowEntityJSBuilder item(Consumer<ArrowItemBuilder> item) {
         this.item = new ArrowItemBuilder(id, this);
         item.accept(this.item);

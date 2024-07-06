@@ -1,6 +1,6 @@
 package net.liopyu.entityjs.util;
 
-import dev.latvian.mods.kubejs.util.ConsoleJS;
+import dev.latvian.mods.kubejs.script.ConsoleJS;
 import net.liopyu.entityjs.builders.living.modification.ModifyLivingEntityBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
@@ -10,7 +10,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.apache.commons.lang3.NotImplementedException;
-import software.bernie.geckolib.core.animation.Animation;
+import software.bernie.geckolib.animation.Animation;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -82,7 +82,7 @@ public class EntityJSHelperClass {
         if (input instanceof ResourceLocation) {
             return (ResourceLocation) input;
         } else if (input instanceof String) {
-            return new ResourceLocation((String) input);
+            return ResourceLocation.parse((String) input);
         }
         return null;
     }

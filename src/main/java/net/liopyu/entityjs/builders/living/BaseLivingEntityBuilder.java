@@ -158,7 +158,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> onLivingJump;
     public transient Consumer<LivingEntity> aiStep;
     public transient Consumer<AttributeSupplier.Builder> attributes;
-    public SpawnPlacements.Type placementType;
+    public SpawnPlacementType placementType;
     public Heightmap.Types heightMap;
     public SpawnPlacements.SpawnPredicate<? extends Entity> spawnPredicate;
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
@@ -191,7 +191,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         height = 1;
         summonable = true;
         save = true;
-        immuneTo = new ResourceLocation[0];
+        immuneTo = ResourceLocation.parse[0];
         fireImmune = false;
         spawnFarFromPlayer = false;
         clientTrackingRange = 5;
@@ -815,7 +815,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         modelResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
@@ -846,7 +846,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         textureResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
@@ -878,7 +878,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         animationResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
@@ -1023,7 +1023,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```
             """)
     public BaseLivingEntityBuilder<T> setDeathSound(Object sound) {
-        if (sound instanceof String) setDeathSound = new ResourceLocation((String) sound);
+        if (sound instanceof String) setDeathSound = ResourceLocation.parse((String) sound);
         else if (sound instanceof ResourceLocation) setDeathSound = (ResourceLocation) sound;
         else
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound. Value: " + sound + ". Must be a ResourceLocation. Example: \"minecraft:entity.generic.death\"");
@@ -1040,12 +1040,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```
             """)
     public BaseLivingEntityBuilder<T> setSwimSound(Object sound) {
-        if (sound instanceof String) setSwimSound = new ResourceLocation((String) sound);
+        if (sound instanceof String) setSwimSound = ResourceLocation.parse((String) sound);
         else if (sound instanceof ResourceLocation) setSwimSound = (ResourceLocation) sound;
         else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.swim\"");
 
-            setSwimSound = new ResourceLocation("minecraft:entity.generic.swim");
+            setSwimSound = ResourceLocation.parse("minecraft:entity.generic.swim");
         }
         return this;
     }
@@ -1061,13 +1061,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> setSwimSplashSound(Object sound) {
         if (sound instanceof String) {
-            setSwimSplashSound = new ResourceLocation((String) sound);
+            setSwimSplashSound = ResourceLocation.parse((String) sound);
         } else if (sound instanceof ResourceLocation) {
             setSwimSplashSound = (ResourceLocation) sound;
         } else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.splash\"");
 
-            setSwimSplashSound = new ResourceLocation("minecraft", "entity/generic/splash");
+            setSwimSplashSound = ResourceLocation.parse("minecraft", "entity/generic/splash");
         }
         return this;
     }
@@ -1623,21 +1623,21 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> fallSounds(Object smallFallSound, Object largeFallSound) {
         if (smallFallSound instanceof String) {
-            this.smallFallSound = new ResourceLocation((String) smallFallSound);
+            this.smallFallSound = ResourceLocation.parse((String) smallFallSound);
         } else if (smallFallSound instanceof ResourceLocation) {
             this.smallFallSound = (ResourceLocation) smallFallSound;
         } else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for smallFallSound. Value: " + smallFallSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.small_fall\"");
-            this.smallFallSound = new ResourceLocation("minecraft", "entity/generic/small_fall");
+            this.smallFallSound = ResourceLocation.parse("minecraft", "entity/generic/small_fall");
         }
 
         if (largeFallSound instanceof String) {
-            this.largeFallSound = new ResourceLocation((String) largeFallSound);
+            this.largeFallSound = ResourceLocation.parse((String) largeFallSound);
         } else if (largeFallSound instanceof ResourceLocation) {
             this.largeFallSound = (ResourceLocation) largeFallSound;
         } else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for largeFallSound. Value: " + largeFallSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.large_fall\"");
-            this.largeFallSound = new ResourceLocation("minecraft", "entity/generic/large_fall");
+            this.largeFallSound = ResourceLocation.parse("minecraft", "entity/generic/large_fall");
         }
 
         return this;
@@ -1654,12 +1654,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> eatingSound(Object sound) {
         if (sound instanceof String) {
-            this.eatingSound = new ResourceLocation((String) sound);
+            this.eatingSound = ResourceLocation.parse((String) sound);
         } else if (sound instanceof ResourceLocation) {
             this.eatingSound = (ResourceLocation) sound;
         } else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
-            this.eatingSound = new ResourceLocation("minecraft", "entity/zombie/ambient");
+            this.eatingSound = ResourceLocation.parse("minecraft", "entity/zombie/ambient");
         }
         return this;
     }

@@ -26,11 +26,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.entity.PartEntity;
+import net.neoforged.neoforge.entity.PartEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 
 public class ContextUtils {
@@ -732,12 +732,12 @@ public class ContextUtils {
 
     public static class EntityBlockPathTypeContext {
         @Info("The type of block pathfinding being considered")
-        public final BlockPathTypes blockPathType;
+        public final PathType blockPathType;
 
         @Info("The living entity associated with the block path type")
         public final LivingEntity entity;
 
-        public EntityBlockPathTypeContext(BlockPathTypes blockPathType, LivingEntity entity) {
+        public EntityBlockPathTypeContext(PathType blockPathType, LivingEntity entity) {
             this.blockPathType = blockPathType;
             this.entity = entity;
         }
