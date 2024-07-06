@@ -55,32 +55,37 @@ public class PathfinderMobMixin /*implements IModifyEntityJS*/ {
         entityJs$builder = builder;
     }
 
-    /*@Inject(method = "getWalkTargetValue(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/LevelReader;)F", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getWalkTargetValue(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/LevelReader;)F", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void getWalkTargetValue(BlockPos pPos, LevelReader pLevel, CallbackInfoReturnable<Float> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.walkTargetValue == null) return;
-        final ContextUtils.EntityBlockPosLevelContext context = new ContextUtils.EntityBlockPosLevelContext(pPos, pLevel, entityJs$getLivingEntity());
-        Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$builder.walkTargetValue.apply(context), "float");
-        if (obj != null) {
-            cir.setReturnValue((float) obj);
-        } else
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for walkTargetValue from entity: " + entityJs$entityName() + ". Value: " + entityJs$builder.walkTargetValue.apply(context) + ". Must be a float. Defaulting to " + cir.getReturnValue());
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyPathfinderMobBuilder builder) {
+            if (builder.walkTargetValue == null) return;
+            final ContextUtils.EntityBlockPosLevelContext context = new ContextUtils.EntityBlockPosLevelContext(pPos, pLevel, entityJs$getLivingEntity());
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.walkTargetValue.apply(context), "float");
+            if (obj != null) {
+                cir.setReturnValue((float) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for walkTargetValue from entity: " + entityJs$entityName() + ". Value: " + builder.walkTargetValue.apply(context) + ". Must be a float. Defaulting to " + cir.getReturnValue());
+
+        }
     }
 
     @Inject(method = "shouldStayCloseToLeashHolder", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void shouldStayCloseToLeashHolder(CallbackInfoReturnable<Boolean> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.shouldStayCloseToLeashHolder == null) return;
-        Object value = entityJs$builder.shouldStayCloseToLeashHolder.apply(entityJs$getLivingEntity());
-        if (value instanceof Boolean b) {
-            cir.setReturnValue(b);
-        } else
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityJs$entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyPathfinderMobBuilder builder) {
+            if (builder.shouldStayCloseToLeashHolder == null) return;
+            Object value = builder.shouldStayCloseToLeashHolder.apply(entityJs$getLivingEntity());
+            if (value instanceof Boolean b) {
+                cir.setReturnValue(b);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityJs$entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+
+        }
     }
 
     @Inject(method = "followLeashSpeed", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void followLeashSpeed(CallbackInfoReturnable<Double> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        cir.setReturnValue(entityJs$builder.followLeashSpeed == null ? cir.getReturnValue() : entityJs$builder.followLeashSpeed);
-    }*/
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyPathfinderMobBuilder builder) {
+            cir.setReturnValue(builder.followLeashSpeed == null ? cir.getReturnValue() : builder.followLeashSpeed);
+        }
+    }
 }

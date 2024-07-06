@@ -63,25 +63,25 @@ public class MobMixin /*implements IModifyEntityJS*/ {
         entityJs$builder = builder;
     }
 
-    /*@Inject(method = "getControllingPassenger", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getControllingPassenger", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void getControllingPassenger(CallbackInfoReturnable<LivingEntity> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.controlledByFirstPassenger != null) {
-            if (!entityJs$builder.controlledByFirstPassenger) return;
-            Entity var2 = entityJs$getLivingEntity().getFirstPassenger();
-            LivingEntity var10000;
-            if (var2 instanceof LivingEntity entity) {
-                var10000 = entity;
-            } else {
-                var10000 = null;
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.controlledByFirstPassenger != null) {
+                if (!builder.controlledByFirstPassenger) return;
+                Entity var2 = entityJs$getLivingEntity().getFirstPassenger();
+                LivingEntity var10000;
+                if (var2 instanceof LivingEntity entity) {
+                    var10000 = entity;
+                } else {
+                    var10000 = null;
+                }
+                cir.setReturnValue(var10000);
             }
-            cir.setReturnValue(var10000);
         }
-    }*/
+    }
 
     @Inject(method = "mobInteract", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void mobInteract(Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.onInteract != null) {
                 final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(entityJs$getLivingEntity(), pPlayer, pHand);
@@ -91,150 +91,168 @@ public class MobMixin /*implements IModifyEntityJS*/ {
 
     }
 
-    /*@Inject(method = "doHurtTarget", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "doHurtTarget", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void doHurtTarget(Entity pEntity, CallbackInfoReturnable<Boolean> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder != null && entityJs$builder.onHurtTarget != null) {
-            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(entityJs$builder.onHurtTarget, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHurtTarget.");
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (entityJs$builder != null && builder.onHurtTarget != null) {
+                final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, entityJs$getLivingEntity());
+                EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHurtTarget.");
+            }
         }
     }
 
     @Inject(method = "aiStep", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void aiStep(CallbackInfo ci) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.aiStep != null) {
-            EntityJSHelperClass.consumerCallback(entityJs$builder.aiStep, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: aiStep.");
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.aiStep != null) {
+                EntityJSHelperClass.consumerCallback(builder.aiStep, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: aiStep.");
+            }
         }
     }
 
     @Inject(method = "tickLeash", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void tickLeash(CallbackInfo ci) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.tickLeash != null) {
-            Player $$0 = (Player) entityJs$getLivingEntity().getLeashHolder();
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(entityJs$builder.tickLeash, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tickLeash.");
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.tickLeash != null) {
+                Player $$0 = (Player) entityJs$getLivingEntity().getLeashHolder();
+                final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, entityJs$getLivingEntity());
+                EntityJSHelperClass.consumerCallback(builder.tickLeash, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tickLeash.");
+            }
         }
     }
 
     @Inject(method = "setTarget", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void setTarget(LivingEntity pTarget, CallbackInfo ci) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.onTargetChanged != null) {
-            final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(pTarget, entityJs$getLivingEntity());
-            EntityJSHelperClass.consumerCallback(entityJs$builder.onTargetChanged, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onTargetChanged.");
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.onTargetChanged != null) {
+                final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(pTarget, entityJs$getLivingEntity());
+                EntityJSHelperClass.consumerCallback(builder.onTargetChanged, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onTargetChanged.");
+            }
         }
     }
 
     @Inject(method = "ate", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void ate(CallbackInfo ci) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.ate != null) {
-            EntityJSHelperClass.consumerCallback(entityJs$builder.ate, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: ate.");
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.ate != null) {
+                EntityJSHelperClass.consumerCallback(builder.ate, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: ate.");
 
+            }
         }
     }
 
     @Inject(method = "createNavigation", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void createNavigation(Level pLevel, CallbackInfoReturnable<PathNavigation> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder == null || entityJs$builder.createNavigation == null) return;
-        final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, entityJs$getLivingEntity());
-        Object obj = entityJs$builder.createNavigation.apply(context);
-        if (obj instanceof PathNavigation p) {
-            cir.setReturnValue(p);
-        } else
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (entityJs$builder == null || builder.createNavigation == null) return;
+            final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, entityJs$getLivingEntity());
+            Object obj = builder.createNavigation.apply(context);
+            if (obj instanceof PathNavigation p) {
+                cir.setReturnValue(p);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
+
+        }
     }
 
     @Inject(method = "canBeLeashed", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void canBeLeashed(Player pPlayer, CallbackInfoReturnable<Boolean> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.canBeLeashed != null) {
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, entityJs$getLivingEntity());
-            Object obj = entityJs$builder.canBeLeashed.apply(context);
-            if (obj instanceof Boolean b) {
-                cir.setReturnValue(b);
-            } else
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.canBeLeashed != null) {
+                final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, entityJs$getLivingEntity());
+                Object obj = builder.canBeLeashed.apply(context);
+                if (obj instanceof Boolean b) {
+                    cir.setReturnValue(b);
+                } else
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+            }
         }
     }
 
 
     @Inject(method = "getMainArm", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void getMainArm(CallbackInfoReturnable<HumanoidArm> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.mainArm != null) cir.setReturnValue((HumanoidArm) entityJs$builder.mainArm);
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.mainArm != null) cir.setReturnValue((HumanoidArm) builder.mainArm);
+        }
     }
 
 
     @Inject(method = "getAmbientSound", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void getAmbientSound(CallbackInfoReturnable<SoundEvent> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.setAmbientSound != null) {
-            cir.setReturnValue(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) entityJs$builder.setAmbientSound));
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.setAmbientSound != null) {
+                cir.setReturnValue(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setAmbientSound));
+            }
         }
     }
 
     @Inject(method = "canHoldItem", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void canHoldItem(ItemStack pStack, CallbackInfoReturnable<Boolean> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.canHoldItem != null) {
-            final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, entityJs$getLivingEntity());
-            Object obj = entityJs$builder.canHoldItem.apply(context);
-            if (obj instanceof Boolean) {
-                cir.setReturnValue((boolean) obj);
-            } else
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canHoldItem from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.canHoldItem != null) {
+                final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, entityJs$getLivingEntity());
+                Object obj = builder.canHoldItem.apply(context);
+                if (obj instanceof Boolean) {
+                    cir.setReturnValue((boolean) obj);
+                } else
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canHoldItem from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+            }
         }
     }
 
     @Inject(method = "shouldDespawnInPeaceful", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void shouldDespawnInPeaceful(CallbackInfoReturnable<Boolean> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
 
-        cir.setReturnValue(entityJs$builder.shouldDespawnInPeaceful == null ? cir.getReturnValue() : entityJs$builder.shouldDespawnInPeaceful);
+            cir.setReturnValue(builder.shouldDespawnInPeaceful == null ? cir.getReturnValue() : builder.shouldDespawnInPeaceful);
+
+        }
     }
 
     @Inject(method = "isPersistenceRequired", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void isPersistenceRequired(CallbackInfoReturnable<Boolean> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        cir.setReturnValue(entityJs$builder.isPersistenceRequired == null ? cir.getReturnValue() : entityJs$builder.isPersistenceRequired);
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            cir.setReturnValue(builder.isPersistenceRequired == null ? cir.getReturnValue() : builder.isPersistenceRequired);
+
+        }
     }
 
     @Inject(method = "getMeleeAttackRangeSqr", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void getMeleeAttackRangeSqr(LivingEntity pEntity, CallbackInfoReturnable<Double> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.meleeAttackRangeSqr != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$builder.meleeAttackRangeSqr.apply(entityJs$getLivingEntity()), "double");
-            if (obj != null) {
-                cir.setReturnValue((double) obj);
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityJs$entityName() + ". Value: " + entityJs$builder.meleeAttackRangeSqr.apply(entityJs$getLivingEntity()) + ". Must be a double. Defaulting to " + cir.getReturnValue());
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.meleeAttackRangeSqr != null) {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.meleeAttackRangeSqr.apply(entityJs$getLivingEntity()), "double");
+                if (obj != null) {
+                    cir.setReturnValue((double) obj);
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityJs$entityName() + ". Value: " + builder.meleeAttackRangeSqr.apply(entityJs$getLivingEntity()) + ". Must be a double. Defaulting to " + cir.getReturnValue());
+                }
             }
         }
     }
 
     @Inject(method = "getAmbientSoundInterval", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void getAmbientSoundInterval(CallbackInfoReturnable<Integer> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.ambientSoundInterval != null)
-            cir.setReturnValue((int) entityJs$builder.ambientSoundInterval);
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.ambientSoundInterval != null)
+                cir.setReturnValue((int) builder.ambientSoundInterval);
+        }
     }
 
     @Inject(method = "removeWhenFarAway", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void removeWhenFarAway(double pDistanceToClosestPlayer, CallbackInfoReturnable<Boolean> cir) {
-        if (!eventMap.containsKey(entityJs$getLivingEntity().getType())) return;
-        if (entityJs$builder.removeWhenFarAway == null) {
-            return;
-        }
-        final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, entityJs$getLivingEntity());
-        Object obj = entityJs$builder.removeWhenFarAway.apply(context);
-        if (obj instanceof Boolean) {
-            cir.setReturnValue((boolean) obj);
-        } else
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.removeWhenFarAway == null) {
+                return;
+            }
+            final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, entityJs$getLivingEntity());
+            Object obj = builder.removeWhenFarAway.apply(context);
+            if (obj instanceof Boolean) {
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
 
-    }*/
+        }
+    }
 }
