@@ -101,14 +101,14 @@ public class MobMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "aiStep", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    /*@Inject(method = "aiStep", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void aiStep(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.aiStep != null) {
                 EntityJSHelperClass.consumerCallback(builder.aiStep, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: aiStep.");
             }
         }
-    }
+    }*/
 
     @Inject(method = "tickLeash", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void tickLeash(CallbackInfo ci) {

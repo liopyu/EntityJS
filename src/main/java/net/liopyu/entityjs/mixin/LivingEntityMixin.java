@@ -112,7 +112,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    /*@Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false)
     private void entityjs$tick(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.tick != null) {
@@ -121,7 +121,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
                 }
             }
         }
-    }
+    }*/
 
     @Inject(method = "doAutoAttackOnTouch", at = @At(value = "HEAD", ordinal = 0), remap = false)
     private void entityjs$doAutoAttackOnTouch(LivingEntity pTarget, CallbackInfo ci) {
@@ -516,7 +516,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "causeFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    /*@Inject(method = "causeFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     private void entityjs$causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onLivingFall != null) {
@@ -524,16 +524,16 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
                 EntityJSHelperClass.consumerCallback(builder.onLivingFall, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onLivingFall.");
             }
         }
-    }
+    }*/
 
-    @Inject(method = "setSprinting", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    /*@Inject(method = "setSprinting", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     private void entityjs$setSprinting(boolean pSprinting, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onSprint != null) {
                 EntityJSHelperClass.consumerCallback(builder.onSprint, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onSprint.");
             }
         }
-    }
+    }*/
 
     @Inject(method = "getJumpBoostPower", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     private void entityjs$getJumpBoostPower(CallbackInfoReturnable<Float> cir) {
@@ -574,16 +574,16 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "stopRiding", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    /*@Inject(method = "stopRiding", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     private void entityjs$stopRiding(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onStopRiding != null) {
                 EntityJSHelperClass.consumerCallback(builder.onStopRiding, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onStopRiding.");
             }
         }
-    }
+    }*/
 
-    @Inject(method = "rideTick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+   /* @Inject(method = "rideTick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     private void entityjs$rideTick(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.rideTick != null) {
@@ -591,7 +591,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
 
             }
         }
-    }
+    }*/
 
     @Inject(method = "onItemPickup", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     private void entityjs$onItemPickup(ItemEntity pItemEntity, CallbackInfo ci) {

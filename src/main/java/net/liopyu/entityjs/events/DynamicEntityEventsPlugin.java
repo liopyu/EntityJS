@@ -17,8 +17,8 @@ import net.liopyu.entityjs.builders.living.modification.ModifyLivingEntityBuilde
 
 import java.util.*;
 
-public class DynamicEntityEventsPlugin extends ProbeJSPlugin {
-    private static final Map<String, Class<?>> BUILDER_TYPES = new HashMap<>();
+public class DynamicEntityEventsPlugin /*extends ProbeJSPlugin*/ {
+  /*  private static final Map<String, Class<?>> BUILDER_TYPES = new HashMap<>();
     private static final Map<String, Class<?>> ENTITY_TYPE_MAPPING = new HashMap<>();
 
     static {
@@ -62,9 +62,9 @@ public class DynamicEntityEventsPlugin extends ProbeJSPlugin {
     }
 
     private static ClassDecl generateEntityModificationClass() {
-        /*ClassDecl.Builder builder = Statements.clazz("EntityModificationEventJS")
+        *//*ClassDecl.Builder builder = Statements.clazz("EntityModificationEventJS")
                 .superClass(Types.type(EntityModificationEventJS.class));
-*/
+*//*
 
         ClassDecl.Builder builder = Statements.clazz("EntityModificationEventJS").superClass(Types.parameterized(Types.type(EntityModificationEventJS.class), new BaseType[]{Types.type(EntityModificationEventJS.class)}));
         for (Map.Entry<String, Class<?>> entry : ENTITY_TYPE_MAPPING.entrySet()) {
@@ -88,5 +88,5 @@ public class DynamicEntityEventsPlugin extends ProbeJSPlugin {
         classes.add(ModifyLivingEntityBuilder.class);
         classes.add(EntityModificationEventJS.class);
         return classes;
-    }
+    }*/
 }

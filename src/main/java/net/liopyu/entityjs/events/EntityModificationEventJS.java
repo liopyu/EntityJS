@@ -35,14 +35,15 @@ public class EntityModificationEventJS extends EventJS {
 
     public void modify(EntityType<?> entityType, Consumer<? extends ModifyEntityBuilder> consumer) {
         Object builder = getOrCreate(entityType, entity).getBuilder();
-        EntityJSHelperClass.logWarningMessageOnce(builder.getClass().toString());
-        if (builder instanceof ModifyTamableAnimalBuilder) {
+        //EntityJSHelperClass.logWarningMessageOnce(builder.getClass().toString());
+        /*if (builder instanceof ModifyTamableAnimalBuilder) {
             ((Consumer<ModifyTamableAnimalBuilder>) consumer).accept((ModifyTamableAnimalBuilder) builder);
         } else if (builder instanceof ModifyAnimalBuilder) {
             ((Consumer<ModifyAnimalBuilder>) consumer).accept((ModifyAnimalBuilder) builder);
         } else if (builder instanceof ModifyAgeableMobBuilder) {
             ((Consumer<ModifyAgeableMobBuilder>) consumer).accept((ModifyAgeableMobBuilder) builder);
-        } else if (builder instanceof ModifyPathfinderMobBuilder) {
+        } else */
+        if (builder instanceof ModifyPathfinderMobBuilder) {
             ((Consumer<ModifyPathfinderMobBuilder>) consumer).accept((ModifyPathfinderMobBuilder) builder);
         } else if (builder instanceof ModifyMobBuilder) {
             ((Consumer<ModifyMobBuilder>) consumer).accept((ModifyMobBuilder) builder);
@@ -56,13 +57,14 @@ public class EntityModificationEventJS extends EventJS {
     }
 
     public ModifyEntityBuilder determineModificationType(EntityType<?> type, Entity entity) {
-        if (entity instanceof TamableAnimal) {
+        /*if (entity instanceof TamableAnimal) {
             return new ModifyTamableAnimalBuilder(type);
         } else if (entity instanceof Animal) {
             return new ModifyAnimalBuilder(type);
         } else if (entity instanceof AgeableMob) {
             return new ModifyAgeableMobBuilder(type);
-        } else if (entity instanceof PathfinderMob) {
+        } else */
+        if (entity instanceof PathfinderMob) {
             return new ModifyPathfinderMobBuilder(type);
         } else if (entity instanceof Mob) {
             return new ModifyMobBuilder(type);

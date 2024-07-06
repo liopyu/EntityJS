@@ -12,8 +12,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class EntityJSBuiltinDocs extends ProbeJSPlugin {
-    public static final Supplier<ProbeJSPlugin> plugin = DynamicEntityEventsPlugin::new;
+public class EntityJSBuiltinDocs /*extends ProbeJSPlugin */ {
+   /* public static final Supplier<ProbeJSPlugin> plugin = DynamicEntityEventsPlugin::new;
     public static final List<Supplier<ProbeJSPlugin>> BUILTIN_DOCS = new ArrayList<>(List.of(plugin));
 
     public EntityJSBuiltinDocs() {
@@ -61,4 +61,5 @@ public class EntityJSBuiltinDocs extends ProbeJSPlugin {
     public void addVSCodeSnippets(SnippetDump dump) {
         forEach(builtinDoc -> builtinDoc.addVSCodeSnippets(dump));
     }
+*/
 }
