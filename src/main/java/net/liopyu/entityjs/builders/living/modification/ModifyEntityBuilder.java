@@ -418,27 +418,6 @@ public class ModifyEntityBuilder extends EventJS {
         return this;
     }
 
-
-    @Info(value = """
-            Sets a predicate function to determine whether the entity is attackable.
-            The provided Predicate accepts a {@link Entity} parameter,
-            representing the entity that may be checked for its attackability.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.isAttackable(entity => {
-                // Define conditions to check if the entity is attackable
-                // Use information about the Entity provided by the context.
-                return // Some boolean condition indicating if the entity is attackable;
-            });
-            ```
-            """)
-    public ModifyEntityBuilder isAttackable(Boolean predicate) {
-        isAttackable = predicate;
-        return this;
-    }
-
-
     @Info(value = """
             Sets a predicate function to determine whether the entity can undergo freezing.
             The provided Predicate accepts a {@link Entity} parameter,

@@ -204,8 +204,8 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     @Inject(method = "shouldDespawnInPeaceful", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void shouldDespawnInPeaceful(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
-
-            cir.setReturnValue(builder.shouldDespawnInPeaceful == null ? cir.getReturnValue() : builder.shouldDespawnInPeaceful);
+            if (builder.shouldDespawnInPeaceful == null) return;
+            cir.setReturnValue(builder.shouldDespawnInPeaceful);
 
         }
     }
@@ -213,7 +213,8 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     @Inject(method = "isPersistenceRequired", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void isPersistenceRequired(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
-            cir.setReturnValue(builder.isPersistenceRequired == null ? cir.getReturnValue() : builder.isPersistenceRequired);
+            if (builder.isPersistenceRequired == null) return;
+            cir.setReturnValue(builder.isPersistenceRequired);
 
         }
     }

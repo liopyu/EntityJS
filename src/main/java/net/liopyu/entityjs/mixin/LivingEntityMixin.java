@@ -652,8 +652,8 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     @Inject(method = "attackable", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     private void entityjs$attackable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
-            if (builder.isAttackable != null) {
-                Object obj = builder.isAttackable.apply(entityJs$getLivingEntity());
+            if (builder.isAttackableFunction != null) {
+                Object obj = builder.isAttackableFunction.apply(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else

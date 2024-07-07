@@ -85,7 +85,8 @@ public class PathfinderMobMixin /*implements IModifyEntityJS*/ {
     @Inject(method = "followLeashSpeed", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void followLeashSpeed(CallbackInfoReturnable<Double> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyPathfinderMobBuilder builder) {
-            cir.setReturnValue(builder.followLeashSpeed == null ? cir.getReturnValue() : builder.followLeashSpeed);
+            if (builder.followLeashSpeed == null) return;
+            cir.setReturnValue(builder.followLeashSpeed);
         }
     }
 }

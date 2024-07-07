@@ -71,7 +71,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public transient Consumer<LivingEntity> onEnterCombat;
     public transient Consumer<LivingEntity> onLeaveCombat;
     public transient Function<LivingEntity, Object> isAffectedByPotions;
-    public transient Function<LivingEntity, Object> isAttackable;
+    public transient Function<LivingEntity, Object> isAttackableFunction;
     public transient Function<ContextUtils.EntityItemLevelContext, Object> canTakeItem;
     public transient Function<LivingEntity, Object> isSleeping;
     public transient Consumer<ContextUtils.EntityBlockPosContext> onStartSleeping;
@@ -1049,15 +1049,15 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.isAttackable(entity => {
+            entityBuilder.isAttackableFunction(entity => {
                 // Define conditions to check if the entity is attackable
                 // Use information about the LivingEntity provided by the context.
                 return // Some boolean condition indicating if the entity is attackable;
             });
             ```
             """)
-    public ModifyLivingEntityBuilder isAttackable(Function<LivingEntity, Object> predicate) {
-        isAttackable = predicate;
+    public ModifyLivingEntityBuilder isAttackableFunction(Function<LivingEntity, Object> predicate) {
+        isAttackableFunction = predicate;
         return this;
     }
 

@@ -236,7 +236,8 @@ public class EntityMixin/* implements IModifyEntityJS*/ {
     @Inject(method = "isAttackable", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void isAttackable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
-            cir.setReturnValue(builder.isAttackable == null ? cir.getReturnValue() : builder.isAttackable);
+            if (builder.isAttackable == null) return;
+            cir.setReturnValue(builder.isAttackable);
         }
     }
 
@@ -289,7 +290,8 @@ public class EntityMixin/* implements IModifyEntityJS*/ {
     @Inject(method = "isPushable", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void isPushable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
-            cir.setReturnValue(builder.isPushable == null ? cir.getReturnValue() : builder.isPushable);
+            if (builder.isPushable == null) return;
+            cir.setReturnValue(builder.isPushable);
         }
     }
 
@@ -351,7 +353,8 @@ public class EntityMixin/* implements IModifyEntityJS*/ {
     @Inject(method = "repositionEntityAfterLoad", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     protected void repositionEntityAfterLoad(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
-            cir.setReturnValue(builder.repositionEntityAfterLoad == null ? cir.getReturnValue() : builder.repositionEntityAfterLoad);
+            if (builder.repositionEntityAfterLoad == null) return;
+            cir.setReturnValue(builder.repositionEntityAfterLoad);
         }
     }
 
