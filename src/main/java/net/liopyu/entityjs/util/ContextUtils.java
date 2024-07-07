@@ -61,6 +61,22 @@ public class ContextUtils {
         }
     }
 
+    public static class PositionRiderContextMove {
+        @Info("The vehicle entity")
+        public final Entity entity;
+
+        @Info("The passenger")
+        public final Entity passenger;
+        @Info("The move function")
+        public final Entity.MoveFunction moveFunction;
+
+        public PositionRiderContextMove(Entity entity, Entity passenger, Entity.MoveFunction moveFunction) {
+            this.entity = entity;
+            this.passenger = passenger;
+            this.moveFunction = moveFunction;
+        }
+    }
+
     public static class PreRenderContext<T> {
         @Info("The PoseStack")
         public final PoseStack poseStack;
