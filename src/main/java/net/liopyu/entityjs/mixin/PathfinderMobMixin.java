@@ -1,14 +1,12 @@
 package net.liopyu.entityjs.mixin;
 
-import net.liopyu.entityjs.builders.living.modification.*;
+import net.liopyu.entityjs.builders.modification.ModifyPathfinderMobBuilder;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
-import net.liopyu.entityjs.util.IModifyEntityJS;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,9 +16,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Objects;
-
-import static net.liopyu.entityjs.events.EntityModificationEventJS.eventMap;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
 
 @Mixin(value = PathfinderMob.class, remap = false)

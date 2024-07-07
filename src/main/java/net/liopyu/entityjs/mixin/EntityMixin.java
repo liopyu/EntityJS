@@ -1,26 +1,21 @@
 package net.liopyu.entityjs.mixin;
 
-import dev.latvian.mods.kubejs.script.ScriptType;
-import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.builders.living.modification.*;
+import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
-import net.liopyu.entityjs.util.IModifyEntityJS;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,19 +25,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
 
-
-import static net.liopyu.entityjs.builders.living.modification.TestModifyEntityBuilder.builderMap;
-import static net.liopyu.entityjs.events.EntityModificationEventJS.eventMap;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
 
 @Mixin(value = Entity.class, remap = false)
-public class EntityMixin/* implements IModifyEntityJS*/ {
+public class EntityMixin /*implements IModifyEntityJS*/ {
     @Unique
     private Object entityJs$builder;
 
-   /* @Override
+    /*@Override
     public ModifyEntityBuilder entityJs$getBuilder() {
-        return entityJs$builder;
+        Object obj = getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()).getBuilder();
+        if (obj instanceof ModifyEntityBuilder builder) {
+            return builder;
+        }
+        return entityJs$builder instanceof ModifyEntityBuilder ? (ModifyEntityBuilder) entityJs$builder : null;
     }*/
 
     @Unique

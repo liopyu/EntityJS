@@ -1,12 +1,9 @@
-package net.liopyu.entityjs.builders.living.modification;
+package net.liopyu.entityjs.builders.modification;
 
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
-import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;

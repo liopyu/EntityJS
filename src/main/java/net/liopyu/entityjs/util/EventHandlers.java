@@ -6,8 +6,6 @@ import dev.latvian.mods.kubejs.event.Extra;
 import dev.latvian.mods.kubejs.script.data.VirtualKubeJSDataPack;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.modification.ModifyLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.modification.TestModifyEntityBuilder;
 import net.liopyu.entityjs.events.*;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;

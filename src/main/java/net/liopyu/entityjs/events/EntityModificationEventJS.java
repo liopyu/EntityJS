@@ -1,10 +1,15 @@
 package net.liopyu.entityjs.events;
 
 import dev.latvian.mods.kubejs.event.EventJS;
-import net.liopyu.entityjs.builders.living.modification.*;
-import net.liopyu.entityjs.util.EntityJSHelperClass;
+import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.typings.Param;
+import dev.latvian.mods.rhino.util.HideFromJS;
+import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
+import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
+import net.liopyu.entityjs.builders.modification.ModifyMobBuilder;
+import net.liopyu.entityjs.builders.modification.ModifyPathfinderMobBuilder;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +25,7 @@ public class EntityModificationEventJS extends EventJS {
         this.builder = determineModificationType(entityType, entity);
     }
 
+
     public static EntityModificationEventJS getOrCreate(EntityType<?> entityType, Entity entity) {
         if (!eventMap.containsKey(entityType)) {
             var event = new EntityModificationEventJS(entityType, entity);
@@ -29,28 +35,54 @@ public class EntityModificationEventJS extends EventJS {
         return eventMap.get(entityType);
     }
 
+    @HideFromJS
     public Object getBuilder() {
         return builder;
     }
 
-    public void modify(EntityType<?> entityType, Consumer<? extends ModifyEntityBuilder> consumer) {
+    @Info(value = """
+            Entity type modification event. Allows modification of methods for any existing entity.\s
+            \s
+            This event determines the entity's type and uses the appropriate builder for modification.\s
+            \s
+            Builders:\s
+                - ModifyPathfinderMobBuilder: For entities extending {@link PathfinderMob}\s
+                - ModifyMobBuilder: For entities extending {@link Mob}\s
+                - ModifyLivingEntityBuilder: For entities extending {@link LivingEntity}\s
+                - ModifyEntityBuilder: For entities extending {@link Entity}\s
+            \s
+            Example usage:\s
+            ```javascript
+            EntityJSEvents.modifyEntity(event => {
+                event.modify("minecraft:zombie", builder => {
+                    builder.onRemovedFromWorld(entity => {
+                        // Execute code when the zombie is removed from the world.
+                    })
+                })
+            })
+            ```
+            """, params = {
+            @Param(name = "entityType", value = "The entity type to modify"),
+            @Param(name = "modifyBuilder", value = "A consumer to modify the entity type."),
+    })
+    public void modify(EntityType<?> entityType, Consumer<? extends ModifyEntityBuilder> modifyBuilder) {
         Object builder = getOrCreate(entityType, entity).getBuilder();
         //EntityJSHelperClass.logWarningMessageOnce(builder.getClass().toString());
         /*if (builder instanceof ModifyTamableAnimalBuilder) {
-            ((Consumer<ModifyTamableAnimalBuilder>) consumer).accept((ModifyTamableAnimalBuilder) builder);
+            ((Consumer<ModifyTamableAnimalBuilder>) modifyBuilder).accept((ModifyTamableAnimalBuilder) builder);
         } else if (builder instanceof ModifyAnimalBuilder) {
-            ((Consumer<ModifyAnimalBuilder>) consumer).accept((ModifyAnimalBuilder) builder);
+            ((Consumer<ModifyAnimalBuilder>) modifyBuilder).accept((ModifyAnimalBuilder) builder);
         } else if (builder instanceof ModifyAgeableMobBuilder) {
-            ((Consumer<ModifyAgeableMobBuilder>) consumer).accept((ModifyAgeableMobBuilder) builder);
+            ((Consumer<ModifyAgeableMobBuilder>) modifyBuilder).accept((ModifyAgeableMobBuilder) builder);
         } else */
         if (builder instanceof ModifyPathfinderMobBuilder) {
-            ((Consumer<ModifyPathfinderMobBuilder>) consumer).accept((ModifyPathfinderMobBuilder) builder);
+            ((Consumer<ModifyPathfinderMobBuilder>) modifyBuilder).accept((ModifyPathfinderMobBuilder) builder);
         } else if (builder instanceof ModifyMobBuilder) {
-            ((Consumer<ModifyMobBuilder>) consumer).accept((ModifyMobBuilder) builder);
+            ((Consumer<ModifyMobBuilder>) modifyBuilder).accept((ModifyMobBuilder) builder);
         } else if (builder instanceof ModifyLivingEntityBuilder) {
-            ((Consumer<ModifyLivingEntityBuilder>) consumer).accept((ModifyLivingEntityBuilder) builder);
+            ((Consumer<ModifyLivingEntityBuilder>) modifyBuilder).accept((ModifyLivingEntityBuilder) builder);
         } else if (builder instanceof ModifyEntityBuilder) {
-            ((Consumer<ModifyEntityBuilder>) consumer).accept((ModifyEntityBuilder) builder);
+            ((Consumer<ModifyEntityBuilder>) modifyBuilder).accept((ModifyEntityBuilder) builder);
         } else {
             throw new IllegalArgumentException("Unsupported builder type or consumer type.");
         }
