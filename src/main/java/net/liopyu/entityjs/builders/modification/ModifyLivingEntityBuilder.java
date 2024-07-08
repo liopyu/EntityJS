@@ -80,6 +80,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public transient Consumer<LivingEntity> tick;
     public transient Consumer<LivingEntity> tickDeath;
     public transient MobType mobType;
+    public transient Function<Entity, Object> nextStep;
 
     public ModifyLivingEntityBuilder(EntityType<?> entityType) {
         super(entityType);
@@ -91,7 +92,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.setWaterSlowDown(0.6);
+            modifyBuilder.setWaterSlowDown(0.6);
             ```
             """)
     public ModifyLivingEntityBuilder setWaterSlowDown(float slowdownFactor) {
@@ -105,7 +106,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.setSoundVolume(0.5);
+            modifyBuilder.setSoundVolume(0.5);
             ```
             """)
     public ModifyLivingEntityBuilder setSoundVolume(float volume) {
@@ -122,7 +123,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.shouldDropLoot(entity => {
+            modifyBuilder.shouldDropLoot(entity => {
                 // Define logic to determine whether the entity should drop loot
                 // Use information about the LivingEntity provided by the context.
                 return // Some Boolean value indicating whether the entity should drop loot;
@@ -142,7 +143,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.aiStep(entity => {
+            modifyBuilder.aiStep(entity => {
                 // Custom logic to be executed during the living entity's AI step
                 // Access and modify information about the entity using the provided context.
             });
@@ -172,7 +173,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.isPushable(true);
+            modifyBuilder.isPushable(true);
             ```
             """)
     public ModifyLivingEntityBuilder isPushable(boolean b) {
@@ -189,7 +190,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.isAffectedByFluids(entity => {
+            modifyBuilder.isAffectedByFluids(entity => {
                 // Define logic to determine whether the entity is affected by fluids
                 // Use information about the LivingEntity provided by the context.
                 return // Some Boolean value indicating whether the entity is affected by fluids;
@@ -210,7 +211,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.isImmobile(entity => {
+            modifyBuilder.isImmobile(entity => {
                 // Define logic to determine whether the entity is immobile
                 // Use information about the LivingEntity provided by the context.
                 return // Some Boolean value indicating whether the entity is immobile;
@@ -228,7 +229,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.isAlwaysExperienceDropper(true);
+            modifyBuilder.isAlwaysExperienceDropper(true);
             ```
             """)
     public ModifyLivingEntityBuilder isAlwaysExperienceDropper(boolean b) {
@@ -245,7 +246,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.calculateFallDamage(context => {
+            modifyBuilder.calculateFallDamage(context => {
                 // Define logic to calculate and return the fall damage for the entity
                 // Use information about the CalculateFallDamageContext provided by the context.
                 return // Some Integer value representing the calculated fall damage;
@@ -263,7 +264,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.setDeathSound("minecraft:entity.generic.death");
+            modifyBuilder.setDeathSound("minecraft:entity.generic.death");
             ```
             """)
     public ModifyLivingEntityBuilder setDeathSound(Object sound) {
@@ -280,7 +281,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.setSwimSound("minecraft:entity.generic.swim");
+            modifyBuilder.setSwimSound("minecraft:entity.generic.swim");
             ```
             """)
     public ModifyLivingEntityBuilder setSwimSound(Object sound) {
@@ -300,7 +301,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.setSwimSplashSound("minecraft:entity.generic.splash");
+            modifyBuilder.setSwimSplashSound("minecraft:entity.generic.splash");
             ```
             """)
     public ModifyLivingEntityBuilder setSwimSplashSound(Object sound) {
@@ -323,7 +324,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.doAutoAttackOnTouch(context => {
+            modifyBuilder.doAutoAttackOnTouch(context => {
                 // Define custom logic for handling when the entity automatically attacks on touch
                 // Use information about the AutoAttackContext provided by the context.
             });
@@ -343,7 +344,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.setStandingEyeHeight(context => {
+            modifyBuilder.setStandingEyeHeight(context => {
                 // Define logic to calculate and return the standing eye height for the entity
                 // Use information about the EntityPoseDimensionsContext provided by the context.
                 return // Some Float value representing the standing eye height;
@@ -363,7 +364,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onDecreaseAirSupply(entity => {
+            modifyBuilder.onDecreaseAirSupply(entity => {
                 // Define custom logic for handling when the entity's air supply decreases
                 // Use information about the LivingEntity provided by the context.
             });
@@ -382,7 +383,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onBlockedByShield(context => {
+            modifyBuilder.onBlockedByShield(context => {
                 // Define custom logic for handling when the entity is blocked by a shield
                 // Use information about the LivingEntity provided by the context.
             });
@@ -399,7 +400,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.repositionEntityAfterLoad(true);
+            modifyBuilder.repositionEntityAfterLoad(true);
             ```
             """)
     public ModifyLivingEntityBuilder repositionEntityAfterLoad(boolean customRepositionEntityAfterLoad) {
@@ -416,7 +417,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.nextStep(entity => {
+            modifyBuilder.nextStep(entity => {
                 // Define logic to calculate and return the next step distance for the entity
                 // Use information about the Entity provided by the context.
                 return // Some Float value representing the next step distance;
@@ -436,7 +437,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onIncreaseAirSupply(entity => {
+            modifyBuilder.onIncreaseAirSupply(entity => {
                 // Define custom logic for handling when the entity's air supply increases
                 // Use information about the LivingEntity provided by the context.
             });
@@ -452,7 +453,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             Sets a function to determine the custom hurt sound of the entity.
             The provided Function accepts a {@link ContextUtils.HurtContext} parameter,
             ```javascript
-            entityBuilder.setHurtSound(context => {
+            modifyBuilder.setHurtSound(context => {
                 // Custom logic to determine the hurt sound for the entity
                 // You can use information from the HurtContext to customize the sound based on the context
                 const { entity, damageSource } = context;
@@ -485,7 +486,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.canAttackType(context => {
+            modifyBuilder.canAttackType(context => {
                 // Define conditions to check if the entity can attack the specified entity type
                 // Use information about the EntityTypeEntityContext provided by the context.
                 return // Some boolean condition indicating if the entity can attack the specified entity type;
@@ -506,7 +507,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.scale(entity => {
+            modifyBuilder.scale(entity => {
                 // Define logic to calculate and return the custom scale for the entity
                 // Use information about the LivingEntity provided by the context.
                 return // Some Float value;
@@ -526,7 +527,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.shouldDropExperience(entity => {
+            modifyBuilder.shouldDropExperience(entity => {
                 // Define conditions to check if the entity should drop experience upon death
                 // Use information about the LivingEntity provided by the context.
                 return // Some boolean condition indicating if the entity should drop experience;
@@ -547,7 +548,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.experienceReward(killedEntity => {
+            modifyBuilder.experienceReward(killedEntity => {
                 // Define logic to calculate and return the experience reward for the killedEntity
                 // Use information about the LivingEntity provided by the context.
                 return // Some Integer value representing the experience reward;
@@ -567,7 +568,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onEquipItem(context => {
+            modifyBuilder.onEquipItem(context => {
                 // Define custom logic for handling when the entity equips an item
                 // Use information about the EntityEquipmentContext provided by the context.
             });
@@ -588,7 +589,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.visibilityPercent(context => {
+            modifyBuilder.visibilityPercent(context => {
                 // Define logic to calculate and return the visibility percentage for the targetEntity
                 // Use information about the Entity provided by the context.
                 return // Some Double value representing the visibility percentage;
@@ -608,7 +609,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.canAttack(context => {
+            modifyBuilder.canAttack(context => {
                 // Define conditions to check if the entity can attack the targetEntity
                 // Use information about the LivingEntity provided by the context.
                 return // Some boolean condition indicating if the entity can attack the targetEntity;
@@ -628,7 +629,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.canBeAffected(context => {
+            modifyBuilder.canBeAffected(context => {
                 // Define conditions to check if the entity can be affected by the effect
                 // Use information about the OnEffectContext provided by the context.
                 return // Some boolean condition indicating if the entity can be affected by an effect;
@@ -648,7 +649,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.invertedHealAndHarm(entity => {
+            modifyBuilder.invertedHealAndHarm(entity => {
                 // Custom logic to determine if the entity has inverted heal and harm behavior
                 return true; // Replace with your custom boolean condition
             });
@@ -667,7 +668,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onEffectAdded(context => {
+            modifyBuilder.onEffectAdded(context => {
                 // Define custom logic for handling when an effect is added to the entity
                 // Use information about the OnEffectContext provided by the context.
             });
@@ -687,7 +688,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onLivingHeal(context => {
+            modifyBuilder.onLivingHeal(context => {
                 // Define custom logic for handling when the entity receives healing
                 // Use information about the EntityHealContext provided by the context.
             });
@@ -706,7 +707,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onEffectRemoved(context => {
+            modifyBuilder.onEffectRemoved(context => {
                 // Define custom logic for handling when an effect is removed from the entity
                 // Use information about the OnEffectContext provided by the context.
             });
@@ -725,7 +726,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onHurt(context => {
+            modifyBuilder.onHurt(context => {
                 // Define custom logic for handling when the entity is hurt
                 // Use information about the EntityDamageContext provided by the context.
             });
@@ -744,7 +745,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onDeath(context => {
+            modifyBuilder.onDeath(context => {
                 // Define custom logic for handling the entity's death
                 // Use information about the DeathContext provided by the context.
             });
@@ -763,7 +764,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.dropCustomDeathLoot(context => {
+            modifyBuilder.dropCustomDeathLoot(context => {
                 // Define custom logic for handling the entity dropping custom loot upon death
                 // Use information about the EntityLootContext provided by the context.
             });
@@ -780,7 +781,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.fallSounds("minecraft:entity.generic.small_fall",
+            modifyBuilder.fallSounds("minecraft:entity.generic.small_fall",
                 "minecraft:entity.generic.large_fall");
             ```
             """)
@@ -812,7 +813,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.eatingSound("minecraft:entity.zombie.ambient");
+            modifyBuilder.eatingSound("minecraft:entity.zombie.ambient");
             ```
             """)
     public ModifyLivingEntityBuilder eatingSound(Object sound) {
@@ -835,7 +836,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onClimbable(entity => {
+            modifyBuilder.onClimbable(entity => {
                 // Define conditions to check if the entity is on a climbable surface
                 // Use information about the LivingEntity provided by the context.
                 return // Some boolean condition indicating if the entity is on a climbable surface;
@@ -853,7 +854,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.canBreatheUnderwater(true);
+            modifyBuilder.canBreatheUnderwater(true);
             ```
             """)
     public ModifyLivingEntityBuilder canBreatheUnderwater(boolean canBreatheUnderwater) {
@@ -869,7 +870,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onLivingFall(context => {
+            modifyBuilder.onLivingFall(context => {
                 // Define custom logic for handling when the living entity falls and takes damage
                 // Use information about the EntityFallDamageContext provided by the context.
             });
@@ -886,7 +887,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.jumpBoostPower(entity => {
+            modifyBuilder.jumpBoostPower(entity => {
                 return //some float value
             });
             ```
@@ -904,7 +905,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.canStandOnFluid(context => {
+            modifyBuilder.canStandOnFluid(context => {
                 // Define conditions for the entity to be able to stand on a fluid
                 // Use information about the EntityFluidStateContext provided by the context.
                 return // Some boolean condition indicating if the entity can stand on the fluid;
@@ -924,7 +925,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.isSensitiveToWater(entity => {
+            modifyBuilder.isSensitiveToWater(entity => {
                 // Define conditions to check if the entity is sensitive to water
                 // Use information about the LivingEntity provided by the context.
                 return // Some boolean condition indicating if the entity is sensitive to water;
@@ -944,7 +945,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onItemPickup(context => {
+            modifyBuilder.onItemPickup(context => {
                 // Define custom logic for handling the entity picking up an item
                 // Use information about the EntityItemEntityContext provided by the context.
             });
@@ -963,7 +964,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.hasLineOfSight(context => {
+            modifyBuilder.hasLineOfSight(context => {
                 // Define conditions to check if the entity has line of sight to the target entity
                 // Use information about the Entity provided by the context.
                 return // Some boolean condition indicating if there is line of sight;
@@ -983,7 +984,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onEnterCombat(entity => {
+            modifyBuilder.onEnterCombat(entity => {
                 // Define custom logic for handling the entity entering combat
                 // Use information about the LivingEntity provided by the context.
             });
@@ -1002,7 +1003,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onLeaveCombat(entity => {
+            modifyBuilder.onLeaveCombat(entity => {
                 // Define custom logic for handling the entity leaving combat
                 // Use information about the LivingEntity provided by the context.
             });
@@ -1021,7 +1022,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.isAffectedByPotions(entity => {
+            modifyBuilder.isAffectedByPotions(entity => {
                 // Define conditions to check if the entity is affected by potions
                 // Use information about the LivingEntity provided by the context.
                 return // Some boolean condition indicating if the entity is affected by potions;
@@ -1041,7 +1042,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.isAttackableFunction(entity => {
+            modifyBuilder.isAttackableFunction(entity => {
                 // Define conditions to check if the entity is attackable
                 // Use information about the LivingEntity provided by the context.
                 return // Some boolean condition indicating if the entity is attackable;
@@ -1061,7 +1062,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.canTakeItem(context => {
+            modifyBuilder.canTakeItem(context => {
                 // Define conditions for the entity to be able to take an item
                 // Use information about the EntityItemLevelContext provided by the context.
                 return // Some boolean condition indicating if the entity can take the item;
@@ -1081,7 +1082,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.isSleeping(entity => {
+            modifyBuilder.isSleeping(entity => {
                 // Define conditions to check if the entity is currently sleeping
                 // Use information about the LivingEntity provided by the context.
                 return // Some boolean condition indicating if the entity is sleeping;
@@ -1101,7 +1102,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onStartSleeping(context => {
+            modifyBuilder.onStartSleeping(context => {
                 // Define custom logic for handling the entity starting to sleep
                 // Use information about the EntityBlockPosContext provided by the context.
             });
@@ -1120,7 +1121,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onStopSleeping(entity => {
+            modifyBuilder.onStopSleeping(entity => {
                 // Define custom logic for handling the entity stopping sleeping
                 // Use information about the LivingEntity provided by the context.
             });
@@ -1139,7 +1140,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.eat(context => {
+            modifyBuilder.eat(context => {
                 // Custom logic to handle the entity's eating action
                 // Access information about the item being consumed using the provided context.
             });
@@ -1158,7 +1159,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.shouldRiderFaceForward(context => {
+            modifyBuilder.shouldRiderFaceForward(context => {
                 // Define the conditions for the rider to face forward
                 // Use information about the player entity provided by the context.
                 return true //someBoolean;
@@ -1177,7 +1178,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.canDisableShield(entity => {
+            modifyBuilder.canDisableShield(entity => {
                 // Define the conditions to check if the entity can disable its shield
                 // Use information about the LivingEntity provided by the context.
                 return true;
@@ -1196,7 +1197,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.onInteract(context => {
+            modifyBuilder.onInteract(context => {
                 // Define custom logic for the interaction with the entity
                 // Use information about the MobInteractContext provided by the context.
                 if (context.player.isShiftKeyDown()) return
@@ -1219,7 +1220,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                 
             Example usage:
             ```javascript
-            ModifyLivingEntityBuilder.lerpTo(context => {
+            modifyBuilder.lerpTo(context => {
                 // Custom lerping logic for the living entity
                 const { x, y, z, yaw, pitch, posRotationIncrements, teleport, entity } = context;
                 // Perform custom lerping operations using the provided context
@@ -1238,7 +1239,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.isAlliedTo(context => {
+            modifyBuilder.isAlliedTo(context => {
                 const {entity, target} = context
                 return target.type == 'minecraft:blaze'
             });
@@ -1254,7 +1255,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.onHurtTarget(context => {
+            modifyBuilder.onHurtTarget(context => {
                 const {entity, targetEntity} = context
                 //Execute code when the target is hurt
             });
@@ -1271,7 +1272,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.tickDeath(entity => {
+            modifyBuilder.tickDeath(entity => {
                 // Override the tickDeath method in the entity
             });
             ```
@@ -1287,7 +1288,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             Defaults to false.
             Example usage:
             ```javascript
-            entityBuilder.mountJumpingEnabled(true);
+            modifyBuilder.mountJumpingEnabled(true);
             ```
             """)
     public ModifyLivingEntityBuilder mountJumpingEnabled(boolean mountJumpingEnabled) {
@@ -1300,7 +1301,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.travel(context => {
+            modifyBuilder.travel(context => {
                 const {entity, vec3} = context
                 // Use the vec3 and entity to determine the travel logic of the entity
             });
@@ -1316,7 +1317,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             Defaults to true.
             Example usage:
             ```javascript
-            entityBuilder.canSteer(false);
+            modifyBuilder.canSteer(false);
             ```
             """)
     public ModifyLivingEntityBuilder canSteer(boolean canSteer) {
@@ -1331,7 +1332,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                         
             Example usage:
             ```javascript
-            entityBuilder.mobType('undead');
+            modifyBuilder.mobType('undead');
             ```
             """)
     public ModifyLivingEntityBuilder mobType(Object mt) {
@@ -1369,7 +1370,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                             
                 Example usage:
                 ```javascript
-                entityBuilder.positionRider(context => {
+                modifyBuilder.positionRider(context => {
                     const {entity, passenger, moveFunction} = context
                 });
                 ```

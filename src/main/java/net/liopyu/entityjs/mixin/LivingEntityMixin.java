@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.mixin;
 
+import dev.latvian.mods.kubejs.util.ConsoleJS;
+import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.*;
@@ -24,8 +26,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
-import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
+import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = LivingEntity.class, remap = false)
 public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
@@ -54,11 +57,12 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
+        var entityType = entityJs$getLivingEntity().getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            EventHandlers.modifyEntity.post(getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()));
+            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+            EventHandlers.modifyEntity.post(eventJS);
+            entityJs$builder = eventJS.getBuilder();
         }
-        Object builder = EntityModificationEventJS.getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()).getBuilder();
-        entityJs$builder = builder;
     }
 
     @Inject(method = "getMobType", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
@@ -351,7 +355,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
             final ContextUtils.HurtContext context = new ContextUtils.HurtContext(entityJs$getLivingEntity(), pDamageSource);
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
             if (obj != null)
-                cir.setReturnValue(Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj)));
+                cir.setReturnValue(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
             else
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityJs$entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
 
@@ -550,11 +554,12 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canStandOnFluid != null) {
                 final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(entityJs$getLivingEntity(), pFluidState);
-                Object obj = builder.canStandOnFluid.apply(context);
-                if (obj instanceof Boolean) {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canStandOnFluid.apply(context), "boolean");
+                if (obj != null) {
                     cir.setReturnValue((boolean) obj);
                 } else
                     EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canStandOnFluid from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+                cir.setReturnValue(false);
             }
         }
     }
@@ -563,9 +568,10 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     private void entityjs$isSensitiveToWater(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isSensitiveToWater != null) {
-                Object obj = builder.isSensitiveToWater.apply(entityJs$getLivingEntity());
-                if (obj instanceof Boolean) {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isSensitiveToWater.apply(entityJs$getLivingEntity()), "boolean");
+                if (obj != null) {
                     cir.setReturnValue((boolean) obj);
+                    return;
                 }
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSensitiveToWater from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
             }

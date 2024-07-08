@@ -124,8 +124,10 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly fg.deobf("curse.maven:framework-549225:5180972")
     compileOnly fg.deobf("curse.maven:mrcrayfishs-gun-mod-unofficial-945471:5212457")
-
-    implementation fg.deobf("curse.maven:probejs-585406:5457028")
+    //ProbeJS 7.0
+    //implementation fg.deobf("curse.maven:probejs-585406:5457028")
+    //ProbeJS 6.1
+    implementation fg.deobf("curse.maven:probejs-585406:5227399")
     /*implementation fg.deobf("curse.maven:framework-549225:5180972")
     implementation fg.deobf("curse.maven:mrcrayfishs-gun-mod-unofficial-945471:5212457")*/
     //implementation fg.deobf("curse.maven:corail-tombstone-243707:5395076")

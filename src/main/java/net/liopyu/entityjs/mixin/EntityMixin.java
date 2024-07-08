@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.mixin;
 
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -24,11 +25,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
-import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
+import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = Entity.class, remap = false)
-public class EntityMixin /*implements IModifyEntityJS*/ {
+public class EntityMixin/*implements IModifyEntityJS*/ {
     @Unique
     private Object entityJs$builder;
 
@@ -44,6 +46,7 @@ public class EntityMixin /*implements IModifyEntityJS*/ {
     @Unique
     private Object entityJs$entityObject = this;
 
+
     @Unique
     private Entity entityJs$getLivingEntity() {
         return (Entity) entityJs$entityObject;
@@ -56,17 +59,18 @@ public class EntityMixin /*implements IModifyEntityJS*/ {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
+        var entityType = entityJs$getLivingEntity().getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            EventHandlers.modifyEntity.post(getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()));
+            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+            EventHandlers.modifyEntity.post(eventJS);
+            entityJs$builder = eventJS.getBuilder();
         }
-        entityJs$builder = EntityModificationEventJS.getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()).getBuilder();
     }
 
     @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void tick(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.tick != null) {
-                EntityJSHelperClass.logWarningMessageOnce("tick is not null");
                 EntityJSHelperClass.consumerCallback(builder.tick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tick.");
             }
         }
@@ -119,9 +123,8 @@ public class EntityMixin /*implements IModifyEntityJS*/ {
 
     @Inject(method = "onRemovedFromWorld", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void onRemovedFromWorld(CallbackInfo ci) {
-
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
-            if (entityJs$builder != null && builder.onRemovedFromWorld != null) {
+            if (builder.onRemovedFromWorld != null) {
                 EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onRemovedFromWorld.");
             }
         }
@@ -351,20 +354,6 @@ public class EntityMixin /*implements IModifyEntityJS*/ {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.repositionEntityAfterLoad == null) return;
             cir.setReturnValue(builder.repositionEntityAfterLoad);
-        }
-    }
-
-    @Inject(method = "nextStep", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    protected void nextStep(CallbackInfoReturnable<Float> cir) {
-        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
-            if (builder.nextStep != null) {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.nextStep.apply(entityJs$getLivingEntity()), "float");
-                if (obj != null) {
-                    cir.setReturnValue((float) obj);
-                } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityJs$entityName() + ". Value: " + builder.nextStep.apply(entityJs$getLivingEntity()) + ". Must be a float, defaulting to " + cir.getReturnValue());
-                }
-            }
         }
     }
 

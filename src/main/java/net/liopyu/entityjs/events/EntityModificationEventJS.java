@@ -3,6 +3,7 @@ package net.liopyu.entityjs.events;
 import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
@@ -11,7 +12,9 @@ import net.liopyu.entityjs.builders.modification.ModifyPathfinderMobBuilder;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -20,7 +23,7 @@ public class EntityModificationEventJS extends EventJS {
     private final Object builder;
     private final Entity entity;
 
-    private EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
+    public EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
         this.entity = entity;
         this.builder = determineModificationType(entityType, entity);
     }
@@ -66,15 +69,10 @@ public class EntityModificationEventJS extends EventJS {
             @Param(name = "modifyBuilder", value = "A consumer to modify the entity type."),
     })
     public void modify(EntityType<?> entityType, Consumer<? extends ModifyEntityBuilder> modifyBuilder) {
+        var entity = this.entity;
+        boolean entityTypeMatch = entityType == entity.getType();
+        if (!entityTypeMatch) return;
         Object builder = getOrCreate(entityType, entity).getBuilder();
-        //EntityJSHelperClass.logWarningMessageOnce(builder.getClass().toString());
-        /*if (builder instanceof ModifyTamableAnimalBuilder) {
-            ((Consumer<ModifyTamableAnimalBuilder>) modifyBuilder).accept((ModifyTamableAnimalBuilder) builder);
-        } else if (builder instanceof ModifyAnimalBuilder) {
-            ((Consumer<ModifyAnimalBuilder>) modifyBuilder).accept((ModifyAnimalBuilder) builder);
-        } else if (builder instanceof ModifyAgeableMobBuilder) {
-            ((Consumer<ModifyAgeableMobBuilder>) modifyBuilder).accept((ModifyAgeableMobBuilder) builder);
-        } else */
         if (builder instanceof ModifyPathfinderMobBuilder) {
             ((Consumer<ModifyPathfinderMobBuilder>) modifyBuilder).accept((ModifyPathfinderMobBuilder) builder);
         } else if (builder instanceof ModifyMobBuilder) {

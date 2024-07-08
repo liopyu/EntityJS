@@ -1,5 +1,8 @@
 package net.liopyu.entityjs.mixin;
 
+import dev.latvian.mods.kubejs.util.ConsoleJS;
+import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
+import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyMobBuilder;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -22,7 +25,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
+import java.util.function.Consumer;
+
+import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = Mob.class, remap = false)
 public class MobMixin /*implements IModifyEntityJS*/ {
@@ -49,11 +54,12 @@ public class MobMixin /*implements IModifyEntityJS*/ {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onMobInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
+        var entityType = entityJs$getLivingEntity().getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            EventHandlers.modifyEntity.post(getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()));
+            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+            EventHandlers.modifyEntity.post(eventJS);
+            entityJs$builder = eventJS.getBuilder();
         }
-        Object builder = EntityModificationEventJS.getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()).getBuilder();
-        entityJs$builder = builder;
     }
 
     @Inject(method = "getControllingPassenger", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)

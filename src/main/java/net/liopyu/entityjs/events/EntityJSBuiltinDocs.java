@@ -1,12 +1,12 @@
 package net.liopyu.entityjs.events;
 
-import moe.wolfgirl.probejs.lang.java.clazz.ClassPath;
+/*import moe.wolfgirl.probejs.lang.java.clazz.ClassPath;
 import moe.wolfgirl.probejs.lang.snippet.SnippetDump;
 import moe.wolfgirl.probejs.lang.transpiler.Transpiler;
 import moe.wolfgirl.probejs.lang.transpiler.TypeConverter;
 import moe.wolfgirl.probejs.lang.typescript.ScriptDump;
 import moe.wolfgirl.probejs.lang.typescript.TypeScriptFile;
-import moe.wolfgirl.probejs.plugin.ProbeJSPlugin;
+import moe.wolfgirl.probejs.plugin.ProbeJSPlugin;*/
 
 import java.util.*;
 import java.util.function.Consumer;
