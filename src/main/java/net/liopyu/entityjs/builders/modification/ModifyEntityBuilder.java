@@ -76,6 +76,21 @@ public class ModifyEntityBuilder extends EventJS {
         return this.entityType;
     }
 
+    @Info(value = """
+            Will output the entity type as well as the builder pertaining to the entity type\s
+            \s
+            Example usage:\s
+            ```javascript
+            EntityJSEvents.modifyEntity(event => {
+                event.modify("minecraft:zombie", builder => {
+                    console.log(builder.builderType())
+                })
+            })
+            ```
+            """)
+    public String builderType() {
+        return "[EntityJS]: Builder for " + this.getEntityType().toString() + ": " + this.getClass().getSimpleName();
+    }
 
     @Info(value = """
             Boolean determining if the entity is controlled by the first passenger
