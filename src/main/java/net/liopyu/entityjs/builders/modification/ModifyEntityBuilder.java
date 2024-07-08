@@ -66,13 +66,13 @@ public class ModifyEntityBuilder extends EventJS {
     }
 
     @Info(value = """
-            Returns the current entity type's builder in string format.\s
+            Will output the entity type as well as the builder pertaining to the entity type\s
             \s
             Example usage:\s
             ```javascript
             EntityJSEvents.modifyEntity(event => {
                 event.modify("minecraft:zombie", builder => {
-                    console.log(builder.builderType()) // Will output "ModifyPathfinderMobBuilder"
+                    console.log(builder.builderType())
                 })
             })
             ```
