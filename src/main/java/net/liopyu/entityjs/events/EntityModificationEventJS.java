@@ -73,6 +73,13 @@ public class EntityModificationEventJS extends EventJS {
         boolean entityTypeMatch = entityType == entity.getType();
         if (!entityTypeMatch) return;
         Object builder = getOrCreate(entityType, entity).getBuilder();
+        /*if (builder instanceof ModifyTamableAnimalBuilder) {
+            ((Consumer<ModifyTamableAnimalBuilder>) modifyBuilder).accept((ModifyTamableAnimalBuilder) builder);
+        } else if (builder instanceof ModifyAnimalBuilder) {
+            ((Consumer<ModifyAnimalBuilder>) modifyBuilder).accept((ModifyAnimalBuilder) builder);
+        } else if (builder instanceof ModifyAgeableMobBuilder) {
+            ((Consumer<ModifyAgeableMobBuilder>) modifyBuilder).accept((ModifyAgeableMobBuilder) builder);
+        } else */
         if (builder instanceof ModifyPathfinderMobBuilder) {
             ((Consumer<ModifyPathfinderMobBuilder>) modifyBuilder).accept((ModifyPathfinderMobBuilder) builder);
         } else if (builder instanceof ModifyMobBuilder) {
