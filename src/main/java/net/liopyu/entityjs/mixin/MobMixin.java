@@ -1,5 +1,8 @@
 package net.liopyu.entityjs.mixin;
 
+import dev.latvian.mods.kubejs.util.ConsoleJS;
+import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
+import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyMobBuilder;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -22,8 +25,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static net.liopyu.entityjs.events.EntityModificationEventJS.eventMap;
-import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
+import java.util.function.Consumer;
+
+import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = Mob.class, remap = false)
 public class MobMixin /*implements IModifyEntityJS*/ {
@@ -50,33 +54,17 @@ public class MobMixin /*implements IModifyEntityJS*/ {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onMobInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
-        if (!eventMap.containsKey(pEntityType)) return;
+        var entityType = entityJs$getLivingEntity().getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            EventHandlers.modifyEntity.post(getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()));
+            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+            EventHandlers.modifyEntity.post(eventJS);
+            entityJs$builder = eventJS.getBuilder();
         }
-        Object builder = EntityModificationEventJS.getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()).getBuilder();
-        entityJs$builder = builder;
     }
 
-    /*@Inject(method = "getControllingPassenger", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void getControllingPassenger(CallbackInfoReturnable<LivingEntity> cir) {
-        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
-            if (builder.controlledByFirstPassenger != null) {
-                if (!builder.controlledByFirstPassenger) return;
-                Entity var2 = entityJs$getLivingEntity().getFirstPassenger();
-                LivingEntity var10000;
-                if (var2 instanceof LivingEntity entity) {
-                    var10000 = entity;
-                } else {
-                    var10000 = null;
-                }
-                cir.setReturnValue(var10000);
-            }
-        }
-    }*/
 
     @Inject(method = "mobInteract", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void entityJs$mobInteract(Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
+    public void mobInteract(Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.onInteract != null) {
                 final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(entityJs$getLivingEntity(), pPlayer, pHand);
@@ -87,7 +75,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     }
 
     @Inject(method = "doHurtTarget", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void entityJs$doHurtTarget(Entity pEntity, CallbackInfoReturnable<Boolean> cir) {
+    public void doHurtTarget(Entity pEntity, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (entityJs$builder != null && builder.onHurtTarget != null) {
                 final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, entityJs$getLivingEntity());
@@ -106,7 +94,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     }*/
 
     @Inject(method = "tickLeash", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    protected void entityJs$tickLeash(CallbackInfo ci) {
+    protected void tickLeash(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.tickLeash != null) {
                 Player $$0 = (Player) entityJs$getLivingEntity().getLeashHolder();
@@ -117,7 +105,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     }
 
     @Inject(method = "setTarget", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void entityJs$setTarget(LivingEntity pTarget, CallbackInfo ci) {
+    public void setTarget(LivingEntity pTarget, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.onTargetChanged != null) {
                 final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(pTarget, entityJs$getLivingEntity());
@@ -127,7 +115,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     }
 
     @Inject(method = "ate", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void entityJs$ate(CallbackInfo ci) {
+    public void ate(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.ate != null) {
                 EntityJSHelperClass.consumerCallback(builder.ate, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: ate.");
@@ -137,7 +125,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     }
 
     @Inject(method = "createNavigation", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    protected void entityJs$createNavigation(Level pLevel, CallbackInfoReturnable<PathNavigation> cir) {
+    protected void createNavigation(Level pLevel, CallbackInfoReturnable<PathNavigation> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (entityJs$builder == null || builder.createNavigation == null) return;
             final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, entityJs$getLivingEntity());
@@ -151,7 +139,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     }
 
     @Inject(method = "canBeLeashed", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void entityJs$canBeLeashed(Player pPlayer, CallbackInfoReturnable<Boolean> cir) {
+    public void canBeLeashed(Player pPlayer, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.canBeLeashed != null) {
                 final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, entityJs$getLivingEntity());
@@ -166,7 +154,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
 
 
     @Inject(method = "getMainArm", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void entityJs$getMainArm(CallbackInfoReturnable<HumanoidArm> cir) {
+    public void getMainArm(CallbackInfoReturnable<HumanoidArm> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.mainArm != null) cir.setReturnValue((HumanoidArm) builder.mainArm);
         }
@@ -174,7 +162,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
 
 
     @Inject(method = "getAmbientSound", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    protected void entityJs$getAmbientSound(CallbackInfoReturnable<SoundEvent> cir) {
+    protected void getAmbientSound(CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.setAmbientSound != null) {
                 cir.setReturnValue(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setAmbientSound));
@@ -183,7 +171,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     }
 
     @Inject(method = "canHoldItem", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void entityJs$canHoldItem(ItemStack pStack, CallbackInfoReturnable<Boolean> cir) {
+    public void canHoldItem(ItemStack pStack, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.canHoldItem != null) {
                 final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, entityJs$getLivingEntity());
@@ -197,24 +185,25 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     }
 
     @Inject(method = "shouldDespawnInPeaceful", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    protected void entityJs$shouldDespawnInPeaceful(CallbackInfoReturnable<Boolean> cir) {
+    protected void shouldDespawnInPeaceful(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
-
-            cir.setReturnValue(builder.shouldDespawnInPeaceful == null ? cir.getReturnValue() : builder.shouldDespawnInPeaceful);
+            if (builder.shouldDespawnInPeaceful == null) return;
+            cir.setReturnValue(builder.shouldDespawnInPeaceful);
 
         }
     }
 
     @Inject(method = "isPersistenceRequired", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void entityJs$isPersistenceRequired(CallbackInfoReturnable<Boolean> cir) {
+    public void isPersistenceRequired(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
-            cir.setReturnValue(builder.isPersistenceRequired == null ? cir.getReturnValue() : builder.isPersistenceRequired);
+            if (builder.isPersistenceRequired == null) return;
+            cir.setReturnValue(builder.isPersistenceRequired);
 
         }
     }
 
     @Inject(method = "getMeleeAttackRangeSqr", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void entityJs$getMeleeAttackRangeSqr(LivingEntity pEntity, CallbackInfoReturnable<Double> cir) {
+    public void getMeleeAttackRangeSqr(LivingEntity pEntity, CallbackInfoReturnable<Double> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.meleeAttackRangeSqr != null) {
                 Object obj = EntityJSHelperClass.convertObjectToDesired(builder.meleeAttackRangeSqr.apply(entityJs$getLivingEntity()), "double");
@@ -228,7 +217,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     }
 
     @Inject(method = "getAmbientSoundInterval", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void entityJs$getAmbientSoundInterval(CallbackInfoReturnable<Integer> cir) {
+    public void getAmbientSoundInterval(CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.ambientSoundInterval != null)
                 cir.setReturnValue((int) builder.ambientSoundInterval);
@@ -236,7 +225,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     }
 
     @Inject(method = "removeWhenFarAway", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
-    public void entityJs$removeWhenFarAway(double pDistanceToClosestPlayer, CallbackInfoReturnable<Boolean> cir) {
+    public void removeWhenFarAway(double pDistanceToClosestPlayer, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.removeWhenFarAway == null) {
                 return;

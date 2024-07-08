@@ -1,83 +1,99 @@
 package net.liopyu.entityjs.events;
 
 import dev.latvian.mods.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
+import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyMobBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyPathfinderMobBuilder;
-import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class EntityModificationEventJS extends EventJS {
-    public enum EntityModificationType {
-        PATHFINDERMOB,
-        MOB,
-        LIVING_ENTITY,
-        ENTITY
-    }
-
     public static final Map<EntityType<?>, EntityModificationEventJS> eventMap = new HashMap<>();
-    public static final Map<EntityType<?>, EntityModificationType> entityMap = new HashMap<>();
     private final Object builder;
     private final Entity entity;
 
-    private EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
-        if (!eventMap.containsKey(entityType)) {
-            eventMap.put(entityType, this);
-        }
+    public EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
         this.entity = entity;
         this.builder = determineModificationType(entityType, entity);
     }
 
-    public Entity getEntity() {
-        return entity;
-    }
 
     public static EntityModificationEventJS getOrCreate(EntityType<?> entityType, Entity entity) {
         if (!eventMap.containsKey(entityType)) {
-            ConsoleJS.STARTUP.info("Creating Builder for: " + "EntityType: " + entityType + " Entity: " + entity);
             var event = new EntityModificationEventJS(entityType, entity);
             eventMap.put(entityType, event);
             return event;
         }
-        ConsoleJS.STARTUP.info("Modifying: " + "EntityType: " + entityType + " Entity: " + entity);
         return eventMap.get(entityType);
     }
 
+    @HideFromJS
     public Object getBuilder() {
         return builder;
     }
 
-    public ModifyEntityBuilder modify(EntityType<?> entityType) {
+    @Info(value = """
+            Entity type modification event. Allows modification of methods for any existing entity.\s
+            \s
+            This event determines the entity's type and uses the appropriate builder for modification.\s
+            \s
+            Builders:\s
+                - ModifyPathfinderMobBuilder: For entities extending {@link PathfinderMob}\s
+                - ModifyMobBuilder: For entities extending {@link Mob}\s
+                - ModifyLivingEntityBuilder: For entities extending {@link LivingEntity}\s
+                - ModifyEntityBuilder: For entities extending {@link Entity}\s
+            \s
+            Example usage:\s
+            ```javascript
+            EntityJSEvents.modifyEntity(event => {
+                event.modify("minecraft:zombie", builder => {
+                    builder.onRemovedFromWorld(entity => {
+                        // Execute code when the zombie is removed from the world.
+                    })
+                })
+            })
+            ```
+            """, params = {
+            @Param(name = "entityType", value = "The entity type to modify"),
+            @Param(name = "modifyBuilder", value = "A consumer to modify the entity type."),
+    })
+    public void modify(EntityType<?> entityType, Consumer<? extends ModifyEntityBuilder> modifyBuilder) {
+        var entity = this.entity;
+        boolean entityTypeMatch = entityType == entity.getType();
+        if (!entityTypeMatch) return;
         Object builder = getOrCreate(entityType, entity).getBuilder();
-        ConsoleJS.STARTUP.info(builder.getClass() + " :" + entityType + " -> " + ((ModifyEntityBuilder) builder).getEntity());
         /*if (builder instanceof ModifyTamableAnimalBuilder) {
-            ((Consumer<ModifyTamableAnimalBuilder>) consumer).accept((ModifyTamableAnimalBuilder) builder);
+            ((Consumer<ModifyTamableAnimalBuilder>) modifyBuilder).accept((ModifyTamableAnimalBuilder) builder);
         } else if (builder instanceof ModifyAnimalBuilder) {
-            ((Consumer<ModifyAnimalBuilder>) consumer).accept((ModifyAnimalBuilder) builder);
+            ((Consumer<ModifyAnimalBuilder>) modifyBuilder).accept((ModifyAnimalBuilder) builder);
         } else if (builder instanceof ModifyAgeableMobBuilder) {
-            ((Consumer<ModifyAgeableMobBuilder>) consumer).accept((ModifyAgeableMobBuilder) builder);
+            ((Consumer<ModifyAgeableMobBuilder>) modifyBuilder).accept((ModifyAgeableMobBuilder) builder);
         } else */
         if (builder instanceof ModifyPathfinderMobBuilder) {
-            return (ModifyPathfinderMobBuilder) builder;
+            ((Consumer<ModifyPathfinderMobBuilder>) modifyBuilder).accept((ModifyPathfinderMobBuilder) builder);
         } else if (builder instanceof ModifyMobBuilder) {
-            return (ModifyMobBuilder) builder;
+            ((Consumer<ModifyMobBuilder>) modifyBuilder).accept((ModifyMobBuilder) builder);
         } else if (builder instanceof ModifyLivingEntityBuilder) {
-            return (ModifyLivingEntityBuilder) builder;
+            ((Consumer<ModifyLivingEntityBuilder>) modifyBuilder).accept((ModifyLivingEntityBuilder) builder);
         } else if (builder instanceof ModifyEntityBuilder) {
-            return (ModifyEntityBuilder) builder;
+            ((Consumer<ModifyEntityBuilder>) modifyBuilder).accept((ModifyEntityBuilder) builder);
         } else {
             throw new IllegalArgumentException("Unsupported builder type or consumer type.");
         }
     }
 
     public ModifyEntityBuilder determineModificationType(EntityType<?> type, Entity entity) {
-        ConsoleJS.STARTUP.info("[EntityJS]: " + entity + " is living entity? " + (entity instanceof LivingEntity));
         /*if (entity instanceof TamableAnimal) {
             return new ModifyTamableAnimalBuilder(type);
         } else if (entity instanceof Animal) {
@@ -86,13 +102,13 @@ public class EntityModificationEventJS extends EventJS {
             return new ModifyAgeableMobBuilder(type);
         } else */
         if (entity instanceof PathfinderMob) {
-            return new ModifyPathfinderMobBuilder(type, entity);
+            return new ModifyPathfinderMobBuilder(type);
         } else if (entity instanceof Mob) {
-            return new ModifyMobBuilder(type, entity);
+            return new ModifyMobBuilder(type);
         } else if (entity instanceof LivingEntity) {
-            return new ModifyLivingEntityBuilder(type, entity);
+            return new ModifyLivingEntityBuilder(type);
         } else {
-            return new ModifyEntityBuilder(type, entity);
+            return new ModifyEntityBuilder(type);
         }
     }
 }

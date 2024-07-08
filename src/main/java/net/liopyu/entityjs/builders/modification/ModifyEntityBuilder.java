@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ModifyEntityBuilder /*extends EventJS */ {
+public class ModifyEntityBuilder extends EventJS {
     public final EntityType<?> entityType;
     public transient Boolean repositionEntityAfterLoad;
     public transient Object mainArm;
@@ -20,10 +20,9 @@ public class ModifyEntityBuilder /*extends EventJS */ {
     public transient Function<Entity, Object> setBlockJumpFactor;
     public transient Object setSwimSound;
     public transient Function<Entity, Object> isFlapping;
-    public transient Function<Entity, Object> nextStep;
     public transient Object setSwimSplashSound;
     public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
-    //public transient Consumer<ContextUtils.PositionRiderContextMove> positionRider;
+    public transient Consumer<ContextUtils.PositionRiderContextMove> positionRider;
     public transient Function<Entity, Object> isFreezing;
     public transient Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith;
     public transient Function<ContextUtils.EMayInteractContext, Object> mayInteract;
@@ -59,24 +58,19 @@ public class ModifyEntityBuilder /*extends EventJS */ {
     public transient Function<Entity, Object> myRidingOffset;
     public transient Boolean controlledByFirstPassenger;
     public static Map<EntityType<?>, ModifyEntityBuilder> builderMap = new HashMap<>();
-    private final Entity entity;
 
-    public ModifyEntityBuilder(EntityType<?> entityType, Entity entity) {
+    public ModifyEntityBuilder(EntityType<?> entityType) {
         this.entityType = entityType;
-        this.entity = entity;
+
     }
 
-    public Entity getEntity() {
-        return entity;
-    }
-
-   /* public static ModifyEntityBuilder getOrCreate(EntityType<?> type) {
+    public static ModifyEntityBuilder getOrCreate(EntityType<?> type) {
         if (!builderMap.containsKey(type)) {
             var builder = new ModifyEntityBuilder(type);
             builderMap.put(type, builder);
         }
         return builderMap.get(type);
-    }*/
+    }
 
     public EntityType<?> getEntityType() {
         return this.entityType;
@@ -88,7 +82,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                                                 
             Example usage:
             ```javascript
-            entityBuilder.controlledByFirstPassenger(true)
+            modifyBuilder.controlledByFirstPassenger(true)
             ```
             """)
     public ModifyEntityBuilder controlledByFirstPassenger(boolean controlledByFirstPassenger) {
@@ -104,7 +98,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.myRidingOffset(entity => {
+            modifyBuilder.myRidingOffset(entity => {
                 //Use the provided context about the entity to determine the riding offset of the passengers
                 return 5 //Some double value;
             })
@@ -120,7 +114,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                                                 
             Example usage:
             ```javascript
-            entityBuilder.isPickable(true)
+            modifyBuilder.isPickable(true)
             ```
             """)
     public ModifyEntityBuilder isPickable(boolean isPickable) {
@@ -135,7 +129,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.canCollideWith(context => {
+            modifyBuilder.canCollideWith(context => {
                 return true //Some Boolean value determining whether the entity may collide with another
             });
             ```
@@ -151,7 +145,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.isFreezing(entity => {
+            modifyBuilder.isFreezing(entity => {
                 return true;
             });
             ```
@@ -167,7 +161,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.setBlockJumpFactor(entity => {
+            modifyBuilder.setBlockJumpFactor(entity => {
                 //Set the jump factor for the entity through context
                 return 1 //some float value;
             });
@@ -183,7 +177,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.isPushable(true);
+            modifyBuilder.isPushable(true);
             ```
             """)
     public ModifyEntityBuilder isPushable(boolean b) {
@@ -191,12 +185,12 @@ public class ModifyEntityBuilder /*extends EventJS */ {
         return this;
     }
 
-    /*@Info(value = """
+    @Info(value = """
             @param positionRider A consumer determining the position of rider/riders.
                             
                 Example usage:
                 ```javascript
-                entityBuilder.positionRider(context => {
+                modifyBuilder.positionRider(context => {
                     const {entity, passenger, moveFunction} = context
                 });
                 ```
@@ -204,7 +198,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
     public ModifyEntityBuilder positionRider(Consumer<ContextUtils.PositionRiderContextMove> builderConsumer) {
         this.positionRider = builderConsumer;
         return this;
-    }*/
+    }
 
     @Info(value = """
             Sets a predicate to determine if a passenger can be added to the entity.
@@ -213,9 +207,9 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.canAddPassenger(context => {
+            modifyBuilder.canAddPassenger(context => {
                 // Custom logic to determine if a passenger can be added to the entity
-                return true; 
+                return true;
             });
             ```
             """)
@@ -230,7 +224,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.setSwimSound("minecraft:entity.generic.swim");
+            modifyBuilder.setSwimSound("minecraft:entity.generic.swim");
             ```
             """)
     public ModifyEntityBuilder setSwimSound(Object sound) {
@@ -250,7 +244,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.setSwimSplashSound("minecraft:entity.generic.splash");
+            modifyBuilder.setSwimSplashSound("minecraft:entity.generic.splash");
             ```
             """)
     public ModifyEntityBuilder setSwimSplashSound(Object sound) {
@@ -275,7 +269,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.blockSpeedFactor(entity => {
+            modifyBuilder.blockSpeedFactor(entity => {
                 // Define logic to calculate and return the block speed factor for the entity
                 // Use information about the Entity provided by the context.
                 return // Some Float value representing the block speed factor;
@@ -296,7 +290,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.isFlapping(entity => {
+            modifyBuilder.isFlapping(entity => {
                 // Define logic to determine whether the entity is currently flapping
                 // Use information about the Entity provided by the context.
                 return // Some Boolean value indicating whether the entity is flapping;
@@ -315,7 +309,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.onAddedToWorld(entity => {
+            modifyBuilder.onAddedToWorld(entity => {
                 // Define custom logic for handling when the entity is added to the world
                 // Use information about the Entity provided by the context.
             });
@@ -332,32 +326,11 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.repositionEntityAfterLoad(true);
+            modifyBuilder.repositionEntityAfterLoad(true);
             ```
             """)
     public ModifyEntityBuilder repositionEntityAfterLoad(boolean customRepositionEntityAfterLoad) {
         this.repositionEntityAfterLoad = customRepositionEntityAfterLoad;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a function to determine the next step distance for the entity.
-            The provided Function accepts a {@link Entity} parameter,
-            representing the entity whose next step distance is being determined.
-            It returns a Float representing the next step distance.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.nextStep(entity => {
-                // Define logic to calculate and return the next step distance for the entity
-                // Use information about the Entity provided by the context.
-                return // Some Float value representing the next step distance;
-            });
-            ```
-            """)
-    public ModifyEntityBuilder nextStep(Function<Entity, Object> nextStep) {
-        this.nextStep = nextStep;
         return this;
     }
 
@@ -369,7 +342,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.onSprint(entity => {
+            modifyBuilder.onSprint(entity => {
                 // Define custom logic for handling when the entity starts sprinting
                 // Use information about the Entity provided by the context.
             });
@@ -388,7 +361,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.onStopRiding(entity => {
+            modifyBuilder.onStopRiding(entity => {
                 // Define custom logic for handling when the entity stops being ridden
                 // Use information about the Entity provided by the context.
             });
@@ -407,7 +380,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.rideTick(entity => {
+            modifyBuilder.rideTick(entity => {
                 // Define custom logic for handling each tick when the entity is being ridden
                 // Use information about the Entity provided by the context.
             });
@@ -418,7 +391,6 @@ public class ModifyEntityBuilder /*extends EventJS */ {
         return this;
     }
 
-
     @Info(value = """
             Sets a predicate function to determine whether the entity can undergo freezing.
             The provided Predicate accepts a {@link Entity} parameter,
@@ -426,7 +398,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.canFreeze(entity => {
+            modifyBuilder.canFreeze(entity => {
                 // Define the conditions for the entity to be able to freeze
                 // Use information about the Entity provided by the context.
                 return true //someBoolean;
@@ -446,7 +418,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.isCurrentlyGlowing(entity => {
+            modifyBuilder.isCurrentlyGlowing(entity => {
                 // Define the conditions to check if the entity is currently glowing
                 // Use information about the Entity provided by the context.
                 const isGlowing = // Some boolean condition to check if the entity is glowing;
@@ -465,7 +437,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.setMaxFallDistance(entity => {
+            modifyBuilder.setMaxFallDistance(entity => {
                 // Define custom logic to determine the maximum fall distance
                 // Use information about the Entity provided by the context.
                 return 3;
@@ -485,7 +457,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.onClientRemoval(entity => {
+            modifyBuilder.onClientRemoval(entity => {
                 // Define custom logic for handling the removal of the entity on the client side
                 // Use information about the Entity provided by the context.
             });
@@ -504,7 +476,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.lavaHurt(entity => {
+            modifyBuilder.lavaHurt(entity => {
                 // Define custom logic for handling the entity being hurt by lava
                 // Use information about the Entity provided by the context.
             });
@@ -523,7 +495,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.onFlap(entity => {
+            modifyBuilder.onFlap(entity => {
                 // Define custom logic for handling the entity's flap action
                 // Use information about the Entity provided by the context.
             });
@@ -584,7 +556,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.thunderHit(context => {
+            modifyBuilder.thunderHit(context => {
                 // Define custom logic for handling the entity being hit by thunder
                 // Use information about the ThunderHitContext provided by the context.
             });
@@ -603,7 +575,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.isInvulnerableTo(context => {
+            modifyBuilder.isInvulnerableTo(context => {
                 // Define conditions for the entity to be invulnerable to the specific type of damage
                 // Use information about the DamageContext provided by the context.
                 return true // Some boolean condition indicating if the entity has invulnerability to the damage type;
@@ -623,7 +595,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.canChangeDimensions(entity => {
+            modifyBuilder.canChangeDimensions(entity => {
                 // Define the conditions for the entity to be able to change dimensions
                 // Use information about the Entity provided by the context.
                 return false // Some boolean condition indicating if the entity can change dimensions;
@@ -643,7 +615,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.mayInteract(context => {
+            modifyBuilder.mayInteract(context => {
                 // Define conditions for the entity to be allowed to interact
                 // Use information about the MayInteractContext provided by the context.
                 return false // Some boolean condition indicating if the entity may interact;
@@ -663,7 +635,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.canTrample(context => {
+            modifyBuilder.canTrample(context => {
                 // Define conditions for the entity to be allowed to trample
                 // Use information about the CanTrampleContext provided by the context.
                 return false // Some boolean condition indicating if the entity can trample;
@@ -683,7 +655,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.onRemovedFromWorld(entity => {
+            modifyBuilder.onRemovedFromWorld(entity => {
                 // Define custom logic for handling the removal of the entity from the world
                 // Use information about the Entity provided by the context.
             });
@@ -701,7 +673,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.onFall(context => {
+            modifyBuilder.onFall(context => {
                 // Define custom logic for handling when the entity falls and takes damage
                 // Use information about the EEntityFallDamageContext provided by the context.
             });
@@ -732,7 +704,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.lerpTo(context => {
+            modifyBuilder.lerpTo(context => {
                 // Custom logic for lerping the entity's position
                 // Access information about the lerping process using the provided context.
             });
@@ -752,7 +724,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.shouldRenderAtSqrDistance(context => {
+            modifyBuilder.shouldRenderAtSqrDistance(context => {
                 // Custom logic to determine whether the entity should render
                 // Access information about the distance using the provided context.
                 return true;
@@ -772,7 +744,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.isAttackable(true);
+            modifyBuilder.isAttackable(true);
             ```
             """)
     public ModifyEntityBuilder isAttackable(boolean b) {
@@ -788,7 +760,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.playerTouch(context => {
+            modifyBuilder.playerTouch(context => {
                 // Custom logic to handle the player's touch interaction with the entity
                 // Access information about the interaction using the provided context.
             });
@@ -807,7 +779,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.move(context => {
+            modifyBuilder.move(context => {
                 // Custom logic to handle the entity's movement action
                 // Access information about the movement using the provided context.
             });
@@ -826,7 +798,7 @@ public class ModifyEntityBuilder /*extends EventJS */ {
                         
             Example usage:
             ```javascript
-            entityBuilder.tick(entity => {
+            modifyBuilder.tick(entity => {
                 // Custom logic to be executed on each tick of the entity.
                 // Access information about the entity using the provided parameter.
             });
