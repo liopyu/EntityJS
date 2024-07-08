@@ -2,6 +2,7 @@ package net.liopyu.entityjs.builders.modification;
 
 import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -64,6 +65,23 @@ public class ModifyEntityBuilder extends EventJS {
 
     }
 
+    @Info(value = """
+            Returns the current entity type's builder in string format.\s
+            \s
+            Example usage:\s
+            ```javascript
+            EntityJSEvents.modifyEntity(event => {
+                event.modify("minecraft:zombie", builder => {
+                    console.log(builder.builderType()) // Will output "ModifyPathfinderMobBuilder"
+                })
+            })
+            ```
+            """)
+    public String builderType() {
+        return "[EntityJS]: Builder for " + this.getEntityType().toString() + ": " + this.getClass().getSimpleName();
+    }
+
+    @HideFromJS
     public static ModifyEntityBuilder getOrCreate(EntityType<?> type) {
         if (!builderMap.containsKey(type)) {
             var builder = new ModifyEntityBuilder(type);
