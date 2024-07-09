@@ -44,7 +44,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             builder.removeGoal($PanicGoal)
             =====================================
             """, params = {
-            @Param(name = "goal", value = "The goal to remove")
+            @Param(name = "goal", value = "The goal class to remove")
     })
     public void removeGoal(Class<? extends Goal> goal) {
         selector.removeAllGoals(g -> goal == g.getClass());
