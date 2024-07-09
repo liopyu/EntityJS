@@ -137,7 +137,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
 
     //Some logic overrides up here because there are different implementations in the other builders.
     @Override
-    protected Brain.Provider<Allay> brainProvider() {
+    public Brain.Provider<Allay> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<Allay> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

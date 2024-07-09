@@ -1,37 +1,38 @@
 package net.liopyu.entityjs.mixin;
 
-import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
-import net.liopyu.entityjs.builders.modification.ModifyMobBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyPathfinderMobBuilder;
-import net.liopyu.entityjs.events.EntityModificationEventJS;
+import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
+import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.function.Consumer;
-
-import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
+import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
 
 @Mixin(value = PathfinderMob.class, remap = false)
-public class PathfinderMobMixin /*implements IModifyEntityJS*/ {
+public abstract class PathfinderMobMixin/*implements IModifyEntityJS*/ {
+    @Shadow
+    protected abstract void tickLeash();
+
     @Unique
     public Object entityJs$builder;
 
-   /* @Override
-    public ModifyPathfinderMobBuilder entityJs$getBuilder() {
-        return entityJs$builder instanceof ModifyPathfinderMobBuilder ? (ModifyPathfinderMobBuilder) entityJs$builder : null;
-    }*/
-
+    /* @Override
+     public ModifyPathfinderMobBuilder entityJs$getBuilder() {
+         return entityJs$builder instanceof ModifyPathfinderMobBuilder ? (ModifyPathfinderMobBuilder) entityJs$builder : null;
+     }*/
     @Unique
     private Object entityJs$entityObject = this;
 

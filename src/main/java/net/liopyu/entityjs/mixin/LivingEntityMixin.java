@@ -1,9 +1,11 @@
 package net.liopyu.entityjs.mixin;
 
-import dev.latvian.mods.kubejs.util.ConsoleJS;
-import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
+import com.mojang.serialization.Dynamic;
+import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
-import net.liopyu.entityjs.events.EntityModificationEventJS;
+import net.liopyu.entityjs.entities.living.vanilla.AllayEntityJS;
+import net.liopyu.entityjs.events.BuildBrainEventJS;
+import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -11,6 +13,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -26,7 +30,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
@@ -62,6 +65,29 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
             var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
+        }
+
+    }
+
+    private String getTypeId() {
+        return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(entityJs$getLivingEntity().getType())).toString();
+    }
+
+    @Inject(method = "brainProvider", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    public void brainProvider(CallbackInfoReturnable<Brain.Provider<?>> cir) {
+        if (EventHandlers.buildBrainProvider.hasListeners()) {
+            final BuildBrainProviderEventJS<?> event = new BuildBrainProviderEventJS<>();
+            EventHandlers.buildBrainProvider.post(event, getTypeId());
+            cir.setReturnValue(event.provide());
+        }
+    }
+
+    @Inject(method = "makeBrain", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    public void makeBrain(Dynamic<?> pDynamic, CallbackInfoReturnable<Brain<?>> cir) {
+        if (EventHandlers.buildBrain.hasListeners()) {
+            final Brain<?> brain = UtilsJS.cast(entityJs$getLivingEntity().brainProvider().makeBrain(pDynamic));
+            EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
+            cir.setReturnValue(brain);
         }
     }
 

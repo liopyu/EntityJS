@@ -14,6 +14,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -33,17 +34,18 @@ import net.minecraftforge.entity.PartEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 
 public class ContextUtils {
-    public static class BuilderContext {
-        @Info("The vehicle entity")
-        public final Entity entity;
-        @Info("The vehicle entity")
-        public final ModifyEntityBuilder builder;
+    public static class GoalContext {
+        @Info("The mob entity")
+        public final Mob entity;
+        @Info("The goal from the mob's current goal list")
+        public final Goal goal;
 
-        public BuilderContext(Entity entity, ModifyEntityBuilder builder) {
+        public GoalContext(Mob entity, Goal goal) {
             this.entity = entity;
-            this.builder = builder;
+            this.goal = goal;
         }
     }
+
 
     public static class PositionRiderContext {
         @Info("The vehicle entity")
