@@ -149,7 +149,7 @@ public class CaveSpiderEntityJS extends CaveSpider implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<?> brainProvider() {
+    public Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<CaveSpiderEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

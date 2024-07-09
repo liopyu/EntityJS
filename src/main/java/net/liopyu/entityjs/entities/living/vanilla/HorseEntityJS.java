@@ -169,7 +169,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<?> brainProvider() {
+    public Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<HorseEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

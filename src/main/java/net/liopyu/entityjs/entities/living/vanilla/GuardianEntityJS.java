@@ -151,7 +151,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<?> brainProvider() {
+    public Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<GuardianEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

@@ -172,7 +172,7 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<?> brainProvider() {
+    public Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<ParrotEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

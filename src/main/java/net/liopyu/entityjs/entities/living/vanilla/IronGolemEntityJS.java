@@ -148,7 +148,7 @@ public class IronGolemEntityJS extends IronGolem implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<?> brainProvider() {
+    public Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<IronGolemEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

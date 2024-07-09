@@ -2,7 +2,10 @@ package net.liopyu.entityjs.events;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.ai.CustomGoal;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +32,62 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
 
     public AddGoalSelectorsEventJS(T mob, GoalSelector selector) {
         super(mob, selector);
+    }
+
+    @Info(value = """
+            Remove a goal from the entity via class reference.
+                        
+            Example of usage:
+            =====================================
+            let $PanicGoal = Java.loadClass("net.minecraft.world.entity.ai.goal.PanicGoal")
+            builder.removeGoal($PanicGoal)
+            =====================================
+            """, params = {
+            @Param(name = "goal", value = "The goal class to remove")
+    })
+    public void removeGoal(Class<? extends Goal> goal) {
+        EntityJSHelperClass.removeAllGoals(g -> goal == g.getClass(), selector);
+    }
+
+    @Info(value = """
+            Remove all goals fitting the specified predicate. Returns a boolean
+                        
+            Example of usage:
+            =====================================
+            let $PanicGoal = Java.loadClass("net.minecraft.world.entity.ai.goal.PanicGoal")
+            e.removeGoals(context => {
+                const { goal, entity } = context
+                return goal.getClass() == $PanicGoal
+            })
+            =====================================
+            """, params = {
+            @Param(name = "goalFunction", value = "A function to remove goals with entity & available goals as arguments")
+    })
+    public void removeGoals(Function<ContextUtils.GoalContext, Boolean> goalFunction) {
+        EntityJSHelperClass.removeAllGoals(g -> {
+            ContextUtils.GoalContext context = new ContextUtils.GoalContext(getEntity(), g);
+            Object remove = EntityJSHelperClass.convertObjectToDesired(goalFunction.apply(context), "boolean");
+            if (remove != null) {
+                return (boolean) remove;
+            } else {
+                ConsoleJS.SERVER.error("[EntityJS]: Failed to remove goals from entity " + getEntity().getName() + ": function must return a boolean.");
+                return false;
+            }
+        }, selector);
+    }
+
+    @Info(value = """
+            Remove all goals.
+                        
+            Example of usage:
+            =====================================
+            builder.removeAllGoals()
+            =====================================
+            """, params = {
+            @Param(name = "goal", value = "The goal to remove")
+    })
+    public void removeAllGoals() {
+        selector.removeAllGoals();
     }
 
     @Info(value = """

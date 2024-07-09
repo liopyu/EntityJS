@@ -31,4 +31,8 @@ public abstract class GoalEventJS<T extends Mob> extends EventJS {
         isHorse = mob instanceof AbstractHorse;
         isNeutral = mob instanceof NeutralMob;
     }
+
+    public Mob getEntity() {
+        return this.mob;
+    }
 }

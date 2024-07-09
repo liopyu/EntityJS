@@ -4,6 +4,8 @@ import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyMobBuilder;
+import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
+import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -25,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
@@ -60,8 +63,17 @@ public class MobMixin /*implements IModifyEntityJS*/ {
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
+        if (EventHandlers.addGoalTargets.hasListeners()) {
+            EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(entityJs$getLivingEntity(), entityJs$getLivingEntity().targetSelector), getTypeId());
+        }
+        if (EventHandlers.addGoalSelectors.hasListeners()) {
+            EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(entityJs$getLivingEntity(), entityJs$getLivingEntity().goalSelector), getTypeId());
+        }
     }
 
+    private String getTypeId() {
+        return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(entityJs$getLivingEntity().getType())).toString();
+    }
 
     @Inject(method = "mobInteract", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void mobInteract(Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {

@@ -146,7 +146,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<Goat> brainProvider() {
+    public Brain.Provider<Goat> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<Goat> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

@@ -6,6 +6,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -14,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class EntityJSHelperClass {
     public static final Set<String> errorMessagesLogged = new HashSet<>();
@@ -181,4 +184,7 @@ public class EntityJSHelperClass {
         }
     }
 
+    public static void removeAllGoals(Predicate<Goal> p_262575_, GoalSelector goalSelector) {
+        goalSelector.getAvailableGoals().removeIf((p_262564_) -> p_262575_.test(p_262564_.getGoal()));
+    }
 }

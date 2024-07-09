@@ -125,7 +125,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     //Some logic overrides up here because there are different implementations in the other builders.
 
     @Override
-    protected Brain.Provider<?> brainProvider() {
+    public Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<BaseLivingEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
