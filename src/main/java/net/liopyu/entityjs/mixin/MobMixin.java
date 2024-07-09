@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyMobBuilder;
+import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
@@ -63,6 +64,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
+        if (entityJs$getLivingEntity() instanceof IAnimatableJS) return;
         if (EventHandlers.addGoalTargets.hasListeners()) {
             EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(entityJs$getLivingEntity(), entityJs$getLivingEntity().targetSelector), getTypeId());
         }
@@ -71,7 +73,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    private String getTypeId() {
+    public String getTypeId() {
         return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(entityJs$getLivingEntity().getType())).toString();
     }
 

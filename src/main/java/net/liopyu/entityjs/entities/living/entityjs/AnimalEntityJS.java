@@ -124,7 +124,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
-
     }
 
     // Part Entity Logical Overrides --------------------------------
@@ -1670,6 +1669,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return handItems;
     }
 
+
     @Override
     public ItemStack getItemBySlot(EquipmentSlot slot) {
         return switch (slot.getType()) {
@@ -1677,6 +1677,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             case ARMOR -> armorItems.get(slot.getIndex());
         };
     }
+
 
     @Override
     public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
