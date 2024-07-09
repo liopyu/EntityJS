@@ -44,12 +44,22 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
     public transient Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
+    public transient boolean noEggItem = false;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
         canJump = true;
         ambientSoundInterval = 120;
         canFireProjectileWeaponPredicate = t -> t.projectileWeapon instanceof ProjectileWeaponItem;
+        this.eggItem = new SpawnEggItemBuilder(id, this)
+                .backgroundColor(0)
+                .highlightColor(0);
+    }
+
+    @Info(value = "Indicates that no egg item should be created for this entity type")
+    public MobBuilder<T> noEggItem() {
+        this.noEggItem = true;
+        return this;
     }
 
     @Info(value = "Creates a spawn egg item for this entity type")
@@ -63,9 +73,8 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     @HideFromJS
     @Override
     public void createAdditionalObjects() {
-        if (eggItem != null) {
-            RegistryInfo.ITEM.addBuilder(eggItem);
-        }
+        if (noEggItem) return;
+        RegistryInfo.ITEM.addBuilder(eggItem);
     }
 
     @Info(value = """
