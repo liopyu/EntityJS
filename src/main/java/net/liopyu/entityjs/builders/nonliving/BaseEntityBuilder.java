@@ -101,7 +101,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         height = 1;
         summonable = true;
         save = true;
-        immuneTo = ResourceLocation.parse[0];
+        //immuneTo = ResourceLocation.parse[0];
         fireImmune = false;
         spawnFarFromPlayer = false;
         clientTrackingRange = 5;
@@ -1423,7 +1423,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**
-     * A wrapper around {@link software.bernie.geckolib.core.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
+     * A wrapper around {@link software.bernie.geckolib.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
      * that is easier to work with in js
      */
     @FunctionalInterface

@@ -29,7 +29,7 @@ public class EntityJSMod {
         RegistryUtil.init(modBus);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            ClientEventHandlers.init();
+            ClientEventHandlers.init(modBus);
         }
     }
 

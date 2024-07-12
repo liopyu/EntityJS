@@ -1,10 +1,8 @@
 package net.liopyu.entityjs.builders.nonliving;
 
 import dev.latvian.mods.kubejs.registry.BuilderBase;
-import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
-import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
@@ -1080,10 +1078,6 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         return this;
     }
 
-    @Override
-    public RegistryInfo getRegistryType() {
-        return RegistryInfo.ENTITY_TYPE;
-    }
 
     @HideFromJS
     abstract public EntityType.EntityFactory<T> factory();

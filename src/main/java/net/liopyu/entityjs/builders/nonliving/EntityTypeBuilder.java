@@ -1,12 +1,13 @@
 package net.liopyu.entityjs.builders.nonliving;
 
+import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 
 
 public class EntityTypeBuilder<B extends Entity & IAnimatableJSNL> {
@@ -37,14 +38,14 @@ public class EntityTypeBuilder<B extends Entity & IAnimatableJSNL> {
         if (js.immuneTo.length > 0) {
             final Block[] blocks = new Block[js.immuneTo.length];
             for (int i = 0; i < js.immuneTo.length; i++) {
-                blocks[i] = ForgeRegistries.BLOCKS.getValue(js.immuneTo[i]);
+                blocks[i] = BuiltInRegistries.BLOCK.get(js.immuneTo[i]);
             }
             builder.immuneTo(blocks);
         }
         if (!js.summonable) {
             builder.noSummon();
         }
-        return UtilsJS.cast(builder.build(js.id.toString())); // If this fails, uh... do better?
+        return Cast.to(builder.build(js.id.toString())); // If this fails, uh... do better?
     }
 
 }

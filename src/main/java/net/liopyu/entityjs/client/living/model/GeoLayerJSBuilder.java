@@ -89,7 +89,7 @@ public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
         textureResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {

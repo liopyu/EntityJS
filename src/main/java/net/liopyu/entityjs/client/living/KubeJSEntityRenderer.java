@@ -23,7 +23,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import software.bernie.geckolib.util.RenderUtils;
+import software.bernie.geckolib.util.RenderUtil;
 
 import javax.annotation.Nullable;
 
@@ -114,7 +114,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
             poseStack.mulPose(Axis.YP.rotationDegrees(((float) animatable.tickCount + partialTick) * -75.0F));
         } else if (pose == Pose.SLEEPING) {
             Direction bedOrientation = animatable.getBedOrientation();
-            poseStack.mulPose(Axis.YP.rotationDegrees(bedOrientation != null ? RenderUtils.getDirectionAngle(bedOrientation) : rotationYaw));
+            poseStack.mulPose(Axis.YP.rotationDegrees(bedOrientation != null ? RenderUtil.getDirectionAngle(bedOrientation) : rotationYaw));
             poseStack.mulPose(Axis.ZP.rotationDegrees(this.getDeathMaxRotation(animatable)));
             poseStack.mulPose(Axis.YP.rotationDegrees(270.0F));
         } else if (animatable.hasCustomName() || animatable instanceof Player) {

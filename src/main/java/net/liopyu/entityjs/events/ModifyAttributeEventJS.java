@@ -1,22 +1,23 @@
 package net.liopyu.entityjs.events;
 
-import dev.latvian.mods.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class ModifyAttributeEventJS extends EventJS {
+public class ModifyAttributeEventJS implements KubeEvent {
 
     private final EntityAttributeModificationEvent event;
 
@@ -41,7 +42,7 @@ public class ModifyAttributeEventJS extends EventJS {
     @Info(value = "Returns a list of all attributes the given entity type has by default")
     public List<Attribute> getAttributes(EntityType<? extends LivingEntity> entityType) {
         final List<Attribute> present = new ArrayList<>();
-        for (Attribute attribute : ForgeRegistries.ATTRIBUTES.getValues()) {
+        for (Attribute attribute : BuiltInRegistries.ATTRIBUTE.getValues()) {
             if (event.has(entityType, attribute)) {
                 present.add(attribute);
             }

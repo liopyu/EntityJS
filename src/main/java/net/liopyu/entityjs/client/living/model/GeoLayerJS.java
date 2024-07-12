@@ -15,6 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
+import java.awt.*;
 import java.util.function.Function;
 
 public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRenderLayer<T> {
@@ -66,7 +67,7 @@ public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRende
             super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTicks, packedLightIn, packedOverlay);
         } else {
             RenderType renderLayer = RenderType.entityCutoutNoCull(getTextureResource(animatable));
-            getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, packedLightIn, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+            getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, packedLightIn, OverlayTexture.NO_OVERLAY, Color.OPAQUE);
         }
     }
 }

@@ -1,13 +1,12 @@
 package net.liopyu.entityjs.events;
 
-import dev.latvian.mods.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
-import net.minecraft.world.entity.animal.allay.Allay;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,7 @@ import java.util.List;
                 
         This is only posted for entities made through a builder
         """)
-public class BuildBrainProviderEventJS<T extends LivingEntity> extends EventJS {
+public class BuildBrainProviderEventJS<T extends LivingEntity> implements KubeEvent {
 
     private final List<MemoryModuleType<?>> memories;
     private final List<SensorType<? extends Sensor<? super LivingEntity>>> sensors;

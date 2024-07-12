@@ -1,6 +1,6 @@
 package net.liopyu.entityjs.events;
 
-import dev.latvian.mods.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.event.KubeEvent;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.PathfinderMob;
@@ -10,7 +10,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 
-public abstract class GoalEventJS<T extends Mob> extends EventJS {
+public abstract class GoalEventJS<T extends Mob> implements KubeEvent {
 
     protected final T mob;
     protected final GoalSelector selector;
