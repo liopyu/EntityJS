@@ -1,11 +1,11 @@
 package net.liopyu.entityjs.builders.nonliving.entityjs;
 
-import dev.latvian.mods.kubejs.registry.RegistryInfo;
-import dev.latvian.mods.kubejs.typings.Generics;
+import dev.latvian.mods.kubejs.registry.AdditionalObjectRegistry;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileEntityJS;
 import net.liopyu.entityjs.item.ProjectileItemBuilder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -42,7 +42,6 @@ public class ProjectileEntityJSBuilder extends ProjectileEntityBuilder<Projectil
     }
 
     @Info(value = "Creates the arrow item for this entity type")
-    @Generics(value = BaseEntityBuilder.class)
     public ProjectileEntityJSBuilder item(Consumer<ProjectileItemBuilder> item) {
 
         this.item = new ProjectileItemBuilder(id, this);
@@ -52,9 +51,9 @@ public class ProjectileEntityJSBuilder extends ProjectileEntityBuilder<Projectil
     }
 
     @Override
-    public void createAdditionalObjects() {
+    public void createAdditionalObjects(AdditionalObjectRegistry registry) {
         if (!noItem) {
-            RegistryInfo.ITEM.addBuilder(item);
+            registry.add(Registries.ITEM, item);
         }
     }
 }

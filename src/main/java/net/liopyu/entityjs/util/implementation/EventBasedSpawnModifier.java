@@ -1,7 +1,7 @@
 package net.liopyu.entityjs.util.implementation;
 
 import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.EventHandlers;
@@ -12,9 +12,9 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraftforge.common.world.BiomeModifier;
-import net.minecraftforge.common.world.MobSpawnSettingsBuilder;
-import net.minecraftforge.common.world.ModifiableBiomeInfo;
+import net.neoforged.neoforge.common.world.BiomeModifier;
+import net.neoforged.neoforge.common.world.MobSpawnSettingsBuilder;
+import net.neoforged.neoforge.common.world.ModifiableBiomeInfo;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -102,7 +102,7 @@ public class EventBasedSpawnModifier implements BiomeModifier {
     }
 
     @Override
-    public Codec<? extends BiomeModifier> codec() {
+    public MapCodec<? extends BiomeModifier> codec() {
         return RegistryUtil.EVENT_SPAWN_MODIFIER.get();
     }
 

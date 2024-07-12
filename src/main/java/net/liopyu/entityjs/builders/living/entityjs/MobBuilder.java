@@ -1,7 +1,6 @@
 package net.liopyu.entityjs.builders.living.entityjs;
 
-import dev.latvian.mods.kubejs.registry.RegistryInfo;
-import dev.latvian.mods.kubejs.typings.Generics;
+import dev.latvian.mods.kubejs.registry.AdditionalObjectRegistry;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
@@ -9,6 +8,7 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -53,7 +53,6 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     }
 
     @Info(value = "Creates a spawn egg item for this entity type")
-    @Generics(value = {Mob.class, SpawnEggItemBuilder.class})
     public MobBuilder<T> eggItem(Consumer<SpawnEggItemBuilder> eggItem) {
         this.eggItem = new SpawnEggItemBuilder(id, this);
         eggItem.accept(this.eggItem);
@@ -62,9 +61,9 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @HideFromJS
     @Override
-    public void createAdditionalObjects() {
+    public void createAdditionalObjects(AdditionalObjectRegistry registry) {
         if (eggItem != null) {
-            RegistryInfo.ITEM.addBuilder(eggItem);
+            registry.add(Registries.ITEM, eggItem);
         }
     }
 

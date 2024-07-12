@@ -1,7 +1,6 @@
 package net.liopyu.entityjs.builders.living;
 
 import dev.latvian.mods.kubejs.registry.BuilderBase;
-import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.script.ConsoleJS;
@@ -164,7 +163,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
     public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
     public transient Consumer<ContextUtils.RenderContext<T>> render;
-    public transient MobType mobType;
     public transient Function<LivingEntity, Object> isFreezing;
     public transient Function<ContextUtils.CollidingEntityContext, Object> canCollideWith;
     public transient Boolean defaultDeathPose;
@@ -191,7 +189,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         height = 1;
         summonable = true;
         save = true;
-        immuneTo = ResourceLocation.parse[0];
+        //immuneTo = ResourceLocation.parse[0];
         fireImmune = false;
         spawnFarFromPlayer = false;
         clientTrackingRange = 5;
@@ -209,7 +207,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         canBreatheUnderwater = false;
         renderType = RenderType.CUTOUT;
         mainArm = HumanoidArm.RIGHT;
-        mobType = MobType.UNDEFINED;
         defaultDeathPose = true;
         canSteer = true;
         mountJumpingEnabled = true;
@@ -436,45 +433,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Defines the Mob's Type
-            Examples: 'undead', 'water', 'arthropod', 'undefined', 'illager'
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.mobType('undead');
-            ```
-            """)
-    public BaseLivingEntityBuilder<T> mobType(Object mt) {
-        if (mt instanceof String string) {
-            switch (string.toLowerCase()) {
-                case "undead":
-                    this.mobType = MobType.UNDEAD;
-                    break;
-                case "arthropod":
-                    this.mobType = MobType.ARTHROPOD;
-                    break;
-                case "undefined":
-                    this.mobType = MobType.UNDEFINED;
-                    break;
-                case "illager":
-                    this.mobType = MobType.ILLAGER;
-                    break;
-                case "water":
-                    this.mobType = MobType.WATER;
-                    break;
-                default:
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mobType: " + mt + ". Example: \"undead\"");
-                    break;
-            }
-        } else if (mt instanceof MobType type) {
-            this.mobType = type;
-        } else
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for mobType: " + mt + ". Example: \"undead\"");
-
-        return this;
-    }
-
-    @Info(value = """
             Defines in what condition the entity will start freezing.
                         
             Example usage:
@@ -620,7 +578,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> immuneTo(String... blockNames) {
         this.immuneTo = Arrays.stream(blockNames)
-                .map(ResourceLocation::new)
+                .map(ResourceLocation::parse)
                 .toArray(ResourceLocation[]::new);
         return this;
     }
@@ -1067,7 +1025,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         } else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.splash\"");
 
-            setSwimSplashSound = ResourceLocation.parse("minecraft", "entity/generic/splash");
+            setSwimSplashSound = ResourceLocation.parse("minecraft:entity/generic/splash");
         }
         return this;
     }
@@ -1628,7 +1586,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             this.smallFallSound = (ResourceLocation) smallFallSound;
         } else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for smallFallSound. Value: " + smallFallSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.small_fall\"");
-            this.smallFallSound = ResourceLocation.parse("minecraft", "entity/generic/small_fall");
+            this.smallFallSound = ResourceLocation.parse("minecraft:entity/generic/small_fall");
         }
 
         if (largeFallSound instanceof String) {
@@ -1637,7 +1595,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             this.largeFallSound = (ResourceLocation) largeFallSound;
         } else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for largeFallSound. Value: " + largeFallSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.large_fall\"");
-            this.largeFallSound = ResourceLocation.parse("minecraft", "entity/generic/large_fall");
+            this.largeFallSound = ResourceLocation.parse("minecraft:entity/generic/large_fall");
         }
 
         return this;
@@ -1659,7 +1617,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             this.eatingSound = (ResourceLocation) sound;
         } else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
-            this.eatingSound = ResourceLocation.parse("minecraft", "entity/zombie/ambient");
+            this.eatingSound = ResourceLocation.parse("minecraft:entity/zombie/ambient");
         }
         return this;
     }
@@ -2411,7 +2369,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             @Param(name = "heightMap", value = "The height map used for the spawner"),
             @Param(name = "spawnPredicate", value = "The predicate that determines if the entity will spawn")
     })
-    public BaseLivingEntityBuilder<T> spawnPlacement(SpawnPlacements.Type placementType, Heightmap.Types heightMap, SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
+    public BaseLivingEntityBuilder<T> spawnPlacement(SpawnPlacementType placementType, Heightmap.Types heightMap, SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
         spawnList.add(this);
         this.spawnPredicate = spawnPredicate;
         this.placementType = placementType;
@@ -2549,11 +2507,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @HideFromJS
     abstract public AttributeSupplier.Builder getAttributeBuilder();
 
-    @HideFromJS
-    @Override
-    public RegistryInfo getRegistryType() {
-        return RegistryInfo.ENTITY_TYPE;
-    }
 
     /**
      * A 'supplier' for an {@link AnimationController} that does not require a reference to the entity being animated
@@ -2627,7 +2580,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**
-     * A wrapper around {@link software.bernie.geckolib.core.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
+     * A wrapper around {@link software.bernie.geckolib.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
      * that is easier to work with in js
      */
     @FunctionalInterface

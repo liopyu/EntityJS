@@ -1,13 +1,13 @@
 package net.liopyu.entityjs.builders.nonliving.vanilla;
 
-import dev.latvian.mods.kubejs.registry.RegistryInfo;
-import dev.latvian.mods.kubejs.typings.Generics;
+import dev.latvian.mods.kubejs.registry.AdditionalObjectRegistry;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.NonAnimatableEntityTypeBuilder;
 import net.liopyu.entityjs.entities.nonliving.vanilla.EyeOfEnderEntityJS;
 import net.liopyu.entityjs.item.EyeOfEnderItemBuilder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -57,7 +57,6 @@ public class EyeOfEnderJSBuilder extends EyeOfEnderEntityBuilder<EyeOfEnderEntit
     }
 
     @Info(value = "Creates the item for this entity type")
-    @Generics(value = BaseEntityBuilder.class)
     public EyeOfEnderJSBuilder item(Consumer<EyeOfEnderItemBuilder> item) {
         this.item = new EyeOfEnderItemBuilder(id, this);
         item.accept(this.item);
@@ -70,9 +69,9 @@ public class EyeOfEnderJSBuilder extends EyeOfEnderEntityBuilder<EyeOfEnderEntit
     }
 
     @Override
-    public void createAdditionalObjects() {
+    public void createAdditionalObjects(AdditionalObjectRegistry registry) {
         if (!noItem) {
-            RegistryInfo.ITEM.addBuilder(item);
+            registry.add(Registries.ITEM, item);
         }
     }
 }

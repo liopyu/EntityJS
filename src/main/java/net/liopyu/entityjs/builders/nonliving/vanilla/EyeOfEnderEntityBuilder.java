@@ -99,7 +99,7 @@ public abstract class EyeOfEnderEntityBuilder<T extends Entity & IProjectileEnti
         textureLocation = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {

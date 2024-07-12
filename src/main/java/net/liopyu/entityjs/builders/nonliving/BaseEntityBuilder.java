@@ -1,33 +1,29 @@
 package net.liopyu.entityjs.builders.nonliving;
 
 import dev.latvian.mods.kubejs.registry.BuilderBase;
-import dev.latvian.mods.kubejs.registry.RegistryInfo;
+import dev.latvian.mods.kubejs.script.ConsoleJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animation.Animation;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.AnimationState;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.keyframe.event.CustomInstructionKeyframeEvent;
-import software.bernie.geckolib.core.keyframe.event.KeyFrameEvent;
-import software.bernie.geckolib.core.keyframe.event.ParticleKeyframeEvent;
-import software.bernie.geckolib.core.keyframe.event.SoundKeyframeEvent;
-import software.bernie.geckolib.core.keyframe.event.data.KeyFrameData;
-import software.bernie.geckolib.core.object.DataTicket;
-import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.animation.*;
+import software.bernie.geckolib.animation.keyframe.event.CustomInstructionKeyframeEvent;
+import software.bernie.geckolib.animation.keyframe.event.KeyFrameEvent;
+import software.bernie.geckolib.animation.keyframe.event.ParticleKeyframeEvent;
+import software.bernie.geckolib.animation.keyframe.event.SoundKeyframeEvent;
+import software.bernie.geckolib.animation.keyframe.event.data.KeyFrameData;
+import software.bernie.geckolib.constant.dataticket.DataTicket;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,7 +101,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         height = 1;
         summonable = true;
         save = true;
-        immuneTo = new ResourceLocation[0];
+        immuneTo = ResourceLocation.parse[0];
         fireImmune = false;
         spawnFarFromPlayer = false;
         clientTrackingRange = 5;
@@ -205,7 +201,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         modelResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
@@ -236,7 +232,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         textureResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
@@ -268,7 +264,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         animationResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
@@ -336,12 +332,12 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             ```
             """)
     public BaseEntityBuilder<T> setSwimSound(Object sound) {
-        if (sound instanceof String) setSwimSound = new ResourceLocation((String) sound);
+        if (sound instanceof String) setSwimSound = ResourceLocation.parse((String) sound);
         else if (sound instanceof ResourceLocation) setSwimSound = (ResourceLocation) sound;
         else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.swim\"");
 
-            setSwimSound = new ResourceLocation("minecraft:entity.generic.swim");
+            setSwimSound = ResourceLocation.parse("minecraft:entity.generic.swim");
         }
         return this;
     }
@@ -357,13 +353,13 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             """)
     public BaseEntityBuilder<T> setSwimSplashSound(Object sound) {
         if (sound instanceof String) {
-            setSwimSplashSound = new ResourceLocation((String) sound);
+            setSwimSplashSound = ResourceLocation.parse((String) sound);
         } else if (sound instanceof ResourceLocation) {
             setSwimSplashSound = (ResourceLocation) sound;
         } else {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.splash\"");
 
-            setSwimSplashSound = new ResourceLocation("minecraft", "entity/generic/splash");
+            setSwimSplashSound = ResourceLocation.fromNamespaceAndPath("minecraft", "entity/generic/splash");
         }
         return this;
     }
@@ -875,7 +871,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             """)
     public BaseEntityBuilder<T> immuneTo(String... blockNames) {
         this.immuneTo = Arrays.stream(blockNames)
-                .map(ResourceLocation::new)
+                .map(ResourceLocation::parse)
                 .toArray(ResourceLocation[]::new);
         return this;
     }
@@ -970,7 +966,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         modelResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
@@ -1027,7 +1023,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         textureResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
@@ -1059,7 +1055,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         animationResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return new ResourceLocation((String) obj);
+                return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
                 return (ResourceLocation) obj;
             } else {
@@ -1234,10 +1230,6 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         return this;
     }
 
-    @Override
-    public RegistryInfo getRegistryType() {
-        return RegistryInfo.ENTITY_TYPE;
-    }
 
     @Info(value = """
             Adds an animation controller to the entity with the specified parameters.
@@ -1471,7 +1463,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
      */
     public static class AnimationEventJS<E extends Entity & IAnimatableJSNL> {
         private final List<RawAnimation.Stage> animationList = new ObjectArrayList();
-        private final software.bernie.geckolib.core.animation.AnimationState<E> parent;
+        private final AnimationState<E> parent;
 
         public AnimationEventJS(AnimationState<E> parent) {
             this.parent = parent;

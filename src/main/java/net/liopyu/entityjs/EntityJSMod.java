@@ -1,16 +1,15 @@
 package net.liopyu.entityjs;
 
 import com.mojang.logging.LogUtils;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.client.ClientEventHandlers;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.RegistryUtil;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
 import javax.swing.text.html.parser.Entity;
@@ -23,11 +22,11 @@ public class EntityJSMod {
 
     public static final String MOD_ID = "entityjs";
 
-    public EntityJSMod() {
+    public EntityJSMod(IEventBus modBus) {
         LOGGER.info("Loading EntityJS-Liopyu");
 
         EventHandlers.init();
-        RegistryUtil.init(FMLJavaModLoadingContext.get().getModEventBus());
+        RegistryUtil.init(modBus);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ClientEventHandlers.init();
@@ -36,6 +35,6 @@ public class EntityJSMod {
 
 
     public static ResourceLocation identifier(String path) {
-        return new ResourceLocation(MOD_ID, path);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 }

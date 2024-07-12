@@ -1,19 +1,14 @@
 package net.liopyu.entityjs.entities.living.entityjs;
 
 import dev.latvian.mods.kubejs.util.Cast;
-import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import software.bernie.geckolib.GeckoLibServices;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.network.packet.EntityAnimTriggerPacket;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -45,21 +40,6 @@ public interface IAnimatableJS extends GeoAnimatable, GeoEntity {
         }
     }
 
-    /**
-     * Trigger an animation for this Entity, based on the controller name and animation name.<br>
-     * <b><u>DO NOT OVERRIDE</u></b>
-     *
-     * @param controllerName The name of the controller name the animation belongs to, or null to do an inefficient lazy search
-     * @param animName       The name of animation to trigger. This needs to have been registered with the controller via {@link AnimationController#triggerableAnim AnimationController.triggerableAnim}
-     */
-    /*default void triggerAnim(@Nullable String controllerName, String animName) {
-        Entity entity = (Entity) this;
-        if (entity.level().isClientSide()) {
-            getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
-        } else {
-            GeckoLibNetwork.send(new EntityAnimTriggerPacket<>(entity.getId(), controllerName, animName), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
-        }
-    }*/
 
     /**
      * This cannot be implemented here, the returned value should be a cached value that is initialized in the entity's constructor. See {@link BaseLivingEntityJS} for an example.<br><br>
@@ -70,23 +50,6 @@ public interface IAnimatableJS extends GeoAnimatable, GeoEntity {
      */
     AnimatableInstanceCache getAnimatableInstanceCache();
 
-    /**
-     * Trigger a client-side animation for this GeoAnimatable for the given controller name and animation name.<br>
-     * This can be fired from either the client or the server, but optimally you would call it from the server.<br>
-     * <b><u>DO NOT OVERRIDE</u></b>
-     *
-     * @param controllerName The name of the controller name the animation belongs to, or null to do an inefficient lazy search
-     * @param animName       The name of animation to trigger. This needs to have been registered with the controller via {@link AnimationController#triggerableAnim AnimationController.triggerableAnim}
-     */
-    /*default <D> void triggerAnim(@Nullable String controllerName, String animName) {
-        Entity entity = (Entity) this;
-
-        if (entity.level().isClientSide()) {
-            getAnimatableInstanceCache().getManagerForId(entity.getId()).tryTriggerAnimation(controllerName, animName);
-        } else {
-            GeckoLibServices.NETWORK.triggerEntityAnim(entity, false, controllerName, animName);
-        }
-    }*/
     default double getTick(Object entity) {
         return ((Entity) entity).tickCount;
     }
