@@ -23,8 +23,6 @@ import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
 
 @Mixin(value = PathfinderMob.class, remap = false)
 public abstract class PathfinderMobMixin/*implements IModifyEntityJS*/ {
-    @Shadow
-    protected abstract void tickLeash();
 
     @Unique
     public Object entityJs$builder;
