@@ -71,22 +71,22 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
     @Unique
-    private boolean isRemovedFromWorld = false;
+    private boolean entityJs$isRemovedFromWorld = false;
     @Unique
-    private boolean isAddedToWorld = false;
+    private boolean entityJs$isAddedToWorld = false;
 
     @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void tick(CallbackInfo ci) {
+        if (!entityJs$isAddedToWorld && !entityJs$getLivingEntity().isRemoved()) {
+            onAddedToWorld();
+            entityJs$isAddedToWorld = true;
+            entityJs$isRemovedFromWorld = false;
+        } else if (entityJs$getLivingEntity().isRemoved() && !entityJs$isRemovedFromWorld) {
+            onRemovedFromWorld();
+            entityJs$isAddedToWorld = false;
+            entityJs$isRemovedFromWorld = true;
+        }
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
-            if (!isAddedToWorld && !entityJs$getLivingEntity().isRemoved()) {
-                onAddedToWorld();
-                isAddedToWorld = true;
-                isRemovedFromWorld = false;
-            } else if (entityJs$getLivingEntity().isRemoved() && !isRemovedFromWorld) {
-                onRemovedFromWorld();
-                isAddedToWorld = false;
-                isRemovedFromWorld = true;
-            }
             if (builder.tick != null) {
                 EntityJSHelperClass.consumerCallback(builder.tick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tick.");
             }
@@ -105,19 +105,19 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
 
     @Unique
     public void onAddedToWorld() {
+        if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
+            if (entityJs$getLivingEntity() instanceof Mob mob) {
+                if (EventHandlers.addGoalTargets.hasListeners()) {
+                    EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(mob, mob.targetSelector), entityJs$getTypeId());
+                }
+                if (EventHandlers.addGoalSelectors.hasListeners()) {
+                    EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(mob, mob.goalSelector), entityJs$getTypeId());
+                }
+            }
+        }
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.onAddedToWorld != null && !entityJs$getLivingEntity().level().isClientSide()) {
                 EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onAddedToWorld.");
-            }
-        }
-        if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
-            if (entityJs$getLivingEntity() instanceof Mob m) {
-                if (EventHandlers.addGoalTargets.hasListeners()) {
-                    EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(m, m.targetSelector), entityJs$getTypeId());
-                }
-                if (EventHandlers.addGoalSelectors.hasListeners()) {
-                    EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(m, m.goalSelector), entityJs$getTypeId());
-                }
             }
         }
     }

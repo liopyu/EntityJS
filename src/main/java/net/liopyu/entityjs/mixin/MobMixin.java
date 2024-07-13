@@ -66,7 +66,6 @@ public class MobMixin /*implements IModifyEntityJS*/ {
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
-
     }
 
 
