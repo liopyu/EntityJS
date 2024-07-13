@@ -144,7 +144,7 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<Camel> brainProvider() {
+    public Brain.Provider<Camel> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<Camel> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

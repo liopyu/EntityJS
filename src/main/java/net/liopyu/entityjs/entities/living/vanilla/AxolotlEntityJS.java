@@ -168,7 +168,7 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
 
     //Some logic overrides up here because there are different implementations in the other builders.
     @Override
-    protected Brain.Provider<Axolotl> brainProvider() {
+    public Brain.Provider<Axolotl> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<Axolotl> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

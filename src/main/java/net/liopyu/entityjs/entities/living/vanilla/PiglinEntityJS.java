@@ -216,7 +216,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<Piglin> brainProvider() {
+    public Brain.Provider<Piglin> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<Piglin> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
