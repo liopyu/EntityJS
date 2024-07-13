@@ -67,22 +67,22 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
     @Unique
-    private boolean isRemovedFromWorld = false;
+    private boolean entityJs$isRemovedFromWorld = false;
     @Unique
-    private boolean isAddedToWorld = false;
+    private boolean entityJs$isAddedToWorld = false;
 
     @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void tick(CallbackInfo ci) {
+        if (!entityJs$isAddedToWorld && !entityJs$getLivingEntity().isRemoved()) {
+            onAddedToWorld();
+            entityJs$isAddedToWorld = true;
+            entityJs$isRemovedFromWorld = false;
+        } else if (entityJs$getLivingEntity().isRemoved() && !entityJs$isRemovedFromWorld) {
+            onRemovedFromWorld();
+            entityJs$isAddedToWorld = false;
+            entityJs$isRemovedFromWorld = true;
+        }
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
-            if (!isAddedToWorld && !entityJs$getLivingEntity().isRemoved()) {
-                onAddedToWorld();
-                isAddedToWorld = true;
-                isRemovedFromWorld = false;
-            } else if (entityJs$getLivingEntity().isRemoved() && !isRemovedFromWorld) {
-                onRemovedFromWorld();
-                isAddedToWorld = false;
-                isRemovedFromWorld = true;
-            }
             if (builder.tick != null) {
                 EntityJSHelperClass.consumerCallback(builder.tick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tick.");
             }
