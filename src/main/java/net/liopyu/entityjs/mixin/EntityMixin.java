@@ -33,19 +33,9 @@ import java.util.function.Consumer;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = Entity.class, remap = false)
-public class EntityMixin/*implements IModifyEntityJS*/ {
+public class EntityMixin {
     @Unique
     private Object entityJs$builder;
-
-    /*@Override
-    public ModifyEntityBuilder entityJs$getBuilder() {
-        Object obj = getOrCreate(entityJs$getLivingEntity().getType(), entityJs$getLivingEntity()).getBuilder();
-        if (obj instanceof ModifyEntityBuilder builder) {
-            return builder;
-        }
-        return entityJs$builder instanceof ModifyEntityBuilder ? (ModifyEntityBuilder) entityJs$builder : null;
-    }*/
-
     @Unique
     private Object entityJs$entityObject = this;
 
@@ -71,11 +61,42 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
     @Unique
-    private boolean entityJs$isRemovedFromWorld = false;
+    public boolean entityJs$isRemovedFromWorld = false;
     @Unique
-    private boolean entityJs$isAddedToWorld = false;
+    public boolean entityJs$isAddedToWorld = false;
 
-    @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+
+    @Unique
+    public void onRemovedFromWorld() {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.onRemovedFromWorld != null) {
+                EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onRemovedFromWorld.");
+            }
+        }
+    }
+
+    @Unique
+    public void onAddedToWorld() {
+        /*if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
+            if (entityJs$getLivingEntity() instanceof Mob mob) {
+                ConsoleJS.STARTUP.info("shouldfire");
+                if (EventHandlers.addGoalTargets.hasListeners()) {
+                    EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(mob, mob.targetSelector), entityJs$getTypeId());
+                }
+                if (EventHandlers.addGoalSelectors.hasListeners()) {
+                    EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(mob, mob.goalSelector), entityJs$getTypeId());
+                }
+            }
+        }*/
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.onAddedToWorld != null && !entityJs$getLivingEntity().level().isClientSide()) {
+                EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onAddedToWorld.");
+            }
+        }
+    }
+
+
+    @Inject(method = "tick", at = @At("TAIL"))
     public void tick(CallbackInfo ci) {
         if (!entityJs$isAddedToWorld && !entityJs$getLivingEntity().isRemoved()) {
             onAddedToWorld();
@@ -92,39 +113,6 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
             }
         }
 
-    }
-
-    @Unique
-    public void onRemovedFromWorld() {
-        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
-            if (builder.onRemovedFromWorld != null) {
-                EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onRemovedFromWorld.");
-            }
-        }
-    }
-
-    @Unique
-    public void onAddedToWorld() {
-        if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
-            if (entityJs$getLivingEntity() instanceof Mob mob) {
-                if (EventHandlers.addGoalTargets.hasListeners()) {
-                    EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(mob, mob.targetSelector), entityJs$getTypeId());
-                }
-                if (EventHandlers.addGoalSelectors.hasListeners()) {
-                    EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(mob, mob.goalSelector), entityJs$getTypeId());
-                }
-            }
-        }
-        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
-            if (builder.onAddedToWorld != null && !entityJs$getLivingEntity().level().isClientSide()) {
-                EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onAddedToWorld.");
-            }
-        }
-    }
-
-    @Unique
-    public String entityJs$getTypeId() {
-        return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.getKey(entityJs$getLivingEntity().getType())).toString();
     }
 
     @Inject(method = "getMyRidingOffset", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
