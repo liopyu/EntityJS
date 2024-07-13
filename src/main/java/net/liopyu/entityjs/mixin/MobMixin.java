@@ -66,17 +66,6 @@ public class MobMixin /*implements IModifyEntityJS*/ {
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
-        if (entityJs$getLivingEntity() instanceof IAnimatableJS) return;
-        if (EventHandlers.addGoalTargets.hasListeners()) {
-            EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(entityJs$getLivingEntity(), entityJs$getLivingEntity().targetSelector), getTypeId());
-        }
-        if (EventHandlers.addGoalSelectors.hasListeners()) {
-            EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(entityJs$getLivingEntity(), entityJs$getLivingEntity().goalSelector), getTypeId());
-        }
-    }
-
-    public String getTypeId() {
-        return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(entityJs$getLivingEntity().getType())).toString();
     }
 
     @Inject(method = "getControllingPassenger", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
