@@ -105,24 +105,25 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
 
     @Unique
     public void onAddedToWorld() {
-        if (entityJs$getLivingEntity() instanceof IAnimatableJS) return;
-        if (entityJs$getLivingEntity() instanceof Mob m) {
-            if (EventHandlers.addGoalTargets.hasListeners()) {
-                EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(m, m.targetSelector), getTypeId());
-            }
-            if (EventHandlers.addGoalSelectors.hasListeners()) {
-                EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(m, m.goalSelector), getTypeId());
-            }
-        }
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.onAddedToWorld != null && !entityJs$getLivingEntity().level().isClientSide()) {
                 EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onAddedToWorld.");
             }
         }
+        if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
+            if (entityJs$getLivingEntity() instanceof Mob m) {
+                if (EventHandlers.addGoalTargets.hasListeners()) {
+                    EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(m, m.targetSelector), entityJs$getTypeId());
+                }
+                if (EventHandlers.addGoalSelectors.hasListeners()) {
+                    EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(m, m.goalSelector), entityJs$getTypeId());
+                }
+            }
+        }
     }
 
     @Unique
-    public String getTypeId() {
+    public String entityJs$getTypeId() {
         return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.getKey(entityJs$getLivingEntity().getType())).toString();
     }
 
