@@ -2,6 +2,9 @@ package net.liopyu.entityjs.mixin;
 
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
+import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
+import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -152,11 +155,25 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
 
     @Inject(method = "onAddedToWorld", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void onAddedToWorld(CallbackInfo ci) {
+        if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
+            if (entityJs$getLivingEntity() instanceof Mob m) {
+                if (EventHandlers.addGoalTargets.hasListeners()) {
+                    EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(m, m.targetSelector), entityJs$getTypeId());
+                }
+                if (EventHandlers.addGoalSelectors.hasListeners()) {
+                    EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(m, m.goalSelector), entityJs$getTypeId());
+                }
+            }
+        }
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.onAddedToWorld != null && !entityJs$getLivingEntity().level.isClientSide()) {
                 EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onAddedToWorld.");
             }
         }
+    }
+
+    public String entityJs$getTypeId() {
+        return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(entityJs$getLivingEntity().getType())).toString();
     }
 
     @Inject(method = "setSprinting", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)

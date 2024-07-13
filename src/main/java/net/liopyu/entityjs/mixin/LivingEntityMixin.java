@@ -70,7 +70,8 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    private String getTypeId() {
+    @Unique
+    public String entityJs$getTypeId() {
         return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(entityJs$getLivingEntity().getType())).toString();
     }
 
@@ -78,7 +79,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     public void brainProvider(CallbackInfoReturnable<Brain.Provider<?>> cir) {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<?> event = new BuildBrainProviderEventJS<>();
-            EventHandlers.buildBrainProvider.post(event, getTypeId());
+            EventHandlers.buildBrainProvider.post(event, entityJs$getTypeId());
             cir.setReturnValue(event.provide());
         }
     }
@@ -87,7 +88,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     public void makeBrain(Dynamic<?> pDynamic, CallbackInfoReturnable<Brain<?>> cir) {
         if (EventHandlers.buildBrain.hasListeners()) {
             final Brain<?> brain = UtilsJS.cast(entityJs$getLivingEntity().brainProvider().makeBrain(pDynamic));
-            EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
+            EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), entityJs$getTypeId());
             cir.setReturnValue(brain);
         }
     }
@@ -278,6 +279,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     @Inject(method = "getStandingEyeHeight", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     private void entityjs$getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions, CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
+            if (builder.setStandingEyeHeight == null) return;
             final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, entityJs$getLivingEntity());
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
             if (obj != null) {
