@@ -101,7 +101,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
 
     @Unique
     public void onAddedToWorld() {
-        if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
+        /*if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
             if (entityJs$getLivingEntity() instanceof Mob mob) {
                 if (EventHandlers.addGoalTargets.hasListeners()) {
                     EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(mob, mob.targetSelector), entityJs$getTypeId());
@@ -110,7 +110,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
                     EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(mob, mob.goalSelector), entityJs$getTypeId());
                 }
             }
-        }
+        }*/
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.onAddedToWorld != null && !entityJs$getLivingEntity().level.isClientSide()) {
                 EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onAddedToWorld.");
@@ -118,10 +118,10 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Unique
+    /*@Unique
     public String entityJs$getTypeId() {
         return Objects.requireNonNull(EntityType.getKey(entityJs$getLivingEntity().getType())).toString();
-    }
+    }*/
 
     @Inject(method = "getMyRidingOffset", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
     public void getMyRidingOffset(CallbackInfoReturnable<Double> cir) {

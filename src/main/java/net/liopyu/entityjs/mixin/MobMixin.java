@@ -66,7 +66,19 @@ public class MobMixin /*implements IModifyEntityJS*/ {
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
+        if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
+            if (EventHandlers.addGoalTargets.hasListeners()) {
+                EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(entityJs$getLivingEntity(), entityJs$getLivingEntity().targetSelector), entityJs$getTypeId());
+            }
+            if (EventHandlers.addGoalSelectors.hasListeners()) {
+                EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(entityJs$getLivingEntity(), entityJs$getLivingEntity().goalSelector), entityJs$getTypeId());
+            }
+        }
+    }
 
+    @Unique
+    public String entityJs$getTypeId() {
+        return Objects.requireNonNull(EntityType.getKey(entityJs$getLivingEntity().getType())).toString();
     }
 
     @Inject(method = "mobInteract", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
