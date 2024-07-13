@@ -4,8 +4,11 @@
   "package": "net.liopyu.entityjs.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "EntityMixin",
     "KubeJSCommandsMixin",
+    "LivingEntityMixin",
     "MobMixin",
+    "PathfinderMobMixin",
     "ServerScriptManagerMixin"
   ],
   "client": [
