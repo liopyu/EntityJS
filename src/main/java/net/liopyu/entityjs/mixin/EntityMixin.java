@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
-@Mixin(value = Entity.class, remap = false)
+@Mixin(value = Entity.class, remap = true)
 public class EntityMixin/*implements IModifyEntityJS*/ {
     @Unique
     private Object entityJs$builder;
@@ -60,7 +60,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         return entityJs$getLivingEntity().getType().toString();
     }
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
@@ -70,17 +70,16 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void tick(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.tick != null) {
                 EntityJSHelperClass.consumerCallback(builder.tick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tick.");
             }
         }
-
     }
 
-    @Inject(method = "getMyRidingOffset", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getMyRidingOffset", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void getMyRidingOffset(CallbackInfoReturnable<Double> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.myRidingOffset == null) return;
@@ -93,7 +92,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "lerpTo", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "lerpTo", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.lerpTo != null) {
@@ -104,7 +103,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "move", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "move", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void move(MoverType pType, Vec3 pPos, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.move != null) {
@@ -114,7 +113,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "playerTouch", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "playerTouch", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void playerTouch(Player pPlayer, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (entityJs$builder != null && builder.playerTouch != null) {
@@ -133,7 +132,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "thunderHit", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "thunderHit", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void thunderHit(ServerLevel pLevel, LightningBolt pLightning, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.thunderHit != null) {
@@ -143,7 +142,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "causeFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "causeFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.onFall != null) {
@@ -176,7 +175,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         return Objects.requireNonNull(ForgeRegistries.ENTITY_TYPES.getKey(entityJs$getLivingEntity().getType())).toString();
     }
 
-    @Inject(method = "setSprinting", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "setSprinting", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void setSprinting(boolean pSprinting, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.onSprint != null) {
@@ -186,7 +185,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "stopRiding", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "stopRiding", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void stopRiding(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.onStopRiding != null) {
@@ -196,7 +195,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "rideTick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "rideTick", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void rideTick(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.rideTick != null) {
@@ -205,7 +204,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "onClientRemoval", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "onClientRemoval", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void onClientRemoval(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.onClientRemoval != null) {
@@ -215,7 +214,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "lavaHurt", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "lavaHurt", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void lavaHurt(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.lavaHurt != null) {
@@ -225,7 +224,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "onFlap", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "onFlap", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void onFlap(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.onFlap != null) {
@@ -235,7 +234,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "shouldRenderAtSqrDistance", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "shouldRenderAtSqrDistance", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void shouldRenderAtSqrDistance(double pDistance, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.shouldRenderAtSqrDistance != null) {
@@ -249,7 +248,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "isAttackable", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isAttackable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void isAttackable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isAttackable == null) return;
@@ -258,7 +257,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "getControllingPassenger", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getControllingPassenger", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void getControllingPassenger(CallbackInfoReturnable<LivingEntity> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.controlledByFirstPassenger != null) {
@@ -276,7 +275,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "canCollideWith", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canCollideWith", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void canCollideWith(Entity pEntity, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canCollideWith != null) {
@@ -291,7 +290,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "getBlockJumpFactor", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getBlockJumpFactor", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void getBlockJumpFactor(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.setBlockJumpFactor == null) return;
@@ -303,7 +302,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "isPushable", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isPushable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void isPushable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isPushable == null) return;
@@ -311,7 +310,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getBlockSpeedFactor", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getBlockSpeedFactor", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void getBlockSpeedFactor(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.blockSpeedFactor == null) return;
@@ -324,7 +323,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "positionRider(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity$MoveFunction;)V", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "positionRider(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity$MoveFunction;)V", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void positionRider(Entity pPassenger, Entity.MoveFunction pCallback, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.positionRider != null) {
@@ -335,7 +334,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "canAddPassenger", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canAddPassenger", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void canAddPassenger(Entity pPassenger, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canAddPassenger == null) {
@@ -352,7 +351,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "isFlapping", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isFlapping", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void isFlapping(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isFlapping != null) {
@@ -366,7 +365,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "repositionEntityAfterLoad", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "repositionEntityAfterLoad", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void repositionEntityAfterLoad(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.repositionEntityAfterLoad == null) return;
@@ -375,7 +374,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "getSwimSplashSound", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getSwimSplashSound", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void getSwimSplashSound(CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.setSwimSplashSound == null) return;
@@ -385,7 +384,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "getSwimSound", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getSwimSound", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void getSwimSound(CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.setSwimSound == null) return;
@@ -395,7 +394,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "canFreeze", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canFreeze", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void canFreeze(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canFreeze != null) {
@@ -409,7 +408,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "isFreezing", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isFreezing", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void isFreezing(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isFreezing != null) {
@@ -423,7 +422,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "isCurrentlyGlowing", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isCurrentlyGlowing", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (entityJs$builder != null && builder.isCurrentlyGlowing != null && !entityJs$getLivingEntity().level.isClientSide()) {
@@ -437,7 +436,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "dampensVibrations", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "dampensVibrations", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void dampensVibrations(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.dampensVibrations != null) {
@@ -450,7 +449,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "showVehicleHealth", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "showVehicleHealth", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void showVehicleHealth(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.showVehicleHealth != null) {
@@ -464,7 +463,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "isInvulnerableTo", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isInvulnerableTo", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void isInvulnerableTo(DamageSource pSource, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isInvulnerableTo != null) {
@@ -479,7 +478,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "canChangeDimensions", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canChangeDimensions", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void canChangeDimensions(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canChangeDimensions != null) {
@@ -493,7 +492,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "mayInteract", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "mayInteract", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void mayInteract(Level pLevel, BlockPos pPos, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.mayInteract != null) {
@@ -522,7 +521,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getMaxFallDistance", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getMaxFallDistance", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void getMaxFallDistance(CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.setMaxFallDistance == null) return;
