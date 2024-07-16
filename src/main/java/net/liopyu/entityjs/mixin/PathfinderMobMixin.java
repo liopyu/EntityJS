@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
 
-@Mixin(value = PathfinderMob.class, remap = false)
+@Mixin(value = PathfinderMob.class, remap = true)
 public abstract class PathfinderMobMixin/*implements IModifyEntityJS*/ {
 
     @Unique
@@ -44,7 +44,7 @@ public abstract class PathfinderMobMixin/*implements IModifyEntityJS*/ {
         return entityJs$getLivingEntity().getType().toString();
     }
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onMobInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
@@ -54,7 +54,7 @@ public abstract class PathfinderMobMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getWalkTargetValue(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/LevelReader;)F", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getWalkTargetValue(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/LevelReader;)F", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void getWalkTargetValue(BlockPos pPos, LevelReader pLevel, CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyPathfinderMobBuilder builder) {
             if (builder.walkTargetValue == null) return;
@@ -68,7 +68,7 @@ public abstract class PathfinderMobMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "shouldStayCloseToLeashHolder", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "shouldStayCloseToLeashHolder", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void shouldStayCloseToLeashHolder(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyPathfinderMobBuilder builder) {
             if (builder.shouldStayCloseToLeashHolder == null) return;
@@ -81,7 +81,7 @@ public abstract class PathfinderMobMixin/*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "followLeashSpeed", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "followLeashSpeed", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void followLeashSpeed(CallbackInfoReturnable<Double> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyPathfinderMobBuilder builder) {
             if (builder.followLeashSpeed == null) return;
