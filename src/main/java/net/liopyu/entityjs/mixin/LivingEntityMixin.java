@@ -33,7 +33,7 @@ import java.util.Objects;
 
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
-@Mixin(value = LivingEntity.class, remap = false)
+@Mixin(value = LivingEntity.class, remap = true)
 public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
 
     @Unique
@@ -74,7 +74,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.getKey(entityJs$getLivingEntity().getType())).toString();
     }
 
-    @Inject(method = "brainProvider", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "brainProvider", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void brainProvider(CallbackInfoReturnable<Brain.Provider<?>> cir) {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<?> event = new BuildBrainProviderEventJS<>();
@@ -83,7 +83,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "makeBrain", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "makeBrain", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void makeBrain(Dynamic<?> pDynamic, CallbackInfoReturnable<Brain<?>> cir) {
         if (EventHandlers.buildBrain.hasListeners()) {
             final Brain<?> brain = UtilsJS.cast(entityJs$getLivingEntity().brainProvider().makeBrain(pDynamic));
@@ -92,7 +92,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getMobType", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getMobType", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void getMobType(CallbackInfoReturnable<MobType> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.mobType != null) {
@@ -101,7 +101,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "tickDeath", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "tickDeath", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void tickDeath(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.tickDeath != null) {
@@ -110,7 +110,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "aiStep", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "aiStep", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$aiStep(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.aiStep != null) {
@@ -120,7 +120,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     }
 
     //(Base LivingEntity/Entity Overrides)
-    @Inject(method = "doHurtTarget", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "doHurtTarget", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$isAlliedTo(Entity pTarget, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.onHurtTarget != null) {
@@ -130,7 +130,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "travel", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "travel", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$travel(Vec3 pTravelVector, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.travel != null) {
@@ -141,7 +141,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    /*@Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    /*@Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$tick(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.tick != null) {
@@ -152,7 +152,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }*/
 
-    @Inject(method = "doAutoAttackOnTouch", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "doAutoAttackOnTouch", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$doAutoAttackOnTouch(LivingEntity pTarget, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.doAutoAttackOnTouch != null) {
@@ -162,7 +162,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "decreaseAirSupply", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "decreaseAirSupply", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$decreaseAirSupply(int pCurrentAir, CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onDecreaseAirSupply != null) {
@@ -171,7 +171,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "increaseAirSupply", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "increaseAirSupply", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$increaseAirSupply(int pCurrentAir, CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onIncreaseAirSupply != null) {
@@ -181,7 +181,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "blockedByShield", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "blockedByShield", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$blockedByShield(LivingEntity pDefender, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onBlockedByShield != null) {
@@ -191,7 +191,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "onEquipItem", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "onEquipItem", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$onEquipItem(EquipmentSlot pSlot, ItemStack pOldItem, ItemStack pNewItem, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onEquipItem != null) {
@@ -202,7 +202,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "onEffectAdded", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "onEffectAdded", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$onEffectAdded(MobEffectInstance pEffectInstance, Entity pEntity, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onEffectAdded != null) {
@@ -213,7 +213,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "onEffectRemoved", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "onEffectRemoved", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$onEffectRemoved(MobEffectInstance pEffectInstance, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onEffectRemoved != null) {
@@ -223,7 +223,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "heal", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "heal", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$heal(float pHealAmount, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onLivingHeal != null) {
@@ -234,7 +234,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "die", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "die", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$die(DamageSource pDamageSource, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onDeath != null) {
@@ -244,7 +244,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "dropCustomDeathLoot", at = @At(value = "HEAD", ordinal = 0), remap = false)
+    @Inject(method = "dropCustomDeathLoot", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$dropCustomDeathLoot(DamageSource pDamageSource, int pLooting, boolean pHitByPlayer, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.dropCustomDeathLoot != null) {
@@ -256,7 +256,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "getSoundVolume", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getSoundVolume", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getSoundVolume(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setSoundVolume != null) {
@@ -265,7 +265,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getWaterSlowDown", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getWaterSlowDown", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getWaterSlowDown(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setWaterSlowDown != null) {
@@ -275,7 +275,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "getStandingEyeHeight", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getStandingEyeHeight", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions, CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setStandingEyeHeight == null) return;
@@ -289,7 +289,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "isPushable", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isPushable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$isPushable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isPushable != null) {
@@ -298,7 +298,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getBlockSpeedFactor", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getBlockSpeedFactor", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getBlockSpeedFactor(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.blockSpeedFactor == null) return;
@@ -312,7 +312,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "shouldDropLoot", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "shouldDropLoot", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$shouldDropLoot(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.shouldDropLoot != null) {
@@ -325,7 +325,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "isAffectedByFluids", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isAffectedByFluids", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$isAffectedByFluids(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAffectedByFluids != null) {
@@ -338,7 +338,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "isAlwaysExperienceDropper", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isAlwaysExperienceDropper", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$isAlwaysExperienceDropper(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAlwaysExperienceDropper != null) {
@@ -347,7 +347,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "isImmobile", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isImmobile", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$isImmobile(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isImmobile != null) {
@@ -361,7 +361,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "calculateFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "calculateFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$calculateFallDamage(float pFallDistance, float pDamageMultiplier, CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.calculateFallDamage == null) return;
@@ -376,7 +376,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "getHurtSound", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getHurtSound", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getHurtSound(DamageSource pDamageSource, CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setHurtSound == null) return;
@@ -391,7 +391,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "canAttackType", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canAttackType", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$canAttackType(EntityType<?> pEntityType, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canAttackType != null) {
@@ -405,7 +405,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getScale", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getScale", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getScale(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.scale == null) return;
@@ -418,7 +418,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "shouldDropExperience", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "shouldDropExperience", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$shouldDropExperience(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.shouldDropExperience != null) {
@@ -431,7 +431,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getVisibilityPercent", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getVisibilityPercent", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getVisibilityPercent(Entity pLookingEntity, CallbackInfoReturnable<Double> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.visibilityPercent != null) {
@@ -446,7 +446,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "canAttack(Lnet/minecraft/world/entity/LivingEntity;)Z", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canAttack(Lnet/minecraft/world/entity/LivingEntity;)Z", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$canAttack(LivingEntity pTarget, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canAttack != null) {
@@ -461,7 +461,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "canBeAffected", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canBeAffected", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$canBeAffected(MobEffectInstance pEffectInstance, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canBeAffected == null) {
@@ -477,7 +477,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "isInvertedHealAndHarm", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isInvertedHealAndHarm", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$isInvertedHealAndHarm(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.invertedHealAndHarm == null) {
@@ -492,7 +492,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getDeathSound", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getDeathSound", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getDeathSound(CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setDeathSound == null) return;
@@ -501,7 +501,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getFallSounds", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getFallSounds", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getFallSounds(CallbackInfoReturnable<LivingEntity.Fallsounds> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.fallSounds != null)
@@ -512,7 +512,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getEatingSound", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getEatingSound", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getEatingSound(ItemStack pStack, CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.eatingSound != null)
@@ -521,7 +521,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "onClimbable", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "onClimbable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$onClimbable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onClimbable == null) {
@@ -537,7 +537,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "canBreatheUnderwater", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canBreatheUnderwater", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$canBreatheUnderwater(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canBreatheUnderwater != null) {
@@ -546,7 +546,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    /*@Inject(method = "causeFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    /*@Inject(method = "causeFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onLivingFall != null) {
@@ -556,7 +556,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }*/
 
-    /*@Inject(method = "setSprinting", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    /*@Inject(method = "setSprinting", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$setSprinting(boolean pSprinting, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onSprint != null) {
@@ -565,7 +565,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }*/
 
-    @Inject(method = "getJumpBoostPower", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getJumpBoostPower", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getJumpBoostPower(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.jumpBoostPower == null) return;
@@ -577,7 +577,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "canStandOnFluid", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canStandOnFluid", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$canStandOnFluid(FluidState pFluidState, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canStandOnFluid != null) {
@@ -592,7 +592,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "isSensitiveToWater", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isSensitiveToWater", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$isSensitiveToWater(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isSensitiveToWater != null) {
@@ -606,7 +606,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    /*@Inject(method = "stopRiding", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    /*@Inject(method = "stopRiding", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$stopRiding(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onStopRiding != null) {
@@ -615,7 +615,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }*/
 
-   /* @Inject(method = "rideTick", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+   /* @Inject(method = "rideTick", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$rideTick(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.rideTick != null) {
@@ -625,7 +625,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }*/
 
-    @Inject(method = "onItemPickup", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "onItemPickup", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$onItemPickup(ItemEntity pItemEntity, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onItemPickup != null) {
@@ -635,7 +635,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "hasLineOfSight", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "hasLineOfSight", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$hasLineOfSight(Entity pEntity, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.hasLineOfSight != null) {
@@ -649,7 +649,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "onEnterCombat", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "onEnterCombat", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$onEnterCombat(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onEnterCombat != null) {
@@ -658,7 +658,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "onLeaveCombat", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "onLeaveCombat", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$onLeaveCombat(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onLeaveCombat != null) {
@@ -668,7 +668,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "isAffectedByPotions", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isAffectedByPotions", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$isAffectedByPotions(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAffectedByPotions != null) {
@@ -681,7 +681,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "attackable", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "attackable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$attackable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAttackableFunction != null) {
@@ -694,7 +694,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "canTakeItem", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canTakeItem", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$canTakeItem(ItemStack pStack, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canTakeItem != null) {
@@ -708,7 +708,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "isSleeping", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isSleeping", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$isSleeping(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.isSleeping != null) {
@@ -721,7 +721,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "startSleeping", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "startSleeping", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$startSleeping(BlockPos pPos, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onStartSleeping != null) {
@@ -731,7 +731,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "stopSleeping", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "stopSleeping", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$stopSleeping(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onStopSleeping != null) {
@@ -740,7 +740,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "eat", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "eat", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$eat(Level pLevel, ItemStack pFood, CallbackInfoReturnable<ItemStack> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.eat != null) {
@@ -751,7 +751,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "canFreeze", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canFreeze", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$canFreeze(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canFreeze != null) {
@@ -765,7 +765,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "isCurrentlyGlowing", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "isCurrentlyGlowing", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.isCurrentlyGlowing != null && !entityJs$getLivingEntity().level().isClientSide()) {
@@ -778,7 +778,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "canDisableShield", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canDisableShield", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$canDisableShield(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canDisableShield != null) {
@@ -791,7 +791,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "actuallyHurt", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "actuallyHurt", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$actuallyHurt(DamageSource pDamageSource, float pDamageAmount, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onHurt != null) {
@@ -801,7 +801,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "getExperienceReward", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "getExperienceReward", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getExperienceReward(CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.experienceReward != null) {
@@ -815,7 +815,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
     }
 
 
-    @Inject(method = "canChangeDimensions", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "canChangeDimensions", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$canChangeDimensions(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canChangeDimensions != null) {
@@ -828,7 +828,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "lerpTo", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "lerpTo", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$lerpTo(double pX, double pY, double pZ, float pYaw, float pPitch, int pPosRotationIncrements, boolean pTeleport, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.lerpTo != null) {

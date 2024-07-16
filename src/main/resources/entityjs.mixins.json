@@ -14,5 +14,5 @@
   "client": [
     "MinecraftClientMixin"
   ],
-  "refmap": "entityjs.refmap.json"
+  "refmap": "entityjs-refmap.json"
 }
