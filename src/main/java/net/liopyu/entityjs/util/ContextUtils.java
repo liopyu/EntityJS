@@ -21,6 +21,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -965,13 +966,13 @@ public class ContextUtils {
 
 
     public static class ProjectileEntityHitContext {
-        @Info("The projectile that was thrown")
-        public final ThrowableItemProjectile entity;
+        @Info("The projectile that hit the target entity")
+        public final Projectile entity;
 
-        @Info("The result of the hit")
+        @Info("The result of the hit giving the target as well as the location")
         public final EntityHitResult result;
 
-        public ProjectileEntityHitContext(EntityHitResult result, ThrowableItemProjectile entity) {
+        public ProjectileEntityHitContext(EntityHitResult result, Projectile entity) {
             this.entity = entity;
             this.result = result;
         }
@@ -979,13 +980,13 @@ public class ContextUtils {
 
 
     public static class ProjectileBlockHitContext {
-        @Info("The throwable item projectile that hit the block")
-        public final ThrowableItemProjectile entity;
+        @Info("The projectile that hit the target block")
+        public final Projectile entity;
 
-        @Info("The result of the hit on the block")
+        @Info("The result of the hit on the block giving the target block as well as the location")
         public final BlockHitResult result;
 
-        public ProjectileBlockHitContext(BlockHitResult result, ThrowableItemProjectile entity) {
+        public ProjectileBlockHitContext(BlockHitResult result, Projectile entity) {
             this.entity = entity;
             this.result = result;
         }
