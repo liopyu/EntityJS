@@ -313,6 +313,16 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
         }
     }
 
+    @Inject(method = "push(Lnet/minecraft/world/entity/Entity;)V", at = @At("HEAD"), remap = true, cancellable = true)
+    public void push(Entity pEntity, CallbackInfo ci) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.onEntityCollision != null) {
+                final ContextUtils.CollidingProjectileEntityContext context = new ContextUtils.CollidingProjectileEntityContext(entityJs$getLivingEntity(), pEntity);
+                EntityJSHelperClass.consumerCallback(builder.onEntityCollision, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEntityCollision.");
+            }
+        }
+    }
+
     @Inject(method = "getBlockSpeedFactor", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void getBlockSpeedFactor(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {

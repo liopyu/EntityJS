@@ -5,11 +5,9 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
-import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
-import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
-import net.liopyu.entityjs.builders.modification.ModifyMobBuilder;
-import net.liopyu.entityjs.builders.modification.ModifyPathfinderMobBuilder;
+import net.liopyu.entityjs.builders.modification.*;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
@@ -83,7 +81,9 @@ public class EntityModificationEventJS extends EventJS {
         } else if (builder instanceof ModifyAgeableMobBuilder) {
             ((Consumer<ModifyAgeableMobBuilder>) modifyBuilder).accept((ModifyAgeableMobBuilder) builder);
         } else */
-        if (builder instanceof ModifyPathfinderMobBuilder) {
+        if (builder instanceof ModifyProjectileBuilder) {
+            ((Consumer<ModifyProjectileBuilder>) modifyBuilder).accept((ModifyProjectileBuilder) builder);
+        } else if (builder instanceof ModifyPathfinderMobBuilder) {
             ((Consumer<ModifyPathfinderMobBuilder>) modifyBuilder).accept((ModifyPathfinderMobBuilder) builder);
         } else if (builder instanceof ModifyMobBuilder) {
             ((Consumer<ModifyMobBuilder>) modifyBuilder).accept((ModifyMobBuilder) builder);
@@ -110,6 +110,8 @@ public class EntityModificationEventJS extends EventJS {
             return new ModifyMobBuilder(type);
         } else if (entity instanceof LivingEntity) {
             return new ModifyLivingEntityBuilder(type);
+        } else if (entity instanceof Projectile) {
+            return new ModifyProjectileBuilder(type);
         } else {
             return new ModifyEntityBuilder(type);
         }

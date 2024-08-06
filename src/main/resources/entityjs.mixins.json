@@ -9,6 +9,7 @@
     "LivingEntityMixin",
     "MobMixin",
     "PathfinderMobMixin",
+    "ProjectileMixin",
     "ServerScriptManagerMixin"
   ],
   "client": [],

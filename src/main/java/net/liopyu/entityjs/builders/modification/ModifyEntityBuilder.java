@@ -59,10 +59,28 @@ public class ModifyEntityBuilder extends EventJS {
     public transient Function<Entity, Object> myRidingOffset;
     public transient Boolean controlledByFirstPassenger;
     public static Map<EntityType<?>, ModifyEntityBuilder> builderMap = new HashMap<>();
+    public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
 
     public ModifyEntityBuilder(EntityType<?> entityType) {
         this.entityType = entityType;
 
+    }
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity
+            collides with another entity.
+                        
+            Example usage:
+            ```javascript
+            modifyBuilder.onEntityCollision(context => {
+                const { entity, target } = context
+                console.log(entity)
+            });
+            ```
+            """)
+    public ModifyEntityBuilder onEntityCollision(Consumer<ContextUtils.CollidingProjectileEntityContext> consumer) {
+        onEntityCollision = consumer;
+        return this;
     }
 
     @Info(value = """
