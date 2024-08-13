@@ -1,15 +1,10 @@
 package net.liopyu.entityjs.util;
 
 import dev.latvian.mods.kubejs.script.ConsoleJS;
-import net.liopyu.entityjs.builders.living.modification.ModifyLivingEntityBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
-import org.apache.commons.lang3.NotImplementedException;
+import net.minecraft.world.phys.AABB;
 import software.bernie.geckolib.animation.Animation;
 
 import java.util.*;
@@ -59,8 +54,15 @@ public class EntityJSHelperClass {
             case "interactionresult" -> convertToInteractionResult(input);
             case "resourcelocation" -> convertToResourceLocation(input);
             case "looptype" -> convertToLoopType(input);
+            case "aabb" -> convertToBoundingBox(input);
             default -> input;
         };
+    }
+
+    private static AABB convertToBoundingBox(Object input) {
+        if (input instanceof AABB) {
+            return ((AABB) input);
+        } else return null;
     }
 
     private static Animation.LoopType convertToLoopType(Object input) {

@@ -11,6 +11,7 @@ import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 
 public class ArrowItemBuilder extends ItemBuilder {
@@ -34,11 +35,10 @@ public class ArrowItemBuilder extends ItemBuilder {
     public Item createObject() {
         return new ArrowItem(createItemProperties()) {
             @Override
-            public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter) {
-                final ArrowEntityJS arrow = new ArrowEntityJS(pLevel, pShooter, parent);
+            public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter, @Nullable ItemStack weapon) {
+                final ArrowEntityJS arrow = new ArrowEntityJS(pLevel, parent);
                 if (canBePickedUp) {
                     final ItemStack stack = new ItemStack(pStack.getItem());
-                    stack.setTag(pStack.getTag());
                     arrow.setPickUpItem(stack);
                 }
                 return arrow;

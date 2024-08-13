@@ -2,6 +2,7 @@ package net.liopyu.entityjs.entities.living.vanilla;
 
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.vanilla.WitherJSBuilder;
@@ -18,6 +19,7 @@ import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +28,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.Difficulty;
@@ -36,12 +39,14 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.*;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -49,14 +54,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.entity.PartEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.ArrayList;
@@ -70,7 +74,7 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
     private final int[] idleHeadUpdates = new int[2];
     private final ServerBossEvent bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
     private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = (p_31504_) -> {
-        return p_31504_.getMobType() != MobType.UNDEAD && p_31504_.attackable();
+        return !p_31504_.getType().is(EntityTypeTags.UNDEAD) && p_31504_.attackable();
     };
     private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0D).selector(LIVING_ENTITY_SELECTOR);
     private final WitherJSBuilder builder;
@@ -153,7 +157,7 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<?> brainProvider() {
+    public Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<WitherEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
@@ -166,11 +170,11 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
     @Override
     protected Brain<WitherEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<WitherEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<WitherEntityJS> brain = Cast.to(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
-            return UtilsJS.cast(super.makeBrain(p_21069_));
+            return Cast.to(super.makeBrain(p_21069_));
         }
     }
 
@@ -189,15 +193,6 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
 
 
     //Mob Overrides
-    @Override
-    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-        if (builder.onInteract != null) {
-            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
-        }
-        return super.mobInteract(pPlayer, pHand);
-    }
-
     @Override
     public boolean doHurtTarget(Entity pEntity) {
         if (builder != null && builder.onHurtTarget != null) {
@@ -235,18 +230,6 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         } else super.tickDeath();
     }
 
-
-    @Override
-    protected void tickLeash() {
-        super.tickLeash();
-        if (builder.tickLeash != null) {
-            Player $$0 = (Player) this.getLeashHolder();
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, this);
-            EntityJSHelperClass.consumerCallback(builder.tickLeash, context, "[EntityJS]: Error in " + entityName() + "builder for field: tickLeash.");
-
-        }
-    }
-
     @Override
     public void setTarget(@Nullable LivingEntity target) {
         super.setTarget(target);
@@ -266,243 +249,49 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         }
     }
 
-
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        if (builder == null || builder.createNavigation == null) return super.createNavigation(pLevel);
+        if (builder == null || builder.createNavigation == null) return new GroundPathNavigation(this, pLevel);
         final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
         Object obj = builder.createNavigation.apply(context);
         if (obj instanceof PathNavigation p) return p;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
-        return super.createNavigation(pLevel);
+        return new GroundPathNavigation(this, pLevel);
     }
 
     @Override
-    public boolean canBeLeashed(Player pPlayer) {
+    public boolean canBeLeashed() {
         if (builder.canBeLeashed != null) {
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            Object obj = builder.canBeLeashed.apply(context);
+            Object obj = builder.canBeLeashed.apply(this);
             if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed(pPlayer));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed());
         }
-        return super.canBeLeashed(pPlayer);
+        return super.canBeLeashed();
     }
 
     @Override
-    public MobType getMobType() {
-        if (builder != null) {
-            return builder.mobType;
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
+        if (builder.removeWhenFarAway == null) {
+            return super.removeWhenFarAway(pDistanceToClosestPlayer);
         }
-        return super.getMobType();
+        final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
+        Object obj = builder.removeWhenFarAway.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
+        return super.removeWhenFarAway(pDistanceToClosestPlayer);
     }
 
     @Override
-    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
-        this.performRangedAttack2(0, pTarget);
-    }
-
-    private void performRangedAttack2(int pHead, LivingEntity pTarget) {
-        this.performRangedAttack(pHead, pTarget.getX(), pTarget.getY() + (double) pTarget.getEyeHeight() * 0.5D, pTarget.getZ(), pHead == 0 && this.random.nextFloat() < 0.001F);
-    }
-
-    double xPower;
-    double yPower;
-    double zPower;
-
-    /**
-     * Launches a Wither skull toward (par2, par4, par6)
-     */
-    private void performRangedAttack(int pHead, double pX, double pY, double pZ, boolean pIsDangerous) {
-        if (!this.isSilent()) {
-            this.level().levelEvent((Player) null, 1024, this.blockPosition(), 0);
-        }
-
-        double d0 = this.getHeadX(pHead);
-        double d1 = this.getHeadY(pHead);
-        double d2 = this.getHeadZ(pHead);
-        double d3 = pX - d0;
-        double d4 = pY - d1;
-        double d5 = pZ - d2;
-
-        if (builder.attackProjectile != null) {
-            try {
-                Projectile entity = (Projectile) ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(builder.attackProjectile)).create(this.level());
-                xPower = d3 * 0.1D;
-                yPower = d4 * 0.1D;
-                zPower = d5 * 0.1D;
-
-                entity.setOwner(this);
-                Vec3 vec3 = this.getDeltaMovement();
-                entity.setDeltaMovement(vec3.add(xPower, yPower, zPower).scale(0.75));
-                entity.setPosRaw(d0, d1, d2);
-                this.level().addFreshEntity(entity);
-            } catch (ClassCastException e) {
-                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Invalid value in attackProjectile field from entity: " + entityName() + ". Value: " + builder.attackProjectile + ". Must be a projectile entity", e);
-            }
-        } else {
-            WitherSkull witherskull = new WitherSkull(this.level(), this, d3, d4, d5);
-            witherskull.setOwner(this);
-            if (pIsDangerous) {
-                witherskull.setDangerous(true);
-            }
-
-            witherskull.setPosRaw(d0, d1, d2);
-            this.level().addFreshEntity(witherskull);
-        }
-    }
-
-    private double getHeadX(int pHead) {
-        if (pHead <= 0) {
-            return this.getX();
-        } else {
-            float f = (this.yBodyRot + (float) (180 * (pHead - 1))) * ((float) Math.PI / 180F);
-            float f1 = Mth.cos(f);
-            return this.getX() + (double) f1 * 1.3D;
-        }
-    }
-
-    private double getHeadY(int pHead) {
-        return pHead <= 0 ? this.getY() + 3.0D : this.getY() + 2.2D;
-    }
-
-    private double getHeadZ(int pHead) {
-        if (pHead <= 0) {
-            return this.getZ();
-        } else {
-            float f = (this.yBodyRot + (float) (180 * (pHead - 1))) * ((float) Math.PI / 180F);
-            float f1 = Mth.sin(f);
-            return this.getZ() + (double) f1 * 1.3D;
-        }
+    protected double followLeashSpeed() {
+        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
     }
 
     @Override
-    public void makeInvulnerable() {
-        this.setInvulnerableTicks(220);
-        this.bossEvent.setProgress(0.0F);
-        this.setHealth(this.getMaxHealth() / 3.0F);
-    }
-
-    @Override
-    public void startSeenByPlayer(ServerPlayer pPlayer) {
-        this.bossEvent.addPlayer(pPlayer);
-    }
-
-
-    @Override
-    public void stopSeenByPlayer(ServerPlayer pPlayer) {
-        this.bossEvent.removePlayer(pPlayer);
-    }
-
-    @Override
-    public void setCustomName(@javax.annotation.Nullable Component pName) {
-        super.setCustomName(pName);
-        this.bossEvent.setName(this.getDisplayName());
-    }
-
-    @Override
-    protected void customServerAiStep() {
-        if (builder.customServerAiStep) {
-            if (this.getInvulnerableTicks() > 0) {
-                int k1 = this.getInvulnerableTicks() - 1;
-                this.bossEvent.setProgress(1.0F - (float) k1 / 220.0F);
-                if (k1 <= 0) {
-                    this.level().explode(this, this.getX(), this.getEyeY(), this.getZ(), 7.0F, false, Level.ExplosionInteraction.MOB);
-                    if (!this.isSilent()) {
-                        this.level().globalLevelEvent(1023, this.blockPosition(), 0);
-                    }
-                }
-
-                this.setInvulnerableTicks(k1);
-                if (this.tickCount % 10 == 0) {
-                    this.heal(10.0F);
-                }
-
-            } else {
-
-                for (int i = 1; i < 3; ++i) {
-                    if (this.tickCount >= this.nextHeadUpdate[i - 1]) {
-                        this.nextHeadUpdate[i - 1] = this.tickCount + 10 + this.random.nextInt(10);
-                        if (this.level().getDifficulty() == Difficulty.NORMAL || this.level().getDifficulty() == Difficulty.HARD) {
-                            int i3 = i - 1;
-                            int j3 = this.idleHeadUpdates[i - 1];
-                            this.idleHeadUpdates[i3] = this.idleHeadUpdates[i - 1] + 1;
-                            if (j3 > 15) {
-                                float f = 10.0F;
-                                float f1 = 5.0F;
-                                double d0 = Mth.nextDouble(this.random, this.getX() - 10.0D, this.getX() + 10.0D);
-                                double d1 = Mth.nextDouble(this.random, this.getY() - 5.0D, this.getY() + 5.0D);
-                                double d2 = Mth.nextDouble(this.random, this.getZ() - 10.0D, this.getZ() + 10.0D);
-                                this.performRangedAttack(i + 1, d0, d1, d2, true);
-                                this.idleHeadUpdates[i - 1] = 0;
-                            }
-                        }
-
-                        int l1 = this.getAlternativeTarget(i);
-                        if (l1 > 0) {
-                            LivingEntity livingentity = (LivingEntity) this.level().getEntity(l1);
-                            if (livingentity != null && this.canAttack(livingentity) && !(this.distanceToSqr(livingentity) > 900.0D) && this.hasLineOfSight(livingentity)) {
-                                this.performRangedAttack2(i + 1, livingentity);
-                                this.nextHeadUpdate[i - 1] = this.tickCount + 40 + this.random.nextInt(20);
-                                this.idleHeadUpdates[i - 1] = 0;
-                            } else {
-                                this.setAlternativeTarget(i, 0);
-                            }
-                        } else {
-                            List<LivingEntity> list = this.level().getNearbyEntities(LivingEntity.class, TARGETING_CONDITIONS, this, this.getBoundingBox().inflate(20.0D, 8.0D, 20.0D));
-                            if (!list.isEmpty()) {
-                                LivingEntity livingentity1 = list.get(this.random.nextInt(list.size()));
-                                this.setAlternativeTarget(i, livingentity1.getId());
-                            }
-                        }
-                    }
-                }
-
-                if (this.getTarget() != null) {
-                    this.setAlternativeTarget(0, this.getTarget().getId());
-                } else {
-                    this.setAlternativeTarget(0, 0);
-                }
-
-                if (this.destroyBlocksTick > 0) {
-                    --this.destroyBlocksTick;
-                    if (this.destroyBlocksTick == 0 && ForgeEventFactory.getMobGriefingEvent(this.level(), this)) {
-                        int j1 = Mth.floor(this.getY());
-                        int i2 = Mth.floor(this.getX());
-                        int j2 = Mth.floor(this.getZ());
-                        boolean flag = false;
-
-                        for (int j = -1; j <= 1; ++j) {
-                            for (int k2 = -1; k2 <= 1; ++k2) {
-                                for (int k = 0; k <= 3; ++k) {
-                                    int l2 = i2 + j;
-                                    int l = j1 + k;
-                                    int i1 = j2 + k2;
-                                    BlockPos blockpos = new BlockPos(l2, l, i1);
-                                    BlockState blockstate = this.level().getBlockState(blockpos);
-                                    if (blockstate.canEntityDestroy(this.level(), blockpos, this) && ForgeEventFactory.onEntityDestroyBlock(this, blockpos, blockstate)) {
-                                        flag = this.level().destroyBlock(blockpos, true, this) || flag;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (flag) {
-                            this.level().levelEvent((Player) null, 1022, this.blockPosition(), 0);
-                        }
-                    }
-                }
-
-                if (this.tickCount % 20 == 0) {
-                    this.heal(1.0F);
-                }
-
-                this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
-            }
-        }
-    }
-
-    protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
-        return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
+    public int getAmbientSoundInterval() {
+        if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
+        return super.getAmbientSoundInterval();
     }
 
     public boolean canJump() {
@@ -531,12 +320,12 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
 
         this.hasImpulse = true;
         onJump();
-        ForgeHooks.onLivingJump(this);
+        CommonHooks.onLivingJump(this);
     }
 
     public boolean shouldJump() {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
+        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.maxUpStep() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -601,7 +390,7 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
     @Override
     protected SoundEvent getAmbientSound() {
         if (builder.setAmbientSound != null) {
-            return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setAmbientSound);
+            return BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setAmbientSound);
         } else {
             return super.getAmbientSound();
         }
@@ -631,55 +420,18 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         return Objects.requireNonNullElseGet(builder.isPersistenceRequired, super::isPersistenceRequired);
     }
 
-
     @Override
-    public double getMeleeAttackRangeSqr(LivingEntity entity) {
-        if (builder.meleeAttackRangeSqr != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.meleeAttackRangeSqr.apply(this), "double");
+    public AABB getAttackBoundingBox() {
+        if (builder.getAttackBoundingBox != null) {
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.getAttackBoundingBox.apply(this), "aabb");
             if (obj != null) {
-                return (double) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityName() + ". Value: " + builder.meleeAttackRangeSqr.apply(this) + ". Must be a double. Defaulting to " + super.getMeleeAttackRangeSqr(entity));
-                return super.getMeleeAttackRangeSqr(entity);
+                return (AABB) obj;
             }
-        } else {
-            return super.getMeleeAttackRangeSqr(entity);
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getAttackBoundingBox from entity: " + entityName() + ". Value: " + builder.getAttackBoundingBox.apply(this) + ". Must be an AABB. Defaulting to " + super.getAttackBoundingBox());
         }
+        return super.getAttackBoundingBox();
     }
 
-    @Override
-    public int getAmbientSoundInterval() {
-        if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
-        return super.getAmbientSoundInterval();
-    }
-
-    @Override
-    public double getMyRidingOffset() {
-        if (builder.myRidingOffset == null) return super.getMyRidingOffset();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.myRidingOffset.apply(this), "double");
-        if (obj != null) return (double) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for myRidingOffset from entity: " + entityName() + ". Value: " + builder.myRidingOffset.apply(this) + ". Must be a double. Defaulting to " + super.getMyRidingOffset());
-        return super.getMyRidingOffset();
-    }
-
-    @Override
-    protected double followLeashSpeed() {
-        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
-    }
-
-    @Override
-    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
-        if (builder.removeWhenFarAway == null) {
-            return super.removeWhenFarAway(pDistanceToClosestPlayer);
-        }
-        final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
-        Object obj = builder.removeWhenFarAway.apply(context);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
-        return super.removeWhenFarAway(pDistanceToClosestPlayer);
-    }
 
     //(Base LivingEntity/Entity Overrides)
     @Override
@@ -714,7 +466,7 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
 
                     this.setDeltaMovement(newVelocityX, newVelocityY, newVelocityZ);
                     onJump();
-                    ForgeHooks.onLivingJump(this);
+                    CommonHooks.onLivingJump(this);
                 }
             }
 
@@ -757,11 +509,8 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
     }
 
     @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
-        if (builder.defaultGoals) {
-            super.registerGoals();
-        }
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
@@ -860,13 +609,13 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
     }
 
     @Override
-    protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
+    protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource damageSource, boolean allowDrops) {
         if (builder.dropCustomDeathLoot != null) {
-            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, this);
+            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(serverLevel, damageSource, allowDrops, this);
             EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityName() + "builder for field: dropCustomDeathLoot.");
 
         } else {
-            super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
+            super.dropCustomDeathLoot(serverLevel, damageSource, allowDrops);
         }
     }
 
@@ -941,18 +690,6 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
         return super.getBlockJumpFactor();
     }
-
-    @Override
-    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
-        if (builder == null || builder.setStandingEyeHeight == null)
-            return super.getStandingEyeHeight(pPose, pDimensions);
-        final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setStandingEyeHeight from entity: " + entityName() + ". Value: " + builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + super.getStandingEyeHeight(pPose, pDimensions));
-        return super.getStandingEyeHeight(pPose, pDimensions);
-    }
-
 
     @Override
     public boolean isPushable() {
@@ -1093,7 +830,7 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
         final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, p_21239_);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
-        if (obj != null) return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        if (obj != null) return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
         return super.getHurtSound(p_21239_);
     }
@@ -1102,14 +839,14 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -1223,7 +960,7 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
     @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setDeathSound));
     }
 
 
@@ -1231,8 +968,8 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
     public @NotNull Fallsounds getFallSounds() {
         if (builder.fallSounds != null)
             return new Fallsounds(
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.smallFallSound)),
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.largeFallSound))
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.smallFallSound)),
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.largeFallSound))
             );
         return super.getFallSounds();
     }
@@ -1240,7 +977,7 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null)
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.eatingSound));
+            return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.eatingSound));
         return super.getEatingSound(itemStack);
     }
 
@@ -1255,13 +992,6 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         }
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onClimbable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super.onClimbable(): " + super.onClimbable());
         return super.onClimbable();
-    }
-
-
-    //Deprecated but still works for 1.20.4 :shrug:
-    @Override
-    public boolean canBreatheUnderwater() {
-        return Objects.requireNonNullElseGet(builder.canBreatheUnderwater, super::canBreatheUnderwater);
     }
 
 
@@ -1461,11 +1191,10 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         super.stopSleeping();
     }
 
-
     @Override
-    public @NotNull ItemStack eat(@NotNull Level level, @NotNull ItemStack itemStack) {
+    public ItemStack eat(Level level, ItemStack itemStack, FoodProperties properties) {
         if (builder.eat != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, level);
+            final ContextUtils.FoodItemLevelContext context = new ContextUtils.FoodItemLevelContext(this, itemStack, level, properties);
             EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityName() + "builder for field: eat.");
             return itemStack;
         }
@@ -1567,17 +1296,16 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         super.lavaHurt();
     }
 
-
     @Override
-    public int getExperienceReward() {
+    protected int getBaseExperienceReward() {
         if (builder.experienceReward != null) {
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.experienceReward.apply(this), "integer");
             if (obj != null) {
                 return (int) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getExperienceReward());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getBaseExperienceReward());
         }
-        return super.getExperienceReward();
+        return super.getBaseExperienceReward();
     }
 
 
@@ -1642,15 +1370,16 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
 
 
     @Override
-    public boolean canChangeDimensions() {
+    public boolean canChangeDimensions(Level to, Level from) {
         if (builder.canChangeDimensions != null) {
-            Object obj = builder.canChangeDimensions.apply(this);
+            ContextUtils.ChangeDimensionsContext context = new ContextUtils.ChangeDimensionsContext(this, to, from);
+            Object obj = builder.canChangeDimensions.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions(to, from));
         }
-        return super.canChangeDimensions();
+        return super.canChangeDimensions(to, from);
     }
 
 
@@ -1685,11 +1414,11 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
 
 
     @Override
-    public void onRemovedFromWorld() {
+    public void onRemovedFromLevel() {
         if (builder != null && builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
         }
-        super.onRemovedFromWorld();
+        super.onRemovedFromLevel();
     }
 
 
@@ -1703,13 +1432,24 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         return super.getMaxFallDistance();
     }
 
-
     @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements) {
+        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements);
         if (builder.lerpTo != null) {
-            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
+            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, this);
             EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
     }
+
+
+    @Override
+    public Iterable<ItemStack> getArmorSlots() {
+        return armorItems;
+    }
+
+    @Override
+    public Iterable<ItemStack> getHandSlots() {
+        return handItems;
+    }
+
 }

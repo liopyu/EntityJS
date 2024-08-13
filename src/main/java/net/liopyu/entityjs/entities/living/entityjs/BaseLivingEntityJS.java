@@ -2,16 +2,20 @@ package net.liopyu.entityjs.entities.living.entityjs;
 
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.BaseLivingEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraftforge.entity.PartEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import net.minecraft.world.food.FoodProperties;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.entity.PartEntity;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
@@ -35,8 +39,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -124,7 +126,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     @Override
-    protected Brain.Provider<?> brainProvider() {
+    public Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<BaseLivingEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
@@ -137,11 +139,11 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     protected Brain<BaseLivingEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<BaseLivingEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<BaseLivingEntityJS> brain = Cast.to(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
-            return UtilsJS.cast(super.makeBrain(p_21069_));
+            return Cast.to(super.makeBrain(p_21069_));
         }
     }
 
@@ -175,12 +177,12 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
         this.hasImpulse = true;
         onJump();
-        ForgeHooks.onLivingJump(this);
+        CommonHooks.onLivingJump(this);
     }
 
     public boolean shouldJump() {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
+        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.maxUpStep() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -222,16 +224,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     @Override
-    public boolean doHurtTarget(Entity pEntity) {
-        if (builder != null && builder.onHurtTarget != null) {
-            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget.");
-
-        }
-        return super.doHurtTarget(pEntity);
-    }
-
-    @Override
     public void travel(Vec3 pTravelVector) {
         LivingEntity livingentity = this.getControllingPassenger();
         if (this.isAlive() && this.isVehicle() && builder.canSteer && livingentity != null) {
@@ -252,7 +244,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
                     this.setDeltaMovement(newVelocityX, newVelocityY, newVelocityZ);
                     onJump();
-                    ForgeHooks.onLivingJump(this);
+                    CommonHooks.onLivingJump(this);
                 }
             }
 
@@ -295,8 +287,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
@@ -395,13 +387,13 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     @Override
-    protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
+    protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource damageSource, boolean allowDrops) {
         if (builder.dropCustomDeathLoot != null) {
-            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, this);
+            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(serverLevel, damageSource, allowDrops, this);
             EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityName() + "builder for field: dropCustomDeathLoot.");
 
         } else {
-            super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
+            super.dropCustomDeathLoot(serverLevel, damageSource, allowDrops);
         }
     }
 
@@ -476,18 +468,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
         return super.getBlockJumpFactor();
     }
-
-    @Override
-    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
-        if (builder == null || builder.setStandingEyeHeight == null)
-            return super.getStandingEyeHeight(pPose, pDimensions);
-        final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setStandingEyeHeight from entity: " + entityName() + ". Value: " + builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + super.getStandingEyeHeight(pPose, pDimensions));
-        return super.getStandingEyeHeight(pPose, pDimensions);
-    }
-
 
     @Override
     public boolean isPushable() {
@@ -628,7 +608,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
         final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, p_21239_);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
-        if (obj != null) return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        if (obj != null) return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
         return super.getHurtSound(p_21239_);
     }
@@ -637,14 +617,14 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -758,7 +738,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setDeathSound));
     }
 
 
@@ -766,8 +746,8 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public @NotNull Fallsounds getFallSounds() {
         if (builder.fallSounds != null)
             return new Fallsounds(
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.smallFallSound)),
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.largeFallSound))
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.smallFallSound)),
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.largeFallSound))
             );
         return super.getFallSounds();
     }
@@ -775,7 +755,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null)
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.eatingSound));
+            return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.eatingSound));
         return super.getEatingSound(itemStack);
     }
 
@@ -790,13 +770,6 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         }
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onClimbable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super.onClimbable(): " + super.onClimbable());
         return super.onClimbable();
-    }
-
-
-    //Deprecated but still works for 1.20.4 :shrug:
-    @Override
-    public boolean canBreatheUnderwater() {
-        return Objects.requireNonNullElseGet(builder.canBreatheUnderwater, super::canBreatheUnderwater);
     }
 
 
@@ -996,11 +969,10 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         super.stopSleeping();
     }
 
-
     @Override
-    public @NotNull ItemStack eat(@NotNull Level level, @NotNull ItemStack itemStack) {
+    public ItemStack eat(Level level, ItemStack itemStack, FoodProperties properties) {
         if (builder.eat != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, level);
+            final ContextUtils.FoodItemLevelContext context = new ContextUtils.FoodItemLevelContext(this, itemStack, level, properties);
             EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityName() + "builder for field: eat.");
             return itemStack;
         }
@@ -1102,17 +1074,16 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         super.lavaHurt();
     }
 
-
     @Override
-    public int getExperienceReward() {
+    protected int getBaseExperienceReward() {
         if (builder.experienceReward != null) {
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.experienceReward.apply(this), "integer");
             if (obj != null) {
                 return (int) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getExperienceReward());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getBaseExperienceReward());
         }
-        return super.getExperienceReward();
+        return super.getBaseExperienceReward();
     }
 
 
@@ -1177,15 +1148,16 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
 
     @Override
-    public boolean canChangeDimensions() {
+    public boolean canChangeDimensions(Level to, Level from) {
         if (builder.canChangeDimensions != null) {
-            Object obj = builder.canChangeDimensions.apply(this);
+            ContextUtils.ChangeDimensionsContext context = new ContextUtils.ChangeDimensionsContext(this, to, from);
+            Object obj = builder.canChangeDimensions.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions(to, from));
         }
-        return super.canChangeDimensions();
+        return super.canChangeDimensions(to, from);
     }
 
 
@@ -1220,11 +1192,11 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
 
     @Override
-    public void onRemovedFromWorld() {
+    public void onRemovedFromLevel() {
         if (builder != null && builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
         }
-        super.onRemovedFromWorld();
+        super.onRemovedFromLevel();
     }
 
 
@@ -1238,12 +1210,11 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         return super.getMaxFallDistance();
     }
 
-
     @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements) {
+        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements);
         if (builder.lerpTo != null) {
-            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
+            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, this);
             EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
     }
@@ -1255,24 +1226,30 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     }
 
     @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return handItems;
-    }
-
-    @Override
-    public ItemStack getItemBySlot(EquipmentSlot slot) {
-        return switch (slot.getType()) {
-            case HAND -> handItems.get(slot.getIndex());
-            case ARMOR -> armorItems.get(slot.getIndex());
+    public ItemStack getItemBySlot(EquipmentSlot p_21467_) {
+        return switch (p_21467_.getType()) {
+            case HAND -> (ItemStack) this.handItems.get(p_21467_.getIndex());
+            case HUMANOID_ARMOR -> (ItemStack) this.armorItems.get(p_21467_.getIndex());
+            case ANIMAL_ARMOR -> null;
         };
     }
 
     @Override
-    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
-        verifyEquippedItem(stack);
-        switch (slot.getType()) {
-            case HAND -> onEquipItem(slot, handItems.set(slot.getIndex(), stack), stack);
-            case ARMOR -> onEquipItem(slot, armorItems.set(slot.getIndex(), stack), stack);
+    public void setItemSlot(EquipmentSlot p_21416_, ItemStack p_21417_) {
+        this.verifyEquippedItem(p_21417_);
+        switch (p_21416_.getType()) {
+            case HAND:
+                this.onEquipItem(p_21416_, this.handItems.set(p_21416_.getIndex(), p_21417_), p_21417_);
+                break;
+            case HUMANOID_ARMOR:
+                this.onEquipItem(p_21416_, this.armorItems.set(p_21416_.getIndex(), p_21417_), p_21417_);
+                break;
         }
     }
+
+    @Override
+    public Iterable<ItemStack> getHandSlots() {
+        return handItems;
+    }
+
 }

@@ -1,11 +1,8 @@
-package net.liopyu.entityjs.builders.living.modification;
+package net.liopyu.entityjs.builders.modification;
 
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 
 import java.util.function.Function;

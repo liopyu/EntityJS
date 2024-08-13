@@ -11,6 +11,7 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -23,6 +24,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -31,9 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -66,8 +66,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
     }
 
-    public ArrowEntityJS(Level level, LivingEntity shooter, ArrowEntityJSBuilder builder) {
-        super(builder.get(), shooter, level);
+    public ArrowEntityJS(Level level, ArrowEntityJSBuilder builder) {
+        super(builder.get(), level);
         this.builder = builder;
         pickUpStack = ItemStack.EMPTY;
         this.baseDamage = builder.setBaseDamage;
@@ -86,6 +86,11 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     protected ItemStack getPickupItem() {
+        return pickUpStack;
+    }
+
+    @Override
+    protected ItemStack getDefaultPickupItem() {
         return pickUpStack;
     }
 
@@ -132,7 +137,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected SoundEvent getDefaultHitGroundSoundEvent() {
         if (builder != null && builder.defaultHitGroundSoundEvent != null) {
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.defaultHitGroundSoundEvent));
+            return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.defaultHitGroundSoundEvent));
         }
         return super.getDefaultHitGroundSoundEvent();
     }
@@ -193,24 +198,6 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         return this.knockback;
     }
 
-    @Override
-    public void setEnchantmentEffectsFromEntity(LivingEntity pShooter, float pVelocity) {
-        int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.POWER_ARROWS, pShooter);
-        int j = EnchantmentHelper.getEnchantmentLevel(Enchantments.PUNCH_ARROWS, pShooter);
-        this.setBaseDamage((double) (pVelocity * 2.0F) + this.random.triangle((double) this.level().getDifficulty().getId() * 0.11, 0.57425));
-        if (i > 0) {
-            this.setBaseDamage(this.getBaseDamage() + (double) i * 0.5 + 0.5);
-        }
-
-        if (j > 0) {
-            this.setKnockback(j);
-        }
-
-        if (EnchantmentHelper.getEnchantmentLevel(Enchantments.FLAMING_ARROWS, pShooter) > 0) {
-            this.setSecondsOnFire(100);
-        }
-
-    }
 
     //Base Entity Overrides
     public boolean hurt(DamageSource pSource, float pAmount) {
@@ -223,10 +210,10 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements) {
+        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements);
         if (builder.lerpTo != null) {
-            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
+            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, this);
             EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
     }
@@ -260,11 +247,11 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     @Override
-    public void onRemovedFromWorld() {
+    public void onRemovedFromLevel() {
         if (builder != null && builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
         }
-        super.onRemovedFromWorld();
+        super.onRemovedFromLevel();
     }
 
     @Override
@@ -286,8 +273,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
@@ -369,10 +356,19 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     //Projectile Overrides
 
     @Override
-    protected void onHitEntity(EntityHitResult pResult) {
-        Entity entity = pResult.getEntity();
+    protected void onHitEntity(EntityHitResult p_36757_) {
+
+        super.onHitEntity(p_36757_);
+        Entity entity = p_36757_.getEntity();
         float f = (float) this.getDeltaMovement().length();
-        int i = Mth.ceil(Mth.clamp((double) f * this.baseDamage, 0.0, 2.147483647E9));
+        double d0 = this.baseDamage;
+        Entity entity1 = this.getOwner();
+        DamageSource damagesource = this.damageSources().arrow(this, (Entity) (entity1 != null ? entity1 : this));
+        if (this.getWeaponItem() != null && this.level() instanceof ServerLevel serverlevel) {
+            d0 = (double) EnchantmentHelper.modifyDamage(serverlevel, this.getWeaponItem(), entity, damagesource, (float) d0);
+        }
+
+        int j = Mth.ceil(Mth.clamp((double) f * d0, 0.0, 2.147483647E9));
         if (this.getPierceLevel() > 0) {
             if (this.piercingIgnoreEntityIds == null) {
                 this.piercingIgnoreEntityIds = new IntOpenHashSet(5);
@@ -391,53 +387,37 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         }
 
         if (this.isCritArrow()) {
-            long j = (long) this.random.nextInt(i / 2 + 2);
-            i = (int) Math.min(j + (long) i, 2147483647L);
+            long k = (long) this.random.nextInt(j / 2 + 2);
+            j = (int) Math.min(k + (long) j, 2147483647L);
         }
 
-        Entity entity1 = this.getOwner();
-        DamageSource damagesource;
-        if (entity1 == null) {
-            damagesource = this.damageSources().arrow(this, this);
-        } else {
-            damagesource = this.damageSources().arrow(this, entity1);
-            if (entity1 instanceof LivingEntity) {
-                ((LivingEntity) entity1).setLastHurtMob(entity);
-            }
+        if (entity1 instanceof LivingEntity livingentity1) {
+            livingentity1.setLastHurtMob(entity);
         }
 
         boolean flag = entity.getType() == EntityType.ENDERMAN;
-        int k = entity.getRemainingFireTicks();
+        int i = entity.getRemainingFireTicks();
         if (this.isOnFire() && !flag) {
-            entity.setSecondsOnFire(5);
+            entity.igniteForSeconds(5.0F);
         }
 
-        if (entity.hurt(damagesource, (float) i)) {
+        if (entity.hurt(damagesource, (float) j)) {
             if (flag) {
                 return;
             }
 
-            if (entity instanceof LivingEntity) {
-                LivingEntity livingentity = (LivingEntity) entity;
+            if (entity instanceof LivingEntity livingentity) {
                 if (!this.level().isClientSide && this.getPierceLevel() <= 0) {
                     livingentity.setArrowCount(livingentity.getArrowCount() + 1);
                 }
 
-                if (this.knockback > 0) {
-                    double d0 = Math.max(0.0, 1.0 - livingentity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
-                    Vec3 vec3 = this.getDeltaMovement().multiply(1.0, 0.0, 1.0).normalize().scale((double) this.knockback * 0.6 * d0);
-                    if (vec3.lengthSqr() > 0.0) {
-                        livingentity.push(vec3.x, 0.1, vec3.z);
-                    }
-                }
-
-                if (!this.level().isClientSide && entity1 instanceof LivingEntity) {
-                    EnchantmentHelper.doPostHurtEffects(livingentity, entity1);
-                    EnchantmentHelper.doPostDamageEffects((LivingEntity) entity1, livingentity);
+                this.doKnockback(livingentity, damagesource);
+                if (this.level() instanceof ServerLevel serverlevel1) {
+                    EnchantmentHelper.doPostAttackEffectsWithItemSource(serverlevel1, livingentity, damagesource, this.getWeaponItem());
                 }
 
                 this.doPostHurtEffects(livingentity);
-                if (entity1 != null && livingentity != entity1 && livingentity instanceof Player && entity1 instanceof ServerPlayer && !this.isSilent()) {
+                if (livingentity != entity1 && livingentity instanceof Player && entity1 instanceof ServerPlayer && !this.isSilent()) {
                     ((ServerPlayer) entity1).connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.ARROW_HIT_PLAYER, 0.0F));
                 }
 
@@ -445,8 +425,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
                     this.piercedAndKilledEntities.add(livingentity);
                 }
 
-                if (!this.level().isClientSide && entity1 instanceof ServerPlayer) {
-                    ServerPlayer serverplayer = (ServerPlayer) entity1;
+                if (!this.level().isClientSide && entity1 instanceof ServerPlayer serverplayer) {
                     if (this.piercedAndKilledEntities != null && this.shotFromCrossbow()) {
                         CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverplayer, this.piercedAndKilledEntities);
                     } else if (!entity.isAlive() && this.shotFromCrossbow()) {
@@ -460,19 +439,19 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
                 this.discard();
             }
         } else {
-            entity.setRemainingFireTicks(k);
-            this.setDeltaMovement(this.getDeltaMovement().scale(-0.1));
-            this.setYRot(this.getYRot() + 180.0F);
-            this.yRotO += 180.0F;
+            entity.setRemainingFireTicks(i);
+            this.deflect(ProjectileDeflection.REVERSE, entity, this.getOwner(), false);
+            this.setDeltaMovement(this.getDeltaMovement().scale(0.2));
             if (!this.level().isClientSide && this.getDeltaMovement().lengthSqr() < 1.0E-7) {
                 if (this.pickup == AbstractArrow.Pickup.ALLOWED) {
                     this.spawnAtLocation(this.getPickupItem(), 0.1F);
                 }
+
                 this.discard();
             }
         }
         if (builder != null && builder.onHitEntity != null) {
-            final ContextUtils.ArrowEntityHitContext context = new ContextUtils.ArrowEntityHitContext(pResult, this);
+            final ContextUtils.ArrowEntityHitContext context = new ContextUtils.ArrowEntityHitContext(p_36757_, this);
             EntityJSHelperClass.consumerCallback(builder.onHitEntity, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHitEntity.");
         }
     }
@@ -618,14 +597,14 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -709,15 +688,16 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
 
     @Override
-    public boolean canChangeDimensions() {
+    public boolean canChangeDimensions(Level to, Level from) {
         if (builder.canChangeDimensions != null) {
-            Object obj = builder.canChangeDimensions.apply(this);
+            final ContextUtils.ChangeDimensionsContext context = new ContextUtils.ChangeDimensionsContext(this, to, from);
+            Object obj = builder.canChangeDimensions.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions(to, from));
         }
-        return super.canChangeDimensions();
+        return super.canChangeDimensions(to, from);
     }
 
 

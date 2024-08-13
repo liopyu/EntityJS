@@ -2,6 +2,8 @@ modLoader = "javafml" #mandatory
 loaderVersion = "${loader_version_range}" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 license = "${mod_license}"
 issueTrackerURL = "https://github.com/liopyu/EntityJS/issues" #optional
+[[accessTransformers]]
+file = "META-INF/accesstransformer.cfg"
 [[mods]] #mandatory
 modId = "entityjs" #mandatory
 version = "${mod_version}" #mandatory
@@ -25,13 +27,13 @@ side = "BOTH"
 [[dependencies.entityjs]]
 modId = "kubejs"
 mandatory = true
-versionRange = "[2001.6.4-build.99,)"
+versionRange = "[2100.7.0-build.83,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.entityjs]]
 modId = "geckolib"
 mandatory = true
-versionRange = "[4.3,)"
+versionRange = "[4.5,)"
 ordering = "NONE"
 side = "BOTH"

@@ -2,6 +2,7 @@ package net.liopyu.entityjs.entities.living.vanilla;
 
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
@@ -21,6 +22,7 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -41,6 +43,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -48,13 +51,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.entity.PartEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -147,7 +150,7 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     //Some logic overrides up here because there are different implementations in the other builders.
 
     @Override
-    protected Brain.Provider<?> brainProvider() {
+    public Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<PandaEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
@@ -160,11 +163,11 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     @Override
     protected Brain<PandaEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<PandaEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<PandaEntityJS> brain = Cast.to(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
-            return UtilsJS.cast(super.makeBrain(p_21069_));
+            return Cast.to(super.makeBrain(p_21069_));
         }
     }
 
@@ -186,7 +189,7 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
             final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
             if (obj instanceof ResourceLocation resourceLocation) {
-                EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
+                EntityType<?> breedOffspringType = BuiltInRegistries.ENTITY_TYPE.get(resourceLocation);
                 if (breedOffspringType != null) {
                     Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
                     if (breedOffspringEntity instanceof AgeableMob) {
@@ -333,18 +336,6 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
         } else super.tickDeath();
     }
 
-
-    @Override
-    protected void tickLeash() {
-        super.tickLeash();
-        if (builder.tickLeash != null) {
-            Player $$0 = (Player) this.getLeashHolder();
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, this);
-            EntityJSHelperClass.consumerCallback(builder.tickLeash, context, "[EntityJS]: Error in " + entityName() + "builder for field: tickLeash.");
-
-        }
-    }
-
     @Override
     public void setTarget(@Nullable LivingEntity target) {
         super.setTarget(target);
@@ -375,14 +366,13 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     }
 
     @Override
-    public boolean canBeLeashed(Player pPlayer) {
+    public boolean canBeLeashed() {
         if (builder.canBeLeashed != null) {
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            Object obj = builder.canBeLeashed.apply(context);
+            Object obj = builder.canBeLeashed.apply(this);
             if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed(pPlayer));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed());
         }
-        return super.canBeLeashed(pPlayer);
+        return super.canBeLeashed();
     }
 
     @Override
@@ -408,45 +398,6 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     public int getAmbientSoundInterval() {
         if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
         return super.getAmbientSoundInterval();
-    }
-
-    @Override
-    public double getMyRidingOffset() {
-        if (builder.myRidingOffset == null) return super.getMyRidingOffset();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.myRidingOffset.apply(this), "double");
-        if (obj != null) return (double) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for myRidingOffset from entity: " + entityName() + ". Value: " + builder.myRidingOffset.apply(this) + ". Must be a double. Defaulting to " + super.getMyRidingOffset());
-        return super.getMyRidingOffset();
-    }
-
-    @Override
-    public MobType getMobType() {
-        if (builder != null) {
-            return builder.mobType;
-        }
-        return super.getMobType();
-    }
-
-    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
-        ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, (item) -> {
-            return item instanceof BowItem;
-        })));
-        AbstractArrow abstractarrow = this.getArrow(itemstack, pDistanceFactor);
-        if (this.getMainHandItem().getItem() instanceof BowItem) {
-            abstractarrow = ((BowItem) this.getMainHandItem().getItem()).customArrow(abstractarrow);
-        }
-
-        double d0 = pTarget.getX() - this.getX();
-        double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
-        double d2 = pTarget.getZ() - this.getZ();
-        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level().getDifficulty().getId() * 4));
-        this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-        this.level().addFreshEntity(abstractarrow);
-    }
-
-    protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
-        return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
     }
 
     public boolean canJump() {
@@ -475,12 +426,12 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
 
         this.hasImpulse = true;
         onJump();
-        ForgeHooks.onLivingJump(this);
+        CommonHooks.onLivingJump(this);
     }
 
     public boolean shouldJump() {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
+        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.maxUpStep() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -545,7 +496,7 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     @Override
     protected SoundEvent getAmbientSound() {
         if (builder.setAmbientSound != null) {
-            return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setAmbientSound);
+            return BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setAmbientSound);
         } else {
             return super.getAmbientSound();
         }
@@ -575,17 +526,16 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
         return Objects.requireNonNullElseGet(builder.isPersistenceRequired, super::isPersistenceRequired);
     }
 
-
     @Override
-    public double getMeleeAttackRangeSqr(LivingEntity entity) {
-        if (builder.meleeAttackRangeSqr != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.meleeAttackRangeSqr.apply(this), "double");
+    public AABB getAttackBoundingBox() {
+        if (builder.getAttackBoundingBox != null) {
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.getAttackBoundingBox.apply(this), "aabb");
             if (obj != null) {
-                return (double) obj;
+                return (AABB) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityName() + ". Value: " + builder.meleeAttackRangeSqr.apply(this) + ". Must be a double. Defaulting to " + super.getMeleeAttackRangeSqr(entity));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getAttackBoundingBox from entity: " + entityName() + ". Value: " + builder.getAttackBoundingBox.apply(this) + ". Must be an AABB. Defaulting to " + super.getAttackBoundingBox());
         }
-        return super.getMeleeAttackRangeSqr(entity);
+        return super.getAttackBoundingBox();
     }
 
 
@@ -622,7 +572,7 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
 
                     this.setDeltaMovement(newVelocityX, newVelocityY, newVelocityZ);
                     onJump();
-                    ForgeHooks.onLivingJump(this);
+                    CommonHooks.onLivingJump(this);
                 }
             }
 
@@ -665,11 +615,8 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     }
 
     @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
-        if (builder.defaultGoals) {
-            super.registerGoals();
-        }
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
@@ -768,13 +715,13 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     }
 
     @Override
-    protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
+    protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource damageSource, boolean allowDrops) {
         if (builder.dropCustomDeathLoot != null) {
-            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, this);
+            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(serverLevel, damageSource, allowDrops, this);
             EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityName() + "builder for field: dropCustomDeathLoot.");
 
         } else {
-            super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
+            super.dropCustomDeathLoot(serverLevel, damageSource, allowDrops);
         }
     }
 
@@ -849,18 +796,6 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
         return super.getBlockJumpFactor();
     }
-
-    @Override
-    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
-        if (builder == null || builder.setStandingEyeHeight == null)
-            return super.getStandingEyeHeight(pPose, pDimensions);
-        final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setStandingEyeHeight from entity: " + entityName() + ". Value: " + builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + super.getStandingEyeHeight(pPose, pDimensions));
-        return super.getStandingEyeHeight(pPose, pDimensions);
-    }
-
 
     @Override
     public boolean isPushable() {
@@ -1001,7 +936,7 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
         if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
         final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, p_21239_);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
-        if (obj != null) return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        if (obj != null) return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
         return super.getHurtSound(p_21239_);
     }
@@ -1010,14 +945,14 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -1131,7 +1066,7 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setDeathSound));
     }
 
 
@@ -1139,8 +1074,8 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     public @NotNull Fallsounds getFallSounds() {
         if (builder.fallSounds != null)
             return new Fallsounds(
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.smallFallSound)),
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.largeFallSound))
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.smallFallSound)),
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.largeFallSound))
             );
         return super.getFallSounds();
     }
@@ -1148,7 +1083,7 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null)
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.eatingSound));
+            return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.eatingSound));
         return super.getEatingSound(itemStack);
     }
 
@@ -1163,13 +1098,6 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
         }
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onClimbable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super.onClimbable(): " + super.onClimbable());
         return super.onClimbable();
-    }
-
-
-    //Deprecated but still works for 1.20.4 :shrug:
-    @Override
-    public boolean canBreatheUnderwater() {
-        return Objects.requireNonNullElseGet(builder.canBreatheUnderwater, super::canBreatheUnderwater);
     }
 
 
@@ -1369,11 +1297,10 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
         super.stopSleeping();
     }
 
-
     @Override
-    public @NotNull ItemStack eat(@NotNull Level level, @NotNull ItemStack itemStack) {
+    public ItemStack eat(Level level, ItemStack itemStack, FoodProperties properties) {
         if (builder.eat != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, level);
+            final ContextUtils.FoodItemLevelContext context = new ContextUtils.FoodItemLevelContext(this, itemStack, level, properties);
             EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityName() + "builder for field: eat.");
             return itemStack;
         }
@@ -1475,17 +1402,16 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
         super.lavaHurt();
     }
 
-
     @Override
-    public int getExperienceReward() {
+    protected int getBaseExperienceReward() {
         if (builder.experienceReward != null) {
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.experienceReward.apply(this), "integer");
             if (obj != null) {
                 return (int) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getExperienceReward());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getBaseExperienceReward());
         }
-        return super.getExperienceReward();
+        return super.getBaseExperienceReward();
     }
 
 
@@ -1550,15 +1476,16 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
 
 
     @Override
-    public boolean canChangeDimensions() {
+    public boolean canChangeDimensions(Level to, Level from) {
         if (builder.canChangeDimensions != null) {
-            Object obj = builder.canChangeDimensions.apply(this);
+            ContextUtils.ChangeDimensionsContext context = new ContextUtils.ChangeDimensionsContext(this, to, from);
+            Object obj = builder.canChangeDimensions.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions(to, from));
         }
-        return super.canChangeDimensions();
+        return super.canChangeDimensions(to, from);
     }
 
 
@@ -1593,11 +1520,11 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
 
 
     @Override
-    public void onRemovedFromWorld() {
+    public void onRemovedFromLevel() {
         if (builder != null && builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
         }
-        super.onRemovedFromWorld();
+        super.onRemovedFromLevel();
     }
 
 
@@ -1611,12 +1538,11 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
         return super.getMaxFallDistance();
     }
 
-
     @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements) {
+        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements);
         if (builder.lerpTo != null) {
-            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
+            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, this);
             EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
     }
@@ -1632,20 +1558,4 @@ public class PandaEntityJS extends Panda implements IAnimatableJS {
         return handItems;
     }
 
-    @Override
-    public ItemStack getItemBySlot(EquipmentSlot slot) {
-        return switch (slot.getType()) {
-            case HAND -> handItems.get(slot.getIndex());
-            case ARMOR -> armorItems.get(slot.getIndex());
-        };
-    }
-
-    @Override
-    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
-        verifyEquippedItem(stack);
-        switch (slot.getType()) {
-            case HAND -> onEquipItem(slot, handItems.set(slot.getIndex(), stack), stack);
-            case ARMOR -> onEquipItem(slot, armorItems.set(slot.getIndex(), stack), stack);
-        }
-    }
 }

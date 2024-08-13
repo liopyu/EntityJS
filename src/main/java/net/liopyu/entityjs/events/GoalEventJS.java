@@ -31,4 +31,8 @@ public abstract class GoalEventJS<T extends Mob> implements KubeEvent {
         isHorse = mob instanceof AbstractHorse;
         isNeutral = mob instanceof NeutralMob;
     }
+
+    public Mob getEntity() {
+        return this.mob;
+    }
 }

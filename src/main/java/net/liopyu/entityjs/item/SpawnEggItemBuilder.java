@@ -1,12 +1,12 @@
 package net.liopyu.entityjs.item;
 
-import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
+import dev.latvian.mods.kubejs.generator.KubeAssetGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.ForgeSpawnEggItem;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 
 
 public class SpawnEggItemBuilder extends ItemBuilder {
@@ -36,13 +36,13 @@ public class SpawnEggItemBuilder extends ItemBuilder {
 
     @Override
     public Item createObject() {
-        return new ForgeSpawnEggItem(parent, backgroundColor, highlightColor, createItemProperties());
+        return new DeferredSpawnEggItem(parent, backgroundColor, highlightColor, createItemProperties());
     }
 
     @Override
-    public void generateAssetJsons(AssetJsonGenerator generator) {
+    public void generateAssets(KubeAssetGenerator generator) {
         if (modelJson != null) {
-            generator.json(AssetJsonGenerator.asItemModelLocation(id), modelJson);
+            generator.json(KubeAssetGenerator.asItemModelLocation(id), modelJson);
             return;
         }
 
@@ -63,4 +63,5 @@ public class SpawnEggItemBuilder extends ItemBuilder {
             }
         });
     }
+
 }

@@ -42,8 +42,8 @@ public class ModifyAttributeEventJS implements KubeEvent {
     @Info(value = "Returns a list of all attributes the given entity type has by default")
     public List<Attribute> getAttributes(EntityType<? extends LivingEntity> entityType) {
         final List<Attribute> present = new ArrayList<>();
-        for (Attribute attribute : BuiltInRegistries.ATTRIBUTE.getValues()) {
-            if (event.has(entityType, attribute)) {
+        for (Attribute attribute : BuiltInRegistries.ATTRIBUTE.stream().toList()) {
+            if (event.has(entityType, BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute))) {
                 present.add(attribute);
             }
         }
@@ -59,7 +59,7 @@ public class ModifyAttributeEventJS implements KubeEvent {
                 It is safe to add an attribute that an entity type already has
                 """)
         public void add(Attribute attribute) {
-            event.add(type, attribute);
+            event.add(type, BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
         }
 
         @Info(value = """
@@ -72,15 +72,15 @@ public class ModifyAttributeEventJS implements KubeEvent {
         })
         public void add(Object attribute, double defaultValue) {
             if (attribute instanceof String string) {
-                ResourceLocation stringLocation = new ResourceLocation(string.toLowerCase());
-                Attribute att = ForgeRegistries.ATTRIBUTES.getValue(stringLocation);
+                ResourceLocation stringLocation = ResourceLocation.parse(string.toLowerCase());
+                Attribute att = BuiltInRegistries.ATTRIBUTE.get(stringLocation);
                 if (att != null) {
-                    event.add(type, att, defaultValue);
+                    event.add(type, BuiltInRegistries.ATTRIBUTE.wrapAsHolder(att), defaultValue);
                 } else {
                     EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Unable to add attribute, attribute " + attribute + " does not exist");
                 }
             } else if (attribute instanceof Attribute att) {
-                event.add(type, att, defaultValue);
+                event.add(type, BuiltInRegistries.ATTRIBUTE.wrapAsHolder(att), defaultValue);
             } else
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Unable to add attribute, attribute: " + attribute + ". Must be of type Attribute or resource location. Example: \"minecraft:generic.max_health\"");
         }

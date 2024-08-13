@@ -3,6 +3,7 @@ package net.liopyu.entityjs.entities.living.vanilla;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.vanilla.PiglinJSBuilder;
@@ -18,6 +19,7 @@ import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -35,12 +37,14 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -48,13 +52,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.entity.PartEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.ArrayList;
@@ -78,13 +82,17 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     private static final EntityDataAccessor<Boolean> DATA_IS_CHARGING_CROSSBOW;
     private static final EntityDataAccessor<Boolean> DATA_IS_DANCING;
     private static final UUID SPEED_MODIFIER_BABY_UUID;
+    private static final ResourceLocation SPEED_MODIFIER_BABY_ID;
     private static final AttributeModifier SPEED_MODIFIER_BABY;
     protected static final ImmutableList<SensorType<? extends Sensor<? super Piglin>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.HURT_BY, SensorType.PIGLIN_SPECIFIC_SENSOR);
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.DOORS_TO_CLOSE, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS, MemoryModuleType.NEARBY_ADULT_PIGLINS, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.PATH, MemoryModuleType.ANGRY_AT, MemoryModuleType.UNIVERSAL_ANGER, MemoryModuleType.AVOID_TARGET, MemoryModuleType.ADMIRING_ITEM, MemoryModuleType.TIME_TRYING_TO_REACH_ADMIRE_ITEM, MemoryModuleType.ADMIRING_DISABLED, MemoryModuleType.DISABLE_WALK_TO_ADMIRE_ITEM, MemoryModuleType.CELEBRATE_LOCATION, MemoryModuleType.DANCING, MemoryModuleType.HUNTED_RECENTLY, MemoryModuleType.NEAREST_VISIBLE_BABY_HOGLIN, MemoryModuleType.NEAREST_VISIBLE_NEMESIS, MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED, MemoryModuleType.RIDE_TARGET, MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT, MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, MemoryModuleType.NEAREST_VISIBLE_HUNTABLE_HOGLIN, MemoryModuleType.NEAREST_TARGETABLE_PLAYER_NOT_WEARING_GOLD, MemoryModuleType.NEAREST_PLAYER_HOLDING_WANTED_ITEM, MemoryModuleType.ATE_RECENTLY, MemoryModuleType.NEAREST_REPELLENT);
 
     static {
         SPEED_MODIFIER_BABY_UUID = UUID.fromString("766bfa64-11f3-11ea-8d71-362b9e144667");
-        SPEED_MODIFIER_BABY = new AttributeModifier(SPEED_MODIFIER_BABY_UUID, "Baby speed boost", 0.20000000298023224, AttributeModifier.Operation.MULTIPLY_BASE);
+        SPEED_MODIFIER_BABY_ID = ResourceLocation.withDefaultNamespace("baby");
+        SPEED_MODIFIER_BABY = new AttributeModifier(
+                SPEED_MODIFIER_BABY_ID, 0.2F, AttributeModifier.Operation.ADD_MULTIPLIED_BASE
+        );
         DATA_BABY_ID = SynchedEntityData.defineId(PiglinEntityJS.class, EntityDataSerializers.BOOLEAN);
         DATA_IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(PiglinEntityJS.class, EntityDataSerializers.BOOLEAN);
         DATA_IS_DANCING = SynchedEntityData.defineId(PiglinEntityJS.class, EntityDataSerializers.BOOLEAN);
@@ -105,11 +113,11 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
     //Default Piglin behavior
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(DATA_BABY_ID, false);
-        this.entityData.define(DATA_IS_CHARGING_CROSSBOW, false);
-        this.entityData.define(DATA_IS_DANCING, false);
+    protected void defineSynchedData(SynchedEntityData.Builder p_326106_) {
+        super.defineSynchedData(p_326106_);
+        p_326106_.define(DATA_BABY_ID, false);
+        p_326106_.define(DATA_IS_CHARGING_CROSSBOW, false);
+        p_326106_.define(DATA_IS_DANCING, false);
     }
 
     @Override
@@ -214,7 +222,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
 
     @Override
-    protected Brain.Provider<Piglin> brainProvider() {
+    public Brain.Provider<Piglin> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<Piglin> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
@@ -227,11 +235,11 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     @Override
     protected Brain<PiglinEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<PiglinEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
+            final Brain<PiglinEntityJS> brain = Cast.to(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
-            return UtilsJS.cast(super.makeBrain(p_21069_));
+            return Cast.to(super.makeBrain(p_21069_));
         }
     }
 
@@ -246,15 +254,6 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     }
 
     //Mob Overrides
-    @Override
-    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-        if (builder.onInteract != null) {
-            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-            EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
-        }
-        return super.mobInteract(pPlayer, pHand);
-    }
-
     @Override
     public boolean doHurtTarget(Entity pEntity) {
         if (builder != null && builder.onHurtTarget != null) {
@@ -292,18 +291,6 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         } else super.tickDeath();
     }
 
-
-    @Override
-    protected void tickLeash() {
-        super.tickLeash();
-        if (builder.tickLeash != null) {
-            Player $$0 = (Player) this.getLeashHolder();
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, this);
-            EntityJSHelperClass.consumerCallback(builder.tickLeash, context, "[EntityJS]: Error in " + entityName() + "builder for field: tickLeash.");
-
-        }
-    }
-
     @Override
     public void setTarget(@Nullable LivingEntity target) {
         super.setTarget(target);
@@ -323,67 +310,49 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         }
     }
 
-
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        if (builder == null || builder.createNavigation == null) return super.createNavigation(pLevel);
+        if (builder == null || builder.createNavigation == null) return new GroundPathNavigation(this, pLevel);
         final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
         Object obj = builder.createNavigation.apply(context);
         if (obj instanceof PathNavigation p) return p;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
-        return super.createNavigation(pLevel);
+        return new GroundPathNavigation(this, pLevel);
     }
 
     @Override
-    public boolean canBeLeashed(Player pPlayer) {
+    public boolean canBeLeashed() {
         if (builder.canBeLeashed != null) {
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            Object obj = builder.canBeLeashed.apply(context);
+            Object obj = builder.canBeLeashed.apply(this);
             if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed(pPlayer));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed());
         }
-        return super.canBeLeashed(pPlayer);
+        return super.canBeLeashed();
     }
 
     @Override
-    public MobType getMobType() {
-        if (builder != null) {
-            return builder.mobType;
+    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
+        if (builder.removeWhenFarAway == null) {
+            return super.removeWhenFarAway(pDistanceToClosestPlayer);
         }
-        return super.getMobType();
+        final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
+        Object obj = builder.removeWhenFarAway.apply(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
+        return super.removeWhenFarAway(pDistanceToClosestPlayer);
     }
 
     @Override
-    public boolean isConverting() {
-        if (builder.isConverting != null) {
-            Object obj = builder.isConverting.apply(this);
-            if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isConverting from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isConverting());
-        }
-        return super.isConverting();
+    protected double followLeashSpeed() {
+        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
     }
 
     @Override
-    protected void finishConversion(ServerLevel pServerLevel) {
-        if (builder.finishConversion != null) {
-            final ContextUtils.EntityServerLevelContext context = new ContextUtils.EntityServerLevelContext(pServerLevel, this);
-            EntityJSHelperClass.consumerCallback(builder.finishConversion, context, "[EntityJS]: Error in " + entityName() + "builder for field: finishConversion.");
-        }
-        super.finishConversion(pServerLevel);
-    }
-
-    @Override
-    public ItemStack getProjectile(ItemStack pShootable) {
-        if (pShootable.getItem() instanceof ProjectileWeaponItem item) {
-            if (canFireProjectileWeapon(item)) {
-                Predicate<ItemStack> predicate = ((ProjectileWeaponItem) pShootable.getItem()).getSupportedHeldProjectiles();
-                ItemStack itemstack = ProjectileWeaponItem.getHeldProjectile(this, predicate);
-                return net.minecraftforge.common.ForgeHooks.getProjectile(this, pShootable, itemstack.isEmpty() ? new ItemStack(Items.ARROW) : itemstack);
-            }
-            return net.minecraftforge.common.ForgeHooks.getProjectile(this, pShootable, ItemStack.EMPTY);
-        } else {
-            return net.minecraftforge.common.ForgeHooks.getProjectile(this, pShootable, ItemStack.EMPTY);
-        }
+    public int getAmbientSoundInterval() {
+        if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
+        return super.getAmbientSoundInterval();
     }
 
     public boolean canJump() {
@@ -412,12 +381,12 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
         this.hasImpulse = true;
         onJump();
-        ForgeHooks.onLivingJump(this);
+        CommonHooks.onLivingJump(this);
     }
 
     public boolean shouldJump() {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
-        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
+        return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.maxUpStep() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
     }
 
     @Override
@@ -482,7 +451,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     @Override
     protected SoundEvent getAmbientSound() {
         if (builder.setAmbientSound != null) {
-            return ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setAmbientSound);
+            return BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setAmbientSound);
         } else {
             return super.getAmbientSound();
         }
@@ -512,55 +481,18 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         return Objects.requireNonNullElseGet(builder.isPersistenceRequired, super::isPersistenceRequired);
     }
 
-
     @Override
-    public double getMeleeAttackRangeSqr(LivingEntity entity) {
-        if (builder.meleeAttackRangeSqr != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.meleeAttackRangeSqr.apply(this), "double");
+    public AABB getAttackBoundingBox() {
+        if (builder.getAttackBoundingBox != null) {
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.getAttackBoundingBox.apply(this), "aabb");
             if (obj != null) {
-                return (double) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityName() + ". Value: " + builder.meleeAttackRangeSqr.apply(this) + ". Must be a double. Defaulting to " + super.getMeleeAttackRangeSqr(entity));
-                return super.getMeleeAttackRangeSqr(entity);
+                return (AABB) obj;
             }
-        } else {
-            return super.getMeleeAttackRangeSqr(entity);
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getAttackBoundingBox from entity: " + entityName() + ". Value: " + builder.getAttackBoundingBox.apply(this) + ". Must be an AABB. Defaulting to " + super.getAttackBoundingBox());
         }
+        return super.getAttackBoundingBox();
     }
 
-    @Override
-    public int getAmbientSoundInterval() {
-        if (builder.ambientSoundInterval != null) return (int) builder.ambientSoundInterval;
-        return super.getAmbientSoundInterval();
-    }
-
-    @Override
-    public double getMyRidingOffset() {
-        if (builder.myRidingOffset == null) return super.getMyRidingOffset();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.myRidingOffset.apply(this), "double");
-        if (obj != null) return (double) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for myRidingOffset from entity: " + entityName() + ". Value: " + builder.myRidingOffset.apply(this) + ". Must be a double. Defaulting to " + super.getMyRidingOffset());
-        return super.getMyRidingOffset();
-    }
-
-    @Override
-    protected double followLeashSpeed() {
-        return Objects.requireNonNullElseGet(builder.followLeashSpeed, super::followLeashSpeed);
-    }
-
-    @Override
-    public boolean removeWhenFarAway(double pDistanceToClosestPlayer) {
-        if (builder.removeWhenFarAway == null) {
-            return super.removeWhenFarAway(pDistanceToClosestPlayer);
-        }
-        final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
-        Object obj = builder.removeWhenFarAway.apply(context);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for removeWhenFarAway from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.removeWhenFarAway(pDistanceToClosestPlayer));
-        return super.removeWhenFarAway(pDistanceToClosestPlayer);
-    }
 
     //(Base LivingEntity/Entity Overrides)
     @Override
@@ -595,7 +527,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
                     this.setDeltaMovement(newVelocityX, newVelocityY, newVelocityZ);
                     onJump();
-                    ForgeHooks.onLivingJump(this);
+                    CommonHooks.onLivingJump(this);
                 }
             }
 
@@ -638,11 +570,8 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     }
 
     @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
-        if (builder.defaultGoals) {
-            super.registerGoals();
-        }
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
@@ -741,13 +670,13 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     }
 
     @Override
-    protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
+    protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource damageSource, boolean allowDrops) {
         if (builder.dropCustomDeathLoot != null) {
-            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, this);
+            final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(serverLevel, damageSource, allowDrops, this);
             EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityName() + "builder for field: dropCustomDeathLoot.");
 
         } else {
-            super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
+            super.dropCustomDeathLoot(serverLevel, damageSource, allowDrops);
         }
     }
 
@@ -822,18 +751,6 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
         return super.getBlockJumpFactor();
     }
-
-    @Override
-    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
-        if (builder == null || builder.setStandingEyeHeight == null)
-            return super.getStandingEyeHeight(pPose, pDimensions);
-        final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setStandingEyeHeight from entity: " + entityName() + ". Value: " + builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + super.getStandingEyeHeight(pPose, pDimensions));
-        return super.getStandingEyeHeight(pPose, pDimensions);
-    }
-
 
     @Override
     public boolean isPushable() {
@@ -974,7 +891,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
         final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, p_21239_);
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
-        if (obj != null) return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
+        if (obj != null) return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
         return super.getHurtSound(p_21239_);
     }
@@ -983,14 +900,14 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
     }
 
@@ -1104,7 +1021,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
-        return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setDeathSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setDeathSound));
     }
 
 
@@ -1112,8 +1029,8 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     public @NotNull Fallsounds getFallSounds() {
         if (builder.fallSounds != null)
             return new Fallsounds(
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.smallFallSound)),
-                    Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.largeFallSound))
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.smallFallSound)),
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.largeFallSound))
             );
         return super.getFallSounds();
     }
@@ -1121,7 +1038,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null)
-            return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.eatingSound));
+            return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.eatingSound));
         return super.getEatingSound(itemStack);
     }
 
@@ -1136,13 +1053,6 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         }
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onClimbable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super.onClimbable(): " + super.onClimbable());
         return super.onClimbable();
-    }
-
-
-    //Deprecated but still works for 1.20.4 :shrug:
-    @Override
-    public boolean canBreatheUnderwater() {
-        return Objects.requireNonNullElseGet(builder.canBreatheUnderwater, super::canBreatheUnderwater);
     }
 
 
@@ -1342,11 +1252,10 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         super.stopSleeping();
     }
 
-
     @Override
-    public @NotNull ItemStack eat(@NotNull Level level, @NotNull ItemStack itemStack) {
+    public ItemStack eat(Level level, ItemStack itemStack, FoodProperties properties) {
         if (builder.eat != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, level);
+            final ContextUtils.FoodItemLevelContext context = new ContextUtils.FoodItemLevelContext(this, itemStack, level, properties);
             EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityName() + "builder for field: eat.");
             return itemStack;
         }
@@ -1448,17 +1357,16 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         super.lavaHurt();
     }
 
-
     @Override
-    public int getExperienceReward() {
+    protected int getBaseExperienceReward() {
         if (builder.experienceReward != null) {
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.experienceReward.apply(this), "integer");
             if (obj != null) {
                 return (int) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getExperienceReward());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getBaseExperienceReward());
         }
-        return super.getExperienceReward();
+        return super.getBaseExperienceReward();
     }
 
 
@@ -1523,15 +1431,16 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
 
     @Override
-    public boolean canChangeDimensions() {
+    public boolean canChangeDimensions(Level to, Level from) {
         if (builder.canChangeDimensions != null) {
-            Object obj = builder.canChangeDimensions.apply(this);
+            ContextUtils.ChangeDimensionsContext context = new ContextUtils.ChangeDimensionsContext(this, to, from);
+            Object obj = builder.canChangeDimensions.apply(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions(to, from));
         }
-        return super.canChangeDimensions();
+        return super.canChangeDimensions(to, from);
     }
 
 
@@ -1566,11 +1475,11 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
 
     @Override
-    public void onRemovedFromWorld() {
+    public void onRemovedFromLevel() {
         if (builder != null && builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
         }
-        super.onRemovedFromWorld();
+        super.onRemovedFromLevel();
     }
 
 
@@ -1584,13 +1493,13 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         return super.getMaxFallDistance();
     }
 
-
     @Override
-    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
+    public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements) {
+        super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements);
         if (builder.lerpTo != null) {
-            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
+            final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, this);
             EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
     }
+
 }

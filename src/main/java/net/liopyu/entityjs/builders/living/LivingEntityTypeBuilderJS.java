@@ -34,7 +34,7 @@ public class LivingEntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
         if (!js.save) {
             builder.noSave();
         }
-        if (js.immuneTo.length > 0) {
+        if (js.immuneTo != null && js.immuneTo.length > 0) {
             final Block[] blocks = new Block[js.immuneTo.length];
             for (int i = 0; i < js.immuneTo.length; i++) {
                 blocks[i] = BuiltInRegistries.BLOCK.get(js.immuneTo[i]);

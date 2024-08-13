@@ -6,6 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
@@ -18,8 +20,6 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -45,8 +45,8 @@ public enum Behaviors {
             @Param(name = "partnerType", value = "The entity type the animal can breed with, note: both animals must have the same class unless their `canBreed` methods have been overridden"),
             @Param(name = "speedModifier", value = "The modifier to the animal's speed when this behavior is active")
     })
-    public AnimalMakeLove animalMakeLove(EntityType<? extends Animal> partnerType, float speedModifier) {
-        return new AnimalMakeLove(partnerType, speedModifier);
+    public AnimalMakeLove animalMakeLove(EntityType<? extends Animal> partnerType, float speedModifier, int closeEnoughDistance) {
+        return new AnimalMakeLove(partnerType, speedModifier, closeEnoughDistance);
     }
 
     @Info(value = "Creates an `AnimalPanic` behavior, only applicable to **pathfinder** entities", params = {
@@ -251,7 +251,7 @@ public enum Behaviors {
                 maxJumpWidth,
                 maxJumpVelocity,
                 jumpSound,
-                TagKey.create(ForgeRegistries.BLOCKS.getRegistryKey(), preferredBlockTag),
+                TagKey.create(BuiltInRegistries.BLOCK.key(), preferredBlockTag),
                 preferredBlockChance,
                 acceptableLandingSpot
         );

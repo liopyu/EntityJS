@@ -3,6 +3,7 @@ package net.liopyu.entityjs.entities.living.entityjs;
 import dev.latvian.mods.kubejs.util.Cast;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import software.bernie.geckolib.animatable.GeoAnimatable;
@@ -57,8 +58,8 @@ public interface IAnimatableJS extends GeoAnimatable, GeoEntity {
     /**
      * Gets the id of the entity's entity type
      */
-    default String getTypeId() {
-        return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.getKey(getType())).toString();
+    default ResourceKey<EntityType<?>> getTypeId() {
+        return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.getResourceKey(getType())).get();
     }
 
     EntityType<?> getType();

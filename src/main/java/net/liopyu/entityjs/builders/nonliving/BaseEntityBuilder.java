@@ -77,7 +77,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient Function<Entity, Object> showVehicleHealth;
     public transient Consumer<ContextUtils.EThunderHitContext> thunderHit;
     public transient Function<ContextUtils.EDamageContext, Object> isInvulnerableTo;
-    public transient Function<Entity, Object> canChangeDimensions;
+    public transient Function<ContextUtils.ChangeDimensionsContext, Object> canChangeDimensions;
     public transient Function<ContextUtils.EMayInteractContext, Object> mayInteract;
     public transient Function<ContextUtils.ECanTrampleContext, Object> canTrample;
     public transient Consumer<Entity> onRemovedFromWorld;
@@ -736,19 +736,19 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
 
     @Info(value = """
             Sets a predicate function to determine whether the entity can change dimensions.
-            The provided Predicate accepts a {@link Entity} parameter,
+            The provided Predicate accepts a {@link ContextUtils.ChangeDimensionsContext} parameter,
             representing the entity that may attempt to change dimensions.
                         
             Example usage:
             ```javascript
-            entityBuilder.canChangeDimensions(entity => {
+            entityBuilder.canChangeDimensions(ctx => {
                 // Define the conditions for the entity to be able to change dimensions
                 // Use information about the Entity provided by the context.
                 return false // Some boolean condition indicating if the entity can change dimensions;
             });
             ```
             """)
-    public BaseEntityBuilder<T> canChangeDimensions(Function<Entity, Object> supplier) {
+    public BaseEntityBuilder<T> canChangeDimensions(Function<ContextUtils.ChangeDimensionsContext, Object> supplier) {
         canChangeDimensions = supplier;
         return this;
     }

@@ -25,7 +25,7 @@ public class EntityJSMod {
     public EntityJSMod(IEventBus modBus) {
         LOGGER.info("Loading EntityJS-Liopyu");
 
-        EventHandlers.init();
+        EventHandlers.init(modBus);
         RegistryUtil.init(modBus);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {

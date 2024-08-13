@@ -87,7 +87,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient EntityType<?> getType;
     public transient Object mainArm;
     public transient Consumer<ContextUtils.AutoAttackContext> doAutoAttackOnTouch;
-    public transient Function<ContextUtils.EntityPoseDimensionsContext, Object> setStandingEyeHeight;
     public transient Consumer<LivingEntity> onDecreaseAirSupply;
     public transient Consumer<ContextUtils.LivingEntityContext> onBlockedByShield;
     public transient Boolean repositionEntityAfterLoad;
@@ -133,7 +132,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<LivingEntity, Object> isSleeping;
     public transient Consumer<ContextUtils.EntityBlockPosContext> onStartSleeping;
     public transient Consumer<LivingEntity> onStopSleeping;
-    public transient Consumer<ContextUtils.EntityItemLevelContext> eat;
+    public transient Consumer<ContextUtils.FoodItemLevelContext> eat;
     public transient Function<ContextUtils.PlayerEntityContext, Object> shouldRiderFaceForward;
     public transient Function<LivingEntity, Object> canFreeze;
     public transient Function<LivingEntity, Object> isCurrentlyGlowing;
@@ -149,7 +148,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<LivingEntity, Object> showVehicleHealth;
     public transient Consumer<ContextUtils.ThunderHitContext> thunderHit;
     public transient Function<ContextUtils.DamageContext, Object> isInvulnerableTo;
-    public transient Function<LivingEntity, Object> canChangeDimensions;
+    public transient Function<ContextUtils.ChangeDimensionsContext, Object> canChangeDimensions;
     public transient Function<ContextUtils.CalculateFallDamageContext, Object> calculateFallDamage;
     public transient Function<ContextUtils.MayInteractContext, Object> mayInteract;
     public transient Function<ContextUtils.CanTrampleContext, Object> canTrample;
@@ -189,7 +188,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         height = 1;
         summonable = true;
         save = true;
-        //immuneTo = ResourceLocation.parse[0];
         fireImmune = false;
         spawnFarFromPlayer = false;
         clientTrackingRange = 5;
@@ -555,7 +553,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```javascript
             baseLivingEntityBuilder.lerpTo(context => {
                 // Custom lerping logic for the living entity
-                const { x, y, z, yaw, pitch, posRotationIncrements, teleport, entity } = context;
+                const { x, y, z, yaw, pitch, posRotationIncrements, entity } = context;
                 // Perform custom lerping operations using the provided context
                 // For example, you can smoothly move the entity from its current position to the target position
                 entity.setPositionAndRotation(x, y, z, yaw, pitch);
@@ -1126,27 +1124,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> doAutoAttackOnTouch(Consumer<ContextUtils.AutoAttackContext> doAutoAttackOnTouch) {
         this.doAutoAttackOnTouch = doAutoAttackOnTouch;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a function to determine the standing eye height of the entity.
-            The provided Function accepts a {@link ContextUtils.EntityPoseDimensionsContext} parameter,
-            representing the context of the entity's pose and dimensions when standing.
-            It returns a Float representing the standing eye height.
-                        
-            Example usage:
-            ```javascript
-            entityBuilder.setStandingEyeHeight(context => {
-                // Define logic to calculate and return the standing eye height for the entity
-                // Use information about the EntityPoseDimensionsContext provided by the context.
-                return // Some Float value representing the standing eye height;
-            });
-            ```
-            """)
-    public BaseLivingEntityBuilder<T> setStandingEyeHeight(Function<ContextUtils.EntityPoseDimensionsContext, Object> setStandingEyeHeight) {
-        this.setStandingEyeHeight = setStandingEyeHeight;
         return this;
     }
 
@@ -1986,7 +1963,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a callback function to be executed when the entity performs an eating action.
-            The provided Consumer accepts a {@link ContextUtils.EntityItemLevelContext} parameter,
+            The provided Consumer accepts a {@link ContextUtils.FoodItemLevelContext} parameter,
             representing the context of the entity's interaction with a specific item during eating.
                         
             Example usage:
@@ -1997,7 +1974,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> eat(Consumer<ContextUtils.EntityItemLevelContext> function) {
+    public BaseLivingEntityBuilder<T> eat(Consumer<ContextUtils.FoodItemLevelContext> function) {
         eat = function;
         return this;
     }
@@ -2280,19 +2257,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a predicate function to determine whether the entity can change dimensions.
-            The provided Predicate accepts a {@link LivingEntity} parameter,
+            The provided Predicate accepts a {@link ContextUtils.ChangeDimensionContext} parameter,
             representing the entity that may attempt to change dimensions.
                         
             Example usage:
             ```javascript
-            entityBuilder.canChangeDimensions(entity => {
+            entityBuilder.canChangeDimensions(ctx => {
+                const { to, from, entity } = ctx
                 // Define the conditions for the entity to be able to change dimensions
                 // Use information about the LivingEntity provided by the context.
                 return false // Some boolean condition indicating if the entity can change dimensions;
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canChangeDimensions(Function<LivingEntity, Object> supplier) {
+    public BaseLivingEntityBuilder<T> canChangeDimensions(Function<ContextUtils.ChangeDimensionsContext, Object> supplier) {
         canChangeDimensions = supplier;
         return this;
     }

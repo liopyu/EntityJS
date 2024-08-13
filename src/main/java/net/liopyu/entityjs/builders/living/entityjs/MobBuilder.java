@@ -26,7 +26,6 @@ import java.util.function.*;
  */
 public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivingEntityBuilder<T> {
 
-    public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
     public transient SpawnEggItemBuilder eggItem;
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Ingredient canFireProjectileWeapon;
@@ -37,19 +36,31 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     public transient Boolean shouldDespawnInPeaceful;
     public transient Function<Mob, Object> canPickUpLoot;
     public transient Boolean isPersistenceRequired;
-    public transient Function<Mob, Object> meleeAttackRangeSqr;
+    public transient Function<Mob, Object> getAttackBoundingBox;
     public transient Boolean canJump;
-    public transient Function<LivingEntity, Object> myRidingOffset;
+    /*
+        public transient Function<LivingEntity, Object> myRidingOffset;
+    */
     public transient Object ambientSoundInterval;
     public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
-    public transient Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed;
+    public transient Function<LivingEntity, Object> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
+    public transient boolean noEggItem = false;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
         canJump = true;
         ambientSoundInterval = 120;
         canFireProjectileWeaponPredicate = t -> t.projectileWeapon instanceof ProjectileWeaponItem;
+        this.eggItem = new SpawnEggItemBuilder(id, this)
+                .backgroundColor(0)
+                .highlightColor(0);
+    }
+
+    @Info(value = "Indicates that no egg item should be created for this entity type")
+    public MobBuilder<T> noEggItem() {
+        this.noEggItem = true;
+        return this;
     }
 
     @Info(value = "Creates a spawn egg item for this entity type")
@@ -62,9 +73,8 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     @HideFromJS
     @Override
     public void createAdditionalObjects(AdditionalObjectRegistry registry) {
-        if (eggItem != null) {
-            registry.add(Registries.ITEM, eggItem);
-        }
+        if (noEggItem) return;
+        registry.add(Registries.ITEM, eggItem);
     }
 
     @Info(value = """
@@ -88,16 +98,16 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     @Info(value = """
             Sets a function to determine if the entity can be leashed.
                         
-            @param canBeLeashed A Function accepting a ContextUtils.PlayerEntityContext parameter
+            @param canBeLeashed A Function accepting a LivingEntity parameter
                         
             Example usage:
             ```javascript
-            mobBuilder.canBeLeashed(context => {
+            mobBuilder.canBeLeashed(entity => {
                 return true // Return true if the entity can be leashed, false otherwise.
             });
             ```
             """)
-    public MobBuilder<T> canBeLeashed(Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed) {
+    public MobBuilder<T> canBeLeashed(Function<LivingEntity, Object> canBeLeashed) {
         this.canBeLeashed = canBeLeashed;
         return this;
     }
@@ -137,7 +147,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         return this;
     }
 
-    @Info(value = """
+    /*@Info(value = """
             Function which sets the offset for riding on the mob entity.
                         
             @param myRidingOffset The offset value for riding on the mob.
@@ -154,7 +164,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     public MobBuilder<T> myRidingOffset(Function<LivingEntity, Object> myRidingOffset) {
         this.myRidingOffset = myRidingOffset;
         return this;
-    }
+    }*/
 
     @Info(value = """
             Sets whether the entity can jump.
@@ -337,40 +347,19 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     }
 
     @Info(value = """
-            Sets the function to determine the squared melee attack range for the entity.
-                        
-            @param meleeAttackRangeSqr A Function accepting a {@link Mob} parameter,
-                                      defining the squared melee attack range based on the entity's state.
-                                      Returns a 'Double' value representing the squared melee attack range.
+            @param getAttackBoundingBox A Function accepting a {@link Mob} parameter,
+                                      defining the bounding box to check for target intersection attacks.
+                                      Returns an 'AABB' value representing the melee attack range.
             Example usage:
             ```javascript
-            mobBuilder.meleeAttackRangeSqr(entity => {
+            mobBuilder.getAttackBoundingBox(entity => {
                 // Custom logic to calculate the squared melee attack range based on the provided mob.
-                return 2;
+                return entity;
             });
             ```
             """)
-    public MobBuilder<T> meleeAttackRangeSqr(Function<Mob, Object> meleeAttackRangeSqr) {
-        this.meleeAttackRangeSqr = meleeAttackRangeSqr;
-        return this;
-    }
-
-    @Info(value = """
-            Sets the callback function to be executed when the entity ticks while leashed.
-                        
-            @param consumer A Consumer accepting a {@link ContextUtils.PlayerEntityContext} parameter,
-                            defining the behavior to be executed when the entity ticks while leashed.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.tickLeash(context => {
-                // Custom logic to handle the entity's behavior while leashed.
-                // Access information about the player and entity using the provided context.
-            });
-            ```
-            """)
-    public MobBuilder<T> tickLeash(Consumer<ContextUtils.PlayerEntityContext> consumer) {
-        this.tickLeash = consumer;
+    public MobBuilder<T> getAttackBoundingBox(Function<Mob, Object> getAttackBoundingBox) {
+        this.getAttackBoundingBox = getAttackBoundingBox;
         return this;
     }
 

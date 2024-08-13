@@ -1,19 +1,20 @@
 package net.liopyu.entityjs.events;
 
-import dev.latvian.mods.kubejs.event.EventJS;
+import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.SpawnPlacementType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 
-public class RegisterSpawnPlacementsEventJS extends EventJS {
+public class RegisterSpawnPlacementsEventJS implements KubeEvent {
 
-    private final SpawnPlacementRegisterEvent event;
+    private final RegisterSpawnPlacementsEvent event;
 
-    public RegisterSpawnPlacementsEventJS(SpawnPlacementRegisterEvent event) {
+    public RegisterSpawnPlacementsEventJS(RegisterSpawnPlacementsEvent event) {
         this.event = event;
     }
 
@@ -23,8 +24,8 @@ public class RegisterSpawnPlacementsEventJS extends EventJS {
             @Param(name = "heightmap", value = "The heightmap to use"),
             @Param(name = "predicate", value = "The spawn predicate for the entity type's spawning")
     })
-    public <T extends Entity> void replace(EntityType<T> entityType, SpawnPlacements.Type placementType, Heightmap.Types heightmap, SpawnPlacements.SpawnPredicate<T> predicate) {
-        event.register(entityType, placementType, heightmap, predicate, SpawnPlacementRegisterEvent.Operation.REPLACE);
+    public <T extends Entity> void replace(EntityType<T> entityType, SpawnPlacementType placementType, Heightmap.Types heightmap, SpawnPlacements.SpawnPredicate<T> predicate) {
+        event.register(entityType, placementType, heightmap, predicate, RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 
     @Info(value = "ANDs the given spawn predicate with the existing spawn predicates of the given entity type", params = {
@@ -32,7 +33,7 @@ public class RegisterSpawnPlacementsEventJS extends EventJS {
             @Param(name = "predicate", value = "The spawn predicate that will be ANDed with the entity type's existing spawn predicates")
     })
     public <T extends Entity> void and(EntityType<T> entityType, SpawnPlacements.SpawnPredicate<T> predicate) {
-        event.register(entityType, predicate, SpawnPlacementRegisterEvent.Operation.AND);
+        event.register(entityType, predicate, RegisterSpawnPlacementsEvent.Operation.AND);
     }
 
     @Info(value = "ORs the given spawn predicate with the existing spawn predicate of the given entity type", params = {
@@ -40,6 +41,6 @@ public class RegisterSpawnPlacementsEventJS extends EventJS {
             @Param(name = "predicate", value = "The spawn predicate that will be ORed with the entity type's existing spawn predicates")
     })
     public <T extends Entity> void or(EntityType<T> entityType, SpawnPlacements.SpawnPredicate<T> predicate) {
-        event.register(entityType, predicate, SpawnPlacementRegisterEvent.Operation.OR);
+        event.register(entityType, predicate, RegisterSpawnPlacementsEvent.Operation.OR);
     }
 }

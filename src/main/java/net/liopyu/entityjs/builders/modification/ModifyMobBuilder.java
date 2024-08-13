@@ -1,12 +1,10 @@
-package net.liopyu.entityjs.builders.living.modification;
+package net.liopyu.entityjs.builders.modification;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
-import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -18,19 +16,16 @@ import java.util.function.Function;
 public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
     public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
-    public transient Ingredient canFireProjectileWeapon;
-    public transient Function<ContextUtils.EntityProjectileWeaponContext, Object> canFireProjectileWeaponPredicate;
     public transient Consumer<LivingEntity> ate;
     public transient Object setAmbientSound;
     public transient Function<ContextUtils.EntityItemStackContext, Object> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
     public transient Function<Mob, Object> canPickUpLoot;
     public transient Boolean isPersistenceRequired;
-    public transient Function<Mob, Object> meleeAttackRangeSqr;
-    public transient Boolean canJump;
+    public transient Function<Mob, Object> getAttackBoundingBox;
     public transient Object ambientSoundInterval;
     public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
-    public transient Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed;
+    public transient Function<Mob, Object> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
 
     public ModifyMobBuilder(EntityType<?> entity) {
@@ -44,7 +39,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.createNavigation(context => {
+            modifyBuilder.createNavigation(context => {
                 const {entity, level} = context
                 return EntityJSUtils.createWallClimberNavigation(entity, level) // Return some path navigation
             });
@@ -58,16 +53,16 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
     @Info(value = """
             Sets a function to determine if the entity can be leashed.
                         
-            @param canBeLeashed A Function accepting a ContextUtils.PlayerEntityContext parameter
+            @param canBeLeashed A Function accepting a Mob parameter
                         
             Example usage:
             ```javascript
-            mobBuilder.canBeLeashed(context => {
+            modifyBuilder.canBeLeashed(context => {
                 return true // Return true if the entity can be leashed, false otherwise.
             });
             ```
             """)
-    public ModifyMobBuilder canBeLeashed(Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed) {
+    public ModifyMobBuilder canBeLeashed(Function<Mob, Object> canBeLeashed) {
         this.canBeLeashed = canBeLeashed;
         return this;
     }
@@ -80,7 +75,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.removeWhenFarAway(context => {
+            modifyBuilder.removeWhenFarAway(context => {
                 // Custom logic to determine if the entity should be removed when far away
                 // Return true if the entity should be removed based on the provided context.
             });
@@ -99,7 +94,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.ambientSoundInterval(100);
+            modifyBuilder.ambientSoundInterval(100);
             ```
             """)
     public ModifyMobBuilder ambientSoundInterval(int ambientSoundInterval) {
@@ -109,21 +104,6 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
 
     @Info(value = """
-            Sets whether the entity can jump.
-                        
-            @param canJump A boolean indicating whether the entity can jump.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.canJump(true);
-            ```
-            """)
-    public ModifyMobBuilder canJump(boolean canJump) {
-        this.canJump = canJump;
-        return this;
-    }
-
-    @Info(value = """
             Sets a callback function to be executed when the entity's target changes.
                         
             @param setTarget A Consumer accepting a ContextUtils.TargetChangeContext parameter,
@@ -131,7 +111,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.onTargetChanged(context => {
+            modifyBuilder.onTargetChanged(context => {
                 // Custom logic to handle the entity's target change
                 // Access information about the target change using the provided context.
             });
@@ -142,44 +122,6 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
         return this;
     }
 
-    @Info(value = """
-            Sets the ingredient required for the entity to fire a projectile weapon.
-                        
-            @param canFireProjectileWeapon An Ingredient representing the required item for firing a projectile weapon.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.canFireProjectileWeapon([
-                'minecraft:bow',
-                'minecraft:crossbow'
-            ]);
-            ```
-            """)
-    public ModifyMobBuilder canFireProjectileWeapon(Ingredient canFireProjectileWeapon) {
-        this.canFireProjectileWeapon = canFireProjectileWeapon;
-        return this;
-    }
-
-    @Info(value = """
-            Sets a predicate to determine whether the entity can fire a projectile weapon.
-                        
-            @param canFireProjectileWeaponPredicate A Predicate accepting a
-                       ContextUtils.EntityProjectileWeaponContext parameter,
-                       defining the condition under which the entity can fire a projectile weapon.
-                        
-            Example usage:
-            ```javascript
-            mobBuilder.canFireProjectileWeaponPredicate(context => {
-                // Custom logic to determine whether the entity can fire a projectile weapon
-                // Access information about the entity and the projectile weapon using the provided context.
-                return context.projectileWeapon.id == 'minecraft:bow'; // Replace with your specific condition.
-            });
-            ```
-            """)
-    public ModifyMobBuilder canFireProjectileWeaponPredicate(Function<ContextUtils.EntityProjectileWeaponContext, Object> canFireProjectileWeaponPredicate) {
-        this.canFireProjectileWeaponPredicate = canFireProjectileWeaponPredicate;
-        return this;
-    }
 
     @Info(value = """
             Sets a callback function to be executed when the entity performs an eating action.
@@ -189,7 +131,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.ate(entity => {
+            modifyBuilder.ate(entity => {
                 // Custom logic to handle the entity's eating action
                 // Access information about the entity using the provided parameter.
             });
@@ -205,7 +147,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.setAmbientSound("minecraft:entity.zombie.ambient");
+            modifyBuilder.setAmbientSound("minecraft:entity.zombie.ambient");
             ```
             """)
     public ModifyMobBuilder setAmbientSound(Object ambientSound) {
@@ -228,7 +170,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.canHoldItem(context => {
+            modifyBuilder.canHoldItem(context => {
                 // Custom logic to determine whether the entity can hold an item based on the provided context.
                 return true;
             });
@@ -246,7 +188,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.shouldDespawnInPeaceful(true);
+            modifyBuilder.shouldDespawnInPeaceful(true);
             ```
             """)
     public ModifyMobBuilder shouldDespawnInPeaceful(boolean shouldDespawnInPeaceful) {
@@ -262,7 +204,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.canPickUpLoot(entity => {
+            modifyBuilder.canPickUpLoot(entity => {
                 // Custom logic to determine whether the entity can pick up loot based on the provided mob.
                 return true;
             });
@@ -280,7 +222,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.isPersistenceRequired(true);
+            modifyBuilder.isPersistenceRequired(true);
             ```
             """)
     public ModifyMobBuilder isPersistenceRequired(boolean isPersistenceRequired) {
@@ -289,21 +231,19 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
     }
 
     @Info(value = """
-            Sets the function to determine the squared melee attack range for the entity.
-                        
-            @param meleeAttackRangeSqr A Function accepting a {@link Mob} parameter,
-                                      defining the squared melee attack range based on the entity's state.
-                                      Returns a 'Double' value representing the squared melee attack range.
+            @param getAttackBoundingBox A Function accepting a {@link Mob} parameter,
+                                      defining the bounding box to check for target intersection attacks.
+                                      Returns an 'AABB' value representing the melee attack range.
             Example usage:
             ```javascript
-            mobBuilder.meleeAttackRangeSqr(entity => {
+            modifyBuilder.getAttackBoundingBox(entity => {
                 // Custom logic to calculate the squared melee attack range based on the provided mob.
-                return 2;
+                return entity;
             });
             ```
             """)
-    public ModifyMobBuilder meleeAttackRangeSqr(Function<Mob, Object> meleeAttackRangeSqr) {
-        this.meleeAttackRangeSqr = meleeAttackRangeSqr;
+    public ModifyMobBuilder getAttackBoundingBox(Function<Mob, Object> getAttackBoundingBox) {
+        this.getAttackBoundingBox = getAttackBoundingBox;
         return this;
     }
 
@@ -315,7 +255,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
                         
             Example usage:
             ```javascript
-            mobBuilder.tickLeash(context => {
+            modifyBuilder.tickLeash(context => {
                 // Custom logic to handle the entity's behavior while leashed.
                 // Access information about the player and entity using the provided context.
             });

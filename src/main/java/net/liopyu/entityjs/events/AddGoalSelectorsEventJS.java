@@ -1,9 +1,14 @@
 package net.liopyu.entityjs.events;
 
+import dev.latvian.mods.kubejs.script.ConsoleJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.ai.CustomGoal;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,7 +21,6 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -30,6 +34,62 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
 
     public AddGoalSelectorsEventJS(T mob, GoalSelector selector) {
         super(mob, selector);
+    }
+
+    @Info(value = """
+            Remove a goal from the entity via class reference.
+                        
+            Example of usage:
+            =====================================
+            let $PanicGoal = Java.loadClass("net.minecraft.world.entity.ai.goal.PanicGoal")
+            builder.removeGoal($PanicGoal)
+            =====================================
+            """, params = {
+            @Param(name = "goal", value = "The goal class to remove")
+    })
+    public void removeGoal(Class<? extends Goal> goal) {
+        selector.removeAllGoals(g -> goal == g.getClass());
+    }
+
+    @Info(value = """
+            Remove all goals fitting the specified predicate. Returns a boolean
+                        
+            Example of usage:
+            =====================================
+            let $PanicGoal = Java.loadClass("net.minecraft.world.entity.ai.goal.PanicGoal")
+            e.removeGoals(context => {
+                const { goal, entity } = context
+                return goal.getClass() == $PanicGoal
+            })
+            =====================================
+            """, params = {
+            @Param(name = "goalFunction", value = "A function to remove goals with entity & available goals as arguments")
+    })
+    public void removeGoals(Function<ContextUtils.GoalContext, Boolean> goalFunction) {
+        selector.removeAllGoals(g -> {
+            ContextUtils.GoalContext context = new ContextUtils.GoalContext(getEntity(), g);
+            Object remove = EntityJSHelperClass.convertObjectToDesired(goalFunction.apply(context), "boolean");
+            if (remove != null) {
+                return (boolean) remove;
+            } else {
+                ConsoleJS.SERVER.error("[EntityJS]: Failed to remove goals from entity " + getEntity().getName() + ": function must return a boolean.");
+                return false;
+            }
+        });
+    }
+
+    @Info(value = """
+            Remove all goals.
+                        
+            Example of usage:
+            =====================================
+            builder.removeAllGoals()
+            =====================================
+            """, params = {
+            @Param(name = "goal", value = "The goal to remove")
+    })
+    public void removeAllGoals() {
+        selector.removeAllGoals(goal -> true);
     }
 
     @Info(value = """
@@ -117,7 +177,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
     })
     public void breed(int priority, double speedModifier, @Nullable Class<? extends Animal> partnerClass) {
         if (isAnimal) {
-            selector.addGoal(priority, new BreedGoal((Animal) mob, speedModifier, partnerClass != null ? partnerClass : UtilsJS.cast(mob.getClass())));
+            selector.addGoal(priority, new BreedGoal((Animal) mob, speedModifier, partnerClass != null ? partnerClass : Cast.to(mob.getClass())));
         }
     }
 
@@ -136,7 +196,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
     })
     public void removeBlock(int priority, ResourceLocation block, double speedModifier, int verticalSearchRange) {
         if (isPathFinder) {
-            selector.addGoal(priority, new RemoveBlockGoal(Objects.requireNonNull(ForgeRegistries.BLOCKS.getValue(block)), (PathfinderMob) mob, speedModifier, verticalSearchRange));
+            selector.addGoal(priority, new RemoveBlockGoal(Objects.requireNonNull(BuiltInRegistries.BLOCK.get(block)), (PathfinderMob) mob, speedModifier, verticalSearchRange));
         }
     }
 
@@ -199,12 +259,11 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move"),
             @Param(name = "startDistance", value = "The distance away from the owner the mob will start moving"),
-            @Param(name = "stopDistance", value = "The distance away from the owner the mob will stop moving"),
-            @Param(name = "canFly", value = "If the mob can teleport into leaves") // Yes, this is what it means
+            @Param(name = "stopDistance", value = "The distance away from the owner the mob will stop moving")
     })
-    public void followOwner(int priority, double speedModifier, float startDistance, float stopDistance, boolean canFly) {
+    public void followOwner(int priority, double speedModifier, float startDistance, float stopDistance) {
         if (isTamable) {
-            selector.addGoal(priority, new FollowOwnerGoal((TamableAnimal) mob, speedModifier, startDistance, stopDistance, canFly));
+            selector.addGoal(priority, new FollowOwnerGoal((TamableAnimal) mob, speedModifier, startDistance, stopDistance));
         }
     }
 
@@ -431,7 +490,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "canUseSelector", value = "Determines when the item may be used")
     })
     public void useItem(int priority, ItemStack itemToUse, @Nullable ResourceLocation soundEvent, Predicate<T> canUseSelector) {
-        selector.addGoal(priority, new UseItemGoal<>(mob, itemToUse, soundEvent == null ? null : ForgeRegistries.SOUND_EVENTS.getValue(soundEvent), canUseSelector)); // I like this one, interesting function and not stupidly restricted, Mojang please more of these :)
+        selector.addGoal(priority, new UseItemGoal<>(mob, itemToUse, soundEvent == null ? null : BuiltInRegistries.SOUND_EVENT.get(soundEvent), canUseSelector)); // I like this one, interesting function and not stupidly restricted, Mojang please more of these :)
     }
 
     @Info(value = "Adds a `WaterAvoidingRandomFlyingGoal` to the entity, only applicable to **pathfinder** mobs", params = {

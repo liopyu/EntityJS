@@ -3,10 +3,9 @@ package net.liopyu.entityjs.util;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.living.modification.ModifyEntityBuilder;
+import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
-import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
@@ -15,11 +14,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
@@ -34,15 +35,27 @@ import net.neoforged.neoforge.entity.PartEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 
 public class ContextUtils {
-    public static class BuilderContext {
-        @Info("The vehicle entity")
+    public static class ChangeDimensionsContext {
         public final Entity entity;
-        @Info("The vehicle entity")
-        public final ModifyEntityBuilder builder;
+        public final Level to;
+        public final Level from;
 
-        public BuilderContext(Entity entity, ModifyEntityBuilder builder) {
+        public ChangeDimensionsContext(Entity entity, Level to, Level from) {
             this.entity = entity;
-            this.builder = builder;
+            this.to = to;
+            this.from = from;
+        }
+    }
+
+    public static class GoalContext {
+        @Info("The mob entity")
+        public final Mob entity;
+        @Info("The goal from the mob's current goal list")
+        public final Goal goal;
+
+        public GoalContext(Mob entity, Goal goal) {
+            this.entity = entity;
+            this.goal = goal;
         }
     }
 
@@ -290,6 +303,26 @@ public class ContextUtils {
             this.entity = entity;
             this.itemStack = itemStack;
             this.level = level;
+        }
+    }
+
+    public static class FoodItemLevelContext {
+        @Info("The living entity")
+        public final LivingEntity entity;
+
+        @Info("The item stack")
+        public final ItemStack itemStack;
+
+        @Info("The level")
+        public final Level level;
+        @Info("The food properties of the itemStack being eaten")
+        public final FoodProperties foodProperties;
+
+        public FoodItemLevelContext(LivingEntity entity, ItemStack itemStack, Level level, FoodProperties properties) {
+            this.entity = entity;
+            this.itemStack = itemStack;
+            this.level = level;
+            this.foodProperties = properties;
         }
     }
 
@@ -659,8 +692,8 @@ public class ContextUtils {
         @Info("The source of the damage causing the loot")
         public final DamageSource damageSource;
 
-        @Info("The looting multiplier for the loot")
-        public final int lootingMultiplier;
+        @Info("The server level")
+        public final ServerLevel serverLevel;
 
         @Info("Whether the entity was hit by a player or not")
         public final boolean hitByPlayer;
@@ -668,9 +701,9 @@ public class ContextUtils {
         @Info("The living entity involved")
         public final LivingEntity entity;
 
-        public EntityLootContext(DamageSource damageSource, int lootingMultiplier, boolean hitByPlayer, LivingEntity entity) {
+        public EntityLootContext(ServerLevel serverLevel, DamageSource damageSource, boolean hitByPlayer, LivingEntity entity) {
             this.damageSource = damageSource;
-            this.lootingMultiplier = lootingMultiplier;
+            this.serverLevel = serverLevel;
             this.hitByPlayer = hitByPlayer;
             this.entity = entity;
         }
@@ -803,20 +836,16 @@ public class ContextUtils {
         @Info("The number of position rotation increments")
         public final int posRotationIncrements;
 
-        @Info("Whether to teleport the entity")
-        public final boolean teleport;
-
         @Info("The entity to lerp")
         public final Entity entity;
 
-        public LerpToContext(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport, Entity entity) {
+        public LerpToContext(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, Entity entity) {
             this.x = x;
             this.y = y;
             this.z = z;
             this.yaw = yaw;
             this.pitch = pitch;
             this.posRotationIncrements = posRotationIncrements;
-            this.teleport = teleport;
             this.entity = entity;
         }
     }
