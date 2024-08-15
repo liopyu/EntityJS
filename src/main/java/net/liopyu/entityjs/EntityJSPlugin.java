@@ -56,6 +56,8 @@ public class EntityJSPlugin extends KubeJSPlugin {
         RegistryInfo.ENTITY_TYPE.addType("minecraft:eye_of_ender", EyeOfEnderJSBuilder.class, EyeOfEnderJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:piglin", PiglinJSBuilder.class, PiglinJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:wither", WitherJSBuilder.class, WitherJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("minecraft:slime", SlimeJSBuilder.class, SlimeJSBuilder::new);
+
         if (Platform.isModLoaded("cgm") && Platform.isModLoaded("framework")) {
             LOGGER.info("Loading CGM EntityJS Compatibility");
             RegistryInfo.ENTITY_TYPE.addType("cgm:ammo", CGMProjectileEntityJSBuilder.class, CGMProjectileEntityJSBuilder::new);
