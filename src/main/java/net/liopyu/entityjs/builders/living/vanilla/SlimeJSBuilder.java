@@ -31,11 +31,25 @@ public class SlimeJSBuilder extends MobBuilder<SlimeEntityJS> {
                         
             Example usage:
             ```javascript
-            builder.setSquishSound(false);
+            builder.setSquishSound("block.azalea.hit");
             ```
             """)
     public SlimeJSBuilder setSquishSound(SoundEvent sound) {
         this.setSquishSound = sound;
+        return this;
+    }
+
+    @Info(value = """  
+            @param setParticleType Sets the particles emitted off the slime
+            Defaults to slime particles
+                        
+            Example usage:
+            ```javascript
+            builder.setParticleType("crit");
+            ```
+            """)
+    public SlimeJSBuilder setParticleType(ParticleType<?> type) {
+        this.setParticleType = (ParticleOptions) type;
         return this;
     }
 
@@ -55,19 +69,6 @@ public class SlimeJSBuilder extends MobBuilder<SlimeEntityJS> {
         return this;
     }
 
-    @Info(value = """  
-            @param setParticleType Sets the particles emitted off the slime
-            Defaults to slime particles
-                        
-            Example usage:
-            ```javascript
-            builder.setParticleType(false);
-            ```
-            """)
-    public SlimeJSBuilder setParticleType(ParticleType<?> type) {
-        this.setParticleType = (ParticleOptions) type;
-        return this;
-    }
 
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
