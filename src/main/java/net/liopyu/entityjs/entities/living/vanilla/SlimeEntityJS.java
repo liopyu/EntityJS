@@ -306,28 +306,6 @@ public class SlimeEntityJS extends Slime implements IAnimatableJS {
         return super.getMobType();
     }
 
-    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
-        ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, (item) -> {
-            return item instanceof BowItem;
-        })));
-        AbstractArrow abstractarrow = this.getArrow(itemstack, pDistanceFactor);
-        if (this.getMainHandItem().getItem() instanceof BowItem) {
-            abstractarrow = ((BowItem) this.getMainHandItem().getItem()).customArrow(abstractarrow);
-        }
-
-        double d0 = pTarget.getX() - this.getX();
-        double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
-        double d2 = pTarget.getZ() - this.getZ();
-        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level().getDifficulty().getId() * 4));
-        this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-        this.level().addFreshEntity(abstractarrow);
-    }
-
-    protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
-        return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
-    }
-
     public boolean canJump() {
         return Objects.requireNonNullElse(builder.canJump, true);
     }
@@ -361,6 +339,29 @@ public class SlimeEntityJS extends Slime implements IAnimatableJS {
         BlockPos forwardPos = this.blockPosition().relative(this.getDirection());
         return this.level().loadedAndEntityCanStandOn(forwardPos, this) && this.getStepHeight() < this.level().getBlockState(forwardPos).getShape(this.level(), forwardPos).max(Direction.Axis.Y);
     }
+
+    public void performRangedAttack(LivingEntity pTarget, float pDistanceFactor) {
+        ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, (item) -> {
+            return item instanceof BowItem;
+        })));
+        AbstractArrow abstractarrow = this.getArrow(itemstack, pDistanceFactor);
+        if (this.getMainHandItem().getItem() instanceof BowItem) {
+            abstractarrow = ((BowItem) this.getMainHandItem().getItem()).customArrow(abstractarrow);
+        }
+
+        double d0 = pTarget.getX() - this.getX();
+        double d1 = pTarget.getY(0.3333333333333333) - abstractarrow.getY();
+        double d2 = pTarget.getZ() - this.getZ();
+        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+        abstractarrow.shoot(d0, d1 + d3 * 0.20000000298023224, d2, 1.6F, (float) (14 - this.level().getDifficulty().getId() * 4));
+        this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.level().addFreshEntity(abstractarrow);
+    }
+
+    protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {
+        return ProjectileUtil.getMobArrow(this, pArrowStack, pVelocity);
+    }
+
 
     @Override
     public HumanoidArm getMainArm() {
@@ -935,12 +936,6 @@ public class SlimeEntityJS extends Slime implements IAnimatableJS {
     }
 
 
-    /*@Override
-    public boolean rideableUnderWater() {
-        return Objects.requireNonNullElseGet(builder.rideableUnderWater, super::rideableUnderWater);
-    }*/
-
-
     @Override
     public boolean shouldDropExperience() {
         if (builder.shouldDropExperience != null) {
@@ -1306,7 +1301,6 @@ public class SlimeEntityJS extends Slime implements IAnimatableJS {
         return super.isFreezing();
     }
 
-
     @Override
     public boolean isCurrentlyGlowing() {
         if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
@@ -1393,7 +1387,7 @@ public class SlimeEntityJS extends Slime implements IAnimatableJS {
         if (builder.playerTouch != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
             EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
-        }
+        } else super.playerTouch(p_20081_);
     }
 
 
@@ -1446,7 +1440,6 @@ public class SlimeEntityJS extends Slime implements IAnimatableJS {
         }
         return super.canChangeDimensions();
     }
-
 
     @Override
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
