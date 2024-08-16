@@ -6,6 +6,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import dev.latvian.mods.rhino.util.RemapForJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
@@ -182,6 +183,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public final List<GeoLayerJSBuilder<T>> layerList = new ArrayList<>();
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
+    public transient List<String> superMethods = new ArrayList<>();
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -216,6 +218,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         scaleHeight = 1F;
         scaleWidth = 1F;
     }
+
+   /* @RemapForJS("ejs$")
+    @Info(value = """
+            @param super Adds a method to be called regardless of having a builder.
+                            
+                Example usage:
+                ```javascript
+                entityBuilder.super("playertouch");
+                ```
+            """)
+    public BaseLivingEntityBuilder<T> ejs$super(String string) {
+        this.superMethods.add(string);
+        return this;
+    }*/
 
     @Info(value = """
             @param positionRider A consumer determining the position of rider/riders.

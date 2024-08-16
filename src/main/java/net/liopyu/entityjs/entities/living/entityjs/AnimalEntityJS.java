@@ -1541,6 +1541,13 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
             EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
         } else super.playerTouch(p_20081_);
+
+        /*StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        String thisMethod = stackTrace[1].getMethodName();
+
+        if (builder.playerTouch != null && builder.superMethods.contains(thisMethod)) {
+            super.playerTouch(p_20081_);
+        }*/
     }
 
 
