@@ -1511,7 +1511,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
         if (builder.playerTouch != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
             EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
-        }
+        } else super.playerTouch(p_20081_);
     }
 
 
