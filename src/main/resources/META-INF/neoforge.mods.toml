@@ -37,3 +37,5 @@ mandatory = true
 versionRange = "[4.5,)"
 ordering = "NONE"
 side = "BOTH"
+[[mixins]]
+config = "entityjs.mixins.json"
