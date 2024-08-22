@@ -4,6 +4,8 @@ import dev.latvian.mods.kubejs.script.ConsoleJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.SpawnPlacementType;
+import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.phys.AABB;
 import software.bernie.geckolib.animation.Animation;
 
@@ -179,6 +181,33 @@ public class EntityJSHelperClass {
             prevZ = currentZ;
 
             return moving;
+        }
+    }
+
+    public enum SpawnPlacementTypeEnum {
+        NO_RESTRICTIONS,
+        IN_WATER,
+        IN_LAVA,
+        ON_GROUND
+    }
+
+    public static SpawnPlacementType getSpawnPlacementType(SpawnPlacementTypeEnum typeEnum) {
+        switch (typeEnum) {
+            case IN_LAVA -> {
+                return SpawnPlacementTypes.IN_LAVA;
+            }
+            case ON_GROUND -> {
+                return SpawnPlacementTypes.ON_GROUND;
+            }
+            case IN_WATER -> {
+                return SpawnPlacementTypes.IN_WATER;
+            }
+            case NO_RESTRICTIONS -> {
+                return SpawnPlacementTypes.NO_RESTRICTIONS;
+            }
+            default -> {
+                return SpawnPlacementTypes.NO_RESTRICTIONS;
+            }
         }
     }
 }

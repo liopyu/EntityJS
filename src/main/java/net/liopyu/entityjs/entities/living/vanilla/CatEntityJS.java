@@ -313,10 +313,10 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder p_325925_) {
-        super.defineSynchedData(p_325925_);
-        p_325925_.define(DATA_INTERESTED_ID, false);
-        p_325925_.define(DATA_REMAINING_ANGER_TIME, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder p_326034_) {
+        super.defineSynchedData(p_326034_);
+        p_326034_.define(DATA_INTERESTED_ID, false);
+        p_326034_.define(DATA_REMAINING_ANGER_TIME, 0);
     }
 
     @Override

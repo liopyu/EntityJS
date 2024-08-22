@@ -54,10 +54,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -315,8 +312,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder p_326034_) {
         super.defineSynchedData(p_326034_);
-        p_326034_.define(DATA_FLAGS_ID, (byte) 0);
-        p_326034_.define(DATA_OWNERUUID_ID, Optional.empty());
+        p_326034_.define(DATA_INTERESTED_ID, false);
+        p_326034_.define(DATA_REMAINING_ANGER_TIME, 0);
     }
 
     @Override

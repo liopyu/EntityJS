@@ -3,10 +3,8 @@ package net.liopyu.entityjs.events;
 import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.SpawnPlacementType;
-import net.minecraft.world.entity.SpawnPlacements;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 
@@ -24,8 +22,8 @@ public class RegisterSpawnPlacementsEventJS implements KubeEvent {
             @Param(name = "heightmap", value = "The heightmap to use"),
             @Param(name = "predicate", value = "The spawn predicate for the entity type's spawning")
     })
-    public <T extends Entity> void replace(EntityType<T> entityType, SpawnPlacementType placementType, Heightmap.Types heightmap, SpawnPlacements.SpawnPredicate<T> predicate) {
-        event.register(entityType, placementType, heightmap, predicate, RegisterSpawnPlacementsEvent.Operation.REPLACE);
+    public <T extends Entity> void replace(EntityType<T> entityType, EntityJSHelperClass.SpawnPlacementTypeEnum placementType, Heightmap.Types heightmap, SpawnPlacements.SpawnPredicate<T> predicate) {
+        event.register(entityType, EntityJSHelperClass.getSpawnPlacementType(placementType), heightmap, predicate, RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 
     @Info(value = "ANDs the given spawn predicate with the existing spawn predicates of the given entity type", params = {

@@ -12,6 +12,5 @@
     "ProjectileMixin",
     "ServerScriptManagerMixin"
   ],
-  "client": [],
-  "refmap": "entityjs.refmap.json"
+  "client": []
 }
