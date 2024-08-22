@@ -420,15 +420,19 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
         return super.getAttackBoundingBox();
     }
 
-
     //(Base LivingEntity/Entity Overrides)
     @Override
     public boolean isAlliedTo(Entity pEntity) {
         if (builder.isAlliedTo != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            Object obj = builder.isAlliedTo.apply(context);
-            if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
+            try {
+                Object obj = builder.isAlliedTo.apply(context);
+                if (obj instanceof Boolean b) return b;
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity), e);
+                return super.isAlliedTo(pEntity);
+            }
         }
         return super.isAlliedTo(pEntity);
     }
@@ -652,12 +656,689 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
     public boolean canCollideWith(Entity pEntity) {
         if (builder.canCollideWith != null) {
             final ContextUtils.CollidingEntityContext context = new ContextUtils.CollidingEntityContext(this, pEntity);
-            Object obj = builder.canCollideWith.apply(context);
-            if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
+            try {
+                Object obj = builder.canCollideWith.apply(context);
+                if (obj instanceof Boolean b) return b;
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canCollideWith. Defaulting to " + super.canCollideWith(pEntity), e);
+                return super.canCollideWith(pEntity);
+            }
         }
         return super.canCollideWith(pEntity);
     }
+
+    @Override
+    protected float getBlockSpeedFactor() {
+        if (builder.blockSpeedFactor != null) {
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
+                if (obj != null) {
+                    return (float) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + builder.get() + ". Value: " + builder.blockSpeedFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockSpeedFactor());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: blockSpeedFactor. Defaulting to " + super.getBlockSpeedFactor(), e);
+            }
+        }
+        return super.getBlockSpeedFactor();
+    }
+
+
+    @Override
+    protected float getBlockJumpFactor() {
+        if (builder.setBlockJumpFactor != null) {
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor.apply(this), "float");
+                if (obj != null) {
+                    return (float) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: setBlockJumpFactor. Defaulting to " + super.getBlockJumpFactor(), e);
+            }
+        }
+        return super.getBlockJumpFactor();
+    }
+
+
+    @Override
+    protected boolean canAddPassenger(@NotNull Entity entity) {
+        if (builder.canAddPassenger != null) {
+            final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(entity, this);
+            try {
+                Object obj = builder.canAddPassenger.apply(context);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAddPassenger from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean, defaulting to " + super.canAddPassenger(entity));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canAddPassenger. Defaulting to " + super.canAddPassenger(entity), e);
+            }
+        }
+        return super.canAddPassenger(entity);
+    }
+
+
+    @Override
+    protected boolean shouldDropLoot() {
+        if (builder.shouldDropLoot != null) {
+            try {
+                Object obj = builder.shouldDropLoot.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropLoot from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean, defaulting to " + super.shouldDropLoot());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: shouldDropLoot. Defaulting to " + super.shouldDropLoot(), e);
+            }
+        }
+        return super.shouldDropLoot();
+    }
+
+
+    @Override
+    protected boolean isAffectedByFluids() {
+        if (builder.isAffectedByFluids != null) {
+            try {
+                Object obj = builder.isAffectedByFluids.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByFluids from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAffectedByFluids());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: isAffectedByFluids. Defaulting to " + super.isAffectedByFluids(), e);
+            }
+        }
+        return super.isAffectedByFluids();
+    }
+
+    @Override
+    protected boolean isImmobile() {
+        if (builder.isImmobile != null) {
+            try {
+                Object obj = builder.isImmobile.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isImmobile from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isImmobile());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: isImmobile. Defaulting to " + super.isImmobile(), e);
+            }
+        }
+        return super.isImmobile();
+    }
+
+
+    @Override
+    protected boolean isFlapping() {
+        if (builder.isFlapping != null) {
+            try {
+                Object obj = builder.isFlapping.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFlapping from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFlapping());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: isFlapping. Defaulting to " + super.isFlapping(), e);
+            }
+        }
+        return super.isFlapping();
+    }
+
+
+    @Override
+    public int calculateFallDamage(float fallDistance, float pDamageMultiplier) {
+        if (builder.calculateFallDamage != null) {
+            final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(fallDistance, pDamageMultiplier, this);
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.calculateFallDamage.apply(context), "integer");
+                if (obj != null) {
+                    return (int) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for calculateFallDamage from entity: " + entityName() + ". Value: " + builder.calculateFallDamage.apply(context) + ". Must be an int, defaulting to " + super.calculateFallDamage(fallDistance, pDamageMultiplier));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: calculateFallDamage. Defaulting to " + super.calculateFallDamage(fallDistance, pDamageMultiplier), e);
+            }
+        }
+        return super.calculateFallDamage(fallDistance, pDamageMultiplier);
+    }
+
+    @Override
+    protected float nextStep() {
+        if (builder.nextStep != null) {
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.nextStep.apply(this), "float");
+                if (obj != null) {
+                    return (float) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityName() + ". Value: " + builder.nextStep.apply(this) + ". Must be a float, defaulting to " + super.nextStep());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: nextStep. Defaulting to " + super.nextStep(), e);
+            }
+        }
+        return super.nextStep();
+    }
+
+
+    @Nullable
+    @Override
+    protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
+        if (builder.setHurtSound != null) {
+            final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, p_21239_);
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
+                if (obj != null) {
+                    return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: setHurtSound. Defaulting to \"minecraft:entity.generic.hurt\"", e);
+            }
+        }
+        return super.getHurtSound(p_21239_);
+    }
+
+    @Override
+    public boolean canAttackType(@NotNull EntityType<?> entityType) {
+        if (builder.canAttackType != null) {
+            final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(this, entityType);
+            try {
+                Object obj = builder.canAttackType.apply(context);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttackType from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canAttackType(entityType));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canAttackType. Defaulting to " + super.canAttackType(entityType), e);
+            }
+        }
+        return super.canAttackType(entityType);
+    }
+
+    @Override
+    public float getScale() {
+        if (builder.scale != null) {
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.scale.apply(this), "float");
+                if (obj != null) {
+                    return (float) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for scale from entity: " + entityName() + ". Value: " + builder.scale.apply(this) + ". Must be a float. Defaulting to " + super.getScale());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: scale. Defaulting to " + super.getScale(), e);
+            }
+        }
+        return super.getScale();
+    }
+
+    @Override
+    public boolean shouldDropExperience() {
+        if (builder.shouldDropExperience != null) {
+            try {
+                Object obj = builder.shouldDropExperience.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropExperience from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.shouldDropExperience());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: shouldDropExperience. Defaulting to " + super.shouldDropExperience(), e);
+            }
+        }
+        return super.shouldDropExperience();
+    }
+
+    @Override
+    public double getVisibilityPercent(@Nullable Entity p_20969_) {
+        if (builder.visibilityPercent != null) {
+            final ContextUtils.VisualContext context = new ContextUtils.VisualContext(p_20969_, this);
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.visibilityPercent.apply(context), "double");
+                if (obj != null) {
+                    return (double) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityName() + ". Value: " + builder.visibilityPercent.apply(context) + ". Must be a double. Defaulting to " + super.getVisibilityPercent(p_20969_));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: visibilityPercent. Defaulting to " + super.getVisibilityPercent(p_20969_), e);
+            }
+        }
+        return super.getVisibilityPercent(p_20969_);
+    }
+
+
+    @Override
+    public boolean canAttack(@NotNull LivingEntity entity) {
+        if (builder.canAttack != null) {
+            final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(this, entity);
+            try {
+                Object obj = builder.canAttack.apply(context);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj && super.canAttack(entity);
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttack from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canAttack(entity));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canAttack. Defaulting to " + super.canAttack(entity), e);
+            }
+        }
+        return super.canAttack(entity);
+    }
+
+    @Override
+    public boolean canBeAffected(@NotNull MobEffectInstance effectInstance) {
+        if (builder.canBeAffected != null) {
+            final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
+            try {
+                Object result = builder.canBeAffected.apply(context);
+                if (result instanceof Boolean) {
+                    return (boolean) result;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeAffected from entity: " + entityName() + ". Value: " + result + ". Must be a boolean. Defaulting to " + super.canBeAffected(effectInstance));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canBeAffected. Defaulting to " + super.canBeAffected(effectInstance), e);
+            }
+        }
+        return super.canBeAffected(effectInstance);
+    }
+
+
+    @Override
+    public boolean isInvertedHealAndHarm() {
+        if (builder.invertedHealAndHarm != null) {
+            try {
+                Object obj = builder.invertedHealAndHarm.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for invertedHealAndHarm from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isInvertedHealAndHarm());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: invertedHealAndHarm. Defaulting to " + super.isInvertedHealAndHarm(), e);
+            }
+        }
+        return super.isInvertedHealAndHarm();
+    }
+
+    @Override
+    public boolean onClimbable() {
+        if (builder.onClimbable != null) {
+            try {
+                Object obj = builder.onClimbable.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onClimbable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super.onClimbable(): " + super.onClimbable());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: onClimbable. Defaulting to " + super.onClimbable(), e);
+            }
+        }
+        return super.onClimbable();
+    }
+
+
+    @Override
+    public float getJumpBoostPower() {
+        if (builder.jumpBoostPower != null) {
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "float");
+                if (obj != null) {
+                    return (float) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: jumpBoostPower. Defaulting to " + super.getJumpBoostPower(), e);
+            }
+        }
+        return super.getJumpBoostPower();
+    }
+
+    @Override
+    public boolean canStandOnFluid(@NotNull FluidState fluidState) {
+        if (builder.canStandOnFluid != null) {
+            final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(this, fluidState);
+            try {
+                Object obj = builder.canStandOnFluid.apply(context);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canStandOnFluid from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canStandOnFluid(fluidState));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canStandOnFluid. Defaulting to " + super.canStandOnFluid(fluidState), e);
+            }
+        }
+        return super.canStandOnFluid(fluidState);
+    }
+
+    @Override
+    public boolean isSensitiveToWater() {
+        if (builder.isSensitiveToWater != null) {
+            try {
+                Object obj = builder.isSensitiveToWater.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSensitiveToWater from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isSensitiveToWater());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: isSensitiveToWater. Defaulting to " + super.isSensitiveToWater(), e);
+            }
+        }
+        return super.isSensitiveToWater();
+    }
+
+    @Override
+    public boolean hasLineOfSight(@NotNull Entity entity) {
+        if (builder.hasLineOfSight != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entity, this);
+            try {
+                Object obj = builder.hasLineOfSight.apply(context);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: hasLineOfSight. Defaulting to " + super.hasLineOfSight(entity), e);
+            }
+        }
+        return super.hasLineOfSight(entity);
+    }
+
+    @Override
+    public boolean isAffectedByPotions() {
+        if (builder.isAffectedByPotions != null) {
+            try {
+                Object obj = builder.isAffectedByPotions.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByPotions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAffectedByPotions());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: isAffectedByPotions. Defaulting to " + super.isAffectedByPotions(), e);
+            }
+        }
+        return super.isAffectedByPotions();
+    }
+
+    @Override
+    public boolean attackable() {
+        if (builder.isAttackable != null) {
+            try {
+                Object obj = builder.isAttackable.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAttackable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.attackable());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: isAttackable. Defaulting to " + super.attackable(), e);
+            }
+        }
+        return super.attackable();
+    }
+
+    @Override
+    public boolean canTakeItem(@NotNull ItemStack itemStack) {
+        if (builder.canTakeItem != null) {
+            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
+            try {
+                Object obj = builder.canTakeItem.apply(context);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTakeItem from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTakeItem(itemStack));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canTakeItem. Defaulting to " + super.canTakeItem(itemStack), e);
+            }
+        }
+        return super.canTakeItem(itemStack);
+    }
+
+    @Override
+    public boolean isSleeping() {
+        if (builder.isSleeping != null) {
+            try {
+                Object obj = builder.isSleeping.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSleeping from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isSleeping());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: isSleeping. Defaulting to " + super.isSleeping(), e);
+            }
+        }
+        return super.isSleeping();
+    }
+
+    @Override
+    public boolean shouldRiderFaceForward(@NotNull Player player) {
+        if (builder.shouldRiderFaceForward != null) {
+            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, this);
+            try {
+                Object obj = builder.shouldRiderFaceForward.apply(context);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldRiderFaceForward from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.shouldRiderFaceForward(player));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: shouldRiderFaceForward. Defaulting to " + super.shouldRiderFaceForward(player), e);
+            }
+        }
+        return super.shouldRiderFaceForward(player);
+    }
+
+    @Override
+    public boolean canFreeze() {
+        if (builder.canFreeze != null) {
+            try {
+                Object obj = builder.canFreeze.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canFreeze());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canFreeze. Defaulting to " + super.canFreeze(), e);
+            }
+        }
+        return super.canFreeze();
+    }
+
+    @Override
+    public boolean isFreezing() {
+        if (builder.isFreezing != null) {
+            try {
+                Object obj = builder.isFreezing.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFreezing());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: isFreezing. Defaulting to " + super.isFreezing(), e);
+            }
+        }
+        return super.isFreezing();
+    }
+
+    @Override
+    public boolean isCurrentlyGlowing() {
+        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+            try {
+                Object obj = builder.isCurrentlyGlowing.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isCurrentlyGlowing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isCurrentlyGlowing());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: isCurrentlyGlowing. Defaulting to " + super.isCurrentlyGlowing(), e);
+            }
+        }
+        return super.isCurrentlyGlowing();
+    }
+
+    @Override
+    public boolean canDisableShield() {
+        if (builder.canDisableShield != null) {
+            try {
+                Object obj = builder.canDisableShield.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canDisableShield from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canDisableShield());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canDisableShield. Defaulting to " + super.canDisableShield(), e);
+            }
+        }
+        return super.canDisableShield();
+    }
+
+    @Override
+    protected int getBaseExperienceReward() {
+        if (builder.experienceReward != null) {
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.experienceReward.apply(this), "integer");
+                if (obj != null) {
+                    return (int) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getBaseExperienceReward());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: experienceReward. Defaulting to " + super.getBaseExperienceReward(), e);
+            }
+        }
+        return super.getBaseExperienceReward();
+    }
+
+    @Override
+    public boolean dampensVibrations() {
+        if (builder.dampensVibrations != null) {
+            try {
+                Object obj = builder.dampensVibrations.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for dampensVibrations from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.dampensVibrations());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: dampensVibrations. Defaulting to " + super.dampensVibrations(), e);
+            }
+        }
+        return super.dampensVibrations();
+    }
+
+    @Override
+    public boolean showVehicleHealth() {
+        if (builder.showVehicleHealth != null) {
+            try {
+                Object obj = builder.showVehicleHealth.apply(this);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for showVehicleHealth from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.showVehicleHealth());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: showVehicleHealth. Defaulting to " + super.showVehicleHealth(), e);
+            }
+        }
+        return super.showVehicleHealth();
+    }
+
+    @Override
+    public boolean canChangeDimensions(Level to, Level from) {
+        if (builder.canChangeDimensions != null) {
+            ContextUtils.ChangeDimensionsContext context = new ContextUtils.ChangeDimensionsContext(this, to, from);
+            try {
+                Object obj = builder.canChangeDimensions.apply(context);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions(to, from));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canChangeDimensions. Defaulting to " + super.canChangeDimensions(to, from), e);
+            }
+        }
+        return super.canChangeDimensions(to, from);
+    }
+
+    @Override
+    public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
+        if (builder.mayInteract != null) {
+            final ContextUtils.MayInteractContext context = new ContextUtils.MayInteractContext(p_146843_, p_146844_, this);
+            try {
+                Object obj = builder.mayInteract.apply(context);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for mayInteract from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.mayInteract(p_146843_, p_146844_));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: mayInteract. Defaulting to " + super.mayInteract(p_146843_, p_146844_), e);
+            }
+        }
+        return super.mayInteract(p_146843_, p_146844_);
+    }
+
+    @Override
+    public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
+        if (builder.canTrample != null) {
+            final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
+            try {
+                Object obj = builder.canTrample.apply(context);
+                if (obj instanceof Boolean) {
+                    return (boolean) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTrample from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTrample(state, pos, fallDistance));
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canTrample. Defaulting to " + super.canTrample(state, pos, fallDistance), e);
+            }
+        }
+        return super.canTrample(state, pos, fallDistance);
+    }
+
+    @Override
+    public int getMaxFallDistance() {
+        if (builder.setMaxFallDistance != null) {
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setMaxFallDistance.apply(this), "integer");
+                if (obj != null) {
+                    return (int) obj;
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: setMaxFallDistance. Defaulting to " + super.getMaxFallDistance(), e);
+            }
+        }
+        return super.getMaxFallDistance();
+    }
+
 
     @Override
     protected float getSoundVolume() {
@@ -671,31 +1352,10 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
 
 
     @Override
-    protected float getBlockJumpFactor() {
-        if (builder.setBlockJumpFactor == null) return super.getBlockJumpFactor();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor.apply(this), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
-        return super.getBlockJumpFactor();
-    }
-
-    @Override
     public boolean isPushable() {
         return builder.isPushable;
     }
 
-    @Override
-    protected float getBlockSpeedFactor() {
-        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
-        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
-        if (obj != null) {
-            return (float) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + builder.get() + ". Value: " + builder.blockSpeedFactor.apply(this) + ". Must be a float, defaulting to " + super.getBlockSpeedFactor());
-            return super.getBlockSpeedFactor();
-        }
-    }
 
     @Override
     protected void positionRider(Entity pPassenger, MoveFunction pCallback) {
@@ -707,46 +1367,6 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
         super.positionRider(pPassenger, pCallback);
     }
 
-    @Override
-    protected boolean canAddPassenger(@NotNull Entity entity) {
-        if (builder.canAddPassenger == null) {
-            return super.canAddPassenger(entity);
-        }
-        final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(entity, this);
-        Object obj = builder.canAddPassenger.apply(context);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAddPassenger from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean, defaulting to " + super.canAddPassenger(entity));
-        return super.canAddPassenger(entity);
-    }
-
-
-    @Override
-    protected boolean shouldDropLoot() {
-        if (builder.shouldDropLoot != null) {
-            Object obj = builder.shouldDropLoot.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropLoot from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean, defaulting to " + super.shouldDropLoot());
-        }
-        return super.shouldDropLoot();
-    }
-
-
-    @Override
-    protected boolean isAffectedByFluids() {
-        if (builder.isAffectedByFluids != null) {
-            Object obj = builder.isAffectedByFluids.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByFluids from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAffectedByFluids());
-        }
-        return super.isAffectedByFluids();
-    }
-
 
     @Override
     protected boolean isAlwaysExperienceDropper() {
@@ -755,72 +1375,8 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
 
 
     @Override
-    protected boolean isImmobile() {
-        if (builder.isImmobile != null) {
-            Object obj = builder.isImmobile.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isImmobile from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isImmobile());
-        }
-        return super.isImmobile();
-    }
-
-
-    @Override
-    protected boolean isFlapping() {
-        if (builder.isFlapping != null) {
-            Object obj = builder.isFlapping.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFlapping from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFlapping());
-        }
-        return super.isFlapping();
-    }
-
-
-    @Override
-    public int calculateFallDamage(float fallDistance, float pDamageMultiplier) {
-        if (builder.calculateFallDamage == null) return super.calculateFallDamage(fallDistance, pDamageMultiplier);
-        final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(fallDistance, pDamageMultiplier, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.calculateFallDamage.apply(context), "integer");
-        if (obj != null) {
-            return (int) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for calculateFallDamage from entity: " + entityName() + ". Value: " + builder.calculateFallDamage.apply(context) + ". Must be an int, defaulting to " + super.calculateFallDamage(fallDistance, pDamageMultiplier));
-        return super.calculateFallDamage(fallDistance, pDamageMultiplier);
-    }
-
-
-    @Override
     protected boolean repositionEntityAfterLoad() {
         return Objects.requireNonNullElseGet(builder.repositionEntityAfterLoad, super::repositionEntityAfterLoad);
-    }
-
-    @Override
-    protected float nextStep() {
-        if (builder.nextStep != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.nextStep.apply(this), "float");
-            if (obj != null) {
-                return (float) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityName() + ". Value: " + builder.nextStep.apply(this) + ". Must be a float, defaulting to " + super.nextStep());
-            }
-        }
-        return super.nextStep();
-    }
-
-
-    @Nullable
-    @Override
-    protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
-        if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
-        final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, p_21239_);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
-        if (obj != null) return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
-        return super.getHurtSound(p_21239_);
     }
 
 
@@ -836,112 +1392,6 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
         if (builder.setSwimSound == null) return super.getSwimSound();
         return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
 
-    }
-
-
-    @Override
-    public boolean canAttackType(@NotNull EntityType<?> entityType) {
-        if (builder.canAttackType != null) {
-            final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(this, entityType);
-            Object obj = builder.canAttackType.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttackType from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canAttackType(entityType));
-        }
-        return super.canAttackType(entityType);
-    }
-
-
-    @Override
-    public float getScale() {
-        if (builder.scale == null) return super.getScale();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.scale.apply(this), "float");
-        if (obj != null) {
-            return (float) obj;
-        } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for scale from entity: " + entityName() + ". Value: " + builder.scale.apply(this) + ". Must be a float. Defaulting to " + super.getScale());
-            return super.getScale();
-        }
-    }
-
-
-    /*@Override
-    public boolean rideableUnderWater() {
-        return Objects.requireNonNullElseGet(builder.rideableUnderWater, super::rideableUnderWater);
-    }*/
-
-
-    @Override
-    public boolean shouldDropExperience() {
-        if (builder.shouldDropExperience != null) {
-            Object obj = builder.shouldDropExperience.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldDropExperience from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.shouldDropExperience());
-        }
-        return super.shouldDropExperience();
-    }
-
-
-    @Override
-    public double getVisibilityPercent(@Nullable Entity p_20969_) {
-        if (builder.visibilityPercent != null) {
-            final ContextUtils.VisualContext context = new ContextUtils.VisualContext(p_20969_, this);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.visibilityPercent.apply(context), "double");
-            if (obj != null) {
-                return (double) obj;
-            } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityName() + ". Value: " + builder.visibilityPercent.apply(context) + ". Must be a double. Defaulting to " + super.getVisibilityPercent(p_20969_));
-                return super.getVisibilityPercent(p_20969_);
-            }
-        } else {
-            return super.getVisibilityPercent(p_20969_);
-        }
-    }
-
-
-    @Override
-    public boolean canAttack(@NotNull LivingEntity entity) {
-        if (builder.canAttack != null) {
-            final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(this, entity);
-            Object obj = builder.canAttack.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj && super.canAttack(entity);
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttack from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canAttack(entity));
-        }
-        return super.canAttack(entity);
-    }
-
-
-    @Override
-    public boolean canBeAffected(@NotNull MobEffectInstance effectInstance) {
-        if (builder.canBeAffected == null) {
-            return super.canBeAffected(effectInstance);
-        }
-        final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-        Object result = builder.canBeAffected.apply(context);
-        if (result instanceof Boolean) {
-            return (boolean) result;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeAffected from entity: " + entityName() + ". Value: " + result + ". Must be a boolean. Defaulting to " + super.canBeAffected(effectInstance));
-        return super.canBeAffected(effectInstance);
-    }
-
-
-    @Override
-    public boolean isInvertedHealAndHarm() {
-        if (builder.invertedHealAndHarm == null) {
-            return super.isInvertedHealAndHarm();
-        }
-        Object obj = builder.invertedHealAndHarm.apply(this);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for invertedHealAndHarm from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isInvertedHealAndHarm());
-        return super.isInvertedHealAndHarm();
     }
 
 
@@ -969,19 +1419,6 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
         return super.getEatingSound(itemStack);
     }
 
-    @Override
-    public boolean onClimbable() {
-        if (builder.onClimbable == null) {
-            return super.onClimbable();
-        }
-        Object obj = builder.onClimbable.apply(this);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for onClimbable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super.onClimbable(): " + super.onClimbable());
-        return super.onClimbable();
-    }
-
 
     @Override
     public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
@@ -1001,43 +1438,6 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
 
         }
         super.setSprinting(sprinting);
-    }
-
-
-    @Override
-    public float getJumpBoostPower() {
-        if (builder.jumpBoostPower == null) return super.getJumpBoostPower();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "float");
-        if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
-        return super.getJumpBoostPower();
-    }
-
-
-    @Override
-    public boolean canStandOnFluid(@NotNull FluidState fluidState) {
-        if (builder.canStandOnFluid != null) {
-            final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(this, fluidState);
-            Object obj = builder.canStandOnFluid.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canStandOnFluid from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canStandOnFluid(fluidState));
-        }
-        return super.canStandOnFluid(fluidState);
-    }
-
-
-    @Override
-    public boolean isSensitiveToWater() {
-        if (builder.isSensitiveToWater != null) {
-            Object obj = builder.isSensitiveToWater.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSensitiveToWater from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isSensitiveToWater());
-        }
-        return super.isSensitiveToWater();
     }
 
 
@@ -1073,20 +1473,6 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
 
 
     @Override
-    public boolean hasLineOfSight(@NotNull Entity entity) {
-        if (builder.hasLineOfSight != null) {
-            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entity, this);
-            Object obj = builder.hasLineOfSight.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasLineOfSight from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.hasLineOfSight(entity));
-        }
-        return super.hasLineOfSight(entity);
-    }
-
-
-    @Override
     public void onEnterCombat() {
         if (builder.onEnterCombat != null) {
             EntityJSHelperClass.consumerCallback(builder.onEnterCombat, this, "[EntityJS]: Error in " + entityName() + "builder for field: onEnterCombat.");
@@ -1104,58 +1490,6 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
 
         }
         super.onLeaveCombat();
-    }
-
-    @Override
-    public boolean isAffectedByPotions() {
-        if (builder.isAffectedByPotions != null) {
-            Object obj = builder.isAffectedByPotions.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByPotions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAffectedByPotions());
-        }
-        return super.isAffectedByPotions();
-    }
-
-
-    @Override
-    public boolean attackable() {
-        if (builder.isAttackable != null) {
-            Object obj = builder.isAttackable.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAttackable from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.attackable());
-        }
-        return super.attackable();
-    }
-
-
-    @Override
-    public boolean canTakeItem(@NotNull ItemStack itemStack) {
-        if (builder.canTakeItem != null) {
-            final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
-            Object obj = builder.canTakeItem.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTakeItem from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTakeItem(itemStack));
-        }
-        return super.canTakeItem(itemStack);
-    }
-
-
-    @Override
-    public boolean isSleeping() {
-        if (builder.isSleeping != null) {
-            Object obj = builder.isSleeping.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSleeping from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isSleeping());
-        }
-        return super.isSleeping();
     }
 
 
@@ -1191,72 +1525,6 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
 
 
     @Override
-    public boolean shouldRiderFaceForward(@NotNull Player player) {
-        if (builder.shouldRiderFaceForward != null) {
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, this);
-            Object obj = builder.shouldRiderFaceForward.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldRiderFaceForward from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.shouldRiderFaceForward(player));
-        }
-        return super.shouldRiderFaceForward(player);
-    }
-
-
-    @Override
-    public boolean canFreeze() {
-        if (builder.canFreeze != null) {
-            Object obj = builder.canFreeze.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canFreeze());
-        }
-        return super.canFreeze();
-    }
-
-
-    @Override
-    public boolean isFreezing() {
-        if (builder.isFreezing != null) {
-            Object obj = builder.isFreezing.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFreezing());
-        }
-        return super.isFreezing();
-    }
-
-
-    @Override
-    public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
-            Object obj = builder.isCurrentlyGlowing.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isCurrentlyGlowing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isCurrentlyGlowing());
-        }
-        return super.isCurrentlyGlowing();
-    }
-
-
-    @Override
-    public boolean canDisableShield() {
-        if (builder.canDisableShield != null) {
-            Object obj = builder.canDisableShield.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canDisableShield from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canDisableShield());
-        }
-        return super.canDisableShield();
-    }
-
-
-    @Override
     public void onClientRemoval() {
         if (builder.onClientRemoval != null) {
             EntityJSHelperClass.consumerCallback(builder.onClientRemoval, this, "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval.");
@@ -1285,50 +1553,11 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
     }
 
     @Override
-    protected int getBaseExperienceReward() {
-        if (builder.experienceReward != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.experienceReward.apply(this), "integer");
-            if (obj != null) {
-                return (int) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getBaseExperienceReward());
-        }
-        return super.getBaseExperienceReward();
-    }
-
-
-    @Override
-    public boolean dampensVibrations() {
-        if (builder.dampensVibrations != null) {
-            Object obj = builder.dampensVibrations.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for dampensVibrations from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.dampensVibrations());
-        }
-        return super.dampensVibrations();
-    }
-
-
-    @Override
     public void playerTouch(Player p_20081_) {
         if (builder.playerTouch != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
             EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
         }
-    }
-
-
-    @Override
-    public boolean showVehicleHealth() {
-        if (builder.showVehicleHealth != null) {
-            Object obj = builder.showVehicleHealth.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for showVehicleHealth from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.showVehicleHealth());
-        }
-        return super.showVehicleHealth();
     }
 
 
@@ -1358,50 +1587,6 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
 
 
     @Override
-    public boolean canChangeDimensions(Level to, Level from) {
-        if (builder.canChangeDimensions != null) {
-            ContextUtils.ChangeDimensionsContext context = new ContextUtils.ChangeDimensionsContext(this, to, from);
-            Object obj = builder.canChangeDimensions.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canChangeDimensions from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canChangeDimensions(to, from));
-        }
-        return super.canChangeDimensions(to, from);
-    }
-
-
-    @Override
-    public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
-        if (builder.mayInteract != null) {
-            final ContextUtils.MayInteractContext context = new ContextUtils.MayInteractContext(p_146843_, p_146844_, this);
-            Object obj = builder.mayInteract.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for mayInteract from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.mayInteract(p_146843_, p_146844_));
-        }
-
-        return super.mayInteract(p_146843_, p_146844_);
-    }
-
-
-    @Override
-    public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
-        if (builder.canTrample != null) {
-            final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
-            Object obj = builder.canTrample.apply(context);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTrample from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canTrample(state, pos, fallDistance));
-        }
-
-        return super.canTrample(state, pos, fallDistance);
-    }
-
-
-    @Override
     public void onRemovedFromLevel() {
         if (builder != null && builder.onRemovedFromWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
@@ -1409,16 +1594,6 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
         super.onRemovedFromLevel();
     }
 
-
-    @Override
-    public int getMaxFallDistance() {
-        if (builder.setMaxFallDistance == null) return super.getMaxFallDistance();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setMaxFallDistance.apply(this), "integer");
-        if (obj != null)
-            return (int) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
-        return super.getMaxFallDistance();
-    }
 
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements) {

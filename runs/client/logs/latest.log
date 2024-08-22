@@ -1,117 +1,117 @@
-[22Aug2024 06:21:46.097] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientuserdev, --version, 21.0.148, --assetIndex, asset-index, --assetsDir, C:\Users\subli\.gradle\caches\minecraft\assets\1.21, --gameDir, ., --fml.neoForgeVersion, 21.0.148, --fml.fmlVersion, 4.0.21, --fml.mcVersion, 1.21, --fml.neoFormVersion, 20240613.152323]
-[22Aug2024 06:21:46.097] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Eclipse Adoptium OpenJDK 64-Bit Server VM 21.0.3+9-LTS
-[22Aug2024 06:21:46.097] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.4+main.d2e20e43 starting: java version 21.0.3 by Eclipse Adoptium; OS Windows 11 arch amd64 version 10.0
-[22Aug2024 06:21:46.218] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
-[22Aug2024 06:21:46.298] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
-[22Aug2024 06:21:46.502] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
-[22Aug2024 06:21:46.578] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.6 Source=union:/C:/Users/subli/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.14.0+mixin.0.8.6/c265173c84346e9e5d42a2384b2b02bd39a4a899/sponge-mixin-0.14.0+mixin.0.8.6.jar%23135!/ Service=ModLauncher Env=CLIENT
-[22Aug2024 06:21:46.830] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 3050 Laptop GPU/PCIe/SSE2 GL version 4.6.0 NVIDIA 555.99, NVIDIA Corporation
-[22Aug2024 06:21:46.840] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.148.jar" [locator: neoforge devenv provider ([C:\Users\subli\Desktop\EntityJs\.gradle\repositories\ng_dummy_ng\net\neoforged\neoforge\21.0.148\neoforge-21.0.148.jar])]
-[22Aug2024 06:21:46.860] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.148.jar" [locator: neoforge devenv provider ([C:\Users\subli\Desktop\EntityJs\.gradle\repositories\ng_dummy_ng\net\neoforged\neoforge\21.0.148\neoforge-21.0.148.jar])]
-[22Aug2024 06:21:46.880] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "main" [locator: userdev mods and services, reader: mod manifest]
-[22Aug2024 06:21:46.890] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.148.jar" [locator: userdev mods and services, reader: mod manifest]
-[22Aug2024 06:21:46.900] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "probejs-585406-5536459.jar" [locator: userdev mods and services, reader: mod manifest]
-[22Aug2024 06:21:46.910] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "kubejs-neoforge-2100.7.0-build.121.jar" [locator: userdev mods and services, reader: mod manifest]
-[22Aug2024 06:21:46.910] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "rhino-2100.2.5-build.46.jar" [locator: userdev mods and services, reader: mod manifest]
-[22Aug2024 06:21:46.921] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "geckolib-neoforge-1.21-4.5.7.jar" [locator: userdev mods and services, reader: mod manifest]
-[22Aug2024 06:21:46.952] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found gamelibrary file "mixinextras-neoforge-0.3.5.jar" [locator: userdev mods and services, reader: mod manifest]
-[22Aug2024 06:21:47.212] [main/WARN] [net.neoforged.jarjar.selection.JarSelector/]: Attempted to select a dependency jar for JarJar which was passed in as source: mixinextras-neoforge-0.3.5.jar. Using Mod File: C:\Users\subli\.gradle\caches\modules-2\files-2.1\io.github.llamalad7\mixinextras-neoforge\0.3.5\ef3ffcf309dae656517b2f120189b1c9b21737dd\mixinextras-neoforge-0.3.5.jar
-[22Aug2024 06:21:47.212] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 4 dependencies adding them to mods collection
-[22Aug2024 06:21:47.212] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "vineflower-1.10.1.jar" [parent: probejs-585406-5536459.jar, locator: jarinjar]
-[22Aug2024 06:21:47.212] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "javaparser-symbol-solver-core-3.25.8.jar" [parent: probejs-585406-5536459.jar, locator: jarinjar]
-[22Aug2024 06:21:47.212] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "Java-WebSocket-1.5.6.jar" [parent: probejs-585406-5536459.jar, locator: jarinjar]
-[22Aug2024 06:21:47.212] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "javaparser-core-3.25.8.jar" [parent: probejs-585406-5536459.jar, locator: jarinjar]
-[22Aug2024 06:21:47.416] [main/INFO] [net.neoforged.fml.loading.FMLServiceProvider/CORE]: Loading coremod script-engine for [neoforge]
-[22Aug2024 06:21:48.157] [main/INFO] [mixin/]: Compatibility level set to JAVA_21
-[22Aug2024 06:21:48.167] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientuserdev' with arguments [--version, 21.0.148, --gameDir, ., --assetsDir, C:\Users\subli\.gradle\caches\minecraft\assets\1.21, --assetIndex, asset-index]
-[22Aug2024 06:21:48.207] [main/WARN] [mixin/]: Reference map 'geckolib.refmap.json' for geckolib.mixins.json could not be read. If this is a development environment you can ignore this message
-[22Aug2024 06:21:48.823] [main/WARN] [mixin/]: Error loading class: mezz/modnametooltip/TooltipEventHandler (java.lang.ClassNotFoundException: mezz.modnametooltip.TooltipEventHandler)
-[22Aug2024 06:21:48.833] [main/WARN] [mixin/]: Error loading class: me/shedaniel/rei/impl/client/ClientHelperImpl (java.lang.ClassNotFoundException: me.shedaniel.rei.impl.client.ClientHelperImpl)
-[22Aug2024 06:21:48.943] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.3.5).
-[22Aug2024 06:21:50.720] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 229 Datafixer optimizations took 490 milliseconds
-[22Aug2024 06:21:55.946] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[22Aug2024 06:21:55.948] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
-[22Aug2024 06:21:55.948] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[22Aug2024 06:21:55.948] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[22Aug2024 06:21:55.948] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[22Aug2024 06:21:56.088] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/subli/Desktop/EntityJs/.gradle/repositories/ng_dummy_ng/net/neoforged/neoforge/21.0.148/neoforge-21.0.148.jar%23189!/assets/.mcassetsroot' uses unexpected schema
-[22Aug2024 06:21:56.088] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/subli/Desktop/EntityJs/.gradle/repositories/ng_dummy_ng/net/neoforged/neoforge/21.0.148/neoforge-21.0.148.jar%23189!/data/.mcassetsroot' uses unexpected schema
-[22Aug2024 06:21:56.108] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
-[22Aug2024 06:21:56.118] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
-[22Aug2024 06:21:56.294] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.3+5
-[22Aug2024 06:21:56.615] [modloading-worker-0/INFO] [net.liopyu.entityjs.EntityJSMod/]: Loading EntityJS-Liopyu
-[22Aug2024 06:21:56.629] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.0.148, for MC 1.21
-[22Aug2024 06:21:56.636] [modloading-worker-0/INFO] [KubeJS Startup/]: Capturing errors for startup scripts enabled
-[22Aug2024 06:21:56.637] [modloading-worker-0/INFO] [KubeJS Client/]: Capturing errors for client scripts enabled
-[22Aug2024 06:21:56.637] [modloading-worker-0/INFO] [KubeJS/]: Loading vanilla registries...
-[22Aug2024 06:21:56.649] [modloading-worker-0/INFO] [KubeJS/]: Looking for KubeJS plugins...
-[22Aug2024 06:21:56.652] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source kubejs
-[22Aug2024 06:21:56.657] [modloading-worker-0/WARN] [KubeJS/]: Plugin dev.latvian.mods.kubejs.integration.architectury.ArchitecturyIntegration does not have required mod 'architectury' loaded, skipping
-[22Aug2024 06:21:56.657] [modloading-worker-0/WARN] [KubeJS/]: Plugin dev.latvian.mods.kubejs.integration.gamestages.GameStagesIntegration does not have required mod 'gamestages' loaded, skipping
-[22Aug2024 06:21:56.657] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source probejs
-[22Aug2024 06:21:56.659] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source entityjs
-[22Aug2024 06:21:56.662] [modloading-worker-0/INFO] [KubeJS/]: Done in 10.87 ms
-[22Aug2024 06:21:57.112] [modloading-worker-0/INFO] [KubeJS Startup/]: startup_scripts:example.js#3: Loaded Java class 'net.minecraft.client.resources.DefaultPlayerSkin'
-[22Aug2024 06:21:57.126] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:example.js in 0.049 s
-[22Aug2024 06:21:57.126] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded 1/1 KubeJS startup scripts in 0.369 s with 0 errors and 0 warnings
-[22Aug2024 06:21:57.151] [modloading-worker-0/INFO] [KubeJS Client/]: Loaded script client_scripts:example.js in 0.0 s
-[22Aug2024 06:21:57.151] [modloading-worker-0/INFO] [KubeJS Client/]: Loaded 1/1 KubeJS client scripts in 0.018 s with 0 errors and 0 warnings
-[22Aug2024 06:21:57.507] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.armor: 0
-[22Aug2024 06:21:57.507] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.armor_toughness: 0
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.attack_damage: 2
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.attack_knockback: 0
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.burning_time: 1
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.explosion_knockback_resistance: 0
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.fall_damage_multiplier: 1
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.flying_speed: 0.4
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.follow_range: 32
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.gravity: 0.08
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.jump_strength: 0.41999998688697815
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.knockback_resistance: 0
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.max_absorption: 0
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.max_health: 20
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.movement_efficiency: 0
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.movement_speed: 0.7
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.oxygen_bonus: 0
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.safe_fall_distance: 3
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.scale: 1
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.step_height: 0.6
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.water_movement_efficiency: 0
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: neoforge.swim_speed: 1
-[22Aug2024 06:21:57.515] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: neoforge.name_tag_distance: 64
-[22Aug2024 06:21:57.525] [modloading-sync-worker/INFO] [KubeJS Startup/]: [entity.minecraft.allay, entity.minecraft.armadillo, entity.minecraft.armor_stand, entity.minecraft.axolotl, entity.minecraft.bat, entity.minecraft.bee, entity.minecraft.blaze, entity.minecraft.bogged, entity.minecraft.breeze, entity.minecraft.camel, entity.minecraft.cat, entity.minecraft.cave_spider, entity.minecraft.chicken, entity.minecraft.cod, entity.minecraft.cow, entity.minecraft.creeper, entity.minecraft.dolphin, entity.minecraft.donkey, entity.minecraft.drowned, entity.minecraft.elder_guardian, entity.minecraft.ender_dragon, entity.minecraft.enderman, entity.minecraft.endermite, entity.minecraft.evoker, entity.minecraft.fox, entity.minecraft.frog, entity.minecraft.ghast, entity.minecraft.giant, entity.minecraft.glow_squid, entity.minecraft.goat, entity.minecraft.guardian, entity.minecraft.hoglin, entity.minecraft.horse, entity.minecraft.husk, entity.minecraft.illusioner, entity.minecraft.iron_golem, entity.minecraft.llama, entity.minecraft.magma_cube, entity.minecraft.mooshroom, entity.minecraft.mule, entity.minecraft.ocelot, entity.minecraft.panda, entity.minecraft.parrot, entity.minecraft.phantom, entity.minecraft.pig, entity.minecraft.piglin, entity.minecraft.piglin_brute, entity.minecraft.pillager, entity.minecraft.polar_bear, entity.minecraft.pufferfish, entity.minecraft.rabbit, entity.minecraft.ravager, entity.minecraft.salmon, entity.minecraft.sheep, entity.minecraft.shulker, entity.minecraft.silverfish, entity.minecraft.skeleton, entity.minecraft.skeleton_horse, entity.minecraft.slime, entity.minecraft.sniffer, entity.minecraft.snow_golem, entity.minecraft.spider, entity.minecraft.squid, entity.minecraft.stray, entity.minecraft.strider, entity.minecraft.tadpole, entity.minecraft.trader_llama, entity.minecraft.tropical_fish, entity.minecraft.turtle, entity.minecraft.vex, entity.minecraft.villager, entity.minecraft.vindicator, entity.minecraft.wandering_trader, entity.minecraft.warden, entity.minecraft.witch, entity.minecraft.wither, entity.minecraft.wither_skeleton, entity.minecraft.wolf, entity.minecraft.zoglin, entity.minecraft.zombie, entity.minecraft.zombie_horse, entity.minecraft.zombie_villager, entity.minecraft.zombified_piglin, entity.minecraft.player, entity.kubejs.wyrm, entity.kubejs.sasuke] [java.util.ArrayList]
-[22Aug2024 06:21:57.880] [Render thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: []
-[22Aug2024 06:21:58.110] [Render thread/INFO] [KubeJS/]: Loaded 13 asset packs: vanilla, KubeJS Virtual Resource Pack [Before Mods, assets], mod_resources, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, assets], KubeJS Virtual Resource Pack [After Mods, assets], KubeJS File Resource Pack [assets], mod/neoforge, KubeJS Virtual Resource Pack [Last, assets]
-[22Aug2024 06:21:58.110] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, KubeJS Virtual Resource Pack [Before Mods, assets], mod_resources, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, assets], KubeJS Virtual Resource Pack [After Mods, assets], KubeJS File Resource Pack [assets], mod/neoforge, KubeJS Virtual Resource Pack [Last, assets]
-[22Aug2024 06:21:58.190] [Render thread/INFO] [KubeJS Client/]: Client resource reload complete!
-[22Aug2024 06:21:58.200] [Worker-Main-1/ERROR] [GeckoLib/]: Unable to parse animation: move
+[22Aug2024 07:12:58.284] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientuserdev, --version, 21.0.148, --assetIndex, asset-index, --assetsDir, C:\Users\subli\.gradle\caches\minecraft\assets\1.21, --gameDir, ., --fml.neoForgeVersion, 21.0.148, --fml.fmlVersion, 4.0.21, --fml.mcVersion, 1.21, --fml.neoFormVersion, 20240613.152323]
+[22Aug2024 07:12:58.289] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Eclipse Adoptium OpenJDK 64-Bit Server VM 21.0.3+9-LTS
+[22Aug2024 07:12:58.292] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.4+main.d2e20e43 starting: java version 21.0.3 by Eclipse Adoptium; OS Windows 11 arch amd64 version 10.0
+[22Aug2024 07:12:58.517] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[22Aug2024 07:12:58.673] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[22Aug2024 07:12:59.145] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[22Aug2024 07:12:59.285] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.6 Source=union:/C:/Users/subli/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.14.0+mixin.0.8.6/c265173c84346e9e5d42a2384b2b02bd39a4a899/sponge-mixin-0.14.0+mixin.0.8.6.jar%23135!/ Service=ModLauncher Env=CLIENT
+[22Aug2024 07:12:59.648] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.148.jar" [locator: neoforge devenv provider ([C:\Users\subli\Desktop\EntityJs\.gradle\repositories\ng_dummy_ng\net\neoforged\neoforge\21.0.148\neoforge-21.0.148.jar])]
+[22Aug2024 07:12:59.661] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 3050 Laptop GPU/PCIe/SSE2 GL version 4.6.0 NVIDIA 555.99, NVIDIA Corporation
+[22Aug2024 07:12:59.678] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.148.jar" [locator: neoforge devenv provider ([C:\Users\subli\Desktop\EntityJs\.gradle\repositories\ng_dummy_ng\net\neoforged\neoforge\21.0.148\neoforge-21.0.148.jar])]
+[22Aug2024 07:12:59.698] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "main" [locator: userdev mods and services, reader: mod manifest]
+[22Aug2024 07:12:59.717] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.148.jar" [locator: userdev mods and services, reader: mod manifest]
+[22Aug2024 07:12:59.726] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "probejs-585406-5536459.jar" [locator: userdev mods and services, reader: mod manifest]
+[22Aug2024 07:12:59.740] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "kubejs-neoforge-2100.7.0-build.121.jar" [locator: userdev mods and services, reader: mod manifest]
+[22Aug2024 07:12:59.748] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "rhino-2100.2.5-build.46.jar" [locator: userdev mods and services, reader: mod manifest]
+[22Aug2024 07:12:59.756] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "geckolib-neoforge-1.21-4.5.7.jar" [locator: userdev mods and services, reader: mod manifest]
+[22Aug2024 07:12:59.793] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found gamelibrary file "mixinextras-neoforge-0.3.5.jar" [locator: userdev mods and services, reader: mod manifest]
+[22Aug2024 07:13:00.316] [main/WARN] [net.neoforged.jarjar.selection.JarSelector/]: Attempted to select a dependency jar for JarJar which was passed in as source: mixinextras-neoforge-0.3.5.jar. Using Mod File: C:\Users\subli\.gradle\caches\modules-2\files-2.1\io.github.llamalad7\mixinextras-neoforge\0.3.5\ef3ffcf309dae656517b2f120189b1c9b21737dd\mixinextras-neoforge-0.3.5.jar
+[22Aug2024 07:13:00.316] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 4 dependencies adding them to mods collection
+[22Aug2024 07:13:00.317] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "vineflower-1.10.1.jar" [parent: probejs-585406-5536459.jar, locator: jarinjar]
+[22Aug2024 07:13:00.317] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "javaparser-symbol-solver-core-3.25.8.jar" [parent: probejs-585406-5536459.jar, locator: jarinjar]
+[22Aug2024 07:13:00.317] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "Java-WebSocket-1.5.6.jar" [parent: probejs-585406-5536459.jar, locator: jarinjar]
+[22Aug2024 07:13:00.317] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "javaparser-core-3.25.8.jar" [parent: probejs-585406-5536459.jar, locator: jarinjar]
+[22Aug2024 07:13:00.643] [main/INFO] [net.neoforged.fml.loading.FMLServiceProvider/CORE]: Loading coremod script-engine for [neoforge]
+[22Aug2024 07:13:01.692] [main/INFO] [mixin/]: Compatibility level set to JAVA_21
+[22Aug2024 07:13:01.706] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientuserdev' with arguments [--version, 21.0.148, --gameDir, ., --assetsDir, C:\Users\subli\.gradle\caches\minecraft\assets\1.21, --assetIndex, asset-index]
+[22Aug2024 07:13:01.757] [main/WARN] [mixin/]: Reference map 'geckolib.refmap.json' for geckolib.mixins.json could not be read. If this is a development environment you can ignore this message
+[22Aug2024 07:13:02.833] [main/WARN] [mixin/]: Error loading class: mezz/modnametooltip/TooltipEventHandler (java.lang.ClassNotFoundException: mezz.modnametooltip.TooltipEventHandler)
+[22Aug2024 07:13:02.836] [main/WARN] [mixin/]: Error loading class: me/shedaniel/rei/impl/client/ClientHelperImpl (java.lang.ClassNotFoundException: me.shedaniel.rei.impl.client.ClientHelperImpl)
+[22Aug2024 07:13:02.977] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.3.5).
+[22Aug2024 07:13:04.889] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 229 Datafixer optimizations took 296 milliseconds
+[22Aug2024 07:13:11.639] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[22Aug2024 07:13:11.640] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[22Aug2024 07:13:11.644] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[22Aug2024 07:13:11.645] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[22Aug2024 07:13:11.647] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[22Aug2024 07:13:11.789] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/subli/Desktop/EntityJs/.gradle/repositories/ng_dummy_ng/net/neoforged/neoforge/21.0.148/neoforge-21.0.148.jar%23189!/assets/.mcassetsroot' uses unexpected schema
+[22Aug2024 07:13:11.790] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/subli/Desktop/EntityJs/.gradle/repositories/ng_dummy_ng/net/neoforged/neoforge/21.0.148/neoforge-21.0.148.jar%23189!/data/.mcassetsroot' uses unexpected schema
+[22Aug2024 07:13:11.822] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[22Aug2024 07:13:11.833] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
+[22Aug2024 07:13:12.047] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.3+5
+[22Aug2024 07:13:12.316] [modloading-worker-0/INFO] [net.liopyu.entityjs.EntityJSMod/]: Loading EntityJS-Liopyu
+[22Aug2024 07:13:12.338] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.0.148, for MC 1.21
+[22Aug2024 07:13:12.351] [modloading-worker-0/INFO] [KubeJS Startup/]: Capturing errors for startup scripts enabled
+[22Aug2024 07:13:12.351] [modloading-worker-0/INFO] [KubeJS Client/]: Capturing errors for client scripts enabled
+[22Aug2024 07:13:12.351] [modloading-worker-0/INFO] [KubeJS/]: Loading vanilla registries...
+[22Aug2024 07:13:12.370] [modloading-worker-0/INFO] [KubeJS/]: Looking for KubeJS plugins...
+[22Aug2024 07:13:12.373] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source kubejs
+[22Aug2024 07:13:12.380] [modloading-worker-0/WARN] [KubeJS/]: Plugin dev.latvian.mods.kubejs.integration.architectury.ArchitecturyIntegration does not have required mod 'architectury' loaded, skipping
+[22Aug2024 07:13:12.381] [modloading-worker-0/WARN] [KubeJS/]: Plugin dev.latvian.mods.kubejs.integration.gamestages.GameStagesIntegration does not have required mod 'gamestages' loaded, skipping
+[22Aug2024 07:13:12.381] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source probejs
+[22Aug2024 07:13:12.383] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source entityjs
+[22Aug2024 07:13:12.386] [modloading-worker-0/INFO] [KubeJS/]: Done in 14.32 ms
+[22Aug2024 07:13:12.956] [modloading-worker-0/INFO] [KubeJS Startup/]: startup_scripts:example.js#3: Loaded Java class 'net.minecraft.client.resources.DefaultPlayerSkin'
+[22Aug2024 07:13:12.992] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:example.js in 0.079 s
+[22Aug2024 07:13:12.995] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded 1/1 KubeJS startup scripts in 0.461 s with 0 errors and 0 warnings
+[22Aug2024 07:13:13.020] [modloading-worker-0/INFO] [KubeJS Client/]: Loaded script client_scripts:example.js in 0.0 s
+[22Aug2024 07:13:13.020] [modloading-worker-0/INFO] [KubeJS Client/]: Loaded 1/1 KubeJS client scripts in 0.021 s with 0 errors and 0 warnings
+[22Aug2024 07:13:13.380] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.armor: 0
+[22Aug2024 07:13:13.380] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.armor_toughness: 0
+[22Aug2024 07:13:13.384] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.attack_damage: 2
+[22Aug2024 07:13:13.385] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.attack_knockback: 0
+[22Aug2024 07:13:13.385] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.burning_time: 1
+[22Aug2024 07:13:13.385] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.explosion_knockback_resistance: 0
+[22Aug2024 07:13:13.385] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.fall_damage_multiplier: 1
+[22Aug2024 07:13:13.385] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.flying_speed: 0.4
+[22Aug2024 07:13:13.385] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.follow_range: 32
+[22Aug2024 07:13:13.385] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.gravity: 0.08
+[22Aug2024 07:13:13.386] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.jump_strength: 0.41999998688697815
+[22Aug2024 07:13:13.386] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.knockback_resistance: 0
+[22Aug2024 07:13:13.386] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.max_absorption: 0
+[22Aug2024 07:13:13.386] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.max_health: 20
+[22Aug2024 07:13:13.387] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.movement_efficiency: 0
+[22Aug2024 07:13:13.387] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.movement_speed: 0.7
+[22Aug2024 07:13:13.387] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.oxygen_bonus: 0
+[22Aug2024 07:13:13.387] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.safe_fall_distance: 3
+[22Aug2024 07:13:13.388] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.scale: 1
+[22Aug2024 07:13:13.388] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.step_height: 0.6
+[22Aug2024 07:13:13.388] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: attribute.name.generic.water_movement_efficiency: 0
+[22Aug2024 07:13:13.388] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: neoforge.swim_speed: 1
+[22Aug2024 07:13:13.389] [modloading-sync-worker/INFO] [KubeJS Startup/]: Allay Attribute: neoforge.name_tag_distance: 64
+[22Aug2024 07:13:13.396] [modloading-sync-worker/INFO] [KubeJS Startup/]: [entity.minecraft.allay, entity.minecraft.armadillo, entity.minecraft.armor_stand, entity.minecraft.axolotl, entity.minecraft.bat, entity.minecraft.bee, entity.minecraft.blaze, entity.minecraft.bogged, entity.minecraft.breeze, entity.minecraft.camel, entity.minecraft.cat, entity.minecraft.cave_spider, entity.minecraft.chicken, entity.minecraft.cod, entity.minecraft.cow, entity.minecraft.creeper, entity.minecraft.dolphin, entity.minecraft.donkey, entity.minecraft.drowned, entity.minecraft.elder_guardian, entity.minecraft.ender_dragon, entity.minecraft.enderman, entity.minecraft.endermite, entity.minecraft.evoker, entity.minecraft.fox, entity.minecraft.frog, entity.minecraft.ghast, entity.minecraft.giant, entity.minecraft.glow_squid, entity.minecraft.goat, entity.minecraft.guardian, entity.minecraft.hoglin, entity.minecraft.horse, entity.minecraft.husk, entity.minecraft.illusioner, entity.minecraft.iron_golem, entity.minecraft.llama, entity.minecraft.magma_cube, entity.minecraft.mooshroom, entity.minecraft.mule, entity.minecraft.ocelot, entity.minecraft.panda, entity.minecraft.parrot, entity.minecraft.phantom, entity.minecraft.pig, entity.minecraft.piglin, entity.minecraft.piglin_brute, entity.minecraft.pillager, entity.minecraft.polar_bear, entity.minecraft.pufferfish, entity.minecraft.rabbit, entity.minecraft.ravager, entity.minecraft.salmon, entity.minecraft.sheep, entity.minecraft.shulker, entity.minecraft.silverfish, entity.minecraft.skeleton, entity.minecraft.skeleton_horse, entity.minecraft.slime, entity.minecraft.sniffer, entity.minecraft.snow_golem, entity.minecraft.spider, entity.minecraft.squid, entity.minecraft.stray, entity.minecraft.strider, entity.minecraft.tadpole, entity.minecraft.trader_llama, entity.minecraft.tropical_fish, entity.minecraft.turtle, entity.minecraft.vex, entity.minecraft.villager, entity.minecraft.vindicator, entity.minecraft.wandering_trader, entity.minecraft.warden, entity.minecraft.witch, entity.minecraft.wither, entity.minecraft.wither_skeleton, entity.minecraft.wolf, entity.minecraft.zoglin, entity.minecraft.zombie, entity.minecraft.zombie_horse, entity.minecraft.zombie_villager, entity.minecraft.zombified_piglin, entity.minecraft.player, entity.kubejs.sasuke] [java.util.ArrayList]
+[22Aug2024 07:13:13.834] [Render thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: []
+[22Aug2024 07:13:14.088] [Render thread/INFO] [KubeJS/]: Loaded 13 asset packs: vanilla, KubeJS Virtual Resource Pack [Before Mods, assets], mod_resources, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, assets], KubeJS Virtual Resource Pack [After Mods, assets], KubeJS File Resource Pack [assets], mod/neoforge, KubeJS Virtual Resource Pack [Last, assets]
+[22Aug2024 07:13:14.090] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, KubeJS Virtual Resource Pack [Before Mods, assets], mod_resources, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, assets], KubeJS Virtual Resource Pack [After Mods, assets], KubeJS File Resource Pack [assets], mod/neoforge, KubeJS Virtual Resource Pack [Last, assets]
+[22Aug2024 07:13:14.206] [Render thread/INFO] [KubeJS Client/]: Client resource reload complete!
+[22Aug2024 07:13:14.215] [Worker-Main-1/ERROR] [GeckoLib/]: Unable to parse animation: move
 	-> Failed to parse expression '3.0 * (variable.slime_squish_factor < 0.0 ? 0.0 : variable.slime_squish_factor) * 1.7'
 		-> Unknown operator symbol '?'
-[22Aug2024 06:21:58.250] [Worker-Main-3/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.1.05.hex, loading
-[22Aug2024 06:21:58.350] [Worker-Main-8/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_jp_patch-15.1.05.hex, loading
-[22Aug2024 06:21:58.410] [Render thread/INFO] [KubeJS/]: Started the local web server at http://localhost:61423
-[22Aug2024 06:21:59.596] [Render thread/INFO] [KubeJS Startup/]: Capturing errors for startup scripts disabled
-[22Aug2024 06:21:59.596] [Render thread/INFO] [KubeJS Client/]: Capturing errors for client scripts disabled
-[22Aug2024 06:21:59.716] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
-[22Aug2024 06:21:59.716] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
-[22Aug2024 06:22:00.032] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device OpenAL Soft on Speakers (Realtek(R) Audio)
-[22Aug2024 06:22:00.032] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
-[22Aug2024 06:22:00.147] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
-[22Aug2024 06:22:00.158] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
-[22Aug2024 06:22:00.158] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
-[22Aug2024 06:22:00.158] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
-[22Aug2024 06:22:00.159] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
-[22Aug2024 06:22:00.162] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
-[22Aug2024 06:22:00.162] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
-[22Aug2024 06:22:00.162] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
-[22Aug2024 06:22:00.162] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
-[22Aug2024 06:22:00.289] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
-[22Aug2024 06:22:00.290] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
-[22Aug2024 06:22:00.291] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
-[22Aug2024 06:22:00.291] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
-[22Aug2024 06:22:00.291] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
-[22Aug2024 06:22:00.313] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
-[22Aug2024 06:22:03.798] [Render thread/WARN] [mixin/]: Mixin apply for mod entityjs failed entityjs.mixins.json:ServerScriptManagerMixin from mod entityjs -> dev.latvian.mods.kubejs.server.ServerScriptManager: org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException @WrapOperation annotation is trying to target an <init> call in dev/latvian/mods/kubejs/server/ServerScriptManager::createPackResources(Ljava/util/List;)Ljava/util/List; in dev/latvian/mods/kubejs/server/ServerScriptManager::entityjs$capturePacks! If this is an instantiation, target the NEW instead.
+[22Aug2024 07:13:14.282] [Worker-Main-11/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.1.05.hex, loading
+[22Aug2024 07:13:14.611] [Render thread/INFO] [KubeJS/]: Started the local web server at http://localhost:61423
+[22Aug2024 07:13:14.644] [Worker-Main-7/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_jp_patch-15.1.05.hex, loading
+[22Aug2024 07:13:16.050] [Render thread/INFO] [KubeJS Startup/]: Capturing errors for startup scripts disabled
+[22Aug2024 07:13:16.050] [Render thread/INFO] [KubeJS Client/]: Capturing errors for client scripts disabled
+[22Aug2024 07:13:16.190] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
+[22Aug2024 07:13:16.190] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[22Aug2024 07:13:16.540] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device OpenAL Soft on Headphones (Realtek(R) Audio)
+[22Aug2024 07:13:16.541] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
+[22Aug2024 07:13:16.693] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
+[22Aug2024 07:13:16.709] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[22Aug2024 07:13:16.709] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[22Aug2024 07:13:16.711] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[22Aug2024 07:13:16.712] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[22Aug2024 07:13:16.716] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[22Aug2024 07:13:16.717] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[22Aug2024 07:13:16.717] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[22Aug2024 07:13:16.718] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[22Aug2024 07:13:16.903] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[22Aug2024 07:13:16.906] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[22Aug2024 07:13:16.907] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[22Aug2024 07:13:16.907] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[22Aug2024 07:13:16.907] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[22Aug2024 07:13:16.945] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[22Aug2024 07:13:21.040] [Render thread/WARN] [mixin/]: Mixin apply for mod entityjs failed entityjs.mixins.json:ServerScriptManagerMixin from mod entityjs -> dev.latvian.mods.kubejs.server.ServerScriptManager: org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException @WrapOperation annotation is trying to target an <init> call in dev/latvian/mods/kubejs/server/ServerScriptManager::createPackResources(Ljava/util/List;)Ljava/util/List; in dev/latvian/mods/kubejs/server/ServerScriptManager::entityjs$capturePacks! If this is an instantiation, target the NEW instead.
 org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: @WrapOperation annotation is trying to target an <init> call in dev/latvian/mods/kubejs/server/ServerScriptManager::createPackResources(Ljava/util/List;)Ljava/util/List; in dev/latvian/mods/kubejs/server/ServerScriptManager::entityjs$capturePacks! If this is an instantiation, target the NEW instead.
 	at TRANSFORMER/mixinextras.neoforge@0.3.5/com.llamalad7.mixinextras.versions.MixinVersionImpl_v0_8_4.makeInvalidInjectionException(MixinVersionImpl_v0_8_4.java:14) ~[mixinextras-neoforge-0.3.5.jar:?]
 	at TRANSFORMER/mixinextras.neoforge@0.3.5/com.llamalad7.mixinextras.utils.CompatibilityHelper.makeInvalidInjectionException(CompatibilityHelper.java:17) ~[mixinextras-neoforge-0.3.5.jar:?]
@@ -159,9 +159,11 @@ org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: @Wra
 	at TRANSFORMER/minecraft@1.21/net.minecraft.client.MouseHandler.lambda$setup$5(MouseHandler.java:202) ~[neoforge-21.0.148.jar%23189!/:?]
 	at MC-BOOTSTRAP/org.lwjgl.glfw@3.3.3+5/org.lwjgl.glfw.GLFWMouseButtonCallbackI.callback(GLFWMouseButtonCallbackI.java:43) ~[lwjgl-glfw-3.3.3.jar%23171!/:build 5]
 	at MC-BOOTSTRAP/org.lwjgl@3.3.3+5/org.lwjgl.system.JNI.invokeV(Native Method) ~[lwjgl-3.3.3.jar%23182!/:build 5]
-	at MC-BOOTSTRAP/org.lwjgl.glfw@3.3.3+5/org.lwjgl.glfw.GLFW.glfwWaitEventsTimeout(GLFW.java:3509) ~[lwjgl-glfw-3.3.3.jar%23171!/:build 5]
-	at TRANSFORMER/minecraft@1.21/com.mojang.blaze3d.systems.RenderSystem.limitDisplayFPS(RenderSystem.java:162) ~[neoforge-21.0.148.jar%23189!/:?]
-	at TRANSFORMER/minecraft@1.21/net.minecraft.client.Minecraft.runTick(Minecraft.java:1220) ~[neoforge-21.0.148.jar%23189!/:?]
+	at MC-BOOTSTRAP/org.lwjgl.glfw@3.3.3+5/org.lwjgl.glfw.GLFW.glfwPollEvents(GLFW.java:3438) ~[lwjgl-glfw-3.3.3.jar%23171!/:build 5]
+	at TRANSFORMER/minecraft@1.21/com.mojang.blaze3d.systems.RenderSystem.pollEvents(RenderSystem.java:134) ~[neoforge-21.0.148.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21/com.mojang.blaze3d.systems.RenderSystem.flipFrame(RenderSystem.java:143) ~[neoforge-21.0.148.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21/com.mojang.blaze3d.platform.Window.updateDisplay(Window.java:290) ~[neoforge-21.0.148.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21/net.minecraft.client.Minecraft.runTick(Minecraft.java:1217) ~[neoforge-21.0.148.jar%23189!/:?]
 	at TRANSFORMER/minecraft@1.21/net.minecraft.client.Minecraft.run(Minecraft.java:807) ~[neoforge-21.0.148.jar%23189!/:?]
 	at TRANSFORMER/minecraft@1.21/net.minecraft.client.main.Main.main(Main.java:230) ~[neoforge-21.0.148.jar%23189!/:?]
 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
@@ -179,163 +181,209 @@ org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: @Wra
 	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.4/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) [modlauncher-11.0.4.jar%23125!/:?]
 	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.run(BootstrapLauncher.java:210) [bootstraplauncher-2.0.2.jar:?]
 	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:69) [bootstraplauncher-2.0.2.jar:?]
-[22Aug2024 06:22:03.812] [Render thread/INFO] [KubeJS Server/]: Capturing errors for server scripts enabled
-[22Aug2024 06:22:03.824] [Render thread/INFO] [KubeJS Server/]: Loaded script server_scripts:example.js in 0.002 s
-[22Aug2024 06:22:03.824] [Render thread/INFO] [KubeJS Server/]: Loaded 1/1 KubeJS server scripts in 0.01 s with 0 errors and 0 warnings
-[22Aug2024 06:22:03.826] [Render thread/INFO] [KubeJS/]: Loaded 14 data packs: vanilla, KubeJS Virtual Resource Pack [Before Mods, data], mod_data, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, data], KubeJS Virtual Resource Pack [Registries, data], KubeJS Virtual Resource Pack [After Mods, data], KubeJS File Resource Pack [data], mod/neoforge, KubeJS Virtual Resource Pack [Last, data]
-[22Aug2024 06:22:04.758] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1290 recipes
-[22Aug2024 06:22:04.910] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1399 advancements
-[22Aug2024 06:22:05.348] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Starting integrated minecraft server version 1.21
-[22Aug2024 06:22:05.348] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
-[22Aug2024 06:22:05.633] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
-[22Aug2024 06:22:05.635] [Server thread/INFO] [KubeJS Server/]: Capturing errors for server scripts disabled
-[22Aug2024 06:22:05.643] [Server thread/INFO] [KubeJS Server/]: Server resource reload complete!
-[22Aug2024 06:22:05.811] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[22Aug2024 06:22:05.975] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
-[22Aug2024 06:22:05.984] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 343 ms
-[22Aug2024 06:22:06.044] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing view distance to 12, from 10
-[22Aug2024 06:22:06.044] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing simulation distance to 12, from 0
-[22Aug2024 06:22:06.741] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[local:E:eb2067a9] logged in with entity id 71 at (15.994969204478993, -57.1242016833202, -1.5616574068409625)
-[22Aug2024 06:22:06.784] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
-[22Aug2024 06:22:07.195] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ProbeJS is enabled! You should exclude .probe generated when you finished development, and disable the mod by: /probejs disable
-[22Aug2024 06:22:07.198] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] To learn about how to use ProbeJS (or report issue), please go to the Wiki Page
-[22Aug2024 06:22:07.224] [Server thread/INFO] [KubeJS Server/]: Loaded Java class 'net.minecraft.world.entity.ai.goal.PanicGoal'
-[22Aug2024 06:22:07.245] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 53 advancements
-[22Aug2024 06:22:07.246] [Server thread/INFO] [KubeJS Server/]: 25
-[22Aug2024 06:22:07.249] [Server thread/INFO] [KubeJS Server/]: 25
-[22Aug2024 06:22:07.249] [Server thread/INFO] [KubeJS Server/]: 25
-[22Aug2024 06:22:07.250] [Server thread/INFO] [KubeJS Server/]: 25
-[22Aug2024 06:22:07.250] [Server thread/INFO] [KubeJS Server/]: 25
-[22Aug2024 06:22:07.250] [Server thread/INFO] [KubeJS Server/]: 25
-[22Aug2024 06:22:07.251] [Server thread/INFO] [KubeJS Server/]: 25
-[22Aug2024 06:22:07.350] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.351] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.351] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.351] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.351] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.351] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.352] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.352] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.353] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.353] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.353] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.353] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.354] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.354] [Server thread/INFO] [KubeJS Server/]: 28
-[22Aug2024 06:22:07.621] [Server thread/INFO] [KubeJS Server/]: 33
-[22Aug2024 06:22:07.621] [Server thread/INFO] [KubeJS Server/]: 33
-[22Aug2024 06:22:07.622] [Server thread/INFO] [KubeJS Server/]: 33
-[22Aug2024 06:22:07.622] [Server thread/INFO] [KubeJS Server/]: 33
-[22Aug2024 06:22:07.622] [Server thread/INFO] [KubeJS Server/]: 33
-[22Aug2024 06:22:07.622] [Server thread/INFO] [KubeJS Server/]: 33
-[22Aug2024 06:22:07.622] [Server thread/INFO] [KubeJS Server/]: 33
-[22Aug2024 06:22:07.747] [Server thread/INFO] [KubeJS Server/]: 36
-[22Aug2024 06:22:07.747] [Server thread/INFO] [KubeJS Server/]: 36
-[22Aug2024 06:22:07.747] [Server thread/INFO] [KubeJS Server/]: 36
-[22Aug2024 06:22:07.748] [Server thread/INFO] [KubeJS Server/]: 36
-[22Aug2024 06:22:07.748] [Server thread/INFO] [KubeJS Server/]: 36
-[22Aug2024 06:22:07.748] [Server thread/INFO] [KubeJS Server/]: 36
-[22Aug2024 06:22:07.748] [Server thread/INFO] [KubeJS Server/]: 36
-[22Aug2024 06:22:09.254] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.254] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.255] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.255] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.255] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.255] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.255] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.256] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.256] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.256] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.256] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.257] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.257] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.257] [Server thread/INFO] [KubeJS Server/]: 66
-[22Aug2024 06:22:09.504] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.504] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.505] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.505] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.505] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.505] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.506] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.506] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.506] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.507] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.507] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.507] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.507] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:09.507] [Server thread/INFO] [KubeJS Server/]: 71
-[22Aug2024 06:22:20.558] [Server thread/INFO] [KubeJS Startup/]: 3.4028235E38
-[22Aug2024 06:22:20.575] [Render thread/WARN] [KubeJS Startup/]: Invalid animation resource: undefined. Defaulting to kubejs:animations/entity/sasuke.animation.json
-[22Aug2024 06:22:20.589] [Server thread/INFO] [net.minecraft.world.entity.npc.Villager/]: Villager Villager['Villager'/297, l='ServerLevel[New World]', x=210.50, y=-59.00, z=231.50] died, message: 'Villager was killed'
-[22Aug2024 06:22:20.598] [Server thread/INFO] [net.minecraft.world.entity.npc.Villager/]: Villager Villager['Villager'/298, l='ServerLevel[New World]', x=208.76, y=-58.44, z=230.54] died, message: 'Villager was killed'
-[22Aug2024 06:22:20.601] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Killed 145 entities]
-[22Aug2024 06:22:20.611] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Killed 145 entities
-[22Aug2024 06:22:21.535] [Server thread/INFO] [KubeJS Startup/]: ParrotEntityJS['entity.kubejs.sasuke'/14, l='ServerLevel[New World]', x=8.15, y=-60.00, z=-0.00, removed=KILLED] was just removed from the world!
-[22Aug2024 06:22:21.552] [Render thread/INFO] [KubeJS Startup/]: ParrotEntityJS['entity.kubejs.sasuke'/14, l='ClientLevel', x=8.15, y=-60.00, z=-0.00, removed=DISCARDED] was just removed from the world!
-[22Aug2024 06:22:21.552] [Render thread/INFO] [KubeJS Startup/]: ParrotEntityJS['entity.kubejs.sasuke'/14, l='ClientLevel', x=8.15, y=-60.00, z=-0.00, removed=DISCARDED] was removed on the client
-[22Aug2024 06:22:29.997] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set own game mode to Survival Mode]
-[22Aug2024 06:22:30.000] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set own game mode to Survival Mode
-[22Aug2024 06:22:32.650] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set own game mode to Creative Mode]
-[22Aug2024 06:22:32.655] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set own game mode to Creative Mode
-[22Aug2024 06:22:36.421] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set own game mode to Survival Mode]
-[22Aug2024 06:22:36.427] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set own game mode to Survival Mode
-[22Aug2024 06:22:40.728] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.729] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.729] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.729] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.729] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.729] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.729] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.730] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.730] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.730] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.730] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.730] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.730] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.730] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.730] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.732] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.732] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.732] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.732] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.732] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.732] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.733] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.733] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.733] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.733] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.733] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.733] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:40.733] [Server thread/INFO] [KubeJS Server/]: 696
-[22Aug2024 06:22:50.993] [Server thread/INFO] [KubeJS Startup/]: 1.0
-[22Aug2024 06:22:50.994] [Server thread/INFO] [KubeJS Startup/]: ParrotEntityJS['entity.kubejs.sasuke'/864, l='ServerLevel[New World]', x=8.84, y=-60.00, z=5.50] just entered combat
-[22Aug2024 06:22:54.494] [Server thread/INFO] [KubeJS Startup/]: 1.0
-[22Aug2024 06:22:56.627] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Saving and pausing game...
-[22Aug2024 06:22:56.644] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
-[22Aug2024 06:22:56.668] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
-[22Aug2024 06:22:56.681] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
-[22Aug2024 06:22:58.218] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!
-[22Aug2024 06:22:58.234] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: Disconnected
-[22Aug2024 06:22:58.234] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev left the game
-[22Aug2024 06:22:58.244] [Server thread/INFO] [net.minecraft.server.network.ServerCommonPacketListenerImpl/]: Stopping singleplayer server as player logged out
-[22Aug2024 06:22:58.286] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
-[22Aug2024 06:22:58.286] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
-[22Aug2024 06:22:58.286] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
-[22Aug2024 06:22:58.297] [Server thread/INFO] [KubeJS Startup/]: ParrotEntityJS['entity.kubejs.sasuke'/864, l='ServerLevel[New World]', x=6.32, y=-61.00, z=6.45] was just removed from the world!
-[22Aug2024 06:22:58.343] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
-[22Aug2024 06:22:58.392] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
-[22Aug2024 06:22:58.400] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
-[22Aug2024 06:22:58.411] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (New World): All chunks are saved
-[22Aug2024 06:22:58.412] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
-[22Aug2024 06:22:58.412] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
-[22Aug2024 06:22:58.412] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved
-[22Aug2024 06:22:58.453] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Before Mods, data]
-[22Aug2024 06:22:58.453] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Internal, data]
-[22Aug2024 06:22:58.453] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Registries, data]
-[22Aug2024 06:22:58.453] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [After Mods, data]
-[22Aug2024 06:22:58.453] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Last, data]
-[22Aug2024 06:22:58.568] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Before Mods, assets]
-[22Aug2024 06:22:58.568] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Internal, assets]
-[22Aug2024 06:22:58.568] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [After Mods, assets]
-[22Aug2024 06:22:58.568] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Last, assets]
-[22Aug2024 06:22:58.601] [KubeJS Web Server Shutdown Hook/INFO] [KubeJS/]: Stopped the local web server
+[22Aug2024 07:13:21.056] [Render thread/INFO] [KubeJS Server/]: Capturing errors for server scripts enabled
+[22Aug2024 07:13:21.068] [Render thread/INFO] [KubeJS Server/]: Loaded script server_scripts:example.js in 0.001 s
+[22Aug2024 07:13:21.069] [Render thread/INFO] [KubeJS Server/]: Loaded 1/1 KubeJS server scripts in 0.009 s with 0 errors and 0 warnings
+[22Aug2024 07:13:21.071] [Render thread/INFO] [KubeJS/]: Loaded 14 data packs: vanilla, KubeJS Virtual Resource Pack [Before Mods, data], mod_data, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, data], KubeJS Virtual Resource Pack [Registries, data], KubeJS Virtual Resource Pack [After Mods, data], KubeJS File Resource Pack [data], mod/neoforge, KubeJS Virtual Resource Pack [Last, data]
+[22Aug2024 07:13:22.089] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1290 recipes
+[22Aug2024 07:13:22.288] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1399 advancements
+[22Aug2024 07:13:22.816] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Starting integrated minecraft server version 1.21
+[22Aug2024 07:13:22.817] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[22Aug2024 07:13:23.145] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[22Aug2024 07:13:23.147] [Server thread/INFO] [KubeJS Server/]: Capturing errors for server scripts disabled
+[22Aug2024 07:13:23.155] [Server thread/INFO] [KubeJS Server/]: Server resource reload complete!
+[22Aug2024 07:13:23.349] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[22Aug2024 07:13:23.512] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[22Aug2024 07:13:23.527] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 368 ms
+[22Aug2024 07:13:23.656] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing view distance to 12, from 10
+[22Aug2024 07:13:23.657] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing simulation distance to 12, from 0
+[22Aug2024 07:13:23.706] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-60.00, z=6.00] is sprinting!
+[22Aug2024 07:13:23.725] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-60.08, z=6.00] is sprinting!
+[22Aug2024 07:13:23.736] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-60.23, z=6.00] is sprinting!
+[22Aug2024 07:13:23.765] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-60.46, z=6.00] is sprinting!
+[22Aug2024 07:13:23.811] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-60.77, z=6.00] is sprinting!
+[22Aug2024 07:13:23.815] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] just fell 0.7684761881828308 blocks!
+[22Aug2024 07:13:23.866] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:23.894] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:23.918] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:23.967] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.017] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.067] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.119] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.167] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.217] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.266] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.317] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.367] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.417] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.466] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.532] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[local:E:71d57df4] logged in with entity id 76 at (12.394313618624885, -60.0, 8.970851313539677)
+[22Aug2024 07:13:24.595] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
+[22Aug2024 07:13:24.674] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.717] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.725] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.732] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.740] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.785] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.829] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.886] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.933] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:24.980] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.036] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.081] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.107] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ProbeJS is enabled! You should exclude .probe generated when you finished development, and disable the mod by: /probejs disable
+[22Aug2024 07:13:25.112] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] To learn about how to use ProbeJS (or report issue), please go to the Wiki Page
+[22Aug2024 07:13:25.139] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.154] [Server thread/INFO] [KubeJS Server/]: Loaded Java class 'net.minecraft.world.entity.ai.goal.PanicGoal'
+[22Aug2024 07:13:25.167] [Server thread/INFO] [KubeJS Server/]: 33
+[22Aug2024 07:13:25.170] [Server thread/INFO] [KubeJS Server/]: 33
+[22Aug2024 07:13:25.171] [Server thread/INFO] [KubeJS Server/]: 33
+[22Aug2024 07:13:25.171] [Server thread/INFO] [KubeJS Server/]: 33
+[22Aug2024 07:13:25.171] [Server thread/INFO] [KubeJS Server/]: 33
+[22Aug2024 07:13:25.172] [Server thread/INFO] [KubeJS Server/]: 33
+[22Aug2024 07:13:25.172] [Server thread/INFO] [KubeJS Server/]: 33
+[22Aug2024 07:13:25.177] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 53 advancements
+[22Aug2024 07:13:25.205] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.244] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.286] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.348] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.382] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.433] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.452] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.453] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.453] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.454] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.454] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.454] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.454] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.455] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.455] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.456] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.456] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.456] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.457] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.457] [Server thread/INFO] [KubeJS Server/]: 39
+[22Aug2024 07:13:25.476] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.548] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.609] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.645] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.677] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.757] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.788] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.829] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.892] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.946] [Server thread/INFO] [KubeJS Server/]: 48
+[22Aug2024 07:13:25.946] [Server thread/INFO] [KubeJS Server/]: 48
+[22Aug2024 07:13:25.947] [Server thread/INFO] [KubeJS Server/]: 48
+[22Aug2024 07:13:25.947] [Server thread/INFO] [KubeJS Server/]: 48
+[22Aug2024 07:13:25.948] [Server thread/INFO] [KubeJS Server/]: 48
+[22Aug2024 07:13:25.948] [Server thread/INFO] [KubeJS Server/]: 48
+[22Aug2024 07:13:25.948] [Server thread/INFO] [KubeJS Server/]: 48
+[22Aug2024 07:13:25.966] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:25.997] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.044] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.084] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.135] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.182] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.241] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.282] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.334] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.416] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.469] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.515] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.565] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.623] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.665] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.723] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.764] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.801] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.829] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.908] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.949] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:26.979] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.050] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.086] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.131] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.206] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.245] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.279] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.347] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.391] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.456] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.508] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.536] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.583] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.625] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.696] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.723] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.798] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.831] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.915] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.957] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:27.991] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:28.029] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:28.097] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:28.139] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:28.191] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:28.242] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:28.316] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:28.366] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:28.410] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:28.424] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Saving and pausing game...
+[22Aug2024 07:13:28.461] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[22Aug2024 07:13:28.511] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[22Aug2024 07:13:28.535] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[22Aug2024 07:13:31.391] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!
+[22Aug2024 07:13:31.426] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] is sprinting!
+[22Aug2024 07:13:31.432] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.432] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.432] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.432] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.432] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.432] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.433] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.433] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.433] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.434] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.434] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.434] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.434] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.434] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.435] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.435] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.435] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.435] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.435] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.436] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.436] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.436] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.436] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.436] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.436] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.438] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.438] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.438] [Server thread/INFO] [KubeJS Server/]: 99
+[22Aug2024 07:13:31.439] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: Disconnected
+[22Aug2024 07:13:31.439] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev left the game
+[22Aug2024 07:13:31.453] [Server thread/INFO] [net.minecraft.server.network.ServerCommonPacketListenerImpl/]: Stopping singleplayer server as player logged out
+[22Aug2024 07:13:31.489] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
+[22Aug2024 07:13:31.489] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[22Aug2024 07:13:31.490] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
+[22Aug2024 07:13:31.543] [Server thread/INFO] [KubeJS Startup/]: CatEntityJS['entity.kubejs.sasuke'/1, l='ServerLevel[New World]', x=2.50, y=-61.00, z=6.00] was just removed from the world!
+[22Aug2024 07:13:31.669] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[22Aug2024 07:13:31.784] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[22Aug2024 07:13:31.797] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[22Aug2024 07:13:31.817] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (New World): All chunks are saved
+[22Aug2024 07:13:31.817] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[22Aug2024 07:13:31.817] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[22Aug2024 07:13:31.817] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved
+[22Aug2024 07:13:31.871] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Before Mods, data]
+[22Aug2024 07:13:31.871] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Internal, data]
+[22Aug2024 07:13:31.871] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Registries, data]
+[22Aug2024 07:13:31.871] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [After Mods, data]
+[22Aug2024 07:13:31.871] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Last, data]
+[22Aug2024 07:13:32.012] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Before Mods, assets]
+[22Aug2024 07:13:32.012] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Internal, assets]
+[22Aug2024 07:13:32.012] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [After Mods, assets]
+[22Aug2024 07:13:32.012] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Last, assets]
+[22Aug2024 07:13:32.077] [KubeJS Web Server Shutdown Hook/INFO] [KubeJS/]: Stopped the local web server

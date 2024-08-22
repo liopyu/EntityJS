@@ -204,7 +204,6 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         if (builder.onHurt != null) {
             final ContextUtils.EntityHurtContext context = new ContextUtils.EntityHurtContext(this, pSource, pAmount);
             EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurt.");
-
         }
         return super.hurt(pSource, pAmount);
     }
