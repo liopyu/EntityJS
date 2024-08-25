@@ -23,3 +23,100 @@ run
 
 # Files from Forge MDK
 forge*changelog.txt
+/runs/client/.gitignore
+/runs/client/saves/New World/playerdata/380df991-f603-344c-a090-369bad2a924a.dat
+/runs/client/saves/New World/playerdata/380df991-f603-344c-a090-369bad2a924a.dat_old
+/runs/client/saves/New World/advancements/380df991-f603-344c-a090-369bad2a924a.json
+/runs/client/saves/New World/stats/380df991-f603-344c-a090-369bad2a924a.json
+/runs/client/kubejs/config/client.json
+/runs/client/command_history.txt
+/runs/client/kubejs/config/common.json
+/runs/client/crash-reports/crash-2024-08-12_13.46.52-fml.txt
+/runs/client/crash-reports/crash-2024-08-12_13.50.49-client.txt
+/runs/client/crash-reports/crash-2024-08-12_13.55.31-fml.txt
+/runs/client/crash-reports/crash-2024-08-12_13.59.14-fml.txt
+/runs/client/crash-reports/crash-2024-08-12_14.01.55-client.txt
+/runs/client/crash-reports/crash-2024-08-12_14.05.25-client.txt
+/runs/client/crash-reports/crash-2024-08-12_14.06.27-client.txt
+/runs/client/crash-reports/crash-2024-08-12_14.12.51-client.txt
+/runs/client/crash-reports/crash-2024-08-12_14.26.05-client.txt
+/runs/client/crash-reports/crash-2024-08-17_16.41.59-fml.txt
+/runs/client/crash-reports/crash-2024-08-22_06.31.54-server.txt
+/runs/client/local/kubejs/dev.json
+/runs/client/kubejs/client_scripts/example.js
+/runs/client/kubejs/server_scripts/example.js
+/runs/client/kubejs/startup_scripts/example.js
+/runs/client/kubejs/assets/kubejs/textures/block/example_block.png
+/runs/client/kubejs/assets/kubejs/textures/item/example_item.png
+/runs/client/saves/New World/icon.png
+/runs/client/kubejs/assets/kubejs/models/item/illager_king_summoner.json
+/runs/client/kubejs/client_scripts/jsconfig.json
+/runs/client/kubejs/server_scripts/jsconfig.json
+/runs/client/kubejs/startup_scripts/jsconfig.json
+/runs/client/saves/New World/kubejs_persistent_data.nbt
+/runs/client/saves/New World/level.dat
+/runs/client/saves/New World/level.dat_old
+/runs/client/downloads/log.json
+/runs/client/config/neoforge-client.toml
+/runs/client/config/neoforge-client-1.toml.bak
+/runs/client/config/neoforge-common.toml
+/runs/client/config/neoforge-common-1.toml.bak
+/runs/client/config/neoforge-server.toml
+/runs/client/config/neoforge-server-1.toml.bak
+/runs/client/saves/New World/data/neoforge_data_attachments.dat
+/runs/client/saves/New World/DIM1/data/neoforge_data_attachments.dat
+/runs/client/saves/New World/DIM-1/data/neoforge_data_attachments.dat
+/runs/client/options.txt
+/runs/client/kubejs/assets/kubejs/models/block/pizza_slice.json
+/runs/client/kubejs/assets/kubejs/textures/block/pizza_slice.png
+/runs/client/kubejs/assets/kubejs/textures/item/pizza_slice.png
+/runs/client/.vscode/probe.code-snippets
+/runs/client/kubejs/config/probe-settings.json
+/runs/client/kubejs/assets/kubejs/animations/entity/projectile.animation.json
+/runs/client/kubejs/assets/kubejs/geo/entity/projectile.geo.json
+/runs/client/kubejs/assets/kubejs/textures/entity/projectile.png
+/runs/client/saves/New World/DIM1/entities/r.0.0.mca
+/runs/client/saves/New World/DIM1/poi/r.0.0.mca
+/runs/client/saves/New World/DIM1/region/r.0.0.mca
+/runs/client/saves/New World/entities/r.0.0.mca
+/runs/client/saves/New World/poi/r.0.0.mca
+/runs/client/saves/New World/region/r.0.0.mca
+/runs/client/saves/New World/poi/r.0.1.mca
+/runs/client/saves/New World/region/r.0.1.mca
+/runs/client/saves/New World/DIM1/entities/r.0.-1.mca
+/runs/client/saves/New World/DIM1/poi/r.0.-1.mca
+/runs/client/saves/New World/DIM1/region/r.0.-1.mca
+/runs/client/saves/New World/entities/r.0.-1.mca
+/runs/client/saves/New World/poi/r.0.-1.mca
+/runs/client/saves/New World/region/r.0.-1.mca
+/runs/client/saves/New World/DIM1/entities/r.-1.0.mca
+/runs/client/saves/New World/DIM1/poi/r.-1.0.mca
+/runs/client/saves/New World/DIM1/region/r.-1.0.mca
+/runs/client/saves/New World/entities/r.-1.0.mca
+/runs/client/saves/New World/poi/r.-1.0.mca
+/runs/client/saves/New World/region/r.-1.0.mca
+/runs/client/saves/New World/poi/r.-1.1.mca
+/runs/client/saves/New World/region/r.-1.1.mca
+/runs/client/saves/New World/DIM1/entities/r.-1.-1.mca
+/runs/client/saves/New World/DIM1/poi/r.-1.-1.mca
+/runs/client/saves/New World/DIM1/region/r.-1.-1.mca
+/runs/client/saves/New World/entities/r.-1.-1.mca
+/runs/client/saves/New World/poi/r.-1.-1.mca
+/runs/client/saves/New World/region/r.-1.-1.mca
+/runs/client/saves/New World/data/raids.dat
+/runs/client/saves/New World/DIM-1/data/raids.dat
+/runs/client/saves/New World/DIM1/data/raids_end.dat
+/runs/client/saves/New World/data/random_sequences.dat
+/runs/client/kubejs/README.txt
+/runs/client/saves/New World/serverconfig/readme.txt
+/runs/client/.vscode/recipe.json
+/runs/client/saves/New World/session.lock
+/runs/client/.vscode/settings.json
+/runs/client/kubejs/assets/kubejs/animations/entity/slime.animation.json
+/runs/client/kubejs/assets/kubejs/geo/entity/slime.geo.json
+/runs/client/kubejs/assets/kubejs/textures/entity/slime.png
+/runs/client/usercache.json
+/runs/client/usernamecache.json
+/runs/client/kubejs/assets/kubejs/animations/entity/venus_blaze.animation.json
+/runs/client/kubejs/assets/kubejs/geo/entity/venus_blaze.geo.json
+/runs/client/kubejs/assets/kubejs/textures/entity/venus_blaze.png

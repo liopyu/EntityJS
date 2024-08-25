@@ -4,7 +4,6 @@ import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
@@ -15,11 +14,6 @@ import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.client.nonliving.*;
 import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class ClientEventHandlers implements ClientModInitializer {
     /**
