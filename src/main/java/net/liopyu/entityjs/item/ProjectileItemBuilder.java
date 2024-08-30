@@ -1,13 +1,20 @@
 package net.liopyu.entityjs.item;
 
 import dev.latvian.mods.kubejs.item.ItemBuilder;
+import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileAnimatableJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
+import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileAnimatableJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -15,13 +22,13 @@ import net.minecraft.world.level.Level;
 
 
 public class ProjectileItemBuilder extends ItemBuilder {
-    public transient final ProjectileEntityJSBuilder parent;
+    public transient final BuilderBase<?> parent;
     public transient boolean canThrow;
     public transient float projectileZ;
     public transient float projectileVelocity;
     public transient float projectileInaccuracy;
 
-    public ProjectileItemBuilder(ResourceLocation i, ProjectileEntityJSBuilder parent) {
+    public ProjectileItemBuilder(ResourceLocation i, BuilderBase<?> parent) {
         super(i);
         this.parent = parent;
         canThrow = false;
@@ -42,10 +49,19 @@ public class ProjectileItemBuilder extends ItemBuilder {
                         float pZ = projectileZ;
                         float pVelocity = projectileVelocity;
                         float pInaccuracy = projectileInaccuracy;
-                        ProjectileEntityJS $$4 = new ProjectileEntityJS(parent, parent.get(), pPlayer, pLevel);
-                        $$4.setItem($$3);
-                        $$4.shootFromRotation(pPlayer, pPlayer.getXRot(), pPlayer.getYRot(), pZ, pVelocity, pInaccuracy);
-                        pLevel.addFreshEntity($$4);
+                        if (parent instanceof BaseNonAnimatableEntityBuilder<?> builder) {
+                            var newBuilder = ((ProjectileEntityJSBuilder) builder);
+                            ProjectileEntityJS $$4 = new ProjectileEntityJS(newBuilder, newBuilder.get(), pPlayer, pLevel);
+                            $$4.setItem($$3);
+                            $$4.shootFromRotation(pPlayer, pPlayer.getXRot(), pPlayer.getYRot(), pZ, pVelocity, pInaccuracy);
+                            pLevel.addFreshEntity($$4);
+                        } else if (parent instanceof BaseEntityBuilder<?> builder) {
+                            var newBuilder = ((ProjectileAnimatableJSBuilder) builder);
+                            ProjectileAnimatableJS $$4 = new ProjectileAnimatableJS(newBuilder, newBuilder.get(), pPlayer, pLevel);
+                            $$4.setItem($$3);
+                            $$4.shootFromRotation(pPlayer, pPlayer.getXRot(), pPlayer.getYRot(), pZ, pVelocity, pInaccuracy);
+                            pLevel.addFreshEntity($$4);
+                        }
                     }
                     pPlayer.awardStat(Stats.ITEM_USED.get(this));
                     if (!pPlayer.getAbilities().instabuild) {

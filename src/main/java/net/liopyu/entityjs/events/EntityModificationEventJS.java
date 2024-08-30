@@ -18,7 +18,6 @@ import java.util.function.Consumer;
 
 public class EntityModificationEventJS extends EventJS {
     public static final Map<EntityType<?>, EntityModificationEventJS> eventMap = new HashMap<>();
-    public static final Map<EntityType<?>, Object> builderMap = new HashMap<>();
 
     private final Object builder;
     private final Entity entity;

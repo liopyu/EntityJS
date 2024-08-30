@@ -26,8 +26,6 @@ public class ProjectileEntityJSBuilder extends ProjectileEntityBuilder<Projectil
                 .texture(i.getNamespace() + ":item/" + i.getPath());
     }
 
-    public transient Level level;
-
 
     @Override
     public EntityType.EntityFactory<ProjectileEntityJS> factory() {
