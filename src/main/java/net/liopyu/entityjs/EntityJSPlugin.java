@@ -9,6 +9,7 @@ import net.liopyu.entityjs.builders.living.entityjs.*;
 import net.liopyu.entityjs.builders.living.vanilla.*;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.BaseEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileAnimatableJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
@@ -32,6 +33,7 @@ public class EntityJSPlugin implements KubeJSPlugin {
             reg.add("entityjs:tamable", TameableMobJSBuilder.class, TameableMobJSBuilder::new);
             reg.add("entityjs:arrow", ArrowEntityJSBuilder.class, ArrowEntityJSBuilder::new);
             reg.add("entityjs:projectile", ProjectileEntityJSBuilder.class, ProjectileEntityJSBuilder::new);
+            reg.add("entityjs:geckolib_projectile", ProjectileAnimatableJSBuilder.class, ProjectileAnimatableJSBuilder::new);
             reg.add("minecraft:zombie", ZombieJSBuilder.class, ZombieJSBuilder::new);
             reg.add("minecraft:allay", AllayJSBuilder.class, AllayJSBuilder::new);
             reg.add("minecraft:axolotl", AxolotlJSBuilder.class, AxolotlJSBuilder::new);

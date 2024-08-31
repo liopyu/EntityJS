@@ -1193,26 +1193,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
         return this;
     }
 
-    @Info(value = """
-            Sets a consumer to handle the interaction with the entity.
-            The provided Consumer accepts a {@link ContextUtils.MobInteractContext} parameter,
-            representing the context of the interaction
-                        
-            Example usage:
-            ```javascript
-            modifyBuilder.onInteract(context => {
-                // Define custom logic for the interaction with the entity
-                // Use information about the MobInteractContext provided by the context.
-                if (context.player.isShiftKeyDown()) return
-                context.player.startRiding(context.entity);
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder onInteract(Consumer<ContextUtils.MobInteractContext> c) {
-        onInteract = c;
-        return this;
-    }
-
 
     @Info(value = """
             Sets a consumer to handle custom lerping logic for the living entity.

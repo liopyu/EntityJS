@@ -7,6 +7,7 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.ArrowEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -36,7 +37,7 @@ public class ArrowItemBuilder extends ItemBuilder {
         return new ArrowItem(createItemProperties()) {
             @Override
             public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter, @Nullable ItemStack weapon) {
-                final ArrowEntityJS arrow = new ArrowEntityJS(pLevel, parent);
+                final ArrowEntityJS arrow = new ArrowEntityJS(parent, pLevel, pShooter, pStack, weapon);
                 if (canBePickedUp) {
                     final ItemStack stack = new ItemStack(pStack.getItem());
                     arrow.setPickUpItem(stack);

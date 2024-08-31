@@ -16,6 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.animation.keyframe.event.CustomInstructionKeyframeEvent;
@@ -25,10 +26,7 @@ import software.bernie.geckolib.animation.keyframe.event.SoundKeyframeEvent;
 import software.bernie.geckolib.animation.keyframe.event.data.KeyFrameData;
 import software.bernie.geckolib.constant.dataticket.DataTicket;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -93,6 +91,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient float scaleWidth;
     public transient Consumer<ContextUtils.ScaleModelRenderContextNL<T>> scaleModelForRender;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
+    public static Map<EntityType<?>, Item> projectileItems = new HashMap<>();
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);

@@ -27,9 +27,30 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
     public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
     public transient Function<Mob, Object> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
+    public transient Consumer<ContextUtils.MobInteractContext> onMobInteract;
 
     public ModifyMobBuilder(EntityType<?> entity) {
         super(entity);
+    }
+
+    @Info(value = """
+            Sets a consumer to handle the interaction with the entity.
+            The provided Consumer accepts a {@link ContextUtils.MobInteractContext} parameter,
+            representing the context of the interaction
+                        
+            Example usage:
+            ```javascript
+            modifyBuilder.onMobInteract(context => {
+                // Define custom logic for the interaction with the entity
+                // Use information about the MobInteractContext provided by the context.
+                if (context.player.isShiftKeyDown()) return
+                context.player.startRiding(context.entity);
+            });
+            ```
+            """)
+    public ModifyEntityBuilder onMobInteract(Consumer<ContextUtils.MobInteractContext> c) {
+        onMobInteract = c;
+        return this;
     }
 
     @Info(value = """

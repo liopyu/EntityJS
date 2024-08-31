@@ -26,6 +26,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -66,6 +67,14 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
     }
 
+    public ArrowEntityJS(ArrowEntityJSBuilder builder, Level level, LivingEntity shooter, ItemStack stack, @Nullable ItemStack weapon) {
+        super(builder.get(), shooter, level, stack, weapon);
+        this.builder = builder;
+        pickUpStack = ItemStack.EMPTY;
+        this.baseDamage = builder.setBaseDamage;
+        this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+    }
+
     public ArrowEntityJS(Level level, ArrowEntityJSBuilder builder) {
         super(builder.get(), level);
         this.builder = builder;
@@ -91,7 +100,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     protected ItemStack getDefaultPickupItem() {
-        return pickUpStack;
+        return new ItemStack(Items.ARROW);
     }
 
     public String entityName() {

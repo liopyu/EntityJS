@@ -1,13 +1,19 @@
 package net.liopyu.entityjs.entities.nonliving.entityjs;
 
+import dev.latvian.mods.kubejs.script.ConsoleJS;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileAnimatableJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
+import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -27,34 +33,56 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Objects;
 
-public class ProjectileEntityJS extends ThrowableItemProjectile implements IProjectileEntityJS, ItemSupplier {
+import static net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder.projectileItems;
+
+public class ProjectileAnimatableJS extends ThrowableItemProjectile implements IAnimatableJSNL, ItemSupplier {
 
 
-    public ProjectileEntityJSBuilder builder;
+    public ProjectileAnimatableJSBuilder builder;
+    private final AnimatableInstanceCache getAnimatableInstanceCache;
 
-    public ProjectileEntityJS(ProjectileEntityJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, Level pLevel) {
+    public ProjectileAnimatableJS(ProjectileAnimatableJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
+        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     }
 
-    public ProjectileEntityJS(ProjectileEntityJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, LivingEntity pShooter, Level pLevel) {
+    public ProjectileAnimatableJS(ProjectileAnimatableJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, LivingEntity pShooter, Level pLevel) {
         super(pEntityType, pShooter, pLevel);
         this.builder = builder;
+        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     }
 
 
     @Override
-    public ProjectileEntityBuilder<?> getProjectileBuilder() {
+    public BaseEntityBuilder<?> getBuilder() {
         return builder;
     }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return getAnimatableInstanceCache;
+    }
+
 
     @Override
     protected @NotNull Item getDefaultItem() {
         return Items.AIR;
     }
+
+   /* private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK = SynchedEntityData.defineId(
+            ProjectileAnimatableJS.class, EntityDataSerializers.ITEM_STACK
+    );*/
+
+   /* @Override
+    protected void defineSynchedData(SynchedEntityData.Builder p_326015_) {
+        p_326015_.define(DATA_ITEM_STACK, new ItemStack(this.getDefaultItem()));
+    }*/
 
     public String entityName() {
         return this.getType().toString();

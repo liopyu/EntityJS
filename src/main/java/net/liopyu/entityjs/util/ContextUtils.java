@@ -475,6 +475,23 @@ public class ContextUtils {
         }
     }
 
+    public static class EntityInteractContext {
+        @Info("The entity being interacted with")
+        public final Entity entity;
+
+        @Info("The player interacting with the entity")
+        public final Player player;
+
+        @Info("The hand used for interaction")
+        public final InteractionHand hand;
+
+        public EntityInteractContext(Entity entity, Player player, InteractionHand hand) {
+            this.entity = entity;
+            this.player = player;
+            this.hand = hand;
+        }
+    }
+
     public static class MobInteractContext {
         @Info("The living entity being interacted with")
         public final LivingEntity entity;

@@ -77,9 +77,9 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     @Inject(method = "mobInteract", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void mobInteract(Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
-            if (builder.onInteract != null) {
+            if (builder.onMobInteract != null) {
                 final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(entityJs$getLivingEntity(), pPlayer, pHand);
-                EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onInteract.");
+                EntityJSHelperClass.consumerCallback(builder.onMobInteract, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onMobInteract.");
             }
         }
 
