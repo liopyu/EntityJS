@@ -37,6 +37,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @Inject(method = "getRenderType", at = @At("HEAD"), remap = true, cancellable = true)
     private void onGetRenderType(T entity, boolean bodyVisible, boolean translucent, boolean glowing, CallbackInfoReturnable<RenderType> cir) {
+
         var entityType = entity.getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
             var eventJS = getOrCreate(entityType, entity);
@@ -51,7 +52,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
             if (builder.setTextureLocation != null) {
                 var context = new ContextUtils.RendererModelContext(entity, getRenderer(), currentModel);
                 try {
-                    var resourcelocation = EntityJSHelperClass.convertObjectToDesired(builder.setTextureLocation.apply(context), "resourcelocation");
+                    var obj = builder.setTextureLocation.apply(context);
+                    var resourcelocation = EntityJSHelperClass.convertObjectToDesired(obj, "resourcelocation");
                     if (resourcelocation != null) {
                         var textureLocation = (ResourceLocation) resourcelocation;
                         if (translucent) {
@@ -66,7 +68,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
                             return;
                         }
                     }
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value in setTextureLocation field from entity: " + entity.getType() + ". Value: " + resourcelocation + ". Must be a resource location");
+                    if (obj != null) {
+                        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value in setTextureLocation field from entity: " + entity.getType() + ". Value: " + resourcelocation + ". Must be a resource location");
+                    }
+                    return;
                 } catch (Throwable e) {
                     EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in modifyEntity method setTextureLocation from entity: " + entity.getType() + ". ", e);
                 }
@@ -74,12 +79,15 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
             if (builder.setRenderType != null) {
                 var context = new ContextUtils.RendererModelContext(entity, getRenderer(), currentModel);
                 try {
-                    var returnValue = EntityJSHelperClass.convertToRenderType(builder.setRenderType.apply(context), cir.getReturnValue());
+                    var obj = builder.setRenderType.apply(context);
+                    var returnValue = EntityJSHelperClass.convertToRenderType(obj, cir.getReturnValue());
                     if (returnValue != null) {
                         cir.setReturnValue(returnValue);
                         return;
                     }
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value in setRenderType field from entity: " + entity.getType() + ". Must return either a resource location or a RenderType. Return null for the default texture logic.");
+                    if (obj != null) {
+                        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value in setRenderType field from entity: " + entity.getType() + ". Must return either a resource location or a RenderType. Return null for the default texture logic.");
+                    }
                 } catch (Throwable e) {
                     EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in modifyEntity method setRenderType from entity: " + entity.getType() + ". ", e);
                 }
