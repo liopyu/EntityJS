@@ -6,8 +6,10 @@ import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -35,6 +37,21 @@ import net.neoforged.neoforge.entity.PartEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 
 public class ContextUtils {
+    public static class RendererModelContext {
+        @Info("The living entity")
+        public final LivingEntity entity;
+        @Info("The entity's renderer")
+        public final LivingEntityRenderer renderer;
+        @Info("The entity's model")
+        public final EntityModel model;
+
+        public RendererModelContext(LivingEntity entity, LivingEntityRenderer renderer, EntityModel model) {
+            this.entity = entity;
+            this.renderer = renderer;
+            this.model = model;
+        }
+    }
+
     public static class ChangeDimensionsContext {
         public final Entity entity;
         public final Level to;

@@ -12,5 +12,7 @@
     "ProjectileMixin",
     "ServerScriptManagerMixin"
   ],
-  "client": []
+  "client": [
+    "LivingEntityRendererMixin"
+  ]
 }

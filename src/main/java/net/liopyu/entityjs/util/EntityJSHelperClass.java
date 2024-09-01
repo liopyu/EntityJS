@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.util;
 
 import dev.latvian.mods.kubejs.script.ConsoleJS;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -58,6 +59,15 @@ public class EntityJSHelperClass {
             case "looptype" -> convertToLoopType(input);
             case "aabb" -> convertToBoundingBox(input);
             default -> input;
+        };
+    }
+
+    public static RenderType convertToRenderType(Object input, Object defaultValue) {
+        return switch (input) {
+            case null -> (RenderType) defaultValue;
+            case RenderType renderType -> renderType;
+            case String string -> RenderType.entityCutout(ResourceLocation.parse(string));
+            default -> null;
         };
     }
 
