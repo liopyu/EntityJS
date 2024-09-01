@@ -90,6 +90,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     @Info(value = """
             Sets the Texture Location of the entity without modifying the RenderType logic.
             Returns a ResourceLocation.
+            Return null for the default entity's location
                         
             Example usage:
             ```javascript
@@ -101,8 +102,8 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder setTextureLocation(Function<ContextUtils.RendererModelContext, Object> setRenderType) {
-        this.setTextureLocation = setRenderType;
+    public ModifyLivingEntityBuilder setTextureLocation(Function<ContextUtils.RendererModelContext, Object> setTextureLocation) {
+        this.setTextureLocation = setTextureLocation;
         return this;
     }
 
