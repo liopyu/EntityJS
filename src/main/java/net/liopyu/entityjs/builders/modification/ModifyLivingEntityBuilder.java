@@ -104,8 +104,8 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder setTextureLocation(Function<ContextUtils.RendererModelContext, Object> setRenderType) {
-        this.setTextureLocation = setRenderType;
+    public ModifyLivingEntityBuilder setTextureLocation(Function<ContextUtils.RendererModelContext, Object> setTextureLocation) {
+        this.setTextureLocation = setTextureLocation;
         return this;
     }
 
