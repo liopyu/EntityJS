@@ -7,7 +7,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import software.bernie.geckolib.core.animation.Animation;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class EntityJSHelperClass {

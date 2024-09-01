@@ -6,19 +6,14 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
@@ -38,12 +33,6 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     private LivingEntityRenderer<T, M> getRenderer() {
         return ((LivingEntityRenderer) ((Object) this));
     }
-
-    /* @Inject(method = "<init>", at = @At("RETURN"), remap = true)
-     private void entityjs$onModelInit(EntityRendererProvider.Context pContext, EntityModel pModel, float pShadowRadius, CallbackInfo ci) {
-
-     }
- */
 
 
     @Inject(method = "getRenderType", at = @At("HEAD"), remap = true, cancellable = true)
