@@ -2,6 +2,7 @@ package net.liopyu.entityjs.mixin;
 
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
+import net.liopyu.entityjs.builders.modification.ModifyMobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -13,6 +14,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
@@ -68,6 +71,17 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
+    }
+
+    @Inject(method = "interact", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    public void mobInteract(Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.onInteract != null) {
+                final ContextUtils.EntityInteractContext context = new ContextUtils.EntityInteractContext(entityJs$getLivingEntity(), pPlayer, pHand);
+                EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onInteract.");
+            }
+        }
+
     }
 
     @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)

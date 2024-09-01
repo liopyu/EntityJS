@@ -38,7 +38,7 @@ public class ModifyEntityBuilder extends EventJS {
     public transient Consumer<Entity> onFlap;
     public transient Consumer<Entity> onAddedToWorld;
     public transient Consumer<Entity> onClientRemoval;
-    public transient Consumer<ContextUtils.MobInteractContext> onInteract;
+    public transient Consumer<ContextUtils.EntityInteractContext> onInteract;
     public transient Function<Entity, Object> setMaxFallDistance;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
@@ -63,6 +63,26 @@ public class ModifyEntityBuilder extends EventJS {
     public ModifyEntityBuilder(EntityType<?> entityType) {
         this.entityType = entityType;
 
+    }
+
+    @Info(value = """
+            Sets a consumer to handle the interaction with the entity.
+            The provided Consumer accepts a {@link ContextUtils.EntityInteractContext} parameter,
+            representing the context of the interaction
+                        
+            Example usage:
+            ```javascript
+            modifyBuilder.onInteract(context => {
+                // Define custom logic for the interaction with the entity
+                // Use information about the EntityInteractContext provided by the context.
+                if (context.player.isShiftKeyDown()) return
+                context.player.startRiding(context.entity);
+            });
+            ```
+            """)
+    public ModifyEntityBuilder onInteract(Consumer<ContextUtils.EntityInteractContext> c) {
+        onInteract = c;
+        return this;
     }
 
     @Info(value = """

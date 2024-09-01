@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
+    public transient Consumer<ContextUtils.MobInteractContext> mobInteract;
     public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Consumer<LivingEntity> ate;
@@ -29,6 +30,26 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     public ModifyMobBuilder(EntityType<?> entity) {
         super(entity);
+    }
+
+    @Info(value = """
+            Sets a consumer to handle the interaction with the entity.
+            The provided Consumer accepts a {@link ContextUtils.MobInteractContext} parameter,
+            representing the context of the interaction
+                        
+            Example usage:
+            ```javascript
+            modifyBuilder.mobInteract(context => {
+                // Define custom logic for the interaction with the entity
+                // Use information about the MobInteractContext provided by the context.
+                if (context.player.isShiftKeyDown()) return
+                context.player.startRiding(context.entity);
+            });
+            ```
+            """)
+    public ModifyEntityBuilder mobInteract(Consumer<ContextUtils.MobInteractContext> c) {
+        mobInteract = c;
+        return this;
     }
 
     @Info(value = """

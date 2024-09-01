@@ -2,6 +2,7 @@ package net.liopyu.entityjs.util;
 
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.liolib.core.animation.Animation;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -65,6 +66,17 @@ public class EntityJSHelperClass {
             case "looptype" -> convertToLoopType(input);
             default -> input;
         };
+    }
+
+    public static RenderType convertToRenderType(Object input, Object defaultValue) {
+        if (input == null) {
+            return (RenderType) defaultValue;
+        } else if (input instanceof RenderType) {
+            return (RenderType) input;
+        } else if (input instanceof String string) {
+            return RenderType.entityCutout(new ResourceLocation(string));
+        }
+        return null;
     }
 
     private static Animation.LoopType convertToLoopType(Object input) {
