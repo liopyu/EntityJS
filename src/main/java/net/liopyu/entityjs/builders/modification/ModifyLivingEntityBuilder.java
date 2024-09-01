@@ -4,6 +4,9 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 
@@ -11,8 +14,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
-
-
+    public transient Function<ContextUtils.RendererModelContext, Object> setTextureLocation;
+    public transient Function<ContextUtils.RendererModelContext, Object> setRenderType;
     public transient Boolean isPushable;
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
     public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
@@ -86,6 +89,43 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
         super(entityType);
     }
 
+    @Info(value = """
+            Sets the Texture Location of the entity without modifying the RenderType logic.
+            Returns a ResourceLocation.
+                        
+            Example usage:
+            ```javascript
+            modifyBuilder.setTextureLocation(entity => {
+                // Sets the entity's texture to default Steve
+                let DefaultPlayerSkin = Java.loadClass("net.minecraft.client.resources.DefaultPlayerSkin")
+                let skin = DefaultPlayerSkin.getDefaultSkin();
+                return skin;
+            });
+            ```
+            """)
+    public ModifyLivingEntityBuilder setTextureLocation(Function<ContextUtils.RendererModelContext, Object> setRenderType) {
+        this.setRenderType = setRenderType;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the RenderType of the entity, effectively capable of dynamically replacing texture locations.
+            Return null for the default render type.
+                        
+            Example usage:
+            ```javascript
+            modifyBuilder.setRenderType(entity => {
+                // Sets the entity's texture to default Steve
+                let DefaultPlayerSkin = Java.loadClass("net.minecraft.client.resources.DefaultPlayerSkin")
+                let skin = DefaultPlayerSkin.getDefaultSkin();
+                return RenderType.entityCutout(skin);
+            });
+            ```
+            """)
+    public ModifyLivingEntityBuilder setRenderType(Function<ContextUtils.RendererModelContext, Object> setRenderType) {
+        this.setRenderType = setRenderType;
+        return this;
+    }
 
     @Info(value = """
             Sets the water slowdown factor for the entity. Defaults to 0.8.

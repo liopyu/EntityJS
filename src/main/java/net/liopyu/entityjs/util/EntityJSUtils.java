@@ -32,4 +32,5 @@ public interface EntityJSUtils {
     static WaterBoundPathNavigation createWaterBoundPathNavigation(Mob pMob, Level pLevel) {
         return new WaterBoundPathNavigation(pMob, pLevel);
     }
+
 }

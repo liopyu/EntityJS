@@ -122,6 +122,9 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    implementation fg.deobf("curse.maven:lendercataclysm-551586:5474791")
+    implementation fg.deobf("curse.maven:curios-309927:5680164")
+    implementation fg.deobf("curse.maven:lionfish-api-1001614:5363774")
     compileOnly fg.deobf("curse.maven:framework-549225:5180972")
     compileOnly fg.deobf("curse.maven:mrcrayfishs-gun-mod-unofficial-945471:5212457")
     //ProbeJS 7.0

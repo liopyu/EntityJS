@@ -19,6 +19,7 @@ import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
+import net.minecraft.client.renderer.RenderType;
 import org.slf4j.Logger;
 
 public class EntityJSPlugin extends KubeJSPlugin {
@@ -73,6 +74,7 @@ public class EntityJSPlugin extends KubeJSPlugin {
     @Override
     public void registerBindings(BindingsEvent event) {
         event.add("EntityJSUtils", EntityJSUtils.class);
+        event.add("RenderType", RenderType.class);
     }
 
     @Override
