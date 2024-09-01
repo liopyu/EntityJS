@@ -48,7 +48,7 @@ public class ModifyEntityBuilder implements KubeEvent {
     public transient Boolean isAttackable;
     public transient Function<Entity, Object> canChangeDimensions;
     public transient Function<Entity, Object> blockSpeedFactor;
-    public transient boolean isPickable;
+    public transient Function<Entity, Object> isPickable;
     public transient Consumer<ContextUtils.EEntityFallDamageContext> onFall;
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
@@ -165,14 +165,16 @@ public class ModifyEntityBuilder implements KubeEvent {
     }*/
 
     @Info(value = """
-            Boolean determining if the part entity is pickable.
+            Function determining if the entity is pickable.
                                                 
             Example usage:
             ```javascript
-            modifyBuilder.isPickable(true)
+            modifyBuilder.isPickable(entity => {
+                return true;
+            })
             ```
             """)
-    public ModifyEntityBuilder isPickable(boolean isPickable) {
+    public ModifyEntityBuilder isPickable(Function<Entity, Object> isPickable) {
         this.isPickable = isPickable;
         return this;
     }

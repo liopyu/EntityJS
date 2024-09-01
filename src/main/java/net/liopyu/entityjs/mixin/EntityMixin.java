@@ -289,6 +289,18 @@ public class EntityMixin {
         }
     }
 
+    @Inject(method = "isPickable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    public void isPickable(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.isPickable == null) return;
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isPickable.apply(entityJs$getLivingEntity()), "boolean");
+            if (obj != null) {
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isPickable from entity: " + entityJs$entityName() + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+        }
+    }
+
     @Inject(method = "isPushable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void isPushable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
