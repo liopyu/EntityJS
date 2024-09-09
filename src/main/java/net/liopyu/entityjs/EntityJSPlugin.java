@@ -70,7 +70,6 @@ public class EntityJSPlugin extends KubeJSPlugin {
     @Override
     public void registerBindings(BindingsEvent event) {
         event.add("EntityJSUtils", EntityJSUtils.class);
-        event.add("RenderType", RenderType.class);
     }
 
     @Override
