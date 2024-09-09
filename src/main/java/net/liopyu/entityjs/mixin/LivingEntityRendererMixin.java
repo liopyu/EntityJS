@@ -37,7 +37,6 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @Inject(method = "getRenderType", at = @At("HEAD"), remap = true, cancellable = true)
     private void onGetRenderType(T entity, boolean bodyVisible, boolean translucent, boolean glowing, CallbackInfoReturnable<RenderType> cir) {
-
         var entityType = entity.getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
             var eventJS = getOrCreate(entityType, entity);

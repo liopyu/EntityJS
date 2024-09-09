@@ -149,8 +149,8 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
                 }
             }
         }
-    }*/
-
+    }
+*/
     @Inject(method = "doAutoAttackOnTouch", at = @At(value = "HEAD", ordinal = 0), remap = true)
     private void entityjs$doAutoAttackOnTouch(LivingEntity pTarget, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
