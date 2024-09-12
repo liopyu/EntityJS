@@ -53,7 +53,7 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
     public EyeOfEnderItemBuilder(ResourceLocation i, EyeOfEnderJSBuilder parent) {
         super(i);
         this.parent = parent;
-        texture = i.getNamespace() + ":item/" + i.getPath();
+        baseTexture = i.getNamespace() + ":item/" + i.getPath();
         this.triggersCriteria = true;
         this.overrideSound = false;
     }

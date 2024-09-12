@@ -5,7 +5,12 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven { url = 'https://maven.neoforged.net/releases' }
-
+        maven {
+            url 'https://jitpack.io'
+            content {
+                includeGroup "com.github.rtyley"
+            }
+        }
         maven {
             url "https://cursemaven.com"
             content {

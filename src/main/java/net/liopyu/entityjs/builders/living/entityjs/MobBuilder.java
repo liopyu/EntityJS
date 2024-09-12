@@ -52,9 +52,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         canJump = true;
         ambientSoundInterval = 120;
         canFireProjectileWeaponPredicate = t -> t.projectileWeapon instanceof ProjectileWeaponItem;
-        this.eggItem = new SpawnEggItemBuilder(id, this)
-                .backgroundColor(0)
-                .highlightColor(0);
+        this.eggItem = new SpawnEggItemBuilder(id, this);
     }
 
     @Info(value = "Indicates that no egg item should be created for this entity type")

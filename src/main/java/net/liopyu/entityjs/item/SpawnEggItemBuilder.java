@@ -11,14 +11,12 @@ import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 
 public class SpawnEggItemBuilder extends ItemBuilder {
 
-    public transient int backgroundColor;
-    public transient int highlightColor;
+    public transient int backgroundColor = 0xFFFFFFFF;
+    public transient int highlightColor = 0xFFFFFFFF;
     public transient final MobBuilder<?> parent;
 
     public SpawnEggItemBuilder(ResourceLocation i, MobBuilder<?> parent) {
         super(i);
-        backgroundColor = 0xFFFFFFFF;
-        highlightColor = 0XFFFFFFFF;
         this.parent = parent;
     }
 
@@ -41,27 +39,25 @@ public class SpawnEggItemBuilder extends ItemBuilder {
 
     @Override
     public void generateAssets(KubeAssetGenerator generator) {
-        if (modelJson != null) {
-            generator.json(KubeAssetGenerator.asItemModelLocation(id), modelJson);
-            return;
-        }
-
         generator.itemModel(id, m -> {
-            if (!parentModel.isEmpty()) {
+            if (modelGenerator != null) {
+                modelGenerator.accept(m);
+                return;
+            }
+            if (parentModel != null) {
                 m.parent(parentModel);
 
-                if (textureJson.size() == 0) {
+                if (textures.isEmpty()) {
                     texture(newID("item/", "").toString());
                 }
-                m.textures(textureJson);
+                m.textures(textures);
             } else {
-                m.parent("item/template_spawn_egg");
+                m.parent(ResourceLocation.parse("minecraft:item/template_spawn_egg"));
 
-                if (textureJson.size() != 0) {
-                    m.textures(textureJson);
+                if (!textures.isEmpty()) {
+                    m.textures(textures);
                 }
             }
         });
     }
-
 }

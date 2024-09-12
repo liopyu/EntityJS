@@ -69,6 +69,7 @@ repositories {
         url = "https://maven.saps.dev/releases"
         content {
             includeGroup "dev.latvian.mods"
+            includeGroup "dev.latvian.apps"
         }
     }
     maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
@@ -79,10 +80,11 @@ repositories {
             includeGroup "com.github.rtyley"
         }
     }
+
 }
 
 dependencies {
-    implementation "curse.maven:probejs-585406:5536459"
+    implementation "curse.maven:probejs-585406:5700955"
     implementation "net.neoforged:neoforge:${neo_version}"
     implementation "dev.latvian.mods:rhino:$rhino_version"
     implementation "dev.latvian.mods:kubejs-neoforge:$kubejs_version"
