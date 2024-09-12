@@ -579,6 +579,26 @@ public class ContextUtils {
         }
     }
 
+    /*public static class CalculateFinalFallDamageContext {
+        @Info("The height from which the entity is falling")
+        public final float fallHeight;
+
+        @Info("The multiplier applied to calculate fall damage")
+        public final float damageMultiplier;
+
+        @Info("The living entity experiencing fall damage calculation")
+        public final LivingEntity entity;
+
+        @Info("The final damage to be dealt with the default method")
+        public final LivingEntity finalDamage;
+
+        public CalculateFinalFallDamageContext(float fallHeight, float damageMultiplier, LivingEntity entity, LivingEntity finalDamage) {
+            this.fallHeight = fallHeight;
+            this.damageMultiplier = damageMultiplier;
+            this.entity = entity;
+            this.finalDamage = finalDamage;
+        }
+    }*/
 
     public static class CalculateFallDamageContext {
         @Info("The height from which the entity is falling")

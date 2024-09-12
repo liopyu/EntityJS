@@ -2,6 +2,7 @@ package net.liopyu.entityjs.mixin;
 
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.entities.living.vanilla.AllayEntityJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
@@ -99,6 +100,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
             }
         }
     }
+
 
     @Inject(method = "tickDeath", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void tickDeath(CallbackInfo ci) {
@@ -329,6 +331,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAffectedByFluids != null) {
                 Object obj = builder.isAffectedByFluids.apply(entityJs$getLivingEntity());
+                if (obj == null) return;
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -351,6 +354,7 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isImmobile != null) {
                 Object obj = builder.isImmobile.apply(entityJs$getLivingEntity());
+                if (obj == null) return;
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -365,12 +369,13 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.calculateFallDamage == null) return;
             final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(pFallDistance, pDamageMultiplier, entityJs$getLivingEntity());
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.calculateFallDamage.apply(context), "integer");
+            var func = builder.calculateFallDamage.apply(context);
+            if (func == null) return;
+            Object obj = EntityJSHelperClass.convertObjectToDesired(func, "integer");
             if (obj != null) {
                 cir.setReturnValue((int) obj);
             } else
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for calculateFallDamage from entity: " + entityJs$entityName() + ". Value: " + builder.calculateFallDamage.apply(context) + ". Must be an int, defaulting to " + cir.getReturnValue());
-
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for calculateFallDamage from entity: " + entityJs$entityName() + ". Value: " + func + ". Must be an int, defaulting to " + cir.getReturnValue());
         }
     }
 
