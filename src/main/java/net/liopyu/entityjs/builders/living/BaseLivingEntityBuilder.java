@@ -121,6 +121,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<ContextUtils.EntityFluidStateContext, Object> canStandOnFluid;
     public transient Function<LivingEntity, Object> isSensitiveToWater;
     public transient Consumer<LivingEntity> onStopRiding;
+    public transient Consumer<LivingEntity> onRemovePassenger;
     public transient Consumer<LivingEntity> rideTick;
     public transient Consumer<ContextUtils.EntityItemEntityContext> onItemPickup;
     public transient Function<ContextUtils.LineOfSightContext, Object> hasLineOfSight;
@@ -1730,14 +1731,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a callback function to be executed when the entity stops riding.
-            The provided Consumer accepts a {@link LivingEntity} parameter,
-            representing the entity that has stopped being ridden.
                         
             Example usage:
             ```javascript
             entityBuilder.onStopRiding(entity => {
-                // Define custom logic for handling when the entity stops being ridden
-                // Use information about the LivingEntity provided by the context.
+                // Define custom logic for handling when the entity stops riding another entity
             });
             ```
             """)
@@ -1746,6 +1744,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
+    @Info(value = """
+            Sets a callback function to be executed when the entity's passenger dismounts it.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onRemovePassenger(entity => {
+                // Define custom logic for handling when the entity stops being ridden
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> onRemovePassenger(Consumer<LivingEntity> callback) {
+        onRemovePassenger = callback;
+        return this;
+    }
 
     @Info(value = """
             Sets a callback function to be executed during each tick when the entity is being ridden.

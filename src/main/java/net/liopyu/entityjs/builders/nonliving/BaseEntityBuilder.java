@@ -63,6 +63,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient Consumer<ContextUtils.EEntityFallDamageContext> onFall;
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
+    public transient Consumer<Entity> onRemovePassenger;
     public transient Consumer<Entity> rideTick;
     public transient Function<Entity, Object> canFreeze;
     public transient Function<Entity, Object> isCurrentlyGlowing;
@@ -480,19 +481,31 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
 
     @Info(value = """
             Sets a callback function to be executed when the entity stops riding.
-            The provided Consumer accepts a {@link Entity} parameter,
-            representing the entity that has stopped being ridden.
                         
             Example usage:
             ```javascript
             entityBuilder.onStopRiding(entity => {
-                // Define custom logic for handling when the entity stops being ridden
-                // Use information about the Entity provided by the context.
+                // Define custom logic for handling when the entity stops riding another entity
             });
             ```
             """)
     public BaseEntityBuilder<T> onStopRiding(Consumer<Entity> callback) {
         onStopRiding = callback;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity's passenger dismounts it.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onRemovePassenger(entity => {
+                // Define custom logic for handling when the entity stops being ridden
+            });
+            ```
+            """)
+    public BaseEntityBuilder<T> onRemovePassenger(Consumer<Entity> callback) {
+        onRemovePassenger = callback;
         return this;
     }
 

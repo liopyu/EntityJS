@@ -13,6 +13,7 @@ import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.ai.Brain;
@@ -20,6 +21,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.entity.PartEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -618,7 +621,10 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     protected boolean thisJumping = false;
 
     public boolean ableToJump() {
-        return ModKeybinds.mount_jump.isDown() && this.onGround();
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            return Minecraft.getInstance().options.keyJump.isDown() && this.onGround();
+        }
+        return false;
     }
 
     public void setThisJumping(boolean value) {
@@ -1438,13 +1444,19 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public void stopRiding() {
-        super.stopRiding();
         if (builder.onStopRiding != null) {
             EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
-
         }
+        super.stopRiding();
     }
 
+    @Override
+    protected void removePassenger(Entity p_20352_) {
+        if (builder.onRemovePassenger != null) {
+            EntityJSHelperClass.consumerCallback(builder.onRemovePassenger, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovePassenger.");
+        }
+        super.removePassenger(p_20352_);
+    }
 
     @Override
     public void rideTick() {
@@ -1552,7 +1564,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         if (builder.playerTouch != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
             EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
-        }else super.playerTouch(p_20081_);
+        } else super.playerTouch(p_20081_);
     }
 
 

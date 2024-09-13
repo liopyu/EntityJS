@@ -15,6 +15,7 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -48,6 +49,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.entity.PartEntity;
 import org.jetbrains.annotations.NotNull;
@@ -633,7 +636,10 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
     protected boolean thisJumping = false;
 
     public boolean ableToJump() {
-        return ModKeybinds.mount_jump.isDown() && this.onGround();
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            return Minecraft.getInstance().options.keyJump.isDown() && this.onGround();
+        }
+        return false;
     }
 
     public void setThisJumping(boolean value) {
@@ -1453,11 +1459,18 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
 
     @Override
     public void stopRiding() {
-        super.stopRiding();
         if (builder.onStopRiding != null) {
             EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
-
         }
+        super.stopRiding();
+    }
+
+    @Override
+    protected void removePassenger(Entity p_20352_) {
+        if (builder.onRemovePassenger != null) {
+            EntityJSHelperClass.consumerCallback(builder.onRemovePassenger, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovePassenger.");
+        }
+        super.removePassenger(p_20352_);
     }
 
 
@@ -1567,7 +1580,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
         if (builder.playerTouch != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
             EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
-        }else super.playerTouch(p_20081_);
+        } else super.playerTouch(p_20081_);
     }
 
 

@@ -186,12 +186,19 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
 
     @Override
     public void stopRiding() {
-        super.stopRiding();
         if (builder != null && builder.onStopRiding != null) {
             EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
         }
+        super.stopRiding();
     }
 
+    @Override
+    protected void removePassenger(Entity p_20352_) {
+        if (builder.onRemovePassenger != null) {
+            EntityJSHelperClass.consumerCallback(builder.onRemovePassenger, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovePassenger.");
+        }
+        super.removePassenger(p_20352_);
+    }
 
     @Override
     public void rideTick() {

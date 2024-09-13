@@ -3,11 +3,13 @@ package net.liopyu.entityjs.builders.nonliving;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public transient Consumer<ContextUtils.EEntityFallDamageContext> onFall;
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
+    public transient Consumer<Entity> onRemovePassenger;
     public transient Consumer<Entity> rideTick;
     public transient Function<Entity, Object> canFreeze;
     public transient Function<Entity, Object> isCurrentlyGlowing;
@@ -452,19 +455,31 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets a callback function to be executed when the entity stops riding.
-            The provided Consumer accepts a {@link Entity} parameter,
-            representing the entity that has stopped being ridden.
                         
             Example usage:
             ```javascript
             entityBuilder.onStopRiding(entity => {
-                // Define custom logic for handling when the entity stops being ridden
-                // Use information about the Entity provided by the context.
+                // Define custom logic for handling when the entity stops riding another entity
             });
             ```
             """)
     public BaseNonAnimatableEntityBuilder<T> onStopRiding(Consumer<Entity> callback) {
         onStopRiding = callback;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to be executed when the entity's passenger dismounts it.
+                        
+            Example usage:
+            ```javascript
+            entityBuilder.onRemovePassenger(entity => {
+                // Define custom logic for handling when the entity stops being ridden
+            });
+            ```
+            """)
+    public BaseNonAnimatableEntityBuilder<T> onRemovePassenger(Consumer<Entity> callback) {
+        onRemovePassenger = callback;
         return this;
     }
 
