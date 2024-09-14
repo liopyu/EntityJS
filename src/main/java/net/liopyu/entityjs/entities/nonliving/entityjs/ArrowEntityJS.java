@@ -299,7 +299,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     public void stopRiding() {
-        if (builder != null && builder.onStopRiding != null) {
+        if (builder != null && builder.onStopRiding != null && this.isPassenger()) {
             EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
         }
         super.stopRiding();

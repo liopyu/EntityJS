@@ -1714,7 +1714,7 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
 
     @Override
     public void stopRiding() {
-        if (builder.onStopRiding != null) {
+        if (builder.onStopRiding != null && this.isPassenger()) {
             EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
         }
         super.stopRiding();
