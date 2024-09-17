@@ -63,6 +63,8 @@ public class EntityJSPlugin implements KubeJSPlugin {
             reg.add("minecraft:piglin", PiglinJSBuilder.class, PiglinJSBuilder::new);
             reg.add("minecraft:wither", WitherJSBuilder.class, WitherJSBuilder::new);
             reg.add("minecraft:slime", SlimeJSBuilder.class, SlimeJSBuilder::new);
+            reg.add("minecraft:wolf", WolfJSBuilder.class, WolfJSBuilder::new);
+            reg.add("minecraft:skeleton", SkeletonJSBuilder.class, SkeletonJSBuilder::new);
         });
 
     }

@@ -5,10 +5,9 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.entityjs.TameableMobJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.CatJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.SkeletonJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.ZombieJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
-import net.liopyu.entityjs.entities.living.entityjs.TameableMobJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -19,26 +18,17 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.TimeUtil;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -48,26 +38,17 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Cat;
-import net.minecraft.world.entity.animal.camel.Camel;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Ghast;
-import net.minecraft.world.entity.monster.RangedAttackMob;
+import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -75,7 +56,6 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.entity.PartEntity;
-import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -85,49 +65,109 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.function.Predicate;
 
-@MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
+@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, NeutralMob {
+public class SkeletonEntityJS extends Skeleton implements IAnimatableJS {
+    private final SkeletonJSBuilder builder;
     private final AnimatableInstanceCache getAnimatableInstanceCache;
-
-    protected final CatJSBuilder builder;
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
     public String entityName() {
         return this.getType().toString();
     }
 
-    private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID;
-    private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME;
-    private static final UniformInt PERSISTENT_ANGER_TIME;
-    @javax.annotation.Nullable
-    private UUID persistentAngerTarget;
     protected PathNavigation navigation;
+    public final PartEntityJS<?>[] partEntities;
 
-    static {
-        DATA_INTERESTED_ID = SynchedEntityData.defineId(CatEntityJS.class, EntityDataSerializers.BOOLEAN);
-        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(CatEntityJS.class, EntityDataSerializers.INT);
-        PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
-    }
-
-    private final PartEntityJS<?>[] partEntities;
-
-    public CatEntityJS(CatJSBuilder builder, EntityType<? extends Cat> pEntityType, Level pLevel) {
+    public SkeletonEntityJS(SkeletonJSBuilder builder, EntityType<? extends Skeleton> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<CatEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<SkeletonEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
+        this.reassessWeaponGoal();
     }
 
+    public void reassessWeaponGoal() {
+        if (builder == null) return;
+        if (builder.defaultGoals) {
+            if (this.level() != null && !this.level().isClientSide) {
+                this.goalSelector.removeGoal(this.meleeGoal);
+                this.goalSelector.removeGoal(this.bowGoal);
+                ItemStack itemstack = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, (item) -> {
+                    return item instanceof BowItem;
+                }));
+                var flag = itemstack.getItem() instanceof ProjectileWeaponItem && this.canFireProjectileWeapon((ProjectileWeaponItem) itemstack.getItem());
+                if (flag) {
+                    int i = 20;
+                    if (this.level().getDifficulty() != Difficulty.HARD) {
+                        i = 40;
+                    }
+
+                    this.bowGoal.setMinAttackInterval(i);
+                    this.goalSelector.addGoal(4, this.bowGoal);
+                } else {
+                    this.goalSelector.addGoal(4, this.meleeGoal);
+                }
+            }
+        }
+    }
+
+    @Override
+    public ItemStack getProjectile(ItemStack p_33038_) {
+        if (p_33038_.getItem() instanceof ProjectileWeaponItem) {
+            Predicate<ItemStack> predicate = ((ProjectileWeaponItem) p_33038_.getItem()).getSupportedHeldProjectiles(p_33038_);
+            ItemStack itemstack = ProjectileWeaponItem.getHeldProjectile(this, predicate);
+            var stack = builder.setArrow.getItem() instanceof ArrowItem ? builder.setArrow : new ItemStack(Items.ARROW);
+            return net.neoforged.neoforge.common.CommonHooks.getProjectile(this, p_33038_, itemstack.isEmpty() ? stack : itemstack);
+        } else {
+            return net.neoforged.neoforge.common.CommonHooks.getProjectile(this, p_33038_, ItemStack.EMPTY);
+        }
+    }
+
+    @Override
+    public void performRangedAttack(LivingEntity p_32141_, float p_32142_) {
+        ItemStack weapon = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, item -> item instanceof net.minecraft.world.item.BowItem));
+        ItemStack itemstack1 = this.getProjectile(weapon);
+        AbstractArrow abstractarrow = this.getArrow(itemstack1, p_32142_, weapon);
+        if (weapon.getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem weaponItem)
+            abstractarrow = weaponItem.customArrow(abstractarrow, itemstack1, weapon);
+        double d0 = p_32141_.getX() - this.getX();
+        double d1 = p_32141_.getY(0.3333333333333333) - abstractarrow.getY();
+        double d2 = p_32141_.getZ() - this.getZ();
+        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+        abstractarrow.shoot(d0, d1 + d3 * 0.2F, d2, 1.6F, (float) (14 - this.level().getDifficulty().getId() * 4));
+        this.playSound(builder.shootSound, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.level().addFreshEntity(abstractarrow);
+    }
+
+
+    @Override
+    protected boolean isSunBurnTick() {
+        if (builder.isSunBurnTick != null) {
+            Object obj = builder.isSunBurnTick.apply(this);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSunBurnTick from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isSunBurnTick());
+        }
+        return super.isSunBurnTick();
+    }
+
+
+    @Override
+    protected void doFreezeConversion() {
+        if (!builder.canConvert) return;
+        var typeCheck = builder.conversionType instanceof EntityType<? extends Mob> ? builder.conversionType : EntityType.STRAY;
+        this.convertTo(typeCheck, true);
+        if (!this.isSilent()) {
+            this.level().levelEvent((Player) null, 1048, this.blockPosition(), 0);
+        }
+    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -176,20 +216,16 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         return builder;
     }
 
-
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return getAnimatableInstanceCache;
     }
 
-
     //Some logic overrides up here because there are different implementations in the other builders.
-
-
     @Override
     public Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<CatEntityJS> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<ZombieEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -198,9 +234,9 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
     }
 
     @Override
-    protected Brain<CatEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<ZombieEntityJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<CatEntityJS> brain = Cast.to(brainProvider().makeBrain(p_21069_));
+            final Brain<ZombieEntityJS> brain = Cast.to(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
@@ -210,282 +246,11 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
 
     @Override
     protected void registerGoals() {
-        if (EventHandlers.addGoalTargets.hasListeners()) {
-            EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
-        }
-        if (EventHandlers.addGoalSelectors.hasListeners()) {
-            EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
-        }
-    }
-
-    //Tameable Mob Overrides
-    public boolean tamableFood(ItemStack pStack) {
-        if (builder.tamableFood != null) {
-            return builder.tamableFood.test(pStack);
-        }
-        return false;
-    }
-
-    public boolean tamableFoodPredicate(ItemStack pStack) {
-        if (builder.tamableFoodPredicate == null) return false;
-        final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = builder.tamableFoodPredicate.apply(context);
-        if (obj instanceof Boolean b) {
-            return b;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for tamableFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
-    }
-
-    @Override
-    public void tame(Player pPlayer) {
-        if (builder.tameOverride != null) {
-            this.setTame(true, true);
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            EntityJSHelperClass.consumerCallback(builder.tameOverride, context, "[EntityJS]: Error in " + entityName() + "builder for field: tameOverride.");
-            if (pPlayer instanceof ServerPlayer) {
-                CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer) pPlayer, this);
-            }
-        } else super.tame(pPlayer);
-        if (builder.onTamed != null) {
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            EntityJSHelperClass.consumerCallback(builder.onTamed, context, "[EntityJS]: Error in " + entityName() + "builder for field: onTamed.");
-        }
     }
 
 
-    // Basic Tameable Overrides
-    @Override
-    public boolean wantsToAttack(LivingEntity pTarget, LivingEntity pOwner) {
-        if (!(pTarget instanceof Creeper) && !(pTarget instanceof Ghast)) {
-            if (pTarget instanceof TameableMobJS mobjs) {
-                return !mobjs.isTame() || mobjs.getOwner() != pOwner;
-            } else if (pTarget instanceof Player && pOwner instanceof Player && !((Player) pOwner).canHarmPlayer((Player) pTarget)) {
-                return false;
-            } else if (pTarget instanceof AbstractHorse && ((AbstractHorse) pTarget).isTamed()) {
-                return false;
-            } else {
-                return !(pTarget instanceof TamableAnimal) || !((TamableAnimal) pTarget).isTame();
-            }
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public Cat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        if (builder.setBreedOffspring != null) {
-            final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
-            if (obj instanceof ResourceLocation resourceLocation) {
-                EntityType<?> breedOffspringType = BuiltInRegistries.ENTITY_TYPE.get(resourceLocation);
-                if (breedOffspringType != null) {
-                    Object breedOffspringEntity = breedOffspringType.create(serverLevel);
-                    if (breedOffspringEntity instanceof Cat c) {
-                        return c;
-                    }
-                }
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + obj + ". Must return an instance of Cat resource location. Defaulting to super method: " + entityName());
-        }
-        return builder.get().create(serverLevel);
-    }
-
-    @Override
-    public boolean hurt(DamageSource pSource, float pAmount) {
-        if (this.isInvulnerableTo(pSource)) {
-            return false;
-        } else {
-            if (!this.level().isClientSide) {
-                this.setOrderedToSit(false);
-            }
-            return super.hurt(pSource, pAmount);
-        }
-    }
-
-    @Override
-    public void addAdditionalSaveData(CompoundTag pCompound) {
-        super.addAdditionalSaveData(pCompound);
-        this.addPersistentAngerSaveData(pCompound);
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag pCompound) {
-        super.readAdditionalSaveData(pCompound);
-        this.readPersistentAngerSaveData(this.level(), pCompound);
-    }
-
-    @Override
-    protected void defineSynchedData(SynchedEntityData.Builder p_326034_) {
-        super.defineSynchedData(p_326034_);
-        p_326034_.define(DATA_INTERESTED_ID, false);
-        p_326034_.define(DATA_REMAINING_ANGER_TIME, 0);
-    }
-
-    @Override
-    protected void spawnTamingParticles(boolean pTamed) {
-        ParticleOptions particleoptions = ParticleTypes.HEART;
-        if (!pTamed) {
-            particleoptions = ParticleTypes.SMOKE;
-        }
-
-        for (int i = 0; i < 7; ++i) {
-            double d0 = this.random.nextGaussian() * 0.02;
-            double d1 = this.random.nextGaussian() * 0.02;
-            double d2 = this.random.nextGaussian() * 0.02;
-            this.level().addParticle(particleoptions, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d0, d1, d2);
-        }
-    }
-
-
-    //NeutralMob Overrides
-    public int getRemainingPersistentAngerTime() {
-        return (Integer) this.entityData.get(DATA_REMAINING_ANGER_TIME);
-    }
-
-    public void setRemainingPersistentAngerTime(int pTime) {
-        this.entityData.set(DATA_REMAINING_ANGER_TIME, pTime);
-    }
-
-    public void startPersistentAngerTimer() {
-        this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
-    }
-
-    @Nullable
-    public UUID getPersistentAngerTarget() {
-        return this.persistentAngerTarget;
-    }
-
-    public void setPersistentAngerTarget(@javax.annotation.Nullable UUID pTarget) {
-        this.persistentAngerTarget = pTarget;
-    }
-    //Ageable Mob Overrides
-
-    @Override
-    public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return super.isFood(pStack);
-    }
-
-    public boolean isFoodPredicate(ItemStack pStack) {
-        if (builder.isFoodPredicate == null) {
-            return super.isFood(pStack);
-        }
-        final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = builder.isFoodPredicate.apply(context);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
-    }
-
-
-    @Override
-    public boolean canBreed() {
-        if (builder.canBreed == null) {
-            return super.canBreed();
-        }
-        Object obj = builder.canBreed.apply(this);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBreed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super method: " + super.canBreed());
-        return super.canBreed();
-    }
-
-    @Override
-    public boolean canMate(Animal pOtherAnimal) {
-        if (builder.canMate == null) {
-            return super.canMate(pOtherAnimal);
-        }
-        final ContextUtils.EntityAnimalContext context = new ContextUtils.EntityAnimalContext(this, pOtherAnimal);
-        Object obj = builder.canMate.apply(context);
-        if (obj instanceof Boolean) {
-            return (boolean) obj;
-        }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canMate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canMate(pOtherAnimal));
-        return super.canMate(pOtherAnimal);
-    }
-
-
-    @Override
-    public void spawnChildFromBreeding(ServerLevel pLevel, Animal pMate) {
-        if (builder.onSpawnChildFromBreeding != null) {
-            final ContextUtils.LevelAnimalContext context = new ContextUtils.LevelAnimalContext(pMate, this, pLevel);
-            EntityJSHelperClass.consumerCallback(builder.onSpawnChildFromBreeding, context, "[EntityJS]: Error in " + entityName() + "builder for field: onSpawnChildFromBreeding.");
-
-            super.spawnChildFromBreeding(pLevel, pMate);
-        } else {
-            super.spawnChildFromBreeding(pLevel, pMate);
-        }
-    }
-
-
-    //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
-
-    @Override
-    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-        ItemStack itemstack = pPlayer.getItemInHand(pHand);
-
-        if (this.level().isClientSide) {
-            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isTame() && !this.isAngry();
-            return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
-        } else {
-            if (this.isTame()) {
-                if (builder.onInteract != null) {
-                    final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                    EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
-                }
-                if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
-                    if (this.isFood(itemstack)) {
-                        this.heal((float) Objects.requireNonNull(itemstack.getFoodProperties(this)).nutrition());
-
-                        if (!pPlayer.getAbilities().instabuild) {
-                            itemstack.shrink(1);
-                        }
-
-                        this.gameEvent(GameEvent.EAT, this);
-                        return InteractionResult.SUCCESS;
-                    }
-                }
-
-                InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
-                if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(pPlayer)) {
-                    this.setOrderedToSit(!this.isOrderedToSit());
-                    this.jumping = false;
-                    this.navigation.stop();
-                    this.setTarget((LivingEntity) null);
-                    return InteractionResult.SUCCESS;
-                }
-
-                return interactionresult;
-            } else if ((this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isAngry()) {
-                if (!pPlayer.getAbilities().instabuild) {
-                    itemstack.shrink(1);
-                }
-
-                if (this.random.nextInt(3) == 0 && !EventHooks.onAnimalTame(this, pPlayer)) {
-                    this.tame(pPlayer);
-                    this.navigation.stop();
-                    this.setTarget((LivingEntity) null);
-                    this.setOrderedToSit(true);
-                    this.level().broadcastEntityEvent(this, (byte) 7);
-                } else {
-                    this.level().broadcastEntityEvent(this, (byte) 6);
-                }
-
-                return InteractionResult.SUCCESS;
-            }
-            if (builder.onInteract != null) {
-                final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
-            }
-            return super.mobInteract(pPlayer, pHand);
-        }
-    }
+    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
     //Mob Overrides
     @Override
@@ -493,9 +258,9 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         if (builder != null && builder.onHurtTarget != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
             EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget.");
+
         }
         return super.doHurtTarget(pEntity);
-
     }
 
     public void onJump() {
@@ -727,24 +492,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         return super.getAttackBoundingBox();
     }
 
-
     //(Base LivingEntity/Entity Overrides)
-    @Override
-    public boolean isAlliedTo(Entity pEntity) {
-        if (builder.isAlliedTo != null) {
-            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            try {
-                Object obj = builder.isAlliedTo.apply(context);
-                if (obj instanceof Boolean b) return b;
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
-            } catch (Exception e) {
-                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity), e);
-                return super.isAlliedTo(pEntity);
-            }
-        }
-        return super.isAlliedTo(pEntity);
-    }
-
     @Override
     public void travel(Vec3 pTravelVector) {
         LivingEntity livingentity = this.getControllingPassenger();
@@ -813,10 +561,17 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         super.onAddedToLevel();
         if (builder.defaultGoals) {
             super.registerGoals();
+        } else {
+            this.removeAllGoals(p -> true);
+        }
+        if (EventHandlers.addGoalTargets.hasListeners()) {
+            EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
+        }
+        if (EventHandlers.addGoalSelectors.hasListeners()) {
+            EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
-
         }
     }
 
@@ -964,6 +719,22 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
             """)
     public void triggerAnimation(String controllerName, String animName) {
         triggerAnim(controllerName, animName);
+    }
+
+    @Override
+    public boolean isAlliedTo(Entity pEntity) {
+        if (builder.isAlliedTo != null) {
+            final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
+            try {
+                Object obj = builder.isAlliedTo.apply(context);
+                if (obj instanceof Boolean b) return b;
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity), e);
+                return super.isAlliedTo(pEntity);
+            }
+        }
+        return super.isAlliedTo(pEntity);
     }
 
     @Override

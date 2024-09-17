@@ -3,10 +3,8 @@ package net.liopyu.entityjs.entities.living.vanilla;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.Cast;
-import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.living.entityjs.TameableMobJSBuilder;
-import net.liopyu.entityjs.builders.living.vanilla.CatJSBuilder;
+import net.liopyu.entityjs.builders.living.vanilla.WolfJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.living.entityjs.TameableMobJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
@@ -17,7 +15,6 @@ import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
-import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.Minecraft;
@@ -36,7 +33,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
@@ -49,20 +45,16 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Cat;
-import net.minecraft.world.entity.animal.camel.Camel;
+import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -87,12 +79,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
+
+@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, NeutralMob {
+public class WolfEntityJS extends Wolf implements IAnimatableJS, OwnableEntity, NeutralMob {
+
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
-    protected final CatJSBuilder builder;
+    protected final WolfJSBuilder builder;
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
@@ -108,19 +102,20 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
     protected PathNavigation navigation;
 
     static {
-        DATA_INTERESTED_ID = SynchedEntityData.defineId(CatEntityJS.class, EntityDataSerializers.BOOLEAN);
-        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(CatEntityJS.class, EntityDataSerializers.INT);
+        DATA_INTERESTED_ID = SynchedEntityData.defineId(WolfEntityJS.class, EntityDataSerializers.BOOLEAN);
+        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(WolfEntityJS.class, EntityDataSerializers.INT);
         PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     }
 
     private final PartEntityJS<?>[] partEntities;
 
-    public CatEntityJS(CatJSBuilder builder, EntityType<? extends Cat> pEntityType, Level pLevel) {
+    public WolfEntityJS(WolfJSBuilder builder, EntityType<? extends Wolf> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
+        this.setTame(false, false);
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
-        for (ContextUtils.PartEntityParams<CatEntityJS> params : builder.partEntityParamsList) {
+        for (ContextUtils.PartEntityParams<WolfEntityJS> params : builder.partEntityParamsList) {
             PartEntityJS<?> partEntity = new PartEntityJS<>(this, params.name, params.width, params.height, params.builder);
             tempPartEntities.add(partEntity);
         }
@@ -189,7 +184,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
     @Override
     public Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
-            final BuildBrainProviderEventJS<CatEntityJS> event = new BuildBrainProviderEventJS<>();
+            final BuildBrainProviderEventJS<TameableMobJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
         } else {
@@ -198,9 +193,9 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
     }
 
     @Override
-    protected Brain<CatEntityJS> makeBrain(Dynamic<?> p_21069_) {
+    protected Brain<TameableMobJS> makeBrain(Dynamic<?> p_21069_) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<CatEntityJS> brain = Cast.to(brainProvider().makeBrain(p_21069_));
+            final Brain<TameableMobJS> brain = Cast.to(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
         } else {
@@ -253,7 +248,6 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         }
     }
 
-
     // Basic Tameable Overrides
     @Override
     public boolean wantsToAttack(LivingEntity pTarget, LivingEntity pOwner) {
@@ -273,7 +267,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
     }
 
     @Override
-    public Cat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+    public Wolf getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         if (builder.setBreedOffspring != null) {
             final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
@@ -281,12 +275,19 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
                 EntityType<?> breedOffspringType = BuiltInRegistries.ENTITY_TYPE.get(resourceLocation);
                 if (breedOffspringType != null) {
                     Object breedOffspringEntity = breedOffspringType.create(serverLevel);
-                    if (breedOffspringEntity instanceof Cat c) {
-                        return c;
+                    if (breedOffspringEntity instanceof TamableAnimal animal) {
+                        UUID uuid = this.getOwnerUUID();
+                        if (uuid != null) {
+                            animal.setOwnerUUID(uuid);
+                            animal.setTame(true, true);
+                        }
+                        return (Wolf) breedOffspringEntity;
+                    } else if (breedOffspringEntity instanceof Wolf) {
+                        return (Wolf) breedOffspringEntity;
                     }
                 }
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + obj + ". Must return an instance of Cat resource location. Defaulting to super method: " + entityName());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method: " + builder.get());
         }
         return builder.get().create(serverLevel);
     }
@@ -366,12 +367,12 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         if (builder.isFood != null) {
             return builder.isFood.test(pStack);
         }
-        return super.isFood(pStack);
+        return pStack.is(Items.WHEAT);
     }
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
-            return super.isFood(pStack);
+            return this.isFood(pStack);
         }
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
         Object obj = builder.isFoodPredicate.apply(context);
@@ -438,6 +439,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
                 if (builder.onInteract != null) {
                     final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
                     EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
+
                 }
                 if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
                     if (this.isFood(itemstack)) {
@@ -482,6 +484,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
             if (builder.onInteract != null) {
                 final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
                 EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
+
             }
             return super.mobInteract(pPlayer, pHand);
         }
@@ -493,9 +496,9 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         if (builder != null && builder.onHurtTarget != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
             EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget.");
+
         }
         return super.doHurtTarget(pEntity);
-
     }
 
     public void onJump() {
@@ -726,7 +729,6 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         }
         return super.getAttackBoundingBox();
     }
-
 
     //(Base LivingEntity/Entity Overrides)
     @Override
@@ -1770,7 +1772,6 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         }
         super.removePassenger(p_20352_);
     }
-
 
     @Override
     public void rideTick() {

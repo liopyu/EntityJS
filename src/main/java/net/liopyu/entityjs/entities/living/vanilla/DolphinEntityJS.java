@@ -510,6 +510,9 @@ public class DolphinEntityJS extends Dolphin implements IAnimatableJS {
     @Override
     public void onAddedToLevel() {
         super.onAddedToLevel();
+        if (builder.defaultGoals) {
+            super.registerGoals();
+        }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
