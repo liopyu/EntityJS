@@ -1050,7 +1050,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-
+    @ReturnsSelf
     @Info(value = """
             Sets a function to determine whether the entity is currently flapping.
             The provided Function accepts a {@link LivingEntity} parameter,

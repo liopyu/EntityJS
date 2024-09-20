@@ -3,6 +3,7 @@ package net.liopyu.entityjs.builders.living.entityjs;
 import dev.latvian.mods.kubejs.registry.AdditionalObjectRegistry;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import dev.latvian.mods.rhino.util.ReturnsSelf;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
@@ -77,6 +78,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         registry.add(Registries.ITEM, eggItem);
     }
 
+    @ReturnsSelf
     @Info(value = """
             Sets a function to determine the PathNavigation of the entity.
                         
