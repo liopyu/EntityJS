@@ -12,13 +12,18 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -81,7 +86,64 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
 
     @Override
     public void tick() {
-        super.tick();
+        super.baseTick();
+        Vec3 $$0 = this.getDeltaMovement();
+        double $$1 = this.getX() + $$0.x;
+        double $$2 = this.getY() + $$0.y;
+        double $$3 = this.getZ() + $$0.z;
+        double $$4 = $$0.horizontalDistance();
+        this.setXRot(Projectile.lerpRotation(this.xRotO, (float) (Mth.atan2($$0.y, $$4) * 57.2957763671875)));
+        this.setYRot(Projectile.lerpRotation(this.yRotO, (float) (Mth.atan2($$0.x, $$0.z) * 57.2957763671875)));
+        if (!this.level.isClientSide) {
+            double $$5 = this.tx - $$1;
+            double $$6 = this.tz - $$3;
+            float $$7 = (float) Math.sqrt($$5 * $$5 + $$6 * $$6);
+            float $$8 = (float) Mth.atan2($$6, $$5);
+            double $$9 = Mth.lerp(0.0025, $$4, (double) $$7);
+            double $$10 = $$0.y;
+            if ($$7 < 1.0F) {
+                $$9 *= 0.8;
+                $$10 *= 0.8;
+            }
+
+            int $$11 = this.getY() < this.ty ? 1 : -1;
+            $$0 = new Vec3(Math.cos((double) $$8) * $$9, $$10 + ((double) $$11 - $$10) * 0.014999999664723873, Math.sin((double) $$8) * $$9);
+            this.setDeltaMovement($$0);
+        }
+
+        float $$12 = 0.25F;
+        if (!builder.disableTrailParticles) {
+            if (this.isInWater()) {
+                for (int $$13 = 0; $$13 < 4; ++$$13) {
+                    this.level.addParticle(ParticleTypes.BUBBLE, $$1 - $$0.x * 0.25, $$2 - $$0.y * 0.25, $$3 - $$0.z * 0.25, $$0.x, $$0.y, $$0.z);
+                }
+            } else {
+                this.level.addParticle(ParticleTypes.PORTAL, $$1 - $$0.x * 0.25 + this.random.nextDouble() * 0.6 - 0.3, $$2 - $$0.y * 0.25 - 0.5, $$3 - $$0.z * 0.25 + this.random.nextDouble() * 0.6 - 0.3, $$0.x, $$0.y, $$0.z);
+            }
+        }
+
+        if (!this.level.isClientSide) {
+            this.setPos($$1, $$2, $$3);
+            ++this.life;
+            if (this.life > 80 && !this.level.isClientSide) {
+                if (!builder.disableDefaultDeathLogic) {
+                    this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.0F);
+                    this.discard();
+                    if (this.surviveAfterDeath) {
+                        this.level.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), this.getItem()));
+                    } else {
+                        this.level.levelEvent(2003, this.blockPosition(), 0);
+                    }
+                } else {
+                    if (this.surviveAfterDeath) {
+                        this.level.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), this.getItem()));
+                    }
+                    this.discard();
+                }
+            }
+        } else {
+            this.setPosRaw($$1, $$2, $$3);
+        }
         if (builder.tick != null) {
             EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
         }

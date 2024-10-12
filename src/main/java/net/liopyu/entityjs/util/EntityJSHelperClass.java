@@ -25,14 +25,14 @@ public class EntityJSHelperClass {
 
     public static void logErrorMessageOnce(String errorMessage) {
         if (!errorMessagesLogged.contains(errorMessage)) {
-            ConsoleJS.STARTUP.error(errorMessage);
+            ConsoleJS.STARTUP.warn(errorMessage);
             errorMessagesLogged.add(errorMessage);
         }
     }
 
     public static void logErrorMessageOnceCatchable(String errorMessage, Throwable e) {
         if (!errorMessagesLogged.contains(errorMessage)) {
-            ConsoleJS.STARTUP.error(errorMessage, e);
+            ConsoleJS.STARTUP.warn(errorMessage, e);
             errorMessagesLogged.add(errorMessage);
         }
     }

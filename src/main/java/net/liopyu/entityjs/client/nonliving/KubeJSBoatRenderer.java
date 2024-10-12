@@ -6,6 +6,8 @@ import com.mojang.math.Vector3f;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatEntityBuilder;
 import net.liopyu.entityjs.client.nonliving.model.BoatEntityModel;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
+import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -45,6 +47,10 @@ public class KubeJSBoatRenderer<T extends Boat & IAnimatableJSNL> extends GeoEnt
     }
 
     public void render(T pEntity, float pEntityYaw, float pPartialTicks, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
+        if (builder.render != null) {
+            var context = new ContextUtils.NLRenderContext<>(pEntity, pEntityYaw, pPartialTicks, pPoseStack, pBuffer, pPackedLight);
+            EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + pEntity.getType() + "builder for field: render.");
+        }
         pPoseStack.pushPose();
         pPoseStack.translate(0.0, 0.375, 0.0);
         pPoseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - pEntityYaw));

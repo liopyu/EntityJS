@@ -7,6 +7,8 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
+import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -31,6 +33,10 @@ public class KubeJSEnderEyeRenderer<T extends Entity & IProjectileEntityJS> exte
 
     @Override
     public void render(T pEntity, float pEntityYaw, float pPartialTick, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight) {
+        if (builder.render != null) {
+            var context = new ContextUtils.NLRenderContext<>(pEntity, pEntityYaw, pPartialTick, pMatrixStack, pBuffer, pPackedLight);
+            EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + pEntity.getType() + "builder for field: render.");
+        }
         pMatrixStack.pushPose();
         if (builder.renderScale(builder.pX, builder.pY, builder.pZ).pX != null && builder.renderScale(builder.pX, builder.pY, builder.pZ).pY != null && builder.renderScale(builder.pX, builder.pY, builder.pZ).pZ != null) {
             float pX = builder.renderScale(builder.pX, builder.pY, builder.pZ).pX;
