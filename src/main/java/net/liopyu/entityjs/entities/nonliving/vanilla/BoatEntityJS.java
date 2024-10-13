@@ -38,7 +38,7 @@ import java.util.Objects;
 public class BoatEntityJS extends Boat implements IAnimatableJSNL {
     protected final BoatJSBuilder builder;
     private final AnimatableInstanceCache getAnimatableInstanceCache;
-    private boolean inputLeft;
+    /*private boolean inputLeft;
     private boolean inputRight;
     private boolean inputUp;
     private boolean inputDown;
@@ -61,7 +61,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
     private float bubbleMultiplier;
     private float bubbleAngle;
     private float bubbleAngleO;
-    private static final EntityDataAccessor<Integer> DATA_ID_BUBBLE_TIME;
+    private static final EntityDataAccessor<Integer> DATA_ID_BUBBLE_TIME;*/
 
     public BoatEntityJS(BoatJSBuilder builder, EntityType<? extends Boat> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -86,16 +86,17 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
 
     //Boat builder logic
 
-    static {
+    /*static {
         DATA_ID_BUBBLE_TIME = SynchedEntityData.defineId(BoatEntityJS.class, EntityDataSerializers.INT);
-    }
+    }*/
 
 
-    @Override
+    /*@Override
     protected void defineSynchedData(SynchedEntityData.Builder p_326198_) {
         super.defineSynchedData(p_326198_);
         p_326198_.define(DATA_ID_BUBBLE_TIME, 0);
-    }
+    }*/
+/*
 
     private boolean checkInWater() {
         AABB aabb = this.getBoundingBox();
@@ -157,8 +158,9 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
 
         return flag ? Boat.Status.UNDER_WATER : null;
     }
+*/
 
-    private Status getStatus() {
+   /* private Status getStatus() {
         Status boat$status = this.isUnderwater();
         if (boat$status != null) {
             this.waterLevel = this.getBoundingBox().maxY;
@@ -194,9 +196,9 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
             this.setRot(this.getYRot(), this.getXRot());
         }
 
-    }
+    }*/
 
-    private void floatBoat() {
+    /*private void floatBoat() {
         double d0 = -0.03999999910593033;
         double d1 = this.isNoGravity() ? 0.0 : -0.03999999910593033;
         double d2 = 0.0;
@@ -243,9 +245,9 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
 
     public void setBubbleTime(int pBubbleTime) {
         this.entityData.set(DATA_ID_BUBBLE_TIME, pBubbleTime);
-    }
+    }*/
 
-    private void tickBubbleColumn() {
+   /* private void tickBubbleColumn() {
         int k;
         if (this.level().isClientSide) {
             k = this.getBubbleTime();
@@ -285,7 +287,7 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
             }
         }
 
-    }
+    }*/
 
     public void tick() {
         this.oldStatus = this.status;
@@ -349,15 +351,20 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
     }
 
 
-    @Override
+    /*@Override
     public void setInput(boolean pInputLeft, boolean pInputRight, boolean pInputUp, boolean pInputDown) {
         this.inputLeft = pInputLeft;
         this.inputRight = pInputRight;
         this.inputUp = pInputUp;
         this.inputDown = pInputDown;
-    }
+    }*/
 
+    @Override
     public void controlBoat() {
+        if (true) {
+            super.controlBoat();
+            return;
+        }
         if (this.isVehicle()) {
             float f = 0.0F;
             if (this.inputLeft) {

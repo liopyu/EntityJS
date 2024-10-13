@@ -21,11 +21,27 @@ public class EyeOfEnderJSBuilder extends EyeOfEnderEntityBuilder<EyeOfEnderEntit
     public transient Function<EyeOfEnder, Object> getItem;
     public transient EyeOfEnderItemBuilder item;
     public transient boolean noItem;
+    public transient boolean disableTrailParticles;
+    public transient boolean disableDefaultDeathLogic;
 
     public EyeOfEnderJSBuilder(ResourceLocation i) {
         super(i);
         this.item = (EyeOfEnderItemBuilder) new EyeOfEnderItemBuilder(id, this)
                 .texture(i.getNamespace() + ":item/" + i.getPath());
+        this.disableTrailParticles = false;
+        this.disableDefaultDeathLogic = false;
+    }
+
+    @Info(value = "Disables the default ender eye break sound as well as the death particles.")
+    public EyeOfEnderJSBuilder disableDefaultDeathLogic() {
+        this.disableDefaultDeathLogic = true;
+        return this;
+    }
+
+    @Info(value = "The default trail particles will be disabled")
+    public EyeOfEnderJSBuilder disableTrailParticles() {
+        this.disableTrailParticles = true;
+        return this;
     }
 
     @Override

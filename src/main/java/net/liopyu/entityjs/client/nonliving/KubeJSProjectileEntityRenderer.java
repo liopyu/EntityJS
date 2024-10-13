@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
+import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.api.distmarker.Dist;
@@ -35,6 +36,10 @@ public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntity
 
     @Override
     public void render(T pEntity, float pEntityYaw, float pPartialTick, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight) {
+        if (builder.render != null) {
+            var context = new ContextUtils.NLRenderContext<>(pEntity, pEntityYaw, pPartialTick, pMatrixStack, pBuffer, pPackedLight);
+            EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + pEntity.getType() + "builder for field: render.");
+        }
         pMatrixStack.pushPose();
         if (builder.pX != null && builder.pY != null && builder.pZ != null) {
             float pX = builder.pX;
@@ -44,7 +49,7 @@ public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntity
         } else {
             pMatrixStack.scale(2.0F, 2.0F, 2.0F);
         }
-        pMatrixStack.pushPose();  // Second pushPose()
+        pMatrixStack.pushPose();
 
         pMatrixStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         PoseStack.Pose posestack$pose = pMatrixStack.last();
@@ -54,8 +59,7 @@ public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntity
         vertex(vertexconsumer, posestack$pose, pPackedLight, 1.0F, 1, 1, 0);
         vertex(vertexconsumer, posestack$pose, pPackedLight, 0.0F, 1, 0, 0);
 
-        pMatrixStack.popPose();  // Matching popPose() for the second pushPose()
-        pMatrixStack.popPose();  // Matching popPose() for the first pushPose()
+        pMatrixStack.popPose();
 
         super.render(pEntity, pEntityYaw, pPartialTick, pMatrixStack, pBuffer, pPackedLight);
 

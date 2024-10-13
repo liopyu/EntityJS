@@ -6,14 +6,19 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -72,7 +77,72 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
 
     @Override
     public void tick() {
-        super.tick();
+        super.baseTick();
+        Vec3 vec3 = this.getDeltaMovement();
+        double d0 = this.getX() + vec3.x;
+        double d1 = this.getY() + vec3.y;
+        double d2 = this.getZ() + vec3.z;
+        double d3 = vec3.horizontalDistance();
+        this.setXRot(Projectile.lerpRotation(this.xRotO, (float) (Mth.atan2(vec3.y, d3) * 180.0F / (float) Math.PI)));
+        this.setYRot(Projectile.lerpRotation(this.yRotO, (float) (Mth.atan2(vec3.x, vec3.z) * 180.0F / (float) Math.PI)));
+        if (!this.level().isClientSide) {
+            double d4 = this.tx - d0;
+            double d5 = this.tz - d2;
+            float f = (float) Math.sqrt(d4 * d4 + d5 * d5);
+            float f1 = (float) Mth.atan2(d5, d4);
+            double d6 = Mth.lerp(0.0025, d3, (double) f);
+            double d7 = vec3.y;
+            if (f < 1.0F) {
+                d6 *= 0.8;
+                d7 *= 0.8;
+            }
+
+            int j = this.getY() < this.ty ? 1 : -1;
+            vec3 = new Vec3(Math.cos((double) f1) * d6, d7 + ((double) j - d7) * 0.015F, Math.sin((double) f1) * d6);
+            this.setDeltaMovement(vec3);
+        }
+
+        float f2 = 0.25F;
+        if (!builder.disableTrailParticles) {
+            if (this.isInWater()) {
+                for (int i = 0; i < 4; i++) {
+                    this.level().addParticle(ParticleTypes.BUBBLE, d0 - vec3.x * 0.25, d1 - vec3.y * 0.25, d2 - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
+                }
+            } else {
+                this.level()
+                        .addParticle(
+                                ParticleTypes.PORTAL,
+                                d0 - vec3.x * 0.25 + this.random.nextDouble() * 0.6 - 0.3,
+                                d1 - vec3.y * 0.25 - 0.5,
+                                d2 - vec3.z * 0.25 + this.random.nextDouble() * 0.6 - 0.3,
+                                vec3.x,
+                                vec3.y,
+                                vec3.z
+                        );
+            }
+        }
+        if (!this.level().isClientSide) {
+            this.setPos(d0, d1, d2);
+            ++this.life;
+            if (this.life > 80 && !this.level().isClientSide) {
+                if (!builder.disableDefaultDeathLogic) {
+                    this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.0F);
+                    this.discard();
+                    if (this.surviveAfterDeath) {
+                        this.level().addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), this.getItem()));
+                    } else {
+                        this.level().levelEvent(2003, this.blockPosition(), 0);
+                    }
+                } else {
+                    if (this.surviveAfterDeath) {
+                        this.level().addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), this.getItem()));
+                    }
+                    this.discard();
+                }
+            }
+        } else {
+            this.setPosRaw(d0, d1, d2);
+        }
         if (builder.tick != null) {
             EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
         }
