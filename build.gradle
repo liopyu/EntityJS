@@ -135,9 +135,7 @@ dependencies {
     // Use kube's jij'd version
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.2.1"))
     implementation fg.deobf('net.liopyu.liolib:liolib-forge-1.19.2:0.0.2')
-    if (System.getProperty("idea.sync.active") != "true") {
-        annotationProcessor("org.spongepowered:mixin:${mixin_version}:processor")
-    }
+    annotationProcessor("org.spongepowered:mixin:${mixin_version}:processor")
 }
 
 tasks.named('processResources', ProcessResources).configure {

@@ -43,7 +43,6 @@ public class KubeJSEnderEyeRenderer<T extends Entity & IProjectileEntityJS> exte
             float pY = builder.renderScale(builder.pX, builder.pY, builder.pZ).pY;
             float pZ = builder.renderScale(builder.pX, builder.pY, builder.pZ).pZ;
             pMatrixStack.scale(pX, pY, pZ);
-
         } else {
             pMatrixStack.scale(2.0F, 2.0F, 2.0F);
         }
@@ -68,20 +67,23 @@ public class KubeJSEnderEyeRenderer<T extends Entity & IProjectileEntityJS> exte
             float vX = builder.renderOffset(builder.vX, builder.vY, builder.vZ).vX;
             float vY = builder.renderOffset(builder.vX, builder.vY, builder.vZ).vY;
             float vZ = builder.renderOffset(builder.vX, builder.vY, builder.vZ).vZ;
-            p_114090_.vertex(p_114091_, p_114094_ + vX, p_114095_ + vY, p_114096_ + vZ)
+            p_114090_.vertex(p_114091_, p_114094_ + vX - 0.5F, (float) p_114095_ + vY - 0.25F, vZ)
                     .color(255, 255, 255, 255)
                     .uv((float) p_114096_, (float) p_114097_)
                     .overlayCoords(OverlayTexture.NO_OVERLAY)
                     .uv2(p_114093_)
                     .normal(p_114092_, 0.0F, 1.0F, 0.0F)
                     .endVertex();
-        } else p_114090_.vertex(p_114091_, p_114094_, p_114095_, -0.5F) // Position
-                .color(255, 255, 255, 255) // Color (white)
-                .uv((float) p_114096_, (float) p_114097_) // Texture coordinates
-                .overlayCoords(OverlayTexture.NO_OVERLAY) // Overlay coordinates
-                .uv2(p_114093_) // UV2 coordinates
-                .normal(p_114092_, 0.0F, 1.0F, 0.0F) // Normal vector
-                .endVertex(); // Finish defining the vertex
+        } else p_114090_.vertex(p_114091_,
+                        p_114094_ - 0.5F,
+                        (float) p_114095_ - 0.25F,
+                        0.0F)
+                .color(255, 255, 255, 255)
+                .uv((float) p_114096_, (float) p_114097_)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
+                .uv2(p_114093_)
+                .normal(p_114092_, 0.0F, 1.0F, 0.0F)
+                .endVertex();
     }
 
 
