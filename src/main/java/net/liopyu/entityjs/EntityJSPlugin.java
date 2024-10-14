@@ -13,6 +13,7 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileAnimatableJSBui
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.vanilla.TridentJSBuilder;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
@@ -65,6 +66,8 @@ public class EntityJSPlugin implements KubeJSPlugin {
             reg.add("minecraft:slime", SlimeJSBuilder.class, SlimeJSBuilder::new);
             reg.add("minecraft:wolf", WolfJSBuilder.class, WolfJSBuilder::new);
             reg.add("minecraft:skeleton", SkeletonJSBuilder.class, SkeletonJSBuilder::new);
+            reg.add("minecraft:trident", TridentJSBuilder.class, TridentJSBuilder::new);
+
         });
 
     }

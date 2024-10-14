@@ -23,6 +23,7 @@ public class EyeOfEnderJSBuilder extends EyeOfEnderEntityBuilder<EyeOfEnderEntit
     public transient boolean noItem;
     public transient boolean disableTrailParticles;
     public transient boolean disableDefaultDeathLogic;
+    public transient Float survivalChance;
 
     public EyeOfEnderJSBuilder(ResourceLocation i) {
         super(i);
@@ -30,6 +31,19 @@ public class EyeOfEnderJSBuilder extends EyeOfEnderEntityBuilder<EyeOfEnderEntit
                 .texture(i.getNamespace() + ":item/" + i.getPath());
         this.disableTrailParticles = false;
         this.disableDefaultDeathLogic = false;
+    }
+
+    @Info(value = """
+            @param survivalChance A float value from 0 to 1 representing the chance that the Eye of Ender will not break after use.
+                            
+                Example usage:
+                ```javascript
+                eyeOfEnderBuilder.setSurvivalChance(0.8);
+                ```
+            """)
+    public EyeOfEnderJSBuilder setSurvivalChance(float survivalChance) {
+        this.survivalChance = survivalChance;
+        return this;
     }
 
     @Info(value = "Disables the default ender eye break sound as well as the death particles.")

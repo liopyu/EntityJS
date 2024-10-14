@@ -1,85 +1,180 @@
 package net.liopyu.entityjs.entities.nonliving.vanilla;
 
-import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
-import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.vanilla.TridentJSBuilder;
+import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.EyeOfEnder;
-import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJS {
-    protected final EyeOfEnderJSBuilder builder;
+public class TridentEntityJS extends ThrownTrident implements IAnimatableJSNL {
+    public TridentJSBuilder builder;
+    private final AnimatableInstanceCache getAnimatableInstanceCache;
 
-    public EyeOfEnderEntityJS(EyeOfEnderJSBuilder builder, EntityType<? extends EyeOfEnder> pEntityType, Level pLevel) {
+    public TridentEntityJS(TridentJSBuilder builder, EntityType<? extends TridentEntityJS> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
+        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+
     }
 
-    public EyeOfEnderEntityJS(EyeOfEnderJSBuilder builder, Level pLevel, EntityType<? extends EyeOfEnder> pEntityType, double pX, double pY, double pZ) {
+    public TridentEntityJS(TridentJSBuilder builder, EntityType<? extends TridentEntityJS> pEntityType, LivingEntity pShooter, Level pLevel, ItemStack pItemStack) {
         super(pEntityType, pLevel);
         this.builder = builder;
-        this.setPos(pX, pY, pZ);
-    }
-
-    public void signalTo(BlockPos pPos) {
-        double $$1 = (double) pPos.getX();
-        int $$2 = pPos.getY();
-        double $$3 = (double) pPos.getZ();
-        double $$4 = $$1 - this.getX();
-        double $$5 = $$3 - this.getZ();
-        double $$6 = Math.sqrt($$4 * $$4 + $$5 * $$5);
-        if ($$6 > 12.0) {
-            this.tx = this.getX() + $$4 / $$6 * 12.0;
-            this.tz = this.getZ() + $$5 / $$6 * 12.0;
-            this.ty = this.getY() + 8.0;
-        } else {
-            this.tx = $$1;
-            this.ty = (double) $$2;
-            this.tz = $$3;
+        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+        this.setPos(pShooter.getX(), pShooter.getEyeY() - 0.10000000149011612, pShooter.getZ());
+        this.setOwner(pShooter);
+        if (pShooter instanceof Player) {
+            this.pickup = AbstractArrow.Pickup.ALLOWED;
         }
-        this.life = 0;
-        this.surviveAfterDeath = builder.survivalChance != null ?
-                this.random.nextFloat() < builder.survivalChance : this.random.nextInt(5) > 0;
+        this.setPickupItemStack(pItemStack.copy());
+        this.entityData.set(ID_LOYALTY, (byte) this.getLoyaltyFromItem(pItemStack));
+        this.entityData.set(ID_FOIL, pItemStack.hasFoil());
     }
 
     @Override
-    public ItemStack getItem() {
-        if (builder.getItem != null) {
-            Object obj = builder.getItem.apply(this);
-            if (obj instanceof ItemStack i) return i;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getItem in builder: " + obj + ". Must be an ItemStack. Defaulting to super method: " + super.getItem());
-        }
-        return super.getItem();
+    public BaseEntityBuilder<?> getBuilder() {
+        return builder;
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return getAnimatableInstanceCache;
     }
 
     public String entityName() {
         return this.getType().toString();
     }
 
+    // Trident Overrides
+    @Override
+    protected SoundEvent getDefaultHitGroundSoundEvent() {
+        return builder == null ? super.getDefaultHitGroundSoundEvent() : builder.defaultHitGroundSoundEvent;
+    }
+
+    @Override
+    protected void onHitEntity(EntityHitResult result) {
+        if (builder != null && builder.onHitEntity != null) {
+            final ContextUtils.ProjectileEntityHitContext context = new ContextUtils.ProjectileEntityHitContext(result, this);
+            EntityJSHelperClass.consumerCallback(builder.onHitEntity, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHitEntity.");
+        }
+        Entity $$1 = result.getEntity();
+        float $$2 = 8.0F;
+        Entity $$4 = this.getOwner();
+        float f = builder != null ? builder.attackDamage : 8.0F;
+        DamageSource $$5 = builder.damageSource != null ? builder.damageSource : this.damageSources().trident(this, (Entity) ($$4 == null ? this : $$4));
+        if (this.level() instanceof ServerLevel serverlevel) {
+            if (this.getWeaponItem() != null && $$4 != null) {
+                $$2 += EnchantmentHelper.modifyDamage(serverlevel, this.getWeaponItem(), $$4, $$5, f);
+            }
+        }
+        this.dealtDamage = true;
+        SoundEvent $$6 = builder == null ? SoundEvents.TRIDENT_HIT : builder.defaultTridentHitSound;
+
+        if ($$1.hurt($$5, f)) {
+            if ($$1.getType() == EntityType.ENDERMAN) {
+                return;
+            }
+            if (this.level() instanceof ServerLevel serverlevel1) {
+                EnchantmentHelper.doPostAttackEffectsWithItemSource(serverlevel1, $$1, $$5, this.getWeaponItem());
+            }
+            if ($$1 instanceof LivingEntity livingentity) {
+                this.doKnockback(livingentity, $$5);
+                this.doPostHurtEffects(livingentity);
+            }
+        }
+        this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
+        float $$8 = 1.0F;
+        if (this.level() instanceof ServerLevel && (this.level().isThundering() || builder.alwaysThunder) && this.isChanneling()) {
+            BlockPos $$9 = $$1.blockPosition();
+            if (this.level().canSeeSky($$9)) {
+                LightningBolt $$10 = (LightningBolt) EntityType.LIGHTNING_BOLT.create(this.level());
+                $$10.moveTo(Vec3.atBottomCenterOf($$9));
+                $$10.setCause($$4 instanceof ServerPlayer ? (ServerPlayer) $$4 : null);
+                this.level().addFreshEntity($$10);
+                $$6 = builder == null ? SoundEvents.TRIDENT_HIT : builder.thunderHitSound;
+                $$8 = builder == null ? 5.0F : builder.thunderHitVolume;
+            }
+        }
+        this.playSound($$6, $$8, 1.0F);
+    }
+
+    public boolean isChanneling() {
+        AtomicBoolean channeling = new AtomicBoolean(false);
+        this.getWeaponItem().getEnchantments().keySet().forEach(e -> {
+            if (e.unwrapKey().get() == Enchantments.CHANNELING) {
+                channeling.set(true);
+            }
+        });
+        if (builder != null && builder.isChanneling != null) {
+            Object obj = builder.isChanneling.apply(this);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isChanneling from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + channeling.get());
+        }
+        return channeling.get();
+    }
+
+    /*@Override
+    protected void onHitEntity(EntityHitResult result) {
+        if (builder != null && builder.onHitEntity != null) {
+            final ContextUtils.ProjectileEntityHitContext context = new ContextUtils.ProjectileEntityHitContext(result, this);
+            EntityJSHelperClass.consumerCallback(builder.onHitEntity, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHitEntity.");
+        }
+        Entity entity = result.getEntity();
+        float f = 8.0F;
+        Entity entity1 = this.getOwner();
+        DamageSource damagesource = builder.damageSource != null ? builder.damageSource : this.damageSources().trident(this, (Entity) (entity1 == null ? this : entity1));
+        if (this.level() instanceof ServerLevel serverlevel) {
+            f = EnchantmentHelper.modifyDamage(serverlevel, this.getWeaponItem(), entity, damagesource, f);
+        }
+
+        this.dealtDamage = true;
+        if (entity.hurt(damagesource, f)) {
+            if (entity.getType() == EntityType.ENDERMAN) {
+                return;
+            }
+            if (this.level() instanceof ServerLevel serverlevel1) {
+                EnchantmentHelper.doPostAttackEffectsWithItemSource(serverlevel1, entity, damagesource, this.getWeaponItem());
+            }
+            if (entity instanceof LivingEntity livingentity) {
+                this.doKnockback(livingentity, damagesource);
+                this.doPostHurtEffects(livingentity);
+            }
+        }
+
+        this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
+        SoundEvent $$6 = builder == null ? SoundEvents.TRIDENT_HIT : builder.defaultTridentHitSound;
+        this.playSound($$6, 1.0F, 1.0F);
+    }*/
 
     //Base Entity Overrides
     public boolean hurt(DamageSource pSource, float pAmount) {
-        if (builder.onHurt != null) {
+        if (builder != null && builder.onHurt != null) {
             final ContextUtils.EntityHurtContext context = new ContextUtils.EntityHurtContext(this, pSource, pAmount);
             EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurt.");
 
@@ -90,7 +185,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int posRotationIncrements) {
         super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements);
-        if (builder.lerpTo != null) {
+        if (builder != null && builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, this);
             EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
@@ -98,73 +193,8 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
 
     @Override
     public void tick() {
-        super.baseTick();
-        Vec3 vec3 = this.getDeltaMovement();
-        double d0 = this.getX() + vec3.x;
-        double d1 = this.getY() + vec3.y;
-        double d2 = this.getZ() + vec3.z;
-        double d3 = vec3.horizontalDistance();
-        this.setXRot(Projectile.lerpRotation(this.xRotO, (float) (Mth.atan2(vec3.y, d3) * 180.0F / (float) Math.PI)));
-        this.setYRot(Projectile.lerpRotation(this.yRotO, (float) (Mth.atan2(vec3.x, vec3.z) * 180.0F / (float) Math.PI)));
-        if (!this.level().isClientSide) {
-            double d4 = this.tx - d0;
-            double d5 = this.tz - d2;
-            float f = (float) Math.sqrt(d4 * d4 + d5 * d5);
-            float f1 = (float) Mth.atan2(d5, d4);
-            double d6 = Mth.lerp(0.0025, d3, (double) f);
-            double d7 = vec3.y;
-            if (f < 1.0F) {
-                d6 *= 0.8;
-                d7 *= 0.8;
-            }
-
-            int j = this.getY() < this.ty ? 1 : -1;
-            vec3 = new Vec3(Math.cos((double) f1) * d6, d7 + ((double) j - d7) * 0.015F, Math.sin((double) f1) * d6);
-            this.setDeltaMovement(vec3);
-        }
-
-        float f2 = 0.25F;
-        if (!builder.disableTrailParticles) {
-            if (this.isInWater()) {
-                for (int i = 0; i < 4; i++) {
-                    this.level().addParticle(ParticleTypes.BUBBLE, d0 - vec3.x * 0.25, d1 - vec3.y * 0.25, d2 - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
-                }
-            } else {
-                this.level()
-                        .addParticle(
-                                ParticleTypes.PORTAL,
-                                d0 - vec3.x * 0.25 + this.random.nextDouble() * 0.6 - 0.3,
-                                d1 - vec3.y * 0.25 - 0.5,
-                                d2 - vec3.z * 0.25 + this.random.nextDouble() * 0.6 - 0.3,
-                                vec3.x,
-                                vec3.y,
-                                vec3.z
-                        );
-            }
-        }
-        if (!this.level().isClientSide) {
-            this.setPos(d0, d1, d2);
-            ++this.life;
-            if (this.life > 80 && !this.level().isClientSide) {
-                if (!builder.disableDefaultDeathLogic) {
-                    this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.0F);
-                    this.discard();
-                    if (this.surviveAfterDeath) {
-                        this.level().addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), this.getItem()));
-                    } else {
-                        this.level().levelEvent(2003, this.blockPosition(), 0);
-                    }
-                } else {
-                    if (this.surviveAfterDeath) {
-                        this.level().addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), this.getItem()));
-                    }
-                    this.discard();
-                }
-            }
-        } else {
-            this.setPosRaw(d0, d1, d2);
-        }
-        if (builder.tick != null) {
+        super.tick();
+        if (builder != null && builder.tick != null) {
             EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
         }
     }
@@ -172,7 +202,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     @Override
     public void move(MoverType pType, Vec3 pPos) {
         super.move(pType, pPos);
-        if (builder.move != null) {
+        if (builder != null && builder.move != null) {
             final ContextUtils.MovementContext context = new ContextUtils.MovementContext(pType, pPos, this);
             EntityJSHelperClass.consumerCallback(builder.move, context, "[EntityJS]: Error in " + entityName() + "builder for field: move.");
         }
@@ -196,9 +226,10 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         super.onRemovedFromLevel();
     }
 
+
     @Override
     public void thunderHit(ServerLevel p_19927_, LightningBolt p_19928_) {
-        if (builder.thunderHit != null) {
+        if (builder != null && builder.thunderHit != null) {
             super.thunderHit(p_19927_, p_19928_);
             final ContextUtils.EThunderHitContext context = new ContextUtils.EThunderHitContext(p_19927_, p_19928_, this);
             EntityJSHelperClass.consumerCallback(builder.thunderHit, context, "[EntityJS]: Error in " + entityName() + "builder for field: thunderHit.");
@@ -206,25 +237,26 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
-        if (builder.onFall != null) {
-            final ContextUtils.EEntityFallDamageContext context = new ContextUtils.EEntityFallDamageContext(this, damageMultiplier, distance, damageSource);
+    public boolean causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource) {
+        if (builder != null && builder.onFall != null) {
+            final ContextUtils.EEntityFallDamageContext context = new ContextUtils.EEntityFallDamageContext(this, pMultiplier, pFallDistance, pSource);
             EntityJSHelperClass.consumerCallback(builder.onFall, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingFall.");
         }
-        return super.causeFallDamage(distance, damageMultiplier, damageSource);
+        return super.causeFallDamage(pFallDistance, pMultiplier, pSource);
     }
+
 
     @Override
     public void onAddedToLevel() {
         super.onAddedToLevel();
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder != null && builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
     }
 
     @Override
     public void setSprinting(boolean sprinting) {
-        if (builder.onSprint != null) {
+        if (builder != null && builder.onSprint != null) {
             EntityJSHelperClass.consumerCallback(builder.onSprint, this, "[EntityJS]: Error in " + entityName() + "builder for field: onSprint.");
         }
         super.setSprinting(sprinting);
@@ -247,18 +279,17 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         super.removePassenger(p_20352_);
     }
 
-
     @Override
     public void rideTick() {
         super.rideTick();
-        if (builder.rideTick != null) {
+        if (builder != null && builder.rideTick != null) {
             EntityJSHelperClass.consumerCallback(builder.rideTick, this, "[EntityJS]: Error in " + entityName() + "builder for field: rideTick.");
         }
     }
 
     @Override
     public void onClientRemoval() {
-        if (builder.onClientRemoval != null) {
+        if (builder != null && builder.onClientRemoval != null) {
             EntityJSHelperClass.consumerCallback(builder.onClientRemoval, this, "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval.");
         }
         super.onClientRemoval();
@@ -267,7 +298,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
 
     @Override
     public void lavaHurt() {
-        if (builder.lavaHurt != null) {
+        if (builder != null && builder.lavaHurt != null) {
             EntityJSHelperClass.consumerCallback(builder.lavaHurt, this, "[EntityJS]: Error in " + entityName() + "builder for field: lavaHurt.");
         }
         super.lavaHurt();
@@ -276,7 +307,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
 
     @Override
     protected void onFlap() {
-        if (builder.onFlap != null) {
+        if (builder != null && builder.onFlap != null) {
             EntityJSHelperClass.consumerCallback(builder.onFlap, this, "[EntityJS]: Error in " + entityName() + "builder for field: onFlap.");
         }
         super.onFlap();
@@ -284,7 +315,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
 
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
-        if (builder.shouldRenderAtSqrDistance != null) {
+        if (builder != null && builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
             Object obj = builder.shouldRenderAtSqrDistance.apply(context);
             if (obj instanceof Boolean b) return b;
@@ -293,10 +324,47 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         return super.shouldRenderAtSqrDistance(distance);
     }
 
-
     @Override
     public boolean isAttackable() {
-        return builder.isAttackable;
+        return builder.isAttackable != null ? builder.isAttackable : super.isAttackable();
+    }
+
+    //Projectile overrides
+
+    @Override
+    public boolean isPushable() {
+        return true;
+    }
+
+    @Override
+    public void push(Entity pEntity) {
+        if (builder.onEntityCollision != null) {
+            final ContextUtils.CollidingProjectileEntityContext context = new ContextUtils.CollidingProjectileEntityContext(this, pEntity);
+            EntityJSHelperClass.consumerCallback(builder.onEntityCollision, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEntityCollision.");
+        }
+        if (builder.isPushable) {
+            super.push(pEntity);
+        }
+    }
+
+
+    @Override
+    protected void onHitBlock(BlockHitResult result) {
+        super.onHitBlock(result);
+        if (builder != null && builder.onHitBlock != null) {
+            final ContextUtils.ProjectileBlockHitContext context = new ContextUtils.ProjectileBlockHitContext(result, this);
+            EntityJSHelperClass.consumerCallback(builder.onHitBlock, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHitBlock.");
+        }
+    }
+
+    @Override
+    protected boolean canHitEntity(Entity entity) {
+        if (builder != null && builder.canHitEntity != null) {
+            Object obj = builder.canHitEntity.apply(entity);
+            if (obj instanceof Boolean b) return super.canHitEntity(entity) && b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid canHitEntity for arrow builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.canHitEntity(entity));
+        }
+        return super.canHitEntity(entity);
     }
 
 
@@ -312,14 +380,6 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
 
         return var10000;
     }
-
-
-    /*@Info(value = """
-            Calls a triggerable animation to be played anywhere.
-            """)
-    public void triggerAnimation(String controllerName, String animName) {
-        triggerAnim(controllerName, animName);
-    }*/
 
     @Override
     public boolean canCollideWith(Entity pEntity) {
@@ -343,14 +403,10 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     }
 
     @Override
-    public boolean isPushable() {
-        return builder.isPushable;
-    }
-
-    @Override
     protected float getBlockSpeedFactor() {
         if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
+        if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         if (obj != null) {
             return (float) obj;
         } else {
@@ -522,17 +578,6 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         return super.canChangeDimensions(to, from);
     }
 
-    /*public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
-        if (pPlayer.isSecondaryUseActive()) {
-            return InteractionResult.PASS;
-        } else {
-            if (!this.level().isClientSide) {
-                return pPlayer.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
-            } else {
-                return InteractionResult.SUCCESS;
-            }
-        }
-    }*/
 
     @Override
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
@@ -563,7 +608,6 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         return super.canTrample(state, pos, fallDistance);
     }
 
-
     @Override
     public int getMaxFallDistance() {
         if (builder.setMaxFallDistance == null) return super.getMaxFallDistance();
@@ -574,8 +618,4 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         return super.getMaxFallDistance();
     }
 
-    @Override
-    public BaseNonAnimatableEntityBuilder<?> getProjectileBuilder() {
-        return builder;
-    }
 }
