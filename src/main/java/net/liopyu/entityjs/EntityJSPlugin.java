@@ -14,9 +14,9 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder
 import net.liopyu.entityjs.builders.nonliving.modded.CGMProjectileEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.vanilla.TridentJSBuilder;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
-import net.minecraft.client.renderer.RenderType;
 import org.slf4j.Logger;
 
 public class EntityJSPlugin extends KubeJSPlugin {
@@ -62,6 +62,7 @@ public class EntityJSPlugin extends KubeJSPlugin {
         RegistryInfo.ENTITY_TYPE.addType("minecraft:slime", SlimeJSBuilder.class, SlimeJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:skeleton", SkeletonJSBuilder.class, SkeletonJSBuilder::new);
         RegistryInfo.ENTITY_TYPE.addType("minecraft:wolf", WolfJSBuilder.class, WolfJSBuilder::new);
+        RegistryInfo.ENTITY_TYPE.addType("minecraft:trident", TridentJSBuilder.class, TridentJSBuilder::new);
 
         if (Platform.isModLoaded("cgm") && Platform.isModLoaded("framework")) {
             LOGGER.info("Loading CGM EntityJS Compatibility");

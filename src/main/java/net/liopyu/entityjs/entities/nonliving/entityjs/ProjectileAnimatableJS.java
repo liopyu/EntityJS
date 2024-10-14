@@ -499,6 +499,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
         if (builder != null && builder.onHitEntity != null) {
             final ContextUtils.ProjectileEntityHitContext context = new ContextUtils.ProjectileEntityHitContext(result, this);
             EntityJSHelperClass.consumerCallback(builder.onHitEntity, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHitEntity.");
+            super.onHitEntity(result);
         } else {
             super.onHitEntity(result);
         }
