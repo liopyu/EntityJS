@@ -28,6 +28,7 @@ import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.ArrayList;
 
@@ -39,16 +40,31 @@ public class TridentItemBuilder extends ProjectileItemBuilder {
 
     public TridentItemBuilder(ResourceLocation i, BuilderBase<?> parent) {
         super(i, parent);
-        this.maxDamage = 1000;
+        this.maxDamage = 250;
         this.throwSound = SoundEvents.TRIDENT_THROW;
         this.projectileVelocity = 0;
         this.riptide1Sound = SoundEvents.TRIDENT_RIPTIDE_1;
         this.riptide2Sound = SoundEvents.TRIDENT_RIPTIDE_2;
         this.riptide3Sound = SoundEvents.TRIDENT_RIPTIDE_3;
         this.use = (p, l, h) -> true;
+        this.maxStackSize = 1;
         this.useAnimation(UseAnim.SPEAR);
-        var tag = ItemTags.TRIDENT_ENCHANTABLE.location();
-        this.tag(new ResourceLocation[]{tag});
+        var tag = ItemTags.DURABILITY_ENCHANTABLE.location();
+        var tag2 = ItemTags.TRIDENT_ENCHANTABLE.location();
+        var tag3 = Tags.Items.TOOLS_SPEAR.location();
+        var tag4 = ItemTags.VANISHING_ENCHANTABLE.location();
+        var tag5 = Tags.Items.RANGED_WEAPON_TOOLS.location();
+        var tag6 = Tags.Items.MELEE_WEAPON_TOOLS.location();
+        var tag7 = Tags.Items.ENCHANTABLES.location();
+        this.tag(new ResourceLocation[]{
+                tag,
+                tag2,
+                tag3,
+                tag4,
+                tag5,
+                tag6,
+                tag7
+        });
     }
 
     @Info("Sets the sound event for the riptide level 3")
