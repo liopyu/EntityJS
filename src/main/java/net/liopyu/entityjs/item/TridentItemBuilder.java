@@ -9,6 +9,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -24,6 +25,7 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.Tags;
 
 public class TridentItemBuilder extends ProjectileItemBuilder {
     public transient SoundEvent throwSound;
@@ -41,6 +43,15 @@ public class TridentItemBuilder extends ProjectileItemBuilder {
         this.riptide3Sound = SoundEvents.TRIDENT_RIPTIDE_3;
         this.use = (p, l, h) -> true;
         this.useAnimation(UseAnim.SPEAR);
+        this.maxStackSize = 1;
+        var tag = ItemTags.BREAKS_DECORATED_POTS.location();
+        var tag2 = Tags.Items.TOOLS_TRIDENTS.location();
+        var tag3 = Tags.Items.TOOLS.location();
+        var tag4 = ItemTags.TOOLS.location();
+        this.tag(tag);
+        this.tag(tag2);
+        this.tag(tag3);
+        this.tag(tag4);
     }
 
     @Info("Sets the sound event for the riptide level 3")
