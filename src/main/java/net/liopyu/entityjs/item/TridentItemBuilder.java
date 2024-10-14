@@ -35,7 +35,7 @@ public class TridentItemBuilder extends ProjectileItemBuilder {
 
     public TridentItemBuilder(ResourceLocation i, BuilderBase<?> parent) {
         super(i, parent);
-        this.maxDamage = 1000;
+        this.maxDamage = 250;
         this.throwSound = SoundEvents.TRIDENT_THROW;
         this.projectileVelocity = 0;
         this.riptide1Sound = SoundEvents.TRIDENT_RIPTIDE_1;
