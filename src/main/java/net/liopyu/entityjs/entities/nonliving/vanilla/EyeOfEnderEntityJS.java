@@ -41,6 +41,27 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         this.setPos(pX, pY, pZ);
     }
 
+    public void signalTo(BlockPos pPos) {
+        double $$1 = (double) pPos.getX();
+        int $$2 = pPos.getY();
+        double $$3 = (double) pPos.getZ();
+        double $$4 = $$1 - this.getX();
+        double $$5 = $$3 - this.getZ();
+        double $$6 = Math.sqrt($$4 * $$4 + $$5 * $$5);
+        if ($$6 > 12.0) {
+            this.tx = this.getX() + $$4 / $$6 * 12.0;
+            this.tz = this.getZ() + $$5 / $$6 * 12.0;
+            this.ty = this.getY() + 8.0;
+        } else {
+            this.tx = $$1;
+            this.ty = (double) $$2;
+            this.tz = $$3;
+        }
+        this.life = 0;
+        this.surviveAfterDeath = builder.survivalChance != null ?
+                this.random.nextFloat() < builder.survivalChance : this.random.nextInt(5) > 0;
+    }
+
     @Override
     public ItemStack getItem() {
         if (builder.getItem != null) {

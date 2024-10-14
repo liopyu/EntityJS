@@ -1,72 +1,135 @@
-package net.liopyu.entityjs.entities.nonliving.entityjs;
+package net.liopyu.entityjs.entities.nonliving.vanilla;
 
-import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.vanilla.TridentJSBuilder;
+import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ItemSupplier;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Objects;
 
-public class ProjectileEntityJS extends ThrowableItemProjectile implements IProjectileEntityJS, ItemSupplier {
+public class TridentEntityJS extends ThrownTrident implements IAnimatableJSNL {
+    public TridentJSBuilder builder;
+    private final AnimatableInstanceCache getAnimatableInstanceCache;
 
-
-    public ProjectileEntityJSBuilder builder;
-
-    public ProjectileEntityJS(ProjectileEntityJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, Level pLevel) {
+    public TridentEntityJS(TridentJSBuilder builder, EntityType<? extends TridentEntityJS> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
+        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     }
 
-    public ProjectileEntityJS(ProjectileEntityJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, LivingEntity pShooter, Level pLevel) {
-        super(pEntityType, pShooter, pLevel);
+    public TridentEntityJS(TridentJSBuilder builder, EntityType<? extends TridentEntityJS> pEntityType, LivingEntity pShooter, Level pLevel, ItemStack pItemStack) {
+        super(pEntityType, pLevel);
         this.builder = builder;
+        getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+        this.setPos(pShooter.getX(), pShooter.getEyeY() - 0.10000000149011612, pShooter.getZ());
+        this.setOwner(pShooter);
+        if (pShooter instanceof Player) {
+            this.pickup = AbstractArrow.Pickup.ALLOWED;
+        }
+        this.tridentItem = pItemStack.copy();
+        this.entityData.set(ID_LOYALTY, (byte) EnchantmentHelper.getLoyalty(pItemStack));
+        this.entityData.set(ID_FOIL, pItemStack.hasFoil());
     }
 
     @Override
-    public ProjectileEntityBuilder<?> getProjectileBuilder() {
+    public BaseEntityBuilder<?> getBuilder() {
         return builder;
     }
 
     @Override
-    protected Item getDefaultItem() {
-        return null;
-    }
-
-    @Override
-    public ItemStack getItem() {
-        return null;
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return getAnimatableInstanceCache;
     }
 
     public String entityName() {
         return this.getType().toString();
     }
 
+    // Trident Overrides
     @Override
-    public void shootFromRotation(Entity pShooter, float pX, float pY, float pZ, float pVelocity, float pInaccuracy) {
-        super.shootFromRotation(pShooter, pX, pY, pZ, pVelocity, pInaccuracy);
+    public boolean isChanneling() {
+        if (builder != null && builder.isChanneling != null) {
+            Object obj = builder.isChanneling.apply(this);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isChanneling from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isChanneling());
+        }
+        return EnchantmentHelper.hasChanneling(this.tridentItem);
+    }
+
+    @Override
+    protected SoundEvent getDefaultHitGroundSoundEvent() {
+        return builder == null ? super.getDefaultHitGroundSoundEvent() : builder.defaultHitGroundSoundEvent;
+    }
+
+    @Override
+    protected void onHitEntity(EntityHitResult result) {
+        if (builder != null && builder.onHitEntity != null) {
+            final ContextUtils.ProjectileEntityHitContext context = new ContextUtils.ProjectileEntityHitContext(result, this);
+            EntityJSHelperClass.consumerCallback(builder.onHitEntity, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHitEntity.");
+        }
+        Entity $$1 = result.getEntity();
+        float $$2 = 8.0F;
+        if ($$1 instanceof LivingEntity $$3) {
+            $$2 += EnchantmentHelper.getDamageBonus(this.tridentItem, $$3.getMobType());
+        }
+
+        Entity $$4 = this.getOwner();
+        DamageSource $$5 = builder.damageSource != null ? builder.damageSource : this.damageSources().trident(this, (Entity) ($$4 == null ? this : $$4));
+        this.dealtDamage = true;
+        SoundEvent $$6 = builder == null ? SoundEvents.TRIDENT_HIT : builder.defaultTridentHitSound;
+        if ($$1.hurt($$5, $$2)) {
+            if ($$1.getType() == EntityType.ENDERMAN) {
+                return;
+            }
+
+            if ($$1 instanceof LivingEntity) {
+                LivingEntity $$7 = (LivingEntity) $$1;
+                if ($$4 instanceof LivingEntity) {
+                    EnchantmentHelper.doPostHurtEffects($$7, $$4);
+                    EnchantmentHelper.doPostDamageEffects((LivingEntity) $$4, $$7);
+                }
+
+                this.doPostHurtEffects($$7);
+            }
+        }
+
+        this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
+        float $$8 = 1.0F;
+        if (this.level() instanceof ServerLevel && (this.level().isThundering() || builder.alwaysThunder) && this.isChanneling()) {
+            BlockPos $$9 = $$1.blockPosition();
+            if (this.level().canSeeSky($$9)) {
+                LightningBolt $$10 = (LightningBolt) EntityType.LIGHTNING_BOLT.create(this.level());
+                $$10.moveTo(Vec3.atBottomCenterOf($$9));
+                $$10.setCause($$4 instanceof ServerPlayer ? (ServerPlayer) $$4 : null);
+                this.level().addFreshEntity($$10);
+                $$6 = builder == null ? SoundEvents.TRIDENT_HIT : builder.thunderHitSound;
+                $$8 = builder == null ? 5.0F : builder.thunderHitVolume;
+            }
+        }
+        this.playSound($$6, $$8, 1.0F);
     }
 
     //Base Entity Overrides
@@ -237,14 +300,6 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
         }
     }
 
-    @Override
-    protected void onHitEntity(EntityHitResult result) {
-        if (builder != null && builder.onHitEntity != null) {
-            final ContextUtils.ProjectileEntityHitContext context = new ContextUtils.ProjectileEntityHitContext(result, this);
-            EntityJSHelperClass.consumerCallback(builder.onHitEntity, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHitEntity.");
-        }
-        super.onHitEntity(result);
-    }
 
     @Override
     protected void onHitBlock(BlockHitResult result) {
@@ -514,5 +569,6 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
         return super.getMaxFallDistance();
     }
+
 
 }
