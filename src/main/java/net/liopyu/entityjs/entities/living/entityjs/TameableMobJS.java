@@ -470,7 +470,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
 
         if (this.level.isClientSide) {
-            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isTame() && !this.isAngry();
+            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack)) && !this.isTame() && !this.isAngry();
             return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
         } else {
             if (this.isTame()) {
