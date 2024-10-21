@@ -235,6 +235,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob {
 
     //Tameable Mob Overrides
     public boolean tamableFood(ItemStack pStack) {
+        if (builder.tamableFood == null && builder.tamableFoodPredicate == null) return this.isFood(pStack);
         boolean isTamableFood = builder.tamableFood != null && builder.tamableFood.test(pStack);
         boolean isTamableFoodPredicate = builder.tamableFoodPredicate != null && this.tamableFoodPredicate(pStack);
         return isTamableFood || isTamableFoodPredicate;

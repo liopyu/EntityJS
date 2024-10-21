@@ -244,10 +244,10 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
 
     //Tameable Mob Overrides
     public boolean tamableFood(ItemStack pStack) {
-        if (builder.tamableFood != null) {
-            return builder.tamableFood.test(pStack);
-        }
-        return false;
+        if (builder.tamableFood == null && builder.tamableFoodPredicate == null) return this.isFood(pStack);
+        boolean isTamableFood = builder.tamableFood != null && builder.tamableFood.test(pStack);
+        boolean isTamableFoodPredicate = builder.tamableFoodPredicate != null && this.tamableFoodPredicate(pStack);
+        return isTamableFood || isTamableFoodPredicate;
     }
 
     public boolean tamableFoodPredicate(ItemStack pStack) {
