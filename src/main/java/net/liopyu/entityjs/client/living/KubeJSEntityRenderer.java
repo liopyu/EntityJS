@@ -97,7 +97,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         }
     }
 
-    @Override
+   /* @Override
     protected void applyRotations(T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
         Pose pose = animatable.getPose();
         if (this.isShaking(animatable)) {
@@ -136,6 +136,6 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
                 poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
             }
         }
-    }
+    }*/
 }
 

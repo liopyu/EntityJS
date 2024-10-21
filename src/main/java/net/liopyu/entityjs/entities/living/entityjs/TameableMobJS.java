@@ -43,6 +43,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.JumpControl;
+import net.minecraft.world.entity.ai.control.LookControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
@@ -96,7 +99,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     private static final UniformInt PERSISTENT_ANGER_TIME;
     @javax.annotation.Nullable
     private UUID persistentAngerTarget;
-    protected PathNavigation navigation;
+
 
     static {
         DATA_INTERESTED_ID = SynchedEntityData.defineId(TameableMobJS.class, EntityDataSerializers.BOOLEAN);
@@ -117,8 +120,37 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
+        this.lookControl = createLookControl();
+        this.moveControl = createMoveControl();
+        this.jumpControl = createJumpControl();
     }
 
+    private MoveControl createMoveControl() {
+        if (builder.setMoveControl != null) {
+            Object obj = builder.setMoveControl.apply(this);
+            if (obj != null) return (MoveControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMoveControl from entity: " + entityName() + ". Value: " + obj + ". Must be a MoveControl object. Defaulting to super method.");
+        }
+        return new MoveControl(this);
+    }
+
+    private LookControl createLookControl() {
+        if (builder.setLookControl != null) {
+            Object obj = builder.setLookControl.apply(this);
+            if (obj != null) return (LookControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setLookControl from entity: " + entityName() + ". Value: " + obj + ". Must be a LookControl object. Defaulting to super method.");
+        }
+        return new LookControl(this);
+    }
+
+    private JumpControl createJumpControl() {
+        if (builder.setJumpControl != null) {
+            Object obj = builder.setJumpControl.apply(this);
+            if (obj != null) return (JumpControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setJumpControl from entity: " + entityName() + ". Value: " + obj + ". Must be a JumpControl object. Defaulting to super method.");
+        }
+        return new JumpControl(this);
+    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -211,8 +243,11 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
 
     //Tameable Mob Overrides
     public boolean tamableFood(ItemStack pStack) {
-        if (builder.tamableFood != null) {
-            return builder.tamableFood.test(pStack);
+        if (builder.tamableFood == null && builder.tamableFoodPredicate == null) return this.isFood(pStack);
+        boolean isTamableFood = builder.tamableFood != null && builder.tamableFood.test(pStack);
+        boolean isTamableFoodPredicate = builder.tamableFoodPredicate != null && this.tamableFoodPredicate(pStack);
+        if (isTamableFood || isTamableFoodPredicate) {
+            return true;
         }
         return false;
     }
@@ -360,10 +395,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return pStack.is(Items.WHEAT);
+        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
     }
 
     public boolean isFoodPredicate(ItemStack pStack) {
@@ -428,7 +460,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
 
         if (this.level().isClientSide) {
-            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isTame() && !this.isAngry();
+            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || this.tamableFood(itemstack) && !this.isTame() && !this.isAngry();
             return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
         } else {
             if (this.isTame()) {

@@ -37,6 +37,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
@@ -47,6 +48,9 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.JumpControl;
+import net.minecraft.world.entity.ai.control.LookControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
@@ -83,6 +87,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static net.minecraft.tags.ItemTags.PARROT_POISONOUS_FOOD;
+
 @MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
 @ParametersAreNonnullByDefault
 public class ParrotEntityJS extends Parrot implements IAnimatableJS {
@@ -94,17 +100,6 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
 
     public String entityName() {
         return this.getType().toString();
-    }
-
-    private static final Item POISONOUS_FOOD;
-    private static final UniformInt PERSISTENT_ANGER_TIME;
-    @javax.annotation.Nullable
-    private UUID persistentAngerTarget;
-    protected PathNavigation navigation;
-
-    static {
-        PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
-        POISONOUS_FOOD = Items.COOKIE;
     }
 
     private final PartEntityJS<?>[] partEntities;
@@ -120,8 +115,37 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
+        this.lookControl = createLookControl();
+        this.moveControl = createMoveControl();
+        this.jumpControl = createJumpControl();
     }
 
+    private MoveControl createMoveControl() {
+        if (builder.setMoveControl != null) {
+            Object obj = builder.setMoveControl.apply(this);
+            if (obj != null) return (MoveControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMoveControl from entity: " + entityName() + ". Value: " + obj + ". Must be a MoveControl object. Defaulting to super method.");
+        }
+        return this.moveControl;
+    }
+
+    private LookControl createLookControl() {
+        if (builder.setLookControl != null) {
+            Object obj = builder.setLookControl.apply(this);
+            if (obj != null) return (LookControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setLookControl from entity: " + entityName() + ". Value: " + obj + ". Must be a LookControl object. Defaulting to super method.");
+        }
+        return this.lookControl;
+    }
+
+    private JumpControl createJumpControl() {
+        if (builder.setJumpControl != null) {
+            Object obj = builder.setJumpControl.apply(this);
+            if (obj != null) return (JumpControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setJumpControl from entity: " + entityName() + ". Value: " + obj + ". Must be a JumpControl object. Defaulting to super method.");
+        }
+        return this.jumpControl;
+    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -214,8 +238,11 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
 
     //Tameable Mob Overrides
     public boolean tamableFood(ItemStack pStack) {
-        if (builder.tamableFood != null) {
-            return builder.tamableFood.test(pStack);
+        if (builder.tamableFood == null && builder.tamableFoodPredicate == null) return this.isFood(pStack);
+        boolean isTamableFood = builder.tamableFood != null && builder.tamableFood.test(pStack);
+        boolean isTamableFoodPredicate = builder.tamableFoodPredicate != null && this.tamableFoodPredicate(pStack);
+        if (isTamableFood || isTamableFoodPredicate) {
+            return true;
         }
         return false;
     }
@@ -335,26 +362,23 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
     }
 
     //Ageable Mob Overrides
-
     @Override
     public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return super.isFood(pStack);
+        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
     }
+
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
-            return super.isFood(pStack);
+            return pStack.is(ItemTags.PARROT_FOOD);
         }
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
         Object obj = builder.isFoodPredicate.apply(context);
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + pStack.is(ItemTags.PARROT_FOOD));
+        return pStack.is(ItemTags.PARROT_FOOD);
     }
 
 
@@ -400,6 +424,30 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
 
 
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
+    private InteractionResult superMobInteract(Player p_27584_, InteractionHand p_27585_) {
+        ItemStack itemstack = p_27584_.getItemInHand(p_27585_);
+        if (this.isFood(itemstack)) {
+            int i = this.getAge();
+            if (!this.level().isClientSide && i == 0 && this.canFallInLove()) {
+                this.usePlayerItem(p_27584_, p_27585_, itemstack);
+                this.setInLove(p_27584_);
+                return InteractionResult.SUCCESS;
+            }
+
+            if (this.isBaby()) {
+                this.usePlayerItem(p_27584_, p_27585_, itemstack);
+                this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+            }
+
+            if (this.level().isClientSide) {
+                return InteractionResult.CONSUME;
+            }
+        }
+
+        return InteractionResult.PASS;
+    }
+
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         if (builder.onInteract != null) {
@@ -407,17 +455,24 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
             EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
         }
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
-        if (!this.isTame() && (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack))) {
-            if (!pPlayer.getAbilities().instabuild) {
-                itemstack.shrink(1);
-            }
-
+        if (!this.isTame() && this.tamableFood(itemstack)) {
+            itemstack.consume(1, pPlayer);
             if (!this.isSilent()) {
-                this.level().playSound((Player) null, this.getX(), this.getY(), this.getZ(), SoundEvents.PARROT_EAT, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
+                this.level()
+                        .playSound(
+                                null,
+                                this.getX(),
+                                this.getY(),
+                                this.getZ(),
+                                SoundEvents.PARROT_EAT,
+                                this.getSoundSource(),
+                                1.0F,
+                                1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
+                        );
             }
 
             if (!this.level().isClientSide) {
-                if (this.random.nextInt(10) == 0 && !EventHooks.onAnimalTame(this, pPlayer)) {
+                if (this.random.nextInt(10) == 0 && !net.neoforged.neoforge.event.EventHooks.onAnimalTame(this, pPlayer)) {
                     this.tame(pPlayer);
                     this.level().broadcastEntityEvent(this, (byte) 7);
                 } else {
@@ -426,25 +481,24 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
             }
 
             return InteractionResult.sidedSuccess(this.level().isClientSide);
-        } else if (itemstack.is(POISONOUS_FOOD)) {
-            if (!pPlayer.getAbilities().instabuild) {
-                itemstack.shrink(1);
-            }
+        } else if (!itemstack.is(ItemTags.PARROT_POISONOUS_FOOD)) {
+            if (!this.isFlying() && this.isTame() && this.isOwnedBy(pPlayer)) {
+                if (!this.level().isClientSide) {
+                    this.setOrderedToSit(!this.isOrderedToSit());
+                }
 
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+            } else {
+                return superMobInteract(pPlayer, pHand);
+            }
+        } else {
+            itemstack.consume(1, pPlayer);
             this.addEffect(new MobEffectInstance(MobEffects.POISON, 900));
             if (pPlayer.isCreative() || !this.isInvulnerable()) {
                 this.hurt(this.damageSources().playerAttack(pPlayer), Float.MAX_VALUE);
             }
 
             return InteractionResult.sidedSuccess(this.level().isClientSide);
-        } else if (!this.isFlying() && this.isTame() && this.isOwnedBy(pPlayer)) {
-            if (!this.level().isClientSide) {
-                this.setOrderedToSit(!this.isOrderedToSit());
-            }
-
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
-        } else {
-            return super.mobInteract(pPlayer, pHand);
         }
     }
 

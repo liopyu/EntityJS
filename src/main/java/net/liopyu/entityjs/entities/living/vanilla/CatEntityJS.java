@@ -46,6 +46,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.JumpControl;
+import net.minecraft.world.entity.ai.control.LookControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
@@ -89,7 +92,7 @@ import java.util.UUID;
 
 @MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
 @ParametersAreNonnullByDefault
-public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, NeutralMob {
+public class CatEntityJS extends Cat implements IAnimatableJS {
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     protected final CatJSBuilder builder;
@@ -100,18 +103,6 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         return this.getType().toString();
     }
 
-    private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID;
-    private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME;
-    private static final UniformInt PERSISTENT_ANGER_TIME;
-    @javax.annotation.Nullable
-    private UUID persistentAngerTarget;
-    protected PathNavigation navigation;
-
-    static {
-        DATA_INTERESTED_ID = SynchedEntityData.defineId(CatEntityJS.class, EntityDataSerializers.BOOLEAN);
-        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(CatEntityJS.class, EntityDataSerializers.INT);
-        PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
-    }
 
     private final PartEntityJS<?>[] partEntities;
 
@@ -126,8 +117,37 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
+        this.lookControl = createLookControl();
+        this.moveControl = createMoveControl();
+        this.jumpControl = createJumpControl();
     }
 
+    private MoveControl createMoveControl() {
+        if (builder.setMoveControl != null) {
+            Object obj = builder.setMoveControl.apply(this);
+            if (obj != null) return (MoveControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMoveControl from entity: " + entityName() + ". Value: " + obj + ". Must be a MoveControl object. Defaulting to super method.");
+        }
+        return this.moveControl;
+    }
+
+    private LookControl createLookControl() {
+        if (builder.setLookControl != null) {
+            Object obj = builder.setLookControl.apply(this);
+            if (obj != null) return (LookControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setLookControl from entity: " + entityName() + ". Value: " + obj + ". Must be a LookControl object. Defaulting to super method.");
+        }
+        return this.lookControl;
+    }
+
+    private JumpControl createJumpControl() {
+        if (builder.setJumpControl != null) {
+            Object obj = builder.setJumpControl.apply(this);
+            if (obj != null) return (JumpControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setJumpControl from entity: " + entityName() + ". Value: " + obj + ". Must be a JumpControl object. Defaulting to super method.");
+        }
+        return this.jumpControl;
+    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -220,8 +240,11 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
 
     //Tameable Mob Overrides
     public boolean tamableFood(ItemStack pStack) {
-        if (builder.tamableFood != null) {
-            return builder.tamableFood.test(pStack);
+        if (builder.tamableFood == null && builder.tamableFoodPredicate == null) return this.isFood(pStack);
+        boolean isTamableFood = builder.tamableFood != null && builder.tamableFood.test(pStack);
+        boolean isTamableFoodPredicate = builder.tamableFoodPredicate != null && this.tamableFoodPredicate(pStack);
+        if (isTamableFood || isTamableFoodPredicate) {
+            return true;
         }
         return false;
     }
@@ -303,24 +326,6 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         }
     }
 
-    @Override
-    public void addAdditionalSaveData(CompoundTag pCompound) {
-        super.addAdditionalSaveData(pCompound);
-        this.addPersistentAngerSaveData(pCompound);
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag pCompound) {
-        super.readAdditionalSaveData(pCompound);
-        this.readPersistentAngerSaveData(this.level(), pCompound);
-    }
-
-    @Override
-    protected void defineSynchedData(SynchedEntityData.Builder p_326034_) {
-        super.defineSynchedData(p_326034_);
-        p_326034_.define(DATA_INTERESTED_ID, false);
-        p_326034_.define(DATA_REMAINING_ANGER_TIME, 0);
-    }
 
     @Override
     protected void spawnTamingParticles(boolean pTamed) {
@@ -337,37 +342,12 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         }
     }
 
-
-    //NeutralMob Overrides
-    public int getRemainingPersistentAngerTime() {
-        return (Integer) this.entityData.get(DATA_REMAINING_ANGER_TIME);
-    }
-
-    public void setRemainingPersistentAngerTime(int pTime) {
-        this.entityData.set(DATA_REMAINING_ANGER_TIME, pTime);
-    }
-
-    public void startPersistentAngerTimer() {
-        this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
-    }
-
-    @Nullable
-    public UUID getPersistentAngerTarget() {
-        return this.persistentAngerTarget;
-    }
-
-    public void setPersistentAngerTarget(@javax.annotation.Nullable UUID pTarget) {
-        this.persistentAngerTarget = pTarget;
-    }
     //Ageable Mob Overrides
-
     @Override
     public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return super.isFood(pStack);
+        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
     }
+
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
@@ -378,8 +358,8 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFood(pStack));
+        return super.isFood(pStack);
     }
 
 
@@ -425,13 +405,36 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
 
 
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
+    private InteractionResult superMobInteract(Player p_27584_, InteractionHand p_27585_) {
+        ItemStack itemstack = p_27584_.getItemInHand(p_27585_);
+        if (this.isFood(itemstack)) {
+            int i = this.getAge();
+            if (!this.level().isClientSide && i == 0 && this.canFallInLove()) {
+                this.usePlayerItem(p_27584_, p_27585_, itemstack);
+                this.setInLove(p_27584_);
+                return InteractionResult.SUCCESS;
+            }
+
+            if (this.isBaby()) {
+                this.usePlayerItem(p_27584_, p_27585_, itemstack);
+                this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+            }
+
+            if (this.level().isClientSide) {
+                return InteractionResult.CONSUME;
+            }
+        }
+
+        return InteractionResult.PASS;
+    }
 
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
 
         if (this.level().isClientSide) {
-            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isTame() && !this.isAngry();
+            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack)) && !this.isTame();
             return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
         } else {
             if (this.isTame()) {
@@ -439,7 +442,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
                     final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
                     EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
                 }
-                if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
+                if ((this.isFood(itemstack)) && this.getHealth() < this.getMaxHealth()) {
                     if (this.isFood(itemstack)) {
                         this.heal((float) Objects.requireNonNull(itemstack.getFoodProperties(this)).nutrition());
 
@@ -452,7 +455,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
                     }
                 }
 
-                InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
+                InteractionResult interactionresult = superMobInteract(pPlayer, pHand);
                 if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(pPlayer)) {
                     this.setOrderedToSit(!this.isOrderedToSit());
                     this.jumping = false;
@@ -462,7 +465,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
                 }
 
                 return interactionresult;
-            } else if ((this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isAngry()) {
+            } else if ((this.tamableFood(itemstack))) {
                 if (!pPlayer.getAbilities().instabuild) {
                     itemstack.shrink(1);
                 }
@@ -483,7 +486,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, OwnableEntity, Ne
                 final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
                 EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
             }
-            return super.mobInteract(pPlayer, pHand);
+            return superMobInteract(pPlayer, pHand);
         }
     }
 

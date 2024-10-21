@@ -48,6 +48,9 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     public transient Function<LivingEntity, Object> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
     public transient boolean noEggItem = false;
+    public transient Function<LivingEntity, Object> setLookControl;
+    public transient Function<LivingEntity, Object> setMoveControl;
+    public transient Function<LivingEntity, Object> setJumpControl;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
@@ -56,6 +59,24 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         canFireProjectileWeapon = Ingredient.of(Items.BOW);
         canFireProjectileWeaponPredicate = t -> t.projectileWeapon.getDefaultInstance().is(Items.BOW);
         this.eggItem = new SpawnEggItemBuilder(id, this);
+    }
+
+    @Info(value = "Sets a function to define the entity's LookControl behavior")
+    public MobBuilder<T> setLookControl(Function<LivingEntity, Object> setLookControl) {
+        this.setLookControl = setLookControl;
+        return this;
+    }
+
+    @Info(value = "Sets a function to define the entity's MoveControl behavior")
+    public MobBuilder<T> setMoveControl(Function<LivingEntity, Object> setMoveControl) {
+        this.setMoveControl = setMoveControl;
+        return this;
+    }
+
+    @Info(value = "Sets a function to define the entity's JumpControl behavior")
+    public MobBuilder<T> setJumpControl(Function<LivingEntity, Object> setJumpControl) {
+        this.setJumpControl = setJumpControl;
+        return this;
     }
 
     @Info(value = "Indicates that no egg item should be created for this entity type")
@@ -81,9 +102,9 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     @ReturnsSelf
     @Info(value = """
             Sets a function to determine the PathNavigation of the entity.
-                        
+            
             @param createNavigation A Function accepting an EntityLevelContext parameter
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.createNavigation(context => {
@@ -99,9 +120,9 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets a function to determine if the entity can be leashed.
-                        
+            
             @param canBeLeashed A Function accepting a LivingEntity parameter
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.canBeLeashed(entity => {
@@ -116,10 +137,10 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets a predicate to determine if the entity should be removed when far away from the player.
-                        
+            
             @param removeWhenFarAway A Function accepting a ContextUtils.EntityDistanceToPlayerContext parameter,
                                      defining the condition for the entity to be removed when far away.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.removeWhenFarAway(context => {
@@ -135,10 +156,10 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets the interval in ticks between ambient sounds for the mob entity.
-                        
+            
             @param ambientSoundInterval The interval in ticks between ambient sounds.
             Defaults to 120.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.ambientSoundInterval(100);
@@ -170,9 +191,9 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets whether the entity can jump.
-                        
+            
             @param canJump A boolean indicating whether the entity can jump.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.canJump(true);
@@ -185,10 +206,10 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets a callback function to be executed when the entity's target changes.
-                        
+            
             @param setTarget A Consumer accepting a ContextUtils.TargetChangeContext parameter,
                              defining the behavior to be executed when the entity's target changes.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.onTargetChanged(context => {
@@ -204,9 +225,9 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets the ingredient required for the entity to fire a projectile weapon.
-                        
+            
             @param canFireProjectileWeapon An Ingredient representing the required item for firing a projectile weapon.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.canFireProjectileWeapon([
@@ -222,11 +243,11 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets a predicate to determine whether the entity can fire a projectile weapon.
-                        
+            
             @param canFireProjectileWeaponPredicate A Predicate accepting a
                        ContextUtils.EntityProjectileWeaponContext parameter,
                        defining the condition under which the entity can fire a projectile weapon.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.canFireProjectileWeaponPredicate(context => {
@@ -243,10 +264,10 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets a callback function to be executed when the entity performs an eating action.
-                        
+            
             @param ate A Consumer accepting a LivingEntity parameter,
                        defining the behavior to be executed when the entity eats.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.ate(entity => {
@@ -262,7 +283,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets the sound to play when the entity is ambient using either a string representation or a ResourceLocation object.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.setAmbientSound("minecraft:entity.zombie.ambient");
@@ -282,10 +303,10 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets the function to determine whether the entity can hold an item.
-                        
+            
             @param canHoldItem A Function accepting a {@link ContextUtils.EntityItemStackContext} parameter,
                                defining the condition for the entity to hold an item.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.canHoldItem(context => {
@@ -301,9 +322,9 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets whether the entity should despawn in peaceful difficulty.
-                        
+            
             @param shouldDespawnInPeaceful A boolean indicating whether the entity should despawn in peaceful difficulty.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.shouldDespawnInPeaceful(true);
@@ -316,10 +337,10 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets the function to determine whether the entity can pick up loot.
-                        
+            
             @param canPickUpLoot A Function accepting a {@link Mob} parameter,
                                  defining the condition for the entity to pick up loot.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.canPickUpLoot(entity => {
@@ -335,9 +356,9 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     @Info(value = """
             Sets whether persistence is required for the entity.
-                        
+            
             @param isPersistenceRequired A boolean indicating whether persistence is required.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.isPersistenceRequired(true);

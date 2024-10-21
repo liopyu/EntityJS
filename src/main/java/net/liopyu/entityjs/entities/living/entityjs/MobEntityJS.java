@@ -3,7 +3,6 @@ package net.liopyu.entityjs.entities.living.entityjs;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.Cast;
-import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
@@ -18,6 +17,9 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.JumpControl;
+import net.minecraft.world.entity.ai.control.LookControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.phys.AABB;
@@ -33,18 +35,12 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -70,7 +66,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         return this.getType().toString();
     }
 
-    protected PathNavigation navigation;
+
     public final PartEntityJS<?>[] partEntities;
 
     public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
@@ -84,8 +80,37 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
+        this.lookControl = createLookControl();
+        this.moveControl = createMoveControl();
+        this.jumpControl = createJumpControl();
     }
 
+    private MoveControl createMoveControl() {
+        if (builder.setMoveControl != null) {
+            Object obj = builder.setMoveControl.apply(this);
+            if (obj != null) return (MoveControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMoveControl from entity: " + entityName() + ". Value: " + obj + ". Must be a MoveControl object. Defaulting to super method.");
+        }
+        return new MoveControl(this);
+    }
+
+    private LookControl createLookControl() {
+        if (builder.setLookControl != null) {
+            Object obj = builder.setLookControl.apply(this);
+            if (obj != null) return (LookControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setLookControl from entity: " + entityName() + ". Value: " + obj + ". Must be a LookControl object. Defaulting to super method.");
+        }
+        return new LookControl(this);
+    }
+
+    private JumpControl createJumpControl() {
+        if (builder.setJumpControl != null) {
+            Object obj = builder.setJumpControl.apply(this);
+            if (obj != null) return (JumpControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setJumpControl from entity: " + entityName() + ". Value: " + obj + ". Must be a JumpControl object. Defaulting to super method.");
+        }
+        return new JumpControl(this);
+    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override

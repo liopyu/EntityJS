@@ -88,7 +88,7 @@ dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
     implementation "dev.latvian.mods:rhino:$rhino_version"
     implementation "dev.latvian.mods:kubejs-neoforge:$kubejs_version"
-    implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+    implementation "software.bernie.geckolib:geckolib-neoforge-1.21.1:${geckolib_version}"
 
 }
 /*minecraft {
