@@ -73,7 +73,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
 
     protected final GoatJSBuilder builder;
 
-    protected PathNavigation navigation;
+
     public final PartEntityJS<?>[] partEntities;
 
     public GoatEntityJS(GoatJSBuilder builder, EntityType<? extends Goat> pEntityType, Level pLevel) {
@@ -87,6 +87,9 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
+        this.lookControl = createLookControl();
+        this.moveControl = createMoveControl();
+        this.jumpControl = createJumpControl();
     }
 
 
