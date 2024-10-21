@@ -475,7 +475,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
                 }
 
                 return interactionresult;
-            } else if ((this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isAngry()) {
+            } else if ((this.tamableFood(itemstack)) && !this.isAngry()) {
                 if (!pPlayer.getAbilities().instabuild) {
                     itemstack.shrink(1);
                 }

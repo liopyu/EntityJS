@@ -470,7 +470,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob {
                 }
 
                 return interactionresult;
-            } else if ((this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack))) {
+            } else if ((this.tamableFood(itemstack))) {
                 if (!pPlayer.getAbilities().instabuild) {
                     itemstack.shrink(1);
                 }
