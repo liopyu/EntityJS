@@ -284,12 +284,12 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
 
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        if (builder == null || builder.createNavigation == null) return new GroundPathNavigation(this, pLevel);
+        if (builder == null || builder.createNavigation == null) return super.createNavigation(pLevel);
         final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
         Object obj = builder.createNavigation.apply(context);
         if (obj instanceof PathNavigation p) return p;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
-        return new GroundPathNavigation(this, pLevel);
+        return super.createNavigation(pLevel);
     }
 
     @Override
