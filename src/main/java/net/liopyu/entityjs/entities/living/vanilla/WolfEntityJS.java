@@ -416,7 +416,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
     private InteractionResult superMobInteract(Player pPlayer, InteractionHand pHand) {
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
-        if (this.isFood(itemstack) || this.isFoodPredicate(itemstack)) {
+        if (this.isFood(itemstack)) {
             int i = this.getAge();
             if (!this.level().isClientSide && i == 0 && this.canFallInLove()) {
                 this.usePlayerItem(pPlayer, pHand, itemstack);
@@ -452,7 +452,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
                     EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
 
                 }
-                if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
+                if ((this.isFood(itemstack)) && this.getHealth() < this.getMaxHealth()) {
                     if (itemstack.isEdible()) {
                         this.heal((float) Objects.requireNonNull(itemstack.getFoodProperties(this)).getNutrition());
 

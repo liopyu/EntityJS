@@ -469,7 +469,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
                     EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
 
                 }
-                if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
+                if ((this.isFood(itemstack)) && this.getHealth() < this.getMaxHealth()) {
                     if (itemstack.isEdible()) {
                         this.heal((float) Objects.requireNonNull(itemstack.getFoodProperties(this)).getNutrition());
 

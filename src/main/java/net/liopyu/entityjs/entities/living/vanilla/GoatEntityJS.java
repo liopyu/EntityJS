@@ -304,7 +304,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
     private InteractionResult superMobInteract(Player pPlayer, InteractionHand pHand) {
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
-        if (this.isFood(itemstack) || this.isFoodPredicate(itemstack)) {
+        if (this.isFood(itemstack)) {
             int i = this.getAge();
             if (!this.level().isClientSide && i == 0 && this.canFallInLove()) {
                 this.usePlayerItem(pPlayer, pHand, itemstack);
