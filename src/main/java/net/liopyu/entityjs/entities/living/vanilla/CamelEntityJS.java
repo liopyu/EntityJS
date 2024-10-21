@@ -35,6 +35,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.JumpControl;
+import net.minecraft.world.entity.ai.control.LookControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
@@ -79,7 +82,7 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
     protected final CamelJSBuilder builder;
 
-    protected PathNavigation navigation;
+
     public final PartEntityJS<?>[] partEntities;
 
     public CamelEntityJS(CamelJSBuilder builder, EntityType<? extends Camel> pEntityType, Level pLevel) {
@@ -93,8 +96,37 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
+        this.lookControl = createLookControl();
+        this.moveControl = createMoveControl();
+        this.jumpControl = createJumpControl();
     }
 
+    private MoveControl createMoveControl() {
+        if (builder.setMoveControl != null) {
+            Object obj = builder.setMoveControl.apply(this);
+            if (obj != null) return (MoveControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMoveControl from entity: " + entityName() + ". Value: " + obj + ". Must be a MoveControl object. Defaulting to super method.");
+        }
+        return this.moveControl;
+    }
+
+    private LookControl createLookControl() {
+        if (builder.setLookControl != null) {
+            Object obj = builder.setLookControl.apply(this);
+            if (obj != null) return (LookControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setLookControl from entity: " + entityName() + ". Value: " + obj + ". Must be a LookControl object. Defaulting to super method.");
+        }
+        return this.lookControl;
+    }
+
+    private JumpControl createJumpControl() {
+        if (builder.setJumpControl != null) {
+            Object obj = builder.setJumpControl.apply(this);
+            if (obj != null) return (JumpControl) obj;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setJumpControl from entity: " + entityName() + ". Value: " + obj + ". Must be a JumpControl object. Defaulting to super method.");
+        }
+        return this.jumpControl;
+    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -229,11 +261,9 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return super.isFood(pStack);
+        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
     }
+
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
@@ -244,8 +274,8 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFood(pStack));
+        return super.isFood(pStack);
     }
 
 
@@ -294,23 +324,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-        ItemStack itemstack = pPlayer.getItemInHand(pHand);
-        if (this.isFood(itemstack) || this.isFoodPredicate(itemstack)) {
-            int i = this.getAge();
-            if (!this.level().isClientSide && i == 0 && this.canFallInLove()) {
-                this.usePlayerItem(pPlayer, pHand, itemstack);
-                this.setInLove(pPlayer);
-                return InteractionResult.SUCCESS;
-            }
-            if (this.isBaby()) {
-                this.usePlayerItem(pPlayer, pHand, itemstack);
-                this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
-                return InteractionResult.sidedSuccess(this.level().isClientSide);
-            }
-            if (this.level().isClientSide) {
-                return InteractionResult.CONSUME;
-            }
-        }
         if (builder.onInteract != null) {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
             EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
