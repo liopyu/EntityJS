@@ -213,7 +213,7 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return getAnimatableInstanceCache;
     }
-//Some logic overrides up here because there are different implementations in the other builders.
+    //Some logic overrides up here because there are different implementations in the other builders.
 
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
@@ -288,11 +288,9 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return super.isFood(pStack);
+        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
     }
+
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
@@ -303,8 +301,8 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFood(pStack));
+        return super.isFood(pStack);
     }
 
 

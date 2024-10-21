@@ -393,11 +393,9 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return super.isFood(pStack);
+        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
     }
+
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
@@ -408,8 +406,8 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFood(pStack));
+        return super.isFood(pStack);
     }
 
 
@@ -455,13 +453,36 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
 
 
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
+    private InteractionResult superMobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
+        if (this.isFood(itemstack)) {
+            int i = this.getAge();
+            if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
+                this.usePlayerItem(pPlayer, pHand, itemstack);
+                this.setInLove(pPlayer);
+                return InteractionResult.SUCCESS;
+            }
+
+            if (this.isBaby()) {
+                this.usePlayerItem(pPlayer, pHand, itemstack);
+                this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
+            }
+
+            if (this.level.isClientSide) {
+                return InteractionResult.CONSUME;
+            }
+        }
+
+        return InteractionResult.PASS;
+    }
 
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
 
         if (this.level.isClientSide) {
-            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isTame() && !this.isAngry();
+            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack)) && !this.isTame() && !this.isAngry();
             return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
         } else {
             if (this.isTame()) {
@@ -470,7 +491,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
                     EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
 
                 }
-                if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
+                if ((this.isFood(itemstack)) && this.getHealth() < this.getMaxHealth()) {
                     if (itemstack.isEdible()) {
                         this.heal((float) Objects.requireNonNull(itemstack.getFoodProperties(this)).getNutrition());
 
@@ -483,7 +504,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
                     }
                 }
 
-                InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
+                InteractionResult interactionresult = superMobInteract(pPlayer, pHand);
                 if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(pPlayer)) {
                     this.setOrderedToSit(!this.isOrderedToSit());
                     this.jumping = false;
@@ -515,7 +536,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
                 EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
 
             }
-            return super.mobInteract(pPlayer, pHand);
+            return superMobInteract(pPlayer, pHand);
         }
     }
 

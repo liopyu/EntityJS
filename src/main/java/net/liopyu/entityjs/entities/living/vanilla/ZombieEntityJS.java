@@ -190,7 +190,7 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return getAnimatableInstanceCache;
     }
-//Some logic overrides up here because there are different implementations in the other builders.
+    //Some logic overrides up here because there are different implementations in the other builders.
 
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {

@@ -56,9 +56,7 @@ import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -237,10 +235,9 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob {
 
     //Tameable Mob Overrides
     public boolean tamableFood(ItemStack pStack) {
-        if (builder.tamableFood != null) {
-            return builder.tamableFood.test(pStack);
-        }
-        return false;
+        boolean isTamableFood = builder.tamableFood != null && builder.tamableFood.test(pStack);
+        boolean isTamableFoodPredicate = builder.tamableFoodPredicate != null && this.tamableFoodPredicate(pStack);
+        return isTamableFood || isTamableFoodPredicate;
     }
 
     public boolean tamableFoodPredicate(ItemStack pStack) {
@@ -352,11 +349,9 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob {
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return super.isFood(pStack);
+        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
     }
+
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
@@ -367,8 +362,8 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob {
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFood(pStack));
+        return super.isFood(pStack);
     }
 
 
@@ -413,65 +408,94 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob {
 
 
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
+    private InteractionResult superMobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
+        if (this.isFood(itemstack)) {
+            int i = this.getAge();
+            if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
+                this.usePlayerItem(pPlayer, pHand, itemstack);
+                this.setInLove(pPlayer);
+                return InteractionResult.SUCCESS;
+            }
+
+            if (this.isBaby()) {
+                this.usePlayerItem(pPlayer, pHand, itemstack);
+                this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
+            }
+
+            if (this.level.isClientSide) {
+                return InteractionResult.CONSUME;
+            }
+        }
+
+        return InteractionResult.PASS;
+    }
 
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        if (builder.onInteract != null) {
+            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+            EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
+        }
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
-
+        Item item = itemstack.getItem();
         if (this.level.isClientSide) {
-            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isTame();
-            return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
+            if (this.isTame() && this.isOwnedBy(pPlayer)) {
+                return InteractionResult.SUCCESS;
+            } else {
+                return this.isFood(itemstack) && (this.getHealth() < this.getMaxHealth() || !this.isTame()) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+            }
         } else {
+            InteractionResult interactionresult;
             if (this.isTame()) {
-                if (builder.onInteract != null) {
-                    final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                    EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
-                }
-                if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
-                    if (itemstack.isEdible()) {
-                        this.heal((float) Objects.requireNonNull(itemstack.getFoodProperties(this)).getNutrition());
+                if (this.isOwnedBy(pPlayer)) {
+                    if (!(item instanceof DyeItem)) {
+                        if (item.isEdible() && this.isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
+                            this.heal((float) itemstack.getFoodProperties(this).getNutrition());
+                            this.usePlayerItem(pPlayer, pHand, itemstack);
+                            return InteractionResult.CONSUME;
+                        }
 
+                        interactionresult = superMobInteract(pPlayer, pHand);
+                        if (!interactionresult.consumesAction() || this.isBaby()) {
+                            this.setOrderedToSit(!this.isOrderedToSit());
+                        }
+
+                        return interactionresult;
+                    }
+
+                    DyeColor dyecolor = ((DyeItem) item).getDyeColor();
+                    if (dyecolor != this.getCollarColor()) {
+                        this.setCollarColor(dyecolor);
                         if (!pPlayer.getAbilities().instabuild) {
                             itemstack.shrink(1);
                         }
 
-                        this.gameEvent(GameEvent.EAT, this);
-                        return InteractionResult.SUCCESS;
+                        this.setPersistenceRequired();
+                        return InteractionResult.CONSUME;
                     }
                 }
-
-                InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
-                if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(pPlayer)) {
-                    this.setOrderedToSit(!this.isOrderedToSit());
-                    this.jumping = false;
-                    this.navigation.stop();
-                    this.setTarget((LivingEntity) null);
-                    return InteractionResult.SUCCESS;
-                }
-
-                return interactionresult;
-            } else if ((this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack))) {
-                if (!pPlayer.getAbilities().instabuild) {
-                    itemstack.shrink(1);
-                }
-
+            } else if (this.tamableFood(itemstack)) {
+                this.usePlayerItem(pPlayer, pHand, itemstack);
                 if (this.random.nextInt(3) == 0 && !ForgeEventFactory.onAnimalTame(this, pPlayer)) {
                     this.tame(pPlayer);
-                    this.navigation.stop();
-                    this.setTarget((LivingEntity) null);
                     this.setOrderedToSit(true);
                     this.level.broadcastEntityEvent(this, (byte) 7);
                 } else {
                     this.level.broadcastEntityEvent(this, (byte) 6);
                 }
 
-                return InteractionResult.SUCCESS;
+                this.setPersistenceRequired();
+                return InteractionResult.CONSUME;
             }
-            if (builder.onInteract != null) {
-                final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
+
+            interactionresult = superMobInteract(pPlayer, pHand);
+            if (interactionresult.consumesAction()) {
+                this.setPersistenceRequired();
             }
-            return super.mobInteract(pPlayer, pHand);
+
+            return interactionresult;
         }
     }
 

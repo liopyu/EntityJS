@@ -360,11 +360,9 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return super.isFood(pStack);
+        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
     }
+
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
@@ -375,8 +373,8 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFood(pStack));
+        return super.isFood(pStack);
     }
 
 
@@ -421,6 +419,30 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
 
 
     //Mob Interact here because it has special implimentations due to breeding in AgeableMob classes.
+    private InteractionResult superMobInteract(Player pPlayer, InteractionHand pHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pHand);
+        if (this.isFood(itemstack)) {
+            int i = this.getAge();
+            if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
+                this.usePlayerItem(pPlayer, pHand, itemstack);
+                this.setInLove(pPlayer);
+                return InteractionResult.SUCCESS;
+            }
+
+            if (this.isBaby()) {
+                this.usePlayerItem(pPlayer, pHand, itemstack);
+                this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
+            }
+
+            if (this.level.isClientSide) {
+                return InteractionResult.CONSUME;
+            }
+        }
+
+        return InteractionResult.PASS;
+    }
+
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         if (builder.onInteract != null) {
@@ -428,7 +450,7 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
             EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
         }
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
-        if (!this.isTame() && (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack))) {
+        if (!this.isTame() && this.tamableFood(itemstack)) {
             if (!pPlayer.getAbilities().instabuild) {
                 itemstack.shrink(1);
             }
@@ -465,7 +487,7 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
 
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         } else {
-            return super.mobInteract(pPlayer, pHand);
+            return superMobInteract(pPlayer, pHand);
         }
     }
 

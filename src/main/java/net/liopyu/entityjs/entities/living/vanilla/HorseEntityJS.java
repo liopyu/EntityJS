@@ -329,11 +329,9 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return super.isFood(pStack);
+        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
     }
+
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
@@ -344,8 +342,8 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFood(pStack));
+        return super.isFood(pStack);
     }
 
 
@@ -396,24 +394,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
             EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
         }
-        boolean flag = !this.isBaby() && this.isTamed() && pPlayer.isSecondaryUseActive();
-        if (!this.isVehicle() && !flag) {
-            ItemStack itemstack = pPlayer.getItemInHand(pHand);
-            if (!itemstack.isEmpty()) {
-                if (this.isFood(itemstack)) {
-                    return this.fedFood(pPlayer, itemstack);
-                }
-
-                if (!this.isTamed()) {
-                    this.makeMad();
-                    return InteractionResult.sidedSuccess(this.level.isClientSide);
-                }
-            }
-
-            return super.mobInteract(pPlayer, pHand);
-        } else {
-            return super.mobInteract(pPlayer, pHand);
-        }
+        return super.mobInteract(pPlayer, pHand);
     }
 
     //Mob Overrides

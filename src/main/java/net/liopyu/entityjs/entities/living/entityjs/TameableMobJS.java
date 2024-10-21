@@ -244,10 +244,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     //Tameable Mob Overrides
     public boolean tamableFood(ItemStack pStack) {
-        if (builder.tamableFood != null) {
-            return builder.tamableFood.test(pStack);
-        }
-        return false;
+        boolean isTamableFood = builder.tamableFood != null && builder.tamableFood.test(pStack);
+        boolean isTamableFoodPredicate = builder.tamableFoodPredicate != null && this.tamableFoodPredicate(pStack);
+        return isTamableFood || isTamableFoodPredicate;
     }
 
     public boolean tamableFoodPredicate(ItemStack pStack) {
@@ -405,11 +404,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        if (builder.isFood != null) {
-            return builder.isFood.test(pStack);
-        }
-        return super.isFood(pStack);
+        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
     }
+
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
@@ -420,8 +417,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
-        return false;
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFood(pStack));
+        return super.isFood(pStack);
     }
 
 
@@ -480,7 +477,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
                     final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
                     EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
                 }
-                if ((this.isFood(itemstack) || this.isFoodPredicate(itemstack)) && this.getHealth() < this.getMaxHealth()) {
+                if ((this.isFood(itemstack)) && this.getHealth() < this.getMaxHealth()) {
                     if (itemstack.isEdible()) {
                         this.heal((float) Objects.requireNonNull(itemstack.getFoodProperties(this)).getNutrition());
 
@@ -503,7 +500,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
                 }
 
                 return interactionresult;
-            } else if ((this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isAngry()) {
+            } else if ((this.tamableFood(itemstack)) && !this.isAngry()) {
                 if (!pPlayer.getAbilities().instabuild) {
                     itemstack.shrink(1);
                 }
@@ -524,7 +521,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
                 final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
                 EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
             }
-            return super.mobInteract(pPlayer, pHand);
+            return InteractionResult.PASS;
         }
     }
 
