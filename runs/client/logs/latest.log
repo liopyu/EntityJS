@@ -1,96 +1,90 @@
-[14Oct2024 16:38:07.198] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientuserdev, --version, 21.0.167, --assetIndex, asset-index, --assetsDir, C:\Users\subli\.gradle\caches\minecraft\assets\1.21, --gameDir, ., --fml.neoForgeVersion, 21.0.167, --fml.fmlVersion, 4.0.23, --fml.mcVersion, 1.21, --fml.neoFormVersion, 20240613.152323]
-[14Oct2024 16:38:07.201] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Eclipse Adoptium OpenJDK 64-Bit Server VM 21.0.3+9-LTS
-[14Oct2024 16:38:07.203] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.4+main.d2e20e43 starting: java version 21.0.3 by Eclipse Adoptium; OS Windows 11 arch amd64 version 10.0
-[14Oct2024 16:38:07.329] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
-[14Oct2024 16:38:07.435] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
-[14Oct2024 16:38:07.828] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
-[14Oct2024 16:38:07.929] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.6 Source=union:/C:/Users/subli/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.14.0+mixin.0.8.6/c265173c84346e9e5d42a2384b2b02bd39a4a899/sponge-mixin-0.14.0+mixin.0.8.6.jar%23135!/ Service=ModLauncher Env=CLIENT
-[14Oct2024 16:38:08.170] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 3050 Laptop GPU/PCIe/SSE2 GL version 4.6.0 NVIDIA 555.99, NVIDIA Corporation
-[14Oct2024 16:38:08.190] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.167.jar" [locator: neoforge devenv provider ([C:\Users\subli\Desktop\EntityJs\.gradle\repositories\ng_dummy_ng\net\neoforged\neoforge\21.0.167\neoforge-21.0.167.jar])]
-[14Oct2024 16:38:08.207] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.167.jar" [locator: neoforge devenv provider ([C:\Users\subli\Desktop\EntityJs\.gradle\repositories\ng_dummy_ng\net\neoforged\neoforge\21.0.167\neoforge-21.0.167.jar])]
-[14Oct2024 16:38:08.223] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "main" [locator: userdev mods and services, reader: mod manifest]
-[14Oct2024 16:38:08.233] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.167.jar" [locator: userdev mods and services, reader: mod manifest]
-[14Oct2024 16:38:08.239] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "probejs-585406-5700955.jar" [locator: userdev mods and services, reader: mod manifest]
-[14Oct2024 16:38:08.245] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "kubejs-neoforge-2101.7.0-build.171.jar" [locator: userdev mods and services, reader: mod manifest]
-[14Oct2024 16:38:08.249] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "rhino-2101.2.5-build.54.jar" [locator: userdev mods and services, reader: mod manifest]
-[14Oct2024 16:38:08.255] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "geckolib-neoforge-1.21-4.5.7.jar" [locator: userdev mods and services, reader: mod manifest]
-[14Oct2024 16:38:08.280] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found gamelibrary file "mixinextras-neoforge-0.3.5.jar" [locator: userdev mods and services, reader: mod manifest]
-[14Oct2024 16:38:08.549] [main/WARN] [net.neoforged.jarjar.selection.JarSelector/]: Attempted to select a dependency jar for JarJar which was passed in as source: mixinextras-neoforge-0.3.5.jar. Using Mod File: C:\Users\subli\.gradle\caches\modules-2\files-2.1\io.github.llamalad7\mixinextras-neoforge\0.3.5\ef3ffcf309dae656517b2f120189b1c9b21737dd\mixinextras-neoforge-0.3.5.jar
-[14Oct2024 16:38:08.549] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 5 dependencies adding them to mods collection
-[14Oct2024 16:38:08.550] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "animated-gif-lib-for-java-animated-gif-lib-1.7.jar" [parent: kubejs-neoforge-2101.7.0-build.171.jar, locator: jarinjar]
-[14Oct2024 16:38:08.550] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "javaparser-symbol-solver-core-3.24.8.jar" [parent: probejs-585406-5700955.jar, locator: jarinjar]
-[14Oct2024 16:38:08.550] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "javaparser-core-3.24.8.jar" [parent: probejs-585406-5700955.jar, locator: jarinjar]
-[14Oct2024 16:38:08.550] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "vineflower-1.10.1.jar" [parent: probejs-585406-5700955.jar, locator: jarinjar]
-[14Oct2024 16:38:08.550] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "tiny-java-server-1.0.0-build.6.jar" [parent: kubejs-neoforge-2101.7.0-build.171.jar, locator: jarinjar]
-[14Oct2024 16:38:08.766] [main/INFO] [net.neoforged.fml.loading.FMLServiceProvider/CORE]: Loading coremod script-engine for [neoforge]
-[14Oct2024 16:38:09.560] [main/INFO] [mixin/]: Compatibility level set to JAVA_21
-[14Oct2024 16:38:09.572] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientuserdev' with arguments [--version, 21.0.167, --gameDir, ., --assetsDir, C:\Users\subli\.gradle\caches\minecraft\assets\1.21, --assetIndex, asset-index]
-[14Oct2024 16:38:09.608] [main/WARN] [mixin/]: Reference map 'geckolib.refmap.json' for geckolib.mixins.json could not be read. If this is a development environment you can ignore this message
-[14Oct2024 16:38:10.223] [main/WARN] [mixin/]: Error loading class: mezz/modnametooltip/TooltipEventHandler (java.lang.ClassNotFoundException: mezz.modnametooltip.TooltipEventHandler)
-[14Oct2024 16:38:10.226] [main/WARN] [mixin/]: Error loading class: me/shedaniel/rei/impl/client/ClientHelperImpl (java.lang.ClassNotFoundException: me.shedaniel.rei.impl.client.ClientHelperImpl)
-[14Oct2024 16:38:10.344] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.3.5).
-[14Oct2024 16:38:11.656] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 229 Datafixer optimizations took 212 milliseconds
-[14Oct2024 16:38:16.978] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[14Oct2024 16:38:16.979] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
-[14Oct2024 16:38:16.981] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[14Oct2024 16:38:16.982] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[14Oct2024 16:38:16.982] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[14Oct2024 16:38:17.106] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/subli/Desktop/EntityJs/.gradle/repositories/ng_dummy_ng/net/neoforged/neoforge/21.0.167/neoforge-21.0.167.jar%23189!/assets/.mcassetsroot' uses unexpected schema
-[14Oct2024 16:38:17.107] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/subli/Desktop/EntityJs/.gradle/repositories/ng_dummy_ng/net/neoforged/neoforge/21.0.167/neoforge-21.0.167.jar%23189!/data/.mcassetsroot' uses unexpected schema
-[14Oct2024 16:38:17.130] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
-[14Oct2024 16:38:17.138] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
-[14Oct2024 16:38:17.256] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.3+5
-[14Oct2024 16:38:17.508] [modloading-worker-0/INFO] [net.liopyu.entityjs.EntityJSMod/]: Loading EntityJS-Liopyu
-[14Oct2024 16:38:17.531] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.0.167, for MC 1.21
-[14Oct2024 16:38:17.540] [modloading-worker-0/INFO] [KubeJS Startup/]: Capturing errors for startup scripts enabled
-[14Oct2024 16:38:17.541] [modloading-worker-0/INFO] [KubeJS Client/]: Capturing errors for client scripts enabled
-[14Oct2024 16:38:17.541] [modloading-worker-0/INFO] [KubeJS/]: Loading vanilla registries...
-[14Oct2024 16:38:17.581] [modloading-worker-0/INFO] [KubeJS/]: Looking for KubeJS plugins...
-[14Oct2024 16:38:17.584] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source kubejs
-[14Oct2024 16:38:17.592] [modloading-worker-0/WARN] [KubeJS/]: Plugin dev.latvian.mods.kubejs.integration.architectury.ArchitecturyIntegration does not have required mod 'architectury' loaded, skipping
-[14Oct2024 16:38:17.592] [modloading-worker-0/WARN] [KubeJS/]: Plugin dev.latvian.mods.kubejs.integration.gamestages.GameStagesIntegration does not have required mod 'gamestages' loaded, skipping
-[14Oct2024 16:38:17.593] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source probejs
-[14Oct2024 16:38:17.595] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source entityjs
-[14Oct2024 16:38:17.598] [modloading-worker-0/INFO] [KubeJS/]: Done in 15.75 ms
-[14Oct2024 16:38:18.053] [modloading-worker-0/INFO] [KubeJS Startup/]: startup_scripts:example.js#1: Loaded Java class 'com.mojang.math.Axis'
-[14Oct2024 16:38:18.058] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:example.js in 0.055 s
-[14Oct2024 16:38:18.060] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded 1/1 KubeJS startup scripts in 0.454 s with 0 errors and 0 warnings
-[14Oct2024 16:38:18.085] [modloading-worker-0/INFO] [KubeJS Client/]: Loaded script client_scripts:example.js in 0.0 s
-[14Oct2024 16:38:18.086] [modloading-worker-0/INFO] [KubeJS Client/]: Loaded 1/1 KubeJS client scripts in 0.024 s with 0 errors and 0 warnings
-[14Oct2024 16:38:18.847] [Render thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: []
-[14Oct2024 16:38:19.055] [Render thread/INFO] [KubeJS/]: Loaded 13 asset packs: vanilla, KubeJS Virtual Resource Pack [Before Mods, assets], mod_resources, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, assets], KubeJS Virtual Resource Pack [After Mods, assets], KubeJS File Resource Pack [assets], mod/neoforge, KubeJS Virtual Resource Pack [Last, assets]
-[14Oct2024 16:38:19.058] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, KubeJS Virtual Resource Pack [Before Mods, assets], mod_resources, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, assets], KubeJS Virtual Resource Pack [After Mods, assets], KubeJS File Resource Pack [assets], mod/neoforge, KubeJS Virtual Resource Pack [Last, assets]
-[14Oct2024 16:38:19.151] [Render thread/INFO] [KubeJS Client/]: Client resource reload complete!
-[14Oct2024 16:38:19.151] [Worker-Main-4/ERROR] [GeckoLib/]: Unable to parse animation: move
-	-> Failed to parse expression '3.0 * (variable.slime_squish_factor < 0.0 ? 0.0 : variable.slime_squish_factor) * 1.7'
-		-> Unknown operator symbol '?'
-[14Oct2024 16:38:19.219] [Worker-Main-6/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.1.05.hex, loading
-[14Oct2024 16:38:19.225] [Render thread/INFO] [KubeJS/]: Started the local web server at http://localhost:61423
-[14Oct2024 16:38:19.478] [Worker-Main-2/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_jp_patch-15.1.05.hex, loading
-[14Oct2024 16:38:20.422] [Worker-Main-5/WARN] [net.minecraft.client.resources.model.ModelManager/]: Missing textures in model kubejs:wyrm#inventory:
-    minecraft:textures/atlas/blocks.png:kubejs:item/wyrm
-[14Oct2024 16:38:20.552] [Render thread/INFO] [KubeJS Startup/]: Capturing errors for startup scripts disabled
-[14Oct2024 16:38:20.552] [Render thread/INFO] [KubeJS Client/]: Capturing errors for client scripts disabled
-[14Oct2024 16:38:20.701] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
-[14Oct2024 16:38:20.702] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
-[14Oct2024 16:38:20.795] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device OpenAL Soft on Speakers (Focusrite USB Audio)
-[14Oct2024 16:38:20.795] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
-[14Oct2024 16:38:20.970] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
-[14Oct2024 16:38:20.984] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
-[14Oct2024 16:38:20.984] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
-[14Oct2024 16:38:20.985] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
-[14Oct2024 16:38:20.986] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
-[14Oct2024 16:38:20.990] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
-[14Oct2024 16:38:20.990] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
-[14Oct2024 16:38:20.991] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
-[14Oct2024 16:38:20.991] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
-[14Oct2024 16:38:21.126] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
-[14Oct2024 16:38:21.128] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
-[14Oct2024 16:38:21.129] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
-[14Oct2024 16:38:21.129] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
-[14Oct2024 16:38:21.130] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
-[14Oct2024 16:38:21.157] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
-[14Oct2024 16:38:25.996] [Render thread/WARN] [mixin/]: Mixin apply for mod entityjs failed entityjs.mixins.json:ServerScriptManagerMixin from mod entityjs -> dev.latvian.mods.kubejs.server.ServerScriptManager: org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException @WrapOperation annotation is trying to target an <init> call in dev/latvian/mods/kubejs/server/ServerScriptManager::createPackResources(Ljava/util/List;)Ljava/util/List; in dev/latvian/mods/kubejs/server/ServerScriptManager::entityjs$capturePacks! If this is an instantiation, target the NEW instead.
+[21Oct2024 20:54:10.637] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientuserdev, --version, 21.0.167, --assetIndex, asset-index, --assetsDir, C:\Users\subli\.gradle\caches\minecraft\assets\1.21, --gameDir, ., --fml.neoForgeVersion, 21.0.167, --fml.fmlVersion, 4.0.23, --fml.mcVersion, 1.21, --fml.neoFormVersion, 20240613.152323]
+[21Oct2024 20:54:10.641] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Amazon.com Inc. OpenJDK 64-Bit Server VM 21.0.3+9-LTS
+[21Oct2024 20:54:10.643] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.4+main.d2e20e43 starting: java version 21.0.3 by Amazon.com Inc.; OS Windows 11 arch amd64 version 10.0
+[21Oct2024 20:54:10.782] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[21Oct2024 20:54:10.881] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[21Oct2024 20:54:11.150] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[21Oct2024 20:54:11.238] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.6 Source=union:/C:/Users/subli/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.14.0+mixin.0.8.6/c265173c84346e9e5d42a2384b2b02bd39a4a899/sponge-mixin-0.14.0+mixin.0.8.6.jar%23135!/ Service=ModLauncher Env=CLIENT
+[21Oct2024 20:54:11.546] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.167.jar" [locator: neoforge devenv provider ([D:\EntityJs\.gradle\repositories\ng_dummy_ng\net\neoforged\neoforge\21.0.167\neoforge-21.0.167.jar])]
+[21Oct2024 20:54:11.568] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.167.jar" [locator: neoforge devenv provider ([D:\EntityJs\.gradle\repositories\ng_dummy_ng\net\neoforged\neoforge\21.0.167\neoforge-21.0.167.jar])]
+[21Oct2024 20:54:11.571] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 3050 Laptop GPU/PCIe/SSE2 GL version 4.6.0 NVIDIA 555.99, NVIDIA Corporation
+[21Oct2024 20:54:11.584] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "main" [locator: userdev mods and services, reader: mod manifest]
+[21Oct2024 20:54:11.597] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "neoforge-21.0.167.jar" [locator: userdev mods and services, reader: mod manifest]
+[21Oct2024 20:54:11.602] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "probejs-585406-5700955.jar" [locator: userdev mods and services, reader: mod manifest]
+[21Oct2024 20:54:11.610] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "kubejs-neoforge-2101.7.1-build.181.jar" [locator: userdev mods and services, reader: mod manifest]
+[21Oct2024 20:54:11.615] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "rhino-2101.2.5-build.54.jar" [locator: userdev mods and services, reader: mod manifest]
+[21Oct2024 20:54:11.621] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "geckolib-neoforge-1.21.1-4.6.5.jar" [locator: userdev mods and services, reader: mod manifest]
+[21Oct2024 20:54:11.658] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found gamelibrary file "mixinextras-neoforge-0.3.5.jar" [locator: userdev mods and services, reader: mod manifest]
+[21Oct2024 20:54:11.972] [main/WARN] [net.neoforged.jarjar.selection.JarSelector/]: Attempted to select a dependency jar for JarJar which was passed in as source: mixinextras-neoforge-0.3.5.jar. Using Mod File: C:\Users\subli\.gradle\caches\modules-2\files-2.1\io.github.llamalad7\mixinextras-neoforge\0.3.5\ef3ffcf309dae656517b2f120189b1c9b21737dd\mixinextras-neoforge-0.3.5.jar
+[21Oct2024 20:54:11.973] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 5 dependencies adding them to mods collection
+[21Oct2024 20:54:11.973] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "animated-gif-lib-for-java-animated-gif-lib-1.7.jar" [parent: kubejs-neoforge-2101.7.1-build.181.jar, locator: jarinjar]
+[21Oct2024 20:54:11.974] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "javaparser-symbol-solver-core-3.24.8.jar" [parent: probejs-585406-5700955.jar, locator: jarinjar]
+[21Oct2024 20:54:11.974] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "javaparser-core-3.24.8.jar" [parent: probejs-585406-5700955.jar, locator: jarinjar]
+[21Oct2024 20:54:11.974] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "vineflower-1.10.1.jar" [parent: probejs-585406-5700955.jar, locator: jarinjar]
+[21Oct2024 20:54:11.974] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found library file "tiny-java-server-1.0.0-build.6.jar" [parent: kubejs-neoforge-2101.7.1-build.181.jar, locator: jarinjar]
+[21Oct2024 20:54:12.221] [main/INFO] [net.neoforged.fml.loading.FMLServiceProvider/CORE]: Loading coremod script-engine for [neoforge]
+[21Oct2024 20:54:13.130] [main/INFO] [mixin/]: Compatibility level set to JAVA_21
+[21Oct2024 20:54:13.145] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientuserdev' with arguments [--version, 21.0.167, --gameDir, ., --assetsDir, C:\Users\subli\.gradle\caches\minecraft\assets\1.21, --assetIndex, asset-index]
+[21Oct2024 20:54:13.189] [main/WARN] [mixin/]: Reference map 'geckolib.refmap.json' for geckolib.mixins.json could not be read. If this is a development environment you can ignore this message
+[21Oct2024 20:54:13.914] [main/WARN] [mixin/]: Error loading class: mezz/modnametooltip/TooltipEventHandler (java.lang.ClassNotFoundException: mezz.modnametooltip.TooltipEventHandler)
+[21Oct2024 20:54:13.918] [main/WARN] [mixin/]: Error loading class: me/shedaniel/rei/impl/client/ClientHelperImpl (java.lang.ClassNotFoundException: me.shedaniel.rei.impl.client.ClientHelperImpl)
+[21Oct2024 20:54:14.054] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.3.5).
+[21Oct2024 20:54:15.795] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 229 Datafixer optimizations took 486 milliseconds
+[21Oct2024 20:54:22.012] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[21Oct2024 20:54:22.013] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[21Oct2024 20:54:22.016] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[21Oct2024 20:54:22.018] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[21Oct2024 20:54:22.019] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[21Oct2024 20:54:22.168] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/EntityJs/.gradle/repositories/ng_dummy_ng/net/neoforged/neoforge/21.0.167/neoforge-21.0.167.jar%23189!/assets/.mcassetsroot' uses unexpected schema
+[21Oct2024 20:54:22.169] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/EntityJs/.gradle/repositories/ng_dummy_ng/net/neoforged/neoforge/21.0.167/neoforge-21.0.167.jar%23189!/data/.mcassetsroot' uses unexpected schema
+[21Oct2024 20:54:22.196] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[21Oct2024 20:54:22.206] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
+[21Oct2024 20:54:22.409] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.3+5
+[21Oct2024 20:54:22.831] [modloading-worker-0/INFO] [net.liopyu.entityjs.EntityJSMod/]: Loading EntityJS-Liopyu
+[21Oct2024 20:54:22.855] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.0.167, for MC 1.21
+[21Oct2024 20:54:22.866] [modloading-worker-0/INFO] [KubeJS Startup/]: Capturing errors for startup scripts enabled
+[21Oct2024 20:54:22.866] [modloading-worker-0/INFO] [KubeJS Client/]: Capturing errors for client scripts enabled
+[21Oct2024 20:54:22.866] [modloading-worker-0/INFO] [KubeJS/]: Loading vanilla registries...
+[21Oct2024 20:54:22.889] [modloading-worker-0/INFO] [KubeJS/]: Looking for KubeJS plugins...
+[21Oct2024 20:54:22.894] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source kubejs
+[21Oct2024 20:54:22.901] [modloading-worker-0/WARN] [KubeJS/]: Plugin dev.latvian.mods.kubejs.integration.architectury.ArchitecturyIntegration does not have required mod 'architectury' loaded, skipping
+[21Oct2024 20:54:22.902] [modloading-worker-0/WARN] [KubeJS/]: Plugin dev.latvian.mods.kubejs.integration.gamestages.GameStagesIntegration does not have required mod 'gamestages' loaded, skipping
+[21Oct2024 20:54:22.902] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source probejs
+[21Oct2024 20:54:22.903] [modloading-worker-0/INFO] [KubeJS/]: Found plugin source entityjs
+[21Oct2024 20:54:22.906] [modloading-worker-0/INFO] [KubeJS/]: Done in 15.13 ms
+[21Oct2024 20:54:23.494] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded script startup_scripts:example.js in 0.064 s
+[21Oct2024 20:54:23.498] [modloading-worker-0/INFO] [KubeJS Startup/]: Loaded 1/1 KubeJS startup scripts in 0.583 s with 0 errors and 0 warnings
+[21Oct2024 20:54:23.529] [modloading-worker-0/INFO] [KubeJS Client/]: Loaded script client_scripts:example.js in 0.0 s
+[21Oct2024 20:54:23.530] [modloading-worker-0/INFO] [KubeJS Client/]: Loaded 1/1 KubeJS client scripts in 0.031 s with 0 errors and 0 warnings
+[21Oct2024 20:54:24.285] [Render thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: []
+[21Oct2024 20:54:24.561] [Render thread/INFO] [KubeJS/]: Loaded 13 asset packs: vanilla, KubeJS Virtual Resource Pack [Before Mods, assets], mod_resources, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, assets], KubeJS Virtual Resource Pack [After Mods, assets], KubeJS File Resource Pack [assets], mod/neoforge, KubeJS Virtual Resource Pack [Last, assets]
+[21Oct2024 20:54:24.563] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, KubeJS Virtual Resource Pack [Before Mods, assets], mod_resources, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, assets], KubeJS Virtual Resource Pack [After Mods, assets], KubeJS File Resource Pack [assets], mod/neoforge, KubeJS Virtual Resource Pack [Last, assets]
+[21Oct2024 20:54:24.682] [Render thread/INFO] [KubeJS Client/]: Client resource reload complete!
+[21Oct2024 20:54:24.769] [Worker-Main-3/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.1.05.hex, loading
+[21Oct2024 20:54:24.778] [Render thread/INFO] [KubeJS/]: Started the local web server at http://localhost:61423
+[21Oct2024 20:54:24.971] [Worker-Main-8/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_jp_patch-15.1.05.hex, loading
+[21Oct2024 20:54:26.492] [Render thread/INFO] [KubeJS Startup/]: Capturing errors for startup scripts disabled
+[21Oct2024 20:54:26.492] [Render thread/INFO] [KubeJS Client/]: Capturing errors for client scripts disabled
+[21Oct2024 20:54:26.631] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
+[21Oct2024 20:54:26.632] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[21Oct2024 20:54:26.688] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device OpenAL Soft on Speakers (Focusrite USB Audio)
+[21Oct2024 20:54:26.689] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
+[21Oct2024 20:54:27.016] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
+[21Oct2024 20:54:27.031] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[21Oct2024 20:54:27.032] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[21Oct2024 20:54:27.032] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[21Oct2024 20:54:27.033] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[21Oct2024 20:54:27.038] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[21Oct2024 20:54:27.039] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[21Oct2024 20:54:27.040] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[21Oct2024 20:54:27.040] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[21Oct2024 20:54:27.166] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[21Oct2024 20:54:27.168] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[21Oct2024 20:54:27.168] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[21Oct2024 20:54:27.168] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[21Oct2024 20:54:27.169] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[21Oct2024 20:54:27.194] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[21Oct2024 20:54:32.668] [Render thread/WARN] [mixin/]: Mixin apply for mod entityjs failed entityjs.mixins.json:ServerScriptManagerMixin from mod entityjs -> dev.latvian.mods.kubejs.server.ServerScriptManager: org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException @WrapOperation annotation is trying to target an <init> call in dev/latvian/mods/kubejs/server/ServerScriptManager::createPackResources(Ljava/util/List;)Ljava/util/List; in dev/latvian/mods/kubejs/server/ServerScriptManager::entityjs$capturePacks! If this is an instantiation, target the NEW instead.
 org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: @WrapOperation annotation is trying to target an <init> call in dev/latvian/mods/kubejs/server/ServerScriptManager::createPackResources(Ljava/util/List;)Ljava/util/List; in dev/latvian/mods/kubejs/server/ServerScriptManager::entityjs$capturePacks! If this is an instantiation, target the NEW instead.
 	at TRANSFORMER/mixinextras.neoforge@0.3.5/com.llamalad7.mixinextras.versions.MixinVersionImpl_v0_8_4.makeInvalidInjectionException(MixinVersionImpl_v0_8_4.java:14) ~[mixinextras-neoforge-0.3.5.jar:?]
 	at TRANSFORMER/mixinextras.neoforge@0.3.5/com.llamalad7.mixinextras.utils.CompatibilityHelper.makeInvalidInjectionException(CompatibilityHelper.java:17) ~[mixinextras-neoforge-0.3.5.jar:?]
@@ -158,88 +152,95 @@ org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: @Wra
 	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.4/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) [modlauncher-11.0.4.jar%23125!/:?]
 	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.run(BootstrapLauncher.java:210) [bootstraplauncher-2.0.2.jar:?]
 	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:69) [bootstraplauncher-2.0.2.jar:?]
-[14Oct2024 16:38:26.009] [Render thread/INFO] [KubeJS Server/]: Capturing errors for server scripts enabled
-[14Oct2024 16:38:26.020] [Render thread/INFO] [KubeJS Server/]: Loaded script server_scripts:example.js in 0.001 s
-[14Oct2024 16:38:26.021] [Render thread/INFO] [KubeJS Server/]: Loaded 1/1 KubeJS server scripts in 0.012 s with 0 errors and 0 warnings
-[14Oct2024 16:38:26.022] [Render thread/INFO] [KubeJS/]: Loaded 14 data packs: vanilla, KubeJS Virtual Resource Pack [Before Mods, data], mod_data, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, data], KubeJS Virtual Resource Pack [Registries, data], KubeJS Virtual Resource Pack [After Mods, data], KubeJS File Resource Pack [data], mod/neoforge, KubeJS Virtual Resource Pack [Last, data]
-[14Oct2024 16:38:26.646] [Worker-Main-3/INFO] [KubeJS Server/]: [minecraft:item] Found 362 tags, added 1 objects, removed 0 objects
-[14Oct2024 16:38:26.841] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1290 recipes
-[14Oct2024 16:38:27.010] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1399 advancements
-[14Oct2024 16:38:27.415] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Starting integrated minecraft server version 1.21
-[14Oct2024 16:38:27.415] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
-[14Oct2024 16:38:27.739] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
-[14Oct2024 16:38:27.742] [Server thread/INFO] [KubeJS Server/]: Capturing errors for server scripts disabled
-[14Oct2024 16:38:27.773] [Server thread/INFO] [KubeJS Server/]: Server resource reload complete!
-[14Oct2024 16:38:28.055] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[14Oct2024 16:38:28.156] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
-[14Oct2024 16:38:28.172] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 427 ms
-[14Oct2024 16:38:28.276] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.285] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.304] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.308] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.309] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.309] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.312] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.313] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.313] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.313] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.313] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.314] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.314] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.314] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.314] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.315] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.315] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.315] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.320] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.324] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.324] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.324] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.325] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.325] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.331] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing view distance to 12, from 10
-[14Oct2024 16:38:28.331] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing simulation distance to 12, from 0
-[14Oct2024 16:38:28.420] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.429] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.430] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:28.983] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[local:E:c02597c5] logged in with entity id 58 at (-27.690929012559902, -59.36763886958171, 13.999383270386286)
-[14Oct2024 16:38:29.039] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
-[14Oct2024 16:38:29.272] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:29.312] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:29.316] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:29.469] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ProbeJS is enabled! You should exclude .probe generated when you finished development, and disable the mod by: /probejs disable
-[14Oct2024 16:38:29.475] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] To learn about how to use ProbeJS (or report issue), please go to the Wiki Page
-[14Oct2024 16:38:29.533] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 98 advancements
-[14Oct2024 16:38:29.655] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:29.764] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:29.764] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:29.770] [Server thread/INFO] [KubeJS Server/]: spawned
-[14Oct2024 16:38:30.356] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Saving and pausing game...
-[14Oct2024 16:38:30.393] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
-[14Oct2024 16:38:30.429] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
-[14Oct2024 16:38:30.446] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
-[14Oct2024 16:38:50.059] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Saving and pausing game...
-[14Oct2024 16:38:50.070] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
-[14Oct2024 16:38:50.090] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
-[14Oct2024 16:38:50.112] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
-[14Oct2024 16:38:54.947] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set the weather to clear]
-[14Oct2024 16:38:54.950] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set the weather to clear
-[14Oct2024 16:38:56.707] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set the time to 1000]
-[14Oct2024 16:38:56.715] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set the time to 1000
-[14Oct2024 16:39:12.494] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Item in hand:
-[14Oct2024 16:39:12.503] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - 'kubejs:wyrm[enchantments={levels:{"minecraft:riptide":1}}]'
-[14Oct2024 16:39:12.503] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '#minecraft:enchantable/trident'
-[14Oct2024 16:39:12.503] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '#c:enchantables'
-[14Oct2024 16:39:12.511] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '@kubejs'
-[14Oct2024 16:39:14.631] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Item in hand:
-[14Oct2024 16:39:14.631] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - 'minecraft:trident'
-[14Oct2024 16:39:14.631] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '#minecraft:enchantable/durability'
-[14Oct2024 16:39:14.631] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '#minecraft:enchantable/trident'
-[14Oct2024 16:39:14.632] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '#c:tools/spear'
-[14Oct2024 16:39:14.632] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '#minecraft:enchantable/vanishing'
-[14Oct2024 16:39:14.632] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '#c:tools/ranged_weapon'
-[14Oct2024 16:39:14.632] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '#minecraft:breaks_decorated_pots'
-[14Oct2024 16:39:14.632] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '#c:tools'
-[14Oct2024 16:39:14.632] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '#c:tools/melee_weapon'
-[14Oct2024 16:39:14.632] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '#c:enchantables'
-[14Oct2024 16:39:14.632] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] - '@minecraft'
+[21Oct2024 20:54:32.681] [Render thread/INFO] [KubeJS Server/]: Capturing errors for server scripts enabled
+[21Oct2024 20:54:32.695] [Render thread/INFO] [KubeJS Server/]: Loaded script server_scripts:example.js in 0.002 s
+[21Oct2024 20:54:32.695] [Render thread/INFO] [KubeJS Server/]: Loaded 1/1 KubeJS server scripts in 0.014 s with 0 errors and 0 warnings
+[21Oct2024 20:54:32.698] [Render thread/INFO] [KubeJS/]: Loaded 14 data packs: vanilla, KubeJS Virtual Resource Pack [Before Mods, data], mod_data, mod/rhino, mod/kubejs, mod/probejs, mod/entityjs, mod/geckolib, KubeJS Virtual Resource Pack [Internal, data], KubeJS Virtual Resource Pack [Registries, data], KubeJS Virtual Resource Pack [After Mods, data], KubeJS File Resource Pack [data], mod/neoforge, KubeJS Virtual Resource Pack [Last, data]
+[21Oct2024 20:54:33.678] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1290 recipes
+[21Oct2024 20:54:33.893] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1399 advancements
+[21Oct2024 20:54:34.395] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Starting integrated minecraft server version 1.21
+[21Oct2024 20:54:34.395] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[21Oct2024 20:54:34.716] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[21Oct2024 20:54:34.719] [Server thread/INFO] [KubeJS Server/]: Capturing errors for server scripts disabled
+[21Oct2024 20:54:34.728] [Server thread/INFO] [KubeJS Server/]: Server resource reload complete!
+[21Oct2024 20:54:34.961] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[21Oct2024 20:54:35.047] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[21Oct2024 20:54:35.060] [progressListener/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 342 ms
+[21Oct2024 20:54:35.199] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing view distance to 12, from 10
+[21Oct2024 20:54:35.199] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing simulation distance to 12, from 0
+[21Oct2024 20:54:35.259] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.269] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.273] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.273] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.274] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.274] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.274] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.275] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.275] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.276] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.277] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.278] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.278] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.278] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.278] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.282] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.283] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.283] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.284] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.284] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.284] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.285] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.288] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.289] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.289] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.290] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.290] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.291] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.291] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.291] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.449] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.485] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.516] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.517] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.517] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.518] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:35.519] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:36.149] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[local:E:b3037b2e] logged in with entity id 91 at (-19.60935231237107, -60.0, 27.876821471454313)
+[21Oct2024 20:54:36.211] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
+[21Oct2024 20:54:36.501] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:36.598] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:36.605] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:36.717] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ProbeJS is enabled! You should exclude .probe generated when you finished development, and disable the mod by: /probejs disable
+[21Oct2024 20:54:36.719] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:36.721] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] To learn about how to use ProbeJS (or report issue), please go to the Wiki Page
+[21Oct2024 20:54:36.779] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 117 advancements
+[21Oct2024 20:54:36.800] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:36.801] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:54:36.802] [Server thread/INFO] [KubeJS Server/]: spawned
+[21Oct2024 20:55:02.750] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Saving and pausing game...
+[21Oct2024 20:55:02.775] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[21Oct2024 20:55:02.801] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[21Oct2024 20:55:02.807] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[21Oct2024 20:55:03.465] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!
+[21Oct2024 20:55:03.505] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: Disconnected
+[21Oct2024 20:55:03.507] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev left the game
+[21Oct2024 20:55:03.522] [Server thread/INFO] [net.minecraft.server.network.ServerCommonPacketListenerImpl/]: Stopping singleplayer server as player logged out
+[21Oct2024 20:55:03.575] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
+[21Oct2024 20:55:03.575] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[21Oct2024 20:55:03.576] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
+[21Oct2024 20:55:03.641] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[21Oct2024 20:55:03.705] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[21Oct2024 20:55:03.710] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[21Oct2024 20:55:03.723] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (New World): All chunks are saved
+[21Oct2024 20:55:03.724] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[21Oct2024 20:55:03.724] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[21Oct2024 20:55:03.724] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved
+[21Oct2024 20:55:03.733] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Before Mods, data]
+[21Oct2024 20:55:03.733] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Internal, data]
+[21Oct2024 20:55:03.733] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Registries, data]
+[21Oct2024 20:55:03.733] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [After Mods, data]
+[21Oct2024 20:55:03.733] [Server thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Last, data]
+[21Oct2024 20:55:03.923] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Before Mods, assets]
+[21Oct2024 20:55:03.923] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Internal, assets]
+[21Oct2024 20:55:03.923] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [After Mods, assets]
+[21Oct2024 20:55:03.923] [Render thread/INFO] [KubeJS/]: Closed KubeJS Virtual Resource Pack [Last, assets]
