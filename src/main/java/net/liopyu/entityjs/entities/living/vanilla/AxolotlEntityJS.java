@@ -132,21 +132,6 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
         return this.jumpControl;
     }
 
-    static class AxolotlMoveControlJS extends SmoothSwimmingMoveControl {
-        private final AxolotlEntityJS axolotl;
-
-        public AxolotlMoveControlJS(AxolotlEntityJS pAxolotl) {
-            super(pAxolotl, 85, 10, 0.1F, 0.5F, false);
-            this.axolotl = pAxolotl;
-        }
-
-        public void tick() {
-            if (!this.axolotl.isPlayingDead()) {
-                super.tick();
-            }
-
-        }
-    }
 
     static {
         SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_ADULT, SensorType.HURT_BY, SensorType.AXOLOTL_ATTACKABLES, SensorType.AXOLOTL_TEMPTATIONS);

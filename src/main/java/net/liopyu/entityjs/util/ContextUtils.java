@@ -39,6 +39,78 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
 
 public class ContextUtils {
+    public static class IsWalkableContext {
+        public final float pRelativeX;
+        public final float pRelativeZ;
+
+        public IsWalkableContext(float pRelativeX, float pRelativeZ) {
+            this.pRelativeX = pRelativeX;
+            this.pRelativeZ = pRelativeZ;
+        }
+    }
+
+    public static class RotLerpContext {
+        public final float sourceAngle;
+        public final float targetAngle;
+        public final float maximumChange;
+
+        public RotLerpContext(float sourceAngle, float targetAngle, float maximumChange) {
+            this.sourceAngle = sourceAngle;
+            this.targetAngle = targetAngle;
+            this.maximumChange = maximumChange;
+        }
+    }
+
+    public static class SetWantedPositionContext {
+        public final double wantedX;
+        public final double wantedY;
+        public final double wantedZ;
+        public final double speedModifier;
+
+        public SetWantedPositionContext(double wantedX, double wantedY, double wantedZ, double speedModifier) {
+            this.wantedX = wantedX;
+            this.wantedY = wantedY;
+            this.wantedZ = wantedZ;
+            this.speedModifier = speedModifier;
+        }
+    }
+
+    public static class StrafeContext {
+        public final float forward;
+        public final float strafe;
+
+        public StrafeContext(float forward, float strafe) {
+            this.forward = forward;
+            this.strafe = strafe;
+        }
+    }
+
+    public static class RotationContext {
+        public final double wantedX;
+        public final double wantedY;
+        public final double wantedZ;
+        public final Mob entity;
+
+        public RotationContext(double wantedX, double wantedY, double wantedZ, Mob entity) {
+            this.wantedX = wantedX;
+            this.wantedY = wantedY;
+            this.wantedZ = wantedZ;
+            this.entity = entity;
+        }
+    }
+
+    public static class RotationTowardsContext {
+        public final float from;
+        public final float to;
+        public final float maxDelta;
+
+        public RotationTowardsContext(float from, float to, float maxDelta) {
+            this.from = from;
+            this.to = to;
+            this.maxDelta = maxDelta;
+        }
+    }
+
     public static class RendererModelContext {
         @Info("The living entity")
         public final LivingEntity entity;
