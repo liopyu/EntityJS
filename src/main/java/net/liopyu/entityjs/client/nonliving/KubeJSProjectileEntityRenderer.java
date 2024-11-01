@@ -8,8 +8,10 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.world.entity.Entity;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -23,13 +25,10 @@ import net.minecraft.resources.ResourceLocation;
 public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntityJS> extends EntityRenderer<T> {
 
     private final ProjectileEntityBuilder<T> builder;
-    public static RenderType RENDER_TYPE;
-
 
     public KubeJSProjectileEntityRenderer(EntityRendererProvider.Context renderManager, ProjectileEntityBuilder<T> builder) {
         super(renderManager);
         this.builder = builder;
-        RENDER_TYPE = RenderType.entityCutoutNoCull(getDynamicTextureLocation());
     }
 
     @Override
@@ -49,7 +48,7 @@ public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntity
         PoseStack.Pose $$6 = pMatrixStack.last();
         Matrix4f $$7 = $$6.pose();
         Matrix3f $$8 = $$6.normal();
-        VertexConsumer $$9 = pBuffer.getBuffer(RENDER_TYPE);
+        VertexConsumer $$9 = pBuffer.getBuffer(RenderType.entityCutoutNoCull(this.getTextureLocation(pEntity)));
         vertex($$9, $$7, $$8, pPackedLight, 0.0F, 0, 0, 1);
         vertex($$9, $$7, $$8, pPackedLight, 1.0F, 0, 1, 1);
         vertex($$9, $$7, $$8, pPackedLight, 1.0F, 1, 1, 0);
@@ -84,9 +83,17 @@ public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntity
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
-        return (ResourceLocation) builder.textureLocation.apply(entity);
+        if (builder != null && builder.textureLocation != null) {
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.textureLocation.apply(entity), "resourcelocation");
+                if (obj != null) return (ResourceLocation) obj;
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for textureLocation: " + obj + ". Must be a ResourceLocation. Defaulting to super method: " + getDynamicTextureLocation());
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("", e);
+            }
+        }
+        return getDynamicTextureLocation();
     }
-
 
     private ResourceLocation getDynamicTextureLocation() {
         return new ResourceLocation(builder.id.getNamespace() + ":textures/entity/projectiles/" + builder.id.getPath() + ".png");
