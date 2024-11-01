@@ -25,13 +25,11 @@ import net.minecraft.resources.ResourceLocation;
 public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntityJS> extends EntityRenderer<T> {
 
     private final ProjectileEntityBuilder<T> builder;
-    public static RenderType RENDER_TYPE;
 
 
     public KubeJSProjectileEntityRenderer(EntityRendererProvider.Context renderManager, ProjectileEntityBuilder<T> builder) {
         super(renderManager);
         this.builder = builder;
-        RENDER_TYPE = RenderType.entityCutoutNoCull(getDynamicTextureLocation());
     }
 
     @Override
@@ -53,12 +51,13 @@ public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntity
 
         pMatrixStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         PoseStack.Pose posestack$pose = pMatrixStack.last();
-        VertexConsumer vertexconsumer = pBuffer.getBuffer(RENDER_TYPE);
+        VertexConsumer vertexconsumer = pBuffer.getBuffer(RenderType.entityCutoutNoCull(this.getTextureLocation(pEntity)));
         vertex(vertexconsumer, posestack$pose, pPackedLight, 0.0F, 0, 0, 1);
         vertex(vertexconsumer, posestack$pose, pPackedLight, 1.0F, 0, 1, 1);
         vertex(vertexconsumer, posestack$pose, pPackedLight, 1.0F, 1, 1, 0);
         vertex(vertexconsumer, posestack$pose, pPackedLight, 0.0F, 1, 0, 0);
 
+        pMatrixStack.popPose();
         pMatrixStack.popPose();
 
         super.render(pEntity, pEntityYaw, pPartialTick, pMatrixStack, pBuffer, pPackedLight);
@@ -94,7 +93,16 @@ public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntity
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
-        return (ResourceLocation) builder.textureLocation.apply(entity);
+        if (builder != null && builder.textureLocation != null) {
+            try {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.textureLocation.apply(entity), "resourcelocation");
+                if (obj != null) return (ResourceLocation) obj;
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for textureLocation: " + obj + ". Must be a ResourceLocation. Defaulting to super method: " + getDynamicTextureLocation());
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("", e);
+            }
+        }
+        return getDynamicTextureLocation();
     }
 
 
