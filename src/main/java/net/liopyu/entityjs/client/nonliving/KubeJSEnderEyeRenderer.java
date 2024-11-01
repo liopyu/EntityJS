@@ -47,7 +47,7 @@ public class KubeJSEnderEyeRenderer<T extends Entity & IProjectileEntityJS> exte
         PoseStack.Pose $$6 = pMatrixStack.last();
         Matrix4f $$7 = $$6.pose();
         Matrix3f $$8 = $$6.normal();
-        VertexConsumer $$9 = pBuffer.getBuffer(RenderType.entityCutoutNoCull(getDynamicTextureLocation()));
+        VertexConsumer $$9 = pBuffer.getBuffer(RenderType.entityCutoutNoCull(this.getTextureLocation(pEntity)));
         vertex($$9, $$7, $$8, pPackedLight, 0.0F, 0, 0, 1);
         vertex($$9, $$7, $$8, pPackedLight, 1.0F, 0, 1, 1);
         vertex($$9, $$7, $$8, pPackedLight, 1.0F, 1, 1, 0);
