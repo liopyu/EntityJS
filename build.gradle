@@ -84,7 +84,7 @@ repositories {
 }
 
 dependencies {
-    implementation "curse.maven:probejs-585406:5700955"
+    implementation "curse.maven:probejs-585406:5820894"
     implementation "net.neoforged:neoforge:${neo_version}"
     implementation "dev.latvian.mods:rhino:$rhino_version"
     implementation "dev.latvian.mods:kubejs-neoforge:$kubejs_version"
