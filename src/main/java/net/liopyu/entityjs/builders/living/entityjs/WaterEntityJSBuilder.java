@@ -13,14 +13,42 @@ import java.util.function.Function;
 
 public class WaterEntityJSBuilder extends PathfinderMobBuilder<WaterEntityJS> {
     public transient Function<LivingEntity, Object> bucketItemStack;
+    public transient boolean defaultGoals = true;
+    public transient boolean canBeBucketed = false;
 
     public WaterEntityJSBuilder(ResourceLocation i) {
         super(i);
     }
 
     @Info(value = """
+            Whether or not the fish can be bucketed, if true it is recommended to set the
+            bucketItemStack function in the builder otherwise it will give an empty itemstack
+            and the bucket will be lost.
+            Defaults to false
+            Example usage:
+            ```javascript
+            builder.setCanBeBucketed(true)
+            ```
+            """)
+    public void setCanBeBucketed(boolean canBeBucketed) {
+        this.canBeBucketed = canBeBucketed;
+    }
+
+    @Info(value = """
+            Whether or not the fish retains default swimming goals.
+            Defaults to True
+            Example usage:
+            ```javascript
+            builder.setDefaultGoals(false)
+            ```
+            """)
+    public void setDefaultGoals(boolean defaultGoals) {
+        this.defaultGoals = defaultGoals;
+    }
+
+    @Info(value = """
             @param bucketItemStack Function returning the itemstack to receive when bucketed
-            Defaults to Axolotl Bucket
+            Defaults to Empty Itemstack
             Example usage:
             ```javascript
             builder.bucketItemStack(entity => {

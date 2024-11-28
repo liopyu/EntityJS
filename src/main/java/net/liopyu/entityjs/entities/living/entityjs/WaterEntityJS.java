@@ -40,6 +40,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -120,7 +121,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
             if (obj instanceof ItemStack i) return i;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for bucketItemStack from entity: " + entityName() + ". Value: " + obj + ". Must be an ItemStack. Defaulting to super: null");
         }
-        return null;
+        return ItemStack.EMPTY;
     }
 
 
@@ -191,7 +192,9 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
             final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
             EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
         }
-        return super.mobInteract(pPlayer, pHand);
+        if (builder.canBeBucketed) {
+            return super.mobInteract(pPlayer, pHand);
+        } else return InteractionResult.PASS;
     }
 
 
@@ -594,6 +597,9 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
+        if (builder.defaultGoals) {
+            super.registerGoals();
+        }
         if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
