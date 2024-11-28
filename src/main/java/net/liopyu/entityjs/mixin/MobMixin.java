@@ -73,6 +73,19 @@ public class MobMixin /*implements IModifyEntityJS*/ {
         }
     }
 
+    @Inject(method = "getExperienceReward", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    private void entityjs$getExperienceReward(CallbackInfoReturnable<Integer> cir) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.experienceReward != null) {
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.experienceReward.apply(entityJs$getLivingEntity()), "integer");
+                if (obj != null) {
+                    cir.setReturnValue((int) obj);
+                } else
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityJs$entityName() + ". Value: " + builder.experienceReward.apply(entityJs$getLivingEntity()) + ". Must be an integer. Defaulting to " + cir.getReturnValue());
+            }
+        }
+    }
+
     @Inject(method = "mobInteract", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void mobInteract(Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
