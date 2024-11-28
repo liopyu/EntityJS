@@ -217,6 +217,7 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
 
 
     //Mob Overrides
+
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         if (builder.onInteract != null) {

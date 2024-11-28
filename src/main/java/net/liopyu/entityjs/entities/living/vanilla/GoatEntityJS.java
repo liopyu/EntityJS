@@ -317,6 +317,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
     }
 
     //Mob Overrides
+
     @Override
     public boolean doHurtTarget(Entity pEntity) {
         if (builder != null && builder.onHurtTarget != null) {

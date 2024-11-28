@@ -76,6 +76,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
 
     public final PartEntityJS<?>[] partEntities;
 
+
     public WaterEntityJS(WaterEntityJSBuilder builder, EntityType<? extends AbstractFish> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
@@ -126,7 +127,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
             if (obj instanceof ItemStack i) return i;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for bucketItemStack from entity: " + entityName() + ". Value: " + obj + ". Must be an ItemStack. Defaulting to super: null");
         }
-        return null;
+        return ItemStack.EMPTY;
     }
 
 
@@ -220,6 +221,17 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
         if (EventHandlers.addGoalSelectors.hasListeners()) {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
+    }
+
+    @Override
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        if (builder.onInteract != null) {
+            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+            EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
+        }
+        if (builder.canBeBucketed) {
+            return super.mobInteract(pPlayer, pHand);
+        } else return InteractionResult.PASS;
     }
 
     private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
@@ -549,6 +561,9 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
     @Override
     public void onAddedToLevel() {
         super.onAddedToLevel();
+        if (builder.defaultGoals) {
+            super.registerGoals();
+        }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 

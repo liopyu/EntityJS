@@ -404,6 +404,7 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
 
     //Mob Overrides
 
+
     public void onJump() {
         if (builder.onLivingJump != null) {
             EntityJSHelperClass.consumerCallback(builder.onLivingJump, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingJump.");
