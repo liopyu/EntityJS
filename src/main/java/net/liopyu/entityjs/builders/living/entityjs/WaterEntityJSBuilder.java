@@ -30,8 +30,9 @@ public class WaterEntityJSBuilder extends PathfinderMobBuilder<WaterEntityJS> {
             builder.setCanBeBucketed(true)
             ```
             """)
-    public void setCanBeBucketed(boolean canBeBucketed) {
+    public WaterEntityJSBuilder setCanBeBucketed(boolean canBeBucketed) {
         this.canBeBucketed = canBeBucketed;
+        return this;
     }
 
     @Info(value = """
@@ -42,8 +43,9 @@ public class WaterEntityJSBuilder extends PathfinderMobBuilder<WaterEntityJS> {
             builder.setDefaultGoals(false)
             ```
             """)
-    public void setDefaultGoals(boolean defaultGoals) {
+    public WaterEntityJSBuilder setDefaultGoals(boolean defaultGoals) {
         this.defaultGoals = defaultGoals;
+        return this;
     }
 
     @Info(value = """
