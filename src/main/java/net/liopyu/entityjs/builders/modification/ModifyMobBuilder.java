@@ -28,16 +28,32 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
     public transient Function<Mob, Object> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
     public transient Consumer<ContextUtils.MobInteractContext> onMobInteract;
+    public transient Function<LivingEntity, Object> isSunBurnTick;
 
     public ModifyMobBuilder(EntityType<?> entity) {
         super(entity);
+    }
+
+    @Info(value = """  
+            @param isSunBurnTick Sets whether the mob should burn in daylight
+            
+            Example usage:
+            ```javascript
+            modifyBuilder.isSunBurnTick(entity => {
+                return false
+            });
+            ```
+            """)
+    public ModifyMobBuilder isSunBurnTick(Function<LivingEntity, Object> isSunBurnTick) {
+        this.isSunBurnTick = isSunBurnTick;
+        return this;
     }
 
     @Info(value = """
             Sets a consumer to handle the interaction with the entity.
             The provided Consumer accepts a {@link ContextUtils.MobInteractContext} parameter,
             representing the context of the interaction
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.onMobInteract(context => {
@@ -48,16 +64,16 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyEntityBuilder onMobInteract(Consumer<ContextUtils.MobInteractContext> c) {
+    public ModifyMobBuilder onMobInteract(Consumer<ContextUtils.MobInteractContext> c) {
         onMobInteract = c;
         return this;
     }
 
     @Info(value = """
             Sets a function to determine the PathNavigation of the entity.
-                        
+            
             @param createNavigation A Function accepting an EntityLevelContext parameter
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.createNavigation(context => {
@@ -73,9 +89,9 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     @Info(value = """
             Sets a function to determine if the entity can be leashed.
-                        
+            
             @param canBeLeashed A Function accepting a Mob parameter
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.canBeLeashed(context => {
@@ -90,10 +106,10 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     @Info(value = """
             Sets a predicate to determine if the entity should be removed when far away from the player.
-                        
+            
             @param removeWhenFarAway A Function accepting a ContextUtils.EntityDistanceToPlayerContext parameter,
                                      defining the condition for the entity to be removed when far away.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.removeWhenFarAway(context => {
@@ -109,10 +125,10 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     @Info(value = """
             Sets the interval in ticks between ambient sounds for the mob entity.
-                        
+            
             @param ambientSoundInterval The interval in ticks between ambient sounds.
             Defaults to 120.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.ambientSoundInterval(100);
@@ -126,10 +142,10 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     @Info(value = """
             Sets a callback function to be executed when the entity's target changes.
-                        
+            
             @param setTarget A Consumer accepting a ContextUtils.TargetChangeContext parameter,
                              defining the behavior to be executed when the entity's target changes.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.onTargetChanged(context => {
@@ -146,10 +162,10 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     @Info(value = """
             Sets a callback function to be executed when the entity performs an eating action.
-                        
+            
             @param ate A Consumer accepting a LivingEntity parameter,
                        defining the behavior to be executed when the entity eats.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.ate(entity => {
@@ -165,7 +181,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     @Info(value = """
             Sets the sound to play when the entity is ambient using either a string representation or a ResourceLocation object.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.setAmbientSound("minecraft:entity.zombie.ambient");
@@ -185,10 +201,10 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     @Info(value = """
             Sets the function to determine whether the entity can hold an item.
-                        
+            
             @param canHoldItem A Function accepting a {@link ContextUtils.EntityItemStackContext} parameter,
                                defining the condition for the entity to hold an item.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.canHoldItem(context => {
@@ -204,9 +220,9 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     @Info(value = """
             Sets whether the entity should despawn in peaceful difficulty.
-                        
+            
             @param shouldDespawnInPeaceful A boolean indicating whether the entity should despawn in peaceful difficulty.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.shouldDespawnInPeaceful(true);
@@ -219,10 +235,10 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     @Info(value = """
             Sets the function to determine whether the entity can pick up loot.
-                        
+            
             @param canPickUpLoot A Function accepting a {@link Mob} parameter,
                                  defining the condition for the entity to pick up loot.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.canPickUpLoot(entity => {
@@ -238,9 +254,9 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     @Info(value = """
             Sets whether persistence is required for the entity.
-                        
+            
             @param isPersistenceRequired A boolean indicating whether persistence is required.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.isPersistenceRequired(true);
@@ -270,10 +286,10 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     @Info(value = """
             Sets the callback function to be executed when the entity ticks while leashed.
-                        
+            
             @param consumer A Consumer accepting a {@link ContextUtils.PlayerEntityContext} parameter,
                             defining the behavior to be executed when the entity ticks while leashed.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.tickLeash(context => {
