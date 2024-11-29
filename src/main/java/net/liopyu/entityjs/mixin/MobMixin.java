@@ -73,6 +73,23 @@ public class MobMixin /*implements IModifyEntityJS*/ {
         }
     }
 
+    @Inject(method = "isSunBurnTick", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    protected void isSunBurnTick(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            try {
+                if (builder.isSunBurnTick != null) {
+                    Object obj = builder.isSunBurnTick.apply(entityJs$getLivingEntity());
+                    if (obj instanceof Boolean b) {
+                        cir.setReturnValue(b);
+                    } else
+                        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSunBurnTick from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super.");
+                }
+            } catch (Exception e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in " + entityJs$entityName() + "builder for field: isSunBurnTick. ", e);
+            }
+        }
+    }
+
     @Inject(method = "getExperienceReward", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getExperienceReward(CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
