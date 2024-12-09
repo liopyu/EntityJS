@@ -880,19 +880,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            if (!this.level().isClientSide()) {
-                EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
-
-            }
-        }
-    }
-
-    @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
-            EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
-
+            EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
         }
     }
 
