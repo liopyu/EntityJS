@@ -159,7 +159,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder.onAddedToWorld != null && !this.level.isClientSide()) {
+        if (builder.onAddedToWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
         }
@@ -429,7 +429,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level.isClientSide()) {
+        if (builder.isCurrentlyGlowing != null) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;

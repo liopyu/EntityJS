@@ -259,7 +259,7 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder != null && builder.onAddedToWorld != null && !this.level.isClientSide()) {
+        if (builder != null && builder.onAddedToWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
     }
