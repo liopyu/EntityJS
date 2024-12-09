@@ -157,7 +157,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
     @Override
     public void onAddedToWorld() {
         super.onAddedToWorld();
-        if (builder != null && builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder != null && builder.onAddedToWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
         }
     }
@@ -424,7 +424,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;

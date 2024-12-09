@@ -673,7 +673,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         if (builder.defaultGoals) {
             super.registerGoals();
         }
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder.onAddedToWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
         }
@@ -1426,7 +1426,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
