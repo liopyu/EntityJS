@@ -276,10 +276,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            if (!this.level.isClientSide()) {
-                EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
-
-            }
+            EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
         }
     }
 
