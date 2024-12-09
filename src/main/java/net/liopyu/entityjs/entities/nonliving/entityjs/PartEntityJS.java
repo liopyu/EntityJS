@@ -274,7 +274,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public void onAddedToLevel() {
         super.onAddedToLevel();
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder.onAddedToWorld != null) {
             builder.onAddedToWorld.accept(this);
         }
     }
@@ -387,7 +387,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null) {
             Object obj = builder.isCurrentlyGlowing.apply(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;

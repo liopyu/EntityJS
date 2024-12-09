@@ -542,10 +542,7 @@ public class DolphinEntityJS extends Dolphin implements IAnimatableJS {
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            if (!this.level().isClientSide()) {
-                EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
-
-            }
+            EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
         }
     }
 
@@ -555,7 +552,7 @@ public class DolphinEntityJS extends Dolphin implements IAnimatableJS {
         if (builder.defaultGoals) {
             super.registerGoals();
         }
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder.onAddedToWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
         }
@@ -1240,7 +1237,7 @@ public class DolphinEntityJS extends Dolphin implements IAnimatableJS {
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null) {
             try {
                 Object obj = builder.isCurrentlyGlowing.apply(this);
                 if (obj instanceof Boolean) {

@@ -831,17 +831,14 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            if (!this.level().isClientSide()) {
-                EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
-
-            }
+            EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
         }
     }
 
     @Override
     public void onAddedToLevel() {
         super.onAddedToLevel();
-        if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
+        if (builder.onAddedToWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
         }
@@ -1526,7 +1523,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null && !this.level().isClientSide()) {
+        if (builder.isCurrentlyGlowing != null) {
             try {
                 Object obj = builder.isCurrentlyGlowing.apply(this);
                 if (obj instanceof Boolean) {
