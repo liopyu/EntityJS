@@ -889,9 +889,9 @@ public class ContextUtils {
         public final Entity targetEntity;
 
         @Info("The living entity associated with the target entity")
-        public final LivingEntity entity;
+        public final Entity entity;
 
-        public LineOfSightContext(Entity targetEntity, LivingEntity entity) {
+        public LineOfSightContext(Entity targetEntity, Entity entity) {
             this.targetEntity = targetEntity;
             this.entity = entity;
         }
