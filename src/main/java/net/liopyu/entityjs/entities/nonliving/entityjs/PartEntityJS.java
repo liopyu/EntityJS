@@ -43,6 +43,17 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         this.height = pHeight;
     }
 
+    public PartEntityJS(Entity pParentMob, String name, float width, float height, PartBuilder<?> builder) {
+        super((T) pParentMob);
+        this.builder = (PartBuilder<T>) builder;
+        this.size = EntityDimensions.scalable(width, height);
+        this.refreshDimensions();
+        this.parentMob = (T) pParentMob;
+        this.name = name;
+        this.width = width;
+        this.height = height;
+    }
+
     public String entityName() {
         return this.name;
     }
