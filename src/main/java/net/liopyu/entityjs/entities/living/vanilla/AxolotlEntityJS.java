@@ -258,9 +258,6 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
     }
 
 
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
-
     //Ageable Mob Overrides
     @Override
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
@@ -1787,16 +1784,6 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
         }
     }
 
-
-    @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return armorItems;
-    }
-
-    @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return handItems;
-    }
 
 }
 

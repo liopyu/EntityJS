@@ -212,10 +212,6 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
         }
     }
 
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
-
-
     //Mob Overrides
 
     @Override
@@ -1660,15 +1656,5 @@ public class CreeperEntityJS extends Creeper implements IAnimatableJS {
         }
     }
 
-
-    @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return armorItems;
-    }
-
-    @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return handItems;
-    }
 
 }

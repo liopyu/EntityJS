@@ -75,14 +75,16 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
-    private int destroyBlocksTick;
-    private final int[] nextHeadUpdate = new int[2];
-    private final int[] idleHeadUpdates = new int[2];
-    private final ServerBossEvent bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
-    private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = (p_31504_) -> {
-        return !p_31504_.getType().is(EntityTypeTags.UNDEAD) && p_31504_.attackable();
-    };
+    /* private int destroyBlocksTick;
+     private final int[] nextHeadUpdate = new int[2];
+     private final int[] idleHeadUpdates = new int[2];
+     private final ServerBossEvent bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
+     private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = (p_31504_) -> {
+         return !p_31504_.getType().is(EntityTypeTags.UNDEAD) && p_31504_.attackable();
+     };*/
+/*
     private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0D).selector(LIVING_ENTITY_SELECTOR);
+*/
     private final WitherJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
 
@@ -222,10 +224,6 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }
-
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
-
 
     //Mob Overrides
 
@@ -1670,15 +1668,5 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         }
     }
 
-
-    @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return armorItems;
-    }
-
-    @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return handItems;
-    }
 
 }

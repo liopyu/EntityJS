@@ -96,8 +96,6 @@ public class CatEntityJS extends Cat implements IAnimatableJS {
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     protected final CatJSBuilder builder;
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
     public String entityName() {
         return this.getType().toString();
@@ -1926,15 +1924,5 @@ public class CatEntityJS extends Cat implements IAnimatableJS {
         }
     }
 
-
-    @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return armorItems;
-    }
-
-    @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return handItems;
-    }
 
 }

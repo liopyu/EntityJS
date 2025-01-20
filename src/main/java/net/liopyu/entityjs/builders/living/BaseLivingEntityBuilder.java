@@ -185,6 +185,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
         super(i);
+        translationKey("entity." + i.getNamespace() + "." + i.getPath());
         thisList.add(this);
         width = 1;
         height = 1;
@@ -216,7 +217,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             @param positionRider A consumer determining the position of rider/riders.
-                            
+            
                 Example usage:
                 ```javascript
                 entityBuilder.positionRider(context => {
@@ -232,7 +233,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Adds an extra render layer to the mob.
             @param newGeoLayer The builder Consumer for the new render layer.
-                            
+            
                 Example usage:
                 ```javascript
                 entityBuilder.newGeoLayer(builder => {
@@ -256,7 +257,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             its offset. This method is available off of the parent entity anywhere
             including non EntityJS callbacks. (Usually used in the entity's aiStep method)
             For example: `entity.tickPart("head", 0, 1, 0)`
-                        
+            
             Creation of the hitbox:
             ```javascript
             entityBuilder.addPartEntity("head", 1, 2, builder => {
@@ -279,7 +280,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the scale of the model.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.modelSize(2,2);
@@ -294,7 +295,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             @param scaleModelForRender A Consumer to determing logic for model scaling and rendering
                 without affecting core logic such as hitbox sizing.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.scaleModelForRender(context => {
@@ -312,7 +313,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Function determining if the entity is allied with a potential target.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isAlliedTo(context => {
@@ -328,7 +329,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             @param onHurtTarget A Consumer to execute when the mob attacks its target
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.onHurtTarget(context => {
@@ -345,7 +346,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Consumer overriding the tickDeath responsible to counting down
             the ticks it takes to remove the entity when it dies.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.tickDeath(entity => {
@@ -374,7 +375,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Consumer determining travel logic for the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.travel(context => {
@@ -419,7 +420,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Function determining if the entity may collide with another entity
             using the ContextUtils.CollidingEntityContext which has this entity and the
             one colliding with this entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canCollideWith(context => {
@@ -434,7 +435,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Defines in what condition the entity will start freezing.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isFreezing(entity => {
@@ -449,7 +450,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Defines logic to render the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.render(context => {
@@ -468,9 +469,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the main arm of the entity. Defaults to 'right'.
-                        
+            
             @param arm The main arm of the entity. Accepts values "left" or "right".
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.mainArm("left");
@@ -501,10 +502,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the hit box of the entity type.
-                        
+            
             @param width The width of the entity, defaults to 1.
             @param height The height of the entity, defaults to 1.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.sized(2, 3);
@@ -519,7 +520,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Determines if the entity should serialize its data. Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.saves(false);
@@ -533,7 +534,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets whether the entity is immune to fire damage.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.fireImmune(true);
@@ -546,11 +547,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a consumer to handle custom lerping logic for the living entity.
-                
+            
             @param lerpTo The consumer to handle the custom lerping logic.
-                
+            
             The consumer should take a LerpToContext as a parameter, providing information about the lerping operation, including the target position, yaw, pitch, increment count, teleport flag, and the entity itself.
-                
+            
             Example usage:
             ```javascript
             baseLivingEntityBuilder.lerpTo(context => {
@@ -570,7 +571,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the list of block names to which the entity is immune.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.immuneTo("minecraft:stone", "minecraft:dirt");
@@ -586,7 +587,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets whether the entity can spawn far from the player.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canSpawnFarFromPlayer(true);
@@ -600,7 +601,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the block jump factor for the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setBlockJumpFactor(entity => {
@@ -617,7 +618,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the water slowdown factor for the entity. Defaults to 0.8.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setWaterSlowDown(0.6);
@@ -631,7 +632,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the overall sound volume for the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setSoundVolume(0.5);
@@ -648,7 +649,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Predicate accepts a {@link LivingEntity} parameter,
             representing the entity whose loot dropping behavior is being determined.
             It returns a Boolean indicating whether the entity should drop loot.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.shouldDropLoot(entity => {
@@ -668,7 +669,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed during the living entity's AI step.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             allowing customization of the AI behavior.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.aiStep(entity => {
@@ -685,7 +686,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a callback function to be executed when the entity jumps.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onLivingJump(entity => {
@@ -742,7 +743,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets the mob category for the entity.
             Available options: 'monster', 'creature', 'ambient', 'water_creature', 'misc'.
             Defaults to 'misc'.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.mobCategory('monster');
@@ -759,7 +760,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the model based on information about the entity.
             The default behavior returns <namespace>:geo/entity/<path>.geo.json.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.modelResource(entity => {
@@ -790,7 +791,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the texture based on information about the entity.
             The default behavior returns <namespace>:textures/entity/<path>.png.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.textureResource(entity => {
@@ -821,7 +822,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the animations based on information about the entity.
             The default behavior returns <namespace>:animations/<path>.animation.json.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.animationResource(entity => {
@@ -850,7 +851,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets whether the entity is pushable.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isPushable(true);
@@ -864,9 +865,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a predicate to determine if a passenger can be added to the entity.
-                        
+            
             @param predicate The predicate to check if a passenger can be added.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canAddPassenger(context => {
@@ -886,7 +887,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Predicate accepts a {@link LivingEntity} parameter,
             representing the entity whose interaction with fluids is being determined.
             It returns a Boolean indicating whether the entity is affected by fluids.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isAffectedByFluids(entity => {
@@ -904,7 +905,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets whether the entity is summonable.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setSummonable(true);
@@ -921,7 +922,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Predicate accepts a {@link LivingEntity} parameter,
             representing the entity whose immobility is being determined.
             It returns a Boolean indicating whether the entity is immobile.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isImmobile(entity => {
@@ -939,7 +940,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets whether the entity is always considered as an experience dropper.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isAlwaysExperienceDropper(true);
@@ -956,7 +957,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Function accepts a {@link ContextUtils.CalculateFallDamageContext} parameter,
             representing the context of the fall damage calculation.
             It returns an Integer representing the calculated fall damage.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.calculateFallDamage(context => {
@@ -974,7 +975,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the death sound for the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setDeathSound("minecraft:entity.generic.death");
@@ -991,7 +992,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the swim sound for the entity using a string representation.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setSwimSound("minecraft:entity.generic.swim");
@@ -1011,7 +1012,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the swim splash sound for the entity using either a string representation or a ResourceLocation object.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setSwimSplashSound("minecraft:entity.generic.splash");
@@ -1036,7 +1037,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Function accepts a {@link LivingEntity} parameter,
             representing the entity whose block speed factor is being determined.
             It returns a Float representing the block speed factor.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.blockSpeedFactor(entity => {
@@ -1057,7 +1058,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Function accepts a {@link LivingEntity} parameter,
             representing the entity whose flapping status is being determined.
             It returns a Boolean indicating whether the entity is flapping.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isFlapping(entity => {
@@ -1077,7 +1078,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed during each tick of the entity.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that is being ticked.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.tick(entity => {
@@ -1096,7 +1097,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity is added to the world.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that is added to the world.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onAddedToWorld(entity => {
@@ -1115,7 +1116,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity automatically attacks on touch.
             The provided Consumer accepts a {@link ContextUtils.AutoAttackContext} parameter,
             representing the context of the auto-attack when the entity touches another entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.doAutoAttackOnTouch(context => {
@@ -1134,7 +1135,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity's air supply decreases.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity whose air supply is being decreased.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onDecreaseAirSupply(entity => {
@@ -1153,7 +1154,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity is blocked by a shield.
             The provided Consumer accepts a {@link ContextUtils.LivingEntityContext} parameter,
             representing the entity that is blocked by a shield.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onBlockedByShield(context => {
@@ -1170,7 +1171,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets whether to reposition the entity after loading.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.repositionEntityAfterLoad(true);
@@ -1187,7 +1188,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Function accepts a {@link Entity} parameter,
             representing the entity whose next step distance is being determined.
             It returns a Float representing the next step distance.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.nextStep(entity => {
@@ -1207,7 +1208,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity's air supply increases.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity whose air supply is being increased.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onIncreaseAirSupply(entity => {
@@ -1256,7 +1257,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity can attack a specific entity type.
             The provided Predicate accepts a {@link ContextUtils.EntityTypeEntityContext} parameter,
             representing the context of the entity attacking a specific entity type.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canAttackType(context => {
@@ -1277,7 +1278,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Function accepts a {@link LivingEntity} parameter,
             representing the entity whose scale is being determined.
             It returns a Float representing the custom scale.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.scale(entity => {
@@ -1297,7 +1298,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity should drop experience upon death.
             The provided Predicate accepts a {@link LivingEntity} parameter,
             representing the entity whose experience drop is being determined.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.shouldDropExperience(entity => {
@@ -1318,7 +1319,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Function accepts a {@link LivingEntity} parameter,
             representing the entity whose experience reward is being determined.
             It returns an Integer representing the experience reward.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.experienceReward(killedEntity => {
@@ -1338,7 +1339,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity equips an item.
             The provided Consumer accepts a {@link ContextUtils.EntityEquipmentContext} parameter,
             representing the context of the entity equipping an item.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onEquipItem(context => {
@@ -1359,7 +1360,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             representing both the entity whose visibility percentage is being determined
             and the the builder entity who is being looked at.
             It returns a Double representing the visibility percentage.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.visibilityPercent(context => {
@@ -1379,7 +1380,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity can attack another entity.
             The provided Predicate accepts a {@link ContextUtils.LivingEntityContext} parameter,
             representing the entity that may be attacked.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canAttack(context => {
@@ -1399,7 +1400,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity can be affected by an effect.
             The provided Predicate accepts a {@link ContextUtils.OnEffectContext} parameter,
             representing the context of the effect that may affect the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canBeAffected(context => {
@@ -1417,9 +1418,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a predicate to determine if the entity has inverted heal and harm behavior.
-                        
+            
             @param invertedHealAndHarm The predicate to check for inverted heal and harm behavior.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.invertedHealAndHarm(entity => {
@@ -1438,7 +1439,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when an effect is added to the entity.
             The provided Consumer accepts a {@link ContextUtils.OnEffectContext} parameter,
             representing the context of the effect being added to the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onEffectAdded(context => {
@@ -1458,7 +1459,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             The provided Consumer accepts a {@link ContextUtils.EntityHealContext} parameter,
             representing the context of the entity receiving healing.
             Very similar to {@link ForgeEventFactory.onLivingHeal}
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onLivingHeal(context => {
@@ -1477,7 +1478,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when an effect is removed from the entity.
             The provided Consumer accepts a {@link ContextUtils.OnEffectContext} parameter,
             representing the context of the effect being removed from the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onEffectRemoved(context => {
@@ -1496,7 +1497,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity is hurt.
             The provided Consumer accepts a {@link ContextUtils.EntityDamageContext} parameter,
             representing the context of the entity being hurt.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onHurt(context => {
@@ -1515,7 +1516,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity dies.
             The provided Consumer accepts a {@link ContextUtils.DeathContext} parameter,
             representing the context of the entity's death.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onDeath(context => {
@@ -1534,7 +1535,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity drops custom loot upon death.
             The provided Consumer accepts a {@link ContextUtils.EntityLootContext} parameter,
             representing the context of the entity's death and loot dropping.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.dropCustomDeathLoot(context => {
@@ -1551,7 +1552,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the sound resource locations for small and large falls of the entity using either string representations or ResourceLocation objects.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.fallSounds("minecraft:entity.generic.small_fall",
@@ -1583,7 +1584,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the sound resource location for the entity's eating sound using either a string representation or a ResourceLocation object.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.eatingSound("minecraft:entity.zombie.ambient");
@@ -1606,7 +1607,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity is on a climbable surface.
             The provided Predicate accepts a {@link LivingEntity} parameter,
             representing the entity that may be checked for being on a climbable surface.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onClimbable(entity => {
@@ -1624,7 +1625,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets whether the entity can breathe underwater.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canBreatheUnderwater(true);
@@ -1640,7 +1641,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the living entity falls and takes damage.
             The provided Consumer accepts a {@link ContextUtils.EntityFallDamageContext} parameter,
             representing the context of the entity falling and taking fall damage.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onLivingFall(context => {
@@ -1659,7 +1660,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity starts sprinting.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that has started sprinting.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onSprint(entity => {
@@ -1676,7 +1677,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the jump boost power for the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.jumpBoostPower(entity => {
@@ -1694,7 +1695,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity can stand on a fluid.
             The provided Predicate accepts a {@link ContextUtils.EntityFluidStateContext} parameter,
             representing the context of the entity potentially standing on a fluid.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canStandOnFluid(context => {
@@ -1714,7 +1715,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity is sensitive to water.
             The provided Predicate accepts a {@link LivingEntity} parameter,
             representing the entity that may be checked for sensitivity to water.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isSensitiveToWater(entity => {
@@ -1732,7 +1733,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a callback function to be executed when the entity stops riding.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onStopRiding(entity => {
@@ -1747,7 +1748,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a callback function to be executed when the entity's passenger dismounts it.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onRemovePassenger(entity => {
@@ -1764,7 +1765,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed during each tick when the entity is being ridden.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that is being ridden.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.rideTick(entity => {
@@ -1783,7 +1784,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity picks up an item.
             The provided Consumer accepts a {@link ContextUtils.EntityItemEntityContext} parameter,
             representing the context of the entity picking up an item with another entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onItemPickup(context => {
@@ -1802,7 +1803,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity has line of sight to another entity.
             The provided Function accepts a {@link LineOfSightContext} parameter,
             representing the entity to check for line of sight.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.hasLineOfSight(context => {
@@ -1822,7 +1823,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity enters combat.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that has entered combat.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onEnterCombat(entity => {
@@ -1841,7 +1842,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity leaves combat.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that has left combat.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onLeaveCombat(entity => {
@@ -1860,7 +1861,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity is affected by potions.
             The provided Predicate accepts a {@link LivingEntity} parameter,
             representing the entity that may be checked for its susceptibility to potions.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isAffectedByPotions(entity => {
@@ -1880,7 +1881,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity is attackable.
             The provided Predicate accepts a {@link LivingEntity} parameter,
             representing the entity that may be checked for its attackability.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isAttackable(entity => {
@@ -1900,7 +1901,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity can take an item.
             The provided Predicate accepts a {@link ContextUtils.EntityItemLevelContext} parameter,
             representing the context of the entity potentially taking an item.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canTakeItem(context => {
@@ -1920,7 +1921,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity is currently sleeping.
             The provided Predicate accepts a {@link LivingEntity} parameter,
             representing the entity that may be checked for its sleeping state.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isSleeping(entity => {
@@ -1940,7 +1941,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity starts sleeping.
             The provided Consumer accepts a {@link ContextUtils.EntityBlockPosContext} parameter,
             representing the context of the entity starting to sleep at a specific block position.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onStartSleeping(context => {
@@ -1959,7 +1960,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity stops sleeping.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that has stopped sleeping.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onStopSleeping(entity => {
@@ -1978,7 +1979,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity performs an eating action.
             The provided Consumer accepts a {@link ContextUtils.FoodItemLevelContext} parameter,
             representing the context of the entity's interaction with a specific item during eating.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.eat(context => {
@@ -1997,7 +1998,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the rider of the entity should face forward.
             The provided Predicate accepts a {@link ContextUtils.PlayerEntityContext} parameter,
             representing the context of the player entity riding the main entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.shouldRiderFaceForward(context => {
@@ -2017,7 +2018,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity can undergo freezing.
             The provided Predicate accepts a {@link LivingEntity} parameter,
             representing the entity that may be subjected to freezing.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canFreeze(entity => {
@@ -2037,7 +2038,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity is currently glowing.
             The provided Predicate accepts a {@link LivingEntity} parameter,
             representing the entity that may be checked for its glowing state.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isCurrentlyGlowing(entity => {
@@ -2057,7 +2058,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     @Info(value = """
             Sets a function to determine whether the entity can disable its target's shield.
             The provided Predicate accepts a {@link LivingEntity} parameter.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canDisableShield(entity => {
@@ -2076,7 +2077,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a consumer to handle the interaction with the entity.
             The provided Consumer accepts a {@link ContextUtils.MobInteractContext} parameter,
             representing the context of the interaction
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onInteract(context => {
@@ -2095,7 +2096,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the minimum fall distance for the entity before taking damage.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setMaxFallDistance(entity => {
@@ -2115,7 +2116,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity is removed on the client side.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that is being removed on the client side.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onClientRemoval(entity => {
@@ -2134,7 +2135,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity is hurt by lava.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that is affected by lava.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.lavaHurt(entity => {
@@ -2153,7 +2154,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity performs a flap action.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that is flapping.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onFlap(entity => {
@@ -2170,11 +2171,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a predicate to determine whether the living entity dampens vibrations.
-                
+            
             @param predicate The predicate to determine whether the living entity dampens vibrations.
-                
+            
             The predicate should take a LivingEntity as a parameter and return a boolean value indicating whether the living entity dampens vibrations.
-                
+            
             Example usage:
             ```javascript
             baseLivingEntityBuilder.dampensVibrations(entity => {
@@ -2193,7 +2194,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when a player interacts with the entity.
             The provided Consumer accepts a {@link ContextUtils.PlayerEntityContext} parameter,
             representing the context of the player's interaction with the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.playerTouch(context => {
@@ -2210,11 +2211,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets a predicate to determine whether to show the vehicle health for the living entity.
-                
+            
             @param predicate The predicate to determine whether to show the vehicle health.
-                
+            
             The predicate should take a LivingEntity as a parameter and return a boolean value indicating whether to show the vehicle health.
-                
+            
             Example usage:
             ```javascript
             baseLivingEntityBuilder.showVehicleHealth(entity => {
@@ -2233,7 +2234,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity is hit by thunder.
             The provided Consumer accepts a {@link ContextUtils.ThunderHitContext} parameter,
             representing the context of the entity being hit by thunder.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.thunderHit(context => {
@@ -2252,7 +2253,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity is invulnerable to a specific type of damage.
             The provided Predicate accepts a {@link ContextUtils.DamageContext} parameter,
             representing the context of the damage, and returns a boolean indicating invulnerability.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isInvulnerableTo(context => {
@@ -2272,7 +2273,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity can change dimensions.
             The provided Predicate accepts a {@link ContextUtils.ChangeDimensionContext} parameter,
             representing the entity that may attempt to change dimensions.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canChangeDimensions(ctx => {
@@ -2293,7 +2294,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity may interact with something.
             The provided Predicate accepts a {@link ContextUtils.MayInteractContext} parameter,
             representing the context of the potential interaction, and returns a boolean.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.mayInteract(context => {
@@ -2313,7 +2314,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a predicate function to determine whether the entity can trample or step on something.
             The provided Predicate accepts a {@link ContextUtils.CanTrampleContext} parameter,
             representing the context of the potential trampling action, and returns a boolean.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canTrample(context => {
@@ -2333,7 +2334,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Sets a callback function to be executed when the entity is removed from the world.
             The provided Consumer accepts a {@link LivingEntity} parameter,
             representing the entity that is being removed from the world.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onRemovedFromWorld(entity => {
@@ -2381,11 +2382,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Adds an animation controller to the entity with the specified parameters.
-                        
+            
             @param name The name of the animation controller.
             @param translationTicksLength The length of translation ticks for the animation.
             @param predicate The animation predicate defining the conditions for the animation to be played.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.addAnimationController('exampleController', 5, event => {
@@ -2426,7 +2427,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
     @Info(value = """
             Sets the render type for the entity.
-                        
+            
             @param type The render type to be set. Acceptable values are:
                          - "solid
                          - "cutout"
@@ -2434,7 +2435,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                          - RenderType.SOLID
                          - RenderType.CUTOUT
                          - RenderType.TRANSLUCENT
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setRenderType("translucent");
@@ -2654,7 +2655,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
         @Info(value = """
                 Sets a triggerable animation with a specified loop type callable anywhere from the entity.
-                            
+                
                 @param animationName The name of the animation to be triggered, this is the animation named in the json.
                 @param triggerableAnimationID The unique identifier for the triggerable animation.
                 @param loopTypeEnum The loop type for the triggerable animation. Accepts 'LOOP', 'PLAY_ONCE', 'HOLD_ON_LAST_FRAME', or 'DEFAULT'.
@@ -2709,7 +2710,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
         @Info(value = """
                 Returns any extra data that the event may have
-                                
+                
                 Usually used by armor animations to know what item is worn
                 """)
         public Map<DataTicket<?>, ?> getExtraData() {

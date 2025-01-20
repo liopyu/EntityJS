@@ -117,10 +117,10 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
 
     //(Base LivingEntity/Entity Overrides)
     @Inject(method = "doHurtTarget", at = @At(value = "HEAD", ordinal = 0), remap = true)
-    private void entityjs$isAlliedTo(Entity pTarget, CallbackInfoReturnable<Boolean> cir) {
+    private void entityjs$doHurtTarget(Entity pTarget, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.onHurtTarget != null) {
-                final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entityJs$getLivingEntity(), entityJs$getLivingEntity());
+                final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pTarget, entityJs$getLivingEntity());
                 EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHurtTarget.");
             }
         }

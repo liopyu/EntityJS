@@ -87,8 +87,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     protected final TameableMobJSBuilder builder;
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
     public String entityName() {
         return this.getType().toString();
@@ -1948,15 +1946,5 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
         }
     }
 
-
-    @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return armorItems;
-    }
-
-    @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return handItems;
-    }
 
 }

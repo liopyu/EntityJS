@@ -90,8 +90,6 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS {
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
     protected final WolfJSBuilder builder;
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
     public String entityName() {
         return this.getType().toString();
@@ -1923,15 +1921,5 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS {
         }
     }
 
-
-    @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return armorItems;
-    }
-
-    @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return handItems;
-    }
 
 }

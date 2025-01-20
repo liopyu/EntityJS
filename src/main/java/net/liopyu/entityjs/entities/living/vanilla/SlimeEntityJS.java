@@ -213,9 +213,6 @@ public class SlimeEntityJS extends Slime implements IAnimatableJS {
     }
 
 
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
-
     //Slime Overrides
 
     @Override
@@ -1654,39 +1651,6 @@ public class SlimeEntityJS extends Slime implements IAnimatableJS {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, this);
             EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
-    }
-
-
-    @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return armorItems;
-    }
-
-    @Override
-    public ItemStack getItemBySlot(EquipmentSlot p_21467_) {
-        return switch (p_21467_.getType()) {
-            case HAND -> (ItemStack) this.handItems.get(p_21467_.getIndex());
-            case HUMANOID_ARMOR -> (ItemStack) this.armorItems.get(p_21467_.getIndex());
-            case ANIMAL_ARMOR -> null;
-        };
-    }
-
-    @Override
-    public void setItemSlot(EquipmentSlot p_21416_, ItemStack p_21417_) {
-        this.verifyEquippedItem(p_21417_);
-        switch (p_21416_.getType()) {
-            case HAND:
-                this.onEquipItem(p_21416_, this.handItems.set(p_21416_.getIndex(), p_21417_), p_21417_);
-                break;
-            case HUMANOID_ARMOR:
-                this.onEquipItem(p_21416_, this.armorItems.set(p_21416_.getIndex(), p_21417_), p_21417_);
-                break;
-        }
-    }
-
-    @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return handItems;
     }
 
 }

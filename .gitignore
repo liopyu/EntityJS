@@ -26,3 +26,4 @@ forge*changelog.txt
 
 /runs/client/config/
 /runs/client/logs/
+pytests

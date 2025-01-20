@@ -76,6 +76,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     public BaseNonAnimatableEntityBuilder(ResourceLocation i) {
         super(i);
+        translationKey("entity." + i.getNamespace() + "." + i.getPath());
         thisList.add(this);
         width = 1;
         height = 1;
@@ -93,7 +94,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Boolean determining if the part entity is pickable.
-                                                
+            
             Example usage:
             ```javascript
             entityBuilder.isPickable(true)
@@ -108,7 +109,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Function determining if the entity may collide with another entity
             using the ContextUtils.CollidingEntityContext which has this entity and the
             one colliding with this entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canCollideWith(context => {
@@ -124,7 +125,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Defines in what condition the entity will start freezing.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isFreezing(entity => {
@@ -140,7 +141,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets the block jump factor for the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setBlockJumpFactor(entity => {
@@ -252,7 +253,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets whether the entity is pushable.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isPushable(true);
@@ -265,7 +266,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             @param positionRider A consumer determining the position of rider/riders.
-                            
+            
                 Example usage:
                 ```javascript
                 entityBuilder.positionRider(context => {
@@ -280,9 +281,9 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets a predicate to determine if a passenger can be added to the entity.
-                        
+            
             @param predicate The predicate to check if a passenger can be added.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canAddPassenger(context => {
@@ -299,7 +300,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets the swim sound for the entity using a string representation.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setSwimSound("minecraft:entity.generic.swim");
@@ -319,7 +320,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets the swim splash sound for the entity using either a string representation or a ResourceLocation object.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setSwimSplashSound("minecraft:entity.generic.splash");
@@ -344,7 +345,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             The provided Function accepts a {@link Entity} parameter,
             representing the entity whose block speed factor is being determined.
             It returns a Float representing the block speed factor.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.blockSpeedFactor(entity => {
@@ -365,7 +366,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             The provided Function accepts a {@link Entity} parameter,
             representing the entity whose flapping status is being determined.
             It returns a Boolean indicating whether the entity is flapping.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isFlapping(entity => {
@@ -384,7 +385,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a callback function to be executed when the entity is added to the world.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is added to the world.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onAddedToWorld(entity => {
@@ -401,7 +402,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets whether to reposition the entity after loading.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.repositionEntityAfterLoad(true);
@@ -418,7 +419,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             The provided Function accepts a {@link Entity} parameter,
             representing the entity whose next step distance is being determined.
             It returns a Float representing the next step distance.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.nextStep(entity => {
@@ -438,7 +439,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a callback function to be executed when the entity starts sprinting.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that has started sprinting.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onSprint(entity => {
@@ -455,7 +456,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets a callback function to be executed when the entity stops riding.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onStopRiding(entity => {
@@ -470,7 +471,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets a callback function to be executed when the entity's passenger dismounts it.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onRemovePassenger(entity => {
@@ -488,7 +489,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a callback function to be executed during each tick when the entity is being ridden.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is being ridden.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.rideTick(entity => {
@@ -507,7 +508,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a predicate function to determine whether the entity is attackable.
             The provided Predicate accepts a {@link Entity} parameter,
             representing the entity that may be checked for its attackability.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isAttackable(entity => {
@@ -527,7 +528,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a predicate function to determine whether the entity can undergo freezing.
             The provided Predicate accepts a {@link Entity} parameter,
             representing the entity that may be subjected to freezing.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canFreeze(entity => {
@@ -547,7 +548,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a predicate function to determine whether the entity is currently glowing.
             The provided Predicate accepts a {@link Entity} parameter,
             representing the entity that may be checked for its glowing state.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isCurrentlyGlowing(entity => {
@@ -566,7 +567,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets the minimum fall distance for the entity before taking damage.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setMaxFallDistance(entity => {
@@ -586,7 +587,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a callback function to be executed when the entity is removed on the client side.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is being removed on the client side.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onClientRemoval(entity => {
@@ -605,7 +606,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a callback function to be executed when the entity is hurt by lava.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is affected by lava.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.lavaHurt(entity => {
@@ -624,7 +625,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a callback function to be executed when the entity performs a flap action.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is flapping.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onFlap(entity => {
@@ -641,11 +642,11 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets a predicate to determine whether the living entity dampens vibrations.
-                
+            
             @param predicate The predicate to determine whether the living entity dampens vibrations.
-                
+            
             The predicate should take a Entity as a parameter and return a boolean value indicating whether the living entity dampens vibrations.
-                
+            
             Example usage:
             ```javascript
             baseEntityBuilder.dampensVibrations(entity => {
@@ -662,11 +663,11 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets a predicate to determine whether to show the vehicle health for the living entity.
-                
+            
             @param predicate The predicate to determine whether to show the vehicle health.
-                
+            
             The predicate should take a Entity as a parameter and return a boolean value indicating whether to show the vehicle health.
-                
+            
             Example usage:
             ```javascript
             baseEntityBuilder.showVehicleHealth(entity => {
@@ -685,7 +686,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a callback function to be executed when the entity is hit by thunder.
             The provided Consumer accepts a {@link ContextUtils.ThunderHitContext} parameter,
             representing the context of the entity being hit by thunder.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.thunderHit(context => {
@@ -704,7 +705,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a predicate function to determine whether the entity is invulnerable to a specific type of damage.
             The provided Predicate accepts a {@link ContextUtils.DamageContext} parameter,
             representing the context of the damage, and returns a boolean indicating invulnerability.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isInvulnerableTo(context => {
@@ -724,7 +725,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a predicate function to determine whether the entity can change dimensions.
             The provided Predicate accepts a {@link ContextUtils.ChangeDimensionsContext} parameter,
             representing the entity that may attempt to change dimensions.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canChangeDimensions(ctx => {
@@ -744,7 +745,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a predicate function to determine whether the entity may interact with something.
             The provided Predicate accepts a {@link ContextUtils.MayInteractContext} parameter,
             representing the context of the potential interaction, and returns a boolean.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.mayInteract(context => {
@@ -764,7 +765,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a predicate function to determine whether the entity can trample or step on something.
             The provided Predicate accepts a {@link ContextUtils.CanTrampleContext} parameter,
             representing the context of the potential trampling action, and returns a boolean.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canTrample(context => {
@@ -784,7 +785,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a callback function to be executed when the entity is removed from the world.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is being removed from the world.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onRemovedFromWorld(entity => {
@@ -802,7 +803,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a callback function to be executed when the entity falls and takes damage.
             The provided Consumer accepts a {@link ContextUtils.EEntityFallDamageContext} parameter,
             representing the context of the entity falling and taking fall damage.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onFall(context => {
@@ -818,7 +819,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets the list of block names to which the entity is immune.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.immuneTo("minecraft:stone", "minecraft:dirt");
@@ -834,7 +835,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets whether the entity can spawn far from the player.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canSpawnFarFromPlayer(true);
@@ -847,7 +848,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Defines logic to render the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.render(context => {
@@ -876,7 +877,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets whether the entity is summonable.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setSummonable(true);
@@ -891,7 +892,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets the mob category for the entity.
             Available options: 'monster', 'creature', 'ambient', 'water_creature', 'misc'.
             Defaults to 'misc'.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.mobCategory('monster');
@@ -904,7 +905,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Determines if the entity should serialize its data. Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.saves(false);
@@ -918,7 +919,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets whether the entity is immune to fire damage.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.fireImmune(true);
@@ -931,10 +932,10 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets the hit box of the entity type.
-                        
+            
             @param width The width of the entity. Defaults to 0.5.
             @param height The height of the entity. Defaults to 0.5.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.sized(1.0f, 1.5f);
@@ -949,9 +950,9 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets the client tracking range. Defaults to 5.
-                        
+            
             @param trackingRange The client tracking range.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.clientTrackingRange(8);
@@ -966,9 +967,9 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     @Info(value = """
             Sets the update interval in ticks of the entity. 
             Defaults to 1 tick.
-                        
+            
             @param updateInterval The update interval in ticks.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.updateInterval(5);
@@ -982,10 +983,10 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets a consumer to handle lerping (linear interpolation) of the entity's position.
-                        
+            
             @param lerpTo Consumer accepting a {@link ContextUtils.LerpToContext} parameter,
                             providing information and control over the lerping process.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.lerpTo(context => {
@@ -1002,10 +1003,10 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets a function to determine whether the entity should render at a squared distance.
-                        
+            
             @param shouldRenderAtSqrDistance Function accepting a {@link ContextUtils.EntitySqrDistanceContext} parameter,
                              defining the conditions under which the entity should render.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.shouldRenderAtSqrDistance(context => {
@@ -1023,9 +1024,9 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets whether the entity is attackable or not.
-                        
+            
             @param isAttackable Boolean value indicating whether the entity is attackable.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isAttackable(true);
@@ -1041,7 +1042,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a callback function to be executed when a player touches the entity.
             The provided Consumer accepts a {@link ContextUtils.EntityPlayerContext} parameter,
             representing the context of the player's interaction with the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.playerTouch(context => {
@@ -1060,7 +1061,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             Sets a callback function to be executed when the entity performs a movement action.
             The provided Consumer accepts a {@link ContextUtils.MovementContext} parameter,
             representing the context of the entity's movement.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.move(context => {
@@ -1077,9 +1078,9 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
     @Info(value = """
             Sets a callback function to be executed on each tick for the entity.
-                        
+            
             @param consumer A Consumer accepting a {@link Entity} parameter, defining the behavior to be executed on each tick.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.tick(entity => {

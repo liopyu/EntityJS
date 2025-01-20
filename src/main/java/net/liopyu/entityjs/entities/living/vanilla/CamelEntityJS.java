@@ -79,9 +79,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
 
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
-
     public String entityName() {
         return this.getType().toString();
     }
@@ -597,48 +594,7 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
     @Override
     public void travel(Vec3 pTravelVector) {
-        LivingEntity livingentity = this.getControllingPassenger();
-        if (this.isAlive() && this.isVehicle() && builder.canSteer && livingentity != null) {
-            if (this.getControllingPassenger() instanceof Player && builder.mountJumpingEnabled) {
-                if (this.ableToJump()) {
-                    this.setThisJumping(true);
-                }
-                if (this.thisJumping) {
-                    this.setThisJumping(false);
-
-                    double jumpPower = this.getJumpPower() + this.getJumpBoostPower();
-                    Vec3 currentVelocity = this.getDeltaMovement();
-
-                    // Add the jump velocity to the current velocity
-                    double newVelocityX = currentVelocity.x;
-                    double newVelocityY = currentVelocity.y + jumpPower; // Add jump velocity
-                    double newVelocityZ = currentVelocity.z;
-
-                    this.setDeltaMovement(newVelocityX, newVelocityY, newVelocityZ);
-                    onJump();
-                    CommonHooks.onLivingJump(this);
-                }
-            }
-
-            LivingEntity passenger = this.getControllingPassenger();
-            this.yRotO = this.getYRot();
-            this.xRotO = this.getXRot();
-            this.setYRot(passenger.getYRot());
-            this.setXRot(passenger.getXRot() * 0.5F);
-            this.setRot(this.getYRot(), this.getXRot());
-            this.yBodyRot = this.getYRot();
-            this.yHeadRot = this.yBodyRot;
-            float x = passenger.xxa * 0.5F;
-            float z = passenger.zza;
-            if (z <= 0.0F) {
-                z *= 0.25F;
-            }
-            this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
-
-
-            super.travel(new Vec3((double) x, pTravelVector.y, (double) z));
-
-        } else super.travel(pTravelVector);
+        super.travel(pTravelVector);
 
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
@@ -792,20 +748,6 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
 
     public void setThisJumping(boolean value) {
         this.thisJumping = value;
-    }
-
-
-    @Override
-    public LivingEntity getControllingPassenger() {
-        Entity var2 = this.getFirstPassenger();
-        LivingEntity var10000;
-        if (var2 instanceof LivingEntity entity) {
-            var10000 = entity;
-        } else {
-            var10000 = null;
-        }
-
-        return var10000;
     }
 
 
@@ -1775,15 +1717,5 @@ public class CamelEntityJS extends Camel implements IAnimatableJS {
         }
     }
 
-
-    @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return armorItems;
-    }
-
-    @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return handItems;
-    }
 
 }
