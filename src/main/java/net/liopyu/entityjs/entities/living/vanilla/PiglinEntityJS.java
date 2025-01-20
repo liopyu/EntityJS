@@ -77,7 +77,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
 
     public final PartEntityJS<?>[] partEntities;
-    private static final EntityDataAccessor<Boolean> DATA_BABY_ID;
+   /* private static final EntityDataAccessor<Boolean> DATA_BABY_ID;
     private static final EntityDataAccessor<Boolean> DATA_IS_CHARGING_CROSSBOW;
     private static final EntityDataAccessor<Boolean> DATA_IS_DANCING;
     private static final UUID SPEED_MODIFIER_BABY_UUID;
@@ -91,7 +91,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         DATA_BABY_ID = SynchedEntityData.defineId(PiglinEntityJS.class, EntityDataSerializers.BOOLEAN);
         DATA_IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(PiglinEntityJS.class, EntityDataSerializers.BOOLEAN);
         DATA_IS_DANCING = SynchedEntityData.defineId(PiglinEntityJS.class, EntityDataSerializers.BOOLEAN);
-    }
+    }*/
 
     public PiglinEntityJS(PiglinJSBuilder builder, EntityType<? extends Piglin> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -137,7 +137,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     }
 
     //Default Piglin behavior
-    @Override
+    /*@Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_BABY_ID, false);
@@ -152,8 +152,8 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
             this.refreshDimensions();
         }
 
-    }
-
+    }*/
+/*
     private boolean isChargingCrossbow() {
         return (Boolean) this.entityData.get(DATA_IS_CHARGING_CROSSBOW);
     }
@@ -171,9 +171,9 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     @Override
     public void setChargingCrossbow(boolean pIsCharging) {
         this.entityData.set(DATA_IS_CHARGING_CROSSBOW, pIsCharging);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void setBaby(boolean pChildZombie) {
         this.getEntityData().set(DATA_BABY_ID, pChildZombie);
         if (!this.level().isClientSide) {
@@ -184,12 +184,12 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
             }
         }
 
-    }
-
+    }*/
+/*
     @Override
     public boolean isBaby() {
         return (Boolean) this.getEntityData().get(DATA_BABY_ID);
-    }
+    }*/
 
     // Part Entity Logical Overrides --------------------------------
     @Override

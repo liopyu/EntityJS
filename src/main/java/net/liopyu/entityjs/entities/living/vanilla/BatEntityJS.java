@@ -204,9 +204,6 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
         }
     }
 
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
-
 
     //Mob Overrides
     @Override
@@ -1514,30 +1511,4 @@ public class BatEntityJS extends Bat implements IAnimatableJS {
     }
 
 
-    @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return armorItems;
-    }
-
-    @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return handItems;
-    }
-
-    @Override
-    public ItemStack getItemBySlot(EquipmentSlot slot) {
-        return switch (slot.getType()) {
-            case HAND -> handItems.get(slot.getIndex());
-            case ARMOR -> armorItems.get(slot.getIndex());
-        };
-    }
-
-    @Override
-    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
-        verifyEquippedItem(stack);
-        switch (slot.getType()) {
-            case HAND -> onEquipItem(slot, handItems.set(slot.getIndex(), stack), stack);
-            case ARMOR -> onEquipItem(slot, armorItems.set(slot.getIndex(), stack), stack);
-        }
-    }
 }

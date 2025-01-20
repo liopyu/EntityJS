@@ -69,14 +69,14 @@ import java.util.function.Predicate;
 
 public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
     private int destroyBlocksTick;
-    private final int[] nextHeadUpdate = new int[2];
-    private final int[] idleHeadUpdates = new int[2];
-    private final ServerBossEvent bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
-    private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = (p_31504_) -> {
-        return p_31504_.getMobType() != MobType.UNDEAD && p_31504_.attackable();
-    };
-    private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0D).selector(LIVING_ENTITY_SELECTOR);
-    private final WitherJSBuilder builder;
+    /* private final int[] nextHeadUpdate = new int[2];
+     private final int[] idleHeadUpdates = new int[2];
+     private final ServerBossEvent bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
+     private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = (p_31504_) -> {
+         return p_31504_.getMobType() != MobType.UNDEAD && p_31504_.attackable();
+     };
+     private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0D).selector(LIVING_ENTITY_SELECTOR);
+    */ private final WitherJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
 
     public String entityName() {
@@ -215,9 +215,6 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }
-
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
 
     //Mob Overrides
@@ -383,53 +380,6 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         }
     }
 
-    private double getHeadX(int pHead) {
-        if (pHead <= 0) {
-            return this.getX();
-        } else {
-            float f = (this.yBodyRot + (float) (180 * (pHead - 1))) * ((float) Math.PI / 180F);
-            float f1 = Mth.cos(f);
-            return this.getX() + (double) f1 * 1.3D;
-        }
-    }
-
-    private double getHeadY(int pHead) {
-        return pHead <= 0 ? this.getY() + 3.0D : this.getY() + 2.2D;
-    }
-
-    private double getHeadZ(int pHead) {
-        if (pHead <= 0) {
-            return this.getZ();
-        } else {
-            float f = (this.yBodyRot + (float) (180 * (pHead - 1))) * ((float) Math.PI / 180F);
-            float f1 = Mth.sin(f);
-            return this.getZ() + (double) f1 * 1.3D;
-        }
-    }
-
-    @Override
-    public void makeInvulnerable() {
-        this.setInvulnerableTicks(220);
-        this.bossEvent.setProgress(0.0F);
-        this.setHealth(this.getMaxHealth() / 3.0F);
-    }
-
-    @Override
-    public void startSeenByPlayer(ServerPlayer pPlayer) {
-        this.bossEvent.addPlayer(pPlayer);
-    }
-
-
-    @Override
-    public void stopSeenByPlayer(ServerPlayer pPlayer) {
-        this.bossEvent.removePlayer(pPlayer);
-    }
-
-    @Override
-    public void setCustomName(@javax.annotation.Nullable Component pName) {
-        super.setCustomName(pName);
-        this.bossEvent.setName(this.getDisplayName());
-    }
 
     @Override
     protected void customServerAiStep() {
