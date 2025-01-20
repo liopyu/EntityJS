@@ -69,15 +69,15 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
-    private int destroyBlocksTick;
-    private final int[] nextHeadUpdate = new int[2];
-    private final int[] idleHeadUpdates = new int[2];
-    private final ServerBossEvent bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
-    private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = (p_31504_) -> {
-        return p_31504_.getMobType() != MobType.UNDEAD && p_31504_.attackable();
-    };
-    private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0D).selector(LIVING_ENTITY_SELECTOR);
-    private final WitherJSBuilder builder;
+    /* private int destroyBlocksTick;
+     private final int[] nextHeadUpdate = new int[2];
+     private final int[] idleHeadUpdates = new int[2];
+     private final ServerBossEvent bossEvent = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
+     private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = (p_31504_) -> {
+         return p_31504_.getMobType() != MobType.UNDEAD && p_31504_.attackable();
+     };
+     private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0D).selector(LIVING_ENTITY_SELECTOR);
+    */ private final WitherJSBuilder builder;
     private final AnimatableInstanceCache animationFactory;
 
     public String entityName() {
@@ -216,9 +216,6 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }
-
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 
 
     //Mob Overrides
@@ -383,7 +380,7 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
             this.level.addFreshEntity(witherskull);
         }
     }
-
+/*
     private double getHeadX(int pHead) {
         if (pHead <= 0) {
             return this.getX();
@@ -430,7 +427,7 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
     public void setCustomName(@javax.annotation.Nullable Component pName) {
         super.setCustomName(pName);
         this.bossEvent.setName(this.getDisplayName());
-    }
+    }*/
 
     @Override
     protected void customServerAiStep() {

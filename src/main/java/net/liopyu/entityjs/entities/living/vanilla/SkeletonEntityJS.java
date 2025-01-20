@@ -272,10 +272,6 @@ public class SkeletonEntityJS extends Skeleton implements IAnimatableJS {
     }
 
 
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
-
-
     //Mob Overrides
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
