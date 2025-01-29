@@ -182,6 +182,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient float scaleWidth;
     public transient Consumer<ContextUtils.ScaleModelRenderContext<T>> scaleModelForRender;
     public final List<GeoLayerJSBuilder<T>> layerList = new ArrayList<>();
+    public final List<GeoLayerJSBuilder<T>> glowingLayerList = new ArrayList<>();
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public transient List<String> superMethods = new ArrayList<>();
@@ -267,6 +268,26 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
         builderConsumer.accept(layerBuild);
         layerList.add(layerBuild);
+        return this;
+    }
+
+    @Info(value = """
+            Adds an extra glowing render layer to the mob.
+            @param newGeoLayer The builder Consumer for the new render layer.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.newGlowingGeoLayer(builder => {
+                    builder.textureResource(entity => {
+                        return "kubejs:textures/entity/sasuke.png"
+                    })
+                });
+                ```
+            """)
+    public BaseLivingEntityBuilder<T> newGlowingGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
+        GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
+        builderConsumer.accept(layerBuild);
+        glowingLayerList.add(layerBuild);
         return this;
     }
 

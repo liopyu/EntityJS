@@ -89,7 +89,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     private MoveControl createMoveControl() {
         if (builder.setMoveControl != null) {
             Object obj = builder.setMoveControl.apply(this);
-            if (obj != null) return (MoveControl) obj;
+            if (obj instanceof MoveControl) return (MoveControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMoveControl from entity: " + entityName() + ". Value: " + obj + ". Must be a MoveControl object. Defaulting to super method.");
         }
         return new MoveControl(this);
@@ -98,7 +98,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     private LookControl createLookControl() {
         if (builder.setLookControl != null) {
             Object obj = builder.setLookControl.apply(this);
-            if (obj != null) return (LookControl) obj;
+            if (obj instanceof LookControl) return (LookControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setLookControl from entity: " + entityName() + ". Value: " + obj + ". Must be a LookControl object. Defaulting to super method.");
         }
         return new LookControl(this);
@@ -107,7 +107,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
     private JumpControl createJumpControl() {
         if (builder.setJumpControl != null) {
             Object obj = builder.setJumpControl.apply(this);
-            if (obj != null) return (JumpControl) obj;
+            if (obj instanceof JumpControl) return (JumpControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setJumpControl from entity: " + entityName() + ". Value: " + obj + ". Must be a JumpControl object. Defaulting to super method.");
         }
         return new JumpControl(this);
