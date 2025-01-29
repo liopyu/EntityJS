@@ -30,13 +30,17 @@ public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
         return new GeoLayerJS<>(entityRendererIn, this, builder);
     }
 
+    public GlowingGeoLayerJS<T> buildGlowing(KubeJSEntityRenderer<T> entityRendererIn, BaseLivingEntityBuilder<T> builder) {
+        return new GlowingGeoLayerJS<>(entityRendererIn, this, builder);
+    }
+
     public BaseLivingEntityBuilder<T> getBuilder() {
         return builder;
     }
 
     @Info(value = """
             Defines logic to preRender the newGeoLayer.
-                        
+            
             Example usage:
             ```javascript
             geoBuilder.preRender(context => {
@@ -57,7 +61,7 @@ public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
             By default this will render the flat texture set in textureResource
             onto the entity as an overlay. This method overrides the render method completely
             allowing scripters to define their own render logic.
-                        
+            
             Example usage:
             ```javascript
             geoBuilder.render(context => {
@@ -78,7 +82,7 @@ public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the texture based on information about the entity.
             The default behavior returns <namespace>:textures/entity/<path>.png.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.textureResource(entity => {
