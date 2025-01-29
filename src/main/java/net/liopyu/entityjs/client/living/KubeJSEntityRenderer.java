@@ -7,6 +7,7 @@ import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.model.EntityModelJS;
 import net.liopyu.entityjs.client.living.model.GeoLayerJS;
 import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
+import net.liopyu.entityjs.client.living.model.GlowingGeoLayerJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -42,6 +43,10 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         this.scaleWidth = getScaleWidth();
         for (GeoLayerJSBuilder<T> geoBuilder : builder.layerList) {
             GeoLayerJS<T> layerPart = geoBuilder.build(this, builder);
+            addRenderLayer(layerPart);
+        }
+        for (GeoLayerJSBuilder<T> geoBuilder : builder.glowingLayerList) {
+            GlowingGeoLayerJS<T> layerPart = geoBuilder.buildGlowing(this, builder);
             addRenderLayer(layerPart);
         }
     }

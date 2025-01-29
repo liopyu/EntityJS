@@ -181,6 +181,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public final List<GeoLayerJSBuilder<T>> layerList = new ArrayList<>();
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
+    public final List<GeoLayerJSBuilder<T>> glowingLayerList = new ArrayList<>();
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -247,6 +248,26 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
         builderConsumer.accept(layerBuild);
         layerList.add(layerBuild);
+        return this;
+    }
+
+    @Info(value = """
+            Adds an extra glowing render layer to the mob.
+            @param newGeoLayer The builder Consumer for the new render layer.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.newGlowingGeoLayer(builder => {
+                    builder.textureResource(entity => {
+                        return "kubejs:textures/entity/sasuke.png"
+                    })
+                });
+                ```
+            """)
+    public BaseLivingEntityBuilder<T> newGlowingGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
+        GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
+        builderConsumer.accept(layerBuild);
+        glowingLayerList.add(layerBuild);
         return this;
     }
 
