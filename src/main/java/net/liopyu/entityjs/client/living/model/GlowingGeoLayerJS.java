@@ -7,6 +7,7 @@ import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -57,7 +58,7 @@ public class GlowingGeoLayerJS<T extends LivingEntity & IAnimatableJS> extends A
         }
     }
 
-    /*@Override
+    @Override
     public void render(PoseStack poseStack, T animatable, BakedGeoModel bakedModel, RenderType renderType,
                        MultiBufferSource bufferSource, VertexConsumer buffer, float partialTicks,
                        int packedLightIn, int packedOverlay) {
@@ -66,14 +67,14 @@ public class GlowingGeoLayerJS<T extends LivingEntity & IAnimatableJS> extends A
             EntityJSHelperClass.consumerCallback(geoBuilder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render");
             super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTicks, packedLightIn, packedOverlay);
         } else {
-            renderType = getRenderType(animatable);
-
+            renderType = RenderType.entityCutoutNoCull(getTextureResource(animatable));
             if (renderType != null) {
                 getRenderer().reRender(bakedModel, poseStack, bufferSource, animatable, renderType,
-                        bufferSource.getBuffer(renderType), partialTicks, 15728640, packedOverlay,
-                        getRenderer().getRenderColor(animatable, partialTicks, 15728640).argbInt());
+                        bufferSource.getBuffer(renderType), partialTicks, LightTexture.FULL_BRIGHT
+                        , packedOverlay,
+                        getRenderer().getRenderColor(animatable, partialTicks, packedLightIn).argbInt());
             }
         }
-    }*/
+    }
 
 }

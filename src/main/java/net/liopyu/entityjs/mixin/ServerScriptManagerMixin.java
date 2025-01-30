@@ -20,7 +20,7 @@ import java.util.List;
 @Mixin(value = ServerScriptManager.class, remap = false)
 public abstract class ServerScriptManagerMixin {
 
-    @Unique
+    /*@Unique
     private static final ThreadLocal<List<PackResources>> entityjs$CapturedPacks = new ThreadLocal<>();
 
     @Unique
@@ -36,7 +36,7 @@ public abstract class ServerScriptManagerMixin {
     private static void entityjs$captureVirtualDataPack(ServerScriptManager instance, Operation<Void> original) {
         entityjs$CapturedVirtualDataPack.set(instance.virtualPacks.get(GeneratedDataStage.LAST));
         original.call(instance);
-    }
+    }*/
 
     //Unused
     /*@Inject(method = "createPackResources", at = @At("RETURN"), remap = false)
