@@ -57,6 +57,43 @@ public class MobMixin /*implements IModifyEntityJS*/ {
         }
     }
 
+    @Inject(method = "canTakeItem", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    public void canTakeItem(ItemStack pItemstack, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.canTakeItem != null) {
+                try {
+                    var context = new ContextUtils.EntityItemLevelContext(entityJs$getLivingEntity(), pItemstack, entityJs$getLivingEntity().level());
+                    Object obj = builder.canTakeItem.apply(context);
+                    if (obj instanceof Boolean b) {
+                        cir.setReturnValue(b);
+                    } else {
+                        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTakeItem from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+                    }
+                } catch (Exception e) {
+                    EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in " + entityJs$entityName() + "builder for field: canTakeItem. ", e);
+                }
+            }
+        }
+    }
+
+    @Inject(method = "canPickUpLoot", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    public void canPickUpLoot(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
+            if (builder.canPickUpLoot != null) {
+                try {
+                    Object obj = builder.canPickUpLoot.apply(entityJs$getLivingEntity());
+                    if (obj instanceof Boolean b) {
+                        cir.setReturnValue(b);
+                    } else {
+                        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canPickUpLoot from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+                    }
+                } catch (Exception e) {
+                    EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in " + entityJs$entityName() + "builder for field: canPickUpLoot. ", e);
+                }
+            }
+        }
+    }
+
     @Inject(method = "isSunBurnTick", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void isSunBurnTick(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
