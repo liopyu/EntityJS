@@ -72,7 +72,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public transient Consumer<LivingEntity> onLeaveCombat;
     public transient Function<LivingEntity, Object> isAffectedByPotions;
     public transient Function<LivingEntity, Object> isAttackableFunction;
-    public transient Function<ContextUtils.EntityItemLevelContext, Object> canTakeItem;
     public transient Function<LivingEntity, Object> isSleeping;
     public transient Consumer<ContextUtils.EntityBlockPosContext> onStartSleeping;
     public transient Consumer<LivingEntity> onStopSleeping;
@@ -1126,26 +1125,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             """)
     public ModifyLivingEntityBuilder isAttackableFunction(Function<LivingEntity, Object> predicate) {
         isAttackableFunction = predicate;
-        return this;
-    }
-
-
-    @Info(value = """
-            Sets a predicate function to determine whether the entity can take an item.
-            The provided Predicate accepts a {@link ContextUtils.EntityItemLevelContext} parameter,
-            representing the context of the entity potentially taking an item.
-            
-            Example usage:
-            ```javascript
-            modifyBuilder.canTakeItem(context => {
-                // Define conditions for the entity to be able to take an item
-                // Use information about the EntityItemLevelContext provided by the context.
-                return // Some boolean condition indicating if the entity can take the item;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder canTakeItem(Function<ContextUtils.EntityItemLevelContext, Object> predicate) {
-        canTakeItem = predicate;
         return this;
     }
 

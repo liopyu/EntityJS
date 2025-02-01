@@ -21,6 +21,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
     public transient Function<ContextUtils.EntityItemStackContext, Object> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
     public transient Function<Mob, Object> canPickUpLoot;
+    public transient Function<ContextUtils.EntityItemLevelContext, Object> canTakeItem;
     public transient Boolean isPersistenceRequired;
     public transient Function<Mob, Object> meleeAttackRangeSqr;
     public transient Object ambientSoundInterval;
@@ -31,6 +32,25 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
 
     public ModifyMobBuilder(EntityType<?> entity) {
         super(entity);
+    }
+
+    @Info(value = """
+            Sets a predicate function to determine whether the entity can take an item.
+            The provided Predicate accepts a {@link ContextUtils.EntityItemLevelContext} parameter,
+            representing the context of the entity potentially taking an item.
+            
+            Example usage:
+            ```javascript
+            modifyBuilder.canTakeItem(context => {
+                // Define conditions for the entity to be able to take an item
+                // Use information about the EntityItemLevelContext provided by the context.
+                return // Some boolean condition indicating if the entity can take the item;
+            });
+            ```
+            """)
+    public ModifyLivingEntityBuilder canTakeItem(Function<ContextUtils.EntityItemLevelContext, Object> predicate) {
+        canTakeItem = predicate;
+        return this;
     }
 
     @Info(value = """  

@@ -698,19 +698,6 @@ public abstract class LivingEntityMixin /*implements IModifyEntityJS*/ {
         }
     }
 
-    @Inject(method = "canTakeItem", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
-    private void entityjs$canTakeItem(ItemStack pStack, CallbackInfoReturnable<Boolean> cir) {
-        if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
-            if (builder.canTakeItem != null) {
-                final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(entityJs$getLivingEntity(), pStack, entityJs$getLivingEntity().level());
-                Object obj = builder.canTakeItem.apply(context);
-                if (obj instanceof Boolean) {
-                    cir.setReturnValue((boolean) obj);
-                } else
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTakeItem from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
-            }
-        }
-    }
 
     @Inject(method = "isSleeping", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$isSleeping(CallbackInfoReturnable<Boolean> cir) {
