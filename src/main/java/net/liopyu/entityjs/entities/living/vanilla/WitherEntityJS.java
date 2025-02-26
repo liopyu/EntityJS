@@ -184,9 +184,6 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
         }
     }
 
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
-
 
     //Mob Overrides
     @Override
