@@ -141,10 +141,6 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
     }
 
 
-    public boolean isMultipartEntity() {
-        return partEntities != null;
-    }
-
     @Override
     public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
         super.recreateFromPacket(pPacket);

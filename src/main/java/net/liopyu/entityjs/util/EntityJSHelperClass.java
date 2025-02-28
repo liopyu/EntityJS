@@ -4,10 +4,6 @@ import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
-import org.apache.commons.lang3.NotImplementedException;
 import software.bernie.geckolib.core.animation.Animation;
 
 import java.util.HashSet;
@@ -152,6 +148,7 @@ public class EntityJSHelperClass {
         }
     }
 
+
     public static class EntityMovementTracker {
         private double prevX;
         private double prevY;
@@ -178,4 +175,5 @@ public class EntityJSHelperClass {
             return moving;
         }
     }
+
 }

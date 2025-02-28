@@ -10,11 +10,17 @@ import net.liopyu.entityjs.client.living.model.EntityModelJS;
 import net.liopyu.entityjs.client.living.model.GeoLayerJS;
 import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
+import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntity;
+import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
@@ -26,6 +32,9 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import software.bernie.geckolib.util.RenderUtils;
+
+import java.io.Console;
+import java.util.Arrays;
 
 
 /**
@@ -76,7 +85,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     }
 
     @Override
-    public RenderType getRenderType(T animatable, ResourceLocation texture,  MultiBufferSource bufferSource, float partialTick) {
+    public RenderType getRenderType(T animatable, ResourceLocation texture, MultiBufferSource bufferSource, float partialTick) {
         return switch (animatable.getBuilder().renderType) {
             case SOLID -> RenderType.entitySolid(texture);
             case CUTOUT -> RenderType.entityCutout(texture);
@@ -89,6 +98,30 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     @Override
     public void render(T animatable, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        for (PartEntity<?> part : animatable.getParts()) {
+            if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes() &&
+                    !animatable.isInvisible() &&
+                    !Minecraft.getInstance().showOnlyReducedInfo()) {
+
+                VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.lines());
+
+                poseStack.pushPose();
+
+                // Compute the offset of the part relative to the parent
+                double offsetX = part.getX() - animatable.getX();
+                double offsetY = part.getY() - animatable.getY();
+                double offsetZ = part.getZ() - animatable.getZ();
+
+                // Apply the translation offset
+                poseStack.translate(offsetX, offsetY, offsetZ);
+
+                // Render the hitbox at the adjusted position
+                EntityRenderDispatcher.renderHitbox(poseStack, vertexConsumer, part, 0.0F);
+
+                poseStack.popPose();
+            }
+        }
+
 
         if (builder.render != null && this.animatable != null) {
             final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);

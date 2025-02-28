@@ -121,11 +121,6 @@ public class HorseEntityJS extends Horse implements IAnimatableJS {
         EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found for entity: " + entityName());
     }
 
-
-    public boolean isMultipartEntity() {
-        return partEntities != null;
-    }
-
     @Override
     public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
         super.recreateFromPacket(pPacket);

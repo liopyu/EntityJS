@@ -11,6 +11,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
@@ -22,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public final T parentMob;
@@ -42,6 +44,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         this.height = pHeight;
     }
 
+
     public String entityName() {
         return this.name;
     }
@@ -51,23 +54,6 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         return builder.isPickable;
     }
 
-    @Override
-    protected void defineSynchedData() {
-    }
-
-    @Override
-    protected void readAdditionalSaveData(CompoundTag pCompound) {
-    }
-
-    @Override
-    protected void addAdditionalSaveData(CompoundTag pCompound) {
-    }
-
-
-    @Nullable
-    public ItemStack getPickResult() {
-        return this.parentMob.getPickResult();
-    }
 
     //Base Entity Overrides
     public boolean hurt(DamageSource pSource, float pAmount) {
@@ -88,11 +74,6 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public boolean is(Entity pEntity) {
         return this == pEntity || this.parentMob == pEntity;
-    }
-
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        throw new UnsupportedOperationException();
     }
 
 
@@ -134,8 +115,11 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public T getParent() {
         return this.parentMob;
     }
+
+
     private boolean isRemovedFromWorld = false;
     private boolean isAddedToWorld = false;
+
     @Override
     public void tick() {
         if (!isAddedToWorld && !this.isRemoved()) {
@@ -280,7 +264,6 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         }
         return super.isFlapping();
     }
-
 
 
     public void onAddedToWorld() {
@@ -517,8 +500,6 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
         return super.canTrample(state, pos, fallDistance);
     }*/
-
-
 
 
     public void onRemovedFromWorld() {

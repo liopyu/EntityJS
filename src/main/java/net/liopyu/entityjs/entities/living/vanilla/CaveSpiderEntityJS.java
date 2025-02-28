@@ -113,10 +113,6 @@ public class CaveSpiderEntityJS extends CaveSpider implements IAnimatableJS {
     }
 
 
-    public boolean isMultipartEntity() {
-        return partEntities != null;
-    }
-
     @Override
     public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
         super.recreateFromPacket(pPacket);

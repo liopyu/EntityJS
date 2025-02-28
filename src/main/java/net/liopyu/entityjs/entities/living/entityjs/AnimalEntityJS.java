@@ -53,6 +53,7 @@ import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -119,6 +120,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
+
     }
 
 
@@ -147,10 +149,6 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         EntityJSHelperClass.logWarningMessageOnce("Part with name " + partName + " not found for entity: " + entityName());
     }
 
-
-    public boolean isMultipartEntity() {
-        return partEntities != null;
-    }
 
     @Override
     public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
@@ -686,6 +684,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     }
 
     public void onAddedToWorld() {
+
+
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 

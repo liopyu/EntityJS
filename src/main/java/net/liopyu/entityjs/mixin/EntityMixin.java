@@ -3,6 +3,8 @@ package net.liopyu.entityjs.mixin;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntity;
+import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.EntityModificationEventJS;
@@ -77,6 +79,13 @@ public class EntityMixin {
 
     @Unique
     public void onAddedToWorld() {
+       /* if (entityJs$getLivingEntity() instanceof IAnimatableJS animatableJS) {
+            if (animatableJS.isMultipartEntity()) {
+                for (PartEntity<?> part : animatableJS.getParts()) {
+                    entityJs$getLivingEntity().level().addFreshEntity(part);
+                }
+            }
+        }*/
         /*if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
             if (entityJs$getLivingEntity() instanceof Mob mob) {
                 ConsoleJS.STARTUP.info("shouldfire");

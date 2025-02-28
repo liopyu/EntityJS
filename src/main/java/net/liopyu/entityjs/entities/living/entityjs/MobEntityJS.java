@@ -18,6 +18,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.boss.EnderDragonPart;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.spongepowered.asm.mixin.injection.At;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
@@ -44,10 +50,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @MethodsReturnNonnullByDefault
 public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
@@ -75,8 +78,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
         this.helper = new ModifyAttributeEventJS.AttributeModificationHelper((EntityType<? extends LivingEntity>) this.getType());
-
     }
+
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -84,11 +87,18 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         super.setId(entityId);
         for (int i = 0; i < partEntities.length; i++) {
             PartEntityJS<?> partEntity = partEntities[i];
-            if (partEntity != null) {
-                partEntity.setId(entityId + i + 1);
-            }
+            partEntity.setId(entityId + i + 1);
         }
     }
+    /*public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
+        super.recreateFromPacket(clientboundAddEntityPacket);
+        PartEntity<?>[] enderDragonParts = this.partEntities;
+
+        for (int i = 0; i < enderDragonParts.length; ++i) {
+            enderDragonParts[i].setId(i + clientboundAddEntityPacket.getId());
+        }
+
+    }*/
 
     public void tickPart(String partName, double offsetX, double offsetY, double offsetZ) {
         var x = this.getX();
@@ -104,18 +114,10 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
     }
 
 
-    public boolean isMultipartEntity() {
-        return partEntities != null;
-    }
-
-    @Override
-    public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
-        super.recreateFromPacket(pPacket);
-    }
-
     public PartEntity<?>[] getParts() {
         return Objects.requireNonNullElseGet(partEntities, () -> new PartEntity<?>[0]);
     }
+
 
     //Builder and Animatable logic
     @Override
@@ -523,7 +525,16 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
     }
 
+
     public void onAddedToWorld() {
+       /* if (partEntities.length > 0) {
+            EntityJSHelperClass.logWarningMessageOnce("ismultipart");
+            for (PartEntity<?> part : this.getParts()) {
+                EntityJSHelperClass.logWarningMessageOnce("adding part entity: " + this.level());
+                if (!part.isRemoved())
+                    this.level().addFreshEntity(part);
+            }
+        }*/
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");
 
@@ -673,16 +684,96 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         triggerAnim(controllerName, animName);
     }
 
+   /* @Override
+    public HitResult pick(double maxDistance, float tickDelta, boolean includeFluids) {
+        HitResult closestHit = super.pick(maxDistance, tickDelta, includeFluids);
+        double closestDistance = closestHit.getLocation().distanceTo(this.position());
+
+        // Manually check for ray hits on part entities
+        for (PartEntityJS<?> part : partEntities) {
+            AABB partBox = part.getBoundingBox();
+            Optional<Vec3> partHit = partBox.clip(this.getEyePosition(tickDelta), this.getEyePosition(tickDelta).add(this.getLookAngle().scale(maxDistance)));
+
+            if (partHit.isPresent()) {
+                double partDistance = partHit.get().distanceTo(this.position());
+
+                if (partDistance < closestDistance) {
+                    closestDistance = partDistance;
+                    closestHit = new EntityHitResult(part, partHit.get());
+                }
+            }
+        }
+
+        return closestHit;
+    }*/
+
+
+
+    /*@Override
+    private Vec3 collide(Vec3 vec3) {
+        AABB mainBoundingBox = this.getBoundingBox();
+
+        // Get voxel collisions from the world
+        List<VoxelShape> worldCollisions = this.level().getEntityCollisions(this, mainBoundingBox.expandTowards(vec3));
+
+        // Collect all bounding boxes (main entity + parts)
+        List<AABB> entityBoundingBoxes = new ArrayList<>();
+        entityBoundingBoxes.add(mainBoundingBox);
+        for (PartEntityJS<?> part : partEntities) {
+            entityBoundingBoxes.add(part.getBoundingBox());
+        }
+
+        // Compute collision for all bounding boxes
+        Vec3 resolvedMotion = vec3.lengthSqr() == 0.0 ? vec3 : collideBoundingBox(this, vec3, mainBoundingBox, this.level(), worldCollisions);
+
+        for (AABB partBox : entityBoundingBoxes) {
+            resolvedMotion = collideBoundingBox(this, resolvedMotion, partBox, this.level(), worldCollisions);
+        }
+
+        boolean xCollision = vec3.x != resolvedMotion.x;
+        boolean yCollision = vec3.y != resolvedMotion.y;
+        boolean zCollision = vec3.z != resolvedMotion.z;
+        boolean onGround = this.onGround() || (yCollision && vec3.y < 0.0);
+
+        // Handle step-up movement if applicable
+        if (this.maxUpStep() > 0.0F && onGround && (xCollision || zCollision)) {
+            Vec3 stepUpMotion = collideBoundingBox(this, new Vec3(vec3.x, this.maxUpStep(), vec3.z), mainBoundingBox, this.level(), worldCollisions);
+            Vec3 verticalStepMotion = collideBoundingBox(this, new Vec3(0.0, this.maxUpStep(), 0.0), mainBoundingBox.expandTowards(vec3.x, 0.0, vec3.z), this.level(), worldCollisions);
+
+            if (verticalStepMotion.y < this.maxUpStep()) {
+                Vec3 combinedMotion = collideBoundingBox(this, new Vec3(vec3.x, 0.0, vec3.z), mainBoundingBox.move(verticalStepMotion), this.level(), worldCollisions).add(verticalStepMotion);
+                if (combinedMotion.horizontalDistanceSqr() > stepUpMotion.horizontalDistanceSqr()) {
+                    stepUpMotion = combinedMotion;
+                }
+            }
+
+            if (stepUpMotion.horizontalDistanceSqr() > resolvedMotion.horizontalDistanceSqr()) {
+                return stepUpMotion.add(collideBoundingBox(this, new Vec3(0.0, -stepUpMotion.y + vec3.y, 0.0), mainBoundingBox.move(stepUpMotion), this.level(), worldCollisions));
+            }
+        }
+
+        return resolvedMotion;
+    }
+*/
+
     @Override
     public boolean canCollideWith(Entity pEntity) {
+        /*for (PartEntityJS<?> partEntity : partEntities) {
+            EntityJSHelperClass.logWarningMessageOnce("[Entity]: " + partEntity.getBoundingBox());
+            if (pEntity.getBoundingBox().intersects(partEntity.getBoundingBox())) {
+                return true;
+            }
+        }*/
         if (builder.canCollideWith != null) {
             final ContextUtils.CollidingEntityContext context = new ContextUtils.CollidingEntityContext(this, pEntity);
             Object obj = builder.canCollideWith.apply(context);
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
         }
+
         return super.canCollideWith(pEntity);
     }
+
 
     @Override
     protected float getSoundVolume() {

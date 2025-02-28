@@ -3,6 +3,7 @@ package net.liopyu.entityjs.entities.living.entityjs;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.fabricmc.fabric.mixin.registry.sync.RegistriesAccessor;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
@@ -33,6 +34,11 @@ public interface IAnimatableJS extends GeoAnimatable, GeoEntity {
      */
     BaseLivingEntityBuilder<?> getBuilder();
 
+    PartEntity<?>[] getParts();
+
+    default boolean isMultipartEntity() {
+        return this.getParts().length > 0;
+    }
 
     /**
      * Note for implementors: by default this casts {@code this} to {@code <E extends LivingEntity & IAnimatableJS>},
