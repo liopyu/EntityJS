@@ -6,6 +6,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -1147,6 +1148,36 @@ public class ContextUtils {
 
         public RenderContext(T entity, float entityYaw, float partialTick,
                              PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+            this.entity = entity;
+            this.entityYaw = entityYaw;
+            this.partialTick = partialTick;
+            this.poseStack = poseStack;
+            this.bufferSource = bufferSource;
+            this.packedLight = packedLight;
+        }
+    }
+
+    public static class RenderContextCustom<T extends LivingEntity & IAnimatableJSCustom> {
+        @Info("The animatable entity being rendered")
+        public final T entity;
+
+        @Info("The yaw of the entity")
+        public final float entityYaw;
+
+        @Info("The partial tick")
+        public final float partialTick;
+
+        @Info("The pose stack for transformations")
+        public final PoseStack poseStack;
+
+        @Info("The buffer source for rendering")
+        public final MultiBufferSource bufferSource;
+
+        @Info("The packed light information")
+        public final int packedLight;
+
+        public RenderContextCustom(T entity, float entityYaw, float partialTick,
+                                   PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
             this.entity = entity;
             this.entityYaw = entityYaw;
             this.partialTick = partialTick;

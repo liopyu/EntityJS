@@ -124,6 +124,9 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly fg.deobf("curse.maven:framework-549225:5180972")
     compileOnly fg.deobf("curse.maven:mrcrayfishs-gun-mod-unofficial-945471:5212457")
+    // https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy
+    implementation("net.bytebuddy:byte-buddy:1.17.1")
+
     /*runtimeOnly fg.deobf("curse.maven:additional-attributes-986624:6013214")
     runtimeOnly fg.deobf("curse.maven:irons-spells-n-spellbooks-855414:6054196")
     runtimeOnly fg.deobf("curse.maven:curios-309927:6058834")

@@ -10,6 +10,7 @@
     "MobMixin",
     "PathfinderMobMixin",
     "ProjectileMixin",
+    "RegistryEventJSMixin",
     "ServerScriptManagerMixin"
   ],
   "client": [

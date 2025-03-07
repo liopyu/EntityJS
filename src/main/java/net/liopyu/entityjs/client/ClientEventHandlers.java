@@ -2,12 +2,15 @@ package net.liopyu.entityjs.client;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.EntityJSMod;
+import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
+import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderEntityBuilder;
+import net.liopyu.entityjs.client.living.CustomKubeJSEntityRenderer;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.client.nonliving.*;
 import net.liopyu.entityjs.util.ModKeybinds;
@@ -55,7 +58,9 @@ public class ClientEventHandlers {
         for (BoatEntityBuilder<?> builder : BoatEntityBuilder.thisList) {
             event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSBoatRenderer<>(renderManager, builder));
         }
-
+        for (CustomEntityJSBuilder builder : CustomEntityBuilder.thisList) {
+            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new CustomKubeJSEntityRenderer<>(renderManager, builder));
+        }
     }
 
 }

@@ -6,8 +6,11 @@ import dev.latvian.mods.kubejs.event.Extra;
 import dev.latvian.mods.kubejs.script.data.VirtualKubeJSDataPack;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.events.*;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
@@ -27,6 +30,7 @@ public class EventHandlers {
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
     public static final EventHandler modifyEntity = EntityJSEvents.startup("modifyEntity", () -> EntityModificationEventJS.class);
+    public static final EventHandler registry = EntityJSEvents.startup("registry", () -> EntityRegistryEvent.class);
 
 
     public static void init() {
@@ -40,6 +44,9 @@ public class EventHandlers {
     private static void attributeCreation(EntityAttributeCreationEvent event) {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
             event.put(builder.get(), builder.getAttributeBuilder().build());
+        }
+        for (CustomEntityJSBuilder builder : CustomEntityJSBuilder.thisList) {
+            event.put((EntityType<? extends LivingEntity>) builder.get(), builder.getAttributeBuilder().build());
         }
     }
 
