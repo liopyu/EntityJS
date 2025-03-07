@@ -68,7 +68,6 @@ public class IronGolemEntityJS extends IronGolem implements IAnimatableJS {
         return this.getType().toString();
     }
 
-    protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
     public IronGolemEntityJS(IronGolemJSBuilder builder, EntityType<? extends IronGolem> pEntityType, Level pLevel) {
@@ -573,7 +572,7 @@ public class IronGolemEntityJS extends IronGolem implements IAnimatableJS {
     @Override
     public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
         super.onEquipItem(slot, previous, current);
-        if (builder.onEquipItem != null) {
+        if (builder != null && builder.onEquipItem != null) {
             final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, this);
             EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEquipItem.");
 

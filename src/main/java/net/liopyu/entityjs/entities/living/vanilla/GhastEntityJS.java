@@ -72,7 +72,6 @@ public class GhastEntityJS extends Ghast implements IAnimatableJS {
         return this.getType().toString();
     }
 
-    protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
     public GhastEntityJS(GhastJSBuilder builder, EntityType<? extends Ghast> pEntityType, Level pLevel) {
@@ -553,7 +552,7 @@ public class GhastEntityJS extends Ghast implements IAnimatableJS {
     @Override
     public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
         super.onEquipItem(slot, previous, current);
-        if (builder.onEquipItem != null) {
+        if (builder != null && builder.onEquipItem != null) {
             final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, this);
             EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEquipItem.");
 

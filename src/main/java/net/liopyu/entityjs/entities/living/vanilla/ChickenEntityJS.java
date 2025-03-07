@@ -74,7 +74,6 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
 
     protected final ChickenJSBuilder builder;
 
-    protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
 
     public ChickenEntityJS(ChickenJSBuilder builder, EntityType<? extends Chicken> pEntityType, Level pLevel) {
@@ -707,7 +706,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
     @Override
     public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
         super.onEquipItem(slot, previous, current);
-        if (builder.onEquipItem != null) {
+        if (builder != null && builder.onEquipItem != null) {
             final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, this);
             EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEquipItem.");
 

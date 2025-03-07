@@ -90,7 +90,6 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
     private static final UniformInt PERSISTENT_ANGER_TIME;
 
     private UUID persistentAngerTarget;
-    protected PathNavigation navigation;
 
     static {
         PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
@@ -845,7 +844,7 @@ public class ParrotEntityJS extends Parrot implements IAnimatableJS {
     @Override
     public void onEquipItem(EquipmentSlot slot, ItemStack previous, ItemStack current) {
         super.onEquipItem(slot, previous, current);
-        if (builder.onEquipItem != null) {
+        if (builder != null && builder.onEquipItem != null) {
             final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, this);
             EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEquipItem.");
 
