@@ -4,15 +4,17 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
-    public transient Function<ContextUtils.RendererModelContext, Object> setTextureLocation;
-    public transient Function<ContextUtils.RendererModelContext, Object> setRenderType;
+    public transient Function<ContextUtils.RendererModelContext<@NotNull LivingEntity, @NotNull EntityModel<@NotNull LivingEntity>>, Object> setTextureLocation;
+    public transient Function<ContextUtils.RendererModelContext<@NotNull LivingEntity, @NotNull EntityModel<@NotNull LivingEntity>>, Object> setRenderType;
     public transient Boolean isPushable;
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
     public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
@@ -100,7 +102,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder setTextureLocation(Function<ContextUtils.RendererModelContext, Object> setTextureLocation) {
+    public ModifyLivingEntityBuilder setTextureLocation(Function<ContextUtils.RendererModelContext<@NotNull LivingEntity, @NotNull EntityModel<@NotNull LivingEntity>>, Object> setTextureLocation) {
         this.setTextureLocation = setTextureLocation;
         return this;
     }
@@ -119,7 +121,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder setRenderType(Function<ContextUtils.RendererModelContext, Object> setRenderType) {
+    public ModifyLivingEntityBuilder setRenderType(Function<ContextUtils.RendererModelContext<@NotNull LivingEntity, @NotNull EntityModel<@NotNull LivingEntity>>, Object> setRenderType) {
         this.setRenderType = setRenderType;
         return this;
     }
