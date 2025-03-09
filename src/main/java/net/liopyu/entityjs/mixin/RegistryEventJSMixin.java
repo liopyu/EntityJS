@@ -16,17 +16,17 @@ import java.util.List;
 
 @Mixin(RegistryEventJS.class)
 public class RegistryEventJSMixin<T> {
-    @Final
+   /* @Final
     @Shadow
     private RegistryInfo<T> registry;
     @Final
     @Shadow
-    public List<BuilderBase<? extends T>> created;
+    public List<BuilderBase<? extends T>> created;*/
 
-    @Inject(method = "<init>", at = @At("RETURN"), remap = true)
+    /*@Inject(method = "<init>", at = @At("RETURN"), remap = false)
     private void entityjs$onEntityInit(RegistryInfo<T> r, CallbackInfo ci) {
         if (EventHandlers.registry.hasListeners()) {
             EventHandlers.registry.post(new EntityRegistryEvent<>(registry, created));
         }
-    }
+    }*/
 }
