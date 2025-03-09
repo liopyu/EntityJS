@@ -126,15 +126,15 @@ public class ContextUtils {
         }
     }
 
-    public static class RendererModelContext {
+    public static class RendererModelContext<T extends LivingEntity, M extends EntityModel<T>> {
         @Info("The living entity")
         public final LivingEntity entity;
         @Info("The entity's renderer")
-        public final LivingEntityRenderer renderer;
+        public final LivingEntityRenderer<T, M> renderer;
         @Info("The entity's model")
-        public final EntityModel model;
+        public final EntityModel<T> model;
 
-        public RendererModelContext(LivingEntity entity, LivingEntityRenderer renderer, EntityModel model) {
+        public RendererModelContext(LivingEntity entity, LivingEntityRenderer<T, M> renderer, EntityModel<T> model) {
             this.entity = entity;
             this.renderer = renderer;
             this.model = model;
