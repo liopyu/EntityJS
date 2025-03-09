@@ -16,6 +16,7 @@ import java.util.List;
 
 @Mixin(RegistryEventJS.class)
 public class RegistryEventJSMixin<T> {
+
    /* @Final
     @Shadow
     private RegistryInfo<T> registry;
