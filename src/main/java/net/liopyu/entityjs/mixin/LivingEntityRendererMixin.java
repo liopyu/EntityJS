@@ -24,10 +24,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
 
     @Shadow
-    public abstract M getModel();
-
-    private T currentEntity;
-    private M currentModel;
+    protected M model;
     @Unique
     private Object entityJs$builder;
 
@@ -51,9 +48,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
                 return;
             }
             if (builder.setTextureLocation != null) {
-                var context = new ContextUtils.RendererModelContext(entity, getRenderer(), currentModel);
+                var context = new ContextUtils.RendererModelContext<>(entity, getRenderer(), model);
                 try {
-                    var obj = builder.setTextureLocation.apply(context);
+                    var obj = builder.setTextureLocation.apply((ContextUtils.RendererModelContext<LivingEntity, EntityModel<LivingEntity>>) context);
                     var resourcelocation = EntityJSHelperClass.convertObjectToDesired(obj, "resourcelocation");
                     if (resourcelocation != null) {
                         var textureLocation = (ResourceLocation) resourcelocation;
@@ -61,7 +58,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
                             cir.setReturnValue(RenderType.itemEntityTranslucentCull(textureLocation));
                             return;
                         } else if (bodyVisible) {
-                            cir.setReturnValue(getModel().renderType(textureLocation));
+                            cir.setReturnValue(model.renderType(textureLocation));
                             return;
                         } else {
                             var finalValue = glowing ? RenderType.outline(textureLocation) : null;
@@ -78,9 +75,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
                 }
             }
             if (builder.setRenderType != null) {
-                var context = new ContextUtils.RendererModelContext(entity, getRenderer(), currentModel);
+                var context = new ContextUtils.RendererModelContext<>(entity, getRenderer(), model);
                 try {
-                    var obj = builder.setRenderType.apply(context);
+                    var obj = builder.setRenderType.apply((ContextUtils.RendererModelContext<LivingEntity, EntityModel<LivingEntity>>) context);
                     var returnValue = EntityJSHelperClass.convertToRenderType(obj, cir.getReturnValue());
                     if (returnValue != null) {
                         cir.setReturnValue(returnValue);
