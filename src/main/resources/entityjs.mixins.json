@@ -14,6 +14,7 @@
     "ServerScriptManagerMixin"
   ],
   "client": [
+    "EntityRendererMixin",
     "LivingEntityRendererMixin"
   ],
   "refmap": "entityjs.refmap.json"

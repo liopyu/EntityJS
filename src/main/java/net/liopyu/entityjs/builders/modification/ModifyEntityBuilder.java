@@ -61,27 +61,67 @@ public class ModifyEntityBuilder extends EventJS {
     public transient Boolean controlledByFirstPassenger;
     public static Map<EntityType<?>, ModifyEntityBuilder> builderMap = new HashMap<>();
     public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
+    public transient Function<ContextUtils.RendererModelContext, Object> setTextureLocation;
+    public transient Function<ContextUtils.RendererModelContext, Object> setRenderType;
 
     public ModifyEntityBuilder(EntityType<?> entityType) {
         this.entityType = entityType;
 
     }
 
-   /* @Info(value = """
-            Function determining if the entity is allied with a potential target.
+    /* @Info(value = """
+             Function determining if the entity is allied with a potential target.
 
+             Example usage:
+             ```javascript
+             entityBuilder.isAlliedTo(context => {
+                 const {entity, target} = context
+                 return target.type == 'minecraft:blaze'
+             });
+             ```
+             """)
+     public ModifyEntityBuilder isAlliedTo(Function<ContextUtils.LineOfSightContext, Object> isAlliedTo) {
+         this.isAlliedTo = isAlliedTo;
+         return this;
+     }*/
+    @Info(value = """
+            Sets the Texture Location of the entity without modifying the RenderType logic.
+            Returns a ResourceLocation.
+            Return null for the default entity's location
+            
             Example usage:
             ```javascript
-            entityBuilder.isAlliedTo(context => {
-                const {entity, target} = context
-                return target.type == 'minecraft:blaze'
+            modifyBuilder.setTextureLocation(context => {
+                // Sets the entity's texture to default Steve
+                let DefaultPlayerSkin = Java.loadClass("net.minecraft.client.resources.DefaultPlayerSkin")
+                let skin = DefaultPlayerSkin.getDefaultSkin();
+                return skin;
             });
             ```
             """)
-    public ModifyEntityBuilder isAlliedTo(Function<ContextUtils.LineOfSightContext, Object> isAlliedTo) {
-        this.isAlliedTo = isAlliedTo;
+    public ModifyEntityBuilder setTextureLocation(Function<ContextUtils.RendererModelContext, Object> setTextureLocation) {
+        this.setTextureLocation = setTextureLocation;
         return this;
-    }*/
+    }
+
+    @Info(value = """
+            Sets the RenderType of the entity, effectively capable of dynamically replacing texture locations.
+            Return null for the default render type.
+            
+            Example usage:
+            ```javascript
+            modifyBuilder.setRenderType(context => {
+                // Sets the entity's texture to default Steve
+                let DefaultPlayerSkin = Java.loadClass("net.minecraft.client.resources.DefaultPlayerSkin")
+                let skin = DefaultPlayerSkin.getDefaultSkin();
+                return RenderType.entityCutout(skin);
+            });
+            ```
+            """)
+    public ModifyEntityBuilder setRenderType(Function<ContextUtils.RendererModelContext, Object> setRenderType) {
+        this.setRenderType = setRenderType;
+        return this;
+    }
 
     @Info(value = """
             Sets a consumer to handle the interaction with the entity.
