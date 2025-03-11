@@ -13,6 +13,7 @@
     "ServerScriptManagerMixin"
   ],
   "client": [
+    "EntityRendererMixin",
     "LivingEntityRendererMixin"
   ]
 }

@@ -62,6 +62,8 @@ public class ModifyEntityBuilder implements KubeEvent {
     public transient Boolean controlledByFirstPassenger;
     public static Map<EntityType<?>, ModifyEntityBuilder> builderMap = new HashMap<>();
     public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
+    public transient Function<ContextUtils.RendererModelContext, Object> setTextureLocation;
+    public transient Function<ContextUtils.RendererModelContext, Object> setRenderType;
 
     public ModifyEntityBuilder(EntityType<?> entityType) {
         this.entityType = entityType;
@@ -69,10 +71,49 @@ public class ModifyEntityBuilder implements KubeEvent {
     }
 
     @Info(value = """
+            Sets the Texture Location of the entity without modifying the RenderType logic.
+            Returns a ResourceLocation.
+            Return null for the default entity's location
+            
+            Example usage:
+            ```javascript
+            modifyBuilder.setTextureLocation(context => {
+                // Sets the entity's texture to default Steve
+                let DefaultPlayerSkin = Java.loadClass("net.minecraft.client.resources.DefaultPlayerSkin")
+                let skin = DefaultPlayerSkin.getDefaultSkin();
+                return skin;
+            });
+            ```
+            """)
+    public ModifyEntityBuilder setTextureLocation(Function<ContextUtils.RendererModelContext, Object> setTextureLocation) {
+        this.setTextureLocation = setTextureLocation;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the RenderType of the entity, effectively capable of dynamically replacing texture locations.
+            Return null for the default render type.
+            
+            Example usage:
+            ```javascript
+            modifyBuilder.setRenderType(context => {
+                // Sets the entity's texture to default Steve
+                let DefaultPlayerSkin = Java.loadClass("net.minecraft.client.resources.DefaultPlayerSkin")
+                let skin = DefaultPlayerSkin.getDefaultSkin();
+                return RenderType.entityCutout(skin);
+            });
+            ```
+            """)
+    public ModifyEntityBuilder setRenderType(Function<ContextUtils.RendererModelContext, Object> setRenderType) {
+        this.setRenderType = setRenderType;
+        return this;
+    }
+
+    @Info(value = """
             Sets a consumer to handle the interaction with the entity.
             The provided Consumer accepts a {@link ContextUtils.EntityInteractContext} parameter,
             representing the context of the interaction
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.onInteract(context => {
@@ -88,7 +129,7 @@ public class ModifyEntityBuilder implements KubeEvent {
     @Info(value = """
             Sets a callback function to be executed when the entity
             collides with another entity.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.onEntityCollision(context => {
@@ -134,7 +175,7 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Boolean determining if the entity is controlled by the first passenger
-                                                
+            
             Example usage:
             ```javascript
             modifyBuilder.controlledByFirstPassenger(true)
@@ -166,7 +207,7 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Function determining if the entity is pickable.
-                                                
+            
             Example usage:
             ```javascript
             modifyBuilder.isPickable(entity => {
@@ -183,7 +224,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Function determining if the entity may collide with another entity
             using the ContextUtils.CollidingEntityContext which has this entity and the
             one colliding with this entity.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.canCollideWith(context => {
@@ -199,7 +240,7 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Defines in what condition the entity will start freezing.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.isFreezing(entity => {
@@ -215,7 +256,7 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets the block jump factor for the entity.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.setBlockJumpFactor(entity => {
@@ -231,7 +272,7 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets whether the entity is pushable.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.isPushable(true);
@@ -244,7 +285,7 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             @param positionRider A consumer determining the position of rider/riders.
-                            
+            
                 Example usage:
                 ```javascript
                 modifyBuilder.positionRider(context => {
@@ -259,9 +300,9 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets a predicate to determine if a passenger can be added to the entity.
-                        
+            
             @param predicate The predicate to check if a passenger can be added.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.canAddPassenger(context => {
@@ -278,7 +319,7 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets the swim sound for the entity using a string representation.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.setSwimSound("minecraft:entity.generic.swim");
@@ -298,7 +339,7 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets the swim splash sound for the entity using either a string representation or a ResourceLocation object.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.setSwimSplashSound("minecraft:entity.generic.splash");
@@ -323,7 +364,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             The provided Function accepts a {@link Entity} parameter,
             representing the entity whose block speed factor is being determined.
             It returns a Float representing the block speed factor.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.blockSpeedFactor(entity => {
@@ -344,7 +385,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             The provided Function accepts a {@link Entity} parameter,
             representing the entity whose flapping status is being determined.
             It returns a Boolean indicating whether the entity is flapping.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.isFlapping(entity => {
@@ -363,7 +404,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed when the entity is added to the world.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is added to the world.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.onAddedToWorld(entity => {
@@ -380,7 +421,7 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets whether to reposition the entity after loading.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.repositionEntityAfterLoad(true);
@@ -396,7 +437,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed when the entity starts sprinting.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that has started sprinting.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.onSprint(entity => {
@@ -415,7 +456,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed when the entity stops riding.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that has stopped being ridden.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.onStopRiding(entity => {
@@ -434,7 +475,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed during each tick when the entity is being ridden.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is being ridden.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.rideTick(entity => {
@@ -452,7 +493,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a predicate function to determine whether the entity can undergo freezing.
             The provided Predicate accepts a {@link Entity} parameter,
             representing the entity that may be subjected to freezing.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.canFreeze(entity => {
@@ -472,7 +513,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a predicate function to determine whether the entity is currently glowing.
             The provided Predicate accepts a {@link Entity} parameter,
             representing the entity that may be checked for its glowing state.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.isCurrentlyGlowing(entity => {
@@ -491,7 +532,7 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets the minimum fall distance for the entity before taking damage.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.setMaxFallDistance(entity => {
@@ -511,7 +552,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed when the entity is removed on the client side.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is being removed on the client side.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.onClientRemoval(entity => {
@@ -530,7 +571,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed when the entity is hurt by lava.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is affected by lava.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.lavaHurt(entity => {
@@ -549,7 +590,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed when the entity performs a flap action.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is flapping.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.onFlap(entity => {
@@ -566,11 +607,11 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets a predicate to determine whether the living entity dampens vibrations.
-                
+            
             @param predicate The predicate to determine whether the living entity dampens vibrations.
-                
+            
             The predicate should take a Entity as a parameter and return a boolean value indicating whether the living entity dampens vibrations.
-                
+            
             Example usage:
             ```javascript
             baseEntityBuilder.dampensVibrations(entity => {
@@ -587,11 +628,11 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets a predicate to determine whether to show the vehicle health for the living entity.
-                
+            
             @param predicate The predicate to determine whether to show the vehicle health.
-                
+            
             The predicate should take a Entity as a parameter and return a boolean value indicating whether to show the vehicle health.
-                
+            
             Example usage:
             ```javascript
             baseEntityBuilder.showVehicleHealth(entity => {
@@ -610,7 +651,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed when the entity is hit by thunder.
             The provided Consumer accepts a {@link ContextUtils.ThunderHitContext} parameter,
             representing the context of the entity being hit by thunder.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.thunderHit(context => {
@@ -629,7 +670,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a predicate function to determine whether the entity is invulnerable to a specific type of damage.
             The provided Predicate accepts a {@link ContextUtils.DamageContext} parameter,
             representing the context of the damage, and returns a boolean indicating invulnerability.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.isInvulnerableTo(context => {
@@ -649,7 +690,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a predicate function to determine whether the entity can change dimensions.
             The provided Predicate accepts a {@link Entity} parameter,
             representing the entity that may attempt to change dimensions.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.canChangeDimensions(entity => {
@@ -669,7 +710,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a predicate function to determine whether the entity may interact with something.
             The provided Predicate accepts a {@link ContextUtils.MayInteractContext} parameter,
             representing the context of the potential interaction, and returns a boolean.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.mayInteract(context => {
@@ -689,7 +730,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a predicate function to determine whether the entity can trample or step on something.
             The provided Predicate accepts a {@link ContextUtils.CanTrampleContext} parameter,
             representing the context of the potential trampling action, and returns a boolean.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.canTrample(context => {
@@ -709,7 +750,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed when the entity is removed from the world.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is being removed from the world.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.onRemovedFromWorld(entity => {
@@ -727,7 +768,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed when the entity falls and takes damage.
             The provided Consumer accepts a {@link ContextUtils.EEntityFallDamageContext} parameter,
             representing the context of the entity falling and taking fall damage.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.onFall(context => {
@@ -755,10 +796,10 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets a consumer to handle lerping (linear interpolation) of the entity's position.
-                        
+            
             @param lerpTo Consumer accepting a {@link ContextUtils.LerpToContext} parameter,
                             providing information and control over the lerping process.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.lerpTo(context => {
@@ -775,10 +816,10 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets a function to determine whether the entity should render at a squared distance.
-                        
+            
             @param shouldRenderAtSqrDistance Function accepting a {@link ContextUtils.EntitySqrDistanceContext} parameter,
                              defining the conditions under which the entity should render.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.shouldRenderAtSqrDistance(context => {
@@ -796,9 +837,9 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets whether the entity is attackable or not.
-                        
+            
             @param isAttackable Boolean value indicating whether the entity is attackable.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.isAttackable(true);
@@ -814,7 +855,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed when a player touches the entity.
             The provided Consumer accepts a {@link ContextUtils.EntityPlayerContext} parameter,
             representing the context of the player's interaction with the entity.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.playerTouch(context => {
@@ -833,7 +874,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Sets a callback function to be executed when the entity performs a movement action.
             The provided Consumer accepts a {@link ContextUtils.MovementContext} parameter,
             representing the context of the entity's movement.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.move(context => {
@@ -850,9 +891,9 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets a callback function to be executed on each tick for the entity.
-                        
+            
             @param tick A Consumer accepting a {@link Entity} parameter, defining the behavior to be executed on each tick.
-                        
+            
             Example usage:
             ```javascript
             modifyBuilder.tick(entity => {

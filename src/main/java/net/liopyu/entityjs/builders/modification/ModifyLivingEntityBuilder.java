@@ -13,8 +13,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
-    public transient Function<ContextUtils.RendererModelContext<@NotNull LivingEntity, @NotNull EntityModel<@NotNull LivingEntity>>, Object> setTextureLocation;
-    public transient Function<ContextUtils.RendererModelContext<@NotNull LivingEntity, @NotNull EntityModel<@NotNull LivingEntity>>, Object> setRenderType;
     public transient Boolean isPushable;
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
     public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
@@ -88,44 +86,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
         super(entityType);
     }
 
-    @Info(value = """
-            Sets the Texture Location of the entity without modifying the RenderType logic.
-            Returns a ResourceLocation.
-            Return null for the default entity's location
-            
-            Example usage:
-            ```javascript
-            modifyBuilder.setTextureLocation(entity => {
-                // Sets the entity's texture to default Steve
-                let DefaultPlayerSkin = Java.loadClass("net.minecraft.client.resources.DefaultPlayerSkin")
-                let skin = DefaultPlayerSkin.getDefaultSkin();
-                return skin;
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder setTextureLocation(Function<ContextUtils.RendererModelContext<@NotNull LivingEntity, @NotNull EntityModel<@NotNull LivingEntity>>, Object> setTextureLocation) {
-        this.setTextureLocation = setTextureLocation;
-        return this;
-    }
-
-    @Info(value = """
-            Sets the RenderType of the entity, effectively capable of dynamically replacing texture locations.
-            Return null for the default render type.
-            
-            Example usage:
-            ```javascript
-            modifyBuilder.setRenderType(entity => {
-                // Sets the entity's texture to default Steve
-                let DefaultPlayerSkin = Java.loadClass("net.minecraft.client.resources.DefaultPlayerSkin")
-                let skin = DefaultPlayerSkin.getDefaultSkin();
-                return RenderType.entityCutout(skin);
-            });
-            ```
-            """)
-    public ModifyLivingEntityBuilder setRenderType(Function<ContextUtils.RendererModelContext<@NotNull LivingEntity, @NotNull EntityModel<@NotNull LivingEntity>>, Object> setRenderType) {
-        this.setRenderType = setRenderType;
-        return this;
-    }
 
     @Info(value = """
             Sets the water slowdown factor for the entity. Defaults to 0.8.

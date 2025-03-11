@@ -9,6 +9,7 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -109,15 +110,15 @@ public class ContextUtils {
         }
     }
 
-    public static class RendererModelContext<T extends LivingEntity, M extends EntityModel<T>> {
-        @Info("The living entity")
-        public final LivingEntity entity;
+    public static class RendererModelContext {
+        @Info("The entity")
+        public final Entity entity;
         @Info("The entity's renderer")
-        public final LivingEntityRenderer<T, M> renderer;
+        public final EntityRenderer<?> renderer;
         @Info("The entity's model")
-        public final EntityModel<T> model;
+        public final EntityModel<?> model;
 
-        public RendererModelContext(LivingEntity entity, LivingEntityRenderer<T, M> renderer, EntityModel<T> model) {
+        public RendererModelContext(Entity entity, EntityRenderer<?> renderer, EntityModel<?> model) {
             this.entity = entity;
             this.renderer = renderer;
             this.model = model;
