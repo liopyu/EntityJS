@@ -128,7 +128,7 @@ public class ContextUtils {
     }
 
     public static class RendererModelContext {
-        @Info("The living entity")
+        @Info("The entity")
         public final Entity entity;
         @Info("The entity's renderer")
         public final EntityRenderer<?> renderer;
