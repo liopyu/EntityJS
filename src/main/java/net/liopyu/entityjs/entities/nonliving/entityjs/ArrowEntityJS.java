@@ -48,38 +48,33 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     public final ArrowEntityJSBuilder builder;
 
-    private double baseDamage;
-    private int knockback;
-    @Nullable
-    private IntOpenHashSet piercingIgnoreEntityIds;
-    @Nullable
-    private List<Entity> piercedAndKilledEntities;
     private EntityJSHelperClass.EntityMovementTracker movementTracker;
 
     private boolean isMoving;
+    private int knockBack;
 
     public ArrowEntityJS(ArrowEntityJSBuilder builder, EntityType<? extends AbstractArrow> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
-        // pickUpStack = ItemStack.EMPTY;
-        this.baseDamage = builder.setBaseDamage;
+        this.setBaseDamage(builder.setBaseDamage);
         this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+        this.knockBack = builder.setKnockback;
     }
 
     public ArrowEntityJS(ArrowEntityJSBuilder builder, Level level, LivingEntity shooter, ItemStack stack, @Nullable ItemStack weapon) {
         super(builder.get(), shooter, level, stack, weapon);
         this.builder = builder;
-        //pickUpStack = ItemStack.EMPTY;
-        this.baseDamage = builder.setBaseDamage;
+        this.setBaseDamage(builder.setBaseDamage);
         this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+        this.knockBack = builder.setKnockback;
     }
 
     public ArrowEntityJS(Level level, ArrowEntityJSBuilder builder) {
         super(builder.get(), level);
         this.builder = builder;
-        //pickUpStack = ItemStack.EMPTY;
-        this.baseDamage = builder.setBaseDamage;
+        this.setBaseDamage(builder.setBaseDamage);
         this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+        this.knockBack = builder.setKnockback;
     }
 
     @Override
@@ -195,21 +190,15 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     public void setBaseDamage(double pBaseDamage) {
-        this.baseDamage = pBaseDamage + builder.setBaseDamage + setDamageFunction();
+        super.setBaseDamage(pBaseDamage + builder.setBaseDamage + setDamageFunction());
     }
-
-    public double getBaseDamage() {
-        return this.baseDamage;
-    }
-
 
     public void setKnockback(int pKnockback) {
-        if (builder.setKnockback != null) this.knockback = builder.setKnockback + pKnockback;
-        else this.knockback = pKnockback;
+        this.knockBack = pKnockback;
     }
 
     public int getKnockback() {
-        return this.knockback;
+        return this.knockBack;
     }
 
 
@@ -375,6 +364,26 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     //Projectile Overrides
+    @Override
+    protected void doKnockback(LivingEntity p_346111_, DamageSource p_346412_) {
+        double d0 = (double) (
+                this.firedFromWeapon != null && this.level() instanceof ServerLevel serverlevel
+                        ? EnchantmentHelper.modifyKnockback(serverlevel, this.firedFromWeapon, p_346111_, p_346412_, 0.0F)
+                        : 0.0F
+        );
+        d0 += (this.knockBack - 1);
+       /* if (this.knockBack > 1) {
+            d0 += (this.knockBack - 1);
+        }*/
+        if (d0 > 0.0) {
+            double d1 = Math.max(0.0, 1.0 - p_346111_.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+            Vec3 vec3 = this.getDeltaMovement().multiply(1.0, 0.0, 1.0).normalize().scale(d0 * 0.6 * d1);
+            if (vec3.lengthSqr() > 0.0) {
+                p_346111_.push(vec3.x, 0.1, vec3.z);
+            }
+        }
+    }
+
 
     @Override
     protected void onHitEntity(EntityHitResult p_36757_) {
@@ -382,7 +391,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         super.onHitEntity(p_36757_);
         Entity entity = p_36757_.getEntity();
         float f = (float) this.getDeltaMovement().length();
-        double d0 = this.baseDamage;
+        double d0 = this.getBaseDamage();
         Entity entity1 = this.getOwner();
         DamageSource damagesource = this.damageSources().arrow(this, (Entity) (entity1 != null ? entity1 : this));
         if (this.getWeaponItem() != null && this.level() instanceof ServerLevel serverlevel) {
@@ -480,13 +489,13 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     public void addAdditionalSaveData(CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
-        pCompound.putDouble("damage", this.baseDamage);
+        pCompound.putDouble("damage", this.getBaseDamage());
     }
 
     public void readAdditionalSaveData(CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         if (pCompound.contains("damage", 99)) {
-            this.baseDamage = pCompound.getDouble("damage");
+            this.setBaseDamage(pCompound.getDouble("damage"));
         }
     }
 
