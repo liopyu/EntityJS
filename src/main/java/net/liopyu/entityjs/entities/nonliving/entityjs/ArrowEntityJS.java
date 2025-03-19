@@ -83,7 +83,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     @Override
     public ItemStack getPickupItem() {
-        return ForgeRegistries.ITEMS.getValue(builder.item.id).getDefaultInstance();
+        return pickUpStack != ItemStack.EMPTY ? pickUpStack : ForgeRegistries.ITEMS.getValue(builder.item.id).getDefaultInstance();
     }
 
     public String entityName() {
