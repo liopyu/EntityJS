@@ -1,7 +1,6 @@
 package net.liopyu.entityjs.entities.nonliving.entityjs;
 
 import com.google.common.collect.Lists;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
@@ -11,7 +10,6 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -34,10 +32,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 @MethodsReturnNonnullByDefault
@@ -47,28 +43,25 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     public final ArrowEntityJSBuilder builder;
     @NotNull
     public ItemStack pickUpStack;
-    private double baseDamage;
-    private int knockback;
-    @Nullable
-    private IntOpenHashSet piercingIgnoreEntityIds;
-    @Nullable
-    private List<Entity> piercedAndKilledEntities;
+    private int knockBack;
     private boolean isMoving;
 
     public ArrowEntityJS(ArrowEntityJSBuilder builder, EntityType<? extends AbstractArrow> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
         pickUpStack = ItemStack.EMPTY;
-        this.baseDamage = builder.setBaseDamage;
+        this.setBaseDamage(builder.setBaseDamage);
         this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+        this.knockBack = builder.setKnockback;
     }
 
     public ArrowEntityJS(Level level, LivingEntity shooter, ArrowEntityJSBuilder builder) {
         super(builder.get(), shooter, level);
         this.builder = builder;
         pickUpStack = ItemStack.EMPTY;
-        this.baseDamage = builder.setBaseDamage;
+        this.setBaseDamage(builder.setBaseDamage);
         this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+        this.knockBack = builder.setKnockback;
     }
 
     @Override
@@ -175,21 +168,16 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     public void setBaseDamage(double pBaseDamage) {
-        this.baseDamage = pBaseDamage + builder.setBaseDamage + setDamageFunction();
-    }
-
-    public double getBaseDamage() {
-        return this.baseDamage;
+        super.setBaseDamage(pBaseDamage + builder.setBaseDamage + setDamageFunction());
     }
 
 
     public void setKnockback(int pKnockback) {
-        if (builder.setKnockback != null) this.knockback = builder.setKnockback + pKnockback;
-        else this.knockback = pKnockback;
+        this.knockBack = pKnockback;
     }
 
     public int getKnockback() {
-        return this.knockback;
+        return this.knockBack;
     }
 
     @Override
@@ -616,7 +604,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     protected void onHitEntity(EntityHitResult pResult) {
         Entity entity = pResult.getEntity();
         float f = (float) this.getDeltaMovement().length();
-        int i = Mth.ceil(Mth.clamp((double) f * this.baseDamage, 0.0, 2.147483647E9));
+        int i = Mth.ceil(Mth.clamp((double) f * this.getBaseDamage(), 0.0, 2.147483647E9));
         if (this.getPierceLevel() > 0) {
             if (this.piercingIgnoreEntityIds == null) {
                 this.piercingIgnoreEntityIds = new IntOpenHashSet(5);
@@ -667,9 +655,9 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
                     livingentity.setArrowCount(livingentity.getArrowCount() + 1);
                 }
 
-                if (this.knockback > 0) {
+                if (this.knockBack > 0) {
                     double d0 = Math.max(0.0, 1.0 - livingentity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
-                    Vec3 vec3 = this.getDeltaMovement().multiply(1.0, 0.0, 1.0).normalize().scale((double) this.knockback * 0.6 * d0);
+                    Vec3 vec3 = this.getDeltaMovement().multiply(1.0, 0.0, 1.0).normalize().scale((double) this.knockBack * 0.6 * d0);
                     if (vec3.lengthSqr() > 0.0) {
                         livingentity.push(vec3.x, 0.1, vec3.z);
                     }
@@ -738,13 +726,13 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     @Override
     public void addAdditionalSaveData(CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
-        pCompound.putDouble("damage", this.baseDamage);
+        pCompound.putDouble("damage", this.getBaseDamage());
     }
 
     public void readAdditionalSaveData(CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         if (pCompound.contains("damage", 99)) {
-            this.baseDamage = pCompound.getDouble("damage");
+            this.setBaseDamage(pCompound.getDouble("damage"));
         }
     }
 
