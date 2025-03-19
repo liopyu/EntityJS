@@ -34,6 +34,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient Integer setKnockback;
     public transient Float setWaterInertia;
     public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
+    public boolean canShootFromDispenser = true;
 
     public ArrowEntityBuilder(ResourceLocation i) {
         super(i);
@@ -44,6 +45,11 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     }
 
+    @Info(value = "Sets whether or not the projectile can be shot from dispenser blocks, if noItem is set to true this will not register DispenserBehavior.")
+    public void setCanShootFromDispenser(boolean canShootFromDispenser) {
+        this.canShootFromDispenser = canShootFromDispenser;
+    }
+
     @Override
     public EntityType<T> createObject() {
         return new NonAnimatableEntityTypeBuilder<>(this).get();
@@ -52,7 +58,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     @Info(value = """
             Sets a callback function to be executed when the arrow
             collides with an entity.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.onEntityCollision(context => {
@@ -71,7 +77,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the texture based on information about the entity.
             The default behavior returns <namespace>:textures/entity/projectiles/<path>.png.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.textureResource(entity => {
@@ -99,9 +105,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     //Arrow Overrides
     @Info(value = """
             Sets a function to determine if a player can pick up the arrow entity.
-                        
+            
             @param tryPickup The function to check if a player can pick up the arrow.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.tryPickup(context => {
@@ -118,9 +124,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets the base damage value for the arrow entity.
-                        
+            
             @param baseDamage The base damage value to be set.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.setBaseDamage(8.0);
@@ -133,9 +139,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets the base damage value with a function for the arrow entity for more control.
-                        
+            
             @param setDamageFunction Function which returns a double.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.setBaseDamage(entity => {
@@ -151,9 +157,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets the knockback value for the arrow entity when a bow has Punch Enchantment.
-                        
+            
             @param setKnockback The knockback value of the Punch Enchantment to be set.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.setKnockback(2);
@@ -167,10 +173,10 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets the water inertia value for the arrow entity.
-                        
+            
             @param setWaterInertia The water inertia value to be set.
             Defaults to 0.6 for AbstractArrow
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.setWaterInertia(0.5);
@@ -183,9 +189,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets a consumer to perform additional effects after the arrow successfully hurts a living entity.
-                        
+            
             @param doPostHurtEffects The consumer to perform additional effects.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.doPostHurtEffects(context => {
@@ -201,9 +207,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets the default sound event played when the arrow hits the ground using a string representation.
-                        
+            
             @param defaultHitGroundSoundEvent A string representing the ResourceLocation of the sound event.
-                        
+            
             Example usage:
             ```javascript
             // Example to set a custom sound event for the arrow hitting the ground.
@@ -220,9 +226,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets a consumer to be called during each tick to handle arrow entity despawn logic.
-                        
+            
             @param tickDespawn The consumer to handle the arrow entity tick despawn logic.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.tickDespawn(arrow => {
@@ -240,9 +246,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets a consumer to be called when the arrow entity hits another entity.
-                        
+            
             @param onHitEntity The consumer to handle the arrow entity hit context.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.onHitEntity(context => {
@@ -257,9 +263,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets a consumer to be called when the arrow entity hits a block.
-                        
+            
             @param onHitBlock The consumer to handle the arrow block hit context.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.onHitBlock(context => {
@@ -274,9 +280,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
 
     @Info(value = """
             Sets a function to determine if the arrow entity can hit a specific entity.
-                        
+            
             @param canHitEntity Function to check if the arrow can hit the entity.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.canHitEntity(entity => {

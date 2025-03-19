@@ -36,6 +36,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
     public transient Function<TridentEntityJS, Object> isChanneling;
     public transient DamageSource damageSource;
     public transient boolean alwaysThunder;
+    public boolean canShootFromDispenser = true;
 
     public TridentJSBuilder(ResourceLocation i) {
         super(i);
@@ -49,9 +50,14 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
         thunderHitVolume = 5.0F;
     }
 
+    @Info(value = "Sets whether or not the projectile can be shot from dispenser blocks, if noItem is set to true this will not register DispenserBehavior.")
+    public void setCanShootFromDispenser(boolean canShootFromDispenser) {
+        this.canShootFromDispenser = canShootFromDispenser;
+    }
+
     @Info(value = """
             @param alwaysThunder A boolean value determining if the trident always causes thunder on hit, regardless of weather.
-                            
+            
                 Example usage:
                 ```javascript
                 tridentBuilder.setAlwaysThunder(true);
@@ -64,7 +70,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
 
     @Info(value = """
             @param damageSource The source of damage caused by the trident.
-                            
+            
                 Example usage:
                 ```javascript
                 tridentBuilder.setDamageSource(DamageSource.thrownProjectile);
@@ -77,7 +83,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
 
     @Info(value = """
             @param defaultTridentHitSound The sound event to be played when the trident hits an entity by default.
-                            
+            
                 Example usage:
                 ```javascript
                 tridentBuilder.setDefaultTridentHitSound(SoundEvents.TRIDENT_HIT);
@@ -90,7 +96,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
 
     @Info(value = """
             @param thunderHitSound The sound event to be played when the trident hits an entity during a thunderstorm.
-                            
+            
                 Example usage:
                 ```javascript
                 tridentBuilder.setThunderHitSound(SoundEvents.THUNDER);
@@ -104,7 +110,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
 
     @Info(value = """
             @param isChanneling A function that determines whether the trident entity has the channeling enchantment.
-                            
+            
                 Example usage:
                 ```javascript
                 tridentBuilder.setIsChanneling(tridentEntity => {
@@ -119,7 +125,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
 
     @Info(value = """
             @param defaultHitGroundSoundEvent The sound event to be played when the trident hits the ground by default.
-                            
+            
                 Example usage:
                 ```javascript
                 tridentBuilder.setDefaultHitGroundSoundEvent(SoundEvents.GENERIC_HIT);
@@ -173,7 +179,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
     @Info(value = """
             Sets a callback function to be executed when the projectile
             collides with an entity.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.onEntityCollision(context => {
@@ -191,7 +197,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
             Sets a callback function to be executed when the projectile hits an entity.
             The provided Consumer accepts a {@link ContextUtils.ProjectileEntityHitContext} parameter,
             representing the context of the projectile's interaction with a specific entity.
-                        
+            
             Example usage:
             ```javascript
             projectileBuilder.onHitEntity(context -> {
@@ -210,7 +216,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
             Sets a callback function to be executed when the projectile hits a block.
             The provided Consumer accepts a {@link ContextUtils.ProjectileBlockHitContext} parameter,
             representing the context of the projectile's interaction with a specific block.
-                        
+            
             Example usage:
             ```javascript
             projectileBuilder.onHitBlock(context -> {
@@ -226,9 +232,9 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
 
     @Info(value = """
             Sets a function to determine if the projectile entity can hit a specific entity.
-                        
+            
             @param canHitEntity The predicate to check if the arrow can hit the entity.
-                        
+            
             Example usage:
             ```javascript
             projectileEntityBuilder.canHitEntity(entity -> {

@@ -46,7 +46,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     private EntityJSHelperClass.EntityMovementTracker movementTracker;
     public final ArrowEntityJSBuilder builder;
     @NotNull
-    protected ItemStack pickUpStack;
+    public ItemStack pickUpStack;
     private double baseDamage;
     private int knockback;
     @Nullable
@@ -82,8 +82,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     @Override
-    protected ItemStack getPickupItem() {
-        return pickUpStack;
+    public ItemStack getPickupItem() {
+        return pickUpStack != ItemStack.EMPTY ? pickUpStack : ForgeRegistries.ITEMS.getValue(builder.item.id).getDefaultInstance();
     }
 
     public String entityName() {

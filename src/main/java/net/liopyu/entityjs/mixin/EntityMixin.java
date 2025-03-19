@@ -10,6 +10,7 @@ import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
+import net.liopyu.entityjs.util.implementation.IEntityJS;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -36,7 +37,7 @@ import java.util.function.Consumer;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = Entity.class, remap = true)
-public class EntityMixin/*implements IModifyEntityJS*/ {
+public class EntityMixin implements IEntityJS {
     @Unique
     private Object entityJs$builder;
 
@@ -51,7 +52,9 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
 
     @Unique
     private Object entityJs$entityObject = this;
-
+    @Unique
+    private EntityJSHelperClass.EntityMovementTracker entityJs$movementTracker;
+    private boolean entityJs$isMoving = false;
 
     @Unique
     private Entity entityJs$getLivingEntity() {
@@ -71,6 +74,12 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
+        entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+    }
+
+    @Override
+    public boolean entityJs$isMoving() {
+        return this.entityJs$isMoving;
     }
 
     @Inject(method = "interact", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
@@ -86,6 +95,7 @@ public class EntityMixin/*implements IModifyEntityJS*/ {
 
     @Inject(method = "tick", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void tick(CallbackInfo ci) {
+        entityJs$isMoving = entityJs$movementTracker.isMoving(entityJs$getLivingEntity());
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.tick != null) {
                 EntityJSHelperClass.consumerCallback(builder.tick, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tick.");

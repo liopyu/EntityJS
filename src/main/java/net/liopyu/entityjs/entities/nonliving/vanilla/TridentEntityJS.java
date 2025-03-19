@@ -57,6 +57,14 @@ public class TridentEntityJS extends ThrownTrident implements IAnimatableJSNL {
         this.entityData.set(ID_FOIL, pItemStack.hasFoil());
     }
 
+    public ItemStack getTridentItem() {
+        return tridentItem;
+    }
+
+    public void setTridentItem(ItemStack tridentItem) {
+        this.tridentItem = tridentItem;
+    }
+
     @Override
     public BaseEntityBuilder<?> getBuilder() {
         return builder;

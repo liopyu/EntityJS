@@ -4,11 +4,30 @@ import dev.architectury.platform.Platform;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.EntityJSMod;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
+import net.liopyu.entityjs.builders.living.entityjs.MobEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.*;
+import net.liopyu.entityjs.builders.nonliving.vanilla.TridentJSBuilder;
+import net.liopyu.entityjs.entities.nonliving.entityjs.ArrowEntityJS;
+import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileAnimatableJS;
+import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileEntityJS;
+import net.liopyu.entityjs.entities.nonliving.vanilla.TridentEntityJS;
+import net.minecraft.core.Position;
+import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
+import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber(modid = EntityJSMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class SubEvents {
@@ -17,6 +36,68 @@ public class SubEvents {
         if (Platform.isModLoaded("cgm") && Platform.isModLoaded("framework")) {
             event.enqueueWork(() -> registerCGMEntities());
         }
+        event.enqueueWork(() -> {
+            for (BaseNonAnimatableEntityBuilder<?> b : BaseNonAnimatableEntityBuilder.thisList) {
+                if (b instanceof ArrowEntityJSBuilder builder) {
+                    if (!builder.noItem && builder.canShootFromDispenser) {
+                        var item = ForgeRegistries.ITEMS.getValue(builder.item.id);
+                        DispenserBlock.registerBehavior(item, new AbstractProjectileDispenseBehavior() {
+                            @Override
+                            protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
+                                var entity = new ArrowEntityJS(builder, builder.get(), level);
+                                entity.setPos(new Vec3(position.x(), position.y(), position.z()));
+                                entity.pickup = AbstractArrow.Pickup.ALLOWED;
+                                var i = itemStack.copy();
+                                i.setCount(1);
+                                entity.setPickUpItem(i);
+                                return entity;
+                            }
+                        });
+                    }
+                } else if (b instanceof ProjectileEntityJSBuilder builder) {
+                    if (!builder.noItem && builder.canShootFromDispenser) {
+                        var item = ForgeRegistries.ITEMS.getValue(builder.item.id);
+                        DispenserBlock.registerBehavior(item, new AbstractProjectileDispenseBehavior() {
+                            @Override
+                            protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
+                                var entity = new ProjectileEntityJS(builder, builder.get(), level);
+                                entity.setPos(new Vec3(position.x(), position.y(), position.z()));
+                                return entity;
+                            }
+                        });
+                    }
+                }
+            }
+            for (BaseEntityBuilder<?> b : BaseEntityBuilder.thisList) {
+                if (b instanceof TridentJSBuilder builder) {
+                    if (!builder.noItem && builder.canShootFromDispenser) {
+                        var item = ForgeRegistries.ITEMS.getValue(builder.item.id);
+                        DispenserBlock.registerBehavior(item, new AbstractProjectileDispenseBehavior() {
+                            @Override
+                            protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
+                                var entity = new TridentEntityJS(builder, builder.get(), level);
+                                entity.setPos(new Vec3(position.x(), position.y(), position.z()));
+                                entity.pickup = AbstractArrow.Pickup.ALLOWED;
+                                entity.setTridentItem(itemStack.copy());
+                                return entity;
+                            }
+                        });
+                    }
+                } else if (b instanceof ProjectileAnimatableJSBuilder builder) {
+                    if (!builder.noItem && builder.canShootFromDispenser) {
+                        var item = ForgeRegistries.ITEMS.getValue(builder.item.id);
+                        DispenserBlock.registerBehavior(item, new AbstractProjectileDispenseBehavior() {
+                            @Override
+                            protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
+                                var entity = new ProjectileAnimatableJS(builder, builder.get(), level);
+                                entity.setPos(new Vec3(position.x(), position.y(), position.z()));
+                                return entity;
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 
     private static void registerCGMEntities() {
