@@ -49,7 +49,6 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     public transient Function<LivingEntity, Object> setLookControl;
     public transient Function<LivingEntity, Object> setMoveControl;
     public transient Function<LivingEntity, Object> setJumpControl;
-    public boolean canShootFromDispenser;
 
     public MobBuilder(ResourceLocation i) {
         super(i);
