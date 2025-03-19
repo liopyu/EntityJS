@@ -34,7 +34,7 @@ public class ArrowItemBuilder extends ItemBuilder {
 
     @Override
     public Item createObject() {
-        return new ArrowItem(createItemProperties()) {
+        return new ArrowItemJS(createItemProperties(), parent) {
             @Override
             public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter, @Nullable ItemStack weapon) {
                 final ArrowEntityJS arrow = new ArrowEntityJS(parent, pLevel, pShooter, pStack, weapon);

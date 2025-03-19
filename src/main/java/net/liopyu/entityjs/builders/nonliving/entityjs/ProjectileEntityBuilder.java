@@ -33,11 +33,17 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
     public transient Float vY;
     public transient Float vZ;
     public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
+    public boolean canShootFromDispenser = true;
 
     public ProjectileEntityBuilder(ResourceLocation i) {
         super(i);
         textureLocation = t -> t.getProjectileBuilder().newID("textures/entity/projectiles/", ".png");
         thisList.add(this);
+    }
+
+    @Info(value = "Sets whether or not the projectile can be shot from dispenser blocks, if noItem is set to true this will not register DispenserBehavior.")
+    public void setCanShootFromDispenser(boolean canShootFromDispenser) {
+        this.canShootFromDispenser = canShootFromDispenser;
     }
 
     @Override
@@ -48,13 +54,13 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
     //Throwable Projectile Overrides
     @Info(value = """
             Sets the scale for rendering the projectile entity.
-                        
+            
             @param pX The X-axis scale.
-                        
+            
             @param pY The Y-axis scale.
-                        
+            
             @param pZ The Z-axis scale.
-                        
+            
             Example usage:
             ```javascript
             projectileEntityBuilder.renderScale(1.5, 1.5, 1.5);
@@ -70,13 +76,13 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
 
     @Info(value = """
             Sets the offset for rendering the projectile entity.
-                        
+            
             @param vX The X-axis offset.
-                        
+            
             @param vY The Y-axis offset.
-                        
+            
             @param vZ The Z-axis offset.
-                        
+            
             Example usage:
             ```javascript
             projectileEntityBuilder.renderOffset(0.5, 1.0, -0.5);
@@ -94,7 +100,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the texture based on information about the entity.
             The default behavior returns <namespace>:textures/entity/projectiles/<path>.png.
-                        
+            
             Example usage:
             ```javascript
             projectileBuilder.textureResource(entity => {
@@ -124,7 +130,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
     @Info(value = """
             Sets a callback function to be executed when the projectile
             collides with an entity.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.onEntityCollision(context => {
@@ -142,7 +148,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
             Sets a callback function to be executed when the projectile hits an entity.
             The provided Consumer accepts a {@link ContextUtils.ProjectileEntityHitContext} parameter,
             representing the context of the projectile's interaction with a specific entity.
-                        
+            
             Example usage:
             ```javascript
             projectileBuilder.onHitEntity(context -> {
@@ -161,7 +167,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
             Sets a callback function to be executed when the projectile hits a block.
             The provided Consumer accepts a {@link ContextUtils.ProjectileBlockHitContext} parameter,
             representing the context of the projectile's interaction with a specific block.
-                        
+            
             Example usage:
             ```javascript
             projectileBuilder.onHitBlock(context -> {
@@ -177,9 +183,9 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
 
     @Info(value = """
             Sets a function to determine if the projectile entity can hit a specific entity.
-                        
+            
             @param canHitEntity The predicate to check if the arrow can hit the entity.
-                        
+            
             Example usage:
             ```javascript
             projectileEntityBuilder.canHitEntity(entity -> {

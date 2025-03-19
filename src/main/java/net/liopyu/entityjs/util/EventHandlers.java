@@ -8,13 +8,34 @@ import dev.latvian.mods.kubejs.script.data.VirtualDataPack;
 import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileAnimatableJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.vanilla.TridentJSBuilder;
+import net.liopyu.entityjs.entities.nonliving.entityjs.ArrowEntityJS;
+import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileAnimatableJS;
+import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileEntityJS;
+import net.liopyu.entityjs.entities.nonliving.vanilla.TridentEntityJS;
 import net.liopyu.entityjs.events.*;
+import net.minecraft.core.Position;
+import net.minecraft.core.dispenser.ProjectileDispenseBehavior;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
@@ -35,9 +56,43 @@ public class EventHandlers {
 
 
     public static void init(IEventBus modBus) {
+        modBus.addListener(EventHandlers::registerDispenserBehavior);
         modBus.addListener(EventHandlers::attributeCreation);
         modBus.addListener(EventHandlers::attributeModification);
         modBus.addListener(EventPriority.LOW, EventHandlers::registerSpawnPlacements); // Low to allow REPLACE to work and addons to effect the result
+    }
+
+    private static void registerDispenserBehavior(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            for (BaseNonAnimatableEntityBuilder<?> b : BaseNonAnimatableEntityBuilder.thisList) {
+                if (b instanceof ArrowEntityJSBuilder builder) {
+                    if (!builder.noItem && builder.canShootFromDispenser) {
+                        var item = BuiltInRegistries.ITEM.get(builder.item.id);
+                        DispenserBlock.registerProjectileBehavior(item);
+                    }
+                }
+            }
+            for (ProjectileEntityBuilder<?> p : ProjectileEntityBuilder.thisList) {
+                var b = (ProjectileEntityJSBuilder) p;
+                if (!b.noItem && b.canShootFromDispenser) {
+                    var item = BuiltInRegistries.ITEM.get(b.item.id);
+                    DispenserBlock.registerProjectileBehavior(item);
+                }
+            }
+            for (BaseEntityBuilder<?> b : BaseEntityBuilder.thisList) {
+                if (b instanceof TridentJSBuilder builder) {
+                    if (!builder.noItem && builder.canShootFromDispenser) {
+                        var item = BuiltInRegistries.ITEM.get(builder.item.id);
+                        DispenserBlock.registerProjectileBehavior(item);
+                    }
+                } else if (b instanceof ProjectileAnimatableJSBuilder builder) {
+                    if (!builder.noItem && builder.canShootFromDispenser) {
+                        var item = BuiltInRegistries.ITEM.get(builder.item.id);
+                        DispenserBlock.registerProjectileBehavior(item);
+                    }
+                }
+            }
+        });
     }
 
     private static void attributeCreation(EntityAttributeCreationEvent event) {

@@ -89,7 +89,7 @@ public class TridentItemBuilder extends ProjectileItemBuilder {
 
     @Override
     public Item createObject() {
-        return new TridentItem(createItemProperties()) {
+        return new TridentItemJS(createItemProperties(), parent) {
 
             @Override
             public void releaseUsing(ItemStack p_43394_, Level p_43395_, LivingEntity p_43396_, int p_43397_) {

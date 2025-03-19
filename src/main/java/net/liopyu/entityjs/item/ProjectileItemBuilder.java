@@ -39,7 +39,7 @@ public class ProjectileItemBuilder extends ItemBuilder {
 
     @Override
     public Item createObject() {
-        return new Item(createItemProperties()) {
+        return new ProjectileItemJS(createItemProperties(), parent) {
             @Override
             public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
                 if (canThrow) {
@@ -77,9 +77,9 @@ public class ProjectileItemBuilder extends ItemBuilder {
 
     @Info(value = """
             Sets whether the item can be thrown.
-                        
+            
             @param canThrow True if the item can be thrown, false otherwise.
-                        
+            
             Example usage:
             ```javascript
             itemBuilder.canThrow(true);
@@ -93,9 +93,9 @@ public class ProjectileItemBuilder extends ItemBuilder {
 
     @Info(value = """
             Sets the Z offset for the projectile.
-                        
+            
             @param projectileZ The Z offset for the projectile.
-                        
+            
             Example usage:
             ```javascript
             itemBuilder.projectileZ(0.5f);
@@ -108,9 +108,9 @@ public class ProjectileItemBuilder extends ItemBuilder {
 
     @Info(value = """
             Sets the velocity of the projectile.
-                        
+            
             @param projectileVelocity The velocity of the projectile.
-                        
+            
             Example usage:
             ```javascript
             itemBuilder.projectileVelocity(1.5f);
@@ -123,9 +123,9 @@ public class ProjectileItemBuilder extends ItemBuilder {
 
     @Info(value = """
             Sets the inaccuracy of the projectile.
-                        
+            
             @param projectileInaccuracy The inaccuracy of the projectile.
-                        
+            
             Example usage:
             ```javascript
             itemBuilder.projectileInaccuracy(0.1f);

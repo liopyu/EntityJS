@@ -72,6 +72,17 @@ public class TridentEntityJS extends ThrownTrident implements IAnimatableJSNL {
     }
 
     // Trident Overrides
+
+    @Override
+    public ItemStack getPickupItem() {
+        return super.getPickupItem();
+    }
+
+    @Override
+    public void setPickupItemStack(ItemStack p_331486_) {
+        super.setPickupItemStack(p_331486_);
+    }
+
     @Override
     protected SoundEvent getDefaultHitGroundSoundEvent() {
         return builder == null ? super.getDefaultHitGroundSoundEvent() : builder.defaultHitGroundSoundEvent;

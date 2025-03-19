@@ -47,8 +47,7 @@ import java.util.Objects;
 public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     public final ArrowEntityJSBuilder builder;
-    @NotNull
-    protected ItemStack pickUpStack;
+
     private double baseDamage;
     private int knockback;
     @Nullable
@@ -62,7 +61,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     public ArrowEntityJS(ArrowEntityJSBuilder builder, EntityType<? extends AbstractArrow> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
-        pickUpStack = ItemStack.EMPTY;
+        // pickUpStack = ItemStack.EMPTY;
         this.baseDamage = builder.setBaseDamage;
         this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
     }
@@ -70,7 +69,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     public ArrowEntityJS(ArrowEntityJSBuilder builder, Level level, LivingEntity shooter, ItemStack stack, @Nullable ItemStack weapon) {
         super(builder.get(), shooter, level, stack, weapon);
         this.builder = builder;
-        pickUpStack = ItemStack.EMPTY;
+        //pickUpStack = ItemStack.EMPTY;
         this.baseDamage = builder.setBaseDamage;
         this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
     }
@@ -78,7 +77,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     public ArrowEntityJS(Level level, ArrowEntityJSBuilder builder) {
         super(builder.get(), level);
         this.builder = builder;
-        pickUpStack = ItemStack.EMPTY;
+        //pickUpStack = ItemStack.EMPTY;
         this.baseDamage = builder.setBaseDamage;
         this.movementTracker = new EntityJSHelperClass.EntityMovementTracker();
     }
@@ -88,14 +87,20 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
         return builder;
     }
 
+    @Deprecated
     @Override
     public void setPickUpItem(ItemStack stack) {
-        pickUpStack = stack;
+        super.setPickupItemStack(stack);
     }
 
     @Override
-    protected ItemStack getPickupItem() {
-        return pickUpStack;
+    public void setPickupItemStack(ItemStack p_331486_) {
+        super.setPickupItemStack(p_331486_);
+    }
+
+    @Override
+    public ItemStack getPickupItem() {
+        return super.getPickupItem();
     }
 
     @Override
