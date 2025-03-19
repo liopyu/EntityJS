@@ -29,6 +29,7 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
     public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
     public transient ProjectileItemBuilder item;
     public transient boolean noItem;
+    public boolean canShootFromDispenser = true;
 
     public ProjectileAnimatableJSBuilder(ResourceLocation i) {
         super(i);
@@ -37,6 +38,10 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
                 .texture(i.getNamespace() + ":item/" + i.getPath());
     }
 
+    @Info(value = "Sets whether or not the projectile can be shot from dispenser blocks, if noItem is set to true this will not register DispenserBehavior.")
+    public void setCanShootFromDispenser(boolean canShootFromDispenser) {
+        this.canShootFromDispenser = canShootFromDispenser;
+    }
 
     @Info(value = "Indicates that no projectile item should be created for this entity type")
     public ProjectileAnimatableJSBuilder noItem() {
@@ -80,7 +85,7 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
     @Info(value = """
             Sets a callback function to be executed when the projectile
             collides with an entity.
-                        
+            
             Example usage:
             ```javascript
             arrowEntityBuilder.onEntityCollision(context => {
@@ -98,7 +103,7 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
             Sets a callback function to be executed when the projectile hits an entity.
             The provided Consumer accepts a {@link ContextUtils.ProjectileEntityHitContext} parameter,
             representing the context of the projectile's interaction with a specific entity.
-                        
+            
             Example usage:
             ```javascript
             projectileBuilder.onHitEntity(context -> {
@@ -117,7 +122,7 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
             Sets a callback function to be executed when the projectile hits a block.
             The provided Consumer accepts a {@link ContextUtils.ProjectileBlockHitContext} parameter,
             representing the context of the projectile's interaction with a specific block.
-                        
+            
             Example usage:
             ```javascript
             projectileBuilder.onHitBlock(context -> {
@@ -133,9 +138,9 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
 
     @Info(value = """
             Sets a function to determine if the projectile entity can hit a specific entity.
-                        
+            
             @param canHitEntity The predicate to check if the arrow can hit the entity.
-                        
+            
             Example usage:
             ```javascript
             projectileEntityBuilder.canHitEntity(entity -> {

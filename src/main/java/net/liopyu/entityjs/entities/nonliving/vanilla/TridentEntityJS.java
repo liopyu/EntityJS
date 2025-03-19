@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -66,6 +67,14 @@ public class TridentEntityJS extends ThrownTrident implements IAnimatableJSNL {
 
     public String entityName() {
         return this.getType().toString();
+    }
+
+    public ItemStack getTridentItem() {
+        return tridentItem;
+    }
+
+    public void setTridentItem(ItemStack tridentItem) {
+        this.tridentItem = tridentItem;
     }
 
     // Trident Overrides

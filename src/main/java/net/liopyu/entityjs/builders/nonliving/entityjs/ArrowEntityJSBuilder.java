@@ -8,6 +8,7 @@ import net.liopyu.entityjs.item.ArrowItemBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.item.Item;
 
 import java.util.function.Consumer;
 
@@ -22,7 +23,6 @@ public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
                 .canBePickedup(true)
                 .texture(i.getNamespace() + ":item/" + i.getPath())
                 .tag(new ResourceLocation("minecraft:arrows"));
-        
     }
 
 

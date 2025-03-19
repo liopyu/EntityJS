@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
-import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
-import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -33,7 +31,6 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -47,7 +44,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
 
     public final ArrowEntityJSBuilder builder;
     @NotNull
-    protected ItemStack pickUpStack;
+    public ItemStack pickUpStack;
     private double baseDamage;
     private int knockback;
     @Nullable
@@ -85,8 +82,8 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     }
 
     @Override
-    protected ItemStack getPickupItem() {
-        return pickUpStack;
+    public ItemStack getPickupItem() {
+        return ForgeRegistries.ITEMS.getValue(builder.item.id).getDefaultInstance();
     }
 
     public String entityName() {
