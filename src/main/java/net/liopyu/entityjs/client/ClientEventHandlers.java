@@ -12,6 +12,7 @@ import net.liopyu.entityjs.builders.nonliving.vanilla.BoatEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderEntityBuilder;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.client.nonliving.*;
+import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraft.client.KeyMapping;
 
@@ -26,6 +27,7 @@ public class ClientEventHandlers implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
+        EventHandlers.registerClientAttributes();
         registerKeyBindings();
     }
 

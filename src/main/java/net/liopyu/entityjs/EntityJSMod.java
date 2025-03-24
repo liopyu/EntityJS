@@ -1,7 +1,9 @@
 package net.liopyu.entityjs;
 
 import com.mojang.logging.LogUtils;
+import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import net.fabricmc.api.ModInitializer;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;

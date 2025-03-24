@@ -507,6 +507,9 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     @Override
     public void tick() {
+        /*if (this.getEntityData() == null) {
+            return;
+        }*/
         if (!isAddedToWorld && !this.isRemoved()) {
             onAddedToWorld();
             isAddedToWorld = true;

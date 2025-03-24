@@ -1,6 +1,9 @@
 package net.liopyu.entityjs.util;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.authlib.Environment;
+import com.mojang.logging.LogUtils;
+import dev.architectury.platform.Platform;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import dev.architectury.registry.level.entity.SpawnPlacementsRegistry;
 import dev.latvian.mods.kubejs.bindings.event.StartupEvents;
@@ -10,7 +13,9 @@ import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.script.data.VirtualKubeJSDataPack;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -49,12 +54,24 @@ public class EventHandlers {
 
     public static void init() {
         DynamicRegistrySetupCallback.EVENT.register(Event.DEFAULT_PHASE, listener -> {
-            for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-                EntityAttributeRegistry.register(builder::get, builder::getAttributeBuilder);
-            }
             EventHandlers.attributeModification();
-
         });
+
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            registerServerAttributes();
+        });
+    }
+
+    public static void registerServerAttributes() {
+        for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
+            EntityAttributeRegistry.register(builder, builder::getAttributeBuilder);
+        }
+    }
+
+    public static void registerClientAttributes() {
+        for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
+            EntityAttributeRegistry.register(builder, builder::getAttributeBuilder);
+        }
     }
 
     public static void attributeModification() {

@@ -11,6 +11,13 @@ group = project.maven_group
 base {
     archivesName = project.archives_base_name
 }
+loom {
+    runs {
+        client {
+            vmArg "-Dfabric.development.user=Dev"
+        }
+    }
+}
 
 repositories {
     maven {
