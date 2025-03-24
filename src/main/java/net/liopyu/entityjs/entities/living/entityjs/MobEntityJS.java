@@ -80,6 +80,15 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         this.helper = new ModifyAttributeEventJS.AttributeModificationHelper((EntityType<? extends LivingEntity>) this.getType());
     }
 
+    @Override
+    public AttributeMap getAttributes() {
+        for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
+            if (b.get() == this.getType()) {
+                return new AttributeMap(b.getAttributeBuilder().build());
+            }
+        }
+        return super.getAttributes();
+    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override

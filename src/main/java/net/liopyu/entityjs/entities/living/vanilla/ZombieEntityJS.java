@@ -84,6 +84,16 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     }
 
     @Override
+    public AttributeMap getAttributes() {
+        for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
+            if (b.get() == this.getType()) {
+                return new AttributeMap(b.getAttributeBuilder().build());
+            }
+        }
+        return super.getAttributes();
+    }
+
+    @Override
     protected boolean isSunSensitive() {
         return builder.isSunSensitive;
     }

@@ -114,6 +114,15 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
         this.navigation = this.createNavigation(pLevel);
     }
 
+    @Override
+    public AttributeMap getAttributes() {
+        for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
+            if (b.get() == this.getType()) {
+                return new AttributeMap(b.getAttributeBuilder().build());
+            }
+        }
+        return super.getAttributes();
+    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override

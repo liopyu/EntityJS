@@ -69,6 +69,16 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
     }
 
+    @Override
+    public AttributeMap getAttributes() {
+        for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
+            if (b.get() == this.getType()) {
+                return new AttributeMap(b.getAttributeBuilder().build());
+            }
+        }
+        return super.getAttributes();
+    }
+
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {
