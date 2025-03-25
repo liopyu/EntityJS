@@ -47,8 +47,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     }
 
     @Info(value = "Sets whether or not the projectile can be shot from dispenser blocks, if noItem is set to true this will not register DispenserBehavior.")
-    public void setCanShootFromDispenser(boolean canShootFromDispenser) {
+    public ArrowEntityBuilder<T> setCanShootFromDispenser(boolean canShootFromDispenser) {
         this.canShootFromDispenser = canShootFromDispenser;
+        return this;
     }
 
     @Override

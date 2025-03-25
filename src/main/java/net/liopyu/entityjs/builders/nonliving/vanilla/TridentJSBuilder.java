@@ -52,8 +52,9 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
     }
 
     @Info(value = "Sets whether or not the projectile can be shot from dispenser blocks, if noItem is set to true this will not register DispenserBehavior.")
-    public void setCanShootFromDispenser(boolean canShootFromDispenser) {
+    public TridentJSBuilder setCanShootFromDispenser(boolean canShootFromDispenser) {
         this.canShootFromDispenser = canShootFromDispenser;
+        return this;
     }
 
     public TridentJSBuilder setAttackDamage(float attackDamage) {

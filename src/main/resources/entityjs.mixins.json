@@ -4,6 +4,7 @@
   "package": "net.liopyu.entityjs.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "AnimationControllerMixin",
     "EntityMixin",
     "KubeJSCommandsMixin",
     "LivingEntityMixin",
