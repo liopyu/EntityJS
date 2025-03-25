@@ -27,6 +27,7 @@ import software.bernie.geckolib.core.keyframe.event.CustomInstructionKeyframeEve
 import software.bernie.geckolib.core.keyframe.event.KeyFrameEvent;
 import software.bernie.geckolib.core.keyframe.event.ParticleKeyframeEvent;
 import software.bernie.geckolib.core.keyframe.event.SoundKeyframeEvent;
+import software.bernie.geckolib.core.keyframe.event.data.CustomInstructionKeyframeData;
 import software.bernie.geckolib.core.keyframe.event.data.KeyFrameData;
 import software.bernie.geckolib.core.object.DataTicket;
 import software.bernie.geckolib.core.object.PlayState;
@@ -2847,12 +2848,23 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     public static class CustomInstructionKeyframeEventJS<E extends LivingEntity & IAnimatableJS> {
-
-        @Info(value = "A list of all the custom instructions. In blockbench, each line in the custom instruction box is a separate instruction.")
+        @Info(value = "A list of all the custom instructions. In Blockbench, each line in the custom instruction box is a separate instruction.")
         public final String instructions;
+        @Info(value = "The entity this animation is being applied to.")
+        public final E entity;
+        @Info(value = "The current tick of the animation.")
+        public final double animationTick;
+        @Info(value = "The controller handling this animation.")
+        public final AnimationController<E> controller;
+        @Info(value = "The keyframe data containing extra information about the instruction.")
+        public final CustomInstructionKeyframeData keyframeData;
 
         public CustomInstructionKeyframeEventJS(CustomInstructionKeyframeEvent<E> parent) {
-            instructions = parent.getKeyframeData().getInstructions();
+            this.instructions = parent.getKeyframeData().getInstructions();
+            this.entity = parent.getAnimatable();
+            this.animationTick = parent.getAnimationTick();
+            this.controller = parent.getController();
+            this.keyframeData = parent.getKeyframeData();
         }
     }
 
