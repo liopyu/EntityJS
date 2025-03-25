@@ -7,13 +7,11 @@ import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -26,7 +24,10 @@ import software.bernie.geckolib.core.keyframe.event.CustomInstructionKeyframeEve
 import software.bernie.geckolib.core.keyframe.event.KeyFrameEvent;
 import software.bernie.geckolib.core.keyframe.event.ParticleKeyframeEvent;
 import software.bernie.geckolib.core.keyframe.event.SoundKeyframeEvent;
+import software.bernie.geckolib.core.keyframe.event.data.CustomInstructionKeyframeData;
 import software.bernie.geckolib.core.keyframe.event.data.KeyFrameData;
+import software.bernie.geckolib.core.keyframe.event.data.ParticleKeyframeData;
+import software.bernie.geckolib.core.keyframe.event.data.SoundKeyframeData;
 import software.bernie.geckolib.core.object.DataTicket;
 import software.bernie.geckolib.core.object.PlayState;
 
@@ -1580,49 +1581,54 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     }
 
     public static class KeyFrameEventJS<E extends Entity & IAnimatableJSNL, B extends KeyFrameData> {
-        @Info(value = "The amount of ticks that have passed in either the current transition or animation, depending on the controller's AnimationState")
-        public final double animationTick;
-        @Info(value = "The entity being animated")
+        @Info(value = "The entity this animation is being applied to.")
         public final E entity;
-        @Info(value = "The KeyFrame data")
-        private final B eventKeyFrame;
+        @Info(value = "The current tick of the animation.")
+        public final double animationTick;
+        @Info(value = "The controller handling this animation.")
+        public final AnimationController<E> controller;
+        @Info(value = "The keyframe data containing extra information about the instruction.")
+        public final B keyframeData;
 
         protected KeyFrameEventJS(KeyFrameEvent<E, B> parent) {
             animationTick = parent.getAnimationTick();
             entity = parent.getAnimatable();
-            eventKeyFrame = parent.getKeyframeData();
+            controller = parent.getController();
+            keyframeData = parent.getKeyframeData();
         }
     }
 
 
     @FunctionalInterface
     public interface ISoundListenerJS<E extends Entity & IAnimatableJSNL> {
-        void playSound(BaseEntityBuilder.SoundKeyFrameEventJS<E> event);
+        void playSound(SoundKeyFrameEventJS<E> event);
     }
 
-    public static class SoundKeyFrameEventJS<E extends Entity & IAnimatableJSNL> {
-
-        @Info(value = "The name of the sound to play")
+    public static class SoundKeyFrameEventJS<E extends Entity & IAnimatableJSNL> extends KeyFrameEventJS<E, SoundKeyframeData> {
+        @Info(value = "Gets the sound id given by the Keyframe instruction from the animation. json")
         public final String sound;
 
         public SoundKeyFrameEventJS(SoundKeyframeEvent<E> parent) {
+            super(parent);
             sound = parent.getKeyframeData().getSound();
         }
     }
 
     @FunctionalInterface
     public interface IParticleListenerJS<E extends Entity & IAnimatableJSNL> {
-        void summonParticle(BaseEntityBuilder.ParticleKeyFrameEventJS<E> event);
+        void summonParticle(ParticleKeyFrameEventJS<E> event);
     }
 
-    public static class ParticleKeyFrameEventJS<E extends Entity & IAnimatableJSNL> {
-
-        // These aren't documented in geckolib, so I have no idea what they are
+    public static class ParticleKeyFrameEventJS<E extends Entity & IAnimatableJSNL> extends KeyFrameEventJS<E, ParticleKeyframeData> {
+        @Info(value = "Gets the effect id given by the Keyframe instruction from the animation.json")
         public final String effect;
+        @Info(value = "Gets the locator string given by the Keyframe instruction from the animation.json")
         public final String locator;
+        @Info(value = "Gets the script string given by the Keyframe instruction from the animation.json")
         public final String script;
 
         public ParticleKeyFrameEventJS(ParticleKeyframeEvent<E> parent) {
+            super(parent);
             effect = parent.getKeyframeData().getEffect();
             locator = parent.getKeyframeData().getLocator();
             script = parent.getKeyframeData().script();
@@ -1631,16 +1637,16 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
 
     @FunctionalInterface
     public interface ICustomInstructionListenerJS<E extends Entity & IAnimatableJSNL> {
-        void executeInstruction(BaseEntityBuilder.CustomInstructionKeyframeEventJS<E> event);
+        void executeInstruction(CustomInstructionKeyframeEventJS<E> event);
     }
 
-    public static class CustomInstructionKeyframeEventJS<E extends Entity & IAnimatableJSNL> {
-
-        @Info(value = "A list of all the custom instructions. In blockbench, each line in the custom instruction box is a separate instruction.")
+    public static class CustomInstructionKeyframeEventJS<E extends Entity & IAnimatableJSNL> extends KeyFrameEventJS<E, CustomInstructionKeyframeData> {
+        @Info(value = "A list of all the custom instructions. In Blockbench, each line in the custom instruction box is a separate instruction.")
         public final String instructions;
 
         public CustomInstructionKeyframeEventJS(CustomInstructionKeyframeEvent<E> parent) {
-            instructions = parent.getKeyframeData().getInstructions();
+            super(parent);
+            this.instructions = parent.getKeyframeData().getInstructions();
         }
     }
 
