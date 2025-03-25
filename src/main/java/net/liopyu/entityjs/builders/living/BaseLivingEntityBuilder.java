@@ -29,6 +29,8 @@ import software.bernie.geckolib.core.keyframe.event.ParticleKeyframeEvent;
 import software.bernie.geckolib.core.keyframe.event.SoundKeyframeEvent;
 import software.bernie.geckolib.core.keyframe.event.data.CustomInstructionKeyframeData;
 import software.bernie.geckolib.core.keyframe.event.data.KeyFrameData;
+import software.bernie.geckolib.core.keyframe.event.data.ParticleKeyframeData;
+import software.bernie.geckolib.core.keyframe.event.data.SoundKeyframeData;
 import software.bernie.geckolib.core.object.DataTicket;
 import software.bernie.geckolib.core.object.PlayState;
 
@@ -2793,17 +2795,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     public static class KeyFrameEventJS<E extends LivingEntity & IAnimatableJS, B extends KeyFrameData> {
-        @Info(value = "The amount of ticks that have passed in either the current transition or animation, depending on the controller's AnimationState")
-        public final double animationTick;
-        @Info(value = "The entity being animated")
+        @Info(value = "The entity this animation is being applied to.")
         public final E entity;
-        @Info(value = "The KeyFrame data")
-        private final B eventKeyFrame;
+        @Info(value = "The current tick of the animation.")
+        public final double animationTick;
+        @Info(value = "The controller handling this animation.")
+        public final AnimationController<E> controller;
+        @Info(value = "The keyframe data containing extra information about the instruction.")
+        public final B keyframeData;
 
         protected KeyFrameEventJS(KeyFrameEvent<E, B> parent) {
             animationTick = parent.getAnimationTick();
             entity = parent.getAnimatable();
-            eventKeyFrame = parent.getKeyframeData();
+            controller = parent.getController();
+            keyframeData = parent.getKeyframeData();
         }
     }
 
@@ -2813,12 +2818,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         void playSound(SoundKeyFrameEventJS<E> event);
     }
 
-    public static class SoundKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> {
-
-        @Info(value = "The name of the sound to play")
+    public static class SoundKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> extends KeyFrameEventJS<E, SoundKeyframeData> {
+        @Info(value = "Gets the sound id given by the Keyframe instruction from the animation. json")
         public final String sound;
 
         public SoundKeyFrameEventJS(SoundKeyframeEvent<E> parent) {
+            super(parent);
             sound = parent.getKeyframeData().getSound();
         }
     }
@@ -2828,14 +2833,16 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         void summonParticle(ParticleKeyFrameEventJS<E> event);
     }
 
-    public static class ParticleKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> {
-
-        // These aren't documented in geckolib, so I have no idea what they are
+    public static class ParticleKeyFrameEventJS<E extends LivingEntity & IAnimatableJS> extends KeyFrameEventJS<E, ParticleKeyframeData> {
+        @Info(value = "Gets the effect id given by the Keyframe instruction from the animation.json")
         public final String effect;
+        @Info(value = "Gets the locator string given by the Keyframe instruction from the animation.json")
         public final String locator;
+        @Info(value = "Gets the script string given by the Keyframe instruction from the animation.json")
         public final String script;
 
         public ParticleKeyFrameEventJS(ParticleKeyframeEvent<E> parent) {
+            super(parent);
             effect = parent.getKeyframeData().getEffect();
             locator = parent.getKeyframeData().getLocator();
             script = parent.getKeyframeData().script();
@@ -2847,24 +2854,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         void executeInstruction(CustomInstructionKeyframeEventJS<E> event);
     }
 
-    public static class CustomInstructionKeyframeEventJS<E extends LivingEntity & IAnimatableJS> {
+    public static class CustomInstructionKeyframeEventJS<E extends LivingEntity & IAnimatableJS> extends KeyFrameEventJS<E, CustomInstructionKeyframeData> {
         @Info(value = "A list of all the custom instructions. In Blockbench, each line in the custom instruction box is a separate instruction.")
         public final String instructions;
-        @Info(value = "The entity this animation is being applied to.")
-        public final E entity;
-        @Info(value = "The current tick of the animation.")
-        public final double animationTick;
-        @Info(value = "The controller handling this animation.")
-        public final AnimationController<E> controller;
-        @Info(value = "The keyframe data containing extra information about the instruction.")
-        public final CustomInstructionKeyframeData keyframeData;
 
         public CustomInstructionKeyframeEventJS(CustomInstructionKeyframeEvent<E> parent) {
+            super(parent);
             this.instructions = parent.getKeyframeData().getInstructions();
-            this.entity = parent.getAnimatable();
-            this.animationTick = parent.getAnimationTick();
-            this.controller = parent.getController();
-            this.keyframeData = parent.getKeyframeData();
         }
     }
 
