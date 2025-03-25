@@ -11,6 +11,7 @@ import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
+import net.liopyu.entityjs.util.implementation.IEntityJS;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -35,7 +36,7 @@ import java.util.function.Consumer;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = Entity.class, remap = true)
-public class EntityMixin {
+public class EntityMixin implements IEntityJS {
     @Unique
     private Object entityJs$builder;
     @Unique
@@ -52,6 +53,10 @@ public class EntityMixin {
         return entityJs$getLivingEntity().getType().toString();
     }
 
+    @Unique
+    private EntityJSHelperClass.EntityMovementTracker entityJs$movementTracker;
+    private boolean entityJs$isMoving = false;
+
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
@@ -60,6 +65,12 @@ public class EntityMixin {
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
+        entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+    }
+
+    @Override
+    public boolean entityJs$isMoving() {
+        return this.entityJs$isMoving;
     }
 
     @Unique
@@ -107,6 +118,7 @@ public class EntityMixin {
 
     @Inject(method = "tick", at = @At("TAIL"))
     public void tick(CallbackInfo ci) {
+        entityJs$isMoving = entityJs$movementTracker.isMoving(entityJs$getLivingEntity());
         if (!entityJs$isAddedToWorld && !entityJs$getLivingEntity().isRemoved()) {
             onAddedToWorld();
             entityJs$isAddedToWorld = true;
@@ -533,4 +545,6 @@ public class EntityMixin {
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityJs$entityName() + ". Value: " + builder.setMaxFallDistance.apply(entityJs$getLivingEntity()) + ". Must be an integer. Defaulting to " + cir.getReturnValue());
         }
     }
+
+
 }
