@@ -41,8 +41,9 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
     }
 
     @Info(value = "Sets whether or not the projectile can be shot from dispenser blocks, if noItem is set to true this will not register DispenserBehavior.")
-    public void setCanShootFromDispenser(boolean canShootFromDispenser) {
+    public ProjectileEntityBuilder<T> setCanShootFromDispenser(boolean canShootFromDispenser) {
         this.canShootFromDispenser = canShootFromDispenser;
+        return this;
     }
 
     @Override
