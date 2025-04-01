@@ -70,7 +70,8 @@ public class CustomGlowingGeoLayerJS<T extends LivingEntity & IAnimatableJSCusto
         if (geoBuilder.render != null && animatable != null) {
             final ContextUtils.PreRenderContext<T> context = new ContextUtils.PreRenderContext<>(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTicks, packedLightIn, packedOverlay);
             EntityJSHelperClass.consumerCallback(geoBuilder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render");
-            super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTicks, packedLightIn, packedOverlay);
+            RenderType renderLayer = RenderType.entityCutoutNoCull(getTextureResource(animatable));
+            getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, 15728880, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
         } else {
             RenderType renderLayer = RenderType.entityCutoutNoCull(getTextureResource(animatable));
             getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, 15728880, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
