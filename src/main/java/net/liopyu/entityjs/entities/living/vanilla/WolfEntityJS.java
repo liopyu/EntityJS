@@ -33,6 +33,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
@@ -56,9 +57,9 @@ import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -428,62 +429,81 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS {
 
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        if (builder.onInteract != null) {
+            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+            EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
+        }
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
-
-        if (this.level().isClientSide) {
-            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack)) && !this.isTame() && !this.isAngry();
-            return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
-        } else {
+        Item item = itemstack.getItem();
+        if (!this.level().isClientSide || this.isBaby() && this.isFood(itemstack)) {
             if (this.isTame()) {
-                if (builder.onInteract != null) {
-                    final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                    EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
-
-                }
-                if ((this.isFood(itemstack)) && this.getHealth() < this.getMaxHealth()) {
-                    if (this.isFood(itemstack)) {
-                        this.heal((float) Objects.requireNonNull(itemstack.getFoodProperties(this)).nutrition());
-
-                        if (!pPlayer.getAbilities().instabuild) {
-                            itemstack.shrink(1);
+                if (this.isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
+                    FoodProperties foodproperties = itemstack.getFoodProperties(this);
+                    float f = foodproperties != null ? (float) foodproperties.nutrition() : 1.0F;
+                    this.heal(2.0F * f);
+                    itemstack.consume(1, pPlayer);
+                    this.gameEvent(GameEvent.EAT); // Neo: add EAT game event
+                    return InteractionResult.sidedSuccess(this.level().isClientSide());
+                } else {
+                    if (item instanceof DyeItem dyeitem && this.isOwnedBy(pPlayer)) {
+                        DyeColor dyecolor = dyeitem.getDyeColor();
+                        if (dyecolor != this.getCollarColor()) {
+                            this.setCollarColor(dyecolor);
+                            itemstack.consume(1, pPlayer);
+                            return InteractionResult.SUCCESS;
                         }
 
-                        this.gameEvent(GameEvent.EAT, this);
+                        return superMobInteract(pPlayer, pHand);
+                    }
+
+                    if (itemstack.is(Items.WOLF_ARMOR) && this.isOwnedBy(pPlayer) && this.getBodyArmorItem().isEmpty() && !this.isBaby()) {
+                        this.setBodyArmorItem(itemstack.copyWithCount(1));
+                        itemstack.consume(1, pPlayer);
                         return InteractionResult.SUCCESS;
+                    } else if (itemstack.canPerformAction(net.neoforged.neoforge.common.ItemAbilities.SHEARS_REMOVE_ARMOR)
+                            && this.isOwnedBy(pPlayer)
+                            && this.hasArmor()
+                            && (!EnchantmentHelper.has(this.getBodyArmorItem(), EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE) || pPlayer.isCreative())) {
+                        itemstack.hurtAndBreak(1, pPlayer, getSlotForHand(pHand));
+                        this.playSound(SoundEvents.ARMOR_UNEQUIP_WOLF);
+                        ItemStack itemstack1 = this.getBodyArmorItem();
+                        this.setBodyArmorItem(ItemStack.EMPTY);
+                        this.spawnAtLocation(itemstack1);
+                        return InteractionResult.SUCCESS;
+                    } else if (ArmorMaterials.ARMADILLO.value().repairIngredient().get().test(itemstack)
+                            && this.isInSittingPose()
+                            && this.hasArmor()
+                            && this.isOwnedBy(pPlayer)
+                            && this.getBodyArmorItem().isDamaged()) {
+                        itemstack.shrink(1);
+                        this.playSound(SoundEvents.WOLF_ARMOR_REPAIR);
+                        ItemStack itemstack2 = this.getBodyArmorItem();
+                        int i = (int) ((float) itemstack2.getMaxDamage() * 0.125F);
+                        itemstack2.setDamageValue(Math.max(0, itemstack2.getDamageValue() - i));
+                        return InteractionResult.SUCCESS;
+                    } else {
+                        InteractionResult interactionresult = superMobInteract(pPlayer, pHand);
+                        if (!interactionresult.consumesAction() && this.isOwnedBy(pPlayer)) {
+                            this.setOrderedToSit(!this.isOrderedToSit());
+                            this.jumping = false;
+                            this.navigation.stop();
+                            this.setTarget(null);
+                            return InteractionResult.SUCCESS_NO_ITEM_USED;
+                        } else {
+                            return interactionresult;
+                        }
                     }
                 }
-
-                InteractionResult interactionresult = superMobInteract(pPlayer, pHand);
-                if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(pPlayer)) {
-                    this.setOrderedToSit(!this.isOrderedToSit());
-                    this.jumping = false;
-                    this.navigation.stop();
-                    this.setTarget((LivingEntity) null);
-                    return InteractionResult.SUCCESS;
-                }
-
-                return interactionresult;
-            } else if ((this.tamableFood(itemstack)) && !this.isAngry()) {
-                if (!pPlayer.getAbilities().instabuild) {
-                    itemstack.shrink(1);
-                }
-
-                if (this.random.nextInt(3) == 0 && !EventHooks.onAnimalTame(this, pPlayer)) {
-                    this.tame(pPlayer);
-                    this.navigation.stop();
-                    this.setTarget((LivingEntity) null);
-                    this.setOrderedToSit(true);
-                    this.level().broadcastEntityEvent(this, (byte) 7);
-                } else {
-                    this.level().broadcastEntityEvent(this, (byte) 6);
-                }
+            } else if (this.tamableFood(itemstack) && !this.isAngry()) {
+                itemstack.consume(1, pPlayer);
+                this.tryToTame(pPlayer);
                 return InteractionResult.SUCCESS;
+            } else {
+                return superMobInteract(pPlayer, pHand);
             }
-            if (builder.onInteract != null) {
-                final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
-            }
-            return superMobInteract(pPlayer, pHand);
+        } else {
+            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || this.tamableFood(itemstack) && !this.isTame() && !this.isAngry();
+            return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
         }
     }
 

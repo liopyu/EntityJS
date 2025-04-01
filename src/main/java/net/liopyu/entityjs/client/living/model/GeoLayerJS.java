@@ -64,10 +64,11 @@ public class GeoLayerJS<T extends LivingEntity & IAnimatableJS> extends GeoRende
         if (geoBuilder.render != null && animatable != null) {
             final ContextUtils.PreRenderContext<T> context = new ContextUtils.PreRenderContext<>(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTicks, packedLightIn, packedOverlay);
             EntityJSHelperClass.consumerCallback(geoBuilder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render");
-            super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTicks, packedLightIn, packedOverlay);
+            RenderType renderLayer = RenderType.entityCutoutNoCull(getTextureResource(animatable));
+            getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, packedLightIn, OverlayTexture.NO_OVERLAY, getRenderer().getRenderColor(animatable, partialTicks, packedLightIn).argbInt());
         } else {
             RenderType renderLayer = RenderType.entityCutoutNoCull(getTextureResource(animatable));
-            getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, packedLightIn, OverlayTexture.NO_OVERLAY, Color.OPAQUE);
+            getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, packedLightIn, OverlayTexture.NO_OVERLAY, getRenderer().getRenderColor(animatable, partialTicks, packedLightIn).argbInt());
         }
     }
 }
