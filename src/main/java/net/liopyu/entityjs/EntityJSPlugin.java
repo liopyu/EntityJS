@@ -3,27 +3,20 @@ package net.liopyu.entityjs;
 import com.mojang.logging.LogUtils;
 import dev.architectury.platform.Platform;
 import dev.latvian.mods.kubejs.KubeJSPlugin;
-import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.script.BindingsEvent;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.living.entityjs.*;
 import net.liopyu.entityjs.builders.living.vanilla.*;
-import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.BaseEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileAnimatableJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.modded.CGMProjectileEntityJSBuilder;
-import net.liopyu.entityjs.builders.nonliving.vanilla.BoatEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.TridentJSBuilder;
-import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.entity.EntityType;
 import org.slf4j.Logger;
 
 public class EntityJSPlugin extends KubeJSPlugin {

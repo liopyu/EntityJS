@@ -55,9 +55,7 @@ import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -438,28 +436,39 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
 
     @Override
     public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        if (builder.onInteract != null) {
+            final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
+            EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
+        }
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
-
+        Item item = itemstack.getItem();
         if (this.level().isClientSide) {
-            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || (this.tamableFood(itemstack) || this.tamableFoodPredicate(itemstack)) && !this.isTame() && !this.isAngry();
+            boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || itemstack.is(Items.BONE) && !this.isTame() && !this.isAngry();
             return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
-        } else {
-            if (this.isTame()) {
-                if (builder.onInteract != null) {
-                    final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                    EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
-
+        } else if (this.isTame()) {
+            if (this.isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
+                this.heal((float) itemstack.getFoodProperties(this).getNutrition());
+                if (!pPlayer.getAbilities().instabuild) {
+                    itemstack.shrink(1);
                 }
-                if ((this.isFood(itemstack)) && this.getHealth() < this.getMaxHealth()) {
-                    if (itemstack.isEdible()) {
-                        this.heal((float) Objects.requireNonNull(itemstack.getFoodProperties(this)).getNutrition());
 
-                        if (!pPlayer.getAbilities().instabuild) {
-                            itemstack.shrink(1);
+                this.gameEvent(GameEvent.EAT, this);
+                return InteractionResult.SUCCESS;
+            } else {
+                if (item instanceof DyeItem) {
+                    DyeItem dyeitem = (DyeItem) item;
+                    if (this.isOwnedBy(pPlayer)) {
+                        DyeColor dyecolor = dyeitem.getDyeColor();
+                        if (dyecolor != this.getCollarColor()) {
+                            this.setCollarColor(dyecolor);
+                            if (!pPlayer.getAbilities().instabuild) {
+                                itemstack.shrink(1);
+                            }
+
+                            return InteractionResult.SUCCESS;
                         }
 
-                        this.gameEvent(GameEvent.EAT, this);
-                        return InteractionResult.SUCCESS;
+                        return superMobInteract(pPlayer, pHand);
                     }
                 }
 
@@ -470,31 +479,27 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
                     this.navigation.stop();
                     this.setTarget((LivingEntity) null);
                     return InteractionResult.SUCCESS;
-                }
-
-                return interactionresult;
-            } else if ((this.tamableFood(itemstack)) && !this.isAngry()) {
-                if (!pPlayer.getAbilities().instabuild) {
-                    itemstack.shrink(1);
-                }
-
-                if (this.random.nextInt(3) == 0 && !ForgeEventFactory.onAnimalTame(this, pPlayer)) {
-                    this.tame(pPlayer);
-                    this.navigation.stop();
-                    this.setTarget((LivingEntity) null);
-                    this.setOrderedToSit(true);
-                    this.level().broadcastEntityEvent(this, (byte) 7);
                 } else {
-                    this.level().broadcastEntityEvent(this, (byte) 6);
+                    return interactionresult;
                 }
-
-                return InteractionResult.SUCCESS;
             }
-            if (builder.onInteract != null) {
-                final ContextUtils.MobInteractContext context = new ContextUtils.MobInteractContext(this, pPlayer, pHand);
-                EntityJSHelperClass.consumerCallback(builder.onInteract, context, "[EntityJS]: Error in " + entityName() + "builder for field: onInteract.");
-
+        } else if (this.tamableFood(itemstack) && !this.isAngry()) {
+            if (!pPlayer.getAbilities().instabuild) {
+                itemstack.shrink(1);
             }
+
+            if (this.random.nextInt(3) == 0 && !ForgeEventFactory.onAnimalTame(this, pPlayer)) {
+                this.tame(pPlayer);
+                this.navigation.stop();
+                this.setTarget((LivingEntity) null);
+                this.setOrderedToSit(true);
+                this.level().broadcastEntityEvent(this, (byte) 7);
+            } else {
+                this.level().broadcastEntityEvent(this, (byte) 6);
+            }
+
+            return InteractionResult.SUCCESS;
+        } else {
             return superMobInteract(pPlayer, pHand);
         }
     }
