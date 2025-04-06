@@ -88,11 +88,16 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public transient MobType mobType;
     public transient Function<Entity, Object> nextStep;
     public final List<ContextUtils.PartEntityParams<?>> partEntityParamsList = new ArrayList<>();
+    public transient Consumer<LivingEntity> defineSyncedData;
 
     public ModifyLivingEntityBuilder(EntityType<?> entityType) {
         super(entityType);
     }
 
+    public ModifyEntityBuilder defineSyncedData(Consumer<LivingEntity> consumer) {
+        this.defineSyncedData = consumer;
+        return this;
+    }
    /* @Info(value = """
             Adds an extra hitbox to the mob. Aka part-entities.
             Vanilla ticks extra hitboxes(for example the ender dragon's) with the
