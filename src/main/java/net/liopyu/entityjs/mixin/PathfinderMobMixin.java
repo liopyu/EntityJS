@@ -45,7 +45,7 @@ public abstract class PathfinderMobMixin/*implements IModifyEntityJS*/ {
     private void entityjs$onMobInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity().getClass());
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }

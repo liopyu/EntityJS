@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.util;
 
+import com.mojang.logging.LogUtils;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
 import dev.latvian.mods.kubejs.event.EventTargetType;
@@ -26,6 +27,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -39,6 +41,9 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+
+import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
 
 public class EventHandlers {
     public static EventTargetType<ResourceKey<EntityType<?>>> TARGET = EventTargetType.registryKey(Registries.ENTITY_TYPE, EntityType.class);
@@ -114,6 +119,14 @@ public class EventHandlers {
         if (editAttributes.hasListeners()) {
             editAttributes.post(new ModifyAttributeEventJS(event));
         }
+        BuiltInRegistries.ENTITY_TYPE.forEach(entityType -> {
+            if (EventHandlers.modifyEntity.hasListeners()) {
+                var eventJS = getOrCreate(entityType, entityType.getBaseClass());
+                EventHandlers.modifyEntity.post(eventJS);
+                LogUtils.getLogger().info("[EntityJS] Captured builder inline in startup init: " + eventJS.getBuilder());
+            }
+        });
+
     }
 
     public static void postDataEvent(VirtualDataPack pack, MultiPackResourceManager multiManager) {
