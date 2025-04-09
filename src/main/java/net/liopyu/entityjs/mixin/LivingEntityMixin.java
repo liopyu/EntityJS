@@ -69,11 +69,17 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     @Unique
     public Object entityJs$builder;
 
-    /*@Override
-    public ModifyLivingEntityBuilder entityJs$getBuilder() {
-        return entityJs$builder instanceof ModifyLivingEntityBuilder ? (ModifyLivingEntityBuilder) entityJs$builder : null;//(ModifyEntityBuilder) entityJs$builder;
-    }*/
-    @Unique
+    @Inject(method = "<init>", at = @At("RETURN"), remap = true)
+    private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
+        var entityType = entityJs$getLivingEntity().getType();
+        if (EventHandlers.modifyEntity.hasListeners()) {
+            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity().getClass());
+            EventHandlers.modifyEntity.post(eventJS);
+            entityJs$builder = eventJS.getBuilder();
+        }
+        //entityJs$defineSynchedData();
+    }
+   /* @Unique
     public String getDummyData() {
         return ((LivingEntity) (Object) this).getEntityData().get(ENTITYJS_DUMMY_ACCESSOR);
     }
@@ -90,29 +96,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$onEntityData(SynchedEntityData.Builder builder, CallbackInfo ci) {
         dataBuilder = builder;
         builder.define(ENTITYJS_DUMMY_ACCESSOR, ENTITYJS_DUMMY_DEFAULT);
-       /* if (entityJs$getEntity() instanceof IEntityJS entity) {
-            LogUtils.getLogger().info("Creating entity with data");
-            var entityType = entity.thisEntity().getType();
-            if (EventHandlers.modifyEntity.hasListeners()) {
-                var eventJS = getOrCreate(entityType, entity.thisEntity());
-                EventHandlers.modifyEntity.post(eventJS);
-                entityJs$builder = eventJS.getBuilder();
-            }
-            entityJs$defineSynchedData();
-        }*/
+
     }
 
 
-    @Inject(method = "<init>", at = @At("RETURN"), remap = true)
-    private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
-        var entityType = entityJs$getLivingEntity().getType();
-        if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity().getClass());
-            EventHandlers.modifyEntity.post(eventJS);
-            entityJs$builder = eventJS.getBuilder();
-        }
-        //entityJs$defineSynchedData();
-    }
+
 
     @Unique
     private static final Map<Class<?>, Map<String, EntityDataAccessor<?>>> entityJs$classAccessorMap = new HashMap<>();
@@ -289,7 +277,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
             };
             entityJs$setSyncedData(key, value);
         }
-    }
+    }*/
 
     @Unique
     public ResourceKey<EntityType<?>> entityJs$getTypeId() {

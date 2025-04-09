@@ -8,6 +8,6 @@ import net.minecraft.world.entity.Entity;
 public interface IEntityJS {
     boolean entityJs$isMoving();
 
-    void entityJs$addSyncedData(EntitySerializerType type, String key, Object value);
-
+    /*  void entityJs$addSyncedData(EntitySerializerType type, String key, Object value);
+     */
 }

@@ -7,9 +7,9 @@ import net.liopyu.entityjs.util.EntitySerializerType;
 public interface ILivingEntityJS {
     //void entityJs$addSyncedData(EntitySerializerType type, String key, Object value);
 
-    <T> T entityJs$getSyncedData(String identifier);
+   /* <T> T entityJs$getSyncedData(String identifier);
 
     void entityJs$addSyncedData(String identifier, Object value);
 
-    void entityJs$setSyncedData(String key, Object value);
+    void entityJs$setSyncedData(String key, Object value);*/
 }

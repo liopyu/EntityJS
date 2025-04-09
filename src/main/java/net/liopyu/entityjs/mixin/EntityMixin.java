@@ -47,7 +47,6 @@ import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 public class EntityMixin implements IEntityJS {
     @Unique
     private Object entityJs$builder = getOrCreate(entityJs$getLivingEntity().getType(), ((Entity) (Object) this).getClass());
-    ;
 
 
     @Unique
@@ -67,184 +66,144 @@ public class EntityMixin implements IEntityJS {
         return entityJs$getLivingEntity().getType().toString();
     }
 
-    @Unique
-    private static final Map<Class<?>, Map<String, EntityDataAccessor<?>>> entityJs$classAccessorMap = new HashMap<>();
+    /*
+        @Unique
+        private static final Map<Class<?>, Map<String, EntityDataAccessor<?>>> entityJs$classAccessorMap = new HashMap<>();
 
-    @Unique
-    private final Map<String, EntityDataAccessor<?>> entityJs$accessorMap = new HashMap<>();
+        @Unique
+        private final Map<String, EntityDataAccessor<?>> entityJs$accessorMap = new HashMap<>();
 
-    @Inject(method = "<init>", at = @At("CTOR_HEAD"), remap = true)
-    private void entityjs$predefineAccessors(EntityType<?> type, Level level, CallbackInfo ci) {
-        /*var entityType = type;
-        if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, ((Entity) (Object) this).getClass());
-
-            EventHandlers.modifyEntity.post(eventJS);
-            entityJs$builder = eventJS.getBuilder();
-            //LogUtils.getLogger().info("Init method initializing builder: " + entityJs$builder);
-        }*/
-        entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
-        entityJs$preRegisterCustomAccessors();
-    }
-    /*@ModifyVariable(
-            method = "<init>",
-            at = @At(value = "STORE", ordinal = 0), // Store after builder is initialized
-            ordinal = 0
-    )
-    private SynchedEntityData.Builder entityjs$captureBuilder(SynchedEntityData.Builder builder) {
-        // Initialize your builder logic here instead of CTOR_HEAD
-        var entityType = entityJs$getLivingEntity().getType(); // Or use cached type param
-        if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, (Entity) (Object) this);
-            EventHandlers.modifyEntity.post(eventJS);
-            entityJs$builder = eventJS.getBuilder();
-            LogUtils.getLogger().info("Captured builder: " + entityJs$builder);
-        }
-
-        entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
-        entityJs$preRegisterCustomAccessors();
-        return builder;
-    }*/
-
-
-    public void entityJs$defineSynchedData() {
-        LogUtils.getLogger().info("Defining synced data");
-        if (entityJs$builder instanceof ModifyEntityBuilder builder) {
-            LogUtils.getLogger().info("Found synced data builder");
-            if (builder.defineSyncedData != null) {
-                LogUtils.getLogger().info("Found synced data METHOD");
-                builder.defineSyncedData.accept(entityJs$getLivingEntity());
-            }
-        }
-    }
-
-    @Unique
-    private static final Map<Class<?>, Set<String>> entityJs$definedKeys = new HashMap<>();
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void entityJs$addSyncedData(EntitySerializerType type, String key, Object value) {
-        try {
-            Class<?> entityClass = entityJs$getLivingEntity().getClass();
-
-            // Retrieve or initialize the per-class map
-            Map<String, EntityDataAccessor<?>> classAccessors = entityJs$classAccessorMap.computeIfAbsent(entityClass, c -> new HashMap<>());
-
-            // Try to reuse the accessor or define a new one if missing
-            EntityDataAccessor<Object> accessor;
-            if (classAccessors.containsKey(key)) {
-                accessor = (EntityDataAccessor<Object>) classAccessors.get(key);
-                LogUtils.getLogger().info("[EntityJS] Reusing accessor '{}' with id {}", key, accessor.id());
-            } else {
-                EntityDataSerializer<?> serializer = type.getSerializer();
-                accessor = (EntityDataAccessor<Object>) SynchedEntityData.defineId((Class<? extends SyncedDataHolder>) entityClass, serializer);
-                classAccessors.put(key, accessor);
-                LogUtils.getLogger().info("[EntityJS] Defined new accessor '{}' with id {}", key, accessor.id());
-            }
-
-            // Cast the value properly
-            String castHint = switch (type.toString().toLowerCase()) {
-                case "byte", "int", "float", "long" -> type.toString().toLowerCase();
-                default -> null;
-            };
-            Object casted = EntitySerializerType.castValue(value, castHint);
-
-            // Set the value
-            entityJs$getLivingEntity().getEntityData().set(accessor, casted);
-            entityJs$accessorMap.put(key, accessor);
-            LogUtils.getLogger().info("[EntityJS] Synced '{}' = {}", key, casted);
-        } catch (Exception e) {
-            LogUtils.getLogger().error("[EntityJS] Failed to add synced data '{}'", key, e);
-        }
-    }
-
-    private void entityJs$preRegisterCustomAccessors() {
-        if (true) return;
-        Class<?> clazz = entityJs$getLivingEntity().getClass();
-        Set<String> definedKeys = entityJs$definedKeys.computeIfAbsent(clazz, k -> new HashSet<>());
-        Map<String, EntityDataAccessor<?>> accessors = entityJs$classAccessorMap.computeIfAbsent(clazz, k -> new HashMap<>());
-        if (!definedKeys.contains("dummy1")) {
-            EntityDataAccessor<String> a = SynchedEntityData.defineId((Class<? extends SyncedDataHolder>) clazz, EntityDataSerializers.STRING);
-            accessors.put("dummy1", a);
-            definedKeys.add("dummy1");
-        }
-
-        if (!definedKeys.contains("dummy2")) {
-            EntityDataAccessor<String> b = SynchedEntityData.defineId((Class<? extends SyncedDataHolder>) clazz, EntityDataSerializers.STRING);
-            accessors.put("dummy2", b);
-            definedKeys.add("dummy2");
-        }
-    }
-
-
-    @Unique
-    @SuppressWarnings("unchecked")
-    public @Nullable <T> T getTheData(String key) {
-        EntityDataAccessor<T> accessor = (EntityDataAccessor<T>) entityJs$accessorMap.get(key);
-        if (accessor == null) return null;
-        try {
-            return entityJs$getLivingEntity().getEntityData().get(accessor);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    @Inject(method = "<init>", at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/network/syncher/SynchedEntityData$Builder;build()Lnet/minecraft/network/syncher/SynchedEntityData;",
-            shift = At.Shift.BEFORE
-    ), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void entityjs$beforeBuild(EntityType<?> type, Level level, CallbackInfo ci, SynchedEntityData.Builder builder) {
-        // Run this BEFORE defineSynchedData
-        /*if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(type, ((Entity) (Object) this).getClass());
-            EventHandlers.modifyEntity.post(eventJS);
-            entityJs$builder = eventJS.getBuilder();
-            LogUtils.getLogger().info("[EntityJS] Captured builder inline: " + entityJs$builder);
-        }*/
-
-        entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
-
-        // Then now it's safe to define
-        entityJs$defineSynchedData();
-
-        var accessors = entityJs$classAccessorMap.get(entityJs$getLivingEntity().getClass());
-        if (accessors != null) {
-            var items = ((SynchedEntityDataBuilderAccessor) builder).entityJs$getItemsById();
-            for (var entry : accessors.entrySet()) {
-                var key = entry.getKey();
-                var accessor = (EntityDataAccessor<Object>) entry.getValue();
-                int id = accessor.id();
-
-                if (id < items.length && items[id] == null) {
-                    LogUtils.getLogger().info("[EntityJS] Defining synced accessor: " + key);
-                    builder.define(accessor, "default_" + key);
-                    entityJs$accessorMap.put(key, accessor);
-                } else {
-                    LogUtils.getLogger().info("[EntityJS] Skipping already defined accessor: " + key);
+        public void entityJs$defineSynchedData() {
+            LogUtils.getLogger().info("Defining synced data");
+            if (entityJs$builder instanceof ModifyEntityBuilder builder) {
+                LogUtils.getLogger().info("Found synced data builder");
+                if (builder.defineSyncedData != null) {
+                    LogUtils.getLogger().info("Found synced data METHOD");
+                    builder.defineSyncedData.accept(entityJs$getLivingEntity());
                 }
             }
         }
-    }
+
+        @Unique
+        private static final Map<Class<?>, Set<String>> entityJs$definedKeys = new HashMap<>();
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void entityJs$addSyncedData(EntitySerializerType type, String key, Object value) {
+            try {
+                Class<?> entityClass = entityJs$getLivingEntity().getClass();
+
+                // Retrieve or initialize the per-class map
+                Map<String, EntityDataAccessor<?>> classAccessors = entityJs$classAccessorMap.computeIfAbsent(entityClass, c -> new HashMap<>());
+
+                // Try to reuse the accessor or define a new one if missing
+                EntityDataAccessor<Object> accessor;
+                if (classAccessors.containsKey(key)) {
+                    accessor = (EntityDataAccessor<Object>) classAccessors.get(key);
+                    LogUtils.getLogger().info("[EntityJS] Reusing accessor '{}' with id {}", key, accessor.id());
+                } else {
+                    EntityDataSerializer<?> serializer = type.getSerializer();
+                    accessor = (EntityDataAccessor<Object>) SynchedEntityData.defineId((Class<? extends SyncedDataHolder>) entityClass, serializer);
+                    classAccessors.put(key, accessor);
+                    LogUtils.getLogger().info("[EntityJS] Defined new accessor '{}' with id {}", key, accessor.id());
+                }
+
+                // Cast the value properly
+                String castHint = switch (type.toString().toLowerCase()) {
+                    case "byte", "int", "float", "long" -> type.toString().toLowerCase();
+                    default -> null;
+                };
+                Object casted = EntitySerializerType.castValue(value, castHint);
+
+                // Set the value
+                entityJs$getLivingEntity().getEntityData().set(accessor, casted);
+                entityJs$accessorMap.put(key, accessor);
+                LogUtils.getLogger().info("[EntityJS] Synced '{}' = {}", key, casted);
+            } catch (Exception e) {
+                LogUtils.getLogger().error("[EntityJS] Failed to add synced data '{}'", key, e);
+            }
+        }
+
+        private void entityJs$preRegisterCustomAccessors() {
+            if (true) return;
+            Class<?> clazz = entityJs$getLivingEntity().getClass();
+            Set<String> definedKeys = entityJs$definedKeys.computeIfAbsent(clazz, k -> new HashSet<>());
+            Map<String, EntityDataAccessor<?>> accessors = entityJs$classAccessorMap.computeIfAbsent(clazz, k -> new HashMap<>());
+            if (!definedKeys.contains("dummy1")) {
+                EntityDataAccessor<String> a = SynchedEntityData.defineId((Class<? extends SyncedDataHolder>) clazz, EntityDataSerializers.STRING);
+                accessors.put("dummy1", a);
+                definedKeys.add("dummy1");
+            }
+
+            if (!definedKeys.contains("dummy2")) {
+                EntityDataAccessor<String> b = SynchedEntityData.defineId((Class<? extends SyncedDataHolder>) clazz, EntityDataSerializers.STRING);
+                accessors.put("dummy2", b);
+                definedKeys.add("dummy2");
+            }
+        }
 
 
-    // Getter for testing
-    public @Nullable String entityJs$getDummyData(String key) {
-        EntityDataAccessor<String> accessor = (EntityDataAccessor<String>) entityJs$accessorMap.get(key);
-        if (accessor == null) return null;
-        return ((Entity) (Object) this).getEntityData().get(accessor);
-    }
-    /*@Inject(method = "<init>", at = @At("CTOR_HEAD"), remap = true)
+        @Unique
+        @SuppressWarnings("unchecked")
+        public @Nullable <T> T getTheData(String key) {
+            EntityDataAccessor<T> accessor = (EntityDataAccessor<T>) entityJs$accessorMap.get(key);
+            if (accessor == null) return null;
+            try {
+                return entityJs$getLivingEntity().getEntityData().get(accessor);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        @Inject(method = "<init>", at = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/network/syncher/SynchedEntityData$Builder;build()Lnet/minecraft/network/syncher/SynchedEntityData;",
+                shift = At.Shift.BEFORE
+        ), locals = LocalCapture.CAPTURE_FAILHARD)
+        private void entityjs$beforeBuild(EntityType<?> type, Level level, CallbackInfo ci, SynchedEntityData.Builder builder) {
+
+            entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+
+            // Then now it's safe to define
+            entityJs$defineSynchedData();
+
+            var accessors = entityJs$classAccessorMap.get(entityJs$getLivingEntity().getClass());
+            if (accessors != null) {
+                var items = ((SynchedEntityDataBuilderAccessor) builder).entityJs$getItemsById();
+                for (var entry : accessors.entrySet()) {
+                    var key = entry.getKey();
+                    var accessor = (EntityDataAccessor<Object>) entry.getValue();
+                    int id = accessor.id();
+
+                    if (id < items.length && items[id] == null) {
+                        LogUtils.getLogger().info("[EntityJS] Defining synced accessor: " + key);
+                        builder.define(accessor, "default_" + key);
+                        entityJs$accessorMap.put(key, accessor);
+                    } else {
+                        LogUtils.getLogger().info("[EntityJS] Skipping already defined accessor: " + key);
+                    }
+                }
+            }
+        }
+
+
+        // Getter for testing
+        public @Nullable String entityJs$getDummyData(String key) {
+            EntityDataAccessor<String> accessor = (EntityDataAccessor<String>) entityJs$accessorMap.get(key);
+            if (accessor == null) return null;
+            return ((Entity) (Object) this).getEntityData().get(accessor);
+        }*/
+    @Inject(method = "<init>", at = @At("CTOR_HEAD"), remap = true)
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity().getClass());
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
         entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
-        entityJs$preRegisterCustomAccessors();
-    }*/
+        //entityJs$preRegisterCustomAccessors();
+    }
 
     @Override
     public boolean entityJs$isMoving() {
