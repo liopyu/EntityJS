@@ -189,6 +189,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public transient List<String> superMethods = new ArrayList<>();
+/*
+    public transient Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned;
+*/
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -225,6 +228,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         scaleWidth = 1F;
     }
 
+   /* public BaseLivingEntityBuilder<T> onPassengerTurned(Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned) {
+        this.onPassengerTurned = onPassengerTurned;
+        return this;
+    }*/
    /* @RemapForJS("ejs$")
     @Info(value = """
             @param super Adds a method to be called regardless of having a builder.

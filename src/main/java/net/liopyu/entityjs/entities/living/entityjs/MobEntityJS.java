@@ -13,6 +13,7 @@ import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.JumpControl;
@@ -801,6 +802,26 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         }
         super.positionRider(pPassenger, pCallback);
     }
+
+    /*public void onPassengerTurned(Entity pEntityToUpdate) {
+        if (builder.onPassengerTurned != null) {
+            final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(pEntityToUpdate, this);
+            EntityJSHelperClass.consumerCallback(builder.onPassengerTurned, context, "[EntityJS]: Error in " + entityName() + "builder for field: onPassengerTurned.");
+            return;
+        }
+        super.onPassengerTurned(pEntityToUpdate);
+    }*/
+
+    /*public void clampRotation(Entity pEntity) {
+        pEntity.setYBodyRot(this.getYRot());
+        float f = pEntity.getYRot();
+        float f1 = Mth.wrapDegrees(f - this.getYRot());
+        float f2 = Mth.clamp(f1, -160.0F, 160.0F);
+        pEntity.yRotO += f2 - f1;
+        float f3 = f + f2 - f1;
+        pEntity.setYRot(f3);
+        pEntity.setYHeadRot(f3);
+    }*/
 
     @Override
     protected boolean canAddPassenger(@NotNull Entity entity) {
