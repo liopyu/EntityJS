@@ -641,7 +641,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
                 final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(entityJs$getLivingEntity(), pTarget);
                 Object obj = builder.canAttack.apply(context);
                 if (obj instanceof Boolean b) {
-                    boolean bool = b && cir.getReturnValue();
+                    boolean bool = b;
                     cir.setReturnValue(bool);
                 } else
                     EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canAttack from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
