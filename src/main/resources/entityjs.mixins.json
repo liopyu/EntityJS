@@ -11,8 +11,7 @@
     "MobMixin",
     "PathfinderMobMixin",
     "ProjectileMixin",
-    "ServerScriptManagerMixin",
-    "SynchedEntityDataBuilderAccessor"
+    "ServerScriptManagerMixin"
   ],
   "client": [
     "EntityRendererMixin",
