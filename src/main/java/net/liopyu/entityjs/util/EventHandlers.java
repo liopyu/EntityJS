@@ -119,13 +119,13 @@ public class EventHandlers {
         if (editAttributes.hasListeners()) {
             editAttributes.post(new ModifyAttributeEventJS(event));
         }
-        BuiltInRegistries.ENTITY_TYPE.forEach(entityType -> {
+       /* BuiltInRegistries.ENTITY_TYPE.forEach(entityType -> {
             if (EventHandlers.modifyEntity.hasListeners()) {
                 var eventJS = getOrCreate(entityType, entityType.getBaseClass());
                 EventHandlers.modifyEntity.post(eventJS);
                 LogUtils.getLogger().info("[EntityJS] Captured builder inline in startup init: " + eventJS.getBuilder());
             }
-        });
+        });*/
 
     }
 

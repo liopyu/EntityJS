@@ -51,7 +51,7 @@ public class MobMixin /*implements IModifyEntityJS*/ {
     private void entityjs$onMobInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity().getClass());
+            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }

@@ -46,7 +46,7 @@ import java.util.*;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = LivingEntity.class, remap = true)
-public abstract class LivingEntityMixin implements ILivingEntityJS {
+public abstract class LivingEntityMixin /*implements ILivingEntityJS*/ {
 
     @Unique
     private Object entityJs$entityObject = this;
@@ -56,10 +56,10 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         return (LivingEntity) entityJs$entityObject;
     }
 
-    @Unique
+    /*@Unique
     private Entity entityJs$getEntity() {
         return (Entity) entityJs$entityObject;
-    }
+    }*/
 
     @Unique
     private String entityJs$entityName() {
@@ -73,7 +73,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity().getClass());
+            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }

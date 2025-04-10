@@ -46,7 +46,7 @@ import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 @Mixin(value = Entity.class, remap = true)
 public class EntityMixin implements IEntityJS {
     @Unique
-    private Object entityJs$builder = getOrCreate(entityJs$getLivingEntity().getType(), ((Entity) (Object) this).getClass());
+    private Object entityJs$builder;
 
 
     @Unique
@@ -193,11 +193,11 @@ public class EntityMixin implements IEntityJS {
             if (accessor == null) return null;
             return ((Entity) (Object) this).getEntityData().get(accessor);
         }*/
-    @Inject(method = "<init>", at = @At("CTOR_HEAD"), remap = true)
+    @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity().getClass());
+            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }

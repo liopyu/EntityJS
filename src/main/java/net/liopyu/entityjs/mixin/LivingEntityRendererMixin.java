@@ -38,7 +38,7 @@ public abstract class LivingEntityRendererMixin<T, M extends EntityModel<?>> {
     private void onGetRenderType(LivingEntity entity, boolean bodyVisible, boolean translucent, boolean glowing, CallbackInfoReturnable<RenderType> cir) {
         var entityType = entity.getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entity.getClass());
+            var eventJS = getOrCreate(entityType, entity);
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }

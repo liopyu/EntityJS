@@ -55,7 +55,7 @@ public abstract class EntityRendererMixin {
         if (entity instanceof LivingEntity) return;
         var entityType = entity.getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entity.getClass());
+            var eventJS = getOrCreate(entityType, entity);
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
