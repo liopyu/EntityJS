@@ -5,6 +5,7 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +21,18 @@ public class ModifyProjectileBuilder extends ModifyEntityBuilder {
         super(entityType);
     }
 
+    public transient Consumer<Entity> defineSyncedData;
+
+    public ModifyEntityBuilder defineSyncedData(Consumer<Entity> consumer) {
+        this.defineSyncedData = consumer;
+        return this;
+    }
 
     @Info(value = """
             Sets a callback function to be executed when the projectile hits an entity.
             The provided Consumer accepts a {@link ContextUtils.ProjectileEntityHitContext} parameter,
             representing the context of the projectile's interaction with a specific entity.
-                        
+            
             Example usage:
             ```javascript
             projectileBuilder.onHitEntity(context -> {
@@ -44,7 +51,7 @@ public class ModifyProjectileBuilder extends ModifyEntityBuilder {
             Sets a callback function to be executed when the projectile hits a block.
             The provided Consumer accepts a {@link ContextUtils.ProjectileBlockHitContext} parameter,
             representing the context of the projectile's interaction with a specific block.
-                        
+            
             Example usage:
             ```javascript
             projectileBuilder.onHitBlock(context -> {
@@ -60,9 +67,9 @@ public class ModifyProjectileBuilder extends ModifyEntityBuilder {
 
     @Info(value = """
             Sets a function to determine if the projectile entity can hit a specific entity.
-                        
+            
             @param canHitEntity The predicate to check if the arrow can hit the entity.
-                        
+            
             Example usage:
             ```javascript
             projectileEntityBuilder.canHitEntity(entity -> {
