@@ -47,19 +47,14 @@ public class KubeJSNLEntityRenderer<T extends Entity & IAnimatableJSNL> extends 
     public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
         if (builder instanceof ProjectileAnimatableJSBuilder projectileAnimatableJSBuilder) {
             if (projectileAnimatableJSBuilder.facesTrajectory) {
-                if (builder.scaleModelForRender != null && this.animatable != null) {
-                    Vec3 velocity = animatable.getDeltaMovement();
-                    double velX = velocity.x();
-                    double velY = velocity.y();
-                    double velZ = velocity.z();
-                    float yaw = (float) (Math.atan2(velZ, velX) * (180 / Math.PI) - 90);
-                    float pitch = (float) (Math.atan2(velY, Math.sqrt(velX * velX + velZ * velZ)) * (180 / Math.PI));
-                    poseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
-                    poseStack.mulPose(Axis.XP.rotationDegrees(-pitch));
-
-                    ContextUtils.ScaleModelRenderContextNL<T> context = new ContextUtils.ScaleModelRenderContextNL<>(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
-                    EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + " builder for field: scaleModelForRender.");
-                }
+                Vec3 velocity = animatable.getDeltaMovement();
+                double velX = velocity.x();
+                double velY = velocity.y();
+                double velZ = velocity.z();
+                float yaw = (float) (Math.atan2(velZ, velX) * (180 / Math.PI) - 90);
+                float pitch = (float) (Math.atan2(velY, Math.sqrt(velX * velX + velZ * velZ)) * (180 / Math.PI));
+                poseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
+                poseStack.mulPose(Axis.XP.rotationDegrees(-pitch));
             }
         }
 
