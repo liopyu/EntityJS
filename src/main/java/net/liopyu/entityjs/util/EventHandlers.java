@@ -8,9 +8,11 @@ import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.events.*;
+import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
@@ -19,7 +21,6 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class EventHandlers {
-
     public static final EventGroup EntityJSEvents = EventGroup.of("EntityJSEvents");
     public static final EventHandler addGoalTargets = EntityJSEvents.server("addGoals", () -> AddGoalTargetsEventJS.class).extra(Extra.REQUIRES_ID); // Possibly a modify goals event for editing other entities
     public static final EventHandler addGoalSelectors = EntityJSEvents.server("addGoalSelectors", () -> AddGoalSelectorsEventJS.class).extra(Extra.REQUIRES_ID);

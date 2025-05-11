@@ -100,6 +100,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient Consumer<ContextUtils.ScaleModelRenderContextNL<T>> scaleModelForRender;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
 
+
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
         translationKey("entity." + i.getNamespace() + "." + i.getPath());
