@@ -48,8 +48,8 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
             entityBuilder.setFacesTrajectory(false)
             ```
             """)
-    public ProjectileAnimatableJSBuilder setFacesTrajectory(boolean isPickable) {
-        this.isPickable = isPickable;
+    public ProjectileAnimatableJSBuilder setFacesTrajectory(boolean facesTrajectory) {
+        this.facesTrajectory = facesTrajectory;
         return this;
     }
 
