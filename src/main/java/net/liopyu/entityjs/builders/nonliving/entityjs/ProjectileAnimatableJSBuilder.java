@@ -30,12 +30,27 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
     public transient ProjectileItemBuilder item;
     public transient boolean noItem;
     public boolean canShootFromDispenser = true;
+    public transient boolean facesTrajectory = true;
 
     public ProjectileAnimatableJSBuilder(ResourceLocation i) {
         super(i);
         this.item = (ProjectileItemBuilder) new ProjectileItemBuilder(id, this)
                 .canThrow(true)
                 .texture(i.getNamespace() + ":item/" + i.getPath());
+    }
+
+    @Info(value = """
+            Boolean determining if the projectile's model visually faces the direction it's currently headed.
+            Saves manual implementation of this assumed behavior from the projectile.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.setFacesTrajectory(false)
+            ```
+            """)
+    public ProjectileAnimatableJSBuilder setFacesTrajectory(boolean facesTrajectory) {
+        this.facesTrajectory = facesTrajectory;
+        return this;
     }
 
     @Info(value = "Sets whether or not the projectile can be shot from dispenser blocks, if noItem is set to true this will not register DispenserBehavior.")

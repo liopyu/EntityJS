@@ -1,7 +1,9 @@
 package net.liopyu.entityjs.client.nonliving;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileAnimatableJSBuilder;
 import net.liopyu.entityjs.client.nonliving.model.NonLivingEntityModel;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -13,6 +15,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.liopyu.liolib.renderer.GeoEntityRenderer;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 
@@ -42,6 +45,18 @@ public class KubeJSNLEntityRenderer<T extends Entity & IAnimatableJSNL> extends 
 
     @Override
     public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
+        if (builder instanceof ProjectileAnimatableJSBuilder projectileAnimatableJSBuilder) {
+            if (projectileAnimatableJSBuilder.facesTrajectory) {
+                Vec3 velocity = animatable.getDeltaMovement();
+                double velX = velocity.x();
+                double velY = velocity.y();
+                double velZ = velocity.z();
+                float yaw = (float) (Math.atan2(velZ, velX) * (180 / Math.PI) - 90);
+                float pitch = (float) (Math.atan2(velY, Math.sqrt(velX * velX + velZ * velZ)) * (180 / Math.PI));
+                poseStack.mulPose(Vector3f.YP.rotationDegrees(-yaw));
+                poseStack.mulPose(Vector3f.XP.rotationDegrees(-pitch));
+            }
+        }
         if (builder.scaleModelForRender != null && this.animatable != null) {
             final ContextUtils.ScaleModelRenderContextNL<T> context = new ContextUtils.ScaleModelRenderContextNL<>(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
             EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: scaleModelForRender.");
