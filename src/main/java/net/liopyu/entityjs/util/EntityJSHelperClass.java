@@ -1,23 +1,12 @@
 package net.liopyu.entityjs.util;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+
 import dev.latvian.mods.kubejs.util.ConsoleJS;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import software.bernie.geckolib.core.animation.Animation;
 
 import java.util.HashSet;
@@ -73,13 +62,14 @@ public class EntityJSHelperClass {
         };
     }
 
-    public static RenderType convertToRenderType(Object input, Object defaultValue) {
+    @OnlyIn(Dist.CLIENT)
+    public static net.minecraft.client.renderer.RenderType convertToRenderType(Object input, Object defaultValue) {
         if (input == null) {
-            return (RenderType) defaultValue;
-        } else if (input instanceof RenderType) {
-            return (RenderType) input;
+            return (net.minecraft.client.renderer.RenderType) defaultValue;
+        } else if (input instanceof net.minecraft.client.renderer.RenderType) {
+            return (net.minecraft.client.renderer.RenderType) input;
         } else if (input instanceof String string) {
-            return RenderType.entityCutout(new ResourceLocation(string));
+            return net.minecraft.client.renderer.RenderType.entityCutout(new ResourceLocation(string));
         }
         return null;
     }
@@ -198,121 +188,6 @@ public class EntityJSHelperClass {
             prevZ = currentZ;
 
             return moving;
-        }
-    }
-
-
-    public static <E extends Entity> void render(EntityRenderDispatcher entityRenderDispatcher, E pEntity, double pX, double pY, double pZ, float pRotationYaw, float pPartialTicks, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, CallbackInfo ci, Object locationOrRenderType) {
-        EntityRenderer<? super E> entityrenderer = entityRenderDispatcher.getRenderer(pEntity);
-
-        try {
-            Vec3 vec3 = entityrenderer.getRenderOffset(pEntity, pPartialTicks);
-            double d2 = pX + vec3.x();
-            double d3 = pY + vec3.y();
-            double d0 = pZ + vec3.z();
-
-            pPoseStack.pushPose();
-            pPoseStack.translate(d2, d3, d0);
-            MultiBufferSource interceptedBuffer = pBuffer;
-            if (locationOrRenderType instanceof RenderType type) {
-                interceptedBuffer = renderType -> new VertexModifier(pBuffer.getBuffer(type));
-            } else if (locationOrRenderType instanceof ResourceLocation location) {
-                interceptedBuffer = renderType -> new VertexModifier(pBuffer.getBuffer(RenderType.entityCutout(location)));
-            }
-
-            entityrenderer.render(pEntity, pRotationYaw, pPartialTicks, pPoseStack, interceptedBuffer, pPackedLight);
-
-            if (pEntity.displayFireAnimation()) {
-                entityRenderDispatcher.renderFlame(pPoseStack, pBuffer, pEntity);
-            }
-
-            pPoseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
-            if ((Boolean) entityRenderDispatcher.options.entityShadows().get() &&
-                    entityRenderDispatcher.shouldRenderShadow &&
-                    entityrenderer.shadowRadius > 0.0F &&
-                    !pEntity.isInvisible()) {
-
-                double d1 = entityRenderDispatcher.distanceToSqr(pEntity.getX(), pEntity.getY(), pEntity.getZ());
-                float f = (float) (((double) 1.0F - d1 / 256.0F) * entityrenderer.shadowStrength);
-
-                if (f > 0.0F) {
-                    EntityRenderDispatcher.renderShadow(pPoseStack, pBuffer, pEntity, f, pPartialTicks, entityRenderDispatcher.level, Math.min(entityrenderer.shadowRadius, 32.0F));
-                }
-            }
-
-            if (entityRenderDispatcher.renderHitBoxes && !pEntity.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
-                EntityRenderDispatcher.renderHitbox(pPoseStack, pBuffer.getBuffer(RenderType.lines()), pEntity, pPartialTicks);
-            }
-
-            pPoseStack.popPose();
-
-        } catch (Throwable throwable) {
-            CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering entity in world");
-            CrashReportCategory crashreportcategory = crashreport.addCategory("Entity being rendered");
-            pEntity.fillCrashReportCategory(crashreportcategory);
-            CrashReportCategory crashreportcategory1 = crashreport.addCategory("Renderer details");
-            crashreportcategory1.setDetail("Assigned renderer", entityrenderer);
-            crashreportcategory1.setDetail("Location", CrashReportCategory.formatLocation(entityRenderDispatcher.level, pX, pY, pZ));
-            crashreportcategory1.setDetail("Rotation", pRotationYaw);
-            crashreportcategory1.setDetail("Delta", pPartialTicks);
-            throw new ReportedException(crashreport);
-        }
-        ci.cancel();
-    }
-
-
-    private static class VertexModifier implements VertexConsumer {
-        private final VertexConsumer original;
-
-        public VertexModifier(VertexConsumer original) {
-            this.original = original;
-        }
-
-        @Override
-        public VertexConsumer vertex(double v, double v1, double v2) {
-            return original.vertex(v, v1, v2);
-        }
-
-        @Override
-        public VertexConsumer color(int red, int green, int blue, int alpha) {
-            return original.color(red, green, blue, alpha);
-        }
-
-        @Override
-        public VertexConsumer uv(float u, float v) {
-            float newU = u;
-            float newV = v;
-            return original.uv(newU, newV);
-        }
-
-        @Override
-        public VertexConsumer overlayCoords(int u, int v) {
-            return original.overlayCoords(u, v);
-        }
-
-        @Override
-        public VertexConsumer uv2(int u, int v) {
-            return original.uv2(u, v);
-        }
-
-        @Override
-        public VertexConsumer normal(float x, float y, float z) {
-            return original.normal(x, y, z);
-        }
-
-        @Override
-        public void endVertex() {
-            original.endVertex();
-        }
-
-        @Override
-        public void defaultColor(int red, int green, int blue, int alpha) {
-            original.defaultColor(red, green, blue, alpha);
-        }
-
-        @Override
-        public void unsetDefaultColor() {
-            original.unsetDefaultColor();
         }
     }
 }

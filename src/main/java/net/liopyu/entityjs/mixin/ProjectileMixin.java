@@ -1,7 +1,5 @@
 package net.liopyu.entityjs.mixin;
 
-import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
-import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyProjectileBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
