@@ -98,5 +98,8 @@ public interface IAnimatableJS extends GeoAnimatable, GeoEntity {
         return Objects.requireNonNull(Registry.ENTITY_TYPE.getKey(getType()).toString());
     }
 
-    EntityType<?> getType();
+    default EntityType<?> getType() {
+        Entity entity = (Entity) this;
+        return entity.getType();
+    }
 }
