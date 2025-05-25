@@ -6,6 +6,7 @@ import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
@@ -106,5 +107,8 @@ public interface IAnimatableJS extends GeoAnimatable, GeoEntity {
         return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.getKey(getType()).toString());
     }
 
-    EntityType<?> getType();
+    default EntityType<?> getType() {
+        Entity entity = (Entity) this;
+        return entity.getType();
+    }
 }

@@ -104,6 +104,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         return this.getType().toString();
     }
 
+
     protected final AnimalEntityJSBuilder builder;
 
     protected PathNavigation navigation;

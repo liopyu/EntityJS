@@ -64,6 +64,11 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
     private final ZombieJSBuilder builder;
     private final AnimatableInstanceCache getAnimatableInstanceCache;
 
+   /* @Override
+    public EntityType<?> getType() {
+        return super.getType();
+    }*/
+
     public String entityName() {
         return this.getType().toString();
     }
