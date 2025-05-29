@@ -670,6 +670,10 @@ public class BeeEntityJS extends Bee implements IAnimatableJS {
         super.onAddedToWorld();
         if (builder.defaultGoals) {
             super.registerGoals();
+        } else {
+            this.beePollinateGoal = new BeePollinateGoal();
+            this.goToHiveGoal = new BeeGoToHiveGoal();
+            this.goToKnownFlowerGoal = new BeeGoToKnownFlowerGoal();
         }
         if (builder.onAddedToWorld != null) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");

@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.util;
 
+import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.misc.JumpControlJSBuilder;
 import net.liopyu.entityjs.builders.misc.LookControlJSBuilder;
@@ -7,15 +8,43 @@ import net.liopyu.entityjs.builders.misc.MoveControlJSBuilder;
 import net.liopyu.entityjs.util.ai.JumpControlJS;
 import net.liopyu.entityjs.util.ai.LookControlJS;
 import net.liopyu.entityjs.util.ai.MoveControlJS;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.*;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.vanilla.BoatEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderEntityBuilder;
 
 import java.util.function.Consumer;
 
 public interface EntityJSUtils {
+    @Info("Helper method to get the entity's builder for the type.")
+    static <T extends BuilderBase<?>> T getEntityBuilder(EntityType<?> type) {
+        for (ArrowEntityBuilder<?> builder : ArrowEntityBuilder.thisList) {
+            if (builder.get() == type) return (T) builder;
+        }
+        for (ProjectileEntityBuilder<?> builder : ProjectileEntityBuilder.thisList) {
+            if (builder.get() == type) return (T) builder;
+        }
+        for (EyeOfEnderEntityBuilder<?> builder : EyeOfEnderEntityBuilder.thisList) {
+            if (builder.get() == type) return (T) builder;
+        }
+        for (BoatEntityBuilder<?> builder : BoatEntityBuilder.thisList) {
+            if (builder.get() == type) return (T) builder;
+        }
+        for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
+            if (builder.get() == type) return (T) builder;
+        }
+        for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
+            if (builder.get() == type) return (T) builder;
+        }
+        return null;
+    }
+
     @Info("Creates a custom Jump Control builder and returns it.")
     static JumpControlJS createJumpControl(Mob pMob, Consumer<JumpControlJSBuilder> consumer) {
         var builder = new JumpControlJSBuilder();
