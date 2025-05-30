@@ -22,7 +22,7 @@ public class IllusionerJSBuilder extends PathfinderMobBuilder<IllusionerEntityJS
 
     @Info(value = """
             Sets the sound to play when the entity is celebrating using either a string representation or a ResourceLocation object.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.setCelebrateSound("minecraft:entity.zombie.ambient");
@@ -43,7 +43,7 @@ public class IllusionerJSBuilder extends PathfinderMobBuilder<IllusionerEntityJS
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -62,6 +62,10 @@ public class IllusionerJSBuilder extends PathfinderMobBuilder<IllusionerEntityJS
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return IllusionerEntityJS.createAttributes();
+        var builder = IllusionerEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

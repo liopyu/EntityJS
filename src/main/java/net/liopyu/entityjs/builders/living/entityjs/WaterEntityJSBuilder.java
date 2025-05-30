@@ -41,7 +41,7 @@ public class WaterEntityJSBuilder extends PathfinderMobBuilder<WaterEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return WaterEntityJS.createAttributes()
+        var builder = WaterEntityJS.createAttributes()
                 .add(Attributes.MAX_HEALTH, 3)
                 .add(Attributes.FOLLOW_RANGE)
                 .add(Attributes.ATTACK_DAMAGE)
@@ -51,5 +51,9 @@ public class WaterEntityJSBuilder extends PathfinderMobBuilder<WaterEntityJS> {
                 .add(Attributes.ATTACK_KNOCKBACK)
                 .add(Attributes.LUCK)
                 .add(Attributes.MOVEMENT_SPEED);
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

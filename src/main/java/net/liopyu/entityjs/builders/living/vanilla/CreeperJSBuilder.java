@@ -22,7 +22,7 @@ public class CreeperJSBuilder extends PathfinderMobBuilder<CreeperEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -40,6 +40,10 @@ public class CreeperJSBuilder extends PathfinderMobBuilder<CreeperEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return CreeperEntityJS.createAttributes();
+        var builder = CreeperEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

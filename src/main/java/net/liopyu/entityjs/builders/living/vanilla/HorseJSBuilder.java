@@ -30,7 +30,7 @@ public class HorseJSBuilder extends AnimalEntityBuilder<HorseEntityJS> {
     @Info(value = """  
             @param defaultBehaviourGoals Sets whether the mob should inherit it's goal behavior from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultBehaviourGoals(false);
@@ -45,9 +45,9 @@ public class HorseJSBuilder extends AnimalEntityBuilder<HorseEntityJS> {
             Sets a Consumer invoked after the entity is tamed
             and replaces the logic used to set the UUID of the owner
             with the parameter of ContextUtils.PlayerEntityContext callback
-                        
+            
             @param tameOverride A Consumer responsible for determining the uuid to set when the entity is tamed.
-                        
+            
             Example usage:
             ```javascript
             builder.tameOverride(context => {
@@ -66,9 +66,9 @@ public class HorseJSBuilder extends AnimalEntityBuilder<HorseEntityJS> {
             Sets a Consumer with the parameter of ContextUtils.PlayerEntityContext callback
             This is fired after the entity is tamed and all tame logic has already taken place.
             Useful if you don't want to mess with the UUID logic in the tameOverride method.
-                        
+            
             @param onTamed A Consumer that fires when the entity is tamed.
-                        
+            
             Example usage:
             ```javascript
             builder.onTamed(entity => {
@@ -84,7 +84,7 @@ public class HorseJSBuilder extends AnimalEntityBuilder<HorseEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -103,6 +103,10 @@ public class HorseJSBuilder extends AnimalEntityBuilder<HorseEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return HorseEntityJS.createBaseHorseAttributes();
+        var builder = HorseEntityJS.createBaseHorseAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

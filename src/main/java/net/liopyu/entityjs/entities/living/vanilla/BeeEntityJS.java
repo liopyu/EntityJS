@@ -81,15 +81,6 @@ public class BeeEntityJS extends Bee implements IAnimatableJS {
         this.navigation = this.createNavigation(pLevel);
     }
 
-    @Override
-    public AttributeMap getAttributes() {
-        for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
-            if (b.get() == this.getType()) {
-                return new AttributeMap(b.getAttributeBuilder().build());
-            }
-        }
-        return super.getAttributes();
-    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override
@@ -651,6 +642,10 @@ public class BeeEntityJS extends Bee implements IAnimatableJS {
     public void onAddedToWorld() {
         if (builder.defaultGoals) {
             super.registerGoals();
+        } else {
+            this.beePollinateGoal = new BeePollinateGoal();
+            this.goToHiveGoal = new BeeGoToHiveGoal();
+            this.goToKnownFlowerGoal = new BeeGoToKnownFlowerGoal();
         }
         if (builder.onAddedToWorld != null && !this.level().isClientSide()) {
             EntityJSHelperClass.consumerCallback(builder.onAddedToWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onAddedToWorld.");

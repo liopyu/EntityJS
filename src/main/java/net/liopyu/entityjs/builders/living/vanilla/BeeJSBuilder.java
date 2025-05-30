@@ -22,7 +22,7 @@ public class BeeJSBuilder extends AnimalEntityBuilder<BeeEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -41,6 +41,10 @@ public class BeeJSBuilder extends AnimalEntityBuilder<BeeEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return BeeEntityJS.createAttributes();
+        var builder = BeeEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

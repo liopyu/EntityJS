@@ -22,6 +22,10 @@ public class BatJSBuilder extends MobBuilder<BatEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return BatEntityJS.createAttributes();
+        var builder = BatEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

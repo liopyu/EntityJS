@@ -64,7 +64,6 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
 
     protected PathNavigation navigation;
     public final PartEntityJS<?>[] partEntities;
-    public final ModifyAttributeEventJS.AttributeModificationHelper helper;
 
     public MobEntityJS(MobEntityJSBuilder builder, EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -77,18 +76,8 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS {
         }
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
         this.navigation = this.createNavigation(pLevel);
-        this.helper = new ModifyAttributeEventJS.AttributeModificationHelper((EntityType<? extends LivingEntity>) this.getType());
     }
 
-    @Override
-    public AttributeMap getAttributes() {
-        for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
-            if (b.get() == this.getType()) {
-                return new AttributeMap(b.getAttributeBuilder().build());
-            }
-        }
-        return super.getAttributes();
-    }
 
     // Part Entity Logical Overrides --------------------------------
     @Override

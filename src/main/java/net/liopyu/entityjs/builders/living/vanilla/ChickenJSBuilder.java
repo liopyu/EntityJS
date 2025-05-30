@@ -27,7 +27,7 @@ public class ChickenJSBuilder extends AnimalEntityBuilder<ChickenEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -40,7 +40,7 @@ public class ChickenJSBuilder extends AnimalEntityBuilder<ChickenEntityJS> {
 
     @Info(value = """ 
             @param eggTime Sets a function to determine the laying egg time of the entity
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.eggTime(entity => {
@@ -60,7 +60,11 @@ public class ChickenJSBuilder extends AnimalEntityBuilder<ChickenEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return ChickenEntityJS.createAttributes();
+        var builder = ChickenEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }
 

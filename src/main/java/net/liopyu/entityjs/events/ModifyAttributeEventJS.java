@@ -5,7 +5,9 @@ import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.EntityJSUtils;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
@@ -57,21 +59,37 @@ public class ModifyAttributeEventJS extends EventJS {
         Map<Attribute, Double> newAttributeDefaultValues = helper.getDefaultValues();
         List<Attribute> mergedAttributes = new ArrayList<>(existingAttributes);
         mergedAttributes.addAll(newAttributes);
-
-        EntityAttributeRegistry.register(() -> entityType, () -> {
-            AttributeSupplier.Builder builder = AttributeSupplier.builder();
-            for (Attribute attribute : mergedAttributes) {
-                if (newAttributeDefaultValues.containsKey(attribute)) {
-                    builder.add(attribute, newAttributeDefaultValues.get(attribute));
-                } else if (defaultValues.containsKey(attribute)) {
-                    builder.add(attribute, defaultValues.get(attribute));
-                } else {
-                    builder.add(attribute);
+        BaseLivingEntityBuilder<?> b = EntityJSUtils.getEntityBuilder(entityType);
+        if (b != null) {
+            b.attributes(attrBuilder -> {
+                for (Attribute attribute : mergedAttributes) {
+                    if (newAttributeDefaultValues.containsKey(attribute)) {
+                        attrBuilder.add(attribute, newAttributeDefaultValues.get(attribute));
+                    } else if (defaultValues.containsKey(attribute)) {
+                        attrBuilder.add(attribute, defaultValues.get(attribute));
+                    } else {
+                        attrBuilder.add(attribute);
+                    }
                 }
-            }
+            });
+        } else {
+            EntityAttributeRegistry.register(() -> entityType, () -> {
+                AttributeSupplier.Builder builder = AttributeSupplier.builder();
 
-            return builder;
-        });
+                for (Attribute attribute : mergedAttributes) {
+                    if (newAttributeDefaultValues.containsKey(attribute)) {
+                        builder.add(attribute, newAttributeDefaultValues.get(attribute));
+                    } else if (defaultValues.containsKey(attribute)) {
+                        builder.add(attribute, defaultValues.get(attribute));
+                    } else {
+                        builder.add(attribute);
+                    }
+                }
+
+                return builder;
+            });
+        }
+
     }
 
     @Info(value = "Returns a list of all entity types that can have their attributes modified by this event")
@@ -103,17 +121,18 @@ public class ModifyAttributeEventJS extends EventJS {
 
         @Info(value = """
                 Adds the given attribute to the entity type, using its default value
-                                
+                
                 It is safe to add an attribute that an entity type already has
                 """)
         public void add(Attribute attribute) {
+
             newAttributes.add(attribute);
             modifiedAttributesMap.put(entityType, ImmutableList.copyOf(newAttributes));
         }
 
         @Info(value = """
                 Adds the given attribute to the entity type, using the provided default value
-                                
+                
                 It is safe to add an attribute that an entity type already has
                 """, params = {
                 @Param(name = "attribute", value = "The attribute to add"),

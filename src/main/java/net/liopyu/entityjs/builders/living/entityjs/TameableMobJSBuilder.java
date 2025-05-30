@@ -23,7 +23,7 @@ public class TameableMobJSBuilder extends TameableMobBuilder<TameableMobJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return TameableMobJS.createMobAttributes()
+        var builder = TameableMobJS.createMobAttributes()
                 .add(Attributes.MAX_HEALTH)
                 .add(Attributes.FOLLOW_RANGE)
                 .add(Attributes.ATTACK_DAMAGE)
@@ -32,5 +32,9 @@ public class TameableMobJSBuilder extends TameableMobBuilder<TameableMobJS> {
                 .add(Attributes.ATTACK_SPEED)
                 .add(Attributes.ATTACK_KNOCKBACK)
                 .add(Attributes.LUCK);
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

@@ -20,10 +20,13 @@ public class BaseLivingEntityJSBuilder extends BaseLivingEntityBuilder<BaseLivin
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        final AttributeSupplier.Builder builder = BaseLivingEntityJS.createLivingAttributes();
-        builder.add(Attributes.ATTACK_DAMAGE);
-        builder.add(Attributes.ATTACK_SPEED);
-        builder.add(Attributes.ATTACK_KNOCKBACK);
-        return BaseLivingEntityJS.createLivingAttributes();
+        var builder = BaseLivingEntityJS.createLivingAttributes()
+                .add(Attributes.ATTACK_DAMAGE)
+                .add(Attributes.ATTACK_SPEED)
+                .add(Attributes.ATTACK_KNOCKBACK);
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

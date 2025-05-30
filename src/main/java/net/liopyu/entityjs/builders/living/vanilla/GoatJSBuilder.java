@@ -21,7 +21,7 @@ public class GoatJSBuilder extends AnimalEntityBuilder<GoatEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -40,7 +40,11 @@ public class GoatJSBuilder extends AnimalEntityBuilder<GoatEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return GoatEntityJS.createAttributes();
+        var builder = GoatEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }
 

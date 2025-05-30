@@ -22,7 +22,7 @@ public class DolphinJSBuilder extends PathfinderMobBuilder<DolphinEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -40,6 +40,10 @@ public class DolphinJSBuilder extends PathfinderMobBuilder<DolphinEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return DolphinEntityJS.createAttributes();
+        var builder = DolphinEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

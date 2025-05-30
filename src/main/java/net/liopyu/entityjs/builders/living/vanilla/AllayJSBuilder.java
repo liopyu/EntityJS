@@ -25,6 +25,10 @@ public class AllayJSBuilder extends PathfinderMobBuilder<AllayEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return AllayEntityJS.createAttributes();
+        var builder = AllayEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

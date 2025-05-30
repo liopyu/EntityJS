@@ -22,7 +22,7 @@ public class WitherJSBuilder extends PathfinderMobBuilder<WitherEntityJS> {
     @Info(value = """  
             @param attackProjectile Sets the projectile shot by the wither.
             Defaults to a wither skull.
-                        
+            
             Example usage:
             ```javascript
             builder.attackProjectile("minecraft:arrow");
@@ -36,7 +36,7 @@ public class WitherJSBuilder extends PathfinderMobBuilder<WitherEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -50,7 +50,7 @@ public class WitherJSBuilder extends PathfinderMobBuilder<WitherEntityJS> {
     @Info(value = """  
             @param customServerAiStep Sets whether the mob has its default custom server ai step behavior
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.customServerAiStep(false);
@@ -69,6 +69,10 @@ public class WitherJSBuilder extends PathfinderMobBuilder<WitherEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return WitherEntityJS.createAttributes();
+        var builder = WitherEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

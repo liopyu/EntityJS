@@ -21,7 +21,7 @@ public class EvokerJSBuilder extends PathfinderMobBuilder<EvokerEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -40,7 +40,11 @@ public class EvokerJSBuilder extends PathfinderMobBuilder<EvokerEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return EvokerEntityJS.createAttributes();
+        var builder = EvokerEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }
 

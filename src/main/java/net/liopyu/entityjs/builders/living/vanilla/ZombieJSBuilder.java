@@ -28,7 +28,7 @@ public class ZombieJSBuilder extends PathfinderMobBuilder<ZombieEntityJS> {
     @Info(value = """  
             @param isSunSensitive Sets whether the mob should convert in water to another mob
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.convertsInWater(false);
@@ -42,7 +42,7 @@ public class ZombieJSBuilder extends PathfinderMobBuilder<ZombieEntityJS> {
     @Info(value = """  
             @param isSunSensitive Sets whether the mob should burn in daylight
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.isSunSensitive(false);
@@ -56,7 +56,7 @@ public class ZombieJSBuilder extends PathfinderMobBuilder<ZombieEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -70,7 +70,7 @@ public class ZombieJSBuilder extends PathfinderMobBuilder<ZombieEntityJS> {
     @Info(value = """  
             @param defaultBehaviourGoals Sets whether the mob should inherit it's goal behavior from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultBehaviourGoals(false);
@@ -88,6 +88,10 @@ public class ZombieJSBuilder extends PathfinderMobBuilder<ZombieEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return ZombieEntityJS.createAttributes();
+        var builder = ZombieEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

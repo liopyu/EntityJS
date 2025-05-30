@@ -188,7 +188,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public final List<GeoLayerJSBuilder<T>> layerList = new ArrayList<>();
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
-    //public transient Consumer<AttributeSupplier.Builder> attributeBuilder;
+    public transient Consumer<AttributeSupplier.Builder> attributeBuilder;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -223,10 +223,26 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mountJumpingEnabled = true;
         scaleHeight = 1F;
         scaleWidth = 1F;
-        //attributeBuilder = t -> this.getAttributeBuilder();
 
     }
 
+    @Info(value = """
+            @param attr A consumer setting the attributes of the entity.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.attributes(attr => {
+                    attr
+                        .add("minecraft:generic.attack_damage", 5)
+                        .add("minecraft:generic.attack_speed")
+                        .add("minecraft:generic.attack_knockback")
+                })
+                ```
+            """)
+    public BaseLivingEntityBuilder<T> attributes(Consumer<AttributeSupplier.Builder> attributeBuilder) {
+        this.attributeBuilder = attributeBuilder;
+        return this;
+    }
 
     @HideFromJS
     public BaseLivingEntityBuilder<?> getBuilderForEntityType(EntityType<?> entityType) {

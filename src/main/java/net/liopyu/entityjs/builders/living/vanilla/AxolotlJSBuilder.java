@@ -40,6 +40,10 @@ public class AxolotlJSBuilder extends AnimalEntityBuilder<AxolotlEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return AxolotlEntityJS.createAttributes();
+        var builder = AxolotlEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

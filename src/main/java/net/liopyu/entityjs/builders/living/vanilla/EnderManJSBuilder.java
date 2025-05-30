@@ -21,7 +21,7 @@ public class EnderManJSBuilder extends PathfinderMobBuilder<EnderManEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -40,6 +40,10 @@ public class EnderManJSBuilder extends PathfinderMobBuilder<EnderManEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return EnderManEntityJS.createAttributes();
+        var builder = EnderManEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

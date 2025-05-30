@@ -21,7 +21,7 @@ public class CatJSBuilder extends TameableMobBuilder<CatEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -39,6 +39,10 @@ public class CatJSBuilder extends TameableMobBuilder<CatEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return CatEntityJS.createAttributes();
+        var builder = CatEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

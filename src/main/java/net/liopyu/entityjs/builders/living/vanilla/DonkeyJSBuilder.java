@@ -23,7 +23,7 @@ public class DonkeyJSBuilder extends AnimalEntityBuilder<DonkeyEntityJS> {
     @Info(value = """  
             @param defaultBehaviourGoals Sets whether the mob should inherit it's goal behavior from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultBehaviourGoals(false);
@@ -37,7 +37,7 @@ public class DonkeyJSBuilder extends AnimalEntityBuilder<DonkeyEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -55,6 +55,10 @@ public class DonkeyJSBuilder extends AnimalEntityBuilder<DonkeyEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return DonkeyEntityJS.createBaseHorseAttributes();
+        var builder = DonkeyEntityJS.createBaseHorseAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

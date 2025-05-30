@@ -22,7 +22,7 @@ public class CowJSBuilder extends AnimalEntityBuilder<CowEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -41,6 +41,10 @@ public class CowJSBuilder extends AnimalEntityBuilder<CowEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return CowEntityJS.createAttributes();
+        var builder = CowEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

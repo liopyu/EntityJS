@@ -26,9 +26,9 @@ public class PiglinJSBuilder extends PathfinderMobBuilder<PiglinEntityJS> {
 
     @Info(value = """
             Sets a consumer responsible for spawning an entity after the mob has converted.
-                        
+            
             @param finishConversion A Function accepting an entity parameter
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.finishConversion(entity => {
@@ -45,9 +45,9 @@ public class PiglinJSBuilder extends PathfinderMobBuilder<PiglinEntityJS> {
 
     @Info(value = """
             Sets a function to determine if the entity is converting.
-                        
+            
             @param isConverting A Function accepting an entity parameter
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.isConverting(entity => {
@@ -63,7 +63,7 @@ public class PiglinJSBuilder extends PathfinderMobBuilder<PiglinEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -82,6 +82,10 @@ public class PiglinJSBuilder extends PathfinderMobBuilder<PiglinEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return PiglinEntityJS.createAttributes();
+        var builder = PiglinEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

@@ -23,7 +23,7 @@ public class AnimalEntityJSBuilder extends AnimalEntityBuilder<AnimalEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return MobEntityJS.createMobAttributes()
+        var builder = MobEntityJS.createMobAttributes()
                 .add(Attributes.MAX_HEALTH)
                 .add(Attributes.FOLLOW_RANGE)
                 .add(Attributes.ATTACK_DAMAGE)
@@ -33,5 +33,9 @@ public class AnimalEntityJSBuilder extends AnimalEntityBuilder<AnimalEntityJS> {
                 .add(Attributes.ATTACK_KNOCKBACK)
                 .add(Attributes.LUCK)
                 .add(Attributes.MOVEMENT_SPEED);
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }

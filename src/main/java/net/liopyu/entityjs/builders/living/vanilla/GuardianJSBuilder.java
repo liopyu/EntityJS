@@ -21,7 +21,7 @@ public class GuardianJSBuilder extends PathfinderMobBuilder<GuardianEntityJS> {
     @Info(value = """  
             @param defaultGoals Sets whether the mob should inherit it's goals from it's superclass
             Defaults to true.
-                        
+            
             Example usage:
             ```javascript
             builder.defaultGoals(false);
@@ -40,6 +40,10 @@ public class GuardianJSBuilder extends PathfinderMobBuilder<GuardianEntityJS> {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return GuardianEntityJS.createAttributes();
+        var builder = GuardianEntityJS.createAttributes();
+        if (attributeBuilder != null) {
+            attributeBuilder.accept(builder);
+        }
+        return builder;
     }
 }
