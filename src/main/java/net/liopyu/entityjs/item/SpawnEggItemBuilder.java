@@ -2,21 +2,26 @@ package net.liopyu.entityjs.item;
 
 import dev.latvian.mods.kubejs.generator.AssetJsonGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
+import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraftforge.common.ForgeSpawnEggItem;
+
+import java.util.function.Supplier;
 
 
 public class SpawnEggItemBuilder extends ItemBuilder {
 
     public transient int backgroundColor;
     public transient int highlightColor;
-    public transient final MobBuilder<?> parent;
+    public transient final BuilderBase<?> parent;
 
-    public SpawnEggItemBuilder(ResourceLocation i, MobBuilder<?> parent) {
+    public SpawnEggItemBuilder(ResourceLocation i, BuilderBase<?> parent) {
         super(i);
         backgroundColor = 0xFFFFFFFF;
         highlightColor = 0XFFFFFFFF;
@@ -37,7 +42,7 @@ public class SpawnEggItemBuilder extends ItemBuilder {
 
     @Override
     public Item createObject() {
-        return new ForgeSpawnEggItem(parent, backgroundColor, highlightColor, createItemProperties());
+        return new ForgeSpawnEggItem((Supplier<? extends EntityType<? extends Mob>>) parent, backgroundColor, highlightColor, createItemProperties());
     }
 
     @Override

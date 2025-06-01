@@ -19,25 +19,10 @@ public class EntityRegistryEvent<T> extends EventJS {
 
     private final List<BuilderBase<? extends T>> created;
 
+
     public EntityRegistryEvent(RegistryInfo<T> registry, List<BuilderBase<? extends T>> created) {
         this.registry = registry;
         this.created = created;
     }
 
-    public void createCustom(String id, Class<? extends Entity> entityClass, Consumer<CustomEntityBuilder> consumer) {
-        if (!Entity.class.isAssignableFrom(entityClass)) {
-            throw new IllegalArgumentException("Tried to create entity from a class that does not extend Entity. Id: " + id);
-        }
-        var rl = UtilsJS.getMCID(ScriptType.STARTUP.manager.get().context, KubeJS.appendModId(id));
-        CustomEntityBuilder b = null;
-        if (LivingEntity.class.isAssignableFrom(entityClass)) {
-            b = new CustomEntityBuilder(rl, (Class<? extends LivingEntity>) entityClass);
-            consumer.accept(b);
-        }
-        if (b == null) {
-            throw new IllegalArgumentException("CustomEntityBuilder is null for entity id: " + id);
-        }
-        registry.addBuilder((BuilderBase<? extends T>) b);
-        created.add((BuilderBase<? extends T>) b);
-    }
 }

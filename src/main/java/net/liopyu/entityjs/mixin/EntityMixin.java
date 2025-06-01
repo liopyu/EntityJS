@@ -78,6 +78,20 @@ public class EntityMixin implements IEntityJS {
         return this.entityJs$isMoving;
     }
 
+    @Inject(method = "ignoreExplosion", at = @At(value = "HEAD"), remap = true, cancellable = true)
+    public void entityJs$ignoreExplosion(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.ignoreExplosion != null) {
+                Object obj = builder.ignoreExplosion.apply((Entity) (Object) this);
+                if (obj instanceof Boolean b) {
+                    cir.setReturnValue(b);
+                } else {
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid ignoreExplosion return value: " + obj + ". Must be a boolean. Defaulting to super method.");
+                }
+            }
+        }
+    }
+
     /* @Inject(method = "isAlliedTo(Lnet/minecraft/world/entity/Entity;)Z", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
      private void entityjs$isAlliedTo(Entity pTarget, CallbackInfoReturnable<Boolean> cir) {
          if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {

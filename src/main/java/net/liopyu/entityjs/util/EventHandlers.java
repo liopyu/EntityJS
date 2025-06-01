@@ -49,6 +49,7 @@ public class EventHandlers {
         for (CustomEntityJSBuilder builder : CustomEntityJSBuilder.thisList) {
             event.put((EntityType<? extends LivingEntity>) builder.get(), builder.getAttributeBuilder().build());
         }
+
     }
 
     private static void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
