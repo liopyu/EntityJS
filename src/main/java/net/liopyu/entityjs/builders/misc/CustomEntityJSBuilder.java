@@ -3,15 +3,25 @@ package net.liopyu.entityjs.builders.misc;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import dev.latvian.mods.kubejs.script.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
-import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
+import net.liopyu.entityjs.client.living.model.CustomGeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
-import net.liopyu.entityjs.events.EntityModificationEventJS;
-import net.liopyu.entityjs.util.ContextUtils;
-import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
+import net.liopyu.entityjs.util.*;
+import software.bernie.geckolib.animation.*;
+import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.animation.keyframe.event.CustomInstructionKeyframeEvent;
+import software.bernie.geckolib.animation.keyframe.event.KeyFrameEvent;
+import software.bernie.geckolib.animation.keyframe.event.ParticleKeyframeEvent;
+import software.bernie.geckolib.animation.keyframe.event.SoundKeyframeEvent;
+import software.bernie.geckolib.animation.keyframe.event.data.CustomInstructionKeyframeData;
+import software.bernie.geckolib.animation.keyframe.event.data.KeyFrameData;
+import software.bernie.geckolib.animation.keyframe.event.data.ParticleKeyframeData;
+import software.bernie.geckolib.animation.keyframe.event.data.SoundKeyframeData;
+import software.bernie.geckolib.constant.dataticket.DataTicket;
+import software.bernie.geckolib.animation.PlayState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -24,8 +34,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>*/ {
-   /* public transient float width;
+
+public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
+    public transient float width;
     public transient float height;
     public transient int clientTrackingRange;
     public transient int updateInterval;
@@ -45,7 +56,7 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
     public transient float scaleHeight;
     public transient float scaleWidth;
     public transient Object mainArm;
-    public transient Consumer<ContextUtils.ScaleModelRenderContext<LivingEntity>> scaleModelForRender;
+    public transient Consumer<ContextUtils.ScaleModelRenderContext<? extends LivingEntity>> scaleModelForRender;
     public final List<CustomGeoLayerJSBuilder<? extends LivingEntity>> layerList = new ArrayList<>();
     public final List<CustomGeoLayerJSBuilder<? extends LivingEntity>> glowingLayerList = new ArrayList<>();
 
@@ -138,7 +149,7 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
             });
             ```
             """)
-    public CustomEntityJSBuilder scaleModelForRender(Consumer<ContextUtils.ScaleModelRenderContext<LivingEntity>> scaleModelForRender) {
+    public CustomEntityJSBuilder scaleModelForRender(Consumer<ContextUtils.ScaleModelRenderContext<? extends LivingEntity>> scaleModelForRender) {
         this.scaleModelForRender = scaleModelForRender;
         return this;
     }
@@ -153,7 +164,7 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
             """)
     public CustomEntityJSBuilder immuneTo(String... blockNames) {
         this.immuneTo = Arrays.stream(blockNames)
-                .map(ResourceLocation::new)
+                .map(ResourceLocation::parse)
                 .toArray(ResourceLocation[]::new);
         return this;
     }
@@ -308,12 +319,9 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
         return this;
     }
 
-    @Override
-    public RegistryInfo getRegistryType() {
-        return RegistryInfo.ENTITY_TYPE;
-    }
+ 
 
-   *//* @Info(value = """
+   /* @Info(value = """
             Adds an animation controller to the entity with the specified parameters.
 
             @param name The name of the animation controller.
@@ -335,10 +343,10 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
             """)
     public CustomEntityJSBuilder addAnimationController(String name, int translationTicksLength, CustomEntityJSBuilder.IAnimationPredicateJS<?> predicate) {
         return addKeyAnimationController(name, translationTicksLength, predicate, null, null, null);
-    }*//*
+    }*/
 
 
-     *//*@Info(value = "Adds a new AnimationController to the entity, with the ability to add event listeners", params = {
+    /*@Info(value = "Adds a new AnimationController to the entity, with the ability to add event listeners", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
             @Param(name = "predicate", value = "The predicate for the controller, determines if an animation should continue or not"),
@@ -357,7 +365,7 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
         animationSuppliers.add(new CustomEntityJSBuilder.AnimationControllerSupplier<>(name, translationTicksLength, predicate, null, null, null, soundListener, particleListener, instructionListener));
         return this;
     }
-*//*
+*/
     @Info(value = """
             Sets the render type for the entity.
             
@@ -399,10 +407,10 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
     }
 
 
-    *//**
+    /**
      * <strong>Do not</strong> override unless you are creating a custom entity type builder<br><br>
      * See: {@link #factory()}
-     *//*
+     */
 
     @Override
     public EntityType<?> createObject() {
@@ -412,34 +420,34 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
     abstract public EntityType.EntityFactory<?> factory();
 
 
-    *//**
+    /**
      * Used to retrieve the entity type's attributes. Implementors are encouraged to return
      * the {@link AttributeSupplier.Builder} from a static method in the base class
      * (i.e. {@link AnimalEntityJS#createLivingAttributes()})
      *
      * @return The {@link AttributeSupplier.Builder} that will be built during Forge's EntityAttributeCreationEvent
-     *//*
+     */
     @HideFromJS
     abstract public AttributeSupplier.Builder getAttributeBuilder();
 
 
-    *//**
+    /**
      * A 'supplier' for an {@link AnimationController} that does not require a reference to the entity being animated
      *
      * @param name                   The name of the AnimationController that this builds
      * @param translationTicksLength The number of ticks it takes to transition between animations
-     * @param predicate              The {@link CustomEntityJSBuilder.IAnimationPredicateJS script-friendly} animation predicate
-     *//*
+     * @param predicate              The {@link IAnimationPredicateJS script-friendly} animation predicate
+     */
     public record AnimationControllerSupplier<E extends LivingEntity & IAnimatableJSCustom>(
             String name,
             int translationTicksLength,
-            CustomEntityJSBuilder.IAnimationPredicateJS<E> predicate,
+            IAnimationPredicateJS<E> predicate,
             String triggerableAnimationName,
             String triggerableAnimationID,
             Object loopType,
-            @Nullable CustomEntityJSBuilder.ISoundListenerJS<E> soundListener,
-            @Nullable CustomEntityJSBuilder.IParticleListenerJS<E> particleListener,
-            @Nullable CustomEntityJSBuilder.ICustomInstructionListenerJS<E> instructionListener
+            @Nullable ISoundListenerJS<E> soundListener,
+            @Nullable IParticleListenerJS<E> particleListener,
+            @Nullable ICustomInstructionListenerJS<E> instructionListener
     ) {
         public AnimationController<E> get(E entity) {
             final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
@@ -448,19 +456,19 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
                 controller.triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(triggerableAnimationName, (Animation.LoopType) type));
             }
             if (soundListener != null) {
-                controller.setSoundKeyframeHandler(event -> soundListener.playSound(new CustomEntityJSBuilder.SoundKeyFrameEventJS<>(event)));
+                controller.setSoundKeyframeHandler(event -> soundListener.playSound(new SoundKeyFrameEventJS<>(event)));
             }
             if (particleListener != null) {
-                controller.setParticleKeyframeHandler(event -> particleListener.summonParticle(new CustomEntityJSBuilder.ParticleKeyFrameEventJS<>(event)));
+                controller.setParticleKeyframeHandler(event -> particleListener.summonParticle(new ParticleKeyFrameEventJS<>(event)));
             }
             if (instructionListener != null) {
-                controller.setCustomInstructionKeyframeHandler(event -> instructionListener.executeInstruction(new CustomEntityJSBuilder.CustomInstructionKeyframeEventJS<>(event)));
+                controller.setCustomInstructionKeyframeHandler(event -> instructionListener.executeInstruction(new CustomInstructionKeyframeEventJS<>(event)));
             }
             return controller;
         }
     }
 
-   *//* @Info(value = "Adds a triggerable AnimationController to the entity callable off the entity's methods anywhere.", params = {
+    @Info(value = "Adds a triggerable AnimationController to the entity callable off the entity's methods anywhere.", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
             @Param(name = "triggerableAnimationID", value = "The unique identifier of the triggerable animation(sets it apart from other triggerable animations)"),
@@ -474,13 +482,13 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
             String triggerableAnimationID,
             String loopType
     ) {
-        animationSuppliers.add(new CustomEntityJSBuilder.AnimationControllerSupplier<>(
+        animationSuppliers.add(new AnimationControllerSupplier<>(
                 name,
                 translationTicksLength,
-                new CustomEntityJSBuilder.IAnimationPredicateJS<?>() {
+                new IAnimationPredicateJS() {
                     @Override
-                    public boolean test(CustomEntityJSBuilder.AnimationEventJS<?> event) {
-                        return true;
+                    public boolean test(AnimationEventJS event) {
+                        return false;
                     }
                 },
                 triggerableAnimationName,
@@ -491,25 +499,25 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
                 null
         ));
         return this;
-    }*//*
+    }
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
-    *//**
-     * A wrapper around {@link software.bernie.geckolib.core.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
+    /**
+     * A wrapper around {@link software.bernie.geckolib.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
      * that is easier to work with in js
-     *//*
+     */
     @FunctionalInterface
-    public interface IAnimationPredicateJS<E extends Entity & IAnimatableJSCustom> {
+    public interface IAnimationPredicateJS<E extends LivingEntity & IAnimatableJSCustom> {
 
         @Info(value = "Determines if an animation should continue for a given AnimationEvent. Return true to continue the current animation", params = {
                 @Param(name = "event", value = "The AnimationEvent, provides values that can be used to determine if the animation should continue or not")
         })
-        boolean test(CustomEntityJSBuilder.AnimationEventJS<E> event);
+        boolean test(AnimationEventJS<E> event);
 
         default AnimationController.AnimationStateHandler<E> toGecko() {
             return event -> {
                 if (event != null) {
-                    CustomEntityJSBuilder.AnimationEventJS<E> animationEventJS = new CustomEntityJSBuilder.AnimationEventJS<>(event);
+                    AnimationEventJS<E> animationEventJS = new AnimationEventJS<>(event);
                     try {
                         if (animationEventJS == null) return PlayState.STOP;
                     } catch (Exception e) {
@@ -527,15 +535,15 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
     }
 
 
-    *//**
-     * A simple wrapper around a {@link CustomEntityJSBuilder.AnimationEventJS} that restricts access to certain things
+    /**
+     * A simple wrapper around a {@link AnimationEventJS} that restricts access to certain things
      * and adds {@link @Info} annotations for script writers
      *
      * @param <E> The entity being animated in the event
-     *//*
-    public static class AnimationEventJS<E extends Entity & IAnimatableJSCustom> {
+     */
+    public static class AnimationEventJS<E extends LivingEntity & IAnimatableJSCustom> {
         private final List<RawAnimation.Stage> animationList = new ObjectArrayList();
-        private final software.bernie.geckolib.core.animation.AnimationState<E> parent;
+        private final AnimationState<E> parent;
 
         public AnimationEventJS(AnimationState<E> parent) {
             this.parent = parent;
@@ -625,7 +633,7 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
         }
 
         @Info(value = "Adds an animation to the current animation list")
-        public CustomEntityJSBuilder.AnimationEventJS<E> then(String animationName, Animation.LoopType loopType) {
+        public AnimationEventJS<E> then(String animationName, Animation.LoopType loopType) {
             this.animationList.add(new RawAnimation.Stage(animationName, loopType));
             return this;
         }
@@ -641,50 +649,55 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
         }
     }
 
-    public static class KeyFrameEventJS<E extends Entity & IAnimatableJSCustom, B extends KeyFrameData> {
-        @Info(value = "The amount of ticks that have passed in either the current transition or animation, depending on the controller's AnimationState")
-        public final double animationTick;
-        @Info(value = "The entity being animated")
+    public static class KeyFrameEventJS<E extends LivingEntity & IAnimatableJSCustom, B extends KeyFrameData> {
+        @Info(value = "The entity this animation is being applied to.")
         public final E entity;
-        @Info(value = "The KeyFrame data")
-        private final B eventKeyFrame;
+        @Info(value = "The current tick of the animation.")
+        public final double animationTick;
+        @Info(value = "The controller handling this animation.")
+        public final AnimationController<E> controller;
+        @Info(value = "The keyframe data containing extra information about the instruction.")
+        public final B keyframeData;
 
         protected KeyFrameEventJS(KeyFrameEvent<E, B> parent) {
             animationTick = parent.getAnimationTick();
             entity = parent.getAnimatable();
-            eventKeyFrame = parent.getKeyframeData();
+            controller = parent.getController();
+            keyframeData = parent.getKeyframeData();
         }
     }
 
 
     @FunctionalInterface
-    public interface ISoundListenerJS<E extends Entity & IAnimatableJSCustom> {
-        void playSound(CustomEntityJSBuilder.SoundKeyFrameEventJS<E> event);
+    public interface ISoundListenerJS<E extends LivingEntity & IAnimatableJSCustom> {
+        void playSound(SoundKeyFrameEventJS<E> event);
     }
 
-    public static class SoundKeyFrameEventJS<E extends Entity & IAnimatableJSCustom> {
-
-        @Info(value = "The name of the sound to play")
+    public static class SoundKeyFrameEventJS<E extends LivingEntity & IAnimatableJSCustom> extends KeyFrameEventJS<E, SoundKeyframeData> {
+        @Info(value = "Gets the sound id given by the Keyframe instruction from the animation. json")
         public final String sound;
 
         public SoundKeyFrameEventJS(SoundKeyframeEvent<E> parent) {
+            super(parent);
             sound = parent.getKeyframeData().getSound();
         }
     }
 
     @FunctionalInterface
-    public interface IParticleListenerJS<E extends Entity & IAnimatableJSCustom> {
-        void summonParticle(CustomEntityJSBuilder.ParticleKeyFrameEventJS<E> event);
+    public interface IParticleListenerJS<E extends LivingEntity & IAnimatableJSCustom> {
+        void summonParticle(ParticleKeyFrameEventJS<E> event);
     }
 
-    public static class ParticleKeyFrameEventJS<E extends Entity & IAnimatableJSCustom> {
-
-        // These aren't documented in geckolib, so I have no idea what they are
+    public static class ParticleKeyFrameEventJS<E extends LivingEntity & IAnimatableJSCustom> extends KeyFrameEventJS<E, ParticleKeyframeData> {
+        @Info(value = "Gets the effect id given by the Keyframe instruction from the animation.json")
         public final String effect;
+        @Info(value = "Gets the locator string given by the Keyframe instruction from the animation.json")
         public final String locator;
+        @Info(value = "Gets the script string given by the Keyframe instruction from the animation.json")
         public final String script;
 
         public ParticleKeyFrameEventJS(ParticleKeyframeEvent<E> parent) {
+            super(parent);
             effect = parent.getKeyframeData().getEffect();
             locator = parent.getKeyframeData().getLocator();
             script = parent.getKeyframeData().script();
@@ -692,24 +705,25 @@ public abstract class CustomEntityJSBuilder /*extends BuilderBase<EntityType<?>>
     }
 
     @FunctionalInterface
-    public interface ICustomInstructionListenerJS<E extends Entity & IAnimatableJSCustom> {
-        void executeInstruction(CustomEntityJSBuilder.CustomInstructionKeyframeEventJS<E> event);
+    public interface ICustomInstructionListenerJS<E extends LivingEntity & IAnimatableJSCustom> {
+        void executeInstruction(CustomInstructionKeyframeEventJS<E> event);
     }
 
-    public static class CustomInstructionKeyframeEventJS<E extends Entity & IAnimatableJSCustom> {
-
-        @Info(value = "A list of all the custom instructions. In blockbench, each line in the custom instruction box is a separate instruction.")
+    public static class CustomInstructionKeyframeEventJS<E extends LivingEntity & IAnimatableJSCustom> extends KeyFrameEventJS<E, CustomInstructionKeyframeData> {
+        @Info(value = "A list of all the custom instructions. In Blockbench, each line in the custom instruction box is a separate instruction.")
         public final String instructions;
 
         public CustomInstructionKeyframeEventJS(CustomInstructionKeyframeEvent<E> parent) {
-            instructions = parent.getKeyframeData().getInstructions();
+            super(parent);
+            this.instructions = parent.getKeyframeData().getInstructions();
         }
     }
+
 
     public enum RenderType {
         SOLID,
         CUTOUT,
         TRANSLUCENT
     }
-*/
+
 }

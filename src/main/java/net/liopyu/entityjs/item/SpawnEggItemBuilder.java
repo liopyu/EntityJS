@@ -2,20 +2,25 @@ package net.liopyu.entityjs.item;
 
 import dev.latvian.mods.kubejs.generator.KubeAssetGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
+import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
+
+import java.util.function.Supplier;
 
 
 public class SpawnEggItemBuilder extends ItemBuilder {
 
     public transient int backgroundColor = 0xFFFFFFFF;
     public transient int highlightColor = 0xFFFFFFFF;
-    public transient final MobBuilder<?> parent;
+    public transient final BuilderBase<?> parent;
 
-    public SpawnEggItemBuilder(ResourceLocation i, MobBuilder<?> parent) {
+    public SpawnEggItemBuilder(ResourceLocation i, BuilderBase<?> parent) {
         super(i);
         this.parent = parent;
     }
@@ -34,7 +39,7 @@ public class SpawnEggItemBuilder extends ItemBuilder {
 
     @Override
     public Item createObject() {
-        return new DeferredSpawnEggItem(parent, backgroundColor, highlightColor, createItemProperties());
+        return new DeferredSpawnEggItem((Supplier<? extends EntityType<? extends Mob>>) parent, backgroundColor, highlightColor, createItemProperties());
     }
 
     @Override

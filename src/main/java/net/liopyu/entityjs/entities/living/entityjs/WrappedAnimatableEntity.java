@@ -1,0 +1,127 @@
+package net.liopyu.entityjs.entities.living.entityjs;
+
+import com.mojang.logging.LogUtils;
+import dev.latvian.mods.kubejs.typings.Info;
+import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.util.GeckoLibUtil;
+
+/**
+ * A dummy class that serves as a wrapper for dynamically created custom entities in the
+ * {@link CustomEntityJSBuilder} system. This class is used to integrate GeckoLib's
+ * animation system with custom entities while maintaining the original entity's behavior.
+ *
+ * <p>
+ * The {@code WrappedAnimatableEntity} extends {@link LivingEntity} and implements
+ * {@link IAnimatableJSCustom}, making it compatible with GeckoLib's animation framework.
+ * It acts as a proxy for the original entity, allowing animation and rendering logic
+ * to be applied without modifying the base entity's core functionality.
+ * </p>
+ *
+ * <p>
+ * This class is primarily used for entities registered via {@link CustomEntityJSBuilder},
+ * ensuring they have access to GeckoLib's animation system while retaining their
+ * native properties, AI, and interactions. It also allows dynamic modifications
+ * without requiring each entity type to be manually subclassed.
+ * </p>
+ *
+ * <h2>Key Features:</h2>
+ * <ul>
+ *   <li>Retains all behaviors and attributes of the original entity.</li>
+ *   <li>Implements {@link IAnimatableJSCustom} for GeckoLib compatibility.</li>
+ *   <li>Stores an instance of {@link AnimatableInstanceCache} for animation tracking.</li>
+ *   <li>Uses {@link CustomEntityJSBuilder} for defining animation behavior and properties.</li>
+ *   <li>Ensures proper item handling through overridden inventory-related methods.</li>
+ * </ul>
+ *
+ * <h2>Usage:</h2>
+ * <p>
+ * This class is automatically used when creating entities via {@link CustomEntityJSBuilder}.
+ * It should not be instantiated manually; instead, use the builder system to define
+ * and spawn custom animated entities dynamically.
+ * </p>
+ */
+
+public class WrappedAnimatableEntity extends LivingEntity implements IAnimatableJSCustom {
+    private final LivingEntity originalEntity;
+    private final CustomEntityJSBuilder builder;
+    private final AnimatableInstanceCache animatableCache;
+
+    public WrappedAnimatableEntity(LivingEntity originalEntity, CustomEntityJSBuilder builder) {
+        super((EntityType<? extends LivingEntity>) originalEntity.getType(), originalEntity.level());
+        this.originalEntity = originalEntity;
+        this.builder = builder;
+        this.animatableCache = GeckoLibUtil.createInstanceCache(this);
+    }
+
+    public LivingEntity getOriginalEntity() {
+        return originalEntity;
+    }
+
+    @Info(value = """
+            Calls a triggerable animation to be played anywhere.
+            """)
+    public void triggerAnimation(String controllerName, String animName) {
+        triggerAnim(controllerName, animName);
+    }
+
+    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
+
+
+    @Override
+    public HumanoidArm getMainArm() {
+        if (builder.mainArm != null) return (HumanoidArm) builder.mainArm;
+        return HumanoidArm.RIGHT;
+    }
+
+    @Override
+    public CustomEntityJSBuilder getBuilder() {
+        return builder;
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return animatableCache;
+    }
+
+    @Override
+    public Iterable<ItemStack> getArmorSlots() {
+        return armorItems;
+    }
+
+    @Override
+    public Iterable<ItemStack> getHandSlots() {
+        return handItems;
+    }
+
+    @Override
+    public ItemStack getItemBySlot(EquipmentSlot pSlot) {
+        switch (pSlot.getType()) {
+            case HAND -> {
+                return (ItemStack) this.handItems.get(pSlot.getIndex());
+            }
+            case HUMANOID_ARMOR -> {
+                return (ItemStack) this.armorItems.get(pSlot.getIndex());
+            }
+            default -> {
+                return ItemStack.EMPTY;
+            }
+        }
+    }
+
+    @Override
+    public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
+        verifyEquippedItem(stack);
+        switch (slot.getType()) {
+            case HAND -> onEquipItem(slot, handItems.set(slot.getIndex(), stack), stack);
+            case HUMANOID_ARMOR -> onEquipItem(slot, armorItems.set(slot.getIndex(), stack), stack);
+        }
+    }
+}

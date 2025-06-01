@@ -3,9 +3,7 @@ package net.liopyu.entityjs.util;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.misc.JumpControlJSBuilder;
-import net.liopyu.entityjs.builders.misc.LookControlJSBuilder;
-import net.liopyu.entityjs.builders.misc.MoveControlJSBuilder;
+import net.liopyu.entityjs.builders.misc.*;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
@@ -31,6 +29,9 @@ public interface EntityJSUtils {
             if (builder.get() == type) return (T) builder;
         }
         for (EyeOfEnderEntityBuilder<?> builder : EyeOfEnderEntityBuilder.thisList) {
+            if (builder.get() == type) return (T) builder;
+        }
+        for (CustomEntityJSBuilder builder : CustomEntityBuilder.thisList) {
             if (builder.get() == type) return (T) builder;
         }
         for (BoatEntityBuilder<?> builder : BoatEntityBuilder.thisList) {

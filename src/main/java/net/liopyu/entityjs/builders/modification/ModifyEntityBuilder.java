@@ -64,7 +64,7 @@ public class ModifyEntityBuilder implements KubeEvent {
     public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
     public transient Function<ContextUtils.RendererModelContext, Object> setTextureLocation;
     public transient Function<ContextUtils.RendererModelContext, Object> setRenderType;
-
+    public transient Function<Entity, Object> ignoreExplosion;
     /* public transient Consumer<Entity> defineSyncedData;*/
 
     public ModifyEntityBuilder(EntityType<?> entityType) {
@@ -72,6 +72,22 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     }
 
+    @Info(value = """
+            Sets whether an entity should ignore explosions.
+            The provided function should return a truthy value (e.g., true) to ignore explosion effects.
+            
+            Example usage:
+            ```javascript
+            modifyBuilder.ignoreExplosion(entity => {
+                // Ignore explosions only for entities named "BoomProof"
+                return entity.name?.getString() == "BoomProof";
+            });
+            ```
+            """)
+    public ModifyEntityBuilder ignoreExplosion(Function<Entity, Object> ignoreExplosion) {
+        this.ignoreExplosion = ignoreExplosion;
+        return this;
+    }
   /*  public ModifyEntityBuilder defineSyncedData(Consumer<Entity> consumer) {
         this.defineSyncedData = consumer;
         return this;

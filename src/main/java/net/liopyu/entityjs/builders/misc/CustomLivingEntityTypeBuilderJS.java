@@ -1,11 +1,13 @@
 package net.liopyu.entityjs.builders.misc;
 
+import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 
 public class CustomLivingEntityTypeBuilderJS<B> {
-   /* private final CustomEntityJSBuilder builder;
+    private final CustomEntityJSBuilder builder;
 
     public <T extends CustomEntityJSBuilder> CustomLivingEntityTypeBuilderJS(T builder) {
         this.builder = builder;
@@ -32,7 +34,7 @@ public class CustomLivingEntityTypeBuilderJS<B> {
         if (js.immuneTo.length > 0) {
             final Block[] blocks = new Block[js.immuneTo.length];
             for (int i = 0; i < js.immuneTo.length; i++) {
-                blocks[i] = ForgeRegistries.BLOCKS.getValue(js.immuneTo[i]);
+                blocks[i] = BuiltInRegistries.BLOCK.get(js.immuneTo[i]);
             }
             builder.immuneTo(blocks);
         }
@@ -40,6 +42,6 @@ public class CustomLivingEntityTypeBuilderJS<B> {
             builder.noSummon();
         }
 
-        return UtilsJS.cast(builder.build(js.id.toString())); // If this fails, uh... do better?
-    }*/
+        return Cast.to(builder.build(js.id.toString())); // If this fails, uh... do better?
+    }
 }
