@@ -90,6 +90,9 @@ public interface IAnimatableJSCustom extends GeoAnimatable, GeoEntity {
     }
 
     default double getTick(Object entity) {
+        if (entity instanceof WrappedAnimatableEntity wrappedAnimatableEntity) {
+            return wrappedAnimatableEntity.getOriginalEntity().tickCount;
+        }
         return ((Entity) entity).tickCount;
     }
 

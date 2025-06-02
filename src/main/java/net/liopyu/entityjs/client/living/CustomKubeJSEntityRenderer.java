@@ -1,15 +1,14 @@
 package net.liopyu.entityjs.client.living;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.client.living.model.*;
-import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.liopyu.entityjs.entities.living.entityjs.WrappedAnimatableEntity;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -62,18 +61,23 @@ public class CustomKubeJSEntityRenderer<T extends LivingEntity & IAnimatableJSCu
         return builder.scaleWidth;
     }
 
-    /*@Override
-    public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
+    @Override
+    public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T a, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
+        LivingEntity animatable = a;
+        if (animatable instanceof WrappedAnimatableEntity wrappedAnimatableEntity) {
+            animatable = wrappedAnimatableEntity.getOriginalEntity();
+        }
         if (builder.scaleModelForRender != null && this.animatable != null) {
-            final ContextUtils.ScaleModelRenderContext<T> context = new ContextUtils.ScaleModelRenderContext<>(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+            final ContextUtils.ScaleModelRenderContext context = new ContextUtils.ScaleModelRenderContext(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
             EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: scaleModelForRender.");
-            super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+            super.scaleModelForRender(widthScale, heightScale, poseStack, ensureIAnimatableJS(animatable), model, isReRender, partialTick, packedLight, packedOverlay);
         } else
-            super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+            super.scaleModelForRender(widthScale, heightScale, poseStack, ensureIAnimatableJS(animatable), model, isReRender, partialTick, packedLight, packedOverlay);
     }
-*/
+
     @Override
     public ResourceLocation getTextureLocation(T entity) {
+
         return (ResourceLocation) builder.textureResource.apply(entity);
     }
 
@@ -88,37 +92,44 @@ public class CustomKubeJSEntityRenderer<T extends LivingEntity & IAnimatableJSCu
 
 
     @Override
-    public void render(T animatable, float entityYaw, float partialTick,
+    public void render(T a, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-
+        LivingEntity animatable = a;
+        if (animatable instanceof WrappedAnimatableEntity wrappedAnimatableEntity) {
+            animatable = wrappedAnimatableEntity.getOriginalEntity();
+        }
         if (builder.render != null && this.animatable != null) {
             final ContextUtils.RenderContextCustom<T> context = new ContextUtils.RenderContextCustom<>(ensureIAnimatableJS(animatable), entityYaw, partialTick, poseStack, bufferSource, packedLight);
             EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");
-            super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+            super.render(ensureIAnimatableJS(animatable), entityYaw, partialTick, poseStack, bufferSource, packedLight);
         } else {
-            super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+            super.render(ensureIAnimatableJS(animatable), entityYaw, partialTick, poseStack, bufferSource, packedLight);
         }
     }
 
     @Override
-    protected void applyRotations(T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
+    protected void applyRotations(T a, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
+        LivingEntity animatable = a;
+        if (animatable instanceof WrappedAnimatableEntity wrappedAnimatableEntity) {
+            animatable = wrappedAnimatableEntity.getOriginalEntity();
+        }
         Pose pose = animatable.getPose();
-        if (this.isShaking(animatable)) {
+        if (this.isShaking(ensureIAnimatableJS(animatable))) {
             rotationYaw += (float) (Math.cos((double) animatable.tickCount * 3.25) * Math.PI * 0.4);
         }
         if (pose != Pose.SLEEPING) {
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - rotationYaw));
         }
-        if (animatable.deathTime > 0 /*&& builder.defaultDeathPose*/) {
+        if (animatable.deathTime > 0 && builder.defaultDeathPose) {
             float deathRotation = ((float) animatable.deathTime + partialTick - 1.0F) / 20.0F * 1.6F;
-            poseStack.mulPose(Axis.ZP.rotationDegrees(Math.min(Mth.sqrt(deathRotation), 1.0F) * this.getDeathMaxRotation(animatable)));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(Math.min(Mth.sqrt(deathRotation), 1.0F) * this.getDeathMaxRotation(ensureIAnimatableJS(animatable))));
         } else if (animatable.isAutoSpinAttack()) {
             poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F - animatable.getXRot()));
             poseStack.mulPose(Axis.YP.rotationDegrees(((float) animatable.tickCount + partialTick) * -75.0F));
         } else if (pose == Pose.SLEEPING) {
             Direction bedOrientation = animatable.getBedOrientation();
             poseStack.mulPose(Axis.YP.rotationDegrees(bedOrientation != null ? RenderUtils.getDirectionAngle(bedOrientation) : rotationYaw));
-            poseStack.mulPose(Axis.ZP.rotationDegrees(this.getDeathMaxRotation(animatable)));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(this.getDeathMaxRotation(ensureIAnimatableJS(animatable))));
             poseStack.mulPose(Axis.YP.rotationDegrees(270.0F));
         } else if (animatable.hasCustomName() || animatable instanceof Player) {
             String name = animatable.getName().getString();
@@ -141,21 +152,14 @@ public class CustomKubeJSEntityRenderer<T extends LivingEntity & IAnimatableJSCu
         }
     }
 
-    @Override
-    public void actuallyRender(PoseStack poseStack, T animatable, BakedGeoModel model, RenderType renderType,
-                               MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick,
-                               int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-        super.actuallyRender(poseStack, ensureIAnimatableJS(animatable), model, renderType, bufferSource, buffer,
-                isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
-    }
-
-
     /**
      * Ensures that the given entity is always an instance of IAnimatableJS.
      */
     private T ensureIAnimatableJS(LivingEntity entity) {
-        if (entity instanceof IAnimatableJS animatableJS) {
+        if (entity instanceof IAnimatableJSCustom animatableJS) {
             return (T) animatableJS;
+        } else if (entity instanceof ILivingEntityJS iLivingEntityJS) {
+            return (T) iLivingEntityJS.entityJs$getAnimatableEntity();
         }
 
         // Wrap the entity in our custom subclass that implements IAnimatableJS

@@ -31,7 +31,7 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
     @Shadow
     public List<BuilderBase<? extends T>> created;
 
-    public void entityJs$createCustom(String id, Class<? extends Entity> entityClass, Consumer<CustomEntityBuilder> consumer) {
+    public CustomEntityBuilder entityJs$createCustom(String id, Class<? extends Entity> entityClass) {
         if (!Entity.class.isAssignableFrom(entityClass)) {
             throw new IllegalArgumentException("Tried to create entity from a class that does not extend Entity. Id: " + id);
         }
@@ -39,12 +39,13 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
         CustomEntityBuilder b = null;
         if (LivingEntity.class.isAssignableFrom(entityClass)) {
             b = new CustomEntityBuilder(rl, (Class<? extends LivingEntity>) entityClass);
-            consumer.accept(b);
+            //consumer.accept(b);
         }
         if (b == null) {
             throw new IllegalArgumentException("CustomEntityBuilder is null for entity id: " + id);
         }
         registry.addBuilder((BuilderBase<? extends T>) b);
         created.add((BuilderBase<? extends T>) b);
+        return b;
     }
 }

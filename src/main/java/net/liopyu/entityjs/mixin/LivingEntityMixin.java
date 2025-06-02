@@ -1,11 +1,12 @@
 package net.liopyu.entityjs.mixin;
 
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
-import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
+import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
-import net.liopyu.entityjs.entities.living.vanilla.AllayEntityJS;
+import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
+import net.liopyu.entityjs.entities.living.entityjs.WrappedAnimatableEntity;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
@@ -21,7 +22,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -30,9 +30,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -76,7 +74,44 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
+        var customBuilder = EntityJSUtils.getEntityBuilder(pEntityType);
+        if (customBuilder != null) {
+            var wrappedEntity = this.ensureIAnimatableJS(entityJs$getLivingEntity());
+            this.entityJs$setAnimatableEntity((WrappedAnimatableEntity) wrappedEntity);
+        }
         entityJs$defineSynchedData();
+    }
+
+    /**
+     * Ensures that the given entity is always an instance of IAnimatableJSCustom.
+     */
+    private IAnimatableJSCustom ensureIAnimatableJS(LivingEntity entity) {
+        if (entity instanceof IAnimatableJSCustom animatableJS) {
+            return animatableJS;
+        }
+
+        return new WrappedAnimatableEntity(entity, (CustomEntityJSBuilder) this.entityJs$builder);
+    }
+
+    @Unique
+    private WrappedAnimatableEntity entityJs$animatableEntity;
+
+    @Unique
+    public WrappedAnimatableEntity entityJs$getAnimatableEntity() {
+        return this.entityJs$animatableEntity;
+    }
+
+    @Unique
+    private void entityJs$setAnimatableEntity(WrappedAnimatableEntity animatableEntity) {
+        this.entityJs$animatableEntity = animatableEntity;
+    }
+
+    @Info(value = """
+            Calls a triggerable animation to be played anywhere.
+            """)
+    public void triggerAnimation(String controllerName, String animName) {
+        if (this.entityJs$getAnimatableEntity() != null)
+            this.entityJs$getAnimatableEntity().triggerAnim(controllerName, animName);
     }
 
     @Unique

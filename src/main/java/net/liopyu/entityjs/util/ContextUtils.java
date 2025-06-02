@@ -214,18 +214,18 @@ public class ContextUtils {
         }
     }
 
-    public static class ScaleModelRenderContext<T extends LivingEntity> {
+    public static class ScaleModelRenderContext {
         public final float widthScale;
         public final float heightScale;
         public final PoseStack poseStack;
-        public final T entity;
+        public final LivingEntity entity;
         public final BakedGeoModel model;
         public final boolean isReRender;
         public final float partialTick;
         public final int packedLight;
         public final int packedOverlay;
 
-        public ScaleModelRenderContext(float widthScale, float heightScale, PoseStack poseStack, T entity, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
+        public ScaleModelRenderContext(float widthScale, float heightScale, PoseStack poseStack, LivingEntity entity, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
             this.widthScale = widthScale;
             this.heightScale = heightScale;
             this.poseStack = poseStack;
@@ -1158,7 +1158,7 @@ public class ContextUtils {
         }
     }
 
-    public static class RenderContextCustom<T extends LivingEntity & IAnimatableJSCustom> {
+    public static class RenderContextCustom<T extends LivingEntity> {
         @Info("The animatable entity being rendered")
         public final T entity;
 

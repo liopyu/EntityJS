@@ -5,6 +5,8 @@ import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
+import net.liopyu.entityjs.entities.living.entityjs.WrappedAnimatableEntity;
+import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
 import software.bernie.geckolib.model.GeoModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,17 +24,34 @@ public class CustomEntityModelJS<T extends LivingEntity & IAnimatableJSCustom> e
     }
 
     @Override
-    public ResourceLocation getModelResource(T object) {
-        return (ResourceLocation) builder.modelResource.apply(object);
+    public ResourceLocation getModelResource(T animatable) {
+        var a = ensureIAnimatableJS(animatable);
+        return (ResourceLocation) builder.modelResource.apply((WrappedAnimatableEntity) a);
     }
 
     @Override
-    public ResourceLocation getTextureResource(T object) {
-        return (ResourceLocation) builder.textureResource.apply(object);
+    public ResourceLocation getTextureResource(T animatable) {
+        var a = ensureIAnimatableJS(animatable);
+        return (ResourceLocation) builder.textureResource.apply((WrappedAnimatableEntity) a);
     }
 
     @Override
     public ResourceLocation getAnimationResource(T animatable) {
-        return (ResourceLocation) builder.animationResource.apply(animatable);
+        var a = ensureIAnimatableJS(animatable);
+        return (ResourceLocation) builder.animationResource.apply((WrappedAnimatableEntity) a);
+    }
+
+    /**
+     * Ensures that the given entity is always an instance of IAnimatableJS.
+     */
+    private T ensureIAnimatableJS(LivingEntity entity) {
+        if (entity instanceof IAnimatableJSCustom animatableJS) {
+            return (T) animatableJS;
+        } else if (entity instanceof ILivingEntityJS iLivingEntityJS) {
+            return (T) iLivingEntityJS.entityJs$getAnimatableEntity();
+        }
+
+        // Wrap the entity in our custom subclass that implements IAnimatableJS
+        return (T) new WrappedAnimatableEntity(entity, builder);
     }
 }

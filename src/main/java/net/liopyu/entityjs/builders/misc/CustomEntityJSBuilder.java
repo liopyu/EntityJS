@@ -7,13 +7,9 @@ import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.client.living.model.CustomGeoLayerJSBuilder;
-import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
-import net.liopyu.entityjs.events.EntityModificationEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
@@ -59,10 +55,10 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
     public transient boolean spawnFarFromPlayer;
     public transient float scaleHeight;
     public transient float scaleWidth;
-    public transient Object mainArm;
-    public transient Consumer<ContextUtils.ScaleModelRenderContext<LivingEntity>> scaleModelForRender;
+    public transient Consumer<ContextUtils.ScaleModelRenderContext> scaleModelForRender;
     public final List<CustomGeoLayerJSBuilder<? extends LivingEntity>> layerList = new ArrayList<>();
     public final List<CustomGeoLayerJSBuilder<? extends LivingEntity>> glowingLayerList = new ArrayList<>();
+    public transient Boolean defaultDeathPose;
 
     public CustomEntityJSBuilder(ResourceLocation i) {
         super(i);
@@ -85,6 +81,113 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
         animationResource = t -> newID("animations/entity/", ".animation.json");
         scaleHeight = 1F;
         scaleWidth = 1F;
+        defaultDeathPose = true;
+    }
+
+    @Info(value = """
+            Sets a function to determine the model resource for the entity.
+            The provided Function accepts a parameter of type T (the entity),
+            allowing changing the model based on information about the entity.
+            The default behavior returns <namespace>:geo/entity/<path>.geo.json.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.modelResource(entity => {
+                // Define logic to determine the model resource for the entity
+                // Use information about the entity provided by the context.
+                return "kubejs:geo/entity/wyrm.geo.json" // Some ResourceLocation representing the model resource;
+            });
+            ```
+            """)
+    public CustomEntityJSBuilder modelResource(Function<LivingEntity, Object> function) {
+        modelResource = entity -> {
+            Object obj = function.apply(entity);
+            if (obj instanceof String && !obj.toString().equals("undefined")) {
+                return new ResourceLocation((String) obj);
+            } else if (obj instanceof ResourceLocation) {
+                return (ResourceLocation) obj;
+            } else {
+                EntityJSHelperClass.logWarningMessageOnce("Invalid model resource: " + obj + ". Defaulting to " + this.newID("geo/entity/", ".geo.json"));
+                return this.newID("geo/entity/", ".geo.json");
+            }
+        };
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets a function to determine the texture resource for the entity.
+            The provided Function accepts a parameter of type T (the entity),
+            allowing changing the texture based on information about the entity.
+            The default behavior returns <namespace>:textures/entity/<path>.png.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.textureResource(entity => {
+                // Define logic to determine the texture resource for the entity
+                // Use information about the entity provided by the context.
+                return "kubejs:textures/entity/wyrm.png" // Some ResourceLocation representing the texture resource;
+            });
+            ```
+            """)
+    public CustomEntityJSBuilder textureResource(Function<LivingEntity, Object> function) {
+        textureResource = entity -> {
+            Object obj = function.apply(entity);
+            if (obj instanceof String && !obj.toString().equals("undefined")) {
+                return new ResourceLocation((String) obj);
+            } else if (obj instanceof ResourceLocation) {
+                return (ResourceLocation) obj;
+            } else {
+                EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource: " + obj + ". Defaulting to " + this.newID("textures/entity/", ".png"));
+                return this.newID("textures/entity/", ".png");
+            }
+        };
+        return this;
+    }
+
+
+    @Info(value = """
+            Sets a function to determine the animation resource for the entity.
+            The provided Function accepts a parameter of type T (the entity),
+            allowing changing the animations based on information about the entity.
+            The default behavior returns <namespace>:animations/<path>.animation.json.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.animationResource(entity => {
+                // Define logic to determine the animation resource for the entity
+                // Use information about the entity provided by the context.
+                //return some ResourceLocation representing the animation resource;
+                return "kubejs:animations/entity/wyrm.animation.json" // Some ResourceLocation representing the animation resource;
+            });
+            ```
+            """)
+    public CustomEntityJSBuilder animationResource(Function<LivingEntity, Object> function) {
+        animationResource = entity -> {
+            Object obj = function.apply(entity);
+            if (obj instanceof String && !obj.toString().equals("undefined")) {
+                return new ResourceLocation((String) obj);
+            } else if (obj instanceof ResourceLocation) {
+                return (ResourceLocation) obj;
+            } else {
+                EntityJSHelperClass.logWarningMessageOnce("Invalid animation resource: " + obj + ". Defaulting to " + this.newID("animations/entity/", ".animation.json"));
+                return this.newID("animations/entity/", ".animation.json");
+            }
+        };
+        return this;
+    }
+
+    @Info(value = """
+            Boolean determining if the entity will turn sideways on death.
+            Defaults to true.
+            Example usage:
+            ```javascript
+            entityBuilder.defaultDeathPose(false);
+            ```
+            """)
+    public CustomEntityJSBuilder defaultDeathPose(boolean defaultDeathPose) {
+        this.defaultDeathPose = defaultDeathPose;
+        return this;
     }
 
     @Info(value = """
@@ -153,7 +256,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             });
             ```
             """)
-    public CustomEntityJSBuilder scaleModelForRender(Consumer<ContextUtils.ScaleModelRenderContext<LivingEntity>> scaleModelForRender) {
+    public CustomEntityJSBuilder scaleModelForRender(Consumer<ContextUtils.ScaleModelRenderContext> scaleModelForRender) {
         this.scaleModelForRender = scaleModelForRender;
         return this;
     }
@@ -328,7 +431,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
         return RegistryInfo.ENTITY_TYPE;
     }
 
-   /* @Info(value = """
+    @Info(value = """
             Adds an animation controller to the entity with the specified parameters.
             
             @param name The name of the animation controller.
@@ -350,10 +453,10 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             """)
     public CustomEntityJSBuilder addAnimationController(String name, int translationTicksLength, CustomEntityJSBuilder.IAnimationPredicateJS<?> predicate) {
         return addKeyAnimationController(name, translationTicksLength, predicate, null, null, null);
-    }*/
+    }
 
 
-    /*@Info(value = "Adds a new AnimationController to the entity, with the ability to add event listeners", params = {
+    @Info(value = "Adds a new AnimationController to the entity, with the ability to add event listeners", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
             @Param(name = "predicate", value = "The predicate for the controller, determines if an animation should continue or not"),
@@ -364,15 +467,15 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
     public CustomEntityJSBuilder addKeyAnimationController(
             String name,
             int translationTicksLength,
-            CustomEntityJSBuilder.IAnimationPredicateJS<?> predicate,
-            @Nullable CustomEntityJSBuilder.ISoundListenerJS<?> soundListener,
-            @Nullable CustomEntityJSBuilder.IParticleListenerJS<?> particleListener,
-            @Nullable CustomEntityJSBuilder.ICustomInstructionListenerJS<?> instructionListener
+            CustomEntityJSBuilder.IAnimationPredicateJS predicate,
+            @Nullable CustomEntityJSBuilder.ISoundListenerJS soundListener,
+            @Nullable CustomEntityJSBuilder.IParticleListenerJS particleListener,
+            @Nullable CustomEntityJSBuilder.ICustomInstructionListenerJS instructionListener
     ) {
         animationSuppliers.add(new CustomEntityJSBuilder.AnimationControllerSupplier<>(name, translationTicksLength, predicate, null, null, null, soundListener, particleListener, instructionListener));
         return this;
     }
-*/
+
     @Info(value = """
             Sets the render type for the entity.
             
@@ -475,7 +578,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
         }
     }
 
-   /* @Info(value = "Adds a triggerable AnimationController to the entity callable off the entity's methods anywhere.", params = {
+    @Info(value = "Adds a triggerable AnimationController to the entity callable off the entity's methods anywhere.", params = {
             @Param(name = "name", value = "The name of the controller"),
             @Param(name = "translationTicksLength", value = "How many ticks it takes to transition between different animations"),
             @Param(name = "triggerableAnimationID", value = "The unique identifier of the triggerable animation(sets it apart from other triggerable animations)"),
@@ -492,11 +595,12 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
         animationSuppliers.add(new CustomEntityJSBuilder.AnimationControllerSupplier<>(
                 name,
                 translationTicksLength,
-                new CustomEntityJSBuilder.IAnimationPredicateJS<?>() {
+                new CustomEntityJSBuilder.IAnimationPredicateJS() {
                     @Override
-                    public boolean test(CustomEntityJSBuilder.AnimationEventJS<?> event) {
+                    public boolean test(AnimationEventJS event) {
                         return true;
                     }
+
                 },
                 triggerableAnimationName,
                 triggerableAnimationID,
@@ -506,7 +610,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
                 null
         ));
         return this;
-    }*/
+    }
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**

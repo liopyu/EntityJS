@@ -10,6 +10,7 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.liopyu.entityjs.entities.living.entityjs.WrappedAnimatableEntity;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -81,8 +82,10 @@ public class CustomGeoLayerJS<T extends LivingEntity & IAnimatableJSCustom> exte
      * Ensures that the given entity is always an instance of IAnimatableJS.
      */
     private T ensureIAnimatableJS(LivingEntity entity) {
-        if (entity instanceof IAnimatableJS animatableJS) {
+        if (entity instanceof IAnimatableJSCustom animatableJS) {
             return (T) animatableJS;
+        } else if (entity instanceof ILivingEntityJS iLivingEntityJS) {
+            return (T) iLivingEntityJS.entityJs$getAnimatableEntity();
         }
 
         // Wrap the entity in our custom subclass that implements IAnimatableJS

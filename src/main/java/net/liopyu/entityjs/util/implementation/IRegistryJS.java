@@ -8,5 +8,5 @@ import java.util.function.Consumer;
 
 @RemapPrefixForJS("entityJs$")
 public interface IRegistryJS {
-    void entityJs$createCustom(String id, Class<? extends Entity> entityClass, Consumer<CustomEntityBuilder> consumer);
+    CustomEntityBuilder entityJs$createCustom(String id, Class<? extends Entity> entityClass);
 }
