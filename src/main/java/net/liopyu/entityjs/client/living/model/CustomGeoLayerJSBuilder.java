@@ -6,8 +6,10 @@ import net.liopyu.entityjs.client.living.CustomKubeJSEntityRenderer;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
+import net.liopyu.entityjs.entities.living.entityjs.WrappedAnimatableEntity;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -93,6 +95,7 @@ public class CustomGeoLayerJSBuilder<T extends LivingEntity & IAnimatableJSCusto
             """)
     public CustomGeoLayerJSBuilder<T> textureResource(Function<T, Object> function) {
         textureResource = entity -> {
+            entity = ensureIAnimatableJS(entity);
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return ResourceLocation.parse((String) obj);
@@ -104,5 +107,19 @@ public class CustomGeoLayerJSBuilder<T extends LivingEntity & IAnimatableJSCusto
             }
         };
         return this;
+    }
+
+    /**
+     * Ensures that the given entity is always an instance of IAnimatableJS.
+     */
+    private T ensureIAnimatableJS(LivingEntity entity) {
+        if (entity instanceof IAnimatableJSCustom animatableJS) {
+            return (T) animatableJS;
+        } else if (entity instanceof ILivingEntityJS iLivingEntityJS) {
+            return (T) iLivingEntityJS.entityJs$getAnimatableEntity();
+        }
+
+        // Wrap the entity in our custom subclass that implements IAnimatableJS
+        return (T) new WrappedAnimatableEntity(entity, builder);
     }
 }

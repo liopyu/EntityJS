@@ -8,6 +8,7 @@ import net.liopyu.entityjs.util.EntitySerializerType;
 public interface ILivingEntityJS {
     WrappedAnimatableEntity entityJs$getAnimatableEntity();
 
+    void entityJs$triggerAnimation(String controllerName, String animName);
     //void entityJs$addSyncedData(EntitySerializerType type, String key, Object value);
 
    /* <T> T entityJs$getSyncedData(String identifier);

@@ -180,7 +180,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
     public transient float scaleHeight;
     public transient float scaleWidth;
-    public transient Consumer<ContextUtils.ScaleModelRenderContext<T>> scaleModelForRender;
+    public transient Consumer<ContextUtils.ScaleModelRenderContext> scaleModelForRender;
     public final List<GeoLayerJSBuilder<T>> layerList = new ArrayList<>();
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
@@ -330,7 +330,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> scaleModelForRender(Consumer<ContextUtils.ScaleModelRenderContext<T>> scaleModelForRender) {
+    public BaseLivingEntityBuilder<T> scaleModelForRender(Consumer<ContextUtils.ScaleModelRenderContext> scaleModelForRender) {
         this.scaleModelForRender = scaleModelForRender;
         return this;
     }

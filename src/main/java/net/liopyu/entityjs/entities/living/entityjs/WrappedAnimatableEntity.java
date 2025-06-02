@@ -1,8 +1,9 @@
 package net.liopyu.entityjs.entities.living.entityjs;
 
 import com.mojang.logging.LogUtils;
-import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.rhino.util.RemapForJS;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
+import net.liopyu.entityjs.util.EntityJSUtils;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -11,6 +12,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
+
+import java.util.UUID;
 
 /**
  * A dummy class that serves as a wrapper for dynamically created custom entities in the
@@ -60,30 +63,28 @@ public class WrappedAnimatableEntity extends LivingEntity implements IAnimatable
         this.animatableCache = GeckoLibUtil.createInstanceCache(this);
     }
 
+    @Override
+    public int getId() {
+        return originalEntity.getId();
+    }
+
+
     public LivingEntity getOriginalEntity() {
         return originalEntity;
     }
 
-    @Info(value = """
-            Calls a triggerable animation to be played anywhere.
-            """)
-    public void triggerAnimation(String controllerName, String animName) {
-        triggerAnim(controllerName, animName);
+    public int getTickCount() {
+        return this.getOriginalEntity().tickCount;
     }
-
-    private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
-
 
     @Override
     public HumanoidArm getMainArm() {
-        if (builder.mainArm != null) return (HumanoidArm) builder.mainArm;
-        return HumanoidArm.RIGHT;
+        return originalEntity.getMainArm();
     }
 
     @Override
     public CustomEntityJSBuilder getBuilder() {
-        return builder;
+        return builder != null ? builder : EntityJSUtils.getEntityBuilder(this.getType());
     }
 
     @Override
@@ -93,35 +94,21 @@ public class WrappedAnimatableEntity extends LivingEntity implements IAnimatable
 
     @Override
     public Iterable<ItemStack> getArmorSlots() {
-        return armorItems;
+        return originalEntity.getArmorSlots();
     }
 
     @Override
     public Iterable<ItemStack> getHandSlots() {
-        return handItems;
+        return originalEntity.getHandSlots();
     }
 
     @Override
-    public ItemStack getItemBySlot(EquipmentSlot pSlot) {
-        switch (pSlot.getType()) {
-            case HAND -> {
-                return (ItemStack) this.handItems.get(pSlot.getIndex());
-            }
-            case HUMANOID_ARMOR -> {
-                return (ItemStack) this.armorItems.get(pSlot.getIndex());
-            }
-            default -> {
-                return ItemStack.EMPTY;
-            }
-        }
+    public ItemStack getItemBySlot(EquipmentSlot slot) {
+        return originalEntity.getItemBySlot(slot);
     }
 
     @Override
     public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
-        verifyEquippedItem(stack);
-        switch (slot.getType()) {
-            case HAND -> onEquipItem(slot, handItems.set(slot.getIndex(), stack), stack);
-            case HUMANOID_ARMOR -> onEquipItem(slot, armorItems.set(slot.getIndex(), stack), stack);
-        }
+        originalEntity.setItemSlot(slot, stack);
     }
 }

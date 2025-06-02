@@ -7,12 +7,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.GeckoLibServices;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
@@ -42,7 +43,6 @@ public interface IAnimatableJSCustom extends GeoAnimatable, GeoEntity {
         }
     }
 
-
     /**
      * This cannot be implemented here, the returned value should be a cached value that is initialized in the entity's constructor. See {@link BaseLivingEntityJS} for an example.<br><br>
      * <p>
@@ -54,6 +54,9 @@ public interface IAnimatableJSCustom extends GeoAnimatable, GeoEntity {
 
 
     default double getTick(Object entity) {
+        if (entity instanceof WrappedAnimatableEntity wrappedAnimatableEntity) {
+            return wrappedAnimatableEntity.getOriginalEntity().tickCount;
+        }
         return ((Entity) entity).tickCount;
     }
 

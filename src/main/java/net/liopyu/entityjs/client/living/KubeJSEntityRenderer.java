@@ -12,6 +12,7 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Pose;
@@ -66,7 +67,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     @Override
     public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
         if (builder.scaleModelForRender != null && this.animatable != null) {
-            final ContextUtils.ScaleModelRenderContext<T> context = new ContextUtils.ScaleModelRenderContext<>(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+            final ContextUtils.ScaleModelRenderContext context = new ContextUtils.ScaleModelRenderContext(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
             EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: scaleModelForRender.");
             super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
         } else
@@ -102,45 +103,34 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         }
     }
 
-   /* @Override
-    protected void applyRotations(T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
-        Pose pose = animatable.getPose();
-        if (this.isShaking(animatable)) {
-            rotationYaw += (float) (Math.cos((double) animatable.tickCount * 3.25) * Math.PI * 0.4);
-        }
-        if (pose != Pose.SLEEPING) {
-            poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - rotationYaw));
-        }
-        if (animatable.deathTime > 0 && builder.defaultDeathPose) {
-            float deathRotation = ((float) animatable.deathTime + partialTick - 1.0F) / 20.0F * 1.6F;
-            poseStack.mulPose(Axis.ZP.rotationDegrees(Math.min(Mth.sqrt(deathRotation), 1.0F) * this.getDeathMaxRotation(animatable)));
-        } else if (animatable.isAutoSpinAttack()) {
-            poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F - animatable.getXRot()));
-            poseStack.mulPose(Axis.YP.rotationDegrees(((float) animatable.tickCount + partialTick) * -75.0F));
-        } else if (pose == Pose.SLEEPING) {
-            Direction bedOrientation = animatable.getBedOrientation();
-            poseStack.mulPose(Axis.YP.rotationDegrees(bedOrientation != null ? RenderUtil.getDirectionAngle(bedOrientation) : rotationYaw));
-            poseStack.mulPose(Axis.ZP.rotationDegrees(this.getDeathMaxRotation(animatable)));
-            poseStack.mulPose(Axis.YP.rotationDegrees(270.0F));
-        } else if (animatable.hasCustomName() || animatable instanceof Player) {
-            String name = animatable.getName().getString();
-            if (animatable instanceof Player player) {
-                if (!player.isModelPartShown(PlayerModelPart.CAPE)) {
-                    return;
-                }
-            } else {
-                name = ChatFormatting.stripFormatting(name);
-            }
+    @Override
+    protected void applyRotations(T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick, float nativeScale) {
+        if (isShaking(animatable))
+            rotationYaw += (float) (Math.cos(animatable.tickCount * 3.25d) * Math.PI * 0.4d);
 
-            if (name != null && (name.equals("Dinnerbone") || name.equalsIgnoreCase("Grumm"))) {
-                poseStack.translate(0.0F, animatable.getBbHeight() + 0.1F, 0.0F);
-                poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
-            }
-            if (name != null && (name.equalsIgnoreCase("liopyu") || name.equalsIgnoreCase("toomuchmail"))) {
-                poseStack.translate(0.0F, animatable.getBbHeight() + 0.1F, 0.0F);
-                poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
+        if (!animatable.hasPose(Pose.SLEEPING))
+            poseStack.mulPose(Axis.YP.rotationDegrees(180f - rotationYaw));
+
+        if (animatable instanceof LivingEntity livingEntity) {
+            if (livingEntity.deathTime > 0 && builder.defaultDeathPose) {
+                float deathRotation = (livingEntity.deathTime + partialTick - 1f) / 20f * 1.6f;
+
+                poseStack.mulPose(Axis.ZP.rotationDegrees(Math.min(Mth.sqrt(deathRotation), 1) * getDeathMaxRotation(animatable)));
+            } else if (livingEntity.isAutoSpinAttack()) {
+                poseStack.mulPose(Axis.XP.rotationDegrees(-90f - livingEntity.getXRot()));
+                poseStack.mulPose(Axis.YP.rotationDegrees((livingEntity.tickCount + partialTick) * -75f));
+            } else if (animatable.hasPose(Pose.SLEEPING)) {
+                Direction bedOrientation = livingEntity.getBedOrientation();
+
+                poseStack.mulPose(Axis.YP.rotationDegrees(bedOrientation != null ? RenderUtil.getDirectionAngle(bedOrientation) : rotationYaw));
+                poseStack.mulPose(Axis.ZP.rotationDegrees(getDeathMaxRotation(animatable)));
+                poseStack.mulPose(Axis.YP.rotationDegrees(270f));
+            } else if (LivingEntityRenderer.isEntityUpsideDown(livingEntity)) {
+                poseStack.translate(0, (animatable.getBbHeight() + 0.1f) / nativeScale, 0);
+                poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
             }
         }
-    }*/
+    }
+
 }
 
