@@ -7,6 +7,7 @@ import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.model.CustomGeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
@@ -473,6 +474,21 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             @Nullable CustomEntityJSBuilder.ICustomInstructionListenerJS instructionListener
     ) {
         animationSuppliers.add(new CustomEntityJSBuilder.AnimationControllerSupplier<>(name, translationTicksLength, predicate, null, null, null, soundListener, particleListener, instructionListener));
+        return this;
+    }
+
+    public transient Function<LivingEntity, net.minecraft.client.renderer.RenderType> renderTypeFunction;
+
+    @Info(value = """
+            Sets the render type for the entity via a function.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.setRenderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            ```
+            """)
+    public CustomEntityJSBuilder renderType(Function<LivingEntity, net.minecraft.client.renderer.RenderType> type) {
+        renderTypeFunction = type;
         return this;
     }
 

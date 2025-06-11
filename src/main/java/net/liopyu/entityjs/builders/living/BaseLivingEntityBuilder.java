@@ -16,6 +16,7 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.animation.AnimationState;
@@ -2564,6 +2565,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
+    public transient Function<T, net.minecraft.client.renderer.RenderType> renderTypeFunction;
+
+    @Info(value = """
+            Sets the render type for the entity via a function.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.setRenderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {
+        renderTypeFunction = type;
+        return this;
+    }
 
     /**
      * <strong>Do not</strong> override unless you are creating a custom entity type builder<br><br>
