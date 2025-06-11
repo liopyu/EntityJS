@@ -2489,6 +2489,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
+    public transient Function<T, net.minecraft.client.renderer.RenderType> renderTypeFunction;
+
+    @Info(value = """
+            Sets the render type for the entity via a function.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {
+        renderTypeFunction = type;
+        return this;
+    }
 
     /**
      * <strong>Do not</strong> override unless you are creating a custom entity type builder<br><br>

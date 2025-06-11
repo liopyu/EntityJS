@@ -473,6 +473,21 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
         return this;
     }
 
+    public transient Function<LivingEntity, net.minecraft.client.renderer.RenderType> renderTypeFunction;
+
+    @Info(value = """
+            Sets the render type for the entity via a function.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            ```
+            """)
+    public CustomEntityJSBuilder renderType(Function<LivingEntity, net.minecraft.client.renderer.RenderType> type) {
+        renderTypeFunction = type;
+        return this;
+    }
+
     @Info(value = """
             Sets the render type for the entity.
             
