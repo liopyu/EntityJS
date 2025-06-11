@@ -190,10 +190,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public transient List<String> superMethods = new ArrayList<>();
-/*
-    public transient Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned;
-*/
 
+    /*
+        public transient Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned;
+    */
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
         super(i);
@@ -325,6 +325,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     })
     public BaseLivingEntityBuilder<T> addPartEntity(String name, float width, float height, Consumer<PartBuilder<T>> builderConsumer) {
         PartBuilder<T> partBuilder = new PartBuilder<>();
+       /* if ((partBuilder.width != null && partBuilder.height != null)) {
+            width = partBuilder.width;
+            height = partBuilder.height;
+        }*/
         builderConsumer.accept(partBuilder);
         partEntityParamsList.add(new ContextUtils.PartEntityParams<>(name, width, height, partBuilder));
         return this;

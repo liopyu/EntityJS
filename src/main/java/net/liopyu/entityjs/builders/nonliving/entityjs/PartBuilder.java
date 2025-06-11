@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -8,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec2;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -52,15 +54,51 @@ public class PartBuilder<T extends LivingEntity> {
     public transient Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith;
     public transient Consumer<ContextUtils.PartHurtContext<T>> onPartHurt;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
+    public transient Float width;
+    public transient Float height;
+    public transient Function<T, Vec2> hitbox;
 
     public PartBuilder() {
         isPickable = true;
         this.isAttackable = t -> true;
     }
 
+    /*@Info(value = """
+            Sets the size of the hitbox.
+            
+            @param width The width of the part, defaults to 1.
+            @param height The height of the part, defaults to 1.
+            
+            Example usage:
+            ```javascript
+            partBuilder.sized(2, 3);
+            ```
+            """)
+    public PartBuilder<T> sized(float width, float height) {
+        this.width = width;
+        this.height = height;
+        return this;
+    }
+
+    @Info(value = """
+            Sets the size of the hitbox via a function.
+            
+            Example usage:
+            ```javascript
+            partBuilder.sized(entity => {
+                let Vec2 = Java.loadClass("net.minecraft.world.phys.Vec2")
+                return new Vec2(1, 3)
+            });
+            ```
+            """)
+    public PartBuilder<T> sized(Function<T, Vec2> hitbox) {
+        this.hitbox = hitbox;
+        return this;
+    }*/
+
     @Info(value = """
             @param positionRider A consumer determining the position of rider/riders.
-                            
+            
                 Example usage:
                 ```javascript
                 entityBuilder.positionRider(context => {
@@ -75,7 +113,7 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Boolean determining if the part entity is pickable.
-                                                
+            
             Example usage:
             ```javascript
             entityBuilder.isPickable(true)
@@ -88,9 +126,9 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets a consumer to handle part entity hurt logic of the entity's parts.
-                        
+            
             @param onPartHurt Consumer accepting a {@link ContextUtils.PartHurtContext<T>} parameter
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onPartHurt(context => {
@@ -108,10 +146,10 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets a consumer to handle lerping (linear interpolation) of the entity's position.
-                        
+            
             @param lerpTo Consumer accepting a {@link ContextUtils.LerpToContext} parameter,
                             providing information and control over the lerping process.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.lerpTo(context => {
@@ -128,10 +166,10 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets a function to determine whether the entity should render at a squared distance.
-                        
+            
             @param shouldRenderAtSqrDistance Function accepting a {@link ContextUtils.EntitySqrDistanceContext} parameter,
                              defining the conditions under which the entity should render.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.shouldRenderAtSqrDistance(context => {
@@ -150,7 +188,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed when a player touches the entity.
             The provided Consumer accepts a {@link ContextUtils.EntityPlayerContext} parameter,
             representing the context of the player's interaction with the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.playerTouch(context => {
@@ -169,7 +207,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed when the entity performs a movement action.
             The provided Consumer accepts a {@link ContextUtils.MovementContext} parameter,
             representing the context of the entity's movement.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.move(context => {
@@ -186,9 +224,9 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets a callback function to be executed on each tick for the entity.
-                        
+            
             @param consumer A Consumer accepting a {@link Entity} parameter, defining the behavior to be executed on each tick.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.tick(entity => {
@@ -207,7 +245,7 @@ public class PartBuilder<T extends LivingEntity> {
             Function determining if the entity may collide with another entity
             using the ContextUtils.CollidingEntityContext which has this entity and the
             one colliding with this entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canCollideWith(context => {
@@ -223,7 +261,7 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Defines in what condition the entity will start freezing.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isFreezing(entity => {
@@ -239,7 +277,7 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets the block jump factor for the entity.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setBlockJumpFactor(entity => {
@@ -351,7 +389,7 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets whether the entity is pushable.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isPushable(true);
@@ -365,9 +403,9 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets a predicate to determine if a passenger can be added to the entity.
-                        
+            
             @param predicate The predicate to check if a passenger can be added.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canAddPassenger(context => {
@@ -384,7 +422,7 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets the swim sound for the entity using a string representation.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setSwimSound("minecraft:entity.generic.swim");
@@ -404,7 +442,7 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets the swim splash sound for the entity using either a string representation or a ResourceLocation object.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setSwimSplashSound("minecraft:entity.generic.splash");
@@ -429,7 +467,7 @@ public class PartBuilder<T extends LivingEntity> {
             The provided Function accepts a {@link Entity} parameter,
             representing the entity whose block speed factor is being determined.
             It returns a Float representing the block speed factor.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.blockSpeedFactor(entity => {
@@ -450,7 +488,7 @@ public class PartBuilder<T extends LivingEntity> {
             The provided Function accepts a {@link Entity} parameter,
             representing the entity whose flapping status is being determined.
             It returns a Boolean indicating whether the entity is flapping.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isFlapping(entity => {
@@ -469,7 +507,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed when the entity is added to the world.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is added to the world.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onAddedToWorld(entity => {
@@ -486,7 +524,7 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets whether to reposition the entity after loading.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.repositionEntityAfterLoad(true);
@@ -503,7 +541,7 @@ public class PartBuilder<T extends LivingEntity> {
             The provided Function accepts a {@link Entity} parameter,
             representing the entity whose next step distance is being determined.
             It returns a Float representing the next step distance.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.nextStep(entity => {
@@ -523,7 +561,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed when the entity falls and takes damage.
             The provided Consumer accepts a {@link ContextUtils.EEntityFallDamageContext} parameter,
             representing the context of the entity falling and taking fall damage.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onFall(context => {
@@ -542,7 +580,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed when the entity starts sprinting.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that has started sprinting.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onSprint(entity => {
@@ -561,7 +599,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed when the entity stops riding.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that has stopped being ridden.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onStopRiding(entity => {
@@ -580,7 +618,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed during each tick when the entity is being ridden.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is being ridden.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.rideTick(entity => {
@@ -599,7 +637,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a predicate function to determine whether the entity is attackable.
             The provided Predicate accepts a {@link Entity} parameter,
             representing the entity that may be checked for its attackability.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isAttackable(entity => {
@@ -619,7 +657,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a predicate function to determine whether the entity can undergo freezing.
             The provided Predicate accepts a {@link Entity} parameter,
             representing the entity that may be subjected to freezing.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canFreeze(entity => {
@@ -639,7 +677,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a predicate function to determine whether the entity is currently glowing.
             The provided Predicate accepts a {@link Entity} parameter,
             representing the entity that may be checked for its glowing state.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isCurrentlyGlowing(entity => {
@@ -658,7 +696,7 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets the minimum fall distance for the entity before taking damage.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.setMaxFallDistance(entity => {
@@ -678,7 +716,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed when the entity is removed on the client side.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is being removed on the client side.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onClientRemoval(entity => {
@@ -697,7 +735,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed when the entity is hurt by lava.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is affected by lava.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.lavaHurt(entity => {
@@ -716,7 +754,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed when the entity performs a flap action.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is flapping.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onFlap(entity => {
@@ -733,11 +771,11 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets a predicate to determine whether the living entity dampens vibrations.
-                
+            
             @param predicate The predicate to determine whether the living entity dampens vibrations.
-                
+            
             The predicate should take a Entity as a parameter and return a boolean value indicating whether the living entity dampens vibrations.
-                
+            
             Example usage:
             ```javascript
             baseEntityBuilder.dampensVibrations(entity => {
@@ -754,11 +792,11 @@ public class PartBuilder<T extends LivingEntity> {
 
     @Info(value = """
             Sets a predicate to determine whether to show the vehicle health for the living entity.
-                
+            
             @param predicate The predicate to determine whether to show the vehicle health.
-                
+            
             The predicate should take a Entity as a parameter and return a boolean value indicating whether to show the vehicle health.
-                
+            
             Example usage:
             ```javascript
             baseEntityBuilder.showVehicleHealth(entity => {
@@ -777,7 +815,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed when the entity is hit by thunder.
             The provided Consumer accepts a {@link ContextUtils.ThunderHitContext} parameter,
             representing the context of the entity being hit by thunder.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.thunderHit(context => {
@@ -796,7 +834,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a predicate function to determine whether the entity is invulnerable to a specific type of damage.
             The provided Predicate accepts a {@link ContextUtils.DamageContext} parameter,
             representing the context of the damage, and returns a boolean indicating invulnerability.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.isInvulnerableTo(context => {
@@ -816,7 +854,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a predicate function to determine whether the entity can change dimensions.
             The provided Predicate accepts a {@link Entity} parameter,
             representing the entity that may attempt to change dimensions.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canChangeDimensions(entity => {
@@ -836,7 +874,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a predicate function to determine whether the entity may interact with something.
             The provided Predicate accepts a {@link ContextUtils.MayInteractContext} parameter,
             representing the context of the potential interaction, and returns a boolean.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.mayInteract(context => {
@@ -856,7 +894,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a predicate function to determine whether the entity can trample or step on something.
             The provided Predicate accepts a {@link ContextUtils.CanTrampleContext} parameter,
             representing the context of the potential trampling action, and returns a boolean.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.canTrample(context => {
@@ -876,7 +914,7 @@ public class PartBuilder<T extends LivingEntity> {
             Sets a callback function to be executed when the entity is removed from the world.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is being removed from the world.
-                        
+            
             Example usage:
             ```javascript
             entityBuilder.onRemovedFromWorld(entity => {
