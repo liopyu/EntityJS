@@ -2572,7 +2572,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             
             Example usage:
             ```javascript
-            entityBuilder.setRenderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
             ```
             """)
     public BaseLivingEntityBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {

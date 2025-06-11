@@ -484,7 +484,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             
             Example usage:
             ```javascript
-            entityBuilder.setRenderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
             ```
             """)
     public CustomEntityJSBuilder renderType(Function<LivingEntity, net.minecraft.client.renderer.RenderType> type) {
