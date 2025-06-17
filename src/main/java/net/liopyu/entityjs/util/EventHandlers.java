@@ -60,7 +60,7 @@ public class EventHandlers {
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
     public static final EventHandler modifyEntity = EntityJSEvents.startup("modifyEntity", () -> EntityModificationEventJS.class);
-
+    //public static final EventHandler createAttributes = EntityJSEvents.startup("createAttributes", () -> EntityAttributeCreationEventJS.class);
 
     public static void init(IEventBus modBus) {
         modBus.addListener(EventHandlers::registerDispenserBehavior);
@@ -120,18 +120,16 @@ public class EventHandlers {
         }
     }
 
+    /*  private static void addAttributeEvent(EntityAttributeCreationEvent event) {
+          if (createAttributes.hasListeners()) {
+              createAttributes.post(new EntityAttributeCreationEventJS(event));
+          }
+      }
+  */
     private static void attributeModification(EntityAttributeModificationEvent event) {
         if (editAttributes.hasListeners()) {
             editAttributes.post(new ModifyAttributeEventJS(event));
         }
-       /* BuiltInRegistries.ENTITY_TYPE.forEach(entityType -> {
-            if (EventHandlers.modifyEntity.hasListeners()) {
-                var eventJS = getOrCreate(entityType, entityType.getBaseClass());
-                EventHandlers.modifyEntity.post(eventJS);
-                LogUtils.getLogger().info("[EntityJS] Captured builder inline in startup init: " + eventJS.getBuilder());
-            }
-        });*/
-
     }
 
     public static void postDataEvent(VirtualDataPack pack, MultiPackResourceManager multiManager) {
