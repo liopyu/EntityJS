@@ -20,10 +20,7 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ThrownTrident;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TridentItem;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
@@ -93,6 +90,9 @@ public class TridentItemBuilder extends ProjectileItemBuilder {
 
             @Override
             public void releaseUsing(ItemStack p_43394_, Level p_43395_, LivingEntity p_43396_, int p_43397_) {
+                if (releaseUsing != null) {
+                    releaseUsing.releaseUsing(p_43394_, p_43395_, p_43396_, p_43397_);
+                }
                 if (p_43396_ instanceof Player player) {
                     int i = this.getUseDuration(p_43394_, p_43396_) - p_43397_;
                     if (i >= 10) {
@@ -162,6 +162,11 @@ public class TridentItemBuilder extends ProjectileItemBuilder {
 
             @Override
             public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand p_43407_) {
+                if (use != null) {
+                    if (use.use(pLevel, pPlayer, p_43407_)) {
+                        ItemUtils.startUsingInstantly(pLevel, pPlayer, p_43407_);
+                    }
+                }
                 ItemStack itemstack = pPlayer.getItemInHand(p_43407_);
                 if (canThrow) {
                     if (!pLevel.isClientSide) {

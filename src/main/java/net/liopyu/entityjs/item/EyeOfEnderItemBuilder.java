@@ -34,6 +34,7 @@ import net.minecraft.world.entity.projectile.EyeOfEnder;
 import net.minecraft.world.item.EnderEyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -177,6 +178,11 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
         return new EnderEyeItem(createItemProperties()) {
             @Override
             public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pHand) {
+                if (use != null) {
+                    if (use.use(pLevel, pPlayer, pHand)) {
+                        ItemUtils.startUsingInstantly(pLevel, pPlayer, pHand);
+                    }
+                }
                 ItemStack $$3 = pPlayer.getItemInHand(pHand);
                 BlockHitResult $$4 = getPlayerPOVHitResult(pLevel, pPlayer, ClipContext.Fluid.NONE);
                 if ($$4.getType() == HitResult.Type.BLOCK && pLevel.getBlockState($$4.getBlockPos()).is(Blocks.END_PORTAL_FRAME)) {

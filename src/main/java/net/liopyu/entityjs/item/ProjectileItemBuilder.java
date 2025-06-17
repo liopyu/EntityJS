@@ -16,6 +16,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.level.Level;
 
 
@@ -42,6 +43,11 @@ public class ProjectileItemBuilder extends ItemBuilder {
         return new ProjectileItemJS(createItemProperties(), parent) {
             @Override
             public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
+                if (use != null) {
+                    if (use.use(pLevel, pPlayer, pUsedHand)) {
+                        ItemUtils.startUsingInstantly(pLevel, pPlayer, pUsedHand);
+                    }
+                }
                 if (canThrow) {
                     ItemStack $$3 = pPlayer.getItemInHand(pUsedHand);
                     if (!pLevel.isClientSide) {
