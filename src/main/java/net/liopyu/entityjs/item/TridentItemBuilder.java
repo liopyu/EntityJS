@@ -18,10 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TridentItem;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -83,6 +80,11 @@ public class TridentItemBuilder extends ProjectileItemBuilder {
             }
 
             public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pHand) {
+                if (use != null) {
+                    if (use.use(pLevel, pPlayer, pHand)) {
+                        ItemUtils.startUsingInstantly(pLevel, pPlayer, pHand);
+                    }
+                }
                 ItemStack $$3 = pPlayer.getItemInHand(pHand);
                 if (canThrow) {
                     if (!pLevel.isClientSide) {
@@ -113,6 +115,9 @@ public class TridentItemBuilder extends ProjectileItemBuilder {
 
             @Override
             public void releaseUsing(ItemStack pStack, Level pLevel, LivingEntity pEntityLiving, int pTimeLeft) {
+                if (releaseUsing != null) {
+                    releaseUsing.releaseUsing(pStack, pLevel, pEntityLiving, pTimeLeft);
+                }
                 if (pEntityLiving instanceof Player $$4) {
                     int $$5 = this.getUseDuration(pStack) - pTimeLeft;
                     if ($$5 >= 10) {
