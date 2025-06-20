@@ -7,7 +7,11 @@ import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileAnimatableJSBuilder;
+import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
+import net.liopyu.entityjs.client.nonliving.model.NLGeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -99,7 +103,10 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient float scaleWidth;
     public transient Consumer<ContextUtils.ScaleModelRenderContextNL<T>> scaleModelForRender;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
-
+    public final List<NLGeoLayerJSBuilder<T>> glowingLayerList = new ArrayList<>();
+    public final List<NLGeoLayerJSBuilder<T>> layerList = new ArrayList<>();
+    public transient Consumer<NLGeoLayerJSBuilder<T>> newGeoLayer;
+    public transient boolean facesTrajectory = true;
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
@@ -123,6 +130,60 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         animationResource = t -> newID("animations/entity/", ".animation.json");
         scaleHeight = 1F;
         scaleWidth = 1F;
+    }
+
+    @Info(value = """
+            Boolean determining if the entity's model visually faces the direction it's currently headed.
+            Saves manual implementation of this assumed behavior from the entity.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.setFacesTrajectory(false)
+            ```
+            """)
+    public BaseEntityBuilder<T> setFacesTrajectory(boolean facesTrajectory) {
+        this.facesTrajectory = facesTrajectory;
+        return this;
+    }
+
+    @Info(value = """
+            Adds an extra render layer to the entity.
+            @param newGeoLayer The builder Consumer for the new render layer.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.newGeoLayer(builder => {
+                    builder.textureResource(entity => {
+                        return "kubejs:textures/entity/sasuke.png"
+                    })
+                });
+                ```
+            """)
+    public BaseEntityBuilder<T> newGeoLayer(Consumer<NLGeoLayerJSBuilder<T>> builderConsumer) {
+        NLGeoLayerJSBuilder<T> layerBuild = new NLGeoLayerJSBuilder<>(this);
+        builderConsumer.accept(layerBuild);
+        layerList.add(layerBuild);
+        return this;
+    }
+
+    @Info(value = """
+            Adds an extra glowing render layer to the entity.
+            @param newGeoLayer The builder Consumer for the new render layer.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.newGlowingGeoLayer(builder => {
+                    builder.textureResource(entity => {
+                        return "kubejs:textures/entity/sasuke.png"
+                    })
+                });
+                ```
+            """)
+    public BaseEntityBuilder<T> newGlowingGeoLayer(Consumer<NLGeoLayerJSBuilder<T>> builderConsumer) {
+        NLGeoLayerJSBuilder<T> layerBuild = new NLGeoLayerJSBuilder<>(this);
+        builderConsumer.accept(layerBuild);
+        glowingLayerList.add(layerBuild);
+        return this;
     }
 
     @Info(value = """

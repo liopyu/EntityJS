@@ -27,6 +27,7 @@ public class EventHandlers {
     public static final EventHandler buildBrain = EntityJSEvents.server("buildBrain", () -> BuildBrainEventJS.class).extra(Extra.REQUIRES_ID);
     public static final EventHandler buildBrainProvider = EntityJSEvents.server("buildBrainProvider", () -> BuildBrainProviderEventJS.class).extra(Extra.REQUIRES_ID);
     public static final EventHandler biomeSpawns = EntityJSEvents.server("biomeSpawns", () -> BiomeSpawnsEventJS.class);
+    public static final EventHandler createAttributes = EntityJSEvents.startup("createAttributes", () -> AttributeCreationEventJS.class);
 
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
@@ -35,9 +36,9 @@ public class EventHandlers {
 
 
     public static void init() {
-
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         modBus.addListener(EventHandlers::attributeCreation);
+        modBus.addListener(EventHandlers::attributeRegistry);
         modBus.addListener(EventHandlers::attributeModification);
         modBus.addListener(EventPriority.LOW, EventHandlers::registerSpawnPlacements); // Low to allow REPLACE to work and addons to effect the result
     }
@@ -49,7 +50,6 @@ public class EventHandlers {
         for (CustomEntityJSBuilder builder : CustomEntityJSBuilder.thisList) {
             event.put((EntityType<? extends LivingEntity>) builder.get(), builder.getAttributeBuilder().build());
         }
-
     }
 
     private static void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
@@ -58,6 +58,12 @@ public class EventHandlers {
         }
         if (spawnPlacement.hasListeners()) {
             spawnPlacement.post(new RegisterSpawnPlacementsEventJS(event));
+        }
+    }
+
+    private static void attributeRegistry(EntityAttributeCreationEvent event) {
+        if (createAttributes.hasListeners()) {
+            createAttributes.post(new AttributeCreationEventJS(event));
         }
     }
 

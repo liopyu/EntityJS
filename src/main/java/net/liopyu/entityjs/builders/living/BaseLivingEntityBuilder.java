@@ -186,8 +186,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient float scaleWidth;
     public transient Consumer<ContextUtils.ScaleModelRenderContext> scaleModelForRender;
     public final List<GeoLayerJSBuilder<T>> layerList = new ArrayList<>();
-    public final List<GeoLayerJSBuilder<T>> glowingLayerList = new ArrayList<>();
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
+    public final List<GeoLayerJSBuilder<T>> glowingLayerList = new ArrayList<>();
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public transient List<String> superMethods = new ArrayList<>();
 
