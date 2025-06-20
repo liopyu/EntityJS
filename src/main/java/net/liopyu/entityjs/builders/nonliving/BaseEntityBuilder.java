@@ -100,7 +100,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public final List<NLGeoLayerJSBuilder<T>> glowingLayerList = new ArrayList<>();
     public final List<NLGeoLayerJSBuilder<T>> layerList = new ArrayList<>();
     public transient Consumer<NLGeoLayerJSBuilder<T>> newGeoLayer;
-    public transient boolean facesTrajectory = true;
+    public transient boolean facesTrajectory = false;
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);

@@ -30,6 +30,7 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
 
     public ProjectileAnimatableJSBuilder(ResourceLocation i) {
         super(i);
+        facesTrajectory = true;
         this.item = (ProjectileItemBuilder) new ProjectileItemBuilder(id, this)
                 .canThrow(true)
                 .texture(i.getNamespace() + ":item/" + i.getPath());
