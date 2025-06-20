@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "AnimationControllerMixin",
+    "EntityAttributeCreationEventMixin",
     "EntityMixin",
     "KubeJSCommandsMixin",
     "LivingEntityMixin",

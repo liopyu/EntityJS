@@ -4,6 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileAnimatableJSBuilder;
+import net.liopyu.entityjs.client.nonliving.model.NLGeoLayerJS;
+import net.liopyu.entityjs.client.nonliving.model.NLGeoLayerJSBuilder;
+import net.liopyu.entityjs.client.nonliving.model.NLGlowingGeoLayerJS;
 import net.liopyu.entityjs.client.nonliving.model.NonLivingEntityModel;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -29,6 +32,14 @@ public class KubeJSNLEntityRenderer<T extends Entity & IAnimatableJSNL> extends 
         this.builder = builder;
         this.scaleHeight = getScaleHeight();
         this.scaleWidth = getScaleWidth();
+        for (NLGeoLayerJSBuilder<T> geoBuilder : builder.layerList) {
+            NLGeoLayerJS<T> layerPart = geoBuilder.build(this, builder);
+            addRenderLayer(layerPart);
+        }
+        for (NLGeoLayerJSBuilder<T> geoBuilder : builder.glowingLayerList) {
+            NLGlowingGeoLayerJS<T> layerPart = geoBuilder.buildGlowing(this, builder);
+            addRenderLayer(layerPart);
+        }
     }
 
     public String entityName() {
@@ -45,18 +56,7 @@ public class KubeJSNLEntityRenderer<T extends Entity & IAnimatableJSNL> extends 
 
     @Override
     public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
-        if (builder instanceof ProjectileAnimatableJSBuilder projectileAnimatableJSBuilder) {
-            if (projectileAnimatableJSBuilder.facesTrajectory) {
-                Vec3 velocity = animatable.getDeltaMovement();
-                double velX = velocity.x();
-                double velY = velocity.y();
-                double velZ = velocity.z();
-                float yaw = (float) (Math.atan2(velZ, velX) * (180 / Math.PI) - 90);
-                float pitch = (float) (Math.atan2(velY, Math.sqrt(velX * velX + velZ * velZ)) * (180 / Math.PI));
-                poseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
-                poseStack.mulPose(Axis.XP.rotationDegrees(-pitch));
-            }
-        }
+
         if (builder.scaleModelForRender != null && this.animatable != null) {
             final ContextUtils.ScaleModelRenderContextNL<T> context = new ContextUtils.ScaleModelRenderContextNL<>(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
             EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: scaleModelForRender.");
@@ -83,6 +83,16 @@ public class KubeJSNLEntityRenderer<T extends Entity & IAnimatableJSNL> extends 
     @Override
     public void render(T animatable, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        if (builder.facesTrajectory) {
+            Vec3 velocity = animatable.getDeltaMovement();
+            double velX = velocity.x();
+            double velY = velocity.y();
+            double velZ = velocity.z();
+            float yaw = (float) (Math.atan2(velZ, velX) * (180 / Math.PI) - 90);
+            float pitch = (float) (Math.atan2(velY, Math.sqrt(velX * velX + velZ * velZ)) * (180 / Math.PI));
+            poseStack.mulPose(Axis.YP.rotationDegrees(-yaw));
+            poseStack.mulPose(Axis.XP.rotationDegrees(-pitch));
+        }
         if (builder.render != null && this.animatable != null) {
             final ContextUtils.NLRenderContext<T> context = new ContextUtils.NLRenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
             EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");

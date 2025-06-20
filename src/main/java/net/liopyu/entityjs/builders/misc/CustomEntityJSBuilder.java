@@ -85,7 +85,6 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
     }
 
     @Info(value = """
-            Add commentMore actions
             Sets a function to determine the model resource for the entity.
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the model based on information about the entity.

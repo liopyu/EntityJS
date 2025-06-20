@@ -56,7 +56,7 @@ public class EventHandlers {
     public static final TargetedEventHandler<ResourceKey<EntityType<?>>> buildBrain = EntityJSEvents.server("buildBrain", () -> BuildBrainEventJS.class).requiredTarget(TARGET);
     public static final TargetedEventHandler<ResourceKey<EntityType<?>>> buildBrainProvider = EntityJSEvents.server("buildBrainProvider", () -> BuildBrainProviderEventJS.class).requiredTarget(TARGET);
     public static final EventHandler biomeSpawns = EntityJSEvents.server("biomeSpawns", () -> BiomeSpawnsEventJS.class);
-
+    public static final EventHandler createAttributes = EntityJSEvents.startup("createAttributes", () -> AttributeCreationEventJS.class);
     public static final EventHandler editAttributes = EntityJSEvents.startup("attributes", () -> ModifyAttributeEventJS.class);
     public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
     public static final EventHandler modifyEntity = EntityJSEvents.startup("modifyEntity", () -> EntityModificationEventJS.class);
@@ -65,8 +65,15 @@ public class EventHandlers {
     public static void init(IEventBus modBus) {
         modBus.addListener(EventHandlers::registerDispenserBehavior);
         modBus.addListener(EventHandlers::attributeCreation);
+        modBus.addListener(EventHandlers::attributeRegistry);
         modBus.addListener(EventHandlers::attributeModification);
         modBus.addListener(EventPriority.LOW, EventHandlers::registerSpawnPlacements); // Low to allow REPLACE to work and addons to effect the result
+    }
+
+    private static void attributeRegistry(EntityAttributeCreationEvent event) {
+        if (createAttributes.hasListeners()) {
+            createAttributes.post(new AttributeCreationEventJS(event));
+        }
     }
 
     private static void registerDispenserBehavior(FMLCommonSetupEvent event) {

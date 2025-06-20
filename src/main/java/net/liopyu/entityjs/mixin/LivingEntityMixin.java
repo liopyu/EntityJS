@@ -291,7 +291,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
              }
          }*/
     @Info(value = """
-            Calls a triggerable animation to be played anywhere.Add commentMore actions
+            Calls a triggerable animation to be played anywhere.
             """)
     @Override
     public void entityJs$triggerAnimation(String controllerName, String animName) {
