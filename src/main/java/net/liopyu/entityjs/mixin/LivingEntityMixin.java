@@ -89,7 +89,8 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entity instanceof IAnimatableJSCustom animatableJS) {
             return animatableJS;
         }
-        return new WrappedAnimatableEntity(entity, (CustomEntityJSBuilder) this.entityJs$builder);
+        var customBuilder = EntityJSUtils.getEntityBuilder(entity.getType());
+        return new WrappedAnimatableEntity(entity, (CustomEntityJSBuilder) customBuilder);
     }
 
     @Unique
