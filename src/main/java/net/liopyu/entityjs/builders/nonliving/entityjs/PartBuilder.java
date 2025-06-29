@@ -2,6 +2,7 @@ package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -57,6 +58,7 @@ public class PartBuilder<T extends LivingEntity> {
     public transient Float width;
     public transient Float height;
     public transient Function<T, Vec2> hitbox;
+    public transient Function<Entity, Object> canBeCollidedWith;
 
     public PartBuilder() {
         isPickable = true;
@@ -95,6 +97,20 @@ public class PartBuilder<T extends LivingEntity> {
         this.hitbox = hitbox;
         return this;
     }*/
+    @Info(value = """
+            Determines if the entity's hitbox collides with other entities the same as a solic block.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.canBeCollidedWith(entity => {
+                    return true
+                });
+                ```
+            """)
+    public PartBuilder<T> canBeCollidedWith(Function<Entity, Object> canBeCollidedWith) {
+        this.canBeCollidedWith = canBeCollidedWith;
+        return this;
+    }
 
     @Info(value = """
             @param positionRider A consumer determining the position of rider/riders.

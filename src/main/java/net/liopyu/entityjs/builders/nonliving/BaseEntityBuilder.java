@@ -107,6 +107,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public final List<NLGeoLayerJSBuilder<T>> layerList = new ArrayList<>();
     public transient Consumer<NLGeoLayerJSBuilder<T>> newGeoLayer;
     public transient boolean facesTrajectory = false;
+    public transient Function<Entity, Object> canBeCollidedWith;
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
@@ -130,6 +131,21 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         animationResource = t -> newID("animations/entity/", ".animation.json");
         scaleHeight = 1F;
         scaleWidth = 1F;
+    }
+
+    @Info(value = """
+            Determines if the entity's hitbox collides with other entities the same as a solic block.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.canBeCollidedWith(entity => {
+                    return true
+                });
+                ```
+            """)
+    public BaseEntityBuilder<T> canBeCollidedWith(Function<Entity, Object> canBeCollidedWith) {
+        this.canBeCollidedWith = canBeCollidedWith;
+        return this;
     }
 
     @Info(value = """

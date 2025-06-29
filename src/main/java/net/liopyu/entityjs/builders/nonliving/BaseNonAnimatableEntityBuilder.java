@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -11,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 
 import java.util.ArrayList;
@@ -73,6 +75,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public transient ResourceLocation[] immuneTo;
     public transient boolean spawnFarFromPlayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
+    public transient Function<Entity, Object> canBeCollidedWith;
 
     public BaseNonAnimatableEntityBuilder(ResourceLocation i) {
         super(i);
@@ -90,6 +93,21 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         mobCategory = MobCategory.MISC;
         isAttackable = true;
         isPushable = false;
+    }
+
+    @Info(value = """
+            Determines if the entity's hitbox collides with other entities the same as a solic block.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.canBeCollidedWith(entity => {
+                    return true
+                });
+                ```
+            """)
+    public BaseNonAnimatableEntityBuilder<T> canBeCollidedWith(Function<Entity, Object> canBeCollidedWith) {
+        this.canBeCollidedWith = canBeCollidedWith;
+        return this;
     }
 
     @Info(value = """

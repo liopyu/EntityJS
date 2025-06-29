@@ -1551,5 +1551,17 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
         }
     }
 
+    @Override
+    public boolean canBeCollidedWith() {
+        if (builder.canBeCollidedWith == null) {
+            return super.canBeCollidedWith();
+        }
+        Object obj = builder.canBeCollidedWith.apply(this);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeCollidedWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeCollidedWith());
+        return super.canBeCollidedWith();
+    }
 }
 

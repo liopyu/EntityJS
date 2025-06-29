@@ -190,6 +190,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public final List<GeoLayerJSBuilder<T>> glowingLayerList = new ArrayList<>();
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public transient List<String> superMethods = new ArrayList<>();
+    public transient Function<LivingEntity, Object> canBeCollidedWith;
 
     /*
         public transient Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned;
@@ -229,10 +230,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         scaleWidth = 1F;
     }
 
-   /* public BaseLivingEntityBuilder<T> onPassengerTurned(Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned) {
-        this.onPassengerTurned = onPassengerTurned;
-        return this;
-    }*/
+    /* public BaseLivingEntityBuilder<T> onPassengerTurned(Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned) {
+         this.onPassengerTurned = onPassengerTurned;
+         return this;
+     }*/
    /* @RemapForJS("ejs$")
     @Info(value = """
             @param super Adds a method to be called regardless of having a builder.
@@ -246,6 +247,20 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         this.superMethods.add(string);
         return this;
     }*/
+    @Info(value = """
+            Determines if the entity's hitbox collides with other entities the same as a solic block.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.canBeCollidedWith(entity => {
+                    return true
+                });
+                ```
+            """)
+    public BaseLivingEntityBuilder<T> canBeCollidedWith(Function<LivingEntity, Object> canBeCollidedWith) {
+        this.canBeCollidedWith = canBeCollidedWith;
+        return this;
+    }
 
     @Info(value = """
             @param positionRider A consumer determining the position of rider/riders.
