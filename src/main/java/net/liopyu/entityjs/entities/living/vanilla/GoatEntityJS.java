@@ -238,11 +238,6 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
 
 
     @Override
-    public boolean canBeCollidedWith() {
-        return super.canBeCollidedWith();
-    }
-
-    @Override
     public boolean isFood(ItemStack pStack) {
         return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
     }
@@ -1746,6 +1741,19 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, this);
             EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
         }
+    }
+
+    @Override
+    public boolean canBeCollidedWith() {
+        if (builder.canBeCollidedWith == null) {
+            return super.canBeCollidedWith();
+        }
+        Object obj = builder.canBeCollidedWith.apply(this);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeCollidedWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeCollidedWith());
+        return super.canBeCollidedWith();
     }
 
 }

@@ -540,4 +540,17 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
         return super.getMaxFallDistance();
     }
+
+    @Override
+    public boolean canBeCollidedWith() {
+        if (builder.canBeCollidedWith == null) {
+            return super.canBeCollidedWith();
+        }
+        Object obj = builder.canBeCollidedWith.apply(this);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeCollidedWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeCollidedWith());
+        return super.canBeCollidedWith();
+    }
 }

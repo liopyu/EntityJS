@@ -185,6 +185,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public final List<GeoLayerJSBuilder<T>> glowingLayerList = new ArrayList<>();
+    public transient Function<LivingEntity, Object> canBeCollidedWith;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -217,6 +218,21 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mountJumpingEnabled = true;
         scaleHeight = 1F;
         scaleWidth = 1F;
+    }
+
+    @Info(value = """
+            Determines if the entity's hitbox collides with other entities the same as a solic block.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.canBeCollidedWith(entity => {
+                    return true
+                });
+                ```
+            """)
+    public BaseLivingEntityBuilder<T> canBeCollidedWith(Function<LivingEntity, Object> canBeCollidedWith) {
+        this.canBeCollidedWith = canBeCollidedWith;
+        return this;
     }
 
     @Info(value = """

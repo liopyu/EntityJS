@@ -73,6 +73,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public transient ResourceLocation[] immuneTo;
     public transient boolean spawnFarFromPlayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
+    public transient Function<Entity, Object> canBeCollidedWith;
 
     public BaseNonAnimatableEntityBuilder(ResourceLocation i) {
         super(i);
@@ -90,6 +91,21 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         mobCategory = MobCategory.MISC;
         isAttackable = true;
         isPushable = false;
+    }
+
+    @Info(value = """
+            Determines if the entity's hitbox collides with other entities the same as a solic block.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.canBeCollidedWith(entity => {
+                    return true
+                });
+                ```
+            """)
+    public BaseNonAnimatableEntityBuilder<T> canBeCollidedWith(Function<Entity, Object> canBeCollidedWith) {
+        this.canBeCollidedWith = canBeCollidedWith;
+        return this;
     }
 
     @Info(value = """
