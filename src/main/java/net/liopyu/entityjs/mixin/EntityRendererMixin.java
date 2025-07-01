@@ -59,6 +59,11 @@ public abstract class EntityRendererMixin {
         var entityType = entity.getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
             var eventJS = getOrCreate(entityType, entity);
+            if (eventJS.getBuilder() instanceof ModifyEntityBuilder builder) {
+                if (builder.setTextureLocation == null && builder.setRenderType == null) {
+                    return;
+                }
+            }
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }

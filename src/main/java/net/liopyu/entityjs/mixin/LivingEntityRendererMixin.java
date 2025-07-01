@@ -39,6 +39,11 @@ public abstract class LivingEntityRendererMixin<T, M extends EntityModel<?>> {
         var entityType = entity.getType();
         if (EventHandlers.modifyEntity.hasListeners()) {
             var eventJS = getOrCreate(entityType, entity);
+            if (eventJS.getBuilder() instanceof ModifyLivingEntityBuilder builder) {
+                if (builder.setTextureLocation == null && builder.setRenderType == null) {
+                    return;
+                }
+            }
             EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
