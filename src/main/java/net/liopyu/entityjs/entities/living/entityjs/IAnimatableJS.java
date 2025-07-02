@@ -2,10 +2,12 @@ package net.liopyu.entityjs.entities.living.entityjs;
 
 import dev.latvian.mods.kubejs.util.Cast;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.control.JumpControl;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -63,4 +65,6 @@ public interface IAnimatableJS extends GeoAnimatable, GeoEntity {
     }
 
     EntityType<?> getType();
+  
+
 }
