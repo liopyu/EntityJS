@@ -112,7 +112,7 @@ public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
             
             Example usage:
             ```javascript
-            builder.setRenderType("CUTOUT");
+            builder.setRenderType(RenderType.entityCutoutNoCull("kubejs:path/to/texture", true));
             ```
             """)
     public GeoLayerJSBuilder<T> setRenderType(RenderType type) {
