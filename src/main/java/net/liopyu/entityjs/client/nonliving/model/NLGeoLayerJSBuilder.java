@@ -9,6 +9,7 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -105,6 +106,36 @@ public class NLGeoLayerJSBuilder<T extends Entity & IAnimatableJSNL> {
                 return entity.getBuilder().newID("textures/entity/", ".png");
             }
         };
+        return this;
+    }
+
+    public transient RenderType setRenderType;
+
+    @Info(value = """
+            Sets the render type for the entity's layer.
+            
+            Example usage:
+            ```javascript
+            builder.setRenderType(RenderType.entityCutoutNoCull("kubejs:path/to/texture", true));
+            ```
+            """)
+    public NLGeoLayerJSBuilder<T> setRenderType(RenderType type) {
+        setRenderType = type;
+        return this;
+    }
+
+    public transient Function<T, RenderType> renderTypeFunction;
+
+    @Info(value = """
+            Sets the render type for the entity's layer via a function.
+            
+            Example usage:
+            ```javascript
+            builder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            ```
+            """)
+    public NLGeoLayerJSBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {
+        renderTypeFunction = type;
         return this;
     }
 }

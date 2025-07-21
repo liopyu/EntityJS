@@ -88,7 +88,7 @@ public class CustomKubeJSEntityRenderer<T extends LivingEntity & IAnimatableJSCu
                 return builder.renderTypeFunction.apply(ensureIAnimatableJS(animatable));
             }
         } catch (Exception e) {
-            EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in " + entityName() + "builder for field: renderType.", e);
+            EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in " + entityName() + "builder for field: renderTypeFunction.", e);
         }
         return switch (ensureIAnimatableJS(animatable).getBuilder().renderType) {
             case SOLID -> RenderType.entitySolid(texture);

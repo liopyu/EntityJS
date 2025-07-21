@@ -52,7 +52,7 @@ public class GlowingGeoLayerJS<T extends LivingEntity & IAnimatableJS> extends A
         if (geoBuilder.preRender != null && animatable != null) {
             try {
                 if (geoBuilder.renderTypeFunction != null) {
-                    renderType = builder.renderTypeFunction.apply(animatable);
+                    renderType = geoBuilder.renderTypeFunction.apply(animatable);
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in " + entityName() + "builder for field: renderType.", e);
@@ -76,7 +76,7 @@ public class GlowingGeoLayerJS<T extends LivingEntity & IAnimatableJS> extends A
         if (animatable != null) {
             try {
                 if (geoBuilder.renderTypeFunction != null) {
-                    return builder.renderTypeFunction.apply(animatable);
+                    return geoBuilder.renderTypeFunction.apply(animatable);
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in " + entityName() + "builder for field: renderType.", e);
@@ -94,7 +94,7 @@ public class GlowingGeoLayerJS<T extends LivingEntity & IAnimatableJS> extends A
                        int packedLightIn, int packedOverlay) {
         try {
             if (geoBuilder.renderTypeFunction != null) {
-                renderType = builder.renderTypeFunction.apply(animatable);
+                renderType = geoBuilder.renderTypeFunction.apply(animatable);
             }
         } catch (Exception e) {
             EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in " + entityName() + "builder for field: renderType.", e);

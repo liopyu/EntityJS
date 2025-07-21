@@ -95,6 +95,21 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         isPushable = false;
     }
 
+    public transient Function<T, net.minecraft.client.renderer.RenderType> renderTypeFunction;
+
+    @Info(value = """
+            Sets the render type for the entity via a function.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            ```
+            """)
+    public BaseNonAnimatableEntityBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {
+        renderTypeFunction = type;
+        return this;
+    }
+
     @Info(value = """
             Determines if the entity's hitbox collides with other entities the same as a solic block.
             
