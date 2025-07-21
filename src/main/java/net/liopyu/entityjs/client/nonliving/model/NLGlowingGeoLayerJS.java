@@ -54,9 +54,9 @@ public class NLGlowingGeoLayerJS<T extends Entity & IAnimatableJSNL> extends Aut
         if (geoBuilder.preRender != null && animatable != null) {
             final ContextUtils.PreRenderContext<T> context = new ContextUtils.PreRenderContext<>(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
             EntityJSHelperClass.consumerCallback(geoBuilder.preRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: preRender");
-            super.preRender(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, 15728640, packedOverlay);
+            super.preRender(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
         } else {
-            super.preRender(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, 15728640, packedOverlay);
+            super.preRender(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
         }
     }
 
