@@ -377,11 +377,11 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
 
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
-        if (builder != null && builder.shouldRenderAtSqrDistance != null) {
+        if (builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
             Object obj = builder.shouldRenderAtSqrDistance.apply(context);
             if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for arrow builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
         }
         return super.shouldRenderAtSqrDistance(distance);
     }

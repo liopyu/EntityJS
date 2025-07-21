@@ -9,6 +9,7 @@ import dev.latvian.mods.rhino.util.HideFromJS;
 import dev.latvian.mods.rhino.util.RemapForJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
+import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
@@ -247,6 +248,28 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         this.superMethods.add(string);
         return this;
     }*/
+    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
+
+    @Info(value = """
+            Sets a function to determine whether the entity should render at a squared distance.
+            
+            @param shouldRenderAtSqrDistance Function accepting a {@link ContextUtils.EntitySqrDistanceContext} parameter,
+                             defining the conditions under which the entity should render.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.shouldRenderAtSqrDistance(context => {
+                // Custom logic to determine whether the entity should render
+                // Access information about the distance using the provided context.
+                return true;
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> shouldRenderAtSqrDistance(Function<ContextUtils.EntitySqrDistanceContext, Object> func) {
+        shouldRenderAtSqrDistance = func;
+        return this;
+    }
+
     @Info(value = """
             Determines if the entity's hitbox collides with other entities the same as a solic block.
             

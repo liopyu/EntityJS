@@ -1696,4 +1696,15 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeCollidedWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeCollidedWith());
         return super.canBeCollidedWith();
     }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        if (builder.shouldRenderAtSqrDistance != null) {
+            final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
+            Object obj = builder.shouldRenderAtSqrDistance.apply(context);
+            if (obj instanceof Boolean b) return b;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
+        }
+        return super.shouldRenderAtSqrDistance(distance);
+    }
 }
