@@ -2,8 +2,11 @@ package net.liopyu.entityjs.client.nonliving.model;
 
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
+import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.model.GeoModel;
 
 public class NonLivingEntityModel<T extends Entity & IAnimatableJSNL> extends GeoModel<T> {
@@ -12,6 +15,7 @@ public class NonLivingEntityModel<T extends Entity & IAnimatableJSNL> extends Ge
     public NonLivingEntityModel(BaseEntityBuilder<T> builder) {
         this.builder = builder;
     }
+
 
     @Override
     public ResourceLocation getModelResource(T object) {

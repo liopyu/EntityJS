@@ -32,6 +32,17 @@ public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntity
         this.builder = builder;
     }
 
+    public RenderType getRenderType(T entity) {
+        if (builder.renderTypeFunction != null) {
+            try {
+                return builder.renderTypeFunction.apply(entity);
+            } catch (RuntimeException e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in renderTypeFunction. Defaulting to RenderType.entityCutoutNoCull()", e);
+            }
+        }
+        return RenderType.entityCutoutNoCull(this.getTextureLocation(entity));
+    }
+
     @Override
     public void render(T pEntity, float pEntityYaw, float pPartialTick, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight) {
         if (builder.render != null) {
@@ -51,7 +62,7 @@ public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntity
 
         pMatrixStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         PoseStack.Pose posestack$pose = pMatrixStack.last();
-        VertexConsumer vertexconsumer = pBuffer.getBuffer(RenderType.entityCutoutNoCull(this.getTextureLocation(pEntity)));
+        VertexConsumer vertexconsumer = pBuffer.getBuffer(this.getRenderType(pEntity));
         vertex(vertexconsumer, posestack$pose, pPackedLight, 0.0F, 0, 0, 1);
         vertex(vertexconsumer, posestack$pose, pPackedLight, 1.0F, 0, 1, 1);
         vertex(vertexconsumer, posestack$pose, pPackedLight, 1.0F, 1, 1, 0);

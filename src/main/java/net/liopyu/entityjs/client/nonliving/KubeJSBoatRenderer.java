@@ -39,6 +39,13 @@ public class KubeJSBoatRenderer<T extends Boat & IAnimatableJSNL> extends GeoEnt
 
     @Override
     public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
+        if (builder.renderTypeFunction != null) {
+            try {
+                return builder.renderTypeFunction.apply(animatable);
+            } catch (RuntimeException e) {
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in renderTypeFunction.", e);
+            }
+        }
         return switch (animatable.getBuilder().renderType) {
             case SOLID -> RenderType.entitySolid(texture);
             case CUTOUT -> RenderType.entityCutout(texture);
