@@ -38,6 +38,53 @@ import net.minecraftforge.entity.PartEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 
 public class ContextUtils {
+    public static class ApplyRotationsContext<T extends LivingEntity> {
+        public final T entity;
+        public final PoseStack poseStack;
+        public final float ageInTicks;
+        public final float rotationYaw;
+        public final float partialTick;
+
+        public ApplyRotationsContext(T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
+            this.entity = animatable;
+            this.poseStack = poseStack;
+            this.ageInTicks = ageInTicks;
+            this.rotationYaw = rotationYaw;
+            this.partialTick = partialTick;
+        }
+    }
+
+    public static class FinalRenderContext<T extends LivingEntity & IAnimatableJS> {
+
+        public final PoseStack poseStack;
+        public final T entity;
+        public final BakedGeoModel model;
+        public final MultiBufferSource bufferSource;
+        public final VertexConsumer buffer;
+        public final float partialTick;
+        public final int packedLight;
+        public final int packedOverlay;
+        public final float red;
+        public final float green;
+        public final float blue;
+        public final float alpha;
+
+        public FinalRenderContext(PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+            this.poseStack = poseStack;
+            this.entity = animatable;
+            this.model = model;
+            this.bufferSource = bufferSource;
+            this.buffer = buffer;
+            this.partialTick = partialTick;
+            this.packedLight = packedLight;
+            this.packedOverlay = packedOverlay;
+            this.red = red;
+            this.green = green;
+            this.blue = blue;
+            this.alpha = alpha;
+        }
+    }
+
     public static class IsWalkableContext {
         public final float pRelativeX;
         public final float pRelativeZ;

@@ -192,6 +192,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public transient List<String> superMethods = new ArrayList<>();
     public transient Function<LivingEntity, Object> canBeCollidedWith;
+    public transient Consumer<ContextUtils.FinalRenderContext<T>> renderFinal;
+    public transient Consumer<? super ContextUtils.ApplyRotationsContext<T>> applyRotations;
 
     /*
         public transient Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned;
@@ -282,6 +284,22 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> canBeCollidedWith(Function<LivingEntity, Object> canBeCollidedWith) {
         this.canBeCollidedWith = canBeCollidedWith;
+        return this;
+    }
+
+    @Info(value = """
+            @param applyRotations A consumer for applying additional rotations or transforms to the entity model.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.applyRotations(context => {
+                    const { entity, poseStack, ageInTicks, rotationYaw, partialTick } = context
+                    // apply your transforms here
+                });
+                ```
+            """)
+    public BaseLivingEntityBuilder<T> applyRotations(Consumer<ContextUtils.ApplyRotationsContext<T>> builderConsumer) {
+        this.applyRotations = builderConsumer;
         return this;
     }
 
@@ -383,6 +401,37 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public BaseLivingEntityBuilder<T> modelSize(float scaleHeight, float scaleWidth) {
         this.scaleHeight = scaleHeight;
         this.scaleWidth = scaleWidth;
+        return this;
+    }
+
+    @Info(value = """
+            A Consumer determining logic for the final render.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.renderFinal(context => {
+                const {
+                    poseStack,
+                    entity,
+                    model,
+                    bufferSource,
+                    buffer,
+                    partialTick,
+                    packedLight,
+                    packedOverlay,
+                    red,
+                    green,
+                    blue,
+                    alpha
+                } = context
+                if (entity.isBaby()) {
+                    poseStack.scale(0.5, 0.5, 0.5)
+                }
+            })
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> renderFinal(Consumer<ContextUtils.FinalRenderContext<T>> renderFinal) {
+        this.renderFinal = renderFinal;
         return this;
     }
 
