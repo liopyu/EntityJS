@@ -66,11 +66,11 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
 
     @Override
     public void renderFinal(PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-       /* if (builder.renderFinal != null && this.animatable != null) {
+        if (builder.renderFinal != null && this.animatable != null) {
             final ContextUtils.FinalRenderContext<T> context = new ContextUtils.FinalRenderContext<>(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
             EntityJSHelperClass.consumerCallback(builder.renderFinal, context, "[EntityJS]: Error in " + entityName() + "builder for field: renderFinal.");
             super.renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
-        }*/
+        }
         super.renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
     }
 
