@@ -2,7 +2,9 @@ package net.liopyu.entityjs.util;
 
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 
 public enum EntitySerializerType {
@@ -61,6 +63,11 @@ public enum EntitySerializerType {
         if (value instanceof Boolean) return (T) value;
         if (value instanceof net.minecraft.nbt.CompoundTag) return (T) value;
         if (value instanceof org.joml.Vector3f) return (T) value;
+        if (value instanceof org.joml.Vector3d vec3)
+            return (T) new Vector3f((float) vec3.x, (float) vec3.y, (float) vec3.z);
+        if (value instanceof org.joml.Vector3i vec3)
+            return (T) new Vector3f((float) vec3.x, (float) vec3.y, (float) vec3.z);
+        if (value instanceof Vec3 vec3) return (T) new Vector3f((float) vec3.x, (float) vec3.y, (float) vec3.z);
         if (value instanceof org.joml.Quaternionf) return (T) value;
 
         throw new IllegalArgumentException("Unsupported value type for casting: " + value.getClass());
@@ -82,6 +89,9 @@ public enum EntitySerializerType {
         if (value instanceof Boolean) return BOOLEAN;
         if (value instanceof net.minecraft.nbt.CompoundTag) return COMPOUND_TAG;
         if (value instanceof org.joml.Vector3f) return VECTOR3;
+        if (value instanceof org.joml.Vector3d) return VECTOR3;
+        if (value instanceof org.joml.Vector3i) return VECTOR3;
+        if (value instanceof Vec3) return VECTOR3;
         if (value instanceof org.joml.Quaternionf) return QUATERNION;
         throw new IllegalArgumentException("Unsupported value type for serializer: " + value.getClass());
     }

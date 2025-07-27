@@ -41,6 +41,7 @@ public class CustomGoal<T extends Mob> extends Goal {
         this.requiresUpdateEveryTick = requiresUpdateEveryTick;
         this.tick = tick;
     }
+
     @Override
     public boolean canUse() {
         return canUse.test(mob);
@@ -74,6 +75,10 @@ public class CustomGoal<T extends Mob> extends Goal {
     @Override
     public void tick() {
         tick.accept(mob);
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override

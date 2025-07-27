@@ -96,6 +96,15 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         };
     }
 
+    @Override
+    public void renderFinal(PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, @org.jetbrains.annotations.Nullable VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay, int colour) {
+        if (builder.renderFinal != null && this.animatable != null) {
+            final ContextUtils.FinalRenderContext<T> context = new ContextUtils.FinalRenderContext<>(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, colour);
+            EntityJSHelperClass.consumerCallback(builder.renderFinal, context, "[EntityJS]: Error in " + entityName() + "builder for field: renderFinal.");
+            super.renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, colour);
+        }
+        super.renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, colour);
+    }
 
     @Override
     public void render(T animatable, float entityYaw, float partialTick,
@@ -136,6 +145,10 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
                 poseStack.translate(0, (animatable.getBbHeight() + 0.1f) / nativeScale, 0);
                 poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
             }
+        }
+        if (builder.applyRotations != null) {
+            ContextUtils.ApplyRotationsContext<T> context = new ContextUtils.ApplyRotationsContext<>(animatable, poseStack, ageInTicks, rotationYaw, partialTick);
+            EntityJSHelperClass.consumerCallback(builder.applyRotations, context, "[EntityJS]: Error in " + entityName() + " builder for field: applyRotations.");
         }
     }
 

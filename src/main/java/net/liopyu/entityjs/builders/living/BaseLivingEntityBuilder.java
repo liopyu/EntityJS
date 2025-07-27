@@ -186,6 +186,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public final List<GeoLayerJSBuilder<T>> glowingLayerList = new ArrayList<>();
     public transient Function<LivingEntity, Object> canBeCollidedWith;
+    public transient Consumer<ContextUtils.FinalRenderContext<T>> renderFinal;
+    public transient Consumer<? super ContextUtils.ApplyRotationsContext<T>> applyRotations;
+    public transient Predicate<ContextUtils.PassengerVehicleContext> canRide;
+    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
 
     //STUFF
     public BaseLivingEntityBuilder(ResourceLocation i) {
@@ -218,6 +222,71 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mountJumpingEnabled = true;
         scaleHeight = 1F;
         scaleWidth = 1F;
+    }
+
+    @Info(value = """
+            Sets a function to determine whether the entity can ride another entity.
+            
+            @param canRide Predicate accepting a {@link ContextUtils.PassengerVehicleContext} parameter,
+                             defining the conditions under which the entity should ride
+            
+            Example usage:
+            ```javascript
+            entityBuilder.canRide(context => {
+                return true;
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> canRide(Predicate<ContextUtils.PassengerVehicleContext> func) {
+        canRide = func;
+        return this;
+    }
+
+    @Info(value = """
+            @param applyRotations A consumer for applying additional rotations or transforms to the entity model.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.applyRotations(context => {
+                    const { entity, poseStack, ageInTicks, rotationYaw, partialTick } = context
+                    // apply your transforms here
+                });
+                ```
+            """)
+    public BaseLivingEntityBuilder<T> applyRotations(Consumer<ContextUtils.ApplyRotationsContext<T>> builderConsumer) {
+        this.applyRotations = builderConsumer;
+        return this;
+    }
+
+    @Info(value = """
+            A Consumer determining logic for the final render.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.renderFinal(context => {
+                const {
+                    poseStack,
+                    entity,
+                    model,
+                    bufferSource,
+                    buffer,
+                    partialTick,
+                    packedLight,
+                    packedOverlay,
+                    red,
+                    green,
+                    blue,
+                    alpha
+                } = context
+                if (entity.isBaby()) {
+                    poseStack.scale(0.5, 0.5, 0.5)
+                }
+            })
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> renderFinal(Consumer<ContextUtils.FinalRenderContext<T>> renderFinal) {
+        this.renderFinal = renderFinal;
+        return this;
     }
 
     public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;

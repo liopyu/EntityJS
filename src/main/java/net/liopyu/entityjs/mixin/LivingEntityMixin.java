@@ -191,7 +191,13 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
                  case "byte", "int", "float", "long" -> type.toString().toLowerCase();
                  default -> null;
              };
-             Object casted = EntitySerializerType.castValue(value, castHint);
+              Object casted = null;
+        casted = EntitySerializerType.castValue(value, castHint);
+
+
+        if (casted == null) {
+            return;
+        }
              entityJs$getLivingEntity().getEntityData().set(accessor, casted);
          }
 

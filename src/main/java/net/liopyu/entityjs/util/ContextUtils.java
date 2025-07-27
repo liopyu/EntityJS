@@ -39,6 +39,59 @@ import net.neoforged.neoforge.entity.PartEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 
 public class ContextUtils {
+    public static class PassengerVehicleContext {
+
+        public final Entity vehicle;
+
+
+        public final LivingEntity entity;
+
+        public PassengerVehicleContext(Entity vehicle, LivingEntity entity) {
+            this.vehicle = vehicle;
+            this.entity = entity;
+        }
+    }
+
+    public static class ApplyRotationsContext<T extends LivingEntity> {
+        public final T entity;
+        public final PoseStack poseStack;
+        public final float ageInTicks;
+        public final float rotationYaw;
+        public final float partialTick;
+
+        public ApplyRotationsContext(T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
+            this.entity = animatable;
+            this.poseStack = poseStack;
+            this.ageInTicks = ageInTicks;
+            this.rotationYaw = rotationYaw;
+            this.partialTick = partialTick;
+        }
+    }
+
+    public static class FinalRenderContext<T extends LivingEntity & IAnimatableJS> {
+
+        public final PoseStack poseStack;
+        public final T entity;
+        public final BakedGeoModel model;
+        public final MultiBufferSource bufferSource;
+        public final VertexConsumer buffer;
+        public final float partialTick;
+        public final int packedLight;
+        public final int packedOverlay;
+        public final float colour;
+
+        public FinalRenderContext(PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay, float colour) {
+            this.poseStack = poseStack;
+            this.entity = animatable;
+            this.model = model;
+            this.bufferSource = bufferSource;
+            this.buffer = buffer;
+            this.partialTick = partialTick;
+            this.packedLight = packedLight;
+            this.packedOverlay = packedOverlay;
+            this.colour = colour;
+        }
+    }
 
     public static class RenderContextCustom<T extends LivingEntity & IAnimatableJSCustom> {
         @Info("The animatable entity being rendered")
