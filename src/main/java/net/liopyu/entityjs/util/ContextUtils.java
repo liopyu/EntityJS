@@ -405,6 +405,19 @@ public class ContextUtils {
         }
     }
 
+    public static class PassengerVehicleContext {
+
+        public final Entity vehicle;
+
+
+        public final LivingEntity entity;
+
+        public PassengerVehicleContext(Entity vehicle, LivingEntity entity) {
+            this.vehicle = vehicle;
+            this.entity = entity;
+        }
+    }
+
     public static class PassengerEntityContext {
 
         public final Entity passenger;

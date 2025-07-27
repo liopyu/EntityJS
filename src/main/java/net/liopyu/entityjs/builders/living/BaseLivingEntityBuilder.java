@@ -194,6 +194,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<LivingEntity, Object> canBeCollidedWith;
     public transient Consumer<ContextUtils.FinalRenderContext<T>> renderFinal;
     public transient Consumer<? super ContextUtils.ApplyRotationsContext<T>> applyRotations;
+    public transient Predicate<ContextUtils.PassengerVehicleContext> canRide;
+    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
 
     /*
         public transient Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned;
@@ -250,8 +252,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         this.superMethods.add(string);
         return this;
     }*/
-    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
-
     @Info(value = """
             Sets a function to determine whether the entity should render at a squared distance.
             
@@ -269,6 +269,24 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> shouldRenderAtSqrDistance(Function<ContextUtils.EntitySqrDistanceContext, Object> func) {
         shouldRenderAtSqrDistance = func;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a function to determine whether the entity can ride another entity.
+            
+            @param canRide Predicate accepting a {@link ContextUtils.PassengerVehicleContext} parameter,
+                             defining the conditions under which the entity should ride
+            
+            Example usage:
+            ```javascript
+            entityBuilder.canRide(context => {
+                return true;
+            });
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> canRide(Predicate<ContextUtils.PassengerVehicleContext> func) {
+        canRide = func;
         return this;
     }
 

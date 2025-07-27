@@ -5,10 +5,12 @@ import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.ai.NearestAttackableTargetGoalJS;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.target.*;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -23,7 +25,7 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
 
     @Info(value = """
             Remove a goal from the entity via class reference.
-                        
+            
             Example of usage:
             =====================================
             let $PanicGoal = Java.loadClass("net.minecraft.world.entity.ai.goal.PanicGoal")
@@ -38,7 +40,7 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
 
     @Info(value = """
             Remove all goals fitting the specified predicate. Returns a boolean
-                        
+            
             Example of usage:
             =====================================
             let $PanicGoal = Java.loadClass("net.minecraft.world.entity.ai.goal.PanicGoal")
@@ -65,7 +67,7 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
 
     @Info(value = """
             Remove all goals.
-                        
+            
             Example of usage:
             =====================================
             builder.removeAllGoals()
@@ -79,15 +81,15 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
 
     @Info(value = """
             Enables the addition of arbitrary goals to an entity
-                        
+            
             It is the responsibility of the user to ensure the goal is
             compatible with the entity
-                        
+            
             Example of usage:
             =====================================
             builder.arbitraryTargetGoal(3, entity -> new $DefendVillageTargetGoal(entity))
             =====================================
-                       
+            
             Note in the example the entity must be an instance of IronGolem
             """, params = {
             @Param(name = "priority", value = "The priority of the goal"),
@@ -95,6 +97,19 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
     })
     public void arbitraryTargetGoal(int priority, Function<T, Goal> goalSuppler) {
         selector.addGoal(priority, goalSuppler.apply(mob));
+    }
+
+    @Info(value = "Adds a `NearestAttackableTargetGoalJS` to the entity", params = {
+            @Param(name = "priority", value = "The priority of the goal"),
+            @Param(name = "targetClass", value = "The entity class that should be targeted"),
+            @Param(name = "randomInterval", value = "The interval at which the goal amy be 'refreshed'"),
+            @Param(name = "mustSee", value = "If the mob must have line of sight at all times"),
+            @Param(name = "mustReach", value = "If the mob must be able to reach the target to attack"),
+            @Param(name = "targetConditions", value = "The conditions under which the targeted entity will be targeted, may be null"),
+            @Param(name = "radius", value = "The AABB radius to check for a potential target")
+    })
+    public <E extends LivingEntity> void nearestAttackableTarget(int priority, Class<E> targetClass, int randomInterval, boolean mustSee, boolean mustReach, @Nullable Predicate<LivingEntity> targetConditions, AABB radius) {
+        selector.addGoal(priority, new NearestAttackableTargetGoalJS<>(mob, targetClass, randomInterval, mustSee, mustReach, targetConditions, radius));
     }
 
     @Info(value = "Adds a `NearestAttackableTargetGoal` to the entity", params = {

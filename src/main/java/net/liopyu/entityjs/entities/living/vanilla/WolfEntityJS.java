@@ -1851,4 +1851,17 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
         return super.canBeCollidedWith();
     }
 
+    @Override
+    protected boolean canRide(Entity pVehicle) {
+        if (builder.canRide == null) {
+            return super.canRide(pVehicle);
+        }
+        var context = new ContextUtils.PassengerVehicleContext(pVehicle, this);
+        Object obj = builder.canRide.test(context);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canRide from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super method.");
+        return super.canRide(pVehicle);
+    }
 }

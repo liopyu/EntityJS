@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.mixin;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
@@ -82,37 +83,6 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         entityJs$defineSynchedData();
     }
 
-    /**
-     * Ensures that the given entity is always an instance of IAnimatableJSCustom.
-     */
-    private IAnimatableJSCustom ensureIAnimatableJS(LivingEntity entity) {
-        if (entity instanceof IAnimatableJSCustom animatableJS) {
-            return animatableJS;
-        }
-        var customBuilder = EntityJSUtils.getEntityBuilder(entity.getType());
-        return new WrappedAnimatableEntity(entity, (CustomEntityJSBuilder) customBuilder);
-    }
-
-    @Unique
-    private WrappedAnimatableEntity entityJs$animatableEntity;
-
-    @Unique
-    public WrappedAnimatableEntity entityJs$getAnimatableEntity() {
-        return this.entityJs$animatableEntity;
-    }
-
-    @Unique
-    private void entityJs$setAnimatableEntity(WrappedAnimatableEntity animatableEntity) {
-        this.entityJs$animatableEntity = animatableEntity;
-    }
-
-    @Info(value = """
-            Calls a triggerable animation to be played anywhere.
-            """)
-    public void triggerAnimation(String controllerName, String animName) {
-        if (this.entityJs$getAnimatableEntity() != null)
-            this.entityJs$getAnimatableEntity().triggerAnim(controllerName, animName);
-    }
 
     @Unique
     private static final Map<Class<?>, Map<String, EntityDataAccessor<?>>> entityJs$classAccessorMap = new HashMap<>();
@@ -182,15 +152,25 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Tried to set undefined synced data key: " + key);
             return;
         }
+
         EntityDataSerializer<?> serializer = accessor.getSerializer();
         EntitySerializerType type = EntitySerializerType.fromSerializer(serializer);
         String castHint = switch (type.toString().toLowerCase()) {
             case "byte", "int", "float", "long" -> type.toString().toLowerCase();
             default -> null;
         };
-        Object casted = EntitySerializerType.castValue(value, castHint);
+
+        Object casted = null;
+        casted = EntitySerializerType.castValue(value, castHint);
+
+
+        if (casted == null) {
+            return;
+        }
+
         entityJs$getLivingEntity().getEntityData().set(accessor, casted);
     }
+
 
     @SuppressWarnings("unchecked")
     public <T> @Nullable T entityJs$getSyncedData(String identifier) {
@@ -210,43 +190,75 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
     private void entityjs$writeSyncedData(CompoundTag tag, CallbackInfo ci) {
+        var logger = LogUtils.getLogger();
         CompoundTag jsData = new CompoundTag();
+
         for (Map.Entry<String, EntityDataAccessor<?>> entry : entityJs$accessorMap.entrySet()) {
             String key = entry.getKey();
             EntityDataAccessor<?> accessor = entry.getValue();
-            Object value = entityJs$getLivingEntity().getEntityData().get((EntityDataAccessor<Object>) accessor);
+
+            Object value;
+            value = entityJs$getLivingEntity().getEntityData().get((EntityDataAccessor<Object>) accessor);
+
+
+            if (value == null) {
+                continue;
+            }
+
             EntityDataSerializer<?> serializer = accessor.getSerializer();
-            EntitySerializerType type = EntitySerializerType.fromSerializer(serializer);
-            switch (type) {
-                case UUID -> jsData.putUUID(key, (UUID) value);
-                case BYTE -> jsData.putByte(key, (Byte) value);
-                case INT -> jsData.putInt(key, (Integer) value);
-                case LONG -> jsData.putLong(key, (Long) value);
-                case FLOAT -> jsData.putFloat(key, (Float) value);
-                case STRING -> jsData.putString(key, (String) value);
-                case BOOLEAN -> jsData.putBoolean(key, (Boolean) value);
-                case COMPOUND_TAG -> jsData.put(key, ((net.minecraft.nbt.CompoundTag) value).copy());
-                case VECTOR3 -> {
-                    CompoundTag vecTag = new CompoundTag();
-                    var v = (org.joml.Vector3f) value;
-                    vecTag.putFloat("x", v.x());
-                    vecTag.putFloat("y", v.y());
-                    vecTag.putFloat("z", v.z());
-                    jsData.put(key, vecTag);
+            EntitySerializerType type;
+            type = EntitySerializerType.fromSerializer(serializer);
+
+
+            try {
+                switch (type) {
+                    case UUID -> jsData.putUUID(key, (UUID) value);
+                    case BYTE -> jsData.putByte(key, (Byte) value);
+                    case INT -> jsData.putInt(key, (Integer) value);
+                    case LONG -> jsData.putLong(key, (Long) value);
+                    case FLOAT -> jsData.putFloat(key, (Float) value);
+                    case STRING -> jsData.putString(key, (String) value);
+                    case BOOLEAN -> jsData.putBoolean(key, (Boolean) value);
+                    case COMPOUND_TAG -> {
+                        CompoundTag compound = ((CompoundTag) value);
+                        if (compound == null) {
+                            break;
+                        }
+                        jsData.put(key, compound.copy());
+                    }
+                    case VECTOR3 -> {
+                        CompoundTag vecTag = new CompoundTag();
+                        var v = (org.joml.Vector3f) value;
+                        if (v == null) {
+                            break;
+                        }
+                        vecTag.putFloat("x", v.x());
+                        vecTag.putFloat("y", v.y());
+                        vecTag.putFloat("z", v.z());
+                        jsData.put(key, vecTag);
+                    }
+                    case QUATERNION -> {
+                        CompoundTag quatTag = new CompoundTag();
+                        var q = (org.joml.Quaternionf) value;
+                        if (q == null) {
+                            break;
+                        }
+                        quatTag.putFloat("x", q.x());
+                        quatTag.putFloat("y", q.y());
+                        quatTag.putFloat("z", q.z());
+                        quatTag.putFloat("w", q.w());
+                        jsData.put(key, quatTag);
+                    }
+                    default -> logger.warn("[EntityJS] Unhandled serializer type '{}' for key '{}'", type, key);
                 }
-                case QUATERNION -> {
-                    CompoundTag quatTag = new CompoundTag();
-                    var q = (org.joml.Quaternionf) value;
-                    quatTag.putFloat("x", q.x());
-                    quatTag.putFloat("y", q.y());
-                    quatTag.putFloat("z", q.z());
-                    quatTag.putFloat("w", q.w());
-                    jsData.put(key, quatTag);
-                }
+            } catch (Exception e) {
+                logger.error("[EntityJS] Failed to write key '{}', type '{}', value '{}'", key, type, value, e);
             }
         }
+
         tag.put("EntityJSData", jsData);
     }
+
 
     @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
     private void entityjs$readSyncedData(CompoundTag tag, CallbackInfo ci) {
@@ -284,6 +296,38 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
             };
             entityJs$setSyncedData(key, value);
         }
+    }
+
+    /**
+     * Ensures that the given entity is always an instance of IAnimatableJSCustom.
+     */
+    private IAnimatableJSCustom ensureIAnimatableJS(LivingEntity entity) {
+        if (entity instanceof IAnimatableJSCustom animatableJS) {
+            return animatableJS;
+        }
+        var customBuilder = EntityJSUtils.getEntityBuilder(entity.getType());
+        return new WrappedAnimatableEntity(entity, (CustomEntityJSBuilder) customBuilder);
+    }
+
+    @Unique
+    private WrappedAnimatableEntity entityJs$animatableEntity;
+
+    @Unique
+    public WrappedAnimatableEntity entityJs$getAnimatableEntity() {
+        return this.entityJs$animatableEntity;
+    }
+
+    @Unique
+    private void entityJs$setAnimatableEntity(WrappedAnimatableEntity animatableEntity) {
+        this.entityJs$animatableEntity = animatableEntity;
+    }
+
+    @Info(value = """
+            Calls a triggerable animation to be played anywhere.
+            """)
+    public void triggerAnimation(String controllerName, String animName) {
+        if (this.entityJs$getAnimatableEntity() != null)
+            this.entityJs$getAnimatableEntity().triggerAnim(controllerName, animName);
     }
 
     public String entityJs$getTypeId() {
