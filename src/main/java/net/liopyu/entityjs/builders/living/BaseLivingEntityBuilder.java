@@ -289,7 +289,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
 
     @Info(value = """
             Sets a function to determine whether the entity should render at a squared distance.
