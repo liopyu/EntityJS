@@ -86,6 +86,12 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
         super(entityType);
     }
 
+  /*  public transient Consumer<LivingEntity> defineSyncedData;
+
+    public ModifyEntityBuilder defineSyncedData(Consumer<LivingEntity> consumer) {
+        this.defineSyncedData = consumer;
+        return this;
+    }*/
 
     @Info(value = """
             Sets the water slowdown factor for the entity. Defaults to 0.8.

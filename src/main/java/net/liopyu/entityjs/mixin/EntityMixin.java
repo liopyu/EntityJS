@@ -306,7 +306,7 @@ public class EntityMixin implements IEntityJS {
         if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
             if (entityJs$getLivingEntity() instanceof Mob m) {
                 if (EventHandlers.addGoalTargets.hasListeners()) {
-                    EventHandlers.addGoalTargets.post(new AddGoalSelectorsEventJS<>(m, m.goalSelector), entityJs$getTypeId());
+                    EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(m, m.goalSelector), entityJs$getTypeId());
                 }
                 if (EventHandlers.addGoalSelectors.hasListeners()) {
                     EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(m, m.goalSelector), entityJs$getTypeId());
