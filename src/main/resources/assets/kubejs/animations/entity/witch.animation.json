@@ -1,0 +1,49 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.witch.general": {
+			"loop": true,
+			"bones": {
+				"nose": {
+					"rotation": {
+						"vector": [
+							"(variable.isholdingitem ? -25.7831 : (math.sin(query.life_time * 57.296) * 4.5)) - this",
+							0,
+							"(math.cos(query.life_time * 57.296) * 2.5) - this"
+						]
+					}
+				}
+			}
+		},
+		"animation.witch.villager_general": {
+			"loop": true,
+			"bones": {
+				"arms": {
+					"rotation": {
+						"vector": ["-42.97 - this", 0, 0]
+					},
+					"position": {
+						"vector": [0, -1, -1]
+					}
+				}
+			}
+		},
+		"animation.witch.move": {
+			"loop": true,
+			"anim_time_update": "query.modified_distance_moved",
+			"bones": {
+				"leg0": {
+					"rotation": {
+						"vector": ["(math.cos(query.anim_time * 38.17) * 40.0) - this", "-this", 0]
+					}
+				},
+				"leg1": {
+					"rotation": {
+						"vector": ["(math.cos(query.anim_time * 38.17 + 180) * 40.0) - this", "-this", 0]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

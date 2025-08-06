@@ -1,0 +1,66 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.ghast.move": {
+			"loop": true,
+			"bones": {
+				"tentacles_0": {
+					"rotation": {
+						"vector": ["math.sin(query.life_time * 360.0 + 0) * 11.5 + 23", 0, 0]
+					}
+				},
+				"tentacles_1": {
+					"rotation": {
+						"vector": ["math.sin(query.life_time * 360.0 + 57) * 11.5 + 23", 0, 0]
+					}
+				},
+				"tentacles_2": {
+					"rotation": {
+						"vector": ["math.sin(query.life_time * 360.0 + 115) * 11.5 + 23", 0, 0]
+					}
+				},
+				"tentacles_3": {
+					"rotation": {
+						"vector": ["math.sin(query.life_time * 360.0 + 172) * 11.5 + 23", 0, 0]
+					}
+				},
+				"tentacles_4": {
+					"rotation": {
+						"vector": ["math.sin(query.life_time * 360.0 + 229) * 11.5 + 23", 0, 0]
+					}
+				},
+				"tentacles_5": {
+					"rotation": {
+						"vector": ["math.sin(query.life_time * 360.0 + 286) * 11.5 + 23", 0, 0]
+					}
+				},
+				"tentacles_6": {
+					"rotation": {
+						"vector": ["math.sin(query.life_time * 360.0 + 344) * 11.5 + 23", 0, 0]
+					}
+				},
+				"tentacles_7": {
+					"rotation": {
+						"vector": ["math.sin(query.life_time * 360.0 + 402) * 11.5 + 23", 0, 0]
+					}
+				},
+				"tentacles_8": {
+					"rotation": {
+						"vector": ["math.sin(query.life_time * 360.0 + 458) * 11.5 + 23", 0, 0]
+					}
+				}
+			}
+		},
+		"animation.ghast.scale": {
+			"loop": true,
+			"bones": {
+				"body": {
+					"scale": {
+						"vector": [4.5, 4.5, 4.5]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

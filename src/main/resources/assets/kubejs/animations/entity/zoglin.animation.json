@@ -1,0 +1,74 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.zoglin.baby_scaling": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"position": {
+						"vector": [0, 10, 4]
+					},
+					"scale": {
+						"vector": [1.4, 1.4, 1.4]
+					}
+				}
+			}
+		},
+		"animation.zoglin.look_at_target": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"rotation": {
+						"vector": [0, "query.target_y_rotation - this", 0]
+					}
+				}
+			}
+		},
+		"animation.zoglin.walk": {
+			"loop": true,
+			"bones": {
+				"left_ear": {
+					"rotation": {
+						"vector": [0, 0, "variable.tcos_left_side * 0.5"]
+					}
+				},
+				"right_ear": {
+					"rotation": {
+						"vector": [0, 0, "variable.tcos_right_side * 0.5"]
+					}
+				},
+				"leg_back_right": {
+					"rotation": {
+						"vector": ["variable.tcos_right_side", 0, 0]
+					}
+				},
+				"leg_back_left": {
+					"rotation": {
+						"vector": ["variable.tcos_left_side", 0, 0]
+					}
+				},
+				"leg_front_right": {
+					"rotation": {
+						"vector": ["-variable.tcos_right_side", 0, 0]
+					}
+				},
+				"leg_front_left": {
+					"rotation": {
+						"vector": ["-variable.tcos_left_side", 0, 0]
+					}
+				}
+			}
+		},
+		"animation.zoglin.attack": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"rotation": {
+						"vector": ["variable.attack_head_rot", 0, 0]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

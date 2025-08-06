@@ -1,0 +1,150 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.mule.baby_transform": {
+			"loop": true,
+			"bones": {
+				"Body": {
+					"position": {
+						"vector": [0, "11 * ((0.0625 - query.model_scale) * 16.0)", 0]
+					}
+				},
+				"Head": {
+					"scale": {
+						"vector": [
+							"1.0 + 0.5 * (1.0 - (query.model_scale * 16.0))",
+							"1.0 + 0.5 * (1.0 - (query.model_scale * 16.0))",
+							"1.0 + 0.5 * (1.0 - (query.model_scale * 16.0))"
+						]
+					}
+				},
+				"LegBL": {
+					"scale": {
+						"vector": [1, "1.0 + ((0.0625 - query.model_scale) * 16.0)", 1]
+					}
+				},
+				"LegBR": {
+					"scale": {
+						"vector": [1, "1.0 + ((0.0625 - query.model_scale) * 16.0)", 1]
+					}
+				},
+				"LegFL": {
+					"scale": {
+						"vector": [1, "1.0 + ((0.0625 - query.model_scale) * 16.0)", 1]
+					}
+				},
+				"LegFR": {
+					"scale": {
+						"vector": [1, "1.0 + ((0.0625 - query.model_scale) * 16.0)", 1]
+					}
+				}
+			}
+		},
+		"animation.mule.eat": {
+			"loop": true,
+			"bones": {
+				"Neck": {
+					"rotation": {
+						"vector": ["variable.eat_anim * (110.0 + math.sin((query.life_time * 20.0) * 57.3) * 2.86)", 0, 0]
+					}
+				}
+			}
+		},
+		"animation.mule.look_at_player": {
+			"loop": true,
+			"bones": {
+				"Neck": {
+					"rotation": {
+						"vector": ["variable.head_x_rot", "(variable.stand_anim + variable.inverse_max_stand_eat) * query.head_y_rotation(0) - q.body_y_rotation", 0]
+					}
+				}
+			}
+		},
+		"animation.mule.rear": {
+			"loop": true,
+			"bones": {
+				"Body": {
+					"rotation": {
+						"vector": ["-45.0 * variable.stand_anim", 0, 0]
+					}
+				},
+				"LegBL": {
+					"rotation": {
+						"vector": ["45.0 * variable.stand_anim", 0, 0]
+					}
+				},
+				"LegBR": {
+					"rotation": {
+						"vector": ["45.0 * variable.stand_anim", 0, 0]
+					}
+				},
+				"LegFL": {
+					"rotation": {
+						"vector": ["(-60.0 + math.cos((query.life_time * 20.0) * 34.38) * 57.3) * variable.stand_anim", 0, 0]
+					}
+				},
+				"LegFR": {
+					"rotation": {
+						"vector": ["(-60.0 - math.cos((query.life_time * 20.0) * 34.38) * 57.3) * variable.stand_anim", 0, 0]
+					}
+				},
+				"Neck": {
+					"rotation": {
+						"vector": ["(15.0 + variable.head_x_rot) * variable.stand_anim", 0, 0]
+					}
+				},
+				"Tail": {
+					"rotation": {
+						"vector": ["55.0 * variable.stand_anim", 0, 0]
+					}
+				}
+			}
+		},
+		"animation.mule.tail": {
+			"loop": true,
+			"bones": {
+				"Tail": {
+					"rotation": {
+						"vector": [0, "math.cos(query.life_time * 802.0) * 57.3", 0]
+					}
+				}
+			}
+		},
+		"animation.mule.walk": {
+			"loop": true,
+			"bones": {
+				"BagL": {
+					"rotation": {
+						"vector": ["variable.leg_x_rot_anim / 5.0", 0, 0]
+					}
+				},
+				"BagR": {
+					"rotation": {
+						"vector": ["-variable.leg_x_rot_anim / 5.0", 0, 0]
+					}
+				},
+				"LegBL": {
+					"rotation": {
+						"vector": ["(-variable.leg_stand_factor * 28.6 * query.modified_move_speed) * (1.0 - variable.stand_anim)", 0, 0]
+					}
+				},
+				"LegBR": {
+					"rotation": {
+						"vector": ["(variable.leg_stand_factor * 28.6 * query.modified_move_speed) * (1.0 - variable.stand_anim)", 0, 0]
+					}
+				},
+				"LegFL": {
+					"rotation": {
+						"vector": ["variable.leg_x_rot_anim * (1.0 - variable.stand_anim)", 0, 0]
+					}
+				},
+				"LegFR": {
+					"rotation": {
+						"vector": ["-variable.leg_x_rot_anim * (1.0 - variable.stand_anim)", 0, 0]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

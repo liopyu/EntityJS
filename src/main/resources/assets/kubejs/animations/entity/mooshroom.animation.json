@@ -1,0 +1,45 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.mooshroom.baby_transform": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"position": {
+						"vector": [0, "query.is_baby ? 4.0 : 0.0", "query.is_baby ? 4.0 : 0.0"]
+					},
+					"scale": {
+						"vector": ["query.is_baby ? 2.0 : 1.0", "query.is_baby ? 2.0 : 1.0", "query.is_baby ? 2.0 : 1.0"]
+					}
+				}
+			}
+		},
+		"animation.mooshroom.walk": {
+			"loop": true,
+			"anim_time_update": "query.modified_distance_moved",
+			"bones": {
+				"leg0": {
+					"rotation": {
+						"vector": ["math.cos(query.anim_time * 38.17) *  80.0", 0, 0]
+					}
+				},
+				"leg1": {
+					"rotation": {
+						"vector": ["math.cos(query.anim_time * 38.17) * -80.0", 0, 0]
+					}
+				},
+				"leg2": {
+					"rotation": {
+						"vector": ["math.cos(query.anim_time * 38.17) * -80.0", 0, 0]
+					}
+				},
+				"leg3": {
+					"rotation": {
+						"vector": ["math.cos(query.anim_time * 38.17) *  80.0", 0, 0]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}
