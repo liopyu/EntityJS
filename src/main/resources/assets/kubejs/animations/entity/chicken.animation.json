@@ -1,0 +1,47 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.chicken.baby_transform": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"scale": {
+						"vector": [2, 2, 2]
+					}
+				}
+			}
+		},
+		"animation.chicken.general": {
+			"loop": true,
+			"bones": {
+				"wing0": {
+					"rotation": {
+						"vector": [0, 0, "variable.wing_flap - this"]
+					}
+				},
+				"wing1": {
+					"rotation": {
+						"vector": [0, 0, "-variable.wing_flap - this"]
+					}
+				}
+			}
+		},
+		"animation.chicken.move": {
+			"loop": true,
+			"anim_time_update": "query.modified_distance_moved",
+			"bones": {
+				"leg0": {
+					"rotation": {
+						"vector": ["math.cos(query.anim_time * 38.17) *  80.0", 0, 0]
+					}
+				},
+				"leg1": {
+					"rotation": {
+						"vector": ["math.cos(query.anim_time * 38.17) * -80.0", 0, 0]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

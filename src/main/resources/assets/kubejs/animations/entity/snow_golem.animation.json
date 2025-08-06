@@ -1,0 +1,26 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.snow_golem.move": {
+			"loop": true,
+			"bones": {
+				"piece1": {
+					"rotation": {
+						"vector": [0, "query.target_y_rotation * 0.25", 0]
+					}
+				}
+			}
+		},
+		"animation.snow_golem.sheared": {
+			"loop": true,
+			"bones": {
+				"pumpkin": {
+					"scale": {
+						"vector": [0, 0, 0]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

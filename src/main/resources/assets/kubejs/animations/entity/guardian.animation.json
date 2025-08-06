@@ -1,0 +1,256 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.guardian.move_eye": {
+			"loop": true,
+			"bones": {
+				"eye": {
+					"position": {
+						"vector": ["query.eye_target_x_rotation - this", " query.eye_target_y_rotation - this", "-8.25 - this"]
+					}
+				}
+			}
+		},
+		"animation.guardian.setup": {
+			"loop": true,
+			"bones": {
+				"spikepart0": {
+					"rotation": {
+						"vector": ["-45.0 - this", "0.0 - this", "0.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				},
+				"spikepart1": {
+					"rotation": {
+						"vector": ["45.0 - this", "0.0 - this", "0.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				},
+				"spikepart10": {
+					"rotation": {
+						"vector": ["0.0 - this", "0.0 - this", " 135.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				},
+				"spikepart11": {
+					"rotation": {
+						"vector": ["0.0 - this", "0.0 - this", " -135.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				},
+				"spikepart2": {
+					"rotation": {
+						"vector": ["0.0 - this", "0.0 - this", "45.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				},
+				"spikepart3": {
+					"rotation": {
+						"vector": ["0.0 - this", "0.0  - this", "-45.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				},
+				"spikepart4": {
+					"rotation": {
+						"vector": ["90.0 - this", "45.0 - this", " 0.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				},
+				"spikepart5": {
+					"rotation": {
+						"vector": ["90.0 - this", "-45.0 - this", " 0.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				},
+				"spikepart6": {
+					"rotation": {
+						"vector": ["90.0 - this", "-135.0 - this", "0.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				},
+				"spikepart7": {
+					"rotation": {
+						"vector": ["90.0 - this", "135.0 - this", " 0.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				},
+				"spikepart8": {
+					"rotation": {
+						"vector": ["-135.0 - this", "0.0 - this", " 0.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				},
+				"spikepart9": {
+					"rotation": {
+						"vector": ["135.0 - this", "0.0 - this", " 0.0 - this"]
+					},
+					"position": {
+						"vector": [0, -24, 0]
+					}
+				}
+			}
+		},
+		"animation.guardian.spikes": {
+			"loop": true,
+			"bones": {
+				"spikepart0": {
+					"position": {
+						"vector": [
+							"-this",
+							"24 + -8 * (1 + math.cos(query.life_time * 20 * 1.5) * 0.01 + (variable.spike_extension + variable.spike_shake)) - this",
+							"8 * (1 + math.cos(query.life_time * 20 * 1.5) * 0.01 - (variable.spike_extension + variable.spike_shake)) - this"
+						]
+					}
+				},
+				"spikepart1": {
+					"position": {
+						"vector": [
+							"-this",
+							"24 + -8 * (1 + math.cos(query.life_time * 20 * 1.5 + 1) * 0.01 + (variable.spike_extension + variable.spike_shake)) - this",
+							"-8 * (1 + math.cos(query.life_time * 20 * 1.5 + 1) * 0.01 - (variable.spike_extension + variable.spike_shake)) - this"
+						]
+					}
+				},
+				"spikepart10": {
+					"position": {
+						"vector": [
+							"8 * (1 + math.cos(query.life_time * 20 * 1.5 + 10) * 0.01 - (variable.spike_extension + variable.spike_shake)) - this",
+							"-8 + 8 * (1 + math.cos(query.life_time * 20 * 1.5 + 10) * 0.01 + (variable.spike_extension + variable.spike_shake)) - this",
+							"-this"
+						]
+					}
+				},
+				"spikepart11": {
+					"position": {
+						"vector": [
+							"-8 * (1 + math.cos(query.life_time * 20 * 1.5 + 11) * 0.01 - (variable.spike_extension + variable.spike_shake)) - this",
+							"-8 + 8 * (1 + math.cos(query.life_time * 20 * 1.5 + 11) * 0.01 + (variable.spike_extension + variable.spike_shake)) - this",
+							"-this"
+						]
+					}
+				},
+				"spikepart2": {
+					"position": {
+						"vector": [
+							"8 * (1 + math.cos(query.life_time * 20 * 1.5 + 2) * 0.01 - (variable.spike_extension + variable.spike_shake)) - this",
+							"24 + -8 * (1 + math.cos(query.life_time * 20 * 1.5 + 2) * 0.01 + (variable.spike_extension + variable.spike_shake)) - this",
+							"-this"
+						]
+					}
+				},
+				"spikepart3": {
+					"position": {
+						"vector": [
+							"-8 * (1 + math.cos(query.life_time * 20 * 1.5 + 3) * 0.01 - (variable.spike_extension + variable.spike_shake)) - this",
+							"24 + -8 * (1 + math.cos(query.life_time * 20 * 1.5 + 3) * 0.01 + (variable.spike_extension + variable.spike_shake)) - this",
+							0
+						]
+					}
+				},
+				"spikepart4": {
+					"position": {
+						"vector": [
+							"-8 * (1 + math.cos(query.life_time * 20 * 1.5 + 4) * 0.01 - (variable.spike_extension - variable.spike_shake)) - this",
+							"8 - this",
+							"-8 * (1 + math.cos(query.life_time * 20 * 1.5 + 4) * 0.01 - (variable.spike_extension - variable.spike_shake)) - this"
+						]
+					}
+				},
+				"spikepart5": {
+					"position": {
+						"vector": [
+							"8 * (1 + math.cos(query.life_time * 20 * 1.5 + 5) * 0.01 - (variable.spike_extension - variable.spike_shake)) - this",
+							"8 - this",
+							"-8 * (1 + math.cos(query.life_time * 20 * 1.5 + 5) * 0.01 - (variable.spike_extension - variable.spike_shake)) - this"
+						]
+					}
+				},
+				"spikepart6": {
+					"position": {
+						"vector": [
+							"8 * (1 + math.cos(query.life_time * 20 * 1.5 + 6) * 0.01 - (variable.spike_extension - variable.spike_shake)) - this",
+							"8 - this",
+							"8 * (1 + math.cos(query.life_time * 20 * 1.5 + 6) * 0.01 - (variable.spike_extension - variable.spike_shake)) - this"
+						]
+					}
+				},
+				"spikepart7": {
+					"position": {
+						"vector": [
+							"-8 * (1 + math.cos(query.life_time * 20 * 1.5 + 7) * 0.01 - (variable.spike_extension - variable.spike_shake)) - this",
+							"8 - this",
+							"8 * (1 + math.cos(query.life_time * 20 * 1.5 + 7) * 0.01 - (variable.spike_extension - variable.spike_shake)) - this"
+						]
+					}
+				},
+				"spikepart8": {
+					"position": {
+						"vector": [
+							"-this",
+							"-8  + 8 * (1 + math.cos(query.life_time * 20 * 1.5 + 8) * 0.01 + (variable.spike_extension + variable.spike_shake)) - this",
+							"8 * (1 + math.cos(query.life_time * 20 * 1.5 + 8) * 0.01 - (variable.spike_extension + variable.spike_shake)) - this"
+						]
+					}
+				},
+				"spikepart9": {
+					"position": {
+						"vector": [
+							"-this",
+							"-8 + 8 * (1 + math.cos(query.life_time * 20 * 1.5 + 9) * 0.01 + (variable.spike_extension + variable.spike_shake)) - this",
+							"-8 * (1 + math.cos(query.life_time * 20 * 1.5 + 9) * 0.01 - (variable.spike_extension + variable.spike_shake)) - this"
+						]
+					}
+				}
+			}
+		},
+		"animation.guardian.swim": {
+			"loop": true,
+			"bones": {
+				"tailpart0": {
+					"rotation": {
+						"vector": [0, "variable.tail_base_angle * 11.6 - this", 0]
+					}
+				},
+				"tailpart1": {
+					"rotation": {
+						"vector": [0, "variable.tail_base_angle * 22.8 - this", 0]
+					},
+					"position": {
+						"vector": ["-1.5 - this", "-0.5 - this", "14.0 - this"]
+					}
+				},
+				"tailpart2": {
+					"rotation": {
+						"vector": [0, "variable.tail_base_angle * 34.4 - this", 0]
+					},
+					"position": {
+						"vector": ["0.5 - this", "-0.5 - this", "6.0 - this"]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

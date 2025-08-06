@@ -1,0 +1,89 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.goat.baby_scaling": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"position": {
+						"vector": [0, 10, 4]
+					},
+					"scale": {
+						"vector": [1.4, 1.4, 1.4]
+					}
+				}
+			}
+		},
+		"animation.goat.look_at_target": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"rotation": {
+						"vector": ["math.clamp(query.target_x_rotation, -40, 40)", "math.clamp(query.target_y_rotation, -45, 25)", 0]
+					}
+				}
+			}
+		},
+		"animation.goat.walk": {
+			"loop": true,
+			"bones": {
+				"right_back_leg": {
+					"rotation": {
+						"vector": ["variable.tcos_right_side * 0.5", 0, 0]
+					}
+				},
+				"left_back_leg": {
+					"rotation": {
+						"vector": ["variable.tcos_left_side * 0.5", 0, 0]
+					}
+				},
+				"right_front_leg": {
+					"rotation": {
+						"vector": ["-variable.tcos_right_side * 0.5", 0, 0]
+					}
+				},
+				"left_front_leg": {
+					"rotation": {
+						"vector": ["-variable.tcos_left_side * 0.5", 0, 0]
+					}
+				}
+			}
+		},
+		"animation.goat.attack": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"rotation": {
+						"vector": ["variable.attack_head_rot", 0, 0]
+					}
+				}
+			}
+		},
+		"animation.goat.ram_attack": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"rotation": {
+						"vector": ["variable.ram_head_rot", 0, 0]
+					}
+				}
+			}
+		},
+		"animation.goat.horns": {
+			"loop": true,
+			"bones": {
+				"right_horn": {
+					"scale": {
+						"vector": ["variable.goat_has_right_horn", "variable.goat_has_right_horn", "variable.goat_has_right_horn"]
+					}
+				},
+				"left_horn": {
+					"scale": {
+						"vector": ["variable.goat_has_left_horn", "variable.goat_has_left_horn", "variable.goat_has_left_horn"]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}

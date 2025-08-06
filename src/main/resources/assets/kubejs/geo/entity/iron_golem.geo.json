@@ -1,0 +1,70 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.iron_golem",
+				"texture_width": 128,
+				"texture_height": 128,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 4,
+				"visible_bounds_offset": [0, 2, 0]
+			},
+			"bones": [
+				{
+					"name": "body",
+					"pivot": [0, 31, 0],
+					"cubes": [
+						{"origin": [-9, 21, -6], "size": [18, 12, 11], "uv": [0, 40]},
+						{"origin": [-4.5, 16, -3], "size": [9, 5, 6], "inflate": 0.5, "uv": [0, 70]}
+					]
+				},
+				{
+					"name": "head",
+					"parent": "body",
+					"pivot": [0, 31, -2],
+					"cubes": [
+						{"origin": [-4, 33, -7.5], "size": [8, 10, 8], "uv": [0, 0]},
+						{"origin": [-1, 32, -9.5], "size": [2, 4, 2], "uv": [24, 0]}
+					],
+					"locators": {
+						"lead": [0, 31, -2]
+					}
+				},
+				{
+					"name": "arm0",
+					"parent": "body",
+					"pivot": [0, 31, 0],
+					"cubes": [
+						{"origin": [-13, 3.5, -3], "size": [4, 30, 6], "uv": [60, 21]}
+					]
+				},
+				{
+					"name": "arm1",
+					"parent": "body",
+					"pivot": [0, 31, 0],
+					"cubes": [
+						{"origin": [9, 3.5, -3], "size": [4, 30, 6], "uv": [60, 58]}
+					]
+				},
+				{
+					"name": "leg0",
+					"parent": "body",
+					"pivot": [-4, 13, 0],
+					"cubes": [
+						{"origin": [-7.5, 0, -3], "size": [6, 16, 5], "uv": [37, 0]}
+					]
+				},
+				{
+					"name": "leg1",
+					"parent": "body",
+					"pivot": [5, 13, 0],
+					"mirror": true,
+					"cubes": [
+						{"origin": [1.5, 0, -3], "size": [6, 16, 5], "uv": [60, 0]}
+					]
+				}
+			]
+		}
+	]
+}

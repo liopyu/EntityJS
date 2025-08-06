@@ -1,0 +1,66 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.breeze",
+				"texture_width": 32,
+				"texture_height": 32,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 3.5,
+				"visible_bounds_offset": [0, 1.25, 0]
+			},
+			"bones": [
+				{
+					"name": "body",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "rods",
+					"parent": "body",
+					"pivot": [0, 16, 0],
+					"cubes": [
+						{"origin": [-1, 11, -6], "size": [2, 8, 2], "pivot": [0, 19, -3], "rotation": [22.5, 0, 0], "uv": [0, 17]},
+						{"origin": [-3.59808, 11, -1.5], "size": [2, 8, 2], "pivot": [-2.59808, 19, 1.5], "rotation": [-157.5, 60, 180], "uv": [0, 17]},
+						{"origin": [1.59808, 11, -1.5], "size": [2, 8, 2], "pivot": [2.59808, 19, 1.5], "rotation": [-157.5, -60, 180], "uv": [0, 17]}
+					]
+				},
+				{
+					"name": "head",
+					"parent": "body",
+					"pivot": [0, 20, 0],
+					"cubes": [
+						{"origin": [-4, 20, -4], "size": [8, 8, 8], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "eyes",
+					"parent": "head",
+					"pivot": [0, 20, 0],
+					"cubes": [
+						{"origin": [-5, 22, -4.2], "size": [10, 3, 4], "uv": [4, 24]}
+					]
+				},
+				{
+					"name": "tornado_body",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "tornado_bottom",
+					"parent": "tornado_body",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "tornado_mid",
+					"parent": "tornado_bottom",
+					"pivot": [0, 7, 0]
+				},
+				{
+					"name": "tornado_top",
+					"parent": "tornado_mid",
+					"pivot": [0, 13, 0]
+				}
+			]
+		}
+	]
+}

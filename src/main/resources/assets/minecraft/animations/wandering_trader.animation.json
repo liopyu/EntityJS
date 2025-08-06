@@ -1,0 +1,71 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.wandering_trader.baby_transform": {
+			"loop": true,
+			"bones": {
+				"head": {
+					"scale": {
+						"vector": [1.5, 1.5, 1.5]
+					}
+				}
+			}
+		},
+		"animation.wandering_trader.general": {
+			"loop": true,
+			"bones": {
+				"arms": {
+					"rotation": {
+						"vector": ["-42.97 - this", 0, 0]
+					},
+					"position": {
+						"vector": [0, -1, -1]
+					}
+				}
+			}
+		},
+		"animation.wandering_trader.general.v1.0": {
+			"loop": true,
+			"bones": {
+				"arms": {
+					"rotation": {
+						"vector": ["-42.97 - this", 0, 0]
+					},
+					"position": {
+						"vector": [0, "-3.0 - this", "-1.0 - this"]
+					}
+				}
+			}
+		},
+		"animation.wandering_trader.get_in_bed": {
+			"loop": true,
+			"bones": {
+				"body": {
+					"rotation": {
+						"vector": [-90, 0, 0]
+					},
+					"position": {
+						"vector": [0, 1, -15]
+					}
+				}
+			}
+		},
+		"animation.wandering_trader.move": {
+			"loop": true,
+			"anim_time_update": "query.modified_distance_moved",
+			"bones": {
+				"leg0": {
+					"rotation": {
+						"vector": ["(math.cos(query.anim_time * 38.17) * 40.0) - this", "-this", 0]
+					}
+				},
+				"leg1": {
+					"rotation": {
+						"vector": ["(math.cos(query.anim_time * 38.17 + 180) * 40.0) - this", "-this", 0]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}
