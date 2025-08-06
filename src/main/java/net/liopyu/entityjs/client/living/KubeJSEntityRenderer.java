@@ -4,26 +4,32 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
-import net.liopyu.entityjs.client.living.model.EntityModelJS;
-import net.liopyu.entityjs.client.living.model.GeoLayerJS;
-import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
-import net.liopyu.entityjs.client.living.model.GlowingGeoLayerJS;
+import net.liopyu.entityjs.client.living.model.*;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
+import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
+import software.bernie.geckolib.renderer.layer.ItemArmorGeoLayer;
 import software.bernie.geckolib.util.RenderUtils;
 
 import javax.annotation.Nullable;
@@ -49,6 +55,120 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
             GlowingGeoLayerJS<T> layerPart = geoBuilder.buildGlowing(this, builder);
             addRenderLayer(layerPart);
         }
+        if (builder.itemArmorJSBuilder != null) {
+            var b = new ItemArmorJSBuilder<>(animatable);
+            builder.itemArmorJSBuilder.accept(b);
+            ItemArmorGeoLayer<T> armorLayer = new ItemArmorGeoLayer<>(this) {
+
+                @Override
+                protected <I extends Item & GeoItem> void renderVanillaArmorPiece(
+                        PoseStack poseStack, T animatable, GeoBone bone, EquipmentSlot slot,
+                        ItemStack armorStack, ModelPart modelPart,
+                        MultiBufferSource bufferSource, float partialTick,
+                        int packedLight, int packedOverlay) {
+
+                    if (b.vanillaArmorRenderConsumer != null) {
+                        ContextUtils.VanillaArmorRenderContext<T> context = new ContextUtils.VanillaArmorRenderContext<>(
+                                this, poseStack, animatable, bone, slot, armorStack,
+                                modelPart, bufferSource, partialTick, packedLight, packedOverlay);
+                        b.vanillaArmorRenderConsumer.accept(context);
+                    }
+
+                    super.renderVanillaArmorPiece(poseStack, animatable, bone, slot,
+                            armorStack, modelPart, bufferSource, partialTick, packedLight, packedOverlay);
+                }
+
+                @Override
+                public void renderForBone(PoseStack poseStack, T animatable, GeoBone bone, RenderType renderType,
+                                          MultiBufferSource bufferSource, VertexConsumer buffer,
+                                          float partialTick, int packedLight, int packedOverlay) {
+                    if (b.renderBone != null) {
+                        final ContextUtils.RenderBoneContext<T> context =
+                                new ContextUtils.RenderBoneContext<>(this, poseStack, animatable, bone, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
+                        EntityJSHelperClass.consumerCallback(b.renderBone, context,
+                                "[EntityJS]: Error in " + entityName() + " builder for field: renderBone.");
+                    }
+
+                    super.renderForBone(poseStack, animatable, bone, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
+                }
+
+                @Override
+                protected ModelPart getModelPartForBone(GeoBone bone, EquipmentSlot slot,
+                                                        ItemStack stack, T animatable,
+                                                        HumanoidModel<?> baseModel) {
+                    String boneName = bone.getName();
+
+                    return switch (slot) {
+                        case HEAD -> baseModel.head;
+                        case CHEST -> {
+                            if (boneName.contains("left_shoulder")) yield baseModel.leftArm;
+                            if (boneName.contains("right_shoulder")) yield baseModel.rightArm;
+                            yield baseModel.body;
+                        }
+                        case MAINHAND -> baseModel.rightArm;
+                        case OFFHAND -> baseModel.leftArm;
+                        case LEGS -> boneName.contains("left_leg") ? baseModel.leftLeg : baseModel.rightLeg;
+                        case FEET -> boneName.contains("left_foot") ? baseModel.leftLeg : baseModel.rightLeg;
+                        default -> baseModel.body;
+                    };
+                }
+
+                @Override
+                protected ItemStack getArmorItemForBone(GeoBone bone, T animatable) {
+                    try {
+                        if (!b.armorBoneToSlotMap.isEmpty()) {
+                            EquipmentSlot slot = b.armorBoneToSlotMap.get(bone.getName());
+                            if (slot != null) {
+                                switch (slot) {
+                                    case MAINHAND -> {
+                                        return animatable.getMainHandItem();
+                                    }
+                                    case OFFHAND -> {
+                                        return animatable.getOffhandItem();
+                                    }
+                                    case HEAD, CHEST, LEGS, FEET -> {
+                                        return animatable.getItemBySlot(slot);
+                                    }
+                                }
+                            }
+                        }
+                    } catch (RuntimeException e) {
+                        EntityJSHelperClass.logErrorMessageOnceCatchable("[Entityjs]: ", e);
+                    }
+
+                    return super.getArmorItemForBone(bone, animatable);
+                }
+
+
+            };
+            this.addRenderLayer(armorLayer);
+        }
+
+
+        if (builder.addRenderItemLayer != null && builder.itemModelJSBuilder != null) {
+            this.addRenderLayer(new BlockAndItemGeoLayer<>(this,
+                    (bone, entity) -> {
+                        if (builder.addRenderItemLayer.apply(entity).equals(bone.getName())) {
+                            return entity.getMainHandItem();
+                        }
+                        return null;
+                    },
+                    (bone, entity) -> null
+            ) {
+                @Override
+                protected void renderStackForBone(PoseStack poseStack, GeoBone bone, ItemStack stack, T animatable,
+                                                  MultiBufferSource bufferSource, float partialTick,
+                                                  int packedLight, int packedOverlay) {
+                    if (builder.itemModelJSBuilder.renderItem != null) {
+                        final ContextUtils.ItemBoneRenderContext<T> context =
+                                new ContextUtils.ItemBoneRenderContext<>(this, poseStack, bone, stack, animatable, bufferSource, partialTick, packedLight, packedOverlay);
+                        EntityJSHelperClass.consumerCallback(builder.itemModelJSBuilder.renderItem, context,
+                                "[EntityJS]: Error in " + entityName() + " builder for field: renderItem.");
+                    }
+                    super.renderStackForBone(poseStack, bone, stack, animatable, bufferSource, partialTick, packedLight, packedOverlay);
+                }
+            });
+        }
     }
 
     public String entityName() {
@@ -67,7 +187,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     @Override
     public void renderFinal(PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         if (builder.renderFinal != null && this.animatable != null) {
-            final ContextUtils.FinalRenderContext<T> context = new ContextUtils.FinalRenderContext<>(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+            final ContextUtils.FinalRenderContext<T> context = new ContextUtils.FinalRenderContext<>(this, poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
             EntityJSHelperClass.consumerCallback(builder.renderFinal, context, "[EntityJS]: Error in " + entityName() + "builder for field: renderFinal.");
             super.renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
         }
@@ -77,7 +197,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     @Override
     public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack, T animatable, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
         if (builder.scaleModelForRender != null && this.animatable != null) {
-            final ContextUtils.ScaleModelRenderContext context = new ContextUtils.ScaleModelRenderContext(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+            final ContextUtils.ScaleModelRenderContext context = new ContextUtils.ScaleModelRenderContext(this, widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
             EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: scaleModelForRender.");
 
             super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
@@ -110,9 +230,8 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     @Override
     public void render(T animatable, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-
         if (builder.render != null && this.animatable != null) {
-            final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+            final ContextUtils.RenderContext<T> context = new ContextUtils.RenderContext<>(this, animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
             EntityJSHelperClass.consumerCallback(builder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render.");
             super.render(animatable, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         } else {
@@ -161,7 +280,7 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
 
         }
         if (builder.applyRotations != null) {
-            ContextUtils.ApplyRotationsContext<T> context = new ContextUtils.ApplyRotationsContext<>(animatable, poseStack, ageInTicks, rotationYaw, partialTick);
+            ContextUtils.ApplyRotationsContext<T> context = new ContextUtils.ApplyRotationsContext<>(this, animatable, poseStack, ageInTicks, rotationYaw, partialTick);
             EntityJSHelperClass.consumerCallback(builder.applyRotations, context, "[EntityJS]: Error in " + entityName() + " builder for field: applyRotations.");
         }
     }

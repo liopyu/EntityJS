@@ -12,6 +12,8 @@ import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
+import net.liopyu.entityjs.client.living.model.ItemArmorJSBuilder;
+import net.liopyu.entityjs.client.living.model.ItemModelJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
@@ -196,6 +198,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<? super ContextUtils.ApplyRotationsContext<T>> applyRotations;
     public transient Predicate<ContextUtils.PassengerVehicleContext> canRide;
     public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
+    public transient Function<LivingEntity, String> addRenderItemLayer;
+    public transient ItemModelJSBuilder<T> itemModelJSBuilder;
+    public transient Consumer<ItemArmorJSBuilder<T>> itemArmorJSBuilder;
 
     /*
         public transient Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned;
@@ -234,6 +239,52 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         scaleHeight = 1F;
         scaleWidth = 1F;
     }
+
+    public BaseLivingEntityBuilder<T> addArmorItemLayer(Consumer<ItemArmorJSBuilder<T>> itemArmorJSBuilder) {
+
+        this.itemArmorJSBuilder = itemArmorJSBuilder;
+        return this;
+    }
+
+    @Info(value = """
+            Adds a custom item render layer to the entity model using GeckoLib's bone system.
+            
+            The first argument is a function that returns the bone name to attach the item to, based on the entity.
+            The second argument allows configuration of the item render using an ItemModelJSBuilder.
+            
+            Example usage:
+            ```javascript
+            builder.addRenderItemLayer(entity => "right_hand", item => {
+                item.renderItem(context => {
+                    let {
+                        poseStack,
+                        bone,
+                        item,
+                        entity,
+                        bufferSource,
+                        partialTick,
+                        packedLight,
+                        packedOverlay
+                    } = context
+                    try {
+                        poseStack.translate(0.05, -0.5, -0.5)
+                        poseStack.mulPose(Axis.YP.rotationDegrees(90))
+                        poseStack.mulPose(Axis.ZP.rotationDegrees(-40))
+                    } catch (error) {
+                        console.log(error)
+                    }
+                })
+            })
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> addRenderItemLayer(Function<LivingEntity, String> handPartName, Consumer<ItemModelJSBuilder<T>> consumer) {
+        var b = new ItemModelJSBuilder<>();
+        consumer.accept((ItemModelJSBuilder<T>) b);
+        addRenderItemLayer = handPartName;
+        this.itemModelJSBuilder = (ItemModelJSBuilder<T>) b;
+        return this;
+    }
+
 
     /* public BaseLivingEntityBuilder<T> onPassengerTurned(Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned) {
          this.onPassengerTurned = onPassengerTurned;
