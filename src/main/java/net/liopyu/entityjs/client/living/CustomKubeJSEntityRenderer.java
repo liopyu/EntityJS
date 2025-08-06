@@ -71,7 +71,7 @@ public class CustomKubeJSEntityRenderer<T extends LivingEntity & IAnimatableJSCu
             animatable = wrappedAnimatableEntity.getOriginalEntity();
         }
         if (builder.scaleModelForRender != null && this.animatable != null) {
-            final ContextUtils.ScaleModelRenderContext context = new ContextUtils.ScaleModelRenderContext(widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+            final ContextUtils.ScaleModelRenderContext context = new ContextUtils.ScaleModelRenderContext(this, widthScale, heightScale, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
             EntityJSHelperClass.consumerCallback(builder.scaleModelForRender, context, "[EntityJS]: Error in " + entityName() + "builder for field: scaleModelForRender.");
             super.scaleModelForRender(widthScale, heightScale, poseStack, ensureIAnimatableJS(animatable), model, isReRender, partialTick, packedLight, packedOverlay);
         } else

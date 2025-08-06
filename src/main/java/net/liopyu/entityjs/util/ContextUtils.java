@@ -8,6 +8,7 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -37,8 +38,103 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.PartEntity;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
+import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
+import software.bernie.geckolib.renderer.layer.ItemArmorGeoLayer;
 
 public class ContextUtils {
+    public static class VanillaArmorRenderContext<T extends LivingEntity & IAnimatableJS> {
+        public final ItemArmorGeoLayer<T> renderer;
+        public final PoseStack poseStack;
+        public final T entity;
+        public final GeoBone bone;
+        public final EquipmentSlot slot;
+        public final ItemStack armorStack;
+        public final ModelPart modelPart;
+        public final MultiBufferSource bufferSource;
+        public final float partialTick;
+        public final int packedLight;
+        public final int packedOverlay;
+
+        public VanillaArmorRenderContext(ItemArmorGeoLayer<T> renderer, PoseStack poseStack, T animatable, GeoBone bone,
+                                         EquipmentSlot slot, ItemStack armorStack, ModelPart modelPart,
+                                         MultiBufferSource bufferSource, float partialTick, int packedLight, int packedOverlay) {
+            this.renderer = renderer;
+            this.poseStack = poseStack;
+            this.entity = animatable;
+            this.bone = bone;
+            this.slot = slot;
+            this.armorStack = armorStack;
+            this.modelPart = modelPart;
+            this.bufferSource = bufferSource;
+            this.partialTick = partialTick;
+            this.packedLight = packedLight;
+            this.packedOverlay = packedOverlay;
+        }
+    }
+
+    public static class RenderBoneContext<T extends LivingEntity & IAnimatableJS> {
+        public final ItemArmorGeoLayer<T> renderer;
+        public final PoseStack poseStack;
+        public final T entity;
+        public final GeoBone bone;
+        public final RenderType renderType;
+        public final MultiBufferSource bufferSource;
+        public final VertexConsumer buffer;
+        public final float partialTick;
+        public final int packedLight;
+        public final int packedOverlay;
+
+        public RenderBoneContext(ItemArmorGeoLayer<T> renderer,
+                                 PoseStack poseStack,
+                                 T entity,
+                                 GeoBone bone,
+                                 RenderType renderType,
+                                 MultiBufferSource bufferSource,
+                                 VertexConsumer buffer,
+                                 float partialTick,
+                                 int packedLight,
+                                 int packedOverlay) {
+            this.renderer = renderer;
+            this.poseStack = poseStack;
+            this.entity = entity;
+            this.bone = bone;
+            this.renderType = renderType;
+            this.bufferSource = bufferSource;
+            this.buffer = buffer;
+            this.partialTick = partialTick;
+            this.packedLight = packedLight;
+            this.packedOverlay = packedOverlay;
+        }
+    }
+
+    public static class ItemBoneRenderContext<T extends LivingEntity & IAnimatableJS> {
+        public final BlockAndItemGeoLayer<T> layer;
+        public final PoseStack poseStack;
+        public final GeoBone bone;
+        public final ItemStack item;
+        public final T entity;
+        public final MultiBufferSource bufferSource;
+        public final float partialTick;
+        public final int packedLight;
+        public final int packedOverlay;
+
+        public ItemBoneRenderContext(BlockAndItemGeoLayer<T> layer, PoseStack poseStack, GeoBone bone, ItemStack stack, T animatable,
+                                     MultiBufferSource bufferSource, float partialTick,
+                                     int packedLight, int packedOverlay) {
+            this.layer = layer;
+            this.poseStack = poseStack;
+            this.bone = bone;
+            this.item = stack;
+            this.entity = animatable;
+            this.bufferSource = bufferSource;
+            this.partialTick = partialTick;
+            this.packedLight = packedLight;
+            this.packedOverlay = packedOverlay;
+        }
+    }
+
     public static class PassengerVehicleContext {
 
         public final Entity vehicle;
@@ -53,13 +149,15 @@ public class ContextUtils {
     }
 
     public static class ApplyRotationsContext<T extends LivingEntity> {
+        public final GeoEntityRenderer renderer;
         public final T entity;
         public final PoseStack poseStack;
         public final float ageInTicks;
         public final float rotationYaw;
         public final float partialTick;
 
-        public ApplyRotationsContext(T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
+        public ApplyRotationsContext(GeoEntityRenderer renderer, T animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
+            this.renderer = renderer;
             this.entity = animatable;
             this.poseStack = poseStack;
             this.ageInTicks = ageInTicks;
@@ -69,7 +167,7 @@ public class ContextUtils {
     }
 
     public static class FinalRenderContext<T extends LivingEntity & IAnimatableJS> {
-
+        public final GeoEntityRenderer<T> renderer;
         public final PoseStack poseStack;
         public final T entity;
         public final BakedGeoModel model;
@@ -80,7 +178,8 @@ public class ContextUtils {
         public final int packedOverlay;
         public final float colour;
 
-        public FinalRenderContext(PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay, float colour) {
+        public FinalRenderContext(GeoEntityRenderer<T> renderer, PoseStack poseStack, T animatable, BakedGeoModel model, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay, float colour) {
+            this.renderer = renderer;
             this.poseStack = poseStack;
             this.entity = animatable;
             this.model = model;
@@ -294,6 +393,7 @@ public class ContextUtils {
     }
 
     public static class ScaleModelRenderContext {
+        public final GeoEntityRenderer renderer;
         public final float widthScale;
         public final float heightScale;
         public final PoseStack poseStack;
@@ -304,7 +404,8 @@ public class ContextUtils {
         public final int packedLight;
         public final int packedOverlay;
 
-        public ScaleModelRenderContext(float widthScale, float heightScale, PoseStack poseStack, LivingEntity entity, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
+        public ScaleModelRenderContext(GeoEntityRenderer renderer, float widthScale, float heightScale, PoseStack poseStack, LivingEntity entity, BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
+            this.renderer = renderer;
             this.widthScale = widthScale;
             this.heightScale = heightScale;
             this.poseStack = poseStack;
@@ -1221,6 +1322,7 @@ public class ContextUtils {
     }
 
     public static class RenderContext<T extends LivingEntity & IAnimatableJS> {
+        public final GeoEntityRenderer<T> renderer;
         @Info("The animatable entity being rendered")
         public final T entity;
 
@@ -1239,8 +1341,9 @@ public class ContextUtils {
         @Info("The packed light information")
         public final int packedLight;
 
-        public RenderContext(T entity, float entityYaw, float partialTick,
+        public RenderContext(GeoEntityRenderer<T> renderer, T entity, float entityYaw, float partialTick,
                              PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+            this.renderer = renderer;
             this.entity = entity;
             this.entityYaw = entityYaw;
             this.partialTick = partialTick;
