@@ -72,6 +72,13 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     }
 
+    public transient Consumer<Entity> defineSyncedData;
+
+    public ModifyEntityBuilder defineSyncedData(Consumer<Entity> consumer) {
+        this.defineSyncedData = consumer;
+        return this;
+    }
+
     @Info(value = """
             Sets whether an entity should ignore explosions.
             The provided function should return a truthy value (e.g., true) to ignore explosion effects.
