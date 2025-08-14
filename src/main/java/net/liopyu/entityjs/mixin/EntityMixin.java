@@ -120,19 +120,6 @@ public class EntityMixin implements IEntityJS {
         }
     }
 
-    @Inject(method = "onAddedToLevel", at = @At("TAIL"))
-    private void entityjs$onAddedToLevel(CallbackInfo ci) {
-        Entity self = (Entity) (Object) this;
-        if (entityJs$definedOnce) return;
-        if (self.level().isClientSide) return;
-        if (!(entityJs$builder instanceof ModifyEntityBuilder b)) return;
-        if (b.defineSyncedData == null) return;
-
-        net.liopyu.entityjs.util.data.InitDecl.begin(self);
-        b.defineSyncedData.accept(entityJs$getLivingEntity());
-        entityJs$definedOnce = true;
-        ((net.minecraft.server.level.ServerLevel) self.level()).getServer().execute(() -> net.liopyu.entityjs.util.data.InitDecl.finalizeFor(self));
-    }
 
     @Inject(method = "ignoreExplosion", at = @At(value = "HEAD"), remap = true, cancellable = true)
     public void entityJs$ignoreExplosion(CallbackInfoReturnable<Boolean> cir) {
@@ -242,6 +229,17 @@ public class EntityMixin implements IEntityJS {
                 }
             }
         }
+        Entity self = (Entity) (Object) this;
+        if (entityJs$definedOnce) return;
+        if (self.level().isClientSide) return;
+        if (!(entityJs$builder instanceof ModifyEntityBuilder b)) return;
+        if (b.defineSyncedData == null) return;
+
+        net.liopyu.entityjs.util.data.InitDecl.begin(self);
+        b.defineSyncedData.accept(entityJs$getLivingEntity());
+        entityJs$definedOnce = true;
+        ((net.minecraft.server.level.ServerLevel) self.level()).getServer().execute(() -> net.liopyu.entityjs.util.data.InitDecl.finalizeFor(self));
+
     }
 
 
