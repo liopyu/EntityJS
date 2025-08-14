@@ -1,27 +1,20 @@
 package net.liopyu.entityjs.util.data;
 
-import net.liopyu.entityjs.EntityJSMod;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 @net.neoforged.fml.common.EventBusSubscriber
 public class SyncEvents {
     @net.neoforged.bus.api.SubscribeEvent
-    public static void onStartTracking(net.neoforged.neoforge.event.entity.player.PlayerEvent.StartTracking e) {
-        var t = e.getTarget();
-        if (t instanceof Entity le && e.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) {
-            var vals = net.liopyu.entityjs.util.data.ServerCache.getAll(le);
-            var types = net.liopyu.entityjs.util.data.ServerCache.getTypes(le);
-            net.liopyu.entityjs.util.data.Net.sendAllTo(sp, le.getUUID(), vals, types);
-        }
-    }
-
-    @net.neoforged.bus.api.SubscribeEvent
-    public static void onEntityJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent e) {
-        if (!e.getLevel().isClientSide() && e.getEntity() instanceof Entity le) {
-            var vals = net.liopyu.entityjs.util.data.ServerCache.getAll(le);
-            var types = net.liopyu.entityjs.util.data.ServerCache.getTypes(le);
-            net.liopyu.entityjs.util.data.Net.sendAllTracking(le, le.getUUID(), vals, types);
+    public static void onStartTracking(PlayerEvent.StartTracking e) {
+        var ent = e.getTarget();
+        if (ent instanceof Entity && e.getEntity() instanceof ServerPlayer sp) {
+            var vals = ServerCache.getAll(ent);
+            var types = ServerCache.getTypes(ent);
+            Net.sendAllTo(sp, ent.getUUID(), vals, types);
         }
     }
 }
+
 

@@ -25,13 +25,15 @@ public final class InitDecl {
 
     public static void finalizeFor(Entity e) {
         var s = SESSIONS.remove(e.getUUID());
-        if (s == null) return;
         if (!(e.level() instanceof net.minecraft.server.level.ServerLevel sl)) return;
-        if (s.used) {
-            var id = e.getUUID();
-            var vals = net.liopyu.entityjs.util.data.SavedDataJS.get(sl).getAll(id);
-            var types = net.liopyu.entityjs.util.data.SavedDataJS.get(sl).getTypes(id);
-            net.liopyu.entityjs.util.data.Net.sendAllTracking(e, id, vals, types);
+
+        var id = e.getUUID();
+        var vals = net.liopyu.entityjs.util.data.SavedDataJS.get(sl).getAll(id);
+        var types = net.liopyu.entityjs.util.data.SavedDataJS.get(sl).getTypes(id);
+
+        if (s != null && s.used) net.liopyu.entityjs.util.data.Net.sendAllTracking(e, id, vals, types);
+        if (e instanceof net.minecraft.server.level.ServerPlayer sp) {
+            net.liopyu.entityjs.util.data.Net.sendAllTo(sp, id, vals, types);
         }
     }
 }
