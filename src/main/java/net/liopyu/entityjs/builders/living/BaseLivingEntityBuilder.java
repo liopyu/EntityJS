@@ -69,11 +69,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<T, Object> animationResource;
     public transient boolean isPushable;
     public transient final List<AnimationControllerSupplier<T>> animationSuppliers;
-    public transient Function<LivingEntity, Object> shouldDropLoot;
-    public transient Function<ContextUtils.PassengerEntityContext, Object> canAddPassenger;
-    public transient Function<LivingEntity, Object> isAffectedByFluids;
+    public transient Predicate<LivingEntity> shouldDropLoot;
+    public transient Predicate<ContextUtils.PassengerEntityContext> canAddPassenger;
+    public transient Predicate<LivingEntity> isAffectedByFluids;
     public transient boolean isAlwaysExperienceDropper;
-    public transient Function<LivingEntity, Object> isImmobile;
+    public transient Predicate<LivingEntity> isImmobile;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Function<LivingEntity, Object> setBlockJumpFactor;
     public transient Function<LivingEntity, Object> blockSpeedFactor;
@@ -87,7 +87,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient SoundVolumeFunction setSoundVolume1;*/
     public transient Float setWaterSlowDown;
     public transient Object setSwimSound;
-    public transient Function<LivingEntity, Object> isFlapping;
+    public transient Predicate<LivingEntity> isFlapping;
     public transient Object setDeathSound;
     public transient RenderType renderType;
     public transient EntityType<?> getType;
@@ -100,15 +100,15 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> onIncreaseAirSupply;
     public transient Function<ContextUtils.HurtContext, Object> setHurtSound;
     public transient Object setSwimSplashSound;
-    public transient Function<ContextUtils.EntityTypeEntityContext, Object> canAttackType;
+    public transient Predicate<ContextUtils.EntityTypeEntityContext> canAttackType;
     public transient Function<LivingEntity, Object> scale;
-    public transient Function<LivingEntity, Object> shouldDropExperience;
+    public transient Predicate<LivingEntity> shouldDropExperience;
     public transient Function<LivingEntity, Object> experienceReward;
     public transient Consumer<ContextUtils.EntityEquipmentContext> onEquipItem;
     public transient Function<ContextUtils.VisualContext, Object> visibilityPercent;
-    public transient Function<ContextUtils.LivingEntityContext, Object> canAttack;
-    public transient Function<ContextUtils.OnEffectContext, Object> canBeAffected;
-    public transient Function<LivingEntity, Object> invertedHealAndHarm;
+    public transient Predicate<ContextUtils.LivingEntityContext> canAttack;
+    public transient Predicate<ContextUtils.OnEffectContext> canBeAffected;
+    public transient Predicate<LivingEntity> invertedHealAndHarm;
     public transient Consumer<ContextUtils.OnEffectContext> onEffectAdded;
     public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
     public transient Consumer<ContextUtils.EntityHealContext> onLivingHeal;
@@ -119,46 +119,46 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Object smallFallSound;
     public transient Object largeFallSound;
     public transient Object eatingSound;
-    public transient Function<LivingEntity, Object> onClimbable;
+    public transient Predicate<LivingEntity> onClimbable;
     public transient Boolean canBreatheUnderwater;
     public transient Consumer<ContextUtils.EntityFallDamageContext> onLivingFall;
     public transient Consumer<LivingEntity> onSprint;
     public transient Function<LivingEntity, Object> jumpBoostPower;
-    public transient Function<ContextUtils.EntityFluidStateContext, Object> canStandOnFluid;
-    public transient Function<LivingEntity, Object> isSensitiveToWater;
+    public transient Predicate<ContextUtils.EntityFluidStateContext> canStandOnFluid;
+    public transient Predicate<LivingEntity> isSensitiveToWater;
     public transient Consumer<LivingEntity> onStopRiding;
     public transient Consumer<LivingEntity> onRemovePassenger;
     public transient Consumer<LivingEntity> rideTick;
     public transient Consumer<ContextUtils.EntityItemEntityContext> onItemPickup;
-    public transient Function<ContextUtils.LineOfSightContext, Object> hasLineOfSight;
+    public transient Predicate<ContextUtils.LineOfSightContext> hasLineOfSight;
     public transient Consumer<LivingEntity> onEnterCombat;
     public transient Consumer<LivingEntity> onLeaveCombat;
-    public transient Function<LivingEntity, Object> isAffectedByPotions;
-    public transient Function<LivingEntity, Object> isAttackable;
-    public transient Function<ContextUtils.EntityItemLevelContext, Object> canTakeItem;
-    public transient Function<LivingEntity, Object> isSleeping;
+    public transient Predicate<LivingEntity> isAffectedByPotions;
+    public transient Predicate<LivingEntity> isAttackable;
+    public transient Predicate<ContextUtils.EntityItemLevelContext> canTakeItem;
+    public transient Predicate<LivingEntity> isSleeping;
     public transient Consumer<ContextUtils.EntityBlockPosContext> onStartSleeping;
     public transient Consumer<LivingEntity> onStopSleeping;
     public transient Consumer<ContextUtils.FoodItemLevelContext> eat;
-    public transient Function<ContextUtils.PlayerEntityContext, Object> shouldRiderFaceForward;
-    public transient Function<LivingEntity, Object> canFreeze;
-    public transient Function<LivingEntity, Object> isCurrentlyGlowing;
-    public transient Function<LivingEntity, Object> canDisableShield;
+    public transient Predicate<ContextUtils.PlayerEntityContext> shouldRiderFaceForward;
+    public transient Predicate<LivingEntity> canFreeze;
+    public transient Predicate<LivingEntity> isCurrentlyGlowing;
+    public transient Predicate<LivingEntity> canDisableShield;
     public transient Function<LivingEntity, Object> setMaxFallDistance;
     public transient Consumer<ContextUtils.MobInteractContext> onInteract;
     public transient Consumer<LivingEntity> onClientRemoval;
     public transient Consumer<LivingEntity> onAddedToWorld;
     public transient Consumer<LivingEntity> lavaHurt;
     public transient Consumer<LivingEntity> onFlap;
-    public transient Function<LivingEntity, Object> dampensVibrations;
+    public transient Predicate<LivingEntity> dampensVibrations;
     public transient Consumer<ContextUtils.PlayerEntityContext> playerTouch;
-    public transient Function<LivingEntity, Object> showVehicleHealth;
+    public transient Predicate<LivingEntity> showVehicleHealth;
     public transient Consumer<ContextUtils.ThunderHitContext> thunderHit;
-    public transient Function<ContextUtils.DamageContext, Object> isInvulnerableTo;
-    public transient Function<ContextUtils.ChangeDimensionsContext, Object> canChangeDimensions;
+    public transient Predicate<ContextUtils.DamageContext> isInvulnerableTo;
+    public transient Predicate<ContextUtils.ChangeDimensionsContext> canChangeDimensions;
     public transient Function<ContextUtils.CalculateFallDamageContext, Object> calculateFallDamage;
-    public transient Function<ContextUtils.MayInteractContext, Object> mayInteract;
-    public transient Function<ContextUtils.CanTrampleContext, Object> canTrample;
+    public transient Predicate<ContextUtils.MayInteractContext> mayInteract;
+    public transient Predicate<ContextUtils.CanTrampleContext> canTrample;
     public transient Consumer<LivingEntity> onRemovedFromWorld;
     public transient Consumer<LivingEntity> onLivingJump;
     public transient Consumer<LivingEntity> aiStep;
@@ -169,8 +169,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
     public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
     public transient Consumer<ContextUtils.RenderContext<T>> render;
-    public transient Function<LivingEntity, Object> isFreezing;
-    public transient Function<ContextUtils.CollidingEntityContext, Object> canCollideWith;
+    public transient Predicate<LivingEntity> isFreezing;
+    public transient Predicate<ContextUtils.CollidingEntityContext> canCollideWith;
     public transient Boolean defaultDeathPose;
     public transient Function<ContextUtils.Vec3Context, Object> travelVector;
     public transient Consumer<ContextUtils.Vec3Context> travel;
@@ -179,7 +179,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> tickDeath;
     public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
-    public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
+    public transient Predicate<ContextUtils.LineOfSightContext> isAlliedTo;
     public transient float scaleHeight;
     public transient float scaleWidth;
     public transient Consumer<ContextUtils.ScaleModelRenderContext> scaleModelForRender;
@@ -187,11 +187,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public final List<GeoLayerJSBuilder<T>> glowingLayerList = new ArrayList<>();
-    public transient Function<LivingEntity, Object> canBeCollidedWith;
+    public transient Predicate<LivingEntity> canBeCollidedWith;
     public transient Consumer<ContextUtils.FinalRenderContext<T>> renderFinal;
     public transient Consumer<? super ContextUtils.ApplyRotationsContext<T>> applyRotations;
     public transient Predicate<ContextUtils.PassengerVehicleContext> canRide;
-    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
+    public transient Predicate<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
     public transient Function<LivingEntity, String> addRenderItemLayer;
     public transient ItemModelJSBuilder<T> itemModelJSBuilder;
     public transient Consumer<ItemArmorJSBuilder<T>> itemArmorJSBuilder;
@@ -355,7 +355,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> shouldRenderAtSqrDistance(Function<ContextUtils.EntitySqrDistanceContext, Object> func) {
+    public BaseLivingEntityBuilder<T> shouldRenderAtSqrDistance(Predicate<ContextUtils.EntitySqrDistanceContext> func) {
         shouldRenderAtSqrDistance = func;
         return this;
     }
@@ -370,7 +370,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 });
                 ```
             """)
-    public BaseLivingEntityBuilder<T> canBeCollidedWith(Function<LivingEntity, Object> canBeCollidedWith) {
+    public BaseLivingEntityBuilder<T> canBeCollidedWith(Predicate<LivingEntity> canBeCollidedWith) {
         this.canBeCollidedWith = canBeCollidedWith;
         return this;
     }
@@ -502,7 +502,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isAlliedTo(Function<ContextUtils.LineOfSightContext, Object> isAlliedTo) {
+    public BaseLivingEntityBuilder<T> isAlliedTo(Predicate<ContextUtils.LineOfSightContext> isAlliedTo) {
         this.isAlliedTo = isAlliedTo;
         return this;
     }
@@ -608,7 +608,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canCollideWith(Function<ContextUtils.CollidingEntityContext, Object> canCollideWith) {
+    public BaseLivingEntityBuilder<T> canCollideWith(Predicate<ContextUtils.CollidingEntityContext> canCollideWith) {
         this.canCollideWith = canCollideWith;
         return this;
     }
@@ -623,7 +623,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isFreezing(Function<LivingEntity, Object> isFreezing) {
+    public BaseLivingEntityBuilder<T> isFreezing(Predicate<LivingEntity> isFreezing) {
         this.isFreezing = isFreezing;
         return this;
     }
@@ -839,7 +839,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> shouldDropLoot(Function<LivingEntity, Object> b) {
+    public BaseLivingEntityBuilder<T> shouldDropLoot(Predicate<LivingEntity> b) {
         this.shouldDropLoot = b;
         return this;
     }
@@ -1056,7 +1056,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canAddPassenger(Function<ContextUtils.PassengerEntityContext, Object> predicate) {
+    public BaseLivingEntityBuilder<T> canAddPassenger(Predicate<ContextUtils.PassengerEntityContext> predicate) {
         canAddPassenger = predicate;
         return this;
     }
@@ -1077,7 +1077,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isAffectedByFluids(Function<LivingEntity, Object> b) {
+    public BaseLivingEntityBuilder<T> isAffectedByFluids(Predicate<LivingEntity> b) {
         isAffectedByFluids = b;
         return this;
     }
@@ -1112,7 +1112,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isImmobile(Function<LivingEntity, Object> b) {
+    public BaseLivingEntityBuilder<T> isImmobile(Predicate<LivingEntity> b) {
         isImmobile = b;
         return this;
     }
@@ -1248,7 +1248,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isFlapping(Function<LivingEntity, Object> b) {
+    public BaseLivingEntityBuilder<T> isFlapping(Predicate<LivingEntity> b) {
         this.isFlapping = b;
         return this;
     }
@@ -1447,7 +1447,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canAttackType(Function<ContextUtils.EntityTypeEntityContext, Object> canAttackType) {
+    public BaseLivingEntityBuilder<T> canAttackType(Predicate<ContextUtils.EntityTypeEntityContext> canAttackType) {
         this.canAttackType = canAttackType;
         return this;
     }
@@ -1488,7 +1488,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> shouldDropExperience(Function<LivingEntity, Object> p) {
+    public BaseLivingEntityBuilder<T> shouldDropExperience(Predicate<LivingEntity> p) {
         this.shouldDropExperience = p;
         return this;
     }
@@ -1555,7 +1555,6 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-
     @Info(value = """
             Sets a predicate function to determine whether the entity can attack another entity.
             The provided Predicate accepts a {@link ContextUtils.LivingEntityContext} parameter,
@@ -1570,11 +1569,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canAttack(Function<ContextUtils.LivingEntityContext, Object> customCanAttack) {
+    public BaseLivingEntityBuilder<T> canAttack(Predicate<ContextUtils.LivingEntityContext> customCanAttack) {
         this.canAttack = customCanAttack;
         return this;
     }
-
 
     @Info(value = """
             Sets a predicate function to determine whether the entity can be affected by an effect.
@@ -1590,7 +1588,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canBeAffected(Function<ContextUtils.OnEffectContext, Object> predicate) {
+    public BaseLivingEntityBuilder<T> canBeAffected(Predicate<ContextUtils.OnEffectContext> predicate) {
         canBeAffected = predicate;
         return this;
     }
@@ -1609,7 +1607,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> invertedHealAndHarm(Function<LivingEntity, Object> invertedHealAndHarm) {
+    public BaseLivingEntityBuilder<T> invertedHealAndHarm(Predicate<LivingEntity> invertedHealAndHarm) {
         this.invertedHealAndHarm = invertedHealAndHarm;
         return this;
     }
@@ -1797,7 +1795,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> onClimbable(Function<LivingEntity, Object> predicate) {
+    public BaseLivingEntityBuilder<T> onClimbable(Predicate<LivingEntity> predicate) {
         onClimbable = predicate;
         return this;
     }
@@ -1885,7 +1883,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canStandOnFluid(Function<ContextUtils.EntityFluidStateContext, Object> predicate) {
+    public BaseLivingEntityBuilder<T> canStandOnFluid(Predicate<ContextUtils.EntityFluidStateContext> predicate) {
         canStandOnFluid = predicate;
         return this;
     }
@@ -1905,7 +1903,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isSensitiveToWater(Function<LivingEntity, Object> predicate) {
+    public BaseLivingEntityBuilder<T> isSensitiveToWater(Predicate<LivingEntity> predicate) {
         isSensitiveToWater = predicate;
         return this;
     }
@@ -1993,7 +1991,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> hasLineOfSight(Function<ContextUtils.LineOfSightContext, Object> f) {
+    public BaseLivingEntityBuilder<T> hasLineOfSight(Predicate<ContextUtils.LineOfSightContext> f) {
         hasLineOfSight = f;
         return this;
     }
@@ -2051,7 +2049,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isAffectedByPotions(Function<LivingEntity, Object> predicate) {
+    public BaseLivingEntityBuilder<T> isAffectedByPotions(Predicate<LivingEntity> predicate) {
         isAffectedByPotions = predicate;
         return this;
     }
@@ -2071,7 +2069,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isAttackable(Function<LivingEntity, Object> predicate) {
+    public BaseLivingEntityBuilder<T> isAttackable(Predicate<LivingEntity> predicate) {
         isAttackable = predicate;
         return this;
     }
@@ -2091,7 +2089,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canTakeItem(Function<ContextUtils.EntityItemLevelContext, Object> predicate) {
+    public BaseLivingEntityBuilder<T> canTakeItem(Predicate<ContextUtils.EntityItemLevelContext> predicate) {
         canTakeItem = predicate;
         return this;
     }
@@ -2111,7 +2109,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isSleeping(Function<LivingEntity, Object> supplier) {
+    public BaseLivingEntityBuilder<T> isSleeping(Predicate<LivingEntity> supplier) {
         isSleeping = supplier;
         return this;
     }
@@ -2188,7 +2186,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> shouldRiderFaceForward(Function<ContextUtils.PlayerEntityContext, Object> predicate) {
+    public BaseLivingEntityBuilder<T> shouldRiderFaceForward(Predicate<ContextUtils.PlayerEntityContext> predicate) {
         shouldRiderFaceForward = predicate;
         return this;
     }
@@ -2208,7 +2206,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canFreeze(Function<LivingEntity, Object> predicate) {
+    public BaseLivingEntityBuilder<T> canFreeze(Predicate<LivingEntity> predicate) {
         canFreeze = predicate;
         return this;
     }
@@ -2229,7 +2227,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isCurrentlyGlowing(Function<LivingEntity, Object> predicate) {
+    public BaseLivingEntityBuilder<T> isCurrentlyGlowing(Predicate<LivingEntity> predicate) {
         isCurrentlyGlowing = predicate;
         return this;
     }
@@ -2248,7 +2246,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canDisableShield(Function<LivingEntity, Object> predicate) {
+    public BaseLivingEntityBuilder<T> canDisableShield(Predicate<LivingEntity> predicate) {
         canDisableShield = predicate;
         return this;
     }
@@ -2364,7 +2362,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> dampensVibrations(Function<LivingEntity, Object> predicate) {
+    public BaseLivingEntityBuilder<T> dampensVibrations(Predicate<LivingEntity> predicate) {
         this.dampensVibrations = predicate;
         return this;
     }
@@ -2404,7 +2402,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> showVehicleHealth(Function<LivingEntity, Object> predicate) {
+    public BaseLivingEntityBuilder<T> showVehicleHealth(Predicate<LivingEntity> predicate) {
         this.showVehicleHealth = predicate;
         return this;
     }
@@ -2443,7 +2441,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isInvulnerableTo(Function<ContextUtils.DamageContext, Object> predicate) {
+    public BaseLivingEntityBuilder<T> isInvulnerableTo(Predicate<ContextUtils.DamageContext> predicate) {
         isInvulnerableTo = predicate;
         return this;
     }
@@ -2464,7 +2462,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canChangeDimensions(Function<ContextUtils.ChangeDimensionsContext, Object> supplier) {
+    public BaseLivingEntityBuilder<T> canChangeDimensions(Predicate<ContextUtils.ChangeDimensionsContext> supplier) {
         canChangeDimensions = supplier;
         return this;
     }
@@ -2484,7 +2482,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> mayInteract(Function<ContextUtils.MayInteractContext, Object> predicate) {
+    public BaseLivingEntityBuilder<T> mayInteract(Predicate<ContextUtils.MayInteractContext> predicate) {
         mayInteract = predicate;
         return this;
     }
@@ -2504,7 +2502,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canTrample(Function<ContextUtils.CanTrampleContext, Object> predicate) {
+    public BaseLivingEntityBuilder<T> canTrample(Predicate<ContextUtils.CanTrampleContext> predicate) {
         canTrample = predicate;
         return this;
     }
@@ -2535,7 +2533,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.spawnPlacement('on_ground', 'world_surface', (entitypredicate, levelaccessor, spawntype, blockpos, randomsource) => {
                 if (levelaccessor.getLevel().getBiome(blockpos) == 'minecraft:plains') return true;
                 return false
-            })  
+            })
             """, params = {
             @Param(name = "placementType", value = "The placement type of the spawn, accepts 'on_ground', 'in_water', 'no_restrictions', 'in_lava'"),
             @Param(name = "heightMap", value = "The height map used for the spawner"),

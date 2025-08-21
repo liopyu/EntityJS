@@ -10,11 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ModifyProjectileBuilder extends ModifyEntityBuilder {
     public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
-    public transient Function<Entity, Object> canHitEntity;
+    public transient Predicate<Entity> canHitEntity;
 
     public ModifyProjectileBuilder(EntityType<?> entityType) {
         super(entityType);
@@ -25,7 +26,7 @@ public class ModifyProjectileBuilder extends ModifyEntityBuilder {
             Sets a callback function to be executed when the projectile hits an entity.
             The provided Consumer accepts a {@link ContextUtils.ProjectileEntityHitContext} parameter,
             representing the context of the projectile's interaction with a specific entity.
-                        
+            
             Example usage:
             ```javascript
             projectileBuilder.onHitEntity(context -> {
@@ -44,7 +45,7 @@ public class ModifyProjectileBuilder extends ModifyEntityBuilder {
             Sets a callback function to be executed when the projectile hits a block.
             The provided Consumer accepts a {@link ContextUtils.ProjectileBlockHitContext} parameter,
             representing the context of the projectile's interaction with a specific block.
-                        
+            
             Example usage:
             ```javascript
             projectileBuilder.onHitBlock(context -> {
@@ -60,9 +61,9 @@ public class ModifyProjectileBuilder extends ModifyEntityBuilder {
 
     @Info(value = """
             Sets a function to determine if the projectile entity can hit a specific entity.
-                        
+            
             @param canHitEntity The predicate to check if the arrow can hit the entity.
-                        
+            
             Example usage:
             ```javascript
             projectileEntityBuilder.canHitEntity(entity -> {
@@ -71,7 +72,7 @@ public class ModifyProjectileBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyProjectileBuilder canHitEntity(Function<Entity, Object> function) {
+    public ModifyProjectileBuilder canHitEntity(Predicate<Entity> function) {
         canHitEntity = function;
         return this;
     }

@@ -12,24 +12,25 @@ import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
     public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Consumer<LivingEntity> ate;
     public transient Object setAmbientSound;
-    public transient Function<ContextUtils.EntityItemStackContext, Object> canHoldItem;
+    public transient Predicate<ContextUtils.EntityItemStackContext> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
-    public transient Function<Mob, Object> canPickUpLoot;
-    public transient Function<ContextUtils.EntityItemLevelContext, Object> canTakeItem;
+    public transient Predicate<Mob> canPickUpLoot;
+    public transient Predicate<ContextUtils.EntityItemLevelContext> canTakeItem;
     public transient Boolean isPersistenceRequired;
     public transient Function<Mob, Object> getAttackBoundingBox;
     public transient Object ambientSoundInterval;
-    public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
-    public transient Function<Mob, Object> canBeLeashed;
+    public transient Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway;
+    public transient Predicate<Mob> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
     public transient Consumer<ContextUtils.MobInteractContext> onMobInteract;
-    public transient Function<LivingEntity, Object> isSunBurnTick;
+    public transient Predicate<LivingEntity> isSunBurnTick;
 
     public ModifyMobBuilder(EntityType<?> entity) {
         super(entity);
@@ -49,7 +50,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder canTakeItem(Function<ContextUtils.EntityItemLevelContext, Object> predicate) {
+    public ModifyMobBuilder canTakeItem(Predicate<ContextUtils.EntityItemLevelContext> predicate) {
         canTakeItem = predicate;
         return this;
     }
@@ -64,7 +65,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder isSunBurnTick(Function<LivingEntity, Object> isSunBurnTick) {
+    public ModifyMobBuilder isSunBurnTick(Predicate<LivingEntity> isSunBurnTick) {
         this.isSunBurnTick = isSunBurnTick;
         return this;
     }
@@ -119,7 +120,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder canBeLeashed(Function<Mob, Object> canBeLeashed) {
+    public ModifyMobBuilder canBeLeashed(Predicate<Mob> canBeLeashed) {
         this.canBeLeashed = canBeLeashed;
         return this;
     }
@@ -138,7 +139,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder removeWhenFarAway(Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway) {
+    public ModifyMobBuilder removeWhenFarAway(Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway) {
         this.removeWhenFarAway = removeWhenFarAway;
         return this;
     }
@@ -233,7 +234,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder canHoldItem(Function<ContextUtils.EntityItemStackContext, Object> canHoldItem) {
+    public ModifyMobBuilder canHoldItem(Predicate<ContextUtils.EntityItemStackContext> canHoldItem) {
         this.canHoldItem = canHoldItem;
         return this;
     }
@@ -267,7 +268,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder canPickUpLoot(Function<Mob, Object> canPickUpLoot) {
+    public ModifyMobBuilder canPickUpLoot(Predicate<Mob> canPickUpLoot) {
         this.canPickUpLoot = canPickUpLoot;
         return this;
     }

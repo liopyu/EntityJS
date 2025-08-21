@@ -69,7 +69,7 @@ public abstract class PathfinderMobMixin/*implements IModifyEntityJS*/ {
     protected void shouldStayCloseToLeashHolder(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyPathfinderMobBuilder builder) {
             if (builder.shouldStayCloseToLeashHolder == null) return;
-            Object value = builder.shouldStayCloseToLeashHolder.apply(entityJs$getLivingEntity());
+            Object value = builder.shouldStayCloseToLeashHolder.test(entityJs$getLivingEntity());
             if (value instanceof Boolean b) {
                 cir.setReturnValue(b);
             } else

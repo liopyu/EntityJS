@@ -75,7 +75,7 @@ public class ProjectileMixin {
     protected void canHitEntity(Entity pTarget, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyProjectileBuilder builder) {
             if (builder != null && builder.canHitEntity != null) {
-                Object obj = builder.canHitEntity.apply(pTarget);
+                Object obj = builder.canHitEntity.test(pTarget);
                 if (obj instanceof Boolean b) {
                     boolean bool = cir.getReturnValue() && b;
                     cir.setReturnValue(bool);

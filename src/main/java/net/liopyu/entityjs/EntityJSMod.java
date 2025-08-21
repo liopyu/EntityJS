@@ -34,7 +34,4 @@ public class EntityJSMod {
     }
 
 
-    public static ResourceLocation identifier(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
-    }
 }

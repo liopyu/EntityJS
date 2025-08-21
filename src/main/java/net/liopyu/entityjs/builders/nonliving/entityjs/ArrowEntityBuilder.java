@@ -28,8 +28,8 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient Consumer<ContextUtils.ArrowBlockHitContext> onHitBlock;
     public transient Object defaultHitGroundSoundEvent;
     public transient Consumer<ContextUtils.ArrowLivingEntityContext> doPostHurtEffects;
-    public transient Function<Entity, Object> canHitEntity;
-    public transient Function<ContextUtils.ArrowPlayerContext, Object> tryPickup;
+    public transient Predicate<Entity> canHitEntity;
+    public transient Predicate<ContextUtils.ArrowPlayerContext> tryPickup;
     public transient double setBaseDamage;
     public transient Function<Entity, Object> setDamageFunction;
     public transient Integer setKnockback;
@@ -118,7 +118,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             });
             ```
             """)
-    public ArrowEntityBuilder<T> tryPickup(Function<ContextUtils.ArrowPlayerContext, Object> function) {
+    public ArrowEntityBuilder<T> tryPickup(Predicate<ContextUtils.ArrowPlayerContext> function) {
         tryPickup = function;
         return this;
     }
@@ -293,9 +293,8 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             });
             ```
             """)
-    public ArrowEntityBuilder<T> canHitEntity(Function<Entity, Object> function) {
+    public ArrowEntityBuilder<T> canHitEntity(Predicate<Entity> function) {
         canHitEntity = function;
         return this;
     }
 }
-

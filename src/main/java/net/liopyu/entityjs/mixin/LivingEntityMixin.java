@@ -337,7 +337,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$shouldDropLoot(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.shouldDropLoot != null) {
-                Object obj = builder.shouldDropLoot.apply(entityJs$getLivingEntity());
+                Object obj = builder.shouldDropLoot.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -350,7 +350,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$isAffectedByFluids(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAffectedByFluids != null) {
-                Object obj = builder.isAffectedByFluids.apply(entityJs$getLivingEntity());
+                Object obj = builder.isAffectedByFluids.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -372,7 +372,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$isImmobile(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isImmobile != null) {
-                Object obj = builder.isImmobile.apply(entityJs$getLivingEntity());
+                Object obj = builder.isImmobile.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -417,7 +417,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canAttackType != null) {
                 final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(entityJs$getLivingEntity(), pEntityType);
-                Object obj = builder.canAttackType.apply(context);
+                Object obj = builder.canAttackType.test(context);
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -443,7 +443,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$shouldDropExperience(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.shouldDropExperience != null) {
-                Object obj = builder.shouldDropExperience.apply(entityJs$getLivingEntity());
+                Object obj = builder.shouldDropExperience.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -472,7 +472,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canAttack != null) {
                 final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(entityJs$getLivingEntity(), pTarget);
-                Object obj = builder.canAttack.apply(context);
+                Object obj = builder.canAttack.test(context);
                 if (obj instanceof Boolean b) {
                     boolean bool = b;
                     cir.setReturnValue(bool);
@@ -489,7 +489,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
                 return;
             }
             final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(pEffectInstance, entityJs$getLivingEntity());
-            Object result = builder.canBeAffected.apply(context);
+            Object result = builder.canBeAffected.test(context);
             if (result instanceof Boolean) {
                 cir.setReturnValue((boolean) result);
             } else
@@ -504,7 +504,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
             if (builder.invertedHealAndHarm == null) {
                 return;
             }
-            Object obj = builder.invertedHealAndHarm.apply(entityJs$getLivingEntity());
+            Object obj = builder.invertedHealAndHarm.test(entityJs$getLivingEntity());
             if (obj instanceof Boolean) {
                 cir.setReturnValue((boolean) obj);
             } else
@@ -548,7 +548,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
             if (builder.onClimbable == null) {
                 return;
             }
-            Object obj = builder.onClimbable.apply(entityJs$getLivingEntity());
+            Object obj = builder.onClimbable.test(entityJs$getLivingEntity());
             if (obj instanceof Boolean) {
                 cir.setReturnValue((boolean) obj);
             } else
@@ -603,7 +603,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canStandOnFluid != null) {
                 final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(entityJs$getLivingEntity(), pFluidState);
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canStandOnFluid.apply(context), "boolean");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canStandOnFluid.test(context), "boolean");
                 if (obj != null) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -617,7 +617,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$isSensitiveToWater(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isSensitiveToWater != null) {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isSensitiveToWater.apply(entityJs$getLivingEntity()), "boolean");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isSensitiveToWater.test(entityJs$getLivingEntity()), "boolean");
                 if (obj != null) {
                     cir.setReturnValue((boolean) obj);
                     return;
@@ -661,7 +661,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.hasLineOfSight != null) {
                 final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, entityJs$getLivingEntity());
-                Object obj = builder.hasLineOfSight.apply(context);
+                Object obj = builder.hasLineOfSight.test(context);
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -693,7 +693,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$isAffectedByPotions(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAffectedByPotions != null) {
-                Object obj = builder.isAffectedByPotions.apply(entityJs$getLivingEntity());
+                Object obj = builder.isAffectedByPotions.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -706,7 +706,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$attackable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAttackableFunction != null) {
-                Object obj = builder.isAttackableFunction.apply(entityJs$getLivingEntity());
+                Object obj = builder.isAttackableFunction.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -720,7 +720,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$isSleeping(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.isSleeping != null) {
-                Object obj = builder.isSleeping.apply(entityJs$getLivingEntity());
+                Object obj = builder.isSleeping.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -763,7 +763,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.shouldRiderFaceForward != null) {
                 final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, entityJs$getLivingEntity());
-                Object obj = builder.shouldRiderFaceForward.apply(context);
+                Object obj = builder.shouldRiderFaceForward.test(context);
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -776,7 +776,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$canFreeze(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canFreeze != null) {
-                Object obj = builder.canFreeze.apply(entityJs$getLivingEntity());
+                Object obj = builder.canFreeze.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -790,7 +790,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.isCurrentlyGlowing != null && !entityJs$getLivingEntity().level().isClientSide()) {
-                Object obj = builder.isCurrentlyGlowing.apply(entityJs$getLivingEntity());
+                Object obj = builder.isCurrentlyGlowing.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -803,7 +803,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$canDisableShield(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canDisableShield != null) {
-                Object obj = builder.canDisableShield.apply(entityJs$getLivingEntity());
+                Object obj = builder.canDisableShield.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else

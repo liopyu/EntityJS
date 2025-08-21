@@ -6,9 +6,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ModifyPathfinderMobBuilder extends ModifyMobBuilder {
-    public transient Function<Mob, Object> shouldStayCloseToLeashHolder;
+    public transient Predicate<Mob> shouldStayCloseToLeashHolder;
     public transient Double followLeashSpeed;
     public transient Function<ContextUtils.EntityBlockPosLevelContext, Object> walkTargetValue;
 
@@ -18,10 +19,10 @@ public class ModifyPathfinderMobBuilder extends ModifyMobBuilder {
 
     @Info(value = """
             Sets the function to determine whether the entity should stay close to its leash holder.
-                        
+            
             @param predicate A Function accepting a {@link Mob} parameter,
                              defining the condition for the entity to stay close to its leash holder.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.shouldStayCloseToLeashHolder(entity => {
@@ -30,16 +31,16 @@ public class ModifyPathfinderMobBuilder extends ModifyMobBuilder {
             });
             ```
             """)
-    public ModifyPathfinderMobBuilder shouldStayCloseToLeashHolder(Function<Mob, Object> predicate) {
+    public ModifyPathfinderMobBuilder shouldStayCloseToLeashHolder(Predicate<Mob> predicate) {
         this.shouldStayCloseToLeashHolder = predicate;
         return this;
     }
 
     @Info(value = """
             Sets the follow leash speed for the entity.
-                        
+            
             @param speed The follow leash speed.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.followLeashSpeed(1.5);
@@ -52,10 +53,10 @@ public class ModifyPathfinderMobBuilder extends ModifyMobBuilder {
 
     @Info(value = """
             Sets the walk target value function for the entity.
-                        
+            
             @param function A Function accepting a {@link ContextUtils.EntityBlockPosLevelContext} parameter,
                             defining the walk target value based on the entity's interaction with a specific block.
-                        
+            
             Example usage:
             ```javascript
             mobBuilder.walkTargetValue(context => {

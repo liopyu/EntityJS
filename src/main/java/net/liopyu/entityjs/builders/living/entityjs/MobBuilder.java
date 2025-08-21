@@ -31,12 +31,12 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     public transient SpawnEggItemBuilder eggItem;
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Ingredient canFireProjectileWeapon;
-    public transient Function<ContextUtils.EntityProjectileWeaponContext, Object> canFireProjectileWeaponPredicate;
+    public transient Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate;
     public transient Consumer<LivingEntity> ate;
     public transient Object setAmbientSound;
-    public transient Function<ContextUtils.EntityItemStackContext, Object> canHoldItem;
+    public transient Predicate<ContextUtils.EntityItemStackContext> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
-    public transient Function<Mob, Object> canPickUpLoot;
+    public transient Predicate<Mob> canPickUpLoot;
     public transient Boolean isPersistenceRequired;
     public transient Function<Mob, Object> getAttackBoundingBox;
     public transient Boolean canJump;
@@ -44,8 +44,8 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         public transient Function<LivingEntity, Object> myRidingOffset;
     */
     public transient Object ambientSoundInterval;
-    public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
-    public transient Function<LivingEntity, Object> canBeLeashed;
+    public transient Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway;
+    public transient Predicate<LivingEntity> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
     public transient boolean noEggItem = false;
     public transient Function<LivingEntity, Object> setLookControl;
@@ -130,7 +130,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
             });
             ```
             """)
-    public MobBuilder<T> canBeLeashed(Function<LivingEntity, Object> canBeLeashed) {
+    public MobBuilder<T> canBeLeashed(Predicate<LivingEntity> canBeLeashed) {
         this.canBeLeashed = canBeLeashed;
         return this;
     }
@@ -149,7 +149,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
             });
             ```
             """)
-    public MobBuilder<T> removeWhenFarAway(Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway) {
+    public MobBuilder<T> removeWhenFarAway(Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway) {
         this.removeWhenFarAway = removeWhenFarAway;
         return this;
     }
@@ -172,10 +172,10 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
 
     /*@Info(value = """
             Function which sets the offset for riding on the mob entity.
-                        
+
             @param myRidingOffset The offset value for riding on the mob.
             Defaults to 0.0.
-                        
+
             Example usage:
             ```javascript
             mobBuilder.myRidingOffset(entity => {
@@ -257,7 +257,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
             });
             ```
             """)
-    public MobBuilder<T> canFireProjectileWeaponPredicate(Function<ContextUtils.EntityProjectileWeaponContext, Object> canFireProjectileWeaponPredicate) {
+    public MobBuilder<T> canFireProjectileWeaponPredicate(Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate) {
         this.canFireProjectileWeaponPredicate = canFireProjectileWeaponPredicate;
         return this;
     }
@@ -315,7 +315,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
             });
             ```
             """)
-    public MobBuilder<T> canHoldItem(Function<ContextUtils.EntityItemStackContext, Object> canHoldItem) {
+    public MobBuilder<T> canHoldItem(Predicate<ContextUtils.EntityItemStackContext> canHoldItem) {
         this.canHoldItem = canHoldItem;
         return this;
     }
@@ -349,7 +349,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
             });
             ```
             """)
-    public MobBuilder<T> canPickUpLoot(Function<Mob, Object> canPickUpLoot) {
+    public MobBuilder<T> canPickUpLoot(Predicate<Mob> canPickUpLoot) {
         this.canPickUpLoot = canPickUpLoot;
         return this;
     }

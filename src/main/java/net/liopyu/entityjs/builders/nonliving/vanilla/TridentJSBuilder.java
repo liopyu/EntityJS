@@ -20,11 +20,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
     public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
-    public transient Function<Entity, Object> canHitEntity;
+    public transient Predicate<Entity> canHitEntity;
     public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
     public transient TridentItemBuilder item;
     public transient boolean noItem;
@@ -32,7 +33,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
     public transient SoundEvent defaultTridentHitSound;
     public transient SoundEvent thunderHitSound;
     public transient float thunderHitVolume;
-    public transient Function<TridentEntityJS, Object> isChanneling;
+    public transient Predicate<TridentEntityJS> isChanneling;
     public transient DamageSource damageSource;
     public transient float attackDamage;
     public transient boolean alwaysThunder;
@@ -124,7 +125,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
                 });
                 ```
             """)
-    public TridentJSBuilder setIsChanneling(Function<TridentEntityJS, Object> isChanneling) {
+    public TridentJSBuilder setIsChanneling(Predicate<TridentEntityJS> isChanneling) {
         this.isChanneling = isChanneling;
         return this;
     }
@@ -241,7 +242,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
             });
             ```
             """)
-    public TridentJSBuilder canHitEntity(Function<Entity, Object> function) {
+    public TridentJSBuilder canHitEntity(Predicate<Entity> function) {
         canHitEntity = function;
         return this;
     }

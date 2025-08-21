@@ -81,7 +81,7 @@ public class MobMixin implements MobAccessor {
             if (builder.canTakeItem != null) {
                 try {
                     var context = new ContextUtils.EntityItemLevelContext(entityJs$getLivingEntity(), pItemstack, entityJs$getLivingEntity().level());
-                    Object obj = builder.canTakeItem.apply(context);
+                    Object obj = builder.canTakeItem.test(context);
                     if (obj instanceof Boolean b) {
                         cir.setReturnValue(b);
                     } else {
@@ -99,7 +99,7 @@ public class MobMixin implements MobAccessor {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.canPickUpLoot != null) {
                 try {
-                    Object obj = builder.canPickUpLoot.apply(entityJs$getLivingEntity());
+                    Object obj = builder.canPickUpLoot.test(entityJs$getLivingEntity());
                     if (obj instanceof Boolean b) {
                         cir.setReturnValue(b);
                     } else {
@@ -117,7 +117,7 @@ public class MobMixin implements MobAccessor {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             try {
                 if (builder.isSunBurnTick != null) {
-                    Object obj = builder.isSunBurnTick.apply(entityJs$getLivingEntity());
+                    Object obj = builder.isSunBurnTick.test(entityJs$getLivingEntity());
                     if (obj instanceof Boolean b) {
                         cir.setReturnValue(b);
                     } else
@@ -215,7 +215,7 @@ public class MobMixin implements MobAccessor {
     public void canBeLeashed(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.canBeLeashed != null) {
-                Object obj = builder.canBeLeashed.apply(entityJs$getLivingEntity());
+                Object obj = builder.canBeLeashed.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean b) {
                     cir.setReturnValue(b);
                 } else
@@ -247,7 +247,7 @@ public class MobMixin implements MobAccessor {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.canHoldItem != null) {
                 final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, entityJs$getLivingEntity());
-                Object obj = builder.canHoldItem.apply(context);
+                Object obj = builder.canHoldItem.test(context);
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -303,7 +303,7 @@ public class MobMixin implements MobAccessor {
                 return;
             }
             final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, entityJs$getLivingEntity());
-            Object obj = builder.removeWhenFarAway.apply(context);
+            Object obj = builder.removeWhenFarAway.test(context);
             if (obj instanceof Boolean) {
                 cir.setReturnValue((boolean) obj);
             } else

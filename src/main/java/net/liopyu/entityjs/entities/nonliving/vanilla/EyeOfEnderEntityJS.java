@@ -286,7 +286,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-            Object obj = builder.shouldRenderAtSqrDistance.apply(context);
+            Object obj = builder.shouldRenderAtSqrDistance.test(context);
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
         }
@@ -324,7 +324,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     public boolean canCollideWith(Entity pEntity) {
         if (builder.canCollideWith != null) {
             final ContextUtils.ECollidingEntityContext context = new ContextUtils.ECollidingEntityContext(this, pEntity);
-            Object obj = builder.canCollideWith.apply(context);
+            Object obj = builder.canCollideWith.test(context);
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
         }
@@ -374,7 +374,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
             return super.canAddPassenger(entity);
         }
         final ContextUtils.EPassengerEntityContext context = new ContextUtils.EPassengerEntityContext(entity, this);
-        Object obj = builder.canAddPassenger.apply(context);
+        Object obj = builder.canAddPassenger.test(context);
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -386,7 +386,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     @Override
     protected boolean isFlapping() {
         if (builder.isFlapping != null) {
-            Object obj = builder.isFlapping.apply(this);
+            Object obj = builder.isFlapping.test(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -433,7 +433,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     @Override
     public boolean canFreeze() {
         if (builder.canFreeze != null) {
-            Object obj = builder.canFreeze.apply(this);
+            Object obj = builder.canFreeze.test(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -446,7 +446,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     @Override
     public boolean isFreezing() {
         if (builder.isFreezing != null) {
-            Object obj = builder.isFreezing.apply(this);
+            Object obj = builder.isFreezing.test(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -459,7 +459,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     @Override
     public boolean isCurrentlyGlowing() {
         if (builder.isCurrentlyGlowing != null) {
-            Object obj = builder.isCurrentlyGlowing.apply(this);
+            Object obj = builder.isCurrentlyGlowing.test(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -472,7 +472,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     @Override
     public boolean dampensVibrations() {
         if (builder.dampensVibrations != null) {
-            Object obj = builder.dampensVibrations.apply(this);
+            Object obj = builder.dampensVibrations.test(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -484,7 +484,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     @Override
     public boolean showVehicleHealth() {
         if (builder.showVehicleHealth != null) {
-            Object obj = builder.showVehicleHealth.apply(this);
+            Object obj = builder.showVehicleHealth.test(this);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -498,7 +498,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
             final ContextUtils.EDamageContext context = new ContextUtils.EDamageContext(this, p_20122_);
-            Object obj = builder.isInvulnerableTo.apply(context);
+            Object obj = builder.isInvulnerableTo.test(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -512,7 +512,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     public boolean canChangeDimensions(Level to, Level from) {
         if (builder.canChangeDimensions != null) {
             final ContextUtils.ChangeDimensionsContext context = new ContextUtils.ChangeDimensionsContext(this, to, from);
-            Object obj = builder.canChangeDimensions.apply(context);
+            Object obj = builder.canChangeDimensions.test(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -537,7 +537,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
         if (builder.mayInteract != null) {
             final ContextUtils.EMayInteractContext context = new ContextUtils.EMayInteractContext(p_146843_, p_146844_, this);
-            Object obj = builder.mayInteract.apply(context);
+            Object obj = builder.mayInteract.test(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -552,7 +552,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
             final ContextUtils.ECanTrampleContext context = new ContextUtils.ECanTrampleContext(state, pos, fallDistance, this);
-            Object obj = builder.canTrample.apply(context);
+            Object obj = builder.canTrample.test(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -583,7 +583,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object obj = builder.canBeCollidedWith.apply(this);
+        Object obj = builder.canBeCollidedWith.test(this);
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }

@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.rhino.util.ReturnsSelf;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -11,21 +12,22 @@ import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class PartBuilder<T extends LivingEntity> {
     public transient boolean isPickable;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Consumer<ContextUtils.EntityPlayerContext> playerTouch;
-    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
+    public transient Predicate<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
     public transient Consumer<Entity> tick;
     public transient Consumer<ContextUtils.MovementContext> move;
-    public transient Function<Entity, Object> isAttackable;
+    public transient Predicate<Entity> isAttackable;
     public transient boolean isPushable;
-    public transient Function<ContextUtils.EPassengerEntityContext, Object> canAddPassenger;
+    public transient Predicate<ContextUtils.EPassengerEntityContext> canAddPassenger;
     public transient Function<Entity, Object> setBlockJumpFactor;
     public transient Function<Entity, Object> blockSpeedFactor;
     public transient Object setSwimSound;
-    public transient Function<Entity, Object> isFlapping;
+    public transient Predicate<Entity> isFlapping;
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
     public transient Object setSwimSplashSound;
@@ -34,26 +36,26 @@ public class PartBuilder<T extends LivingEntity> {
     public transient Consumer<Entity> onStopRiding;
     public transient Consumer<Entity> onRemovePassenger;
     public transient Consumer<Entity> rideTick;
-    public transient Function<Entity, Object> canFreeze;
-    public transient Function<Entity, Object> isCurrentlyGlowing;
+    public transient Predicate<Entity> canFreeze;
+    public transient Predicate<Entity> isCurrentlyGlowing;
     public transient Function<Entity, Object> setMaxFallDistance;
     public transient Consumer<Entity> onClientRemoval;
     public transient Consumer<Entity> onAddedToWorld;
     public transient Consumer<Entity> lavaHurt;
     public transient Consumer<Entity> onFlap;
-    public transient Function<Entity, Object> dampensVibrations;
-    public transient Function<Entity, Object> showVehicleHealth;
+    public transient Predicate<Entity> dampensVibrations;
+    public transient Predicate<Entity> showVehicleHealth;
     public transient Consumer<ContextUtils.EThunderHitContext> thunderHit;
-    public transient Function<ContextUtils.EDamageContext, Object> isInvulnerableTo;
-    public transient Function<ContextUtils.ChangeDimensionsContext, Object> canChangeDimensions;
-    public transient Function<ContextUtils.EMayInteractContext, Object> mayInteract;
-    public transient Function<ContextUtils.ECanTrampleContext, Object> canTrample;
+    public transient Predicate<ContextUtils.EDamageContext> isInvulnerableTo;
+    public transient Predicate<ContextUtils.ChangeDimensionsContext> canChangeDimensions;
+    public transient Predicate<ContextUtils.EMayInteractContext> mayInteract;
+    public transient Predicate<ContextUtils.ECanTrampleContext> canTrample;
     public transient Consumer<Entity> onRemovedFromWorld;
-    public transient Function<Entity, Object> isFreezing;
-    public transient Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith;
+    public transient Predicate<Entity> isFreezing;
+    public transient Predicate<ContextUtils.ECollidingEntityContext> canCollideWith;
     public transient Consumer<ContextUtils.PartHurtContext<T>> onPartHurt;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
-    public transient Function<Entity, Object> canBeCollidedWith;
+    public transient Predicate<Entity> canBeCollidedWith;
 
     public PartBuilder() {
         isPickable = true;
@@ -70,7 +72,7 @@ public class PartBuilder<T extends LivingEntity> {
                 });
                 ```
             """)
-    public PartBuilder<T> canBeCollidedWith(Function<Entity, Object> canBeCollidedWith) {
+    public PartBuilder<T> canBeCollidedWith(Predicate<Entity> canBeCollidedWith) {
         this.canBeCollidedWith = canBeCollidedWith;
         return this;
     }
@@ -158,7 +160,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> shouldRenderAtSqrDistance(Function<ContextUtils.EntitySqrDistanceContext, Object> func) {
+    public PartBuilder<T> shouldRenderAtSqrDistance(Predicate<ContextUtils.EntitySqrDistanceContext> func) {
         shouldRenderAtSqrDistance = func;
         return this;
     }
@@ -232,7 +234,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> canCollideWith(Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith) {
+    public PartBuilder<T> canCollideWith(Predicate<ContextUtils.ECollidingEntityContext> canCollideWith) {
         this.canCollideWith = canCollideWith;
         return this;
     }
@@ -248,7 +250,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> isFreezing(Function<Entity, Object> isFreezing) {
+    public PartBuilder<T> isFreezing(Predicate<Entity> isFreezing) {
         this.isFreezing = isFreezing;
         return this;
     }
@@ -277,7 +279,7 @@ public class PartBuilder<T extends LivingEntity> {
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the model based on information about the entity.
             The default behavior returns <namespace>:geo/entity/<path>.geo.json.
-                        
+
             Example usage:
             ```javascript
             entityBuilder.modelResource(entity => {
@@ -308,7 +310,7 @@ public class PartBuilder<T extends LivingEntity> {
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the texture based on information about the entity.
             The default behavior returns <namespace>:textures/entity/<path>.png.
-                        
+
             Example usage:
             ```javascript
             entityBuilder.textureResource(entity => {
@@ -339,7 +341,7 @@ public class PartBuilder<T extends LivingEntity> {
             The provided Function accepts a parameter of type T (the entity),
             allowing changing the animations based on information about the entity.
             The default behavior returns <namespace>:animations/<path>.animation.json.
-                        
+
             Example usage:
             ```javascript
             entityBuilder.animationResource(entity => {
@@ -393,7 +395,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> canAddPassenger(Function<ContextUtils.EPassengerEntityContext, Object> predicate) {
+    public PartBuilder<T> canAddPassenger(Predicate<ContextUtils.EPassengerEntityContext> predicate) {
         canAddPassenger = predicate;
         return this;
     }
@@ -477,7 +479,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> isFlapping(Function<Entity, Object> b) {
+    public PartBuilder<T> isFlapping(Predicate<Entity> b) {
         this.isFlapping = b;
         return this;
     }
@@ -638,7 +640,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> isAttackable(Function<Entity, Object> predicate) {
+    public PartBuilder<T> isAttackable(Predicate<Entity> predicate) {
         isAttackable = predicate;
         return this;
     }
@@ -658,7 +660,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> canFreeze(Function<Entity, Object> predicate) {
+    public PartBuilder<T> canFreeze(Predicate<Entity> predicate) {
         canFreeze = predicate;
         return this;
     }
@@ -679,7 +681,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> isCurrentlyGlowing(Function<Entity, Object> predicate) {
+    public PartBuilder<T> isCurrentlyGlowing(Predicate<Entity> predicate) {
         isCurrentlyGlowing = predicate;
         return this;
     }
@@ -775,12 +777,12 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> dampensVibrations(Function<Entity, Object> predicate) {
+    public PartBuilder<T> dampensVibrations(Predicate<Entity> predicate) {
         this.dampensVibrations = predicate;
         return this;
     }
 
-
+    @ReturnsSelf
     @Info(value = """
             Sets a predicate to determine whether to show the vehicle health for the living entity.
             
@@ -796,7 +798,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> showVehicleHealth(Function<Entity, Object> predicate) {
+    public PartBuilder<T> showVehicleHealth(Predicate<Entity> predicate) {
         this.showVehicleHealth = predicate;
         return this;
     }
@@ -835,7 +837,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> isInvulnerableTo(Function<ContextUtils.EDamageContext, Object> predicate) {
+    public PartBuilder<T> isInvulnerableTo(Predicate<ContextUtils.EDamageContext> predicate) {
         isInvulnerableTo = predicate;
         return this;
     }
@@ -855,7 +857,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> canChangeDimensions(Function<ContextUtils.ChangeDimensionsContext, Object> supplier) {
+    public PartBuilder<T> canChangeDimensions(Predicate<ContextUtils.ChangeDimensionsContext> supplier) {
         canChangeDimensions = supplier;
         return this;
     }
@@ -875,7 +877,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> mayInteract(Function<ContextUtils.EMayInteractContext, Object> predicate) {
+    public PartBuilder<T> mayInteract(Predicate<ContextUtils.EMayInteractContext> predicate) {
         mayInteract = predicate;
         return this;
     }
@@ -895,7 +897,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> canTrample(Function<ContextUtils.ECanTrampleContext, Object> predicate) {
+    public PartBuilder<T> canTrample(Predicate<ContextUtils.ECanTrampleContext> predicate) {
         canTrample = predicate;
         return this;
     }

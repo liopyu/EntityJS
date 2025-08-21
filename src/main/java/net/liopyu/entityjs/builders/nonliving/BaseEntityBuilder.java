@@ -34,11 +34,12 @@ import software.bernie.geckolib.constant.dataticket.DataTicket;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> extends BuilderBase<EntityType<T>> {
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Consumer<ContextUtils.EntityPlayerContext> playerTouch;
-    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
+    public transient Predicate<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
     public transient Consumer<Entity> tick;
     public transient Consumer<ContextUtils.MovementContext> move;
     public transient Boolean isAttackable;
@@ -57,11 +58,11 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient boolean isPickable;
 
     public transient boolean isPushable;
-    public transient Function<ContextUtils.EPassengerEntityContext, Object> canAddPassenger;
+    public transient Predicate<ContextUtils.EPassengerEntityContext> canAddPassenger;
     public transient Function<Entity, Object> setBlockJumpFactor;
     public transient Function<Entity, Object> blockSpeedFactor;
     public transient Object setSwimSound;
-    public transient Function<Entity, Object> isFlapping;
+    public transient Predicate<Entity> isFlapping;
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
     public transient Object setSwimSplashSound;
@@ -70,23 +71,23 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient Consumer<Entity> onStopRiding;
     public transient Consumer<Entity> onRemovePassenger;
     public transient Consumer<Entity> rideTick;
-    public transient Function<Entity, Object> canFreeze;
-    public transient Function<Entity, Object> isCurrentlyGlowing;
+    public transient Predicate<Entity> canFreeze;
+    public transient Predicate<Entity> isCurrentlyGlowing;
     public transient Function<Entity, Object> setMaxFallDistance;
     public transient Consumer<Entity> onClientRemoval;
     public transient Consumer<Entity> onAddedToWorld;
     public transient Consumer<Entity> lavaHurt;
     public transient Consumer<Entity> onFlap;
-    public transient Function<Entity, Object> dampensVibrations;
-    public transient Function<Entity, Object> showVehicleHealth;
+    public transient Predicate<Entity> dampensVibrations;
+    public transient Predicate<Entity> showVehicleHealth;
     public transient Consumer<ContextUtils.EThunderHitContext> thunderHit;
-    public transient Function<ContextUtils.EDamageContext, Object> isInvulnerableTo;
-    public transient Function<ContextUtils.ChangeDimensionsContext, Object> canChangeDimensions;
-    public transient Function<ContextUtils.EMayInteractContext, Object> mayInteract;
-    public transient Function<ContextUtils.ECanTrampleContext, Object> canTrample;
+    public transient Predicate<ContextUtils.EDamageContext> isInvulnerableTo;
+    public transient Predicate<ContextUtils.ChangeDimensionsContext> canChangeDimensions;
+    public transient Predicate<ContextUtils.EMayInteractContext> mayInteract;
+    public transient Predicate<ContextUtils.ECanTrampleContext> canTrample;
     public transient Consumer<Entity> onRemovedFromWorld;
-    public transient Function<Entity, Object> isFreezing;
-    public transient Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith;
+    public transient Predicate<Entity> isFreezing;
+    public transient Predicate<ContextUtils.ECollidingEntityContext> canCollideWith;
     public transient Consumer<ContextUtils.EntityHurtContext> onHurt;
     public transient boolean summonable;
     public transient boolean save;
@@ -102,7 +103,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public final List<NLGeoLayerJSBuilder<T>> layerList = new ArrayList<>();
     public transient Consumer<NLGeoLayerJSBuilder<T>> newGeoLayer;
     public transient boolean facesTrajectory = false;
-    public transient Function<Entity, Object> canBeCollidedWith;
+    public transient Predicate<Entity> canBeCollidedWith;
 
     public BaseEntityBuilder(ResourceLocation i) {
         super(i);
@@ -128,6 +129,21 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         scaleWidth = 1F;
     }
 
+    public transient Function<T, net.minecraft.client.renderer.RenderType> renderTypeFunction;
+
+    @Info(value = """
+            Sets the render type for the entity via a function.
+            
+            Example usage:
+            ```javascript
+            entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            ```
+            """)
+    public BaseEntityBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {
+        renderTypeFunction = type;
+        return this;
+    }
+
     @Info(value = """
             Determines if the entity's hitbox collides with other entities the same as a solic block.
             
@@ -138,7 +154,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
                 });
                 ```
             """)
-    public BaseEntityBuilder<T> canBeCollidedWith(Function<Entity, Object> canBeCollidedWith) {
+    public BaseEntityBuilder<T> canBeCollidedWith(Predicate<Entity> canBeCollidedWith) {
         this.canBeCollidedWith = canBeCollidedWith;
         return this;
     }
@@ -222,7 +238,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> canCollideWith(Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith) {
+    public BaseEntityBuilder<T> canCollideWith(Predicate<ContextUtils.ECollidingEntityContext> canCollideWith) {
         this.canCollideWith = canCollideWith;
         return this;
     }
@@ -238,7 +254,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> isFreezing(Function<Entity, Object> isFreezing) {
+    public BaseEntityBuilder<T> isFreezing(Predicate<Entity> isFreezing) {
         this.isFreezing = isFreezing;
         return this;
     }
@@ -397,7 +413,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> canAddPassenger(Function<ContextUtils.EPassengerEntityContext, Object> predicate) {
+    public BaseEntityBuilder<T> canAddPassenger(Predicate<ContextUtils.EPassengerEntityContext> predicate) {
         canAddPassenger = predicate;
         return this;
     }
@@ -481,7 +497,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> isFlapping(Function<Entity, Object> b) {
+    public BaseEntityBuilder<T> isFlapping(Predicate<Entity> b) {
         this.isFlapping = b;
         return this;
     }
@@ -643,7 +659,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> canFreeze(Function<Entity, Object> predicate) {
+    public BaseEntityBuilder<T> canFreeze(Predicate<Entity> predicate) {
         canFreeze = predicate;
         return this;
     }
@@ -664,7 +680,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> isCurrentlyGlowing(Function<Entity, Object> predicate) {
+    public BaseEntityBuilder<T> isCurrentlyGlowing(Predicate<Entity> predicate) {
         isCurrentlyGlowing = predicate;
         return this;
     }
@@ -760,7 +776,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> dampensVibrations(Function<Entity, Object> predicate) {
+    public BaseEntityBuilder<T> dampensVibrations(Predicate<Entity> predicate) {
         this.dampensVibrations = predicate;
         return this;
     }
@@ -781,7 +797,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> showVehicleHealth(Function<Entity, Object> predicate) {
+    public BaseEntityBuilder<T> showVehicleHealth(Predicate<Entity> predicate) {
         this.showVehicleHealth = predicate;
         return this;
     }
@@ -820,7 +836,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> isInvulnerableTo(Function<ContextUtils.EDamageContext, Object> predicate) {
+    public BaseEntityBuilder<T> isInvulnerableTo(Predicate<ContextUtils.EDamageContext> predicate) {
         isInvulnerableTo = predicate;
         return this;
     }
@@ -840,7 +856,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> canChangeDimensions(Function<ContextUtils.ChangeDimensionsContext, Object> supplier) {
+    public BaseEntityBuilder<T> canChangeDimensions(Predicate<ContextUtils.ChangeDimensionsContext> supplier) {
         canChangeDimensions = supplier;
         return this;
     }
@@ -860,7 +876,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> mayInteract(Function<ContextUtils.EMayInteractContext, Object> predicate) {
+    public BaseEntityBuilder<T> mayInteract(Predicate<ContextUtils.EMayInteractContext> predicate) {
         mayInteract = predicate;
         return this;
     }
@@ -880,7 +896,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> canTrample(Function<ContextUtils.ECanTrampleContext, Object> predicate) {
+    public BaseEntityBuilder<T> canTrample(Predicate<ContextUtils.ECanTrampleContext> predicate) {
         canTrample = predicate;
         return this;
     }
@@ -1244,7 +1260,7 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
             });
             ```
             """)
-    public BaseEntityBuilder<T> shouldRenderAtSqrDistance(Function<ContextUtils.EntitySqrDistanceContext, Object> func) {
+    public BaseEntityBuilder<T> shouldRenderAtSqrDistance(Predicate<ContextUtils.EntitySqrDistanceContext> func) {
         shouldRenderAtSqrDistance = func;
         return this;
     }
@@ -1408,20 +1424,6 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
         return this;
     }
 
-    public transient Function<T, net.minecraft.client.renderer.RenderType> renderTypeFunction;
-
-    @Info(value = """
-            Sets the render type for the entity via a function.
-            
-            Example usage:
-            ```javascript
-            entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
-            ```
-            """)
-    public BaseEntityBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {
-        renderTypeFunction = type;
-        return this;
-    }
 
     /**
      * <strong>Do not</strong> override unless you are creating a custom entity type builder<br><br>

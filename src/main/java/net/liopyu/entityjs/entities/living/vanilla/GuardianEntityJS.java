@@ -293,7 +293,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     @Override
     public boolean canBeLeashed() {
         if (builder.canBeLeashed != null) {
-            Object obj = builder.canBeLeashed.apply(this);
+            Object obj = builder.canBeLeashed.test(this);
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed());
         }
@@ -306,7 +306,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
             return super.removeWhenFarAway(pDistanceToClosestPlayer);
         }
         final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
-        Object obj = builder.removeWhenFarAway.apply(context);
+        Object obj = builder.removeWhenFarAway.test(context);
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -380,7 +380,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     @Override
     protected boolean shouldStayCloseToLeashHolder() {
         if (builder.shouldStayCloseToLeashHolder == null) return super.shouldStayCloseToLeashHolder();
-        Object value = builder.shouldStayCloseToLeashHolder.apply(this);
+        Object value = builder.shouldStayCloseToLeashHolder.test(this);
         if (value instanceof Boolean b)
             return b;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.shouldStayCloseToLeashHolder());
@@ -391,7 +391,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeaponPredicate != null) {
             final ContextUtils.EntityProjectileWeaponContext context = new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this);
-            Object obj = builder.canFireProjectileWeaponPredicate.apply(context);
+            Object obj = builder.canFireProjectileWeaponPredicate.test(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -431,7 +431,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean canHoldItem(ItemStack stack) {
         if (builder.canHoldItem != null) {
             final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(stack, this);
-            Object obj = builder.canHoldItem.apply(context);
+            Object obj = builder.canHoldItem.test(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -469,7 +469,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.isAlliedTo != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
             try {
-                Object obj = builder.isAlliedTo.apply(context);
+                Object obj = builder.isAlliedTo.test(context);
                 if (obj instanceof Boolean b) return b;
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
             } catch (Exception e) {
@@ -703,7 +703,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.canCollideWith != null) {
             final ContextUtils.CollidingEntityContext context = new ContextUtils.CollidingEntityContext(this, pEntity);
             try {
-                Object obj = builder.canCollideWith.apply(context);
+                Object obj = builder.canCollideWith.test(context);
                 if (obj instanceof Boolean b) return b;
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
             } catch (Exception e) {
@@ -755,7 +755,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.canAddPassenger != null) {
             final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(entity, this);
             try {
-                Object obj = builder.canAddPassenger.apply(context);
+                Object obj = builder.canAddPassenger.test(context);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -773,7 +773,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     protected boolean shouldDropLoot() {
         if (builder.shouldDropLoot != null) {
             try {
-                Object obj = builder.shouldDropLoot.apply(this);
+                Object obj = builder.shouldDropLoot.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -791,7 +791,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     protected boolean isAffectedByFluids() {
         if (builder.isAffectedByFluids != null) {
             try {
-                Object obj = builder.isAffectedByFluids.apply(this);
+                Object obj = builder.isAffectedByFluids.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -808,7 +808,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     protected boolean isImmobile() {
         if (builder.isImmobile != null) {
             try {
-                Object obj = builder.isImmobile.apply(this);
+                Object obj = builder.isImmobile.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -826,7 +826,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     protected boolean isFlapping() {
         if (builder.isFlapping != null) {
             try {
-                Object obj = builder.isFlapping.apply(this);
+                Object obj = builder.isFlapping.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -900,7 +900,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.canAttackType != null) {
             final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(this, entityType);
             try {
-                Object obj = builder.canAttackType.apply(context);
+                Object obj = builder.canAttackType.test(context);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -934,7 +934,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean shouldDropExperience() {
         if (builder.shouldDropExperience != null) {
             try {
-                Object obj = builder.shouldDropExperience.apply(this);
+                Object obj = builder.shouldDropExperience.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -971,7 +971,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.canAttack != null) {
             final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(this, entity);
             try {
-                Object obj = builder.canAttack.apply(context);
+                Object obj = builder.canAttack.test(context);
                 if (obj instanceof Boolean) {
                     return (boolean) obj && super.canAttack(entity);
                 } else {
@@ -989,7 +989,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.canBeAffected != null) {
             final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
             try {
-                Object result = builder.canBeAffected.apply(context);
+                Object result = builder.canBeAffected.test(context);
                 if (result instanceof Boolean) {
                     return (boolean) result;
                 } else {
@@ -1007,7 +1007,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean isInvertedHealAndHarm() {
         if (builder.invertedHealAndHarm != null) {
             try {
-                Object obj = builder.invertedHealAndHarm.apply(this);
+                Object obj = builder.invertedHealAndHarm.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1024,7 +1024,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean onClimbable() {
         if (builder.onClimbable != null) {
             try {
-                Object obj = builder.onClimbable.apply(this);
+                Object obj = builder.onClimbable.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1060,7 +1060,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.canStandOnFluid != null) {
             final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(this, fluidState);
             try {
-                Object obj = builder.canStandOnFluid.apply(context);
+                Object obj = builder.canStandOnFluid.test(context);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1077,7 +1077,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean isSensitiveToWater() {
         if (builder.isSensitiveToWater != null) {
             try {
-                Object obj = builder.isSensitiveToWater.apply(this);
+                Object obj = builder.isSensitiveToWater.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1095,7 +1095,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.hasLineOfSight != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entity, this);
             try {
-                Object obj = builder.hasLineOfSight.apply(context);
+                Object obj = builder.hasLineOfSight.test(context);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1112,7 +1112,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean isAffectedByPotions() {
         if (builder.isAffectedByPotions != null) {
             try {
-                Object obj = builder.isAffectedByPotions.apply(this);
+                Object obj = builder.isAffectedByPotions.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1129,7 +1129,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean attackable() {
         if (builder.isAttackable != null) {
             try {
-                Object obj = builder.isAttackable.apply(this);
+                Object obj = builder.isAttackable.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1147,7 +1147,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.canTakeItem != null) {
             final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
             try {
-                Object obj = builder.canTakeItem.apply(context);
+                Object obj = builder.canTakeItem.test(context);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1164,7 +1164,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean isSleeping() {
         if (builder.isSleeping != null) {
             try {
-                Object obj = builder.isSleeping.apply(this);
+                Object obj = builder.isSleeping.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1182,7 +1182,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.shouldRiderFaceForward != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, this);
             try {
-                Object obj = builder.shouldRiderFaceForward.apply(context);
+                Object obj = builder.shouldRiderFaceForward.test(context);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1199,7 +1199,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean canFreeze() {
         if (builder.canFreeze != null) {
             try {
-                Object obj = builder.canFreeze.apply(this);
+                Object obj = builder.canFreeze.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1216,7 +1216,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean isFreezing() {
         if (builder.isFreezing != null) {
             try {
-                Object obj = builder.isFreezing.apply(this);
+                Object obj = builder.isFreezing.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1233,7 +1233,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean isCurrentlyGlowing() {
         if (builder.isCurrentlyGlowing != null) {
             try {
-                Object obj = builder.isCurrentlyGlowing.apply(this);
+                Object obj = builder.isCurrentlyGlowing.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1250,7 +1250,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean canDisableShield() {
         if (builder.canDisableShield != null) {
             try {
-                Object obj = builder.canDisableShield.apply(this);
+                Object obj = builder.canDisableShield.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1284,7 +1284,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean dampensVibrations() {
         if (builder.dampensVibrations != null) {
             try {
-                Object obj = builder.dampensVibrations.apply(this);
+                Object obj = builder.dampensVibrations.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1301,7 +1301,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean showVehicleHealth() {
         if (builder.showVehicleHealth != null) {
             try {
-                Object obj = builder.showVehicleHealth.apply(this);
+                Object obj = builder.showVehicleHealth.test(this);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1319,7 +1319,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.canChangeDimensions != null) {
             ContextUtils.ChangeDimensionsContext context = new ContextUtils.ChangeDimensionsContext(this, to, from);
             try {
-                Object obj = builder.canChangeDimensions.apply(context);
+                Object obj = builder.canChangeDimensions.test(context);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1337,7 +1337,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.mayInteract != null) {
             final ContextUtils.MayInteractContext context = new ContextUtils.MayInteractContext(p_146843_, p_146844_, this);
             try {
-                Object obj = builder.mayInteract.apply(context);
+                Object obj = builder.mayInteract.test(context);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1355,7 +1355,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.canTrample != null) {
             final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
             try {
-                Object obj = builder.canTrample.apply(context);
+                Object obj = builder.canTrample.test(context);
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1629,7 +1629,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
             final ContextUtils.DamageContext context = new ContextUtils.DamageContext(this, p_20122_);
-            Object obj = builder.isInvulnerableTo.apply(context);
+            Object obj = builder.isInvulnerableTo.test(context);
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1661,7 +1661,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-            Object obj = builder.shouldRenderAtSqrDistance.apply(context);
+            Object obj = builder.shouldRenderAtSqrDistance.test(context);
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
         }
@@ -1673,7 +1673,7 @@ public class GuardianEntityJS extends Guardian implements IAnimatableJS {
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object obj = builder.canBeCollidedWith.apply(this);
+        Object obj = builder.canBeCollidedWith.test(this);
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }

@@ -312,7 +312,7 @@ public class EntityMixin implements IEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.shouldRenderAtSqrDistance != null) {
                 final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(pDistance, entityJs$getLivingEntity());
-                Object obj = builder.shouldRenderAtSqrDistance.apply(context);
+                Object obj = builder.shouldRenderAtSqrDistance.test(context);
                 if (obj instanceof Boolean b) {
                     cir.setReturnValue(b);
                 } else
@@ -353,7 +353,7 @@ public class EntityMixin implements IEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canCollideWith != null) {
                 final ContextUtils.ECollidingEntityContext context = new ContextUtils.ECollidingEntityContext(entityJs$getLivingEntity(), pEntity);
-                Object obj = builder.canCollideWith.apply(context);
+                Object obj = builder.canCollideWith.test(context);
                 if (obj instanceof Boolean b) {
                     cir.setReturnValue(b);
                 } else
@@ -379,7 +379,7 @@ public class EntityMixin implements IEntityJS {
     public void isPickable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isPickable == null) return;
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isPickable.apply(entityJs$getLivingEntity()), "boolean");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isPickable.test(entityJs$getLivingEntity()), "boolean");
             if (obj != null) {
                 cir.setReturnValue((boolean) obj);
             } else
@@ -436,7 +436,7 @@ public class EntityMixin implements IEntityJS {
                 return;
             }
             final ContextUtils.EPassengerEntityContext context = new ContextUtils.EPassengerEntityContext(pPassenger, entityJs$getLivingEntity());
-            Object obj = builder.canAddPassenger.apply(context);
+            Object obj = builder.canAddPassenger.test(context);
             if (obj instanceof Boolean) {
                 cir.setReturnValue((boolean) obj);
             } else
@@ -450,7 +450,7 @@ public class EntityMixin implements IEntityJS {
     protected void isFlapping(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isFlapping != null) {
-                Object obj = builder.isFlapping.apply(entityJs$getLivingEntity());
+                Object obj = builder.isFlapping.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -493,7 +493,7 @@ public class EntityMixin implements IEntityJS {
     public void canFreeze(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canFreeze != null) {
-                Object obj = builder.canFreeze.apply(entityJs$getLivingEntity());
+                Object obj = builder.canFreeze.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -506,7 +506,7 @@ public class EntityMixin implements IEntityJS {
     private void entityjs$canChangeDimensions(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canChangeDimensions != null) {
-                Object obj = builder.canChangeDimensions.apply(entityJs$getLivingEntity());
+                Object obj = builder.canChangeDimensions.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -519,7 +519,7 @@ public class EntityMixin implements IEntityJS {
     public void isFreezing(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isFreezing != null) {
-                Object obj = builder.isFreezing.apply(entityJs$getLivingEntity());
+                Object obj = builder.isFreezing.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -533,7 +533,7 @@ public class EntityMixin implements IEntityJS {
     public void isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (entityJs$builder != null && builder.isCurrentlyGlowing != null && !entityJs$getLivingEntity().level().isClientSide()) {
-                Object obj = builder.isCurrentlyGlowing.apply(entityJs$getLivingEntity());
+                Object obj = builder.isCurrentlyGlowing.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -547,7 +547,7 @@ public class EntityMixin implements IEntityJS {
     public void dampensVibrations(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.dampensVibrations != null) {
-                Object obj = builder.dampensVibrations.apply(entityJs$getLivingEntity());
+                Object obj = builder.dampensVibrations.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -560,7 +560,7 @@ public class EntityMixin implements IEntityJS {
     public void showVehicleHealth(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.showVehicleHealth != null) {
-                Object obj = builder.showVehicleHealth.apply(entityJs$getLivingEntity());
+                Object obj = builder.showVehicleHealth.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -575,7 +575,7 @@ public class EntityMixin implements IEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isInvulnerableTo != null) {
                 final ContextUtils.EDamageContext context = new ContextUtils.EDamageContext(entityJs$getLivingEntity(), pSource);
-                Object obj = builder.isInvulnerableTo.apply(context);
+                Object obj = builder.isInvulnerableTo.test(context);
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -589,7 +589,7 @@ public class EntityMixin implements IEntityJS {
     public void canChangeDimensions(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canChangeDimensions != null) {
-                Object obj = builder.canChangeDimensions.apply(entityJs$getLivingEntity());
+                Object obj = builder.canChangeDimensions.test(entityJs$getLivingEntity());
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -614,7 +614,7 @@ public class EntityMixin implements IEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.mayInteract != null) {
                 final ContextUtils.EMayInteractContext context = new ContextUtils.EMayInteractContext(pLevel, pPos, entityJs$getLivingEntity());
-                Object obj = builder.mayInteract.apply(context);
+                Object obj = builder.mayInteract.test(context);
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -629,7 +629,7 @@ public class EntityMixin implements IEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canTrample != null) {
                 final ContextUtils.ECanTrampleContext context = new ContextUtils.ECanTrampleContext(state, pos, fallDistance, entityJs$getLivingEntity());
-                Object obj = builder.canTrample.apply(context);
+                Object obj = builder.canTrample.test(context);
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
