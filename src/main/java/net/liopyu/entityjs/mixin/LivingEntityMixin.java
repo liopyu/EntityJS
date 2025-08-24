@@ -4,6 +4,7 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.Cast;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
+import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.liopyu.entityjs.entities.living.entityjs.WrappedAnimatableEntity;
@@ -11,6 +12,7 @@ import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.data.*;
+import net.liopyu.entityjs.util.implementation.IEntityJS;
 import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -68,10 +70,12 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         var entityType = self.getType();
-        if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, self);
-            EventHandlers.modifyEntity.post(eventJS);
-            entityJs$builder = eventJS.getBuilder();
+        var rl = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
+        var customConsumer = createCustomMap.get(rl);
+        var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+        entityJs$builder = eventJS.getBuilder();
+        if (customConsumer != null) {
+            customConsumer.accept((ModifyEntityBuilder) entityJs$builder);
         }
         var customBuilder = EntityJSUtils.getEntityBuilder(pEntityType);
         if (customBuilder instanceof CustomEntityJSBuilder) {

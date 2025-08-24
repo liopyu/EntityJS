@@ -60,10 +60,10 @@ public class EntityMixin implements IEntityJS {
     @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
+        var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+        entityJs$builder = eventJS.getBuilder();
         if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
             EventHandlers.modifyEntity.post(eventJS);
-            entityJs$builder = eventJS.getBuilder();
         }
         entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
     }

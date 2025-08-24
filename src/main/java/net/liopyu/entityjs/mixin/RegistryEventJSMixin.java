@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.mixin;
 
+import com.mojang.logging.LogUtils;
 import dev.latvian.mods.kubejs.DevProperties;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryKubeEvent;
@@ -24,6 +25,8 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
 import java.util.function.Consumer;
+
+import static net.liopyu.entityjs.events.EntityModificationEventJS.createCustomMap;
 
 @Mixin(RegistryKubeEvent.class)
 public class RegistryEventJSMixin<T> implements IRegistryJS {
@@ -60,15 +63,20 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
             Creates a new custom entity based on an existing entity class.
             This allows extending or modifying behavior of vanilla or modded entities dynamically.
             
-            The builder provided in the callback can be used to modify properties, goals, and behaviors.
+            The builder provided in the callback can be used to directly access the respective entity's modification builder.
             
             Example usage:
             ```javascript
-            event.createCustom("wyrm", Zombie);
+            let Villager = Java.loadClass("net.minecraft.world.entity.npc.Villager")
+            event.createCustom('wyrm', Villager, modifyBuilder => {
+                modifyBuilder.tick(entity => {
+                    console.log(entity.type)
+                })
+            })
             ```
             """
     )
-    public CustomEntityBuilder entityJs$createCustom(KubeResourceLocation id, Class<? extends Entity> entityClass) {
+    public CustomEntityBuilder entityJs$createCustom(KubeResourceLocation id, Class<? extends Entity> entityClass, Consumer<ModifyEntityBuilder> consumer) {
         if (!Entity.class.isAssignableFrom(entityClass)) {
             EntityJSHelperClass.logErrorMessageOnce("Tried to create entity from a class that does not extend Entity. Id: " + id);
             return null;
@@ -86,6 +94,8 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
         b.registryKey = registryKey;
         this.addBuilder((BuilderBase<? extends T>) b);
         created.add((BuilderBase<? extends T>) b);
+        createCustomMap.put(rl, consumer);
+        LogUtils.getLogger().info("consumer for: " + rl + ", consumer: " + consumer);
         return b;
     }
 }

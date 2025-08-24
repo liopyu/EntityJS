@@ -5,6 +5,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.modification.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.projectile.Projectile;
 
@@ -16,6 +17,7 @@ public class EntityModificationEventJS implements KubeEvent {
     public static final Map<EntityType<?>, EntityModificationEventJS> eventMap = new HashMap<>();
     private final Object builder;
     private final Entity entity;
+    public static final Map<ResourceLocation, Consumer<ModifyEntityBuilder>> createCustomMap = new HashMap<>();
 
     public EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
         this.entity = entity;

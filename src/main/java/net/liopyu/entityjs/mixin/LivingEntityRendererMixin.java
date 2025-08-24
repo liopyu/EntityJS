@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.mixin;
 
 import dev.latvian.mods.kubejs.script.ConsoleJS;
+import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -37,16 +38,16 @@ public abstract class LivingEntityRendererMixin<T, M extends EntityModel<?>> {
     @Inject(method = "getRenderType", at = @At("HEAD"), remap = true, cancellable = true)
     private void onGetRenderType(LivingEntity entity, boolean bodyVisible, boolean translucent, boolean glowing, CallbackInfoReturnable<RenderType> cir) {
         var entityType = entity.getType();
-        if (EventHandlers.modifyEntity.hasListeners()) {
+        if (entityJs$builder == null) {
             var eventJS = getOrCreate(entityType, entity);
-            if (eventJS.getBuilder() instanceof ModifyLivingEntityBuilder builder) {
-                if (builder.setTextureLocation == null && builder.setRenderType == null) {
-                    return;
-                }
-            }
-            EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
+        if (entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
+            if (builder.setTextureLocation == null && builder.setRenderType == null) {
+                return;
+            }
+        }
+
         if (entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setTextureLocation != null && builder.setRenderType != null) {
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: You may not set both setRenderType and setTextureLocation at the same time for entity: " + entity.getType() + ".");

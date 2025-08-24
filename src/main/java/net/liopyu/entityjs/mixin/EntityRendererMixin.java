@@ -57,16 +57,19 @@ public abstract class EntityRendererMixin {
     public <E extends Entity> void render(E entity, double pX, double pY, double pZ, float pRotationYaw, float pPartialTicks, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, CallbackInfo ci) {
         if (entity instanceof LivingEntity) return;
         var entityType = entity.getType();
-        if (EventHandlers.modifyEntity.hasListeners()) {
+        if (entityJs$builder == null) {
             var eventJS = getOrCreate(entityType, entity);
-            if (eventJS.getBuilder() instanceof ModifyEntityBuilder builder) {
-                if (builder.setTextureLocation == null && builder.setRenderType == null) {
-                    return;
-                }
-            }
-            EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
         }
+        if (entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.setTextureLocation == null && builder.setRenderType == null) {
+                return;
+            }
+        }
+
+        /*if (EventHandlers.modifyEntity.hasListeners()) {
+            EventHandlers.modifyEntity.post(eventJS);
+        }*/
         if (entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.setTextureLocation != null && builder.setRenderType != null) {
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: You may not set both setRenderType and setTextureLocation at the same time for entity: " + entity.getType() + ".");

@@ -10,5 +10,5 @@ import java.util.function.Consumer;
 
 @RemapPrefixForJS("entityJs$")
 public interface IRegistryJS {
-    CustomEntityBuilder entityJs$createCustom(KubeResourceLocation id, Class<? extends Entity> entityClass);
+    CustomEntityBuilder entityJs$createCustom(KubeResourceLocation id, Class<? extends Entity> entityClass, Consumer<ModifyEntityBuilder> consumer);
 }
