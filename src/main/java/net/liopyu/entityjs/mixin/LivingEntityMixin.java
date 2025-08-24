@@ -70,15 +70,15 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         var entityType = self.getType();
-        var rl = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
-        var customConsumer = createCustomMap.get(rl);
         var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
         entityJs$builder = eventJS.getBuilder();
-        if (customConsumer != null) {
-            customConsumer.accept((ModifyEntityBuilder) entityJs$builder);
-        }
         var customBuilder = EntityJSUtils.getEntityBuilder(pEntityType);
         if (customBuilder instanceof CustomEntityJSBuilder) {
+            var rl = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
+            var customConsumer = createCustomMap.get(rl);
+            if (customConsumer != null) {
+                customConsumer.accept((ModifyEntityBuilder) entityJs$builder);
+            }
             var wrappedEntity = this.ensureIAnimatableJS(self);
             this.entityJs$setAnimatableEntity((WrappedAnimatableEntity) wrappedEntity);
         }

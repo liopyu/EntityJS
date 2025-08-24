@@ -95,7 +95,6 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
         this.addBuilder((BuilderBase<? extends T>) b);
         created.add((BuilderBase<? extends T>) b);
         createCustomMap.put(rl, consumer);
-        LogUtils.getLogger().info("consumer for: " + rl + ", consumer: " + consumer);
         return b;
     }
 }
