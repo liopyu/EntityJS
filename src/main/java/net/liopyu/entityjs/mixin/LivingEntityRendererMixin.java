@@ -36,15 +36,14 @@ public abstract class LivingEntityRendererMixin<T, M extends EntityModel<?>> {
     @Inject(method = "getRenderType", at = @At("HEAD"), remap = true, cancellable = true)
     private void onGetRenderType(LivingEntity entity, boolean bodyVisible, boolean translucent, boolean glowing, CallbackInfoReturnable<RenderType> cir) {
         var entityType = entity.getType();
-        if (EventHandlers.modifyEntity.hasListeners()) {
+        if (entityJs$builder == null) {
             var eventJS = getOrCreate(entityType, entity);
-            if (eventJS.getBuilder() instanceof ModifyLivingEntityBuilder builder) {
-                if (builder.setTextureLocation == null && builder.setRenderType == null) {
-                    return;
-                }
-            }
-            EventHandlers.modifyEntity.post(eventJS);
             entityJs$builder = eventJS.getBuilder();
+        }
+        if (entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
+            if (builder.setTextureLocation == null && builder.setRenderType == null) {
+                return;
+            }
         }
         if (entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
 

@@ -44,11 +44,8 @@ public abstract class PathfinderMobMixin/*implements IModifyEntityJS*/ {
     @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onMobInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
-        if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
-            EventHandlers.modifyEntity.post(eventJS);
-            entityJs$builder = eventJS.getBuilder();
-        }
+        var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+        entityJs$builder = eventJS.getBuilder();
     }
 
     @Inject(method = "getWalkTargetValue(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/LevelReader;)F", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)

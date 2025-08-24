@@ -6,6 +6,7 @@ import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.modification.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
@@ -21,6 +22,7 @@ public class EntityModificationEventJS extends EventJS {
 
     private final Object builder;
     private final Entity entity;
+    public static final Map<ResourceLocation, Consumer<ModifyEntityBuilder>> createCustomMap = new HashMap<>();
 
     public EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
         this.entity = entity;

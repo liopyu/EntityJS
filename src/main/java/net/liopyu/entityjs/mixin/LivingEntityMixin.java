@@ -5,6 +5,7 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
+import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.liopyu.entityjs.entities.living.entityjs.WrappedAnimatableEntity;
@@ -13,6 +14,7 @@ import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializer;
@@ -70,13 +72,15 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
-        if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
-            EventHandlers.modifyEntity.post(eventJS);
-            entityJs$builder = eventJS.getBuilder();
-        }
+        var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+        entityJs$builder = eventJS.getBuilder();
         var customBuilder = EntityJSUtils.getEntityBuilder(pEntityType);
         if (customBuilder instanceof CustomEntityJSBuilder) {
+            var rl = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
+            var customConsumer = createCustomMap.get(rl);
+            if (customConsumer != null) {
+                customConsumer.accept((ModifyEntityBuilder) entityJs$builder);
+            }
             var wrappedEntity = this.ensureIAnimatableJS(entityJs$getLivingEntity());
             this.entityJs$setAnimatableEntity((WrappedAnimatableEntity) wrappedEntity);
         }

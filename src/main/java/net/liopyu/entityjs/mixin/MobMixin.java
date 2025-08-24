@@ -67,11 +67,8 @@ public class MobMixin implements MobAccessor {
     @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onMobInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
-        if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
-            EventHandlers.modifyEntity.post(eventJS);
-            entityJs$builder = eventJS.getBuilder();
-        }
+        var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+        entityJs$builder = eventJS.getBuilder();
     }
 
     @Inject(method = "canTakeItem", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
