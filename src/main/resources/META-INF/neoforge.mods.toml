@@ -34,7 +34,7 @@ side = "BOTH"
 [[dependencies.entityjs]]
 modId = "geckolib"
 mandatory = true
-versionRange = "[4.5,)"
+versionRange = "[4.8.2,)"
 ordering = "NONE"
 side = "BOTH"
 [[mixins]]
