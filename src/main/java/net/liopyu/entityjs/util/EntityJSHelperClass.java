@@ -10,6 +10,7 @@ import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.ModList;
 import software.bernie.geckolib.animation.Animation;
 
 import java.util.*;
@@ -222,6 +223,13 @@ public class EntityJSHelperClass {
                 return SpawnPlacementTypes.NO_RESTRICTIONS;
             }
         }
+    }
+
+    public static boolean isLegacyKubeJS() {
+        String v = ModList.get().getModContainerById("kubejs")
+                .map(c -> c.getModInfo().getVersion().toString())
+                .orElse("0.0.0");
+        return v.startsWith("2101.7.1");
     }
 
 
