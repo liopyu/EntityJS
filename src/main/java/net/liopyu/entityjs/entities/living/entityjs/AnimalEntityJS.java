@@ -286,6 +286,19 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
         return super.isFood(pStack);
     }
 
+    
+    @Override
+    public boolean canPickUpLoot() {
+        if (builder.canPickUpLoot == null) {
+            return super.canPickUpLoot();
+        }
+        Object obj = builder.canPickUpLoot.apply(this);
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
+        }
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canPickUpLoot from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to super method: " + super.canPickUpLoot());
+        return super.canPickUpLoot();
+    }
 
     @Override
     public boolean canBreed() {
