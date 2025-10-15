@@ -84,7 +84,7 @@ neoForge {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    // implementation("curse.maven:probejs-585406:5820894")
+    api("curse.maven:probejs-585406:7105159")
     api("dev.latvian.mods:rhino:$rhino_version")
     api("dev.latvian.mods:kubejs-neoforge:$kubejs_version")
     api("software.bernie.geckolib:geckolib-neoforge-1.21.1:${geckolib_version}")

@@ -6,6 +6,7 @@ import net.minecraft.world.entity.Mob;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class LookControlJSBuilder {
     public transient Consumer<Mob> setLookAtVec3;
@@ -14,8 +15,8 @@ public class LookControlJSBuilder {
     public transient Consumer<Mob> setLookAtCoords;
     public transient Consumer<Mob> tick;
     public transient Consumer<Mob> clampHeadRotationToBody;
-    public transient Function<Mob, Boolean> resetXRotOnTick;
-    public transient Function<Mob, Boolean> isLookingAtTarget;
+    public transient Predicate<Mob> resetXRotOnTick;
+    public transient Predicate<Mob> isLookingAtTarget;
     public transient Function<Mob, Double> setWantedX;
     public transient Function<Mob, Double> setWantedY;
     public transient Function<Mob, Double> setWantedZ;
@@ -28,7 +29,7 @@ public class LookControlJSBuilder {
         return this;
     }
 
-    public LookControlJSBuilder setIsLookingAtTarget(Function<Mob, Boolean> isLookingAtTarget) {
+    public LookControlJSBuilder setIsLookingAtTarget(Predicate<Mob> isLookingAtTarget) {
         this.isLookingAtTarget = isLookingAtTarget;
         return this;
     }
@@ -88,7 +89,7 @@ public class LookControlJSBuilder {
         return this;
     }
 
-    public LookControlJSBuilder setResetXRotOnTick(Function<Mob, Boolean> resetXRotOnTick) {
+    public LookControlJSBuilder setResetXRotOnTick(Predicate<Mob> resetXRotOnTick) {
         this.resetXRotOnTick = resetXRotOnTick;
         return this;
     }

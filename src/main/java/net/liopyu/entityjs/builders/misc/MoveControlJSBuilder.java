@@ -5,10 +5,11 @@ import net.minecraft.world.entity.Mob;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class MoveControlJSBuilder {
 
-    public transient Function<Mob, Object> hasWanted;
+    public transient Predicate<Mob> hasWanted;
     public transient Function<Mob, Object> getSpeedModifier;
     public transient Consumer<ContextUtils.SetWantedPositionContext> setWantedPosition;
     public transient Consumer<ContextUtils.StrafeContext> strafe;
@@ -16,7 +17,7 @@ public class MoveControlJSBuilder {
     public transient Function<ContextUtils.RotLerpContext, Object> rotlerp;
     public transient Function<ContextUtils.IsWalkableContext, Object> isWalkable;
 
-    public MoveControlJSBuilder setHasWanted(Function<Mob, Object> hasWanted) {
+    public MoveControlJSBuilder setHasWanted(Predicate<Mob> hasWanted) {
         this.hasWanted = hasWanted;
         return this;
     }

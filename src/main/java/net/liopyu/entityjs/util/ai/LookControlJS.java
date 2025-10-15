@@ -125,7 +125,7 @@ public class LookControlJS extends LookControl {
     @Override
     protected boolean resetXRotOnTick() {
         if (builder.resetXRotOnTick != null) {
-            Object obj = builder.resetXRotOnTick.apply(mob);
+            Object obj = builder.resetXRotOnTick.test(mob);
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for resetXRotOnTick from entity:" + entityName() + " Look Control builder. Value: " + obj + ". Defaulting to super method.");
         }
@@ -135,7 +135,7 @@ public class LookControlJS extends LookControl {
     @Override
     public boolean isLookingAtTarget() {
         if (builder.isLookingAtTarget != null) {
-            Object obj = builder.isLookingAtTarget.apply(mob);
+            Object obj = builder.isLookingAtTarget.test(mob);
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isLookingAtTarget from entity:" + entityName() + " Look Control builder. Value: " + obj + ". Defaulting to super method.");
         }
