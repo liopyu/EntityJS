@@ -14,7 +14,7 @@ base {
 loom {
     runs {
         client {
-            vmArg "-Dfabric.development.user=Dev"
+            programArgs "--username", "Dev"
         }
     }
 }

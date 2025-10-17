@@ -54,14 +54,28 @@ public class EventHandlers {
 
     public static void init() {
         DynamicRegistrySetupCallback.EVENT.register(Event.DEFAULT_PHASE, listener -> {
-            for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
+           /* for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
                 EntityAttributeRegistry.register(builder, builder::getAttributeBuilder);
-            }
+            }*/
             EventHandlers.attributeModification();
 
         });
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            registerServerAttributes();
+        });
     }
 
+    public static void registerServerAttributes() {
+        for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
+            EntityAttributeRegistry.register(builder, builder::getAttributeBuilder);
+        }
+    }
+
+    public static void registerClientAttributes() {
+        for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
+            EntityAttributeRegistry.register(builder, builder::getAttributeBuilder);
+        }
+    }
 
     public static void attributeModification() {
         if (editAttributes.hasListeners()) {
