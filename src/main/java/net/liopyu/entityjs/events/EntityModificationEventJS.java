@@ -19,7 +19,8 @@ public class EntityModificationEventJS implements KubeEvent {
     private final EntityType<?> entityType;
     public static final Map<ResourceLocation, Consumer<ModifyEntityBuilder>> createCustomMap = new HashMap<>();
 
-    public EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
+    // Must use #getOrCreate
+    private EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
         this.entityType = entityType;
         this.builder = determineModificationType(entityType, entity);
     }
