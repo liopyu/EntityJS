@@ -3,40 +3,30 @@ package net.liopyu.entityjs.events;
 import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
-import dev.latvian.mods.kubejs.util.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.modification.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.level.Level;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class EntityModificationEventJS extends EventJS {
     public static final Map<EntityType<?>, EntityModificationEventJS> eventMap = new HashMap<>();
-
     private final Object builder;
-    private final Entity entity;
+    private final EntityType<?> entityType;
     public static final Map<ResourceLocation, Consumer<ModifyEntityBuilder>> createCustomMap = new HashMap<>();
 
-    public EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
-        this.entity = entity;
+    // Must use #getOrCreate
+    private EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
+        this.entityType = entityType;
         this.builder = determineModificationType(entityType, entity);
     }
 
-
     public static EntityModificationEventJS getOrCreate(EntityType<?> entityType, Entity entity) {
-        if (!eventMap.containsKey(entityType)) {
-            var event = new EntityModificationEventJS(entityType, entity);
-            eventMap.put(entityType, event);
-            return event;
-        }
-        return eventMap.get(entityType);
+        return eventMap.computeIfAbsent(entityType, t -> new EntityModificationEventJS(t, entity));
     }
 
     @HideFromJS
@@ -71,10 +61,7 @@ public class EntityModificationEventJS extends EventJS {
             @Param(name = "modifyBuilder", value = "A consumer to modify the entity type."),
     })
     public void modify(EntityType<?> entityType, Consumer<? extends ModifyEntityBuilder> modifyBuilder) {
-        var entity = this.entity;
-        boolean entityTypeMatch = entityType == entity.getType();
-        if (!entityTypeMatch) return;
-        Object builder = getOrCreate(entityType, entity).getBuilder();
+        if (entityType != this.entityType) return;
         /*if (builder instanceof ModifyTamableAnimalBuilder) {
             ((Consumer<ModifyTamableAnimalBuilder>) modifyBuilder).accept((ModifyTamableAnimalBuilder) builder);
         } else if (builder instanceof ModifyAnimalBuilder) {
