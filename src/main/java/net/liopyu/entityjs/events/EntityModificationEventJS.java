@@ -16,22 +16,16 @@ import java.util.function.Consumer;
 public class EntityModificationEventJS implements KubeEvent {
     public static final Map<EntityType<?>, EntityModificationEventJS> eventMap = new HashMap<>();
     private final Object builder;
-    private final Entity entity;
+    private final EntityType<?> entityType;
     public static final Map<ResourceLocation, Consumer<ModifyEntityBuilder>> createCustomMap = new HashMap<>();
 
     public EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
-        this.entity = entity;
+        this.entityType = entityType;
         this.builder = determineModificationType(entityType, entity);
     }
 
-
     public static EntityModificationEventJS getOrCreate(EntityType<?> entityType, Entity entity) {
-        if (!eventMap.containsKey(entityType)) {
-            var event = new EntityModificationEventJS(entityType, entity);
-            eventMap.put(entityType, event);
-            return event;
-        }
-        return eventMap.get(entityType);
+        return eventMap.computeIfAbsent(entityType, t -> new EntityModificationEventJS(t, entity));
     }
 
     @HideFromJS
@@ -66,10 +60,7 @@ public class EntityModificationEventJS implements KubeEvent {
             @Param(name = "modifyBuilder", value = "A consumer to modify the entity type."),
     })
     public void modify(EntityType<?> entityType, Consumer<? extends ModifyEntityBuilder> modifyBuilder) {
-        var entity = this.entity;
-        boolean entityTypeMatch = entityType == entity.getType();
-        if (!entityTypeMatch) return;
-        Object builder = getOrCreate(entityType, entity).getBuilder();
+        if (entityType != this.entityType) return;
         /*if (builder instanceof ModifyTamableAnimalBuilder) {
             ((Consumer<ModifyTamableAnimalBuilder>) modifyBuilder).accept((ModifyTamableAnimalBuilder) builder);
         } else if (builder instanceof ModifyAnimalBuilder) {
