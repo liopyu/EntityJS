@@ -85,6 +85,15 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
         this.moveControl = new AxolotlMoveControlJS(this);
     }
 
+    @Override
+    public AttributeMap getAttributes() {
+        for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
+            if (b.get() == this.getType()) {
+                return new AttributeMap(b.getAttributeBuilder().build());
+            }
+        }
+        return super.getAttributes();
+    }
 
     static class AxolotlMoveControlJS extends SmoothSwimmingMoveControl {
         private final AxolotlEntityJS axolotl;

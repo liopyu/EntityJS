@@ -90,6 +90,15 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
         this.eggTime = this.eggTime();
     }
 
+    @Override
+    public AttributeMap getAttributes() {
+        for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
+            if (b.get() == this.getType()) {
+                return new AttributeMap(b.getAttributeBuilder().build());
+            }
+        }
+        return super.getAttributes();
+    }
 
     private int eggTime() {
         if (builder.eggTime != null) {
