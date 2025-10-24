@@ -27,7 +27,7 @@ public class ClientEventHandlers implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
-        EventHandlers.registerClientAttributes();
+        // EventHandlers.registerClientAttributes();
         registerKeyBindings();
     }
 

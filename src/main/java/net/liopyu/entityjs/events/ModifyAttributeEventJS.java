@@ -8,6 +8,7 @@ import dev.latvian.mods.kubejs.typings.Param;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EntityJSUtils;
+import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 public class ModifyAttributeEventJS extends EventJS {
     public static final Map<EntityType<? extends LivingEntity>, List<Attribute>> modifiedAttributesMap = new HashMap<>();
     private final List<EntityType<? extends LivingEntity>> entityTypes;
+    public static final Map<EntityType<? extends LivingEntity>, Map<Attribute, Double>> pendingAdds = new HashMap<>();
 
     public ModifyAttributeEventJS() {
         this.entityTypes = ImmutableList.copyOf(
@@ -42,9 +44,20 @@ public class ModifyAttributeEventJS extends EventJS {
             @Param(name = "attributes", value = "A consumer for setting the default attributes and their values")
     })
     public void modify(EntityType<? extends LivingEntity> entityType, Consumer<AttributeModificationHelper> attributes) {
-        final AttributeModificationHelper helper = new AttributeModificationHelper(entityType);
+        AttributeModificationHelper helper = new AttributeModificationHelper(entityType);
         attributes.accept(helper);
-
+        BaseLivingEntityBuilder<?> b = net.liopyu.entityjs.util.EntityJSUtils.getEntityBuilder(entityType);
+        if (b != null) {
+            Map<Attribute, Double> map = helper.getDefaultValues();
+            List<Attribute> list = helper.getNewAttributes();
+            Map<Attribute, Double> out = pendingAdds.computeIfAbsent(entityType, k -> new HashMap<>());
+            for (Attribute a : list) {
+                Double v = map.get(a);
+                if (v == null) out.putIfAbsent(a, Double.NaN);
+                else out.put(a, v);
+            }
+            return;
+        }
         AttributeSupplier defaultAttributeSupplier = DefaultAttributes.getSupplier(entityType);
         List<Attribute> existingAttributes = new ArrayList<>();
         Map<Attribute, Double> defaultValues = new HashMap<>();
@@ -54,43 +67,25 @@ public class ModifyAttributeEventJS extends EventJS {
                 defaultValues.put(attribute, defaultAttributeSupplier.getValue(attribute));
             }
         }
-
         List<Attribute> newAttributes = helper.getNewAttributes();
         Map<Attribute, Double> newAttributeDefaultValues = helper.getDefaultValues();
         List<Attribute> mergedAttributes = new ArrayList<>(existingAttributes);
         mergedAttributes.addAll(newAttributes);
-        BaseLivingEntityBuilder<?> b = EntityJSUtils.getEntityBuilder(entityType);
-        if (b != null) {
-            b.attributes(attrBuilder -> {
-                for (Attribute attribute : mergedAttributes) {
-                    if (newAttributeDefaultValues.containsKey(attribute)) {
-                        attrBuilder.add(attribute, newAttributeDefaultValues.get(attribute));
-                    } else if (defaultValues.containsKey(attribute)) {
-                        attrBuilder.add(attribute, defaultValues.get(attribute));
-                    } else {
-                        attrBuilder.add(attribute);
-                    }
+        EntityAttributeRegistry.register(() -> entityType, () -> {
+            AttributeSupplier.Builder builder = AttributeSupplier.builder();
+            for (Attribute attribute : mergedAttributes) {
+                if (newAttributeDefaultValues.containsKey(attribute)) {
+                    builder.add(attribute, newAttributeDefaultValues.get(attribute));
+                } else if (defaultValues.containsKey(attribute)) {
+                    builder.add(attribute, defaultValues.get(attribute));
+                } else {
+                    builder.add(attribute);
                 }
-            });
-        } else {
-            EntityAttributeRegistry.register(() -> entityType, () -> {
-                AttributeSupplier.Builder builder = AttributeSupplier.builder();
-
-                for (Attribute attribute : mergedAttributes) {
-                    if (newAttributeDefaultValues.containsKey(attribute)) {
-                        builder.add(attribute, newAttributeDefaultValues.get(attribute));
-                    } else if (defaultValues.containsKey(attribute)) {
-                        builder.add(attribute, defaultValues.get(attribute));
-                    } else {
-                        builder.add(attribute);
-                    }
-                }
-
-                return builder;
-            });
-        }
-
+            }
+            return builder;
+        });
     }
+
 
     @Info(value = "Returns a list of all entity types that can have their attributes modified by this event")
     public List<EntityType<? extends LivingEntity>> getAllTypes() {
@@ -125,9 +120,9 @@ public class ModifyAttributeEventJS extends EventJS {
                 It is safe to add an attribute that an entity type already has
                 """)
         public void add(Attribute attribute) {
-
             newAttributes.add(attribute);
             modifiedAttributesMap.put(entityType, ImmutableList.copyOf(newAttributes));
+            pendingAdds.computeIfAbsent(entityType, k -> new HashMap<>()).putIfAbsent(attribute, Double.NaN);
         }
 
         @Info(value = """
@@ -142,6 +137,7 @@ public class ModifyAttributeEventJS extends EventJS {
             newAttributes.add(attribute);
             defaultValues.put(attribute, defaultValue);
             modifiedAttributesMap.put(entityType, ImmutableList.copyOf(newAttributes));
+            pendingAdds.computeIfAbsent(entityType, k -> new HashMap<>()).put(attribute, defaultValue);
         }
 
         @Info(value = """

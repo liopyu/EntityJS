@@ -19,10 +19,12 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
 import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.fabricmc.loader.api.FabricLoader;
 import net.liopyu.entityjs.EntityJSMod;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.BaseLivingEntityJSBuilder;
 import net.liopyu.entityjs.events.*;
+import net.liopyu.entityjs.mixin.AttributeSupplierAccessor;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -33,9 +35,11 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EventHandlers {
@@ -52,37 +56,51 @@ public class EventHandlers {
     //public static final EventHandler spawnPlacement = EntityJSEvents.startup("spawnPlacement", () -> RegisterSpawnPlacementsEventJS.class);
     public static final EventHandler modifyEntity = EntityJSEvents.startup("modifyEntity", () -> EntityModificationEventJS.class);
 
+
     public static void init() {
-        DynamicRegistrySetupCallback.EVENT.register(Event.DEFAULT_PHASE, listener -> {
-           /* for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-                EntityAttributeRegistry.register(builder, builder::getAttributeBuilder);
-            }*/
-            EventHandlers.attributeModification();
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            RegistryEntryAddedCallback.event(BuiltInRegistries.ENTITY_TYPE).register((rawId, id, type) -> {
+                BaseLivingEntityBuilder<?> hit = null;
+                for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
+                    if (b.get() == type) {
+                        hit = b; break;
+                    }
+                }
+                if (hit == null) return;
 
+                AttributeSupplier.Builder base = hit.getAttributeBuilder(); // base only
+                FabricDefaultAttributeRegistry.register(UtilsJS.cast(type), base);
+            });
+        }
+
+        DynamicRegistrySetupCallback.EVENT.register(Event.DEFAULT_PHASE, ctx -> {
+
+            if (editAttributes.hasListeners()) {
+                editAttributes.post(new ModifyAttributeEventJS());
+            }
+            for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
+                EntityType<? extends LivingEntity> type = UtilsJS.cast(b.get());
+                var id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+                AttributeSupplier.Builder merged = b.getAttributeBuilder();
+
+                Map<Attribute, Double> adds = ModifyAttributeEventJS.pendingAdds.get(type);
+                int n = adds == null ? 0 : adds.size();
+
+                if (n > 0) {
+                    for (Map.Entry<Attribute, Double> e : adds.entrySet()) {
+                        Attribute a = e.getKey();
+                        Double v = e.getValue();
+                        if (v == null || v.isNaN()) {
+                            merged.add(a);
+                        } else {
+                            merged.add(a, v);
+                        }
+                    }
+                }
+                FabricDefaultAttributeRegistry.register(type, merged);
+            }
         });
-        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-            registerServerAttributes();
-        });
     }
-
-    public static void registerServerAttributes() {
-        for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-            EntityAttributeRegistry.register(builder, builder::getAttributeBuilder);
-        }
-    }
-
-    public static void registerClientAttributes() {
-        for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-            EntityAttributeRegistry.register(builder, builder::getAttributeBuilder);
-        }
-    }
-
-    public static void attributeModification() {
-        if (editAttributes.hasListeners()) {
-            editAttributes.post(new ModifyAttributeEventJS());
-        }
-    }
-
     /*private static void registerSpawnPlacements() {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.spawnList) {
             SpawnPlacementsRegistry.register(() -> UtilsJS.cast(builder.get()), builder.placementType, builder.heightMap, UtilsJS.cast(builder.spawnPredicate)); // Cast because the '?' generics makes the event unhappy
