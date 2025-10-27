@@ -71,6 +71,14 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         partEntities = tempPartEntities.toArray(new PartEntityJS<?>[0]);
     }
 
+    @Override
+    protected MovementEmission getMovementEmission() {
+        if (builder.movementEmission != null) {
+            return builder.movementEmission;
+        }
+        return super.getMovementEmission();
+    }
+
     // Part Entity Logical Overrides --------------------------------
     @Override
     public void setId(int entityId) {

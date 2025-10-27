@@ -774,6 +774,13 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
         return super.getStandingEyeHeight(pPose, pDimensions);
     }
 
+    @Override
+    protected MovementEmission getMovementEmission() {
+        if (builder.movementEmission != null) {
+            return builder.movementEmission;
+        }
+        return super.getMovementEmission();
+    }
 
     @Override
     public boolean isPushable() {

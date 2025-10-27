@@ -85,6 +85,14 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
         this.jumpControl = createJumpControl();
     }
 
+    @Override
+    protected MovementEmission getMovementEmission() {
+        if (builder.movementEmission != null) {
+            return builder.movementEmission;
+        }
+        return super.getMovementEmission();
+    }
+
     private MoveControl createMoveControl() {
         if (builder.setMoveControl != null) {
             Object obj = builder.setMoveControl.apply(this);

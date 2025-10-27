@@ -93,6 +93,14 @@ public class SkeletonEntityJS extends Skeleton implements IAnimatableJS {
         this.reassessWeaponGoal();
     }
 
+    @Override
+    protected MovementEmission getMovementEmission() {
+        if (builder.movementEmission != null) {
+            return builder.movementEmission;
+        }
+        return super.getMovementEmission();
+    }
+
     private MoveControl createMoveControl() {
         if (builder.setMoveControl != null) {
             Object obj = builder.setMoveControl.apply(this);

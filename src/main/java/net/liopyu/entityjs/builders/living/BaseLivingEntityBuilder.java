@@ -201,6 +201,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<LivingEntity, String> addRenderItemLayer;
     public transient ItemModelJSBuilder<T> itemModelJSBuilder;
     public transient Consumer<ItemArmorJSBuilder<T>> itemArmorJSBuilder;
+    public transient Entity.MovementEmission movementEmission;
 
     /*
         public transient Consumer<ContextUtils.PassengerEntityContext> onPassengerTurned;
@@ -238,6 +239,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         mountJumpingEnabled = true;
         scaleHeight = 1F;
         scaleWidth = 1F;
+    }
+
+    @Info(value = """
+            Sets the movement emission for the entity which determines whether it will play sounds or spawn particles.
+            
+            Example usage:
+            ```javascript
+            builder.movementEmission("none")
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> movementEmission(Entity.MovementEmission emission) {
+        this.movementEmission = emission;
+        return this;
     }
 
     public BaseLivingEntityBuilder<T> addArmorItemLayer(Consumer<ItemArmorJSBuilder<T>> itemArmorJSBuilder) {
