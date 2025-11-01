@@ -201,22 +201,21 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
             String key = entry.getKey();
             EntityDataAccessor<?> accessor = entry.getValue();
 
-            Object value;
-            value = entityJs$getLivingEntity().getEntityData().get((EntityDataAccessor<Object>) accessor);
-
-
-            if (value == null) {
-                continue;
-            }
+            Object value = entityJs$getLivingEntity().getEntityData().get((EntityDataAccessor<Object>) accessor);
+            if (value == null) continue;
 
             EntityDataSerializer<?> serializer = accessor.getSerializer();
-            EntitySerializerType type;
-            type = EntitySerializerType.fromSerializer(serializer);
-
+            EntitySerializerType type = EntitySerializerType.fromSerializer(serializer);
 
             try {
                 switch (type) {
-                    case UUID -> jsData.putUUID(key, (UUID) value);
+                    case UUID -> {
+                        if (value instanceof java.util.Optional<?> opt && opt.isPresent()) {
+                            jsData.putUUID(key, (UUID) opt.get());
+                        } else if (value instanceof UUID u) {
+                            jsData.putUUID(key, u);
+                        }
+                    }
                     case BYTE -> jsData.putByte(key, (Byte) value);
                     case INT -> jsData.putInt(key, (Integer) value);
                     case LONG -> jsData.putLong(key, (Long) value);
@@ -225,33 +224,28 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
                     case BOOLEAN -> jsData.putBoolean(key, (Boolean) value);
                     case COMPOUND_TAG -> {
                         CompoundTag compound = ((CompoundTag) value);
-                        if (compound == null) {
-                            break;
-                        }
-                        jsData.put(key, compound.copy());
+                        if (compound != null) jsData.put(key, compound.copy());
                     }
                     case VECTOR3 -> {
-                        CompoundTag vecTag = new CompoundTag();
                         var v = (org.joml.Vector3f) value;
-                        if (v == null) {
-                            break;
+                        if (v != null) {
+                            CompoundTag vecTag = new CompoundTag();
+                            vecTag.putFloat("x", v.x());
+                            vecTag.putFloat("y", v.y());
+                            vecTag.putFloat("z", v.z());
+                            jsData.put(key, vecTag);
                         }
-                        vecTag.putFloat("x", v.x());
-                        vecTag.putFloat("y", v.y());
-                        vecTag.putFloat("z", v.z());
-                        jsData.put(key, vecTag);
                     }
                     case QUATERNION -> {
-                        CompoundTag quatTag = new CompoundTag();
                         var q = (org.joml.Quaternionf) value;
-                        if (q == null) {
-                            break;
+                        if (q != null) {
+                            CompoundTag quatTag = new CompoundTag();
+                            quatTag.putFloat("x", q.x());
+                            quatTag.putFloat("y", q.y());
+                            quatTag.putFloat("z", q.z());
+                            quatTag.putFloat("w", q.w());
+                            jsData.put(key, quatTag);
                         }
-                        quatTag.putFloat("x", q.x());
-                        quatTag.putFloat("y", q.y());
-                        quatTag.putFloat("z", q.z());
-                        quatTag.putFloat("w", q.w());
-                        jsData.put(key, quatTag);
                     }
                     default -> logger.warn("[EntityJS] Unhandled serializer type '{}' for key '{}'", type, key);
                 }
