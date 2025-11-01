@@ -19,6 +19,8 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animation.Animation;
 import software.bernie.geckolib.core.animation.AnimationController;
@@ -191,15 +193,17 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
                 ```
             """)
     public BaseEntityBuilder<T> newGeoLayer(Consumer<NLGeoLayerJSBuilder<T>> builderConsumer) {
-        NLGeoLayerJSBuilder<T> layerBuild = new NLGeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        layerList.add(layerBuild);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            NLGeoLayerJSBuilder<T> layerBuild = new NLGeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            layerList.add(layerBuild);
+        });
         return this;
     }
 
     @Info(value = """
             Adds an extra glowing render layer to the entity.
-            @param newGeoLayer The builder Consumer for the new render layer.
+            @param newGlowingGeoLayer The builder Consumer for the new render layer.
             
                 Example usage:
                 ```javascript
@@ -211,9 +215,11 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
                 ```
             """)
     public BaseEntityBuilder<T> newGlowingGeoLayer(Consumer<NLGeoLayerJSBuilder<T>> builderConsumer) {
-        NLGeoLayerJSBuilder<T> layerBuild = new NLGeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        glowingLayerList.add(layerBuild);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            NLGeoLayerJSBuilder<T> layerBuild = new NLGeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            glowingLayerList.add(layerBuild);
+        });
         return this;
     }
 

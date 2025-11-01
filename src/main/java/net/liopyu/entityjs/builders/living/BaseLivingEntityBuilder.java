@@ -21,6 +21,8 @@ import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import software.bernie.geckolib.core.animation.*;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.keyframe.event.CustomInstructionKeyframeEvent;
@@ -242,6 +244,29 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
+            Adds an extra render layer to the mob.
+            @param newGeoLayer The builder Consumer for the new render layer.
+            
+                Example usage:
+                ```javascript
+                entityBuilder.newGeoLayer(builder => {
+                    builder.textureResource(entity => {
+                        return "kubejs:textures/entity/sasuke.png"
+                    })
+                });
+                ```
+            """)
+    public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<Object> builderConsumer) {
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            GeoLayerJSBuilder<T> layerBuild =
+                    new GeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            layerList.add(layerBuild);
+        });
+        return this;
+    }
+
+    @Info(value = """
             Sets the movement emission for the entity which determines whether it will play sounds or spawn particles.
             
             Example usage:
@@ -402,28 +427,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Adds an extra render layer to the mob.
-            @param newGeoLayer The builder Consumer for the new render layer.
-            
-                Example usage:
-                ```javascript
-                entityBuilder.newGeoLayer(builder => {
-                    builder.textureResource(entity => {
-                        return "kubejs:textures/entity/sasuke.png"
-                    })
-                });
-                ```
-            """)
-    public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
-        GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        layerList.add(layerBuild);
-        return this;
-    }
-
-    @Info(value = """
             Adds an extra glowing render layer to the mob.
-            @param newGeoLayer The builder Consumer for the new render layer.
+            @param newGlowingGeoLayer The builder Consumer for the new render layer.
             
                 Example usage:
                 ```javascript
@@ -435,9 +440,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 ```
             """)
     public BaseLivingEntityBuilder<T> newGlowingGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
-        GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        glowingLayerList.add(layerBuild);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            glowingLayerList.add(layerBuild);
+        });
+
         return this;
     }
 

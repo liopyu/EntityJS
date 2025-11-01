@@ -9,6 +9,7 @@ import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.client.living.model.CustomGeoLayerJSBuilder;
+import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -16,6 +17,8 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.core.animation.Animation;
 import software.bernie.geckolib.core.animation.AnimationController;
@@ -205,15 +208,17 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
                 ```
             """)
     public CustomEntityJSBuilder newGeoLayer(Consumer<CustomGeoLayerJSBuilder<? extends LivingEntity>> builderConsumer) {
-        CustomGeoLayerJSBuilder<? extends LivingEntity> layerBuild = new CustomGeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        layerList.add(layerBuild);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            CustomGeoLayerJSBuilder<? extends LivingEntity> layerBuild = new CustomGeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            layerList.add(layerBuild);
+        });
         return this;
     }
 
     @Info(value = """
             Adds an extra glowing render layer to the mob.
-            @param newGeoLayer The builder Consumer for the new render layer.
+            @param newGlowingGeoLayer The builder Consumer for the new render layer.
             
                 Example usage:
                 ```javascript
@@ -225,9 +230,11 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
                 ```
             """)
     public CustomEntityJSBuilder newGlowingGeoLayer(Consumer<CustomGeoLayerJSBuilder<? extends LivingEntity>> builderConsumer) {
-        CustomGeoLayerJSBuilder<? extends LivingEntity> layerBuild = new CustomGeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        glowingLayerList.add(layerBuild);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            CustomGeoLayerJSBuilder<? extends LivingEntity> layerBuild = new CustomGeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            glowingLayerList.add(layerBuild);
+        });
         return this;
     }
 
