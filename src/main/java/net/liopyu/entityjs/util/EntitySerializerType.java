@@ -6,6 +6,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
+import java.util.Optional;
+
 
 public enum EntitySerializerType {
     BYTE,
@@ -58,7 +60,7 @@ public enum EntitySerializerType {
                 return (T) Integer.valueOf(num.intValue());
             return (T) Float.valueOf(num.floatValue());
         }
-        if (value instanceof java.util.UUID) return (T) value;
+        if (value instanceof java.util.UUID) return (T) Optional.of(value);
         if (value instanceof String) return (T) value;
         if (value instanceof Boolean) return (T) value;
         if (value instanceof net.minecraft.nbt.CompoundTag) return (T) value;
