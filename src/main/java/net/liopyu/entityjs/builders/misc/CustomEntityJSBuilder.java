@@ -7,9 +7,12 @@ import dev.latvian.mods.kubejs.script.ConsoleJS;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.client.living.model.CustomGeoLayerJSBuilder;
+import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.liopyu.entityjs.util.*;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLLoader;
 import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.animation.keyframe.event.CustomInstructionKeyframeEvent;
@@ -204,15 +207,17 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
                 ```
             """)
     public CustomEntityJSBuilder newGeoLayer(Consumer<CustomGeoLayerJSBuilder<? extends LivingEntity>> builderConsumer) {
-        CustomGeoLayerJSBuilder<? extends LivingEntity> layerBuild = new CustomGeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        layerList.add(layerBuild);
+        if (FMLLoader.getDist() == Dist.CLIENT) {
+            CustomGeoLayerJSBuilder<? extends LivingEntity> layerBuild = new CustomGeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            layerList.add(layerBuild);
+        }
         return this;
     }
 
     @Info(value = """
             Adds an extra glowing render layer to the mob.
-            @param newGeoLayer The builder Consumer for the new render layer.
+            @param newGlowingGeoLayer The builder Consumer for the new render layer.
             
                 Example usage:
                 ```javascript
@@ -224,9 +229,11 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
                 ```
             """)
     public CustomEntityJSBuilder newGlowingGeoLayer(Consumer<CustomGeoLayerJSBuilder<? extends LivingEntity>> builderConsumer) {
-        CustomGeoLayerJSBuilder<? extends LivingEntity> layerBuild = new CustomGeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        glowingLayerList.add(layerBuild);
+        if (FMLLoader.getDist() == Dist.CLIENT) {
+            CustomGeoLayerJSBuilder<? extends LivingEntity> layerBuild = new CustomGeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            glowingLayerList.add(layerBuild);
+        }
         return this;
     }
 

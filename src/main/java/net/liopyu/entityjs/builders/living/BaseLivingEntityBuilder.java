@@ -17,6 +17,8 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLLoader;
 import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.animation.keyframe.event.CustomInstructionKeyframeEvent;
@@ -36,6 +38,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
+
 
 import java.util.*;
 import java.util.function.*;
@@ -404,15 +407,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 ```
             """)
     public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
-        GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        layerList.add(layerBuild);
+        if (FMLLoader.getDist() == Dist.CLIENT) {
+            GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            layerList.add(layerBuild);
+        }
         return this;
     }
 
     @Info(value = """
             Adds an extra glowing render layer to the mob.
-            @param newGeoLayer The builder Consumer for the new render layer.
+            @param newGlowingGeoLayer The builder Consumer for the new render layer.
             
                 Example usage:
                 ```javascript
@@ -424,9 +429,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 ```
             """)
     public BaseLivingEntityBuilder<T> newGlowingGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
-        GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        glowingLayerList.add(layerBuild);
+        if (FMLLoader.getDist() == Dist.CLIENT) {
+            GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            glowingLayerList.add(layerBuild);
+        }
         return this;
     }
 
@@ -455,6 +462,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         PartBuilder<T> partBuilder = new PartBuilder<>();
         builderConsumer.accept(partBuilder);
         partEntityParamsList.add(new ContextUtils.PartEntityParams<>(name, width, height, partBuilder));
+
         return this;
     }
 

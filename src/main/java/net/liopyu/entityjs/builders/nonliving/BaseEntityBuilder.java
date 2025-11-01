@@ -8,6 +8,7 @@ import dev.latvian.mods.rhino.util.HideFromJS;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityJSBuilder;
+import net.liopyu.entityjs.client.living.model.CustomGeoLayerJSBuilder;
 import net.liopyu.entityjs.client.nonliving.model.NLGeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
@@ -16,9 +17,12 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.item.Item;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.animation.keyframe.event.CustomInstructionKeyframeEvent;
@@ -187,15 +191,17 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
                 ```
             """)
     public BaseEntityBuilder<T> newGeoLayer(Consumer<NLGeoLayerJSBuilder<T>> builderConsumer) {
-        NLGeoLayerJSBuilder<T> layerBuild = new NLGeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        layerList.add(layerBuild);
+        if (FMLLoader.getDist() == Dist.CLIENT) {
+            NLGeoLayerJSBuilder<T> layerBuild = new NLGeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            layerList.add(layerBuild);
+        }
         return this;
     }
 
     @Info(value = """
             Adds an extra glowing render layer to the entity.
-            @param newGeoLayer The builder Consumer for the new render layer.
+            @param newGlowingGeoLayer The builder Consumer for the new render layer.
             
                 Example usage:
                 ```javascript
@@ -207,9 +213,11 @@ public abstract class BaseEntityBuilder<T extends Entity & IAnimatableJSNL> exte
                 ```
             """)
     public BaseEntityBuilder<T> newGlowingGeoLayer(Consumer<NLGeoLayerJSBuilder<T>> builderConsumer) {
-        NLGeoLayerJSBuilder<T> layerBuild = new NLGeoLayerJSBuilder<>(this);
-        builderConsumer.accept(layerBuild);
-        glowingLayerList.add(layerBuild);
+        if (FMLLoader.getDist() == Dist.CLIENT) {
+            NLGeoLayerJSBuilder<T> layerBuild = new NLGeoLayerJSBuilder<>(this);
+            builderConsumer.accept(layerBuild);
+            glowingLayerList.add(layerBuild);
+        }
         return this;
     }
 
