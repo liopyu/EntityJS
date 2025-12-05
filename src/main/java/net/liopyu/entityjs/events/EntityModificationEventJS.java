@@ -26,7 +26,12 @@ public class EntityModificationEventJS extends EventJS {
     }
 
     public static EntityModificationEventJS getOrCreate(EntityType<?> entityType, Entity entity) {
-        return eventMap.computeIfAbsent(entityType, t -> new EntityModificationEventJS(t, entity));
+        EntityModificationEventJS event = eventMap.get(entityType);
+        if (event == null) {
+            event = new EntityModificationEventJS(entityType, entity);
+            eventMap.put(entityType, event);
+        }
+        return event;
     }
 
     @HideFromJS
