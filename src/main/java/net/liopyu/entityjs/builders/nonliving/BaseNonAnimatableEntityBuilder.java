@@ -537,9 +537,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
 
 
     @Info(value = """
-            Sets a predicate function to determine whether the entity is attackable.
-            The provided Predicate accepts a {@link Entity} parameter,
-            representing the entity that may be checked for its attackability.
+            Sets whether or not this entity is attackable.
             
             Example usage:
             ```javascript
