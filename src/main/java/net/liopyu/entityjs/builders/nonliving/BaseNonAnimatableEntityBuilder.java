@@ -543,11 +543,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             
             Example usage:
             ```javascript
-            entityBuilder.isAttackable(entity => {
-                // Define conditions to check if the entity is attackable
-                // Use information about the Entity provided by the context.
-                return // Some boolean condition indicating if the entity is attackable;
-            });
+            entityBuilder.isAttackable(true);
             ```
             """)
     public BaseNonAnimatableEntityBuilder<T> isAttackable(Boolean predicate) {
