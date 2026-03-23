@@ -196,7 +196,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
 
 
     @Override
-    public Brain.Provider<?> brainProvider() {
+    protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<ChickenEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

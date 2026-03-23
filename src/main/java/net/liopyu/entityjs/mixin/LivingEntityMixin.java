@@ -133,7 +133,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     @Inject(method = "makeBrain", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void makeBrain(Dynamic<?> pDynamic, CallbackInfoReturnable<Brain<?>> cir) {
         if (EventHandlers.buildBrain.hasListeners()) {
-            final Brain<?> brain = Cast.to(entityJs$getLivingEntity().brainProvider().makeBrain(pDynamic));
+            final Brain<?> brain = Cast.to(((LivingEntityAccessor) entityJs$getLivingEntity()).entityJs$brainProvider().makeBrain(pDynamic));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), entityJs$getTypeId());
             cir.setReturnValue(brain);
         }

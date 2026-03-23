@@ -208,7 +208,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
 
 
     @Override
-    public Brain.Provider<?> brainProvider() {
+    protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<TameableMobJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

@@ -194,7 +194,7 @@ public class WitherEntityJS extends WitherBoss implements IAnimatableJS {
 
 
     @Override
-    public Brain.Provider<?> brainProvider() {
+    protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<WitherEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());

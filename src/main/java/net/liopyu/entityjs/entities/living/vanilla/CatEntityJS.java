@@ -205,7 +205,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS {
 
 
     @Override
-    public Brain.Provider<?> brainProvider() {
+    protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<CatEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
