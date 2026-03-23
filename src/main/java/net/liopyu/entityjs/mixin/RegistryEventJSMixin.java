@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 
 import static net.liopyu.entityjs.events.EntityModificationEventJS.createCustomMap;
 
-@Mixin(RegistryEventJS.class)
+@Mixin(value = RegistryEventJS.class, remap = false)
 public class RegistryEventJSMixin<T> implements IRegistryJS {
     @Final
     @Shadow

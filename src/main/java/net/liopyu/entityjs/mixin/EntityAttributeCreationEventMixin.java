@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Unique;
 
 import java.util.Map;
 
-@Mixin(value = EntityAttributeCreationEvent.class, remap = true)
+@Mixin(value = EntityAttributeCreationEvent.class, remap = false)
 public class EntityAttributeCreationEventMixin implements EACAccess {
     @Final
     @Shadow
