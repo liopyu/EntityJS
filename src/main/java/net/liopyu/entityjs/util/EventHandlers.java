@@ -39,7 +39,7 @@ public class EventHandlers {
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         modBus.addListener(EventHandlers::attributeCreation);
         modBus.addListener(EventHandlers::attributeRegistry);
-        modBus.addListener(EventHandlers::attributeModification);
+        modBus.addListener(EventPriority.LOW, EventHandlers::attributeModification);
         modBus.addListener(EventPriority.LOW, EventHandlers::registerSpawnPlacements); // Low to allow REPLACE to work and addons to effect the result
     }
 
