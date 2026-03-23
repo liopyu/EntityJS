@@ -182,7 +182,7 @@ public class EnderManEntityJS extends EnderMan implements IAnimatableJS {
 
     //Some logic overrides up here because there are different implementations in the other builders.
     @Override
-    public Brain.Provider<?> brainProvider() {
+    protected Brain.Provider<?> brainProvider() {
         if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<EnderManEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
