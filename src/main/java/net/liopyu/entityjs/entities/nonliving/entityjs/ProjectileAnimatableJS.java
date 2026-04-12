@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.entities.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.script.ConsoleJS;
+import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileAnimatableJSBuilder;
@@ -86,6 +87,13 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
 
     public String entityName() {
         return this.getType().toString();
+    }
+
+    @Info(value = """
+            Calls a triggerable animation to be played anywhere.
+            """)
+    public void triggerAnimation(String controllerName, String animName) {
+        triggerAnim(controllerName, animName);
     }
 
     @Override
