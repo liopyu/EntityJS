@@ -5,7 +5,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.vanilla.TridentJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.vanilla.TridentEntityJS;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -18,8 +18,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.ThrownTrident;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -35,7 +35,7 @@ public class TridentItemBuilder extends ProjectileItemBuilder {
     public transient Holder<SoundEvent> riptide2Sound;
     public transient Holder<SoundEvent> riptide3Sound;
 
-    public TridentItemBuilder(ResourceLocation i, BuilderBase<?> parent) {
+    public TridentItemBuilder(Identifier i, BuilderBase<?> parent) {
         super(i, parent);
         this.maxDamage = 250;
         this.throwSound = SoundEvents.TRIDENT_THROW;
@@ -53,7 +53,7 @@ public class TridentItemBuilder extends ProjectileItemBuilder {
         var tag5 = Tags.Items.RANGED_WEAPON_TOOLS.location();
         var tag6 = Tags.Items.MELEE_WEAPON_TOOLS.location();
         var tag7 = Tags.Items.ENCHANTABLES.location();
-        this.tag(new ResourceLocation[]{
+        this.tag(new Identifier[]{
                 tag,
                 tag2,
                 tag3,

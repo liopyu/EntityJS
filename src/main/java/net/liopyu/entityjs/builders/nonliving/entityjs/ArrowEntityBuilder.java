@@ -9,10 +9,10 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IArrowEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
     public boolean canShootFromDispenser = true;
 
-    public ArrowEntityBuilder(ResourceLocation i) {
+    public ArrowEntityBuilder(Identifier i) {
         super(i);
         thisList.add(this);
         textureLocation = t -> t.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
@@ -85,7 +85,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             arrowEntityBuilder.textureResource(entity => {
                 // Define logic to determine the texture resource for the entity
                 // Use information about the entity provided by the context.
-                return "kubejs:textures/entity/projectiles/arrow.png" // Some ResourceLocation representing the texture resource;
+                return "kubejs:textures/entity/projectiles/arrow.png" // Some Identifier representing the texture resource;
             });
             ```
             """)
@@ -93,9 +93,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
         textureLocation = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return ResourceLocation.parse((String) obj);
-            } else if (obj instanceof ResourceLocation) {
-                return (ResourceLocation) obj;
+                return Identifier.parse((String) obj);
+            } else if (obj instanceof Identifier) {
+                return (Identifier) obj;
             } else {
                 EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource in arrow builder: " + obj + "Defaulting to " + entity.getArrowBuilder().newID("textures/entity/projectiles/", ".png"));
                 return entity.getArrowBuilder().newID("textures/entity/projectiles/", ".png");
@@ -210,7 +210,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     @Info(value = """
             Sets the default sound event played when the arrow hits the ground using a string representation.
             
-            @param defaultHitGroundSoundEvent A string representing the ResourceLocation of the sound event.
+            @param defaultHitGroundSoundEvent A string representing the Identifier of the sound event.
             
             Example usage:
             ```javascript
@@ -219,10 +219,10 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             ```
             """)
     public ArrowEntityBuilder<T> defaultHitGroundSoundEvent(Object sound) {
-        if (sound instanceof String) defaultHitGroundSoundEvent = ResourceLocation.parse((String) sound);
-        else if (sound instanceof ResourceLocation) defaultHitGroundSoundEvent = (ResourceLocation) sound;
+        if (sound instanceof String) defaultHitGroundSoundEvent = Identifier.parse((String) sound);
+        else if (sound instanceof Identifier) defaultHitGroundSoundEvent = (Identifier) sound;
         else
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for defaultHitGroundSoundEvent. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.arrow.hit\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for defaultHitGroundSoundEvent. Value: " + sound + ". Must be a Identifier or String. Example: \"minecraft:entity.arrow.hit\"");
         return this;
     }
 

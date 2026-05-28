@@ -8,7 +8,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -241,7 +241,7 @@ public enum Behaviors {
             int maxJumpWidth,
             float maxJumpVelocity,
             Function<E, SoundEvent> jumpSound,
-            ResourceLocation preferredBlockTag,
+            Identifier preferredBlockTag,
             float preferredBlockChance,
             BiPredicate<E, BlockPos> acceptableLandingSpot
     ) {

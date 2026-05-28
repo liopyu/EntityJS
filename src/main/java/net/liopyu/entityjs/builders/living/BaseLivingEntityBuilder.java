@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.builders.living;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
@@ -19,19 +21,17 @@ import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLLoader;
-import software.bernie.geckolib.animation.*;
-import software.bernie.geckolib.animation.AnimationState;
-import software.bernie.geckolib.animation.keyframe.event.CustomInstructionKeyframeEvent;
-import software.bernie.geckolib.animation.keyframe.event.KeyFrameEvent;
-import software.bernie.geckolib.animation.keyframe.event.ParticleKeyframeEvent;
-import software.bernie.geckolib.animation.keyframe.event.SoundKeyframeEvent;
-import software.bernie.geckolib.animation.keyframe.event.data.CustomInstructionKeyframeData;
-import software.bernie.geckolib.animation.keyframe.event.data.KeyFrameData;
-import software.bernie.geckolib.animation.keyframe.event.data.ParticleKeyframeData;
-import software.bernie.geckolib.animation.keyframe.event.data.SoundKeyframeData;
-import software.bernie.geckolib.constant.dataticket.DataTicket;
-import software.bernie.geckolib.animation.PlayState;
-import net.minecraft.resources.ResourceLocation;
+import com.geckolib.animation.*;
+import com.geckolib.animation.object.LoopType;
+import com.geckolib.animation.state.AnimationTest;
+import com.geckolib.animation.state.KeyFrameEvent;
+import com.geckolib.cache.animation.keyframeevent.CustomInstructionKeyframeData;
+import com.geckolib.cache.animation.keyframeevent.KeyFrameData;
+import com.geckolib.cache.animation.keyframeevent.ParticleKeyframeData;
+import com.geckolib.cache.animation.keyframeevent.SoundKeyframeData;
+import com.geckolib.constant.dataticket.DataTicket;
+import com.geckolib.animation.object.PlayState;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.random.Weight;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -62,7 +62,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean save;
     public transient boolean fireImmune;
     public transient boolean canSpawnFarFromPlayer;
-    public transient ResourceLocation[] immuneTo;
+    public transient Identifier[] immuneTo;
     public transient boolean spawnFarFromPlayer;
     public transient int clientTrackingRange;
     public transient int updateInterval;
@@ -181,7 +181,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient boolean mountJumpingEnabled;
     public transient Consumer<LivingEntity> tickDeath;
     public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
-    public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
+    public transient Consumer<ContextUtils.EntityEntityServerLevelContext> onHurtTarget;
     public transient Predicate<ContextUtils.LineOfSightContext> isAlliedTo;
     public transient float scaleHeight;
     public transient float scaleWidth;
@@ -200,7 +200,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ItemArmorJSBuilder<T>> itemArmorJSBuilder;
 
     //STUFF
-    public BaseLivingEntityBuilder(ResourceLocation i) {
+    public BaseLivingEntityBuilder(Identifier i) {
         super(i);
         translationKey("entity." + i.getNamespace() + "." + i.getPath());
         thisList.add(this);
@@ -407,7 +407,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 ```
             """)
     public BaseLivingEntityBuilder<T> newGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
-        if (FMLLoader.getDist() == Dist.CLIENT) {
+        if (FMLLoader.getCurrent().getDist() == Dist.CLIENT) {
             GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
             builderConsumer.accept(layerBuild);
             layerList.add(layerBuild);
@@ -429,7 +429,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 ```
             """)
     public BaseLivingEntityBuilder<T> newGlowingGeoLayer(Consumer<GeoLayerJSBuilder<T>> builderConsumer) {
-        if (FMLLoader.getDist() == Dist.CLIENT) {
+        if (FMLLoader.getCurrent().getDist() == Dist.CLIENT) {
             GeoLayerJSBuilder<T> layerBuild = new GeoLayerJSBuilder<>(this);
             builderConsumer.accept(layerBuild);
             glowingLayerList.add(layerBuild);
@@ -767,8 +767,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> immuneTo(String... blockNames) {
         this.immuneTo = Arrays.stream(blockNames)
-                .map(ResourceLocation::parse)
-                .toArray(ResourceLocation[]::new);
+                .map(Identifier::parse)
+                .toArray(Identifier[]::new);
         return this;
     }
 
@@ -954,7 +954,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.modelResource(entity => {
                 // Define logic to determine the model resource for the entity
                 // Use information about the entity provided by the context.
-                return "kubejs:geo/entity/wyrm.geo.json" // Some ResourceLocation representing the model resource;
+                return "kubejs:geo/entity/wyrm.geo.json" // Some Identifier representing the model resource;
             });
             ```
             """)
@@ -962,9 +962,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         modelResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return ResourceLocation.parse((String) obj);
-            } else if (obj instanceof ResourceLocation) {
-                return (ResourceLocation) obj;
+                return Identifier.parse((String) obj);
+            } else if (obj instanceof Identifier) {
+                return (Identifier) obj;
             } else {
                 EntityJSHelperClass.logWarningMessageOnce("Invalid model resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("geo/entity/", ".geo.json"));
                 return entity.getBuilder().newID("geo/entity/", ".geo.json");
@@ -985,7 +985,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.textureResource(entity => {
                 // Define logic to determine the texture resource for the entity
                 // Use information about the entity provided by the context.
-                return "kubejs:textures/entity/wyrm.png" // Some ResourceLocation representing the texture resource;
+                return "kubejs:textures/entity/wyrm.png" // Some Identifier representing the texture resource;
             });
             ```
             """)
@@ -993,9 +993,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         textureResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return ResourceLocation.parse((String) obj);
-            } else if (obj instanceof ResourceLocation) {
-                return (ResourceLocation) obj;
+                return Identifier.parse((String) obj);
+            } else if (obj instanceof Identifier) {
+                return (Identifier) obj;
             } else {
                 EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("textures/entity/", ".png"));
                 return entity.getBuilder().newID("textures/entity/", ".png");
@@ -1016,8 +1016,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.animationResource(entity => {
                 // Define logic to determine the animation resource for the entity
                 // Use information about the entity provided by the context.
-                //return some ResourceLocation representing the animation resource;
-                return "kubejs:animations/entity/wyrm.animation.json" // Some ResourceLocation representing the animation resource;
+                //return some Identifier representing the animation resource;
+                return "kubejs:animations/entity/wyrm.animation.json" // Some Identifier representing the animation resource;
             });
             ```
             """)
@@ -1025,9 +1025,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         animationResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return ResourceLocation.parse((String) obj);
-            } else if (obj instanceof ResourceLocation) {
-                return (ResourceLocation) obj;
+                return Identifier.parse((String) obj);
+            } else if (obj instanceof Identifier) {
+                return (Identifier) obj;
             } else {
                 EntityJSHelperClass.logWarningMessageOnce("Invalid animation resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("animations/entity/", ".animation.json"));
                 return entity.getBuilder().newID("animations/entity/", ".animation.json");
@@ -1170,10 +1170,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```
             """)
     public BaseLivingEntityBuilder<T> setDeathSound(Object sound) {
-        if (sound instanceof String) setDeathSound = ResourceLocation.parse((String) sound);
-        else if (sound instanceof ResourceLocation) setDeathSound = (ResourceLocation) sound;
+        if (sound instanceof String) setDeathSound = Identifier.parse((String) sound);
+        else if (sound instanceof Identifier) setDeathSound = (Identifier) sound;
         else
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound. Value: " + sound + ". Must be a ResourceLocation. Example: \"minecraft:entity.generic.death\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound. Value: " + sound + ". Must be a Identifier. Example: \"minecraft:entity.generic.death\"");
         return this;
     }
 
@@ -1187,19 +1187,19 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```
             """)
     public BaseLivingEntityBuilder<T> setSwimSound(Object sound) {
-        if (sound instanceof String) setSwimSound = ResourceLocation.parse((String) sound);
-        else if (sound instanceof ResourceLocation) setSwimSound = (ResourceLocation) sound;
+        if (sound instanceof String) setSwimSound = Identifier.parse((String) sound);
+        else if (sound instanceof Identifier) setSwimSound = (Identifier) sound;
         else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.swim\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound. Value: " + sound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.swim\"");
 
-            setSwimSound = ResourceLocation.parse("minecraft:entity.generic.swim");
+            setSwimSound = Identifier.parse("minecraft:entity.generic.swim");
         }
         return this;
     }
 
 
     @Info(value = """
-            Sets the swim splash sound for the entity using either a string representation or a ResourceLocation object.
+            Sets the swim splash sound for the entity using either a string representation or a Identifier object.
             
             Example usage:
             ```javascript
@@ -1208,13 +1208,13 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> setSwimSplashSound(Object sound) {
         if (sound instanceof String) {
-            setSwimSplashSound = ResourceLocation.parse((String) sound);
-        } else if (sound instanceof ResourceLocation) {
-            setSwimSplashSound = (ResourceLocation) sound;
+            setSwimSplashSound = Identifier.parse((String) sound);
+        } else if (sound instanceof Identifier) {
+            setSwimSplashSound = (Identifier) sound;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.splash\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.splash\"");
 
-            setSwimSplashSound = ResourceLocation.parse("minecraft:entity/generic/splash");
+            setSwimSplashSound = Identifier.parse("minecraft:entity/generic/splash");
         }
         return this;
     }
@@ -1737,7 +1737,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the sound resource locations for small and large falls of the entity using either string representations or ResourceLocation objects.
+            Sets the sound resource locations for small and large falls of the entity using either string representations or Identifier objects.
             
             Example usage:
             ```javascript
@@ -1747,21 +1747,21 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> fallSounds(Object smallFallSound, Object largeFallSound) {
         if (smallFallSound instanceof String) {
-            this.smallFallSound = ResourceLocation.parse((String) smallFallSound);
-        } else if (smallFallSound instanceof ResourceLocation) {
-            this.smallFallSound = (ResourceLocation) smallFallSound;
+            this.smallFallSound = Identifier.parse((String) smallFallSound);
+        } else if (smallFallSound instanceof Identifier) {
+            this.smallFallSound = (Identifier) smallFallSound;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for smallFallSound. Value: " + smallFallSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.small_fall\"");
-            this.smallFallSound = ResourceLocation.parse("minecraft:entity/generic/small_fall");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for smallFallSound. Value: " + smallFallSound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.small_fall\"");
+            this.smallFallSound = Identifier.parse("minecraft:entity/generic/small_fall");
         }
 
         if (largeFallSound instanceof String) {
-            this.largeFallSound = ResourceLocation.parse((String) largeFallSound);
-        } else if (largeFallSound instanceof ResourceLocation) {
-            this.largeFallSound = (ResourceLocation) largeFallSound;
+            this.largeFallSound = Identifier.parse((String) largeFallSound);
+        } else if (largeFallSound instanceof Identifier) {
+            this.largeFallSound = (Identifier) largeFallSound;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for largeFallSound. Value: " + largeFallSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.large_fall\"");
-            this.largeFallSound = ResourceLocation.parse("minecraft:entity/generic/large_fall");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for largeFallSound. Value: " + largeFallSound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.large_fall\"");
+            this.largeFallSound = Identifier.parse("minecraft:entity/generic/large_fall");
         }
 
         return this;
@@ -1769,7 +1769,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
 
     @Info(value = """
-            Sets the sound resource location for the entity's eating sound using either a string representation or a ResourceLocation object.
+            Sets the sound resource location for the entity's eating sound using either a string representation or a Identifier object.
             
             Example usage:
             ```javascript
@@ -1778,12 +1778,12 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             """)
     public BaseLivingEntityBuilder<T> eatingSound(Object sound) {
         if (sound instanceof String) {
-            this.eatingSound = ResourceLocation.parse((String) sound);
-        } else if (sound instanceof ResourceLocation) {
-            this.eatingSound = (ResourceLocation) sound;
+            this.eatingSound = Identifier.parse((String) sound);
+        } else if (sound instanceof Identifier) {
+            this.eatingSound = (Identifier) sound;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
-            this.eatingSound = ResourceLocation.parse("minecraft:entity/zombie/ambient");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound. Value: " + sound + ". Must be a Identifier or String. Example: \"minecraft:entity.zombie.ambient\"");
+            this.eatingSound = Identifier.parse("minecraft:entity/zombie/ambient");
         }
         return this;
     }
@@ -2651,17 +2651,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    public transient Function<T, net.minecraft.client.renderer.RenderType> renderTypeFunction;
+    public transient Function<T, net.minecraft.client.renderer.rendertype.RenderType> renderTypeFunction;
 
     @Info(value = """
             Sets the render type for the entity via a function.
             
             Example usage:
             ```javascript
-            entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            entityBuilder.renderType(entity => RenderTypes.entityCutout("kubejs:path/to/texture", outlineEntityBoolean));
             ```
             """)
-    public BaseLivingEntityBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {
+    public BaseLivingEntityBuilder<T> renderType(Function<T, net.minecraft.client.renderer.rendertype.RenderType> type) {
         renderTypeFunction = type;
         return this;
     }
@@ -2719,10 +2719,10 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             @Nullable ICustomInstructionListenerJS<E> instructionListener
     ) {
         public AnimationController<E> get(E entity) {
-            final AnimationController<E> controller = new AnimationController<>(entity, name, translationTicksLength, predicate.toGecko());
+            final AnimationController<E> controller = new AnimationController<>(name, translationTicksLength, predicate.toGecko());
             if (triggerableAnimationID != null) {
                 Object type = EntityJSHelperClass.convertObjectToDesired(loopType, "looptype");
-                controller.triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(triggerableAnimationName, (Animation.LoopType) type));
+                controller.triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(triggerableAnimationName, (LoopType) type));
             }
             if (soundListener != null) {
                 controller.setSoundKeyframeHandler(event -> soundListener.playSound(new SoundKeyFrameEventJS<>(event)));
@@ -2772,7 +2772,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     // Wrappers around geckolib things that allow script writers to know what they're doing
 
     /**
-     * A wrapper around {@link software.bernie.geckolib.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
+     * A wrapper around {@link com.geckolib.animation.AnimationController.AnimationStateHandler IAnimationPredicate}
      * that is easier to work with in js
      */
     @FunctionalInterface
@@ -2812,9 +2812,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
      */
     public static class AnimationEventJS<E extends LivingEntity & IAnimatableJS> {
         private final List<RawAnimation.Stage> animationList = new ObjectArrayList();
-        private final AnimationState<E> parent;
+        private final AnimationTest<E> parent;
 
-        public AnimationEventJS(AnimationState<E> parent) {
+        public AnimationEventJS(AnimationTest<E> parent) {
             this.parent = parent;
         }
 
@@ -2825,7 +2825,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
         @Info(value = "Returns the entity that is being animated")
         public E getEntity() {
-            return parent.getAnimatable();
+            return parent.animatable();
         }
 
         // ?
@@ -2850,7 +2850,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
         @Info(value = "Returns the animation controller this event is part of")
         public AnimationController<E> getController() {
-            return parent.getController();
+            return parent.controller();
         }
 
         @Info(value = """
@@ -2865,44 +2865,44 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 """)
         public PlayState addTriggerableAnimation(String animationName, String triggerableAnimationID, Object loopTypeEnum) {
             Object type = EntityJSHelperClass.convertObjectToDesired(loopTypeEnum, "looptype");
-            parent.getController().triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(animationName, (Animation.LoopType) type));
+            parent.controller().triggerableAnim(triggerableAnimationID, RawAnimation.begin().then(animationName, (LoopType) type));
             return PlayState.CONTINUE;
         }
 
         @Info(value = "Sets an animation to play defaulting to the animations.json file loop type")
         public PlayState thenPlay(String animationName) {
-            parent.getController().setAnimation(RawAnimation.begin().then(animationName, Animation.LoopType.DEFAULT));
+            parent.controller().setAnimation(RawAnimation.begin().then(animationName, LoopType.DEFAULT));
             return PlayState.CONTINUE;
         }
 
         @Info(value = "Sets an animation to play in a loop")
         public PlayState thenLoop(String animationName) {
-            parent.getController().setAnimation(RawAnimation.begin().thenLoop(animationName));
+            parent.controller().setAnimation(RawAnimation.begin().thenLoop(animationName));
             return PlayState.CONTINUE;
         }
 
         @Info(value = "Wait a certain amount of ticks before starting the next animation")
         public PlayState thenWait(int ticks) {
-            parent.getController().setAnimation(RawAnimation.begin().thenWait(ticks));
+            parent.controller().setAnimation(RawAnimation.begin().thenWait(ticks));
             return PlayState.CONTINUE;
         }
 
         @Info(value = "Sets an animation to play and hold on the last frame")
         public PlayState thenPlayAndHold(String animationName) {
-            parent.getController().setAnimation(RawAnimation.begin().then(animationName, Animation.LoopType.HOLD_ON_LAST_FRAME));
+            parent.controller().setAnimation(RawAnimation.begin().then(animationName, LoopType.HOLD_ON_LAST_FRAME));
             return PlayState.CONTINUE;
         }
 
         @Info(value = "Sets an animation to play an x amount of times")
         public PlayState thenPlayXTimes(String animationName, int times) {
             for (int i = 0; i < times; ++i) {
-                parent.getController().setAnimation(RawAnimation.begin().then(animationName, i == times - 1 ? Animation.LoopType.DEFAULT : Animation.LoopType.PLAY_ONCE));
+                parent.controller().setAnimation(RawAnimation.begin().then(animationName, i == times - 1 ? LoopType.DEFAULT : LoopType.PLAY_ONCE));
             }
             return PlayState.CONTINUE;
         }
 
         @Info(value = "Adds an animation to the current animation list")
-        public AnimationEventJS<E> then(String animationName, Animation.LoopType loopType) {
+        public AnimationEventJS<E> then(String animationName, LoopType loopType) {
             this.animationList.add(new RawAnimation.Stage(animationName, loopType));
             return this;
         }
@@ -2930,9 +2930,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
 
         protected KeyFrameEventJS(KeyFrameEvent<E, B> parent) {
             animationTick = parent.getAnimationTick();
-            entity = parent.getAnimatable();
-            controller = parent.getController();
-            keyframeData = parent.getKeyframeData();
+            entity = parent.animatable();
+            controller = parent.controller();
+            keyframeData = parent.keyframeData();
         }
     }
 
@@ -2946,9 +2946,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         @Info(value = "Gets the sound id given by the Keyframe instruction from the animation. json")
         public final String sound;
 
-        public SoundKeyFrameEventJS(SoundKeyframeEvent<E> parent) {
+        public SoundKeyFrameEventJS(KeyFrameEvent<E, SoundKeyframeData> parent) {
             super(parent);
-            sound = parent.getKeyframeData().getSound();
+            sound = parent.keyframeData().getSound();
         }
     }
 
@@ -2965,11 +2965,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         @Info(value = "Gets the script string given by the Keyframe instruction from the animation.json")
         public final String script;
 
-        public ParticleKeyFrameEventJS(ParticleKeyframeEvent<E> parent) {
+        public ParticleKeyFrameEventJS(KeyFrameEvent<E, ParticleKeyframeData> parent) {
             super(parent);
-            effect = parent.getKeyframeData().getEffect();
-            locator = parent.getKeyframeData().getLocator();
-            script = parent.getKeyframeData().script();
+            effect = parent.keyframeData().getEffect();
+            locator = parent.keyframeData().getLocatorName();
+            script = parent.keyframeData().script();
         }
     }
 
@@ -2982,9 +2982,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         @Info(value = "A list of all the custom instructions. In Blockbench, each line in the custom instruction box is a separate instruction.")
         public final String instructions;
 
-        public CustomInstructionKeyframeEventJS(CustomInstructionKeyframeEvent<E> parent) {
+        public CustomInstructionKeyframeEventJS(KeyFrameEvent<E, CustomInstructionKeyframeData> parent) {
             super(parent);
-            this.instructions = parent.getKeyframeData().getInstructions();
+            this.instructions = parent.keyframeData().getInstructions();
         }
     }
 

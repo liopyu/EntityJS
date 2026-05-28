@@ -9,7 +9,7 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileAnimatableJSBui
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileAnimatableJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -28,7 +28,7 @@ public class ProjectileItemBuilder extends ItemBuilder {
     public transient float projectileInaccuracy;
 
 
-    public ProjectileItemBuilder(ResourceLocation i, BuilderBase<?> parent) {
+    public ProjectileItemBuilder(Identifier i, BuilderBase<?> parent) {
         super(i);
         this.parent = parent;
         canThrow = false;

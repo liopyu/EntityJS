@@ -17,7 +17,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -60,11 +60,11 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
     public transient float soundPitch;
     public transient boolean overrideSound;
     public transient Function<ContextUtils.ItemUseContext, Object> signalTo;
-    public transient ResourceLocation structure;
-    public transient ResourceLocation structureTag;
+    public transient Identifier structure;
+    public transient Identifier structureTag;
     public transient int chunkRadius;
 
-    public EyeOfEnderItemBuilder(ResourceLocation i, EyeOfEnderJSBuilder parent) {
+    public EyeOfEnderItemBuilder(Identifier i, EyeOfEnderJSBuilder parent) {
         super(i);
         this.parent = parent;
         baseTexture = i.getNamespace() + ":item/" + i.getPath();
@@ -96,7 +96,7 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
             builder.signalToStructureTag("minecraft:village", 100);
             ```
             """)
-    public EyeOfEnderItemBuilder signalToStructureTag(ResourceLocation resourceLocation, int chunkRadius) {
+    public EyeOfEnderItemBuilder signalToStructureTag(Identifier resourceLocation, int chunkRadius) {
         this.structureTag = resourceLocation;
         this.chunkRadius = chunkRadius;
         return this;
@@ -110,7 +110,7 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
             builder.signalToStructureTag("minecraft:village");
             ```
             """)
-    public EyeOfEnderItemBuilder signalToStructureTag(ResourceLocation resourceLocation) {
+    public EyeOfEnderItemBuilder signalToStructureTag(Identifier resourceLocation) {
         this.structureTag = resourceLocation;
         this.chunkRadius = 100;
         return this;
@@ -124,7 +124,7 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
             builder.signalToStructure("minecraft:village_plains", 100);
             ```
             """)
-    public EyeOfEnderItemBuilder signalToStructure(ResourceLocation resourceLocation, int chunkRadius) {
+    public EyeOfEnderItemBuilder signalToStructure(Identifier resourceLocation, int chunkRadius) {
         this.structure = resourceLocation;
         this.chunkRadius = chunkRadius;
         return this;
@@ -138,7 +138,7 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
             builder.signalToStructure("minecraft:village_plains");
             ```
             """)
-    public EyeOfEnderItemBuilder signalToStructure(ResourceLocation resourceLocation) {
+    public EyeOfEnderItemBuilder signalToStructure(Identifier resourceLocation) {
         this.structure = resourceLocation;
         this.chunkRadius = 100;
         return this;
@@ -226,7 +226,7 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
                                     return InteractionResultHolder.consume($$3);
                                 }
                             } else if (structure != null) {
-                                ResourceLocation structureId = structure;
+                                Identifier structureId = structure;
                                 Registry<Structure> structureRegistry = pLevel.registryAccess().registryOrThrow(Registries.STRUCTURE);
                                 Optional<Holder.Reference<Structure>> holder = structureRegistry.getHolder(ResourceKey.create(Registries.STRUCTURE, structureId));
 

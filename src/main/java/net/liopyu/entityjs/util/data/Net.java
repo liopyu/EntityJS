@@ -9,7 +9,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -34,7 +34,7 @@ public final class Net {
     public record SyncAllS2C(UUID entityId, Map<String, Tag> values,
                              Map<String, Integer> types) implements CustomPacketPayload {
         public static final Type<SyncAllS2C> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(EntityJSMod.MOD_ID, "sync_all_s2c"));
+                new Type<>(Identifier.fromNamespaceAndPath(EntityJSMod.MOD_ID, "sync_all_s2c"));
         public static final StreamCodec<ByteBuf, SyncAllS2C> STREAM_CODEC =
                 StreamCodec.composite(UUIDUtil.STREAM_CODEC, SyncAllS2C::entityId, TAG_MAP, SyncAllS2C::values, INT_MAP, SyncAllS2C::types, SyncAllS2C::new);
 
@@ -46,7 +46,7 @@ public final class Net {
 
     public record SetValueS2C(UUID entityId, String name, Tag value) implements CustomPacketPayload {
         public static final Type<SetValueS2C> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(EntityJSMod.MOD_ID, "set_value_s2c"));
+                new Type<>(Identifier.fromNamespaceAndPath(EntityJSMod.MOD_ID, "set_value_s2c"));
         public static final StreamCodec<ByteBuf, SetValueS2C> STREAM_CODEC =
                 StreamCodec.composite(UUIDUtil.STREAM_CODEC, SetValueS2C::entityId, ByteBufCodecs.STRING_UTF8, SetValueS2C::name, ByteBufCodecs.TAG, SetValueS2C::value, SetValueS2C::new);
 
@@ -58,7 +58,7 @@ public final class Net {
 
     public record SetTypeS2C(UUID entityId, String name, int ord) implements CustomPacketPayload {
         public static final Type<SetTypeS2C> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(EntityJSMod.MOD_ID, "set_type_s2c"));
+                new Type<>(Identifier.fromNamespaceAndPath(EntityJSMod.MOD_ID, "set_type_s2c"));
         public static final StreamCodec<ByteBuf, SetTypeS2C> STREAM_CODEC =
                 StreamCodec.composite(UUIDUtil.STREAM_CODEC, SetTypeS2C::entityId, ByteBufCodecs.STRING_UTF8, SetTypeS2C::name, ByteBufCodecs.VAR_INT, SetTypeS2C::ord, SetTypeS2C::new);
 
@@ -70,7 +70,7 @@ public final class Net {
 
     public record DeleteValueS2C(UUID entityId, String name) implements CustomPacketPayload {
         public static final Type<DeleteValueS2C> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(EntityJSMod.MOD_ID, "delete_value_s2c"));
+                new Type<>(Identifier.fromNamespaceAndPath(EntityJSMod.MOD_ID, "delete_value_s2c"));
         public static final StreamCodec<ByteBuf, DeleteValueS2C> STREAM_CODEC =
                 StreamCodec.composite(UUIDUtil.STREAM_CODEC, DeleteValueS2C::entityId, ByteBufCodecs.STRING_UTF8, DeleteValueS2C::name, DeleteValueS2C::new);
 
@@ -82,7 +82,7 @@ public final class Net {
 
     public record SetValueC2S(UUID entityId, String name, Tag value) implements CustomPacketPayload {
         public static final Type<SetValueC2S> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(EntityJSMod.MOD_ID, "set_value_c2s"));
+                new Type<>(Identifier.fromNamespaceAndPath(EntityJSMod.MOD_ID, "set_value_c2s"));
         public static final StreamCodec<ByteBuf, SetValueC2S> STREAM_CODEC =
                 StreamCodec.composite(UUIDUtil.STREAM_CODEC, SetValueC2S::entityId, ByteBufCodecs.STRING_UTF8, SetValueC2S::name, ByteBufCodecs.TAG, SetValueC2S::value, SetValueC2S::new);
 
@@ -95,7 +95,7 @@ public final class Net {
     public record EnsureValueC2S(UUID entityId, String name, EntitySerializerType serType,
                                  Tag value) implements CustomPacketPayload {
         public static final Type<EnsureValueC2S> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(EntityJSMod.MOD_ID, "ensure_value_c2s"));
+                new Type<>(Identifier.fromNamespaceAndPath(EntityJSMod.MOD_ID, "ensure_value_c2s"));
         public static final StreamCodec<ByteBuf, EnsureValueC2S> STREAM_CODEC =
                 StreamCodec.composite(
                         UUIDUtil.STREAM_CODEC, EnsureValueC2S::entityId,
@@ -179,7 +179,7 @@ public final class Net {
 
     public record SetTypedValueS2C(UUID entityId, String name, int ord, Tag value) implements CustomPacketPayload {
         public static final Type<SetTypedValueS2C> TYPE =
-                new Type<>(ResourceLocation.fromNamespaceAndPath(EntityJSMod.MOD_ID, "set_typed_value_s2c"));
+                new Type<>(Identifier.fromNamespaceAndPath(EntityJSMod.MOD_ID, "set_typed_value_s2c"));
         public static final StreamCodec<ByteBuf, SetTypedValueS2C> STREAM_CODEC =
                 StreamCodec.composite(
                         UUIDUtil.STREAM_CODEC, SetTypedValueS2C::entityId,

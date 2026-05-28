@@ -4,14 +4,14 @@ package net.liopyu.entityjs.builders.living.entityjs;
 import net.liopyu.entityjs.builders.living.entityjs.TameableMobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.TameableMobJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class TameableMobJSBuilder extends TameableMobBuilder<TameableMobJS> {
 
-    public TameableMobJSBuilder(ResourceLocation i) {
+    public TameableMobJSBuilder(Identifier i) {
         super(i);
 
     }

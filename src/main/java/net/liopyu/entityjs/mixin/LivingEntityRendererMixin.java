@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.mixin;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import dev.latvian.mods.kubejs.script.ConsoleJS;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
@@ -7,9 +9,9 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -59,15 +61,15 @@ public abstract class LivingEntityRendererMixin<T, M extends EntityModel<?>> {
                     var obj = builder.setTextureLocation.apply(context);
                     var resourcelocation = EntityJSHelperClass.convertObjectToDesired(obj, "resourcelocation");
                     if (resourcelocation != null) {
-                        var textureLocation = (ResourceLocation) resourcelocation;
+                        var textureLocation = (Identifier) resourcelocation;
                         if (translucent) {
-                            cir.setReturnValue(RenderType.itemEntityTranslucentCull(textureLocation));
+                            cir.setReturnValue(RenderTypes.entityTranslucentCullItemTarget(textureLocation));
                             return;
                         } else if (bodyVisible) {
                             cir.setReturnValue(model.renderType(textureLocation));
                             return;
                         } else {
-                            var finalValue = glowing ? RenderType.outline(textureLocation) : null;
+                            var finalValue = glowing ? RenderTypes.outline(textureLocation) : null;
                             cir.setReturnValue(finalValue);
                             return;
                         }

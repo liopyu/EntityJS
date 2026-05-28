@@ -2,14 +2,14 @@ package net.liopyu.entityjs.builders.living.entityjs;
 
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.BaseLivingEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class BaseLivingEntityJSBuilder extends BaseLivingEntityBuilder<BaseLivingEntityJS> {
 
-    public BaseLivingEntityJSBuilder(ResourceLocation i) {
+    public BaseLivingEntityJSBuilder(Identifier i) {
         super(i);
     }
 

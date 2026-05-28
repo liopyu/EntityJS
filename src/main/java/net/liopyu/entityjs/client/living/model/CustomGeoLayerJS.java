@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.client.living.model;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
@@ -12,12 +14,12 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
+import com.geckolib.cache.model.BakedGeoModel;
+import com.geckolib.renderer.layer.GeoRenderLayer;
 
 import java.util.function.Function;
 
@@ -40,12 +42,12 @@ public class CustomGeoLayerJS<T extends LivingEntity & IAnimatableJSCustom> exte
     }
 
     @Override
-    protected ResourceLocation getTextureResource(T animatable) {
+    protected Identifier getTextureResource(T animatable) {
         animatable = ensureIAnimatableJS(animatable);
         if (geoBuilder.textureResource != null) {
             Object obj = geoBuilder.textureResource.apply(animatable);
-            if (obj instanceof ResourceLocation r) return r;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for textureResource in newGeoLayer builder. Value: " + obj + ". Must be a ResourceLocation. Defaulting to " + super.getTextureResource(animatable));
+            if (obj instanceof Identifier r) return r;
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for textureResource in newGeoLayer builder. Value: " + obj + ". Must be a Identifier. Defaulting to " + super.getTextureResource(animatable));
         }
         return super.getTextureResource(animatable);
     }
@@ -70,10 +72,10 @@ public class CustomGeoLayerJS<T extends LivingEntity & IAnimatableJSCustom> exte
         if (geoBuilder.render != null && animatable != null) {
             final ContextUtils.PreRenderContext<T> context = new ContextUtils.PreRenderContext<>(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTicks, packedLightIn, packedOverlay);
             EntityJSHelperClass.consumerCallback(geoBuilder.render, context, "[EntityJS]: Error in " + entityName() + "builder for field: render");
-            RenderType renderLayer = RenderType.entityCutoutNoCull(getTextureResource(animatable));
+            RenderType renderLayer = RenderTypes.entityCutout(getTextureResource(animatable));
             getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, packedLightIn, OverlayTexture.NO_OVERLAY, getRenderer().getRenderColor(animatable, partialTicks, packedLightIn).argbInt());
         } else {
-            RenderType renderLayer = RenderType.entityCutoutNoCull(getTextureResource(animatable));
+            RenderType renderLayer = RenderTypes.entityCutout(getTextureResource(animatable));
             getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderLayer, bufferSource.getBuffer(renderLayer), partialTicks, packedLightIn, OverlayTexture.NO_OVERLAY, getRenderer().getRenderColor(animatable, partialTicks, packedLightIn).argbInt());
         }
     }

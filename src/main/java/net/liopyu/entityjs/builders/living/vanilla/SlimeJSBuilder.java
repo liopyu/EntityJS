@@ -6,7 +6,7 @@ import net.liopyu.entityjs.entities.living.vanilla.SlimeEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,7 +21,7 @@ public class SlimeJSBuilder extends MobBuilder<SlimeEntityJS> {
     public transient Consumer<ContextUtils.LivingEntityContext> dealDamage;
     public transient SoundEvent setSquishSound;
 
-    public SlimeJSBuilder(ResourceLocation i) {
+    public SlimeJSBuilder(Identifier i) {
         super(i);
         defaultGoals = true;
     }

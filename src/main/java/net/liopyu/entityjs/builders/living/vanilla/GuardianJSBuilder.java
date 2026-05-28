@@ -5,7 +5,7 @@ import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.GoatEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.GuardianEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 public class GuardianJSBuilder extends PathfinderMobBuilder<GuardianEntityJS> {
     public transient Boolean defaultGoals;
 
-    public GuardianJSBuilder(ResourceLocation i) {
+    public GuardianJSBuilder(Identifier i) {
         super(i);
         defaultGoals = true;
     }

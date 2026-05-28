@@ -6,7 +6,7 @@ import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.CreeperEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.DolphinEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -14,7 +14,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 public class DolphinJSBuilder extends PathfinderMobBuilder<DolphinEntityJS> {
     public transient boolean defaultGoals;
 
-    public DolphinJSBuilder(ResourceLocation i) {
+    public DolphinJSBuilder(Identifier i) {
         super(i);
         this.defaultGoals = true;
     }

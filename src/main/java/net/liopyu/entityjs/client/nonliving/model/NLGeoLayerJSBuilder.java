@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.client.nonliving.model;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
@@ -7,8 +9,8 @@ import net.liopyu.entityjs.client.nonliving.KubeJSNLEntityRenderer;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 
 import java.util.function.Consumer;
@@ -87,7 +89,7 @@ public class NLGeoLayerJSBuilder<T extends Entity & IAnimatableJSNL> {
             entityBuilder.textureResource(entity => {
                 // Define logic to determine the texture resource for the entity
                 // Use information about the entity provided by the context.
-                return "kubejs:textures/entity/wyrm.png" // Some ResourceLocation representing the texture resource;
+                return "kubejs:textures/entity/wyrm.png" // Some Identifier representing the texture resource;
             });
             ```
             """)
@@ -95,9 +97,9 @@ public class NLGeoLayerJSBuilder<T extends Entity & IAnimatableJSNL> {
         textureResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return ResourceLocation.parse((String) obj);
-            } else if (obj instanceof ResourceLocation) {
-                return (ResourceLocation) obj;
+                return Identifier.parse((String) obj);
+            } else if (obj instanceof Identifier) {
+                return (Identifier) obj;
             } else {
                 EntityJSHelperClass.logWarningMessageOnce("Invalid return value for textureResource in newGeoLayer builder: " + obj + ". Defaulting to " + entity.getBuilder().newID("textures/entity/", ".png"));
                 return entity.getBuilder().newID("textures/entity/", ".png");
@@ -113,7 +115,7 @@ public class NLGeoLayerJSBuilder<T extends Entity & IAnimatableJSNL> {
             
             Example usage:
             ```javascript
-            builder.setRenderType(RenderType.entityCutoutNoCull("kubejs:path/to/texture", true));
+            builder.setRenderType(RenderTypes.entityCutout("kubejs:path/to/texture", true));
             ```
             """)
     public NLGeoLayerJSBuilder<T> setRenderType(RenderType type) {
@@ -128,10 +130,10 @@ public class NLGeoLayerJSBuilder<T extends Entity & IAnimatableJSNL> {
             
             Example usage:
             ```javascript
-            builder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            builder.renderType(entity => RenderTypes.entityCutout("kubejs:path/to/texture", outlineEntityBoolean));
             ```
             """)
-    public NLGeoLayerJSBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {
+    public NLGeoLayerJSBuilder<T> renderType(Function<T, net.minecraft.client.renderer.rendertype.RenderType> type) {
         renderTypeFunction = type;
         return this;
     }

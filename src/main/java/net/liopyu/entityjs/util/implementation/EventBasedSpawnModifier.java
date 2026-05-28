@@ -7,7 +7,7 @@ import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.RegistryUtil;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.Biome;
@@ -40,15 +40,15 @@ public class EventBasedSpawnModifier implements BiomeModifier {
         if (phase == Phase.ADD) {
             for (BiomeSpawn biomeSpawn : BaseLivingEntityBuilder.biomeSpawnList) {
                 final MobSpawnSettings.SpawnerData spawnerData = biomeSpawn.spawnerData().get();
-                for (Either<ResourceLocation, TagKey<Biome>> either : biomeSpawn.biomes()) {
+                for (Either<Identifier, TagKey<Biome>> either : biomeSpawn.biomes()) {
                     either.map(rl -> {
                         if (biome.is(rl)) {
-                            spawnsBuilder.addSpawn(spawnerData.type.getCategory(), spawnerData);
+                            spawnsBuilder.addSpawn(spawnerData.type().getCategory(), spawnerData);
                         }
                         return rl;
                     }, tag -> {
                         if (biome.is(tag)) {
-                            spawnsBuilder.addSpawn(spawnerData.type.getCategory(), spawnerData);
+                            spawnsBuilder.addSpawn(spawnerData.type().getCategory(), spawnerData);
                         }
                         return tag;
                     });
@@ -57,7 +57,7 @@ public class EventBasedSpawnModifier implements BiomeModifier {
 
             if (event != null) {
                 for (BiomeSpawnsEventJS.Addition addition : event.additions) {
-                    for (Either<ResourceLocation, TagKey<Biome>> either : addition.biomes()) {
+                    for (Either<Identifier, TagKey<Biome>> either : addition.biomes()) {
                         either.map(rl -> {
                             if (biome.is(rl)) {
                                 spawnsBuilder.addSpawn(addition.entityType().getCategory(), addition.spawnData());
@@ -77,7 +77,7 @@ public class EventBasedSpawnModifier implements BiomeModifier {
         if (event != null && phase == Phase.REMOVE) {
             for (BiomeSpawnsEventJS.Removal removal : event.removals) {
                 final AtomicBoolean atomicBoolean = new AtomicBoolean(false);
-                for (Either<ResourceLocation, TagKey<Biome>> either : removal.biomes()) {
+                for (Either<Identifier, TagKey<Biome>> either : removal.biomes()) {
                     either.map(rl -> {
                         if (biome.is(rl)) {
                             atomicBoolean.set(true);
@@ -106,7 +106,7 @@ public class EventBasedSpawnModifier implements BiomeModifier {
         return RegistryUtil.EVENT_SPAWN_MODIFIER.get();
     }
 
-    public record BiomeSpawn(List<Either<ResourceLocation, TagKey<Biome>>> biomes,
+    public record BiomeSpawn(List<Either<Identifier, TagKey<Biome>>> biomes,
                              Supplier<MobSpawnSettings.SpawnerData> spawnerData) {
     }
 }

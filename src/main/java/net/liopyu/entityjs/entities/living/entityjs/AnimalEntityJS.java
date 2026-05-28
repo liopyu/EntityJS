@@ -12,14 +12,14 @@ import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
-import net.minecraft.MethodsReturnNonnullByDefault;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -39,7 +39,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BowItem;
@@ -57,8 +57,8 @@ import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.entity.PartEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.util.GeckoLibUtil;
+import com.geckolib.animatable.instance.AnimatableInstanceCache;
+import com.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
@@ -102,7 +102,7 @@ import java.util.Objects;
  * }}</pre>
  * Of course this does not implement any possible networking/synced entity data stuff. figure that out yourself, it scares me
  */
-@MethodsReturnNonnullByDefault // Just remove the countless number of warnings present
+
 @ParametersAreNonnullByDefault
 public class AnimalEntityJS extends Animal implements IAnimatableJS {
 
@@ -255,7 +255,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
         if (builder.setBreedOffspring != null) {
             final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
-            if (obj instanceof ResourceLocation resourceLocation) {
+            if (obj instanceof Identifier resourceLocation) {
                 EntityType<?> breedOffspringType = BuiltInRegistries.ENTITY_TYPE.get(resourceLocation);
                 if (breedOffspringType != null) {
                     Entity breedOffspringEntity = breedOffspringType.create(serverLevel);
@@ -264,7 +264,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
                     }
                 }
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + obj + ". Must return an AgeableMob ResourceLocation. Defaulting to super method: " + builder.get());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + obj + ". Must return an AgeableMob Identifier. Defaulting to super method: " + builder.get());
         }
         return builder.get().create(serverLevel);
     }
@@ -558,7 +558,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     protected SoundEvent getAmbientSound() {
         if (builder.setAmbientSound != null) {
-            return BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setAmbientSound);
+            return BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.setAmbientSound);
         } else {
             return super.getAmbientSound();
         }
@@ -1019,9 +1019,9 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
             try {
                 Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
                 if (obj != null) {
-                    return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
+                    return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) obj));
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a Identifier or String. Defaulting to \"minecraft:entity.generic.hurt\"");
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: setHurtSound. Defaulting to \"minecraft:entity.generic.hurt\"", e);
@@ -1564,14 +1564,14 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     protected SoundEvent getSwimSplashSound() {
         if (builder.setSwimSplashSound == null) return super.getSwimSplashSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.setSwimSplashSound));
     }
 
 
     @Override
     protected SoundEvent getSwimSound() {
         if (builder.setSwimSound == null) return super.getSwimSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.setSwimSound));
 
     }
 
@@ -1579,7 +1579,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     protected SoundEvent getDeathSound() {
         if (builder.setDeathSound == null) return super.getDeathSound();
-        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setDeathSound));
+        return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.setDeathSound));
     }
 
 
@@ -1587,8 +1587,8 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     public @NotNull Fallsounds getFallSounds() {
         if (builder.fallSounds != null)
             return new Fallsounds(
-                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.smallFallSound)),
-                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.largeFallSound))
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.smallFallSound)),
+                    Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.largeFallSound))
             );
         return super.getFallSounds();
     }
@@ -1596,7 +1596,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS {
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
         if (builder.eatingSound != null)
-            return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.eatingSound));
+            return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.eatingSound));
         return super.getEatingSound(itemStack);
     }
 

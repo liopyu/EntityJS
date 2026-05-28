@@ -5,7 +5,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ArrowEntityJS;
 import net.liopyu.entityjs.item.ArrowItemBuilder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 
@@ -16,12 +16,12 @@ public class ArrowEntityJSBuilder extends ArrowEntityBuilder<ArrowEntityJS> {
     public transient ArrowItemBuilder item;
     public transient boolean noItem;
 
-    public ArrowEntityJSBuilder(ResourceLocation i) {
+    public ArrowEntityJSBuilder(Identifier i) {
         super(i);
         this.item = (ArrowItemBuilder) new ArrowItemBuilder(id, this)
                 .canBePickedup(true)
                 .texture(i.getNamespace() + ":item/" + i.getPath())
-                .tag(new ResourceLocation[]{ResourceLocation.parse("minecraft:arrows")});
+                .tag(new Identifier[]{Identifier.parse("minecraft:arrows")});
 
     }
 

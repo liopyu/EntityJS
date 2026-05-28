@@ -6,7 +6,7 @@ import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.BatEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.CamelEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -19,7 +19,7 @@ public class CamelJSBuilder extends AnimalEntityBuilder<CamelEntityJS> {
     public transient Consumer<ContextUtils.PlayerEntityContext> tameOverride;
     public transient Boolean defaultBehaviourGoals;
 
-    public CamelJSBuilder(ResourceLocation i) {
+    public CamelJSBuilder(Identifier i) {
         super(i);
         this.defaultGoals = true;
         defaultBehaviourGoals = true;

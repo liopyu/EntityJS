@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.mixin;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
@@ -17,17 +19,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.ListModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemFrameRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.Boat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.phys.Vec3;
@@ -81,7 +83,7 @@ public abstract class EntityRendererMixin {
                     var obj = builder.setTextureLocation.apply(context);
                     var resourcelocation = EntityJSHelperClass.convertObjectToDesired(obj, "resourcelocation");
                     if (resourcelocation != null) {
-                        var textureLocation = (ResourceLocation) resourcelocation;
+                        var textureLocation = (Identifier) resourcelocation;
                         entityjs$render(entityRenderDispatcher, entity, pX, pY, pZ, pRotationYaw, pPartialTicks, pPoseStack, pBuffer, pPackedLight, ci, textureLocation);
                         return;
                     }
@@ -128,8 +130,8 @@ public abstract class EntityRendererMixin {
             MultiBufferSource interceptedBuffer = pBuffer;
             if (locationOrRenderType instanceof RenderType type) {
                 interceptedBuffer = renderType -> new VertexModifier(pBuffer.getBuffer(type));
-            } else if (locationOrRenderType instanceof ResourceLocation location) {
-                interceptedBuffer = renderType -> new VertexModifier(pBuffer.getBuffer(RenderType.entityCutout(location)));
+            } else if (locationOrRenderType instanceof Identifier location) {
+                interceptedBuffer = renderType -> new VertexModifier(pBuffer.getBuffer(RenderTypes.entityCutout(location)));
             }
 
             entityrenderer.render(pEntity, pRotationYaw, pPartialTicks, pPoseStack, interceptedBuffer, pPackedLight);
@@ -153,7 +155,7 @@ public abstract class EntityRendererMixin {
             }
 
             if (entityRenderDispatcher.renderHitBoxes && !pEntity.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
-                EntityRenderDispatcher.renderHitbox(pPoseStack, pBuffer.getBuffer(RenderType.lines()), pEntity, pPartialTicks, 1.0F, 1.0F, 1.0F);
+                EntityRenderDispatcher.renderHitbox(pPoseStack, pBuffer.getBuffer(RenderTypes.lines()), pEntity, pPartialTicks, 1.0F, 1.0F, 1.0F);
             }
 
             pPoseStack.popPose();

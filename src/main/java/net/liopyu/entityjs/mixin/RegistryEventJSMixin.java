@@ -9,7 +9,7 @@ import dev.latvian.mods.kubejs.script.ConsoleJS;
 import dev.latvian.mods.kubejs.script.SourceLine;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.Cast;
-import dev.latvian.mods.kubejs.util.KubeResourceLocation;
+import dev.latvian.mods.kubejs.util.KubeIdentifier;
 import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -76,7 +76,7 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
             ```
             """
     )
-    public CustomEntityBuilder entityJs$createCustom(KubeResourceLocation id, Class<? extends LivingEntity> entityClass, Consumer<ModifyEntityBuilder> consumer) {
+    public CustomEntityBuilder entityJs$createCustom(KubeIdentifier id, Class<? extends LivingEntity> entityClass, Consumer<ModifyEntityBuilder> consumer) {
         if (!LivingEntity.class.isAssignableFrom(entityClass)) {
             EntityJSHelperClass.logErrorMessageOnce("Tried to create entity from a class that does not extend LivingEntity. Id: " + id);
             return null;

@@ -8,7 +8,7 @@ import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.GoatEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.HorseEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -21,7 +21,7 @@ public class HorseJSBuilder extends AnimalEntityBuilder<HorseEntityJS> {
     public transient Boolean defaultGoals;
     public transient Boolean defaultBehaviourGoals;
 
-    public HorseJSBuilder(ResourceLocation i) {
+    public HorseJSBuilder(Identifier i) {
         super(i);
         defaultBehaviourGoals = true;
         defaultGoals = true;

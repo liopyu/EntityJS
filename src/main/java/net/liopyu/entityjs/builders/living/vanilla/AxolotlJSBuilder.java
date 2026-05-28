@@ -9,7 +9,7 @@ import net.liopyu.entityjs.entities.living.vanilla.AllayEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.AxolotlEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -20,7 +20,7 @@ import java.util.function.Function;
 public class AxolotlJSBuilder extends AnimalEntityBuilder<AxolotlEntityJS> {
     public transient Function<LivingEntity, Object> bucketItemStack;
 
-    public AxolotlJSBuilder(ResourceLocation i) {
+    public AxolotlJSBuilder(Identifier i) {
         super(i);
     }
 

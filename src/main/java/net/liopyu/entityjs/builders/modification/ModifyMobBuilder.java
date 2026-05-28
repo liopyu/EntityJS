@@ -4,7 +4,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -201,7 +201,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
     }
 
     @Info(value = """
-            Sets the sound to play when the entity is ambient using either a string representation or a ResourceLocation object.
+            Sets the sound to play when the entity is ambient using either a string representation or a Identifier object.
             
             Example usage:
             ```javascript
@@ -210,11 +210,11 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             """)
     public ModifyMobBuilder setAmbientSound(Object ambientSound) {
         if (ambientSound instanceof String) {
-            this.setAmbientSound = ResourceLocation.parse((String) ambientSound);
-        } else if (ambientSound instanceof ResourceLocation resourceLocation) {
+            this.setAmbientSound = Identifier.parse((String) ambientSound);
+        } else if (ambientSound instanceof Identifier resourceLocation) {
             this.setAmbientSound = resourceLocation;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setAmbientSound. Value: " + ambientSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setAmbientSound. Value: " + ambientSound + ". Must be a Identifier or String. Example: \"minecraft:entity.zombie.ambient\"");
             this.setAmbientSound = null;
         }
         return this;

@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.client.nonliving;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
@@ -12,13 +14,13 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import com.geckolib.cache.model.BakedGeoModel;
+import com.geckolib.renderer.GeoEntityRenderer;
 
 import javax.annotation.Nullable;
 
@@ -66,12 +68,12 @@ public class KubeJSNLEntityRenderer<T extends Entity & IAnimatableJSNL> extends 
     }
 
     @Override
-    public ResourceLocation getTextureLocation(T entity) {
-        return (ResourceLocation) builder.textureResource.apply(entity);
+    public Identifier getTextureLocation(T entity) {
+        return (Identifier) builder.textureResource.apply(entity);
     }
 
     @Override
-    public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
+    public RenderType getRenderType(T animatable, Identifier texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
         if (builder.renderTypeFunction != null) {
             try {
                 return builder.renderTypeFunction.apply(animatable);
@@ -80,9 +82,9 @@ public class KubeJSNLEntityRenderer<T extends Entity & IAnimatableJSNL> extends 
             }
         }
         return switch (animatable.getBuilder().renderType) {
-            case SOLID -> RenderType.entitySolid(texture);
-            case CUTOUT -> RenderType.entityCutout(texture);
-            case TRANSLUCENT -> RenderType.entityTranslucent(texture);
+            case SOLID -> RenderTypes.entitySolid(texture);
+            case CUTOUT -> RenderTypes.entityCutout(texture);
+            case TRANSLUCENT -> RenderTypes.entityTranslucent(texture);
 
         };
     }

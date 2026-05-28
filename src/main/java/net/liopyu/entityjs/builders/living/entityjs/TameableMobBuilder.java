@@ -5,7 +5,7 @@ import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.item.crafting.Ingredient;
 
@@ -19,7 +19,7 @@ public abstract class TameableMobBuilder<T extends TamableAnimal & IAnimatableJS
     public transient Consumer<ContextUtils.PlayerEntityContext> onTamed;
     public transient Consumer<ContextUtils.PlayerEntityContext> tameOverride;
 
-    public TameableMobBuilder(ResourceLocation i) {
+    public TameableMobBuilder(Identifier i) {
         super(i);
     }
 

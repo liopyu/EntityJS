@@ -1,12 +1,14 @@
 package net.liopyu.entityjs.builders.nonliving;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -71,12 +73,12 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public transient boolean summonable;
     public transient boolean save;
     public transient boolean fireImmune;
-    public transient ResourceLocation[] immuneTo;
+    public transient Identifier[] immuneTo;
     public transient boolean spawnFarFromPlayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public transient Predicate<Entity> canBeCollidedWith;
 
-    public BaseNonAnimatableEntityBuilder(ResourceLocation i) {
+    public BaseNonAnimatableEntityBuilder(Identifier i) {
         super(i);
         translationKey("entity." + i.getNamespace() + "." + i.getPath());
         thisList.add(this);
@@ -84,7 +86,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         height = 1;
         summonable = true;
         save = true;
-        immuneTo = new ResourceLocation[0];
+        immuneTo = new Identifier[0];
         fireImmune = false;
         spawnFarFromPlayer = false;
         clientTrackingRange = 5;
@@ -94,17 +96,17 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         isPushable = false;
     }
 
-    public transient Function<T, net.minecraft.client.renderer.RenderType> renderTypeFunction;
+    public transient Function<T, net.minecraft.client.renderer.rendertype.RenderType> renderTypeFunction;
 
     @Info(value = """
             Sets the render type for the entity via a function.
             
             Example usage:
             ```javascript
-            entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
+            entityBuilder.renderType(entity => RenderTypes.entityCutout("kubejs:path/to/texture", outlineEntityBoolean));
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {
+    public BaseNonAnimatableEntityBuilder<T> renderType(Function<T, net.minecraft.client.renderer.rendertype.RenderType> type) {
         renderTypeFunction = type;
         return this;
     }
@@ -200,7 +202,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             entityBuilder.modelResource(entity => {
                 // Define logic to determine the model resource for the entity
                 // Use information about the entity provided by the context.
-                return "kubejs:geo/entity/wyrm.geo.json" // Some ResourceLocation representing the model resource;
+                return "kubejs:geo/entity/wyrm.geo.json" // Some Identifier representing the model resource;
             });
             ```
             """)
@@ -208,9 +210,9 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         modelResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return ResourceLocation.parse((String) obj);
-            } else if (obj instanceof ResourceLocation) {
-                return (ResourceLocation) obj;
+                return Identifier.parse((String) obj);
+            } else if (obj instanceof Identifier) {
+                return (Identifier) obj;
             } else {
                 EntityJSHelperClass.logWarningMessageOnce("Invalid model resource: " + obj + "Defaulting to " + entity.getBuilder().newID("geo/entity/", ".geo.json"));
                 return entity.getBuilder().newID("geo/entity/", ".geo.json");
@@ -231,7 +233,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             entityBuilder.textureResource(entity => {
                 // Define logic to determine the texture resource for the entity
                 // Use information about the entity provided by the context.
-                return "kubejs:textures/entity/wyrm.png" // Some ResourceLocation representing the texture resource;
+                return "kubejs:textures/entity/wyrm.png" // Some Identifier representing the texture resource;
             });
             ```
             """)
@@ -239,9 +241,9 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         textureResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return ResourceLocation.parse((String) obj);
-            } else if (obj instanceof ResourceLocation) {
-                return (ResourceLocation) obj;
+                return Identifier.parse((String) obj);
+            } else if (obj instanceof Identifier) {
+                return (Identifier) obj;
             } else {
                 EntityJSHelperClass.logWarningMessageOnce("Invalid texture resource: " + obj + "Defaulting to " + entity.getBuilder().newID("textures/entity/", ".png"));
                 return entity.getBuilder().newID("textures/entity/", ".png");
@@ -262,8 +264,8 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             entityBuilder.animationResource(entity => {
                 // Define logic to determine the animation resource for the entity
                 // Use information about the entity provided by the context.
-                //return some ResourceLocation representing the animation resource;
-                return "kubejs:animations/entity/wyrm.animation.json" // Some ResourceLocation representing the animation resource;
+                //return some Identifier representing the animation resource;
+                return "kubejs:animations/entity/wyrm.animation.json" // Some Identifier representing the animation resource;
             });
             ```
             """)
@@ -271,9 +273,9 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         animationResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
-                return ResourceLocation.parse((String) obj);
-            } else if (obj instanceof ResourceLocation) {
-                return (ResourceLocation) obj;
+                return Identifier.parse((String) obj);
+            } else if (obj instanceof Identifier) {
+                return (Identifier) obj;
             } else {
                 EntityJSHelperClass.logWarningMessageOnce("Invalid animation resource: " + obj + ". Defaulting to " + entity.getBuilder().newID("animations/entity/", ".animation.json"));
                 return entity.getBuilder().newID("animations/entity/", ".animation.json");
@@ -339,19 +341,19 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             ```
             """)
     public BaseNonAnimatableEntityBuilder<T> setSwimSound(Object sound) {
-        if (sound instanceof String) setSwimSound = ResourceLocation.parse((String) sound);
-        else if (sound instanceof ResourceLocation) setSwimSound = (ResourceLocation) sound;
+        if (sound instanceof String) setSwimSound = Identifier.parse((String) sound);
+        else if (sound instanceof Identifier) setSwimSound = (Identifier) sound;
         else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.swim\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound. Value: " + sound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.swim\"");
 
-            setSwimSound = ResourceLocation.parse("minecraft:entity.generic.swim");
+            setSwimSound = Identifier.parse("minecraft:entity.generic.swim");
         }
         return this;
     }
 
 
     @Info(value = """
-            Sets the swim splash sound for the entity using either a string representation or a ResourceLocation object.
+            Sets the swim splash sound for the entity using either a string representation or a Identifier object.
             
             Example usage:
             ```javascript
@@ -360,13 +362,13 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             """)
     public BaseNonAnimatableEntityBuilder<T> setSwimSplashSound(Object sound) {
         if (sound instanceof String) {
-            setSwimSplashSound = ResourceLocation.parse((String) sound);
-        } else if (sound instanceof ResourceLocation) {
-            setSwimSplashSound = (ResourceLocation) sound;
+            setSwimSplashSound = Identifier.parse((String) sound);
+        } else if (sound instanceof Identifier) {
+            setSwimSplashSound = (Identifier) sound;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.splash\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.splash\"");
 
-            setSwimSplashSound = ResourceLocation.fromNamespaceAndPath("minecraft", "entity/generic/splash");
+            setSwimSplashSound = Identifier.fromNamespaceAndPath("minecraft", "entity/generic/splash");
         }
         return this;
     }
@@ -853,8 +855,8 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             """)
     public BaseNonAnimatableEntityBuilder<T> immuneTo(String... blockNames) {
         this.immuneTo = Arrays.stream(blockNames)
-                .map(ResourceLocation::parse)
-                .toArray(ResourceLocation[]::new);
+                .map(Identifier::parse)
+                .toArray(Identifier[]::new);
         return this;
     }
 

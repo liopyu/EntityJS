@@ -5,7 +5,7 @@ import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.DolphinEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.DonkeyEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -14,7 +14,7 @@ public class DonkeyJSBuilder extends AnimalEntityBuilder<DonkeyEntityJS> {
     public transient boolean defaultGoals;
     public transient Boolean defaultBehaviourGoals;
 
-    public DonkeyJSBuilder(ResourceLocation i) {
+    public DonkeyJSBuilder(Identifier i) {
         super(i);
         this.defaultGoals = true;
         defaultBehaviourGoals = true;

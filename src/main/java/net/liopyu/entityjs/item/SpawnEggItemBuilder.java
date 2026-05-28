@@ -5,7 +5,7 @@ import dev.latvian.mods.kubejs.item.ItemBuilder;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
@@ -20,7 +20,7 @@ public class SpawnEggItemBuilder extends ItemBuilder {
     public transient int highlightColor = 0xFFFFFFFF;
     public transient final BuilderBase<?> parent;
 
-    public SpawnEggItemBuilder(ResourceLocation i, BuilderBase<?> parent) {
+    public SpawnEggItemBuilder(Identifier i, BuilderBase<?> parent) {
         super(i);
         this.parent = parent;
     }
@@ -57,7 +57,7 @@ public class SpawnEggItemBuilder extends ItemBuilder {
                 }
                 m.textures(textures);
             } else {
-                m.parent(ResourceLocation.parse("minecraft:item/template_spawn_egg"));
+                m.parent(Identifier.parse("minecraft:item/template_spawn_egg"));
 
                 if (!textures.isEmpty()) {
                     m.textures(textures);

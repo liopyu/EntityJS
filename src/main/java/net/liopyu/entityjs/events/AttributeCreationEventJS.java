@@ -8,7 +8,7 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.implementation.EACAccess;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -80,7 +80,7 @@ public class AttributeCreationEventJS implements KubeEvent {
 
         @Info(value = "Adds the given attribute with default value")
         public void add(Attribute attribute) {
-            ResourceLocation id = BuiltInRegistries.ATTRIBUTE.getKey(attribute);
+            Identifier id = BuiltInRegistries.ATTRIBUTE.getKey(attribute);
             if (id != null) {
                 Optional<Holder.Reference<Attribute>> holder = BuiltInRegistries.ATTRIBUTE.getHolder(id);
                 if (holder != null) {
@@ -98,7 +98,7 @@ public class AttributeCreationEventJS implements KubeEvent {
                 @Param(name = "value", value = "Default value for the attribute")
         })
         public void add(Attribute attribute, int value) {
-            ResourceLocation id = BuiltInRegistries.ATTRIBUTE.getKey(attribute);
+            Identifier id = BuiltInRegistries.ATTRIBUTE.getKey(attribute);
             if (id != null) {
                 Optional<Holder.Reference<Attribute>> holder = BuiltInRegistries.ATTRIBUTE.getHolder(id);
                 if (holder.isPresent()) {

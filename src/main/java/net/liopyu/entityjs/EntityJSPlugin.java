@@ -18,7 +18,7 @@ import net.liopyu.entityjs.builders.nonliving.vanilla.TridentJSBuilder;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 
 import static net.liopyu.entityjs.util.EntityJSHelperClass.isLegacyKubeJS;
@@ -75,9 +75,9 @@ public class EntityJSPlugin implements KubeJSPlugin {
 
     private static void addType(Object reg, String id, Class<?> builderClass, BuilderFactory factory, boolean useRL) {
         try {
-            var m = reg.getClass().getDeclaredMethod("add", useRL ? ResourceLocation.class : String.class, Class.class, BuilderFactory.class);
+            var m = reg.getClass().getDeclaredMethod("add", useRL ? Identifier.class : String.class, Class.class, BuilderFactory.class);
             m.setAccessible(true);
-            Object key = useRL ? ResourceLocation.parse(id) : id;
+            Object key = useRL ? Identifier.parse(id) : id;
             m.invoke(reg, key, builderClass, factory);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);

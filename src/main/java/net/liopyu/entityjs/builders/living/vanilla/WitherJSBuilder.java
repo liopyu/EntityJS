@@ -4,7 +4,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
 import net.liopyu.entityjs.entities.living.vanilla.BlazeEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.WitherEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 
@@ -13,7 +13,7 @@ public class WitherJSBuilder extends PathfinderMobBuilder<WitherEntityJS> {
     public transient String attackProjectile;
     public transient boolean customServerAiStep;
 
-    public WitherJSBuilder(ResourceLocation i) {
+    public WitherJSBuilder(Identifier i) {
         super(i);
         defaultGoals = true;
         customServerAiStep = true;

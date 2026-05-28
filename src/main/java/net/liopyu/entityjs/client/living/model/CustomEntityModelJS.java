@@ -7,13 +7,13 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.liopyu.entityjs.entities.living.entityjs.WrappedAnimatableEntity;
 import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
-import software.bernie.geckolib.model.GeoModel;
-import net.minecraft.resources.ResourceLocation;
+import com.geckolib.model.GeoModel;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
  * The default implementation of GeckoLib's {@link GeoModel} which delegates model, texture,
- * and animation handling to {@code Function<T, ResourceLocation>}s in the entity type's builder
+ * and animation handling to {@code Function<T, Identifier>}s in the entity type's builder
  */
 public class CustomEntityModelJS<T extends LivingEntity & IAnimatableJSCustom> extends GeoModel<T> {
 
@@ -23,20 +23,20 @@ public class CustomEntityModelJS<T extends LivingEntity & IAnimatableJSCustom> e
         this.builder = builder;
     }
 
-    public ResourceLocation getModelResource(T animatable) {
+    public Identifier getModelResource(T animatable) {
         var a = ensureIAnimatableJS(animatable);
-        return (ResourceLocation) builder.modelResource.apply((WrappedAnimatableEntity) a);
+        return (Identifier) builder.modelResource.apply((WrappedAnimatableEntity) a);
     }
 
-    public ResourceLocation getTextureResource(T animatable) {
+    public Identifier getTextureResource(T animatable) {
         var a = ensureIAnimatableJS(animatable);
-        return (ResourceLocation) builder.textureResource.apply((WrappedAnimatableEntity) a);
+        return (Identifier) builder.textureResource.apply((WrappedAnimatableEntity) a);
     }
 
     @Override
-    public ResourceLocation getAnimationResource(T animatable) {
+    public Identifier getAnimationResource(T animatable) {
         var a = ensureIAnimatableJS(animatable);
-        return (ResourceLocation) builder.animationResource.apply((WrappedAnimatableEntity) a);
+        return (Identifier) builder.animationResource.apply((WrappedAnimatableEntity) a);
     }
 
     /**

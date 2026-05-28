@@ -5,7 +5,7 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ArrowEntityJS;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;

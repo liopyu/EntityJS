@@ -7,7 +7,7 @@ import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.SkeletonEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.ZombieEntityJS;
 import net.minecraft.client.resources.sounds.Sound;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
@@ -15,7 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -30,7 +30,7 @@ public class SkeletonJSBuilder extends PathfinderMobBuilder<SkeletonEntityJS> {
     public transient EntityType<? extends Mob> conversionType;
     public transient ItemStack setArrow;
 
-    public SkeletonJSBuilder(ResourceLocation i) {
+    public SkeletonJSBuilder(Identifier i) {
         super(i);
         defaultGoals = true;
         canConvert = true;

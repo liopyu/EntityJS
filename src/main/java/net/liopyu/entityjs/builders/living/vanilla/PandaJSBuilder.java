@@ -5,7 +5,7 @@ import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.IllusionerEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.PandaEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 public class PandaJSBuilder extends AnimalEntityBuilder<PandaEntityJS> {
     public transient Boolean defaultGoals;
 
-    public PandaJSBuilder(ResourceLocation i) {
+    public PandaJSBuilder(Identifier i) {
         super(i);
         defaultGoals = true;
     }

@@ -3,7 +3,7 @@ package net.liopyu.entityjs.builders.living.entityjs;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.WaterEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -16,7 +16,7 @@ public class WaterEntityJSBuilder extends PathfinderMobBuilder<WaterEntityJS> {
     public transient boolean defaultGoals = true;
     public transient boolean canBeBucketed = false;
 
-    public WaterEntityJSBuilder(ResourceLocation i) {
+    public WaterEntityJSBuilder(Identifier i) {
         super(i);
     }
 

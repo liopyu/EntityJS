@@ -3,7 +3,7 @@ package net.liopyu.entityjs.builders.living.entityjs;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -20,7 +20,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
     public transient Predicate<ContextUtils.EntityAnimalContext> canMate;
     public transient Consumer<ContextUtils.LevelAnimalContext> onSpawnChildFromBreeding;
 
-    public AnimalEntityBuilder(ResourceLocation i) {
+    public AnimalEntityBuilder(Identifier i) {
         super(i);
         followLeashSpeed = 1.0D;
     }
@@ -35,7 +35,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             ```javascript
             animalBuilder.setBreedOffspring(context => {
                 const { entity, mate, level } = context
-                // Use the context to return a ResourceLocation of an entity to spawn when the entity mates
+                // Use the context to return a Identifier of an entity to spawn when the entity mates
                 return 'minecraft:cow' //Some Resource location representing the entity to spawn.
             })
             ```

@@ -5,7 +5,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -22,7 +22,7 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
     public transient SpawnEggItemBuilder eggItem;
     public transient boolean noEggItem = false;
 
-    public CustomEntityBuilder(ResourceLocation i, Class<? extends LivingEntity> entityClass) {
+    public CustomEntityBuilder(Identifier i, Class<? extends LivingEntity> entityClass) {
         super(i);
         this.entityClass = EntityReflection.createEntityClass(entityClass);
         if (Mob.class.isAssignableFrom(entityClass)) {

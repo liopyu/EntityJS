@@ -9,7 +9,7 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.ai.CustomGoal;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -17,7 +17,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -194,7 +194,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "speedModifier", value = "Sets the speed at which the mob should try to move"),
             @Param(name = "verticalSearchRange", value = "The vertical range the mob will search for the block")
     })
-    public void removeBlock(int priority, ResourceLocation block, double speedModifier, int verticalSearchRange) {
+    public void removeBlock(int priority, Identifier block, double speedModifier, int verticalSearchRange) {
         if (isPathFinder) {
             selector.addGoal(priority, new RemoveBlockGoal(Objects.requireNonNull(BuiltInRegistries.BLOCK.get(block)), (PathfinderMob) mob, speedModifier, verticalSearchRange));
         }
@@ -489,7 +489,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "soundEvent", value = "The registry name of a sound event that should play when the item is used, may be null to indicate not sound event should play"),
             @Param(name = "canUseSelector", value = "Determines when the item may be used")
     })
-    public void useItem(int priority, ItemStack itemToUse, @Nullable ResourceLocation soundEvent, Predicate<T> canUseSelector) {
+    public void useItem(int priority, ItemStack itemToUse, @Nullable Identifier soundEvent, Predicate<T> canUseSelector) {
         selector.addGoal(priority, new UseItemGoal<>(mob, itemToUse, soundEvent == null ? null : BuiltInRegistries.SOUND_EVENT.get(soundEvent), canUseSelector)); // I like this one, interesting function and not stupidly restricted, Mojang please more of these :)
     }
 

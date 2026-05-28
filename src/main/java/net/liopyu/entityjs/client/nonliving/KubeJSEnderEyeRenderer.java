@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.client.nonliving;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -10,11 +12,11 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -36,10 +38,10 @@ public class KubeJSEnderEyeRenderer<T extends Entity & IProjectileEntityJS> exte
             try {
                 return builder.renderTypeFunction.apply(entity);
             } catch (RuntimeException e) {
-                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in renderTypeFunction. Defaulting to RenderType.entityCutoutNoCull()", e);
+                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in renderTypeFunction. Defaulting to RenderTypes.entityCutout()", e);
             }
         }
-        return RenderType.entityCutoutNoCull(this.getTextureLocation(entity));
+        return RenderTypes.entityCutout(this.getTextureLocation(entity));
     }
 
     @Override
@@ -104,12 +106,12 @@ public class KubeJSEnderEyeRenderer<T extends Entity & IProjectileEntityJS> exte
     }
 
     @Override
-    public ResourceLocation getTextureLocation(T entity) {
+    public Identifier getTextureLocation(T entity) {
         if (builder != null && builder.textureLocation != null) {
             try {
                 Object obj = EntityJSHelperClass.convertObjectToDesired(builder.textureLocation.apply(entity), "resourcelocation");
-                if (obj != null) return (ResourceLocation) obj;
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for textureLocation: " + obj + ". Must be a ResourceLocation. Defaulting to super method: " + getDynamicTextureLocation());
+                if (obj != null) return (Identifier) obj;
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for textureLocation: " + obj + ". Must be a Identifier. Defaulting to super method: " + getDynamicTextureLocation());
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("", e);
             }
@@ -118,8 +120,8 @@ public class KubeJSEnderEyeRenderer<T extends Entity & IProjectileEntityJS> exte
     }
 
 
-    private ResourceLocation getDynamicTextureLocation() {
-        return ResourceLocation.parse(builder.id.getNamespace() + ":textures/entity/projectiles/" + builder.id.getPath() + ".png");
+    private Identifier getDynamicTextureLocation() {
+        return Identifier.parse(builder.id.getNamespace() + ":textures/entity/projectiles/" + builder.id.getPath() + ".png");
     }
 
 }

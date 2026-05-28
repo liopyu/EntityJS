@@ -5,7 +5,7 @@ import net.liopyu.entityjs.builders.living.entityjs.TameableMobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.BatEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.CatEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 public class CatJSBuilder extends TameableMobBuilder<CatEntityJS> {
     public transient Boolean defaultGoals;
 
-    public CatJSBuilder(ResourceLocation i) {
+    public CatJSBuilder(Identifier i) {
         super(i);
         defaultGoals = true;
     }

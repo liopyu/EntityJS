@@ -5,7 +5,7 @@ import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.EnderManEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.EvokerEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 public class EvokerJSBuilder extends PathfinderMobBuilder<EvokerEntityJS> {
     public transient Boolean defaultGoals;
 
-    public EvokerJSBuilder(ResourceLocation i) {
+    public EvokerJSBuilder(Identifier i) {
         super(i);
         defaultGoals = true;
     }

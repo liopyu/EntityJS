@@ -6,7 +6,7 @@ import net.liopyu.entityjs.builders.nonliving.NonAnimatableEntityTypeBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
@@ -25,7 +25,7 @@ public abstract class EyeOfEnderEntityBuilder<T extends Entity & IProjectileEnti
     public transient Float vY;
     public transient Float vZ;
 
-    public EyeOfEnderEntityBuilder(ResourceLocation i) {
+    public EyeOfEnderEntityBuilder(Identifier i) {
         super(i);
         textureLocation = t -> t.getProjectileBuilder().newID("textures/entity/projectiles/", ".png");
         thisList.add(this);
@@ -91,7 +91,7 @@ public abstract class EyeOfEnderEntityBuilder<T extends Entity & IProjectileEnti
             projectileBuilder.textureResource(entity => {
                 // Define logic to determine the texture resource for the entity
                 // Use information about the entity provided by the context.
-                return // Some ResourceLocation representing the texture resource;
+                return // Some Identifier representing the texture resource;
             });
             ```
             """)
@@ -99,9 +99,9 @@ public abstract class EyeOfEnderEntityBuilder<T extends Entity & IProjectileEnti
         textureLocation = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String) {
-                return ResourceLocation.parse((String) obj);
-            } else if (obj instanceof ResourceLocation) {
-                return (ResourceLocation) obj;
+                return Identifier.parse((String) obj);
+            } else if (obj instanceof Identifier) {
+                return (Identifier) obj;
             } else {
                 EntityJSHelperClass.logErrorMessageOnce("Invalid texture resource in projectile builder: " + obj + "Defaulting to " + entity.getProjectileBuilder().newID("textures/entity/projectiles/", ".png"));
                 return entity.getProjectileBuilder().newID("textures/entity/projectiles/", ".png");

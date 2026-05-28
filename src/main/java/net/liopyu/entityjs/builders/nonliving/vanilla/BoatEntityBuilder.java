@@ -5,11 +5,11 @@ import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.nonliving.vanilla.BoatEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.Boat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ public abstract class BoatEntityBuilder<T extends Entity & IAnimatableJSNL> exte
     public transient Function<Boat, Object> forwardBoatSpeed;
     public transient Function<Boat, Object> backwardsBoatSpeed;
 
-    public BoatEntityBuilder(ResourceLocation i) {
+    public BoatEntityBuilder(Identifier i) {
         super(i);
         thisList.add(this);
         this.setShadowRadius = 0.3F;

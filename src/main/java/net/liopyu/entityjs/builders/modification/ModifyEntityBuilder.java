@@ -1,12 +1,14 @@
 package net.liopyu.entityjs.builders.modification;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.*;
 
 import java.util.*;
@@ -103,7 +105,7 @@ public class ModifyEntityBuilder implements KubeEvent {
 
     @Info(value = """
             Sets the Texture Location of the entity without modifying the RenderType logic.
-            Returns a ResourceLocation.
+            Returns a Identifier.
             Return null for the default entity's location
             
             Example usage:
@@ -131,7 +133,7 @@ public class ModifyEntityBuilder implements KubeEvent {
                 // Sets the entity's texture to default Steve
                 let DefaultPlayerSkin = Java.loadClass("net.minecraft.client.resources.DefaultPlayerSkin")
                 let skin = DefaultPlayerSkin.getDefaultSkin();
-                return RenderType.entityCutout(skin);
+                return RenderTypes.entityCutout(skin);
             });
             ```
             """)
@@ -357,19 +359,19 @@ public class ModifyEntityBuilder implements KubeEvent {
             ```
             """)
     public ModifyEntityBuilder setSwimSound(Object sound) {
-        if (sound instanceof String) setSwimSound = ResourceLocation.parse((String) sound);
-        else if (sound instanceof ResourceLocation) setSwimSound = (ResourceLocation) sound;
+        if (sound instanceof String) setSwimSound = Identifier.parse((String) sound);
+        else if (sound instanceof Identifier) setSwimSound = (Identifier) sound;
         else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.swim\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound. Value: " + sound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.swim\"");
 
-            setSwimSound = ResourceLocation.parse("minecraft:entity.generic.swim");
+            setSwimSound = Identifier.parse("minecraft:entity.generic.swim");
         }
         return this;
     }
 
 
     @Info(value = """
-            Sets the swim splash sound for the entity using either a string representation or a ResourceLocation object.
+            Sets the swim splash sound for the entity using either a string representation or a Identifier object.
             
             Example usage:
             ```javascript
@@ -378,13 +380,13 @@ public class ModifyEntityBuilder implements KubeEvent {
             """)
     public ModifyEntityBuilder setSwimSplashSound(Object sound) {
         if (sound instanceof String) {
-            setSwimSplashSound = ResourceLocation.parse((String) sound);
-        } else if (sound instanceof ResourceLocation) {
-            setSwimSplashSound = (ResourceLocation) sound;
+            setSwimSplashSound = Identifier.parse((String) sound);
+        } else if (sound instanceof Identifier) {
+            setSwimSplashSound = (Identifier) sound;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.splash\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.splash\"");
 
-            setSwimSplashSound = ResourceLocation.fromNamespaceAndPath("minecraft", "entity/generic/splash");
+            setSwimSplashSound = Identifier.fromNamespaceAndPath("minecraft", "entity/generic/splash");
         }
         return this;
     }

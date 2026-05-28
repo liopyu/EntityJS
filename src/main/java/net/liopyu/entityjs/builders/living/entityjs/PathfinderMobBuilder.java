@@ -3,7 +3,7 @@ package net.liopyu.entityjs.builders.living.entityjs;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 
@@ -15,7 +15,7 @@ public abstract class PathfinderMobBuilder<T extends PathfinderMob & IAnimatable
     public transient Double followLeashSpeed;
     public transient Function<ContextUtils.EntityBlockPosLevelContext, Object> walkTargetValue;
 
-    public PathfinderMobBuilder(ResourceLocation i) {
+    public PathfinderMobBuilder(Identifier i) {
         super(i);
     }
 

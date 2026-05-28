@@ -6,7 +6,7 @@ import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileEntityJS;
 import net.liopyu.entityjs.item.ProjectileItemBuilder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.level.Level;
@@ -19,7 +19,7 @@ public class ProjectileEntityJSBuilder extends ProjectileEntityBuilder<Projectil
     public transient ProjectileItemBuilder item;
     public transient boolean noItem;
 
-    public ProjectileEntityJSBuilder(ResourceLocation i) {
+    public ProjectileEntityJSBuilder(Identifier i) {
         super(i);
         this.item = (ProjectileItemBuilder) new ProjectileItemBuilder(id, this)
                 .canThrow(true)

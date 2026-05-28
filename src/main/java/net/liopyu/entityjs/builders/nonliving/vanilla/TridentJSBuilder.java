@@ -10,7 +10,7 @@ import net.liopyu.entityjs.entities.nonliving.vanilla.TridentEntityJS;
 import net.liopyu.entityjs.item.TridentItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -39,7 +39,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
     public transient boolean alwaysThunder;
     public boolean canShootFromDispenser = true;
 
-    public TridentJSBuilder(ResourceLocation i) {
+    public TridentJSBuilder(Identifier i) {
         super(i);
         this.item = (TridentItemBuilder) new TridentItemBuilder(id, this)
                 .canThrow(false)

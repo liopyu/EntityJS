@@ -8,7 +8,7 @@ import net.liopyu.entityjs.builders.nonliving.NonAnimatableEntityTypeBuilder;
 import net.liopyu.entityjs.entities.nonliving.vanilla.EyeOfEnderEntityJS;
 import net.liopyu.entityjs.item.EyeOfEnderItemBuilder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
@@ -25,7 +25,7 @@ public class EyeOfEnderJSBuilder extends EyeOfEnderEntityBuilder<EyeOfEnderEntit
     public transient boolean disableDefaultDeathLogic;
     public transient Float survivalChance;
 
-    public EyeOfEnderJSBuilder(ResourceLocation i) {
+    public EyeOfEnderJSBuilder(Identifier i) {
         super(i);
         this.item = (EyeOfEnderItemBuilder) new EyeOfEnderItemBuilder(id, this)
                 .texture(i.getNamespace() + ":item/" + i.getPath());

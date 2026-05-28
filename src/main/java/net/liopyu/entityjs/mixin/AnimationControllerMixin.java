@@ -8,12 +8,12 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import software.bernie.geckolib.animatable.GeoAnimatable;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.AnimationState;
-import software.bernie.geckolib.animation.state.BoneSnapshot;
-import software.bernie.geckolib.cache.object.GeoBone;
-import software.bernie.geckolib.model.GeoModel;
+import com.geckolib.animatable.GeoAnimatable;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.state.AnimationTest;
+import com.geckolib.animation.state.BoneSnapshot;
+import com.geckolib.cache.model.GeoBone;
+import com.geckolib.model.GeoModel;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -42,7 +42,7 @@ public class AnimationControllerMixin<T extends GeoAnimatable> implements IAnima
     }
 
     @Inject(method = "process", at = @At(value = "HEAD"))
-    private void entityJs$onProcess(GeoModel<T> model, AnimationState<T> state, Map<String, GeoBone> bones,
+    private void entityJs$onProcess(GeoModel<T> model, AnimationTest<T> state, Map<String, GeoBone> bones,
                                     Map<String, BoneSnapshot> snapshots, final double seekTime,
                                     boolean crashWhenCantFindBone, CallbackInfo ci) {
 

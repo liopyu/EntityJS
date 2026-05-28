@@ -6,7 +6,7 @@ import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.HorseEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.ParrotEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -18,7 +18,7 @@ public class ParrotJSBuilder extends TameableMobBuilder<ParrotEntityJS> {
     public transient Consumer<ContextUtils.PlayerEntityContext> tameOverride;
     public transient Boolean defaultGoals;
 
-    public ParrotJSBuilder(ResourceLocation i) {
+    public ParrotJSBuilder(Identifier i) {
         super(i);
         defaultGoals = true;
     }

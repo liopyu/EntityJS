@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.client.living;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -20,18 +22,18 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import software.bernie.geckolib.animatable.GeoItem;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.cache.object.GeoBone;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import com.geckolib.animatable.GeoItem;
+import com.geckolib.cache.model.BakedGeoModel;
+import com.geckolib.cache.model.GeoBone;
+import com.geckolib.renderer.GeoEntityRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
-import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
-import software.bernie.geckolib.renderer.layer.ItemArmorGeoLayer;
-import software.bernie.geckolib.util.RenderUtil;
+import com.geckolib.renderer.layer.builtin.BlockAndItemGeoLayer;
+import com.geckolib.renderer.layer.builtin.ItemArmorGeoLayer;
+import com.geckolib.util.RenderUtil;
 
 import javax.annotation.Nullable;
 
@@ -195,12 +197,12 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
     }
 
     @Override
-    public ResourceLocation getTextureLocation(T entity) {
-        return (ResourceLocation) builder.textureResource.apply(entity);
+    public Identifier getTextureLocation(T entity) {
+        return (Identifier) builder.textureResource.apply(entity);
     }
 
     @Override
-    public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
+    public RenderType getRenderType(T animatable, Identifier texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
         try {
             if (builder.renderTypeFunction != null) {
                 return builder.renderTypeFunction.apply(animatable);
@@ -209,9 +211,9 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
             EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in " + entityName() + "builder for field: renderTypeFunction.", e);
         }
         return switch (animatable.getBuilder().renderType) {
-            case SOLID -> RenderType.entitySolid(texture);
-            case CUTOUT -> RenderType.entityCutout(texture);
-            case TRANSLUCENT -> RenderType.entityTranslucent(texture);
+            case SOLID -> RenderTypes.entitySolid(texture);
+            case CUTOUT -> RenderTypes.entityCutout(texture);
+            case TRANSLUCENT -> RenderTypes.entityTranslucent(texture);
 
         };
     }

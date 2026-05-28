@@ -18,7 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -408,9 +408,9 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
             final ContextUtils.HurtContext context = new ContextUtils.HurtContext(entityJs$getLivingEntity(), pDamageSource);
             Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
             if (obj != null)
-                cir.setReturnValue(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
+                cir.setReturnValue(BuiltInRegistries.SOUND_EVENT.get((Identifier) obj));
             else
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityJs$entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityJs$entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a Identifier or String. Defaulting to \"minecraft:entity.generic.hurt\"");
 
         }
     }
@@ -521,7 +521,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$getDeathSound(CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setDeathSound == null) return;
-            cir.setReturnValue(Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setDeathSound)));
+            cir.setReturnValue(Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.setDeathSound)));
 
         }
     }
@@ -531,8 +531,8 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.fallSounds != null)
                 cir.setReturnValue(new LivingEntity.Fallsounds(
-                        Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.smallFallSound)),
-                        Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.largeFallSound))
+                        Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.smallFallSound)),
+                        Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.largeFallSound))
                 ));
         }
     }
@@ -541,7 +541,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$getEatingSound(ItemStack pStack, CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.eatingSound != null)
-                cir.setReturnValue(Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.eatingSound)));
+                cir.setReturnValue(Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.eatingSound)));
 
         }
     }

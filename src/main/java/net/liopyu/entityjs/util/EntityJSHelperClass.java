@@ -1,8 +1,10 @@
 package net.liopyu.entityjs.util;
 
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+
 import dev.latvian.mods.kubejs.script.ConsoleJS;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SpawnPlacementType;
@@ -11,7 +13,7 @@ import net.minecraft.world.phys.AABB;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.ModList;
-import software.bernie.geckolib.animation.Animation;
+import com.geckolib.animation.object.LoopType;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -58,7 +60,7 @@ public class EntityJSHelperClass {
             case "float" -> convertToFloat(input);
             case "boolean" -> convertToBoolean(input);
             case "interactionresult" -> convertToInteractionResult(input);
-            case "resourcelocation" -> convertToResourceLocation(input);
+            case "resourcelocation" -> convertToIdentifier(input);
             case "looptype" -> convertToLoopType(input);
             case "aabb" -> convertToBoundingBox(input);
             default -> input;
@@ -66,11 +68,11 @@ public class EntityJSHelperClass {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static net.minecraft.client.renderer.RenderType convertToRenderType(Object input, Object defaultValue) {
+    public static net.minecraft.client.renderer.rendertype.RenderType convertToRenderType(Object input, Object defaultValue) {
         return switch (input) {
-            case null -> (net.minecraft.client.renderer.RenderType) defaultValue;
-            case net.minecraft.client.renderer.RenderType renderType -> renderType;
-            case String string -> net.minecraft.client.renderer.RenderType.entityCutout(ResourceLocation.parse(string));
+            case null -> (net.minecraft.client.renderer.rendertype.RenderType) defaultValue;
+            case net.minecraft.client.renderer.rendertype.RenderType renderType -> renderType;
+            case String string -> net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(Identifier.parse(string));
             default -> null;
         };
     }
@@ -81,26 +83,26 @@ public class EntityJSHelperClass {
         } else return null;
     }
 
-    private static Animation.LoopType convertToLoopType(Object input) {
-        if (input instanceof Animation.LoopType) {
-            return (Animation.LoopType) input;
+    private static LoopType convertToLoopType(Object input) {
+        if (input instanceof LoopType) {
+            return (LoopType) input;
         } else if (input instanceof String) {
             String stringValue = ((String) input).toUpperCase();
             return switch (stringValue) {
-                case "LOOP" -> Animation.LoopType.LOOP;
-                case "PLAY_ONCE" -> Animation.LoopType.PLAY_ONCE;
-                case "HOLD_ON_LAST_FRAME" -> Animation.LoopType.HOLD_ON_LAST_FRAME;
-                default -> Animation.LoopType.DEFAULT;
+                case "LOOP" -> LoopType.LOOP;
+                case "PLAY_ONCE" -> LoopType.PLAY_ONCE;
+                case "HOLD_ON_LAST_FRAME" -> LoopType.HOLD_ON_LAST_FRAME;
+                default -> LoopType.DEFAULT;
             };
         }
-        return Animation.LoopType.DEFAULT;
+        return LoopType.DEFAULT;
     }
 
-    private static ResourceLocation convertToResourceLocation(Object input) {
-        if (input instanceof ResourceLocation) {
-            return (ResourceLocation) input;
+    private static Identifier convertToIdentifier(Object input) {
+        if (input instanceof Identifier) {
+            return (Identifier) input;
         } else if (input instanceof String) {
-            return ResourceLocation.parse((String) input);
+            return Identifier.parse((String) input);
         }
         return null;
     }

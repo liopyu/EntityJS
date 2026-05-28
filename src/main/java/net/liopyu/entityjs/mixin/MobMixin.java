@@ -7,7 +7,7 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.implementation.MobAccessor;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -236,7 +236,7 @@ public class MobMixin implements MobAccessor {
     protected void getAmbientSound(CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.setAmbientSound != null) {
-                cir.setReturnValue(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setAmbientSound));
+                cir.setReturnValue(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.setAmbientSound));
             }
         }
     }

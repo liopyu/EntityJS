@@ -4,10 +4,10 @@ import dev.latvian.mods.kubejs.item.ItemBuilder;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityJSBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.ArrowEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +19,7 @@ public class ArrowItemBuilder extends ItemBuilder {
     public transient final ArrowEntityJSBuilder parent;
     public transient boolean canBePickedUp;
 
-    public ArrowItemBuilder(ResourceLocation i, ArrowEntityJSBuilder parent) {
+    public ArrowItemBuilder(Identifier i, ArrowEntityJSBuilder parent) {
         super(i);
         this.parent = parent;
         canBePickedUp = true;

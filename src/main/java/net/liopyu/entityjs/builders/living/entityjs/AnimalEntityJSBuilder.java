@@ -4,14 +4,14 @@ package net.liopyu.entityjs.builders.living.entityjs;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class AnimalEntityJSBuilder extends AnimalEntityBuilder<AnimalEntityJS> {
 
-    public AnimalEntityJSBuilder(ResourceLocation i) {
+    public AnimalEntityJSBuilder(Identifier i) {
         super(i);
 
     }

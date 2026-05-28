@@ -8,7 +8,7 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.ProjectileAnimatableJS;
 import net.liopyu.entityjs.item.ProjectileItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -29,7 +29,7 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
     public transient boolean noItem;
     public boolean canShootFromDispenser = true;
 
-    public ProjectileAnimatableJSBuilder(ResourceLocation i) {
+    public ProjectileAnimatableJSBuilder(Identifier i) {
         super(i);
         facesTrajectory = true;
         this.item = (ProjectileItemBuilder) new ProjectileItemBuilder(id, this)

@@ -10,7 +10,7 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.core.BlockPos;
@@ -23,7 +23,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
@@ -37,11 +37,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.PartEntity;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.cache.object.GeoBone;
-import software.bernie.geckolib.renderer.GeoEntityRenderer;
-import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
-import software.bernie.geckolib.renderer.layer.ItemArmorGeoLayer;
+import com.geckolib.cache.model.BakedGeoModel;
+import com.geckolib.cache.model.GeoBone;
+import com.geckolib.renderer.GeoEntityRenderer;
+import com.geckolib.renderer.layer.builtin.BlockAndItemGeoLayer;
+import com.geckolib.renderer.layer.builtin.ItemArmorGeoLayer;
 
 public class ContextUtils {
     public static class VanillaArmorRenderContext<T extends LivingEntity & IAnimatableJS> {
@@ -812,6 +812,21 @@ public class ContextUtils {
         }
     }
 
+    public static class EntityEntityServerLevelContext {
+        @Info("The server level of the entity")
+        public final ServerLevel level;
+
+        @Info("The living entity")
+        public final LivingEntity entity;
+        @Info("The target entity")
+        public final Entity target;
+
+        public EntityEntityServerLevelContext(ServerLevel level, LivingEntity entity, Entity target) {
+            this.level = level;
+            this.entity = entity;
+            this.target = target;
+        }
+    }
     public static class EntityServerLevelContext {
         @Info("The server level of the entity")
         public final ServerLevel level;

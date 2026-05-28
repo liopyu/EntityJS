@@ -5,7 +5,7 @@ import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.ZombieEntityJS;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -17,7 +17,7 @@ public class ZombieJSBuilder extends PathfinderMobBuilder<ZombieEntityJS> {
     public transient boolean isSunSensitive;
     public transient boolean convertsInWater;
 
-    public ZombieJSBuilder(ResourceLocation i) {
+    public ZombieJSBuilder(Identifier i) {
         super(i);
         defaultBehaviourGoals = true;
         defaultGoals = true;

@@ -7,7 +7,7 @@ import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.BeeEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.ChickenEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -19,7 +19,7 @@ public class ChickenJSBuilder extends AnimalEntityBuilder<ChickenEntityJS> {
     public transient Boolean defaultGoals;
     public transient Function<LivingEntity, Object> eggTime;
 
-    public ChickenJSBuilder(ResourceLocation i) {
+    public ChickenJSBuilder(Identifier i) {
         super(i);
         defaultGoals = true;
     }

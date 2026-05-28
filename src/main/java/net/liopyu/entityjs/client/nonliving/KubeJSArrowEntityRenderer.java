@@ -10,8 +10,8 @@ import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ArrowRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 
 
 public class KubeJSArrowEntityRenderer<T extends AbstractArrow & IArrowEntityJS> extends ArrowRenderer<T> {
@@ -34,8 +34,8 @@ public class KubeJSArrowEntityRenderer<T extends AbstractArrow & IArrowEntityJS>
     }
 
     @Override
-    public ResourceLocation getTextureLocation(T entity) {
-        return (ResourceLocation) builder.textureLocation.apply(entity);
+    public Identifier getTextureLocation(T entity) {
+        return (Identifier) builder.textureLocation.apply(entity);
     }
 }
 

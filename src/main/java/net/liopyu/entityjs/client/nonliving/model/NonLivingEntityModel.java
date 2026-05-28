@@ -3,11 +3,11 @@ package net.liopyu.entityjs.client.nonliving.model;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.model.GeoModel;
+import com.geckolib.model.GeoModel;
 
 public class NonLivingEntityModel<T extends Entity & IAnimatableJSNL> extends GeoModel<T> {
     private final BaseEntityBuilder<T> builder;
@@ -18,17 +18,17 @@ public class NonLivingEntityModel<T extends Entity & IAnimatableJSNL> extends Ge
 
 
     @Override
-    public ResourceLocation getModelResource(T object) {
-        return (ResourceLocation) builder.modelResource.apply(object);
+    public Identifier getModelResource(T object) {
+        return (Identifier) builder.modelResource.apply(object);
     }
 
     @Override
-    public ResourceLocation getTextureResource(T object) {
-        return (ResourceLocation) builder.textureResource.apply(object);
+    public Identifier getTextureResource(T object) {
+        return (Identifier) builder.textureResource.apply(object);
     }
 
     @Override
-    public ResourceLocation getAnimationResource(T animatable) {
-        return (ResourceLocation) builder.animationResource.apply(animatable);
+    public Identifier getAnimationResource(T animatable) {
+        return (Identifier) builder.animationResource.apply(animatable);
     }
 }

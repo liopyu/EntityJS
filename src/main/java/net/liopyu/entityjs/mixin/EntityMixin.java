@@ -15,7 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
@@ -521,7 +521,7 @@ public class EntityMixin implements IEntityJS {
     protected void getSwimSplashSound(CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.setSwimSplashSound == null) return;
-            cir.setReturnValue(Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSplashSound)));
+            cir.setReturnValue(Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.setSwimSplashSound)));
 
         }
     }
@@ -531,7 +531,7 @@ public class EntityMixin implements IEntityJS {
     protected void getSwimSound(CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.setSwimSound == null) return;
-            cir.setReturnValue(Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) builder.setSwimSound)));
+            cir.setReturnValue(Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((Identifier) builder.setSwimSound)));
 
         }
     }

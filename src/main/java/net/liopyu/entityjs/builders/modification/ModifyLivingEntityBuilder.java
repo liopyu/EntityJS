@@ -5,7 +5,7 @@ import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -269,10 +269,10 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             ```
             """)
     public ModifyLivingEntityBuilder setDeathSound(Object sound) {
-        if (sound instanceof String) setDeathSound = ResourceLocation.parse((String) sound);
-        else if (sound instanceof ResourceLocation) setDeathSound = (ResourceLocation) sound;
+        if (sound instanceof String) setDeathSound = Identifier.parse((String) sound);
+        else if (sound instanceof Identifier) setDeathSound = (Identifier) sound;
         else
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound. Value: " + sound + ". Must be a ResourceLocation. Example: \"minecraft:entity.generic.death\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setDeathSound. Value: " + sound + ". Must be a Identifier. Example: \"minecraft:entity.generic.death\"");
         return this;
     }
 
@@ -286,19 +286,19 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             ```
             """)
     public ModifyLivingEntityBuilder setSwimSound(Object sound) {
-        if (sound instanceof String) setSwimSound = ResourceLocation.parse((String) sound);
-        else if (sound instanceof ResourceLocation) setSwimSound = (ResourceLocation) sound;
+        if (sound instanceof String) setSwimSound = Identifier.parse((String) sound);
+        else if (sound instanceof Identifier) setSwimSound = (Identifier) sound;
         else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.swim\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSound. Value: " + sound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.swim\"");
 
-            setSwimSound = ResourceLocation.parse("minecraft:entity.generic.swim");
+            setSwimSound = Identifier.parse("minecraft:entity.generic.swim");
         }
         return this;
     }
 
 
     @Info(value = """
-            Sets the swim splash sound for the entity using either a string representation or a ResourceLocation object.
+            Sets the swim splash sound for the entity using either a string representation or a Identifier object.
             
             Example usage:
             ```javascript
@@ -307,13 +307,13 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             """)
     public ModifyLivingEntityBuilder setSwimSplashSound(Object sound) {
         if (sound instanceof String) {
-            setSwimSplashSound = ResourceLocation.parse((String) sound);
-        } else if (sound instanceof ResourceLocation) {
-            setSwimSplashSound = (ResourceLocation) sound;
+            setSwimSplashSound = Identifier.parse((String) sound);
+        } else if (sound instanceof Identifier) {
+            setSwimSplashSound = (Identifier) sound;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.splash\"");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for setSwimSplashSound. Value: " + sound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.splash\"");
 
-            setSwimSplashSound = ResourceLocation.fromNamespaceAndPath("minecraft", "entity/generic/splash");
+            setSwimSplashSound = Identifier.fromNamespaceAndPath("minecraft", "entity/generic/splash");
         }
         return this;
     }
@@ -780,7 +780,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
 
 
     @Info(value = """
-            Sets the sound resource locations for small and large falls of the entity using either string representations or ResourceLocation objects.
+            Sets the sound resource locations for small and large falls of the entity using either string representations or Identifier objects.
             
             Example usage:
             ```javascript
@@ -790,21 +790,21 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             """)
     public ModifyLivingEntityBuilder fallSounds(Object smallFallSound, Object largeFallSound) {
         if (smallFallSound instanceof String) {
-            this.smallFallSound = ResourceLocation.parse((String) smallFallSound);
-        } else if (smallFallSound instanceof ResourceLocation) {
-            this.smallFallSound = (ResourceLocation) smallFallSound;
+            this.smallFallSound = Identifier.parse((String) smallFallSound);
+        } else if (smallFallSound instanceof Identifier) {
+            this.smallFallSound = (Identifier) smallFallSound;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for smallFallSound. Value: " + smallFallSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.small_fall\"");
-            this.smallFallSound = ResourceLocation.fromNamespaceAndPath("minecraft", "entity/generic/small_fall");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for smallFallSound. Value: " + smallFallSound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.small_fall\"");
+            this.smallFallSound = Identifier.fromNamespaceAndPath("minecraft", "entity/generic/small_fall");
         }
 
         if (largeFallSound instanceof String) {
-            this.largeFallSound = ResourceLocation.parse((String) largeFallSound);
-        } else if (largeFallSound instanceof ResourceLocation) {
-            this.largeFallSound = (ResourceLocation) largeFallSound;
+            this.largeFallSound = Identifier.parse((String) largeFallSound);
+        } else if (largeFallSound instanceof Identifier) {
+            this.largeFallSound = (Identifier) largeFallSound;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for largeFallSound. Value: " + largeFallSound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.generic.large_fall\"");
-            this.largeFallSound = ResourceLocation.fromNamespaceAndPath("minecraft", "entity/generic/large_fall");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for largeFallSound. Value: " + largeFallSound + ". Must be a Identifier or String. Example: \"minecraft:entity.generic.large_fall\"");
+            this.largeFallSound = Identifier.fromNamespaceAndPath("minecraft", "entity/generic/large_fall");
         }
 
         return this;
@@ -812,7 +812,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
 
 
     @Info(value = """
-            Sets the sound resource location for the entity's eating sound using either a string representation or a ResourceLocation object.
+            Sets the sound resource location for the entity's eating sound using either a string representation or a Identifier object.
             
             Example usage:
             ```javascript
@@ -821,12 +821,12 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             """)
     public ModifyLivingEntityBuilder eatingSound(Object sound) {
         if (sound instanceof String) {
-            this.eatingSound = ResourceLocation.parse((String) sound);
-        } else if (sound instanceof ResourceLocation) {
-            this.eatingSound = (ResourceLocation) sound;
+            this.eatingSound = Identifier.parse((String) sound);
+        } else if (sound instanceof Identifier) {
+            this.eatingSound = (Identifier) sound;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound. Value: " + sound + ". Must be a ResourceLocation or String. Example: \"minecraft:entity.zombie.ambient\"");
-            this.eatingSound = ResourceLocation.fromNamespaceAndPath("minecraft", "entity/zombie/ambient");
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for eatingSound. Value: " + sound + ". Must be a Identifier or String. Example: \"minecraft:entity.zombie.ambient\"");
+            this.eatingSound = Identifier.fromNamespaceAndPath("minecraft", "entity/zombie/ambient");
         }
         return this;
     }
