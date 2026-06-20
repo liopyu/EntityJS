@@ -64,7 +64,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             Example usage:
             ```javascript
             arrowEntityBuilder.onEntityCollision(context => {
-                const { entity, target } = context
+                let { entity, target } = context
                 console.log(entity)
             });
             ```

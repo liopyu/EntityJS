@@ -78,7 +78,7 @@ public class EyeOfEnderItemBuilder extends ItemBuilder {
             Example usage:
             ```javascript
             builder.signalTo(context => {
-                const { level, player, hand } = context
+                let { level, player, hand } = context
                 return // Some BlockPos for the eye to navigate to when thrown
             });
             ```

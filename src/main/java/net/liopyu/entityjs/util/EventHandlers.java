@@ -7,6 +7,7 @@ import dev.latvian.mods.kubejs.event.TargetedEventHandler;
 import dev.latvian.mods.kubejs.script.data.VirtualDataPack;
 import dev.latvian.mods.kubejs.util.Cast;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
@@ -97,6 +98,9 @@ public class EventHandlers {
             event.put(builder.get(), builder.getAttributeBuilder().build());
         }
         for (CustomEntityJSBuilder builder : CustomEntityJSBuilder.thisList) {
+            if (builder instanceof CustomEntityBuilder customBuilder && !customBuilder.isLivingEntityClass()) {
+                continue;
+            }
             event.put((EntityType<? extends LivingEntity>) builder.get(), builder.getAttributeBuilder().build());
         }
     }

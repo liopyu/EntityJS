@@ -34,7 +34,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             Example usage:
             ```javascript
             animalBuilder.setBreedOffspring(context => {
-                const { entity, mate, level } = context
+                let { entity, mate, level } = context
                 // Use the context to return a ResourceLocation of an entity to spawn when the entity mates
                 return 'minecraft:cow' //Some Resource location representing the entity to spawn.
             })

@@ -33,7 +33,7 @@ public class ParrotJSBuilder extends TameableMobBuilder<ParrotEntityJS> {
             Example usage:
             ```javascript
             builder.tameOverride(context => {
-                const {entity,player} = context
+                let {entity,player} = context
                 // Mimic the vanilla way of setting the uuid when the entity is tamed.
                 entity.setOwnerUUID(player.getUUID());
             });

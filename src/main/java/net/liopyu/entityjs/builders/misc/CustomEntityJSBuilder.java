@@ -44,13 +44,13 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
     public transient int clientTrackingRange;
     public transient int updateInterval;
     public transient MobCategory mobCategory;
-    public transient Function<LivingEntity, Object> modelResource;
-    public transient Function<LivingEntity, Object> textureResource;
-    public transient Function<LivingEntity, Object> animationResource;
+    public transient Function<Entity, Object> modelResource;
+    public transient Function<Entity, Object> textureResource;
+    public transient Function<Entity, Object> animationResource;
     public transient CustomEntityJSBuilder.RenderType renderType;
     public transient final List<CustomEntityJSBuilder.AnimationControllerSupplier<?>> animationSuppliers;
     public static final List<CustomEntityJSBuilder> thisList = new ArrayList<>();
-    public transient Consumer<ContextUtils.RenderContextCustom<?>> render;
+    public transient Consumer<Object> render;
     public transient boolean summonable;
     public transient boolean save;
     public transient boolean fireImmune;
@@ -102,7 +102,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             });
             ```
             """)
-    public CustomEntityJSBuilder modelResource(Function<LivingEntity, Object> function) {
+    public CustomEntityJSBuilder modelResource(Function<Entity, Object> function) {
         modelResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
@@ -133,7 +133,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             });
             ```
             """)
-    public CustomEntityJSBuilder textureResource(Function<LivingEntity, Object> function) {
+    public CustomEntityJSBuilder textureResource(Function<Entity, Object> function) {
         textureResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
@@ -165,7 +165,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             });
             ```
             """)
-    public CustomEntityJSBuilder animationResource(Function<LivingEntity, Object> function) {
+    public CustomEntityJSBuilder animationResource(Function<Entity, Object> function) {
         animationResource = entity -> {
             Object obj = function.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
@@ -258,7 +258,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             Example usage:
             ```javascript
             entityBuilder.scaleModelForRender(context => {
-                const { entity, widthScale, heightScale, poseStack, model, isReRender, partialTick, packedLight, packedOverlay } = context
+                let { entity, widthScale, heightScale, poseStack, model, isReRender, partialTick, packedLight, packedOverlay } = context
                 poseStack.scale(0.5, 0.5, 0.5)
             });
             ```
@@ -309,7 +309,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             ```
             """)
     public CustomEntityJSBuilder render(Consumer<ContextUtils.RenderContextCustom<?>> render) {
-        this.render = render;
+        this.render = (Consumer<Object>) (Consumer<?>) render;
         return this;
     }
 
@@ -479,7 +479,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
         return this;
     }
 
-    public transient Function<LivingEntity, net.minecraft.client.renderer.RenderType> renderTypeFunction;
+    public transient Function<Entity, net.minecraft.client.renderer.RenderType> renderTypeFunction;
 
     @Info(value = """
             Sets the render type for the entity via a function.
@@ -489,7 +489,7 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
             ```
             """)
-    public CustomEntityJSBuilder renderType(Function<LivingEntity, net.minecraft.client.renderer.RenderType> type) {
+    public CustomEntityJSBuilder renderType(Function<Entity, net.minecraft.client.renderer.RenderType> type) {
         renderTypeFunction = type;
         return this;
     }

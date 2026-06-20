@@ -21,14 +21,20 @@ public class ModifyEntityBuilder implements KubeEvent {
     public transient Predicate<ContextUtils.EPassengerEntityContext> canAddPassenger;
     public transient Function<Entity, Object> setBlockJumpFactor;
     public transient Object setSwimSound;
+    public transient Consumer<ContextUtils.PlaySwimSoundContext> playSwimSound;
     public transient Predicate<Entity> isFlapping;
+    public transient Consumer<Entity> processFlappingMovement;
     public transient Object setSwimSplashSound;
+    public transient Consumer<Entity> doWaterSplashEffect;
     public transient Predicate<ContextUtils.LineOfSightContext> isAlliedTo;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public transient Predicate<Entity> isFreezing;
     public transient Predicate<ContextUtils.ECollidingEntityContext> canCollideWith;
     public transient Predicate<ContextUtils.EMayInteractContext> mayInteract;
     public transient Predicate<ContextUtils.ECanTrampleContext> canTrample;
+    public transient Consumer<ContextUtils.PlayStepSoundContext> playStepSound;
+    public transient Consumer<ContextUtils.PlayMuffledStepSoundContext> playMuffledStepSound;
+    public transient Consumer<ContextUtils.PlayCombinationStepSoundsContext> playCombinationStepSounds;
     public transient Consumer<Entity> onRemovedFromWorld;
     public transient Consumer<Entity> onLivingJump;
     public transient Consumer<ContextUtils.EThunderHitContext> thunderHit;
@@ -50,6 +56,7 @@ public class ModifyEntityBuilder implements KubeEvent {
     public transient Predicate<Entity> canChangeDimensions;
     public transient Function<Entity, Object> blockSpeedFactor;
     public transient Predicate<Entity> isPickable;
+    public transient Function<Entity, Object> canBeHitByProjectile;
     public transient Consumer<ContextUtils.EEntityFallDamageContext> onFall;
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
@@ -164,7 +171,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             Example usage:
             ```javascript
             modifyBuilder.onEntityCollision(context => {
-                const { entity, target } = context
+                let { entity, target } = context
                 console.log(entity)
             });
             ```
@@ -252,6 +259,22 @@ public class ModifyEntityBuilder implements KubeEvent {
     }
 
     @Info(value = """
+            Function determining if the entity can be hit by projectiles.
+            This is useful as a fallback when a vanilla entity overrides isPickable and projectile targeting needs a separate hook.
+
+            Example usage:
+            ```javascript
+            modifyBuilder.canBeHitByProjectile(entity => {
+                return true;
+            })
+            ```
+            """)
+    public ModifyEntityBuilder canBeHitByProjectile(Function<Entity, Object> canBeHitByProjectile) {
+        this.canBeHitByProjectile = canBeHitByProjectile;
+        return this;
+    }
+
+    @Info(value = """
             Function determining if the entity may collide with another entity
             using the ContextUtils.CollidingEntityContext which has this entity and the
             one colliding with this entity.
@@ -320,7 +343,7 @@ public class ModifyEntityBuilder implements KubeEvent {
                 Example usage:
                 ```javascript
                 modifyBuilder.positionRider(context => {
-                    const {entity, passenger, moveFunction} = context
+                    let {entity, passenger, moveFunction} = context
                 });
                 ```
             """)
@@ -367,6 +390,24 @@ public class ModifyEntityBuilder implements KubeEvent {
         return this;
     }
 
+    @Info(value = """
+            Sets a callback function to override the lower-level swim sound playback path.
+            This is useful as a fallback when a vanilla entity overrides getSwimSound and setSwimSound is not reached.
+
+            Example usage:
+            ```javascript
+            modifyBuilder.playSwimSound(context => {
+                let { entity, volume } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playSwimSound", value = "The callback to run instead of the entity's default swim sound playback")
+    })
+    public ModifyEntityBuilder playSwimSound(Consumer<ContextUtils.PlaySwimSoundContext> playSwimSound) {
+        this.playSwimSound = playSwimSound;
+        return this;
+    }
+
 
     @Info(value = """
             Sets the swim splash sound for the entity using either a string representation or a ResourceLocation object.
@@ -386,6 +427,24 @@ public class ModifyEntityBuilder implements KubeEvent {
 
             setSwimSplashSound = ResourceLocation.fromNamespaceAndPath("minecraft", "entity/generic/splash");
         }
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to override the lower-level water splash effect path.
+            This is useful as a fallback when a vanilla entity overrides getSwimSplashSound and setSwimSplashSound is not reached.
+
+            Example usage:
+            ```javascript
+            modifyBuilder.doWaterSplashEffect(entity => {
+                // Custom splash sound
+            });
+            ```
+            """, params = {
+            @Param(name = "doWaterSplashEffect", value = "The callback to run instead of the entity's default water splash effect")
+    })
+    public ModifyEntityBuilder doWaterSplashEffect(Consumer<Entity> doWaterSplashEffect) {
+        this.doWaterSplashEffect = doWaterSplashEffect;
         return this;
     }
 
@@ -432,6 +491,24 @@ public class ModifyEntityBuilder implements KubeEvent {
     }
 
     @Info(value = """
+            Sets a callback function to override the lower-level flapping movement path.
+            This is useful as a fallback when a vanilla entity overrides isFlapping or onFlap and those hooks are not reached.
+
+            Example usage:
+            ```javascript
+            modifyBuilder.processFlappingMovement(entity => {
+                // Custom flapping behavior
+            });
+            ```
+            """, params = {
+            @Param(name = "processFlappingMovement", value = "The callback to run instead of the entity's default flapping movement processing")
+    })
+    public ModifyEntityBuilder processFlappingMovement(Consumer<Entity> processFlappingMovement) {
+        this.processFlappingMovement = processFlappingMovement;
+        return this;
+    }
+
+    @Info(value = """
             Sets a callback function to be executed when the entity is added to the world.
             The provided Consumer accepts a {@link Entity} parameter,
             representing the entity that is added to the world.
@@ -460,6 +537,57 @@ public class ModifyEntityBuilder implements KubeEvent {
             """)
     public ModifyEntityBuilder repositionEntityAfterLoad(boolean customRepositionEntityAfterLoad) {
         this.repositionEntityAfterLoad = customRepositionEntityAfterLoad;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to override the entity's step sound.
+
+            Example usage:
+            ```javascript
+            modifyBuilder.playStepSound(context => {
+                let { entity, pos, blockState } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playStepSound", value = "The callback to run instead of the entity's default step sound behavior")
+    })
+    public ModifyEntityBuilder playStepSound(Consumer<ContextUtils.PlayStepSoundContext> playStepSound) {
+        this.playStepSound = playStepSound;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to override the entity's muffled step sound.
+
+            Example usage:
+            ```javascript
+            modifyBuilder.playMuffledStepSound(context => {
+                let { entity, blockState, pos } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playMuffledStepSound", value = "The callback to run instead of the entity's default muffled step sound behavior")
+    })
+    public ModifyEntityBuilder playMuffledStepSound(Consumer<ContextUtils.PlayMuffledStepSoundContext> playMuffledStepSound) {
+        this.playMuffledStepSound = playMuffledStepSound;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to override the entity's combination step sounds.
+
+            Example usage:
+            ```javascript
+            modifyBuilder.playCombinationStepSounds(context => {
+                let { entity, primaryStepSound, secondaryStepSound, primaryPos, secondaryPos } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playCombinationStepSounds", value = "The callback to run instead of the entity's default combination step sound behavior")
+    })
+    public ModifyEntityBuilder playCombinationStepSounds(Consumer<ContextUtils.PlayCombinationStepSoundsContext> playCombinationStepSounds) {
+        this.playCombinationStepSounds = playCombinationStepSounds;
         return this;
     }
 
@@ -550,7 +678,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             modifyBuilder.isCurrentlyGlowing(entity => {
                 // Define the conditions to check if the entity is currently glowing
                 // Use information about the Entity provided by the context.
-                const isGlowing = // Some boolean condition to check if the entity is glowing;
+                let isGlowing = // Some boolean condition to check if the entity is glowing;
                 return isGlowing;
             });
             ```

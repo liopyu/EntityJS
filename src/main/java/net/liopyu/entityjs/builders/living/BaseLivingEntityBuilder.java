@@ -100,6 +100,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<ContextUtils.LivingEntityContext> onBlockedByShield;
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
+    public transient Consumer<ContextUtils.PlayStepSoundContext> playStepSound;
+    public transient Consumer<ContextUtils.PlayMuffledStepSoundContext> playMuffledStepSound;
+    public transient Consumer<ContextUtils.PlayCombinationStepSoundsContext> playCombinationStepSounds;
     public transient Consumer<LivingEntity> onIncreaseAirSupply;
     public transient Function<ContextUtils.HurtContext, Object> setHurtSound;
     public transient Object setSwimSplashSound;
@@ -301,7 +304,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 Example usage:
                 ```javascript
                 entityBuilder.applyRotations(context => {
-                    const { entity, poseStack, ageInTicks, rotationYaw, partialTick } = context
+                    let { entity, poseStack, ageInTicks, rotationYaw, partialTick } = context
                     // apply your transforms here
                 });
                 ```
@@ -317,7 +320,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Example usage:
             ```javascript
             entityBuilder.renderFinal(context => {
-                const {
+                let {
                     poseStack,
                     entity,
                     model,
@@ -487,7 +490,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Example usage:
             ```javascript
             entityBuilder.scaleModelForRender(context => {
-                const { entity, widthScale, heightScale, poseStack, model, isReRender, partialTick, packedLight, packedOverlay } = context
+                let { entity, widthScale, heightScale, poseStack, model, isReRender, partialTick, packedLight, packedOverlay } = context
                 if (entity.isBaby()) {
                     poseStack.scale(0.5, 0.5, 0.5)
                 }
@@ -505,7 +508,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Example usage:
             ```javascript
             entityBuilder.isAlliedTo(context => {
-                const {entity, target} = context
+                let {entity, target} = context
                 return target.type == 'minecraft:blaze'
             });
             ```
@@ -521,7 +524,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Example usage:
             ```javascript
             mobBuilder.onHurtTarget(context => {
-                const {entity, targetEntity} = context
+                let {entity, targetEntity} = context
                 //Execute code when the target is hurt
             });
             ```
@@ -567,7 +570,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             Example usage:
             ```javascript
             entityBuilder.travel(context => {
-                const {entity, vec3} = context
+                let {entity, vec3} = context
                 // Use the vec3 and entity to determine the travel logic of the entity
             });
             ```
@@ -744,7 +747,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```javascript
             baseLivingEntityBuilder.lerpTo(context => {
                 // Custom lerping logic for the living entity
-                const { x, y, z, yaw, pitch, posRotationIncrements, entity } = context;
+                let { x, y, z, yaw, pitch, posRotationIncrements, teleport, entity } = context;
                 // Perform custom lerping operations using the provided context
                 // For example, you can smoothly move the entity from its current position to the target position
                 entity.setPositionAndRotation(x, y, z, yaw, pitch);
@@ -1391,6 +1394,57 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
+    @Info(value = """
+            Sets a callback function to override the entity's step sound.
+
+            Example usage:
+            ```javascript
+            entityBuilder.playStepSound(context => {
+                let { entity, pos, blockState } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playStepSound", value = "The callback to run instead of the entity's default step sound behavior")
+    })
+    public BaseLivingEntityBuilder<T> playStepSound(Consumer<ContextUtils.PlayStepSoundContext> playStepSound) {
+        this.playStepSound = playStepSound;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to override the entity's muffled step sound.
+
+            Example usage:
+            ```javascript
+            entityBuilder.playMuffledStepSound(context => {
+                let { entity, blockState, pos } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playMuffledStepSound", value = "The callback to run instead of the entity's default muffled step sound behavior")
+    })
+    public BaseLivingEntityBuilder<T> playMuffledStepSound(Consumer<ContextUtils.PlayMuffledStepSoundContext> playMuffledStepSound) {
+        this.playMuffledStepSound = playMuffledStepSound;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to override the entity's combination step sounds.
+
+            Example usage:
+            ```javascript
+            entityBuilder.playCombinationStepSounds(context => {
+                let { entity, primaryStepSound, secondaryStepSound, primaryPos, secondaryPos } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playCombinationStepSounds", value = "The callback to run instead of the entity's default combination step sound behavior")
+    })
+    public BaseLivingEntityBuilder<T> playCombinationStepSounds(Consumer<ContextUtils.PlayCombinationStepSoundsContext> playCombinationStepSounds) {
+        this.playCombinationStepSounds = playCombinationStepSounds;
+        return this;
+    }
+
 
     @Info(value = """
             Sets a callback function to be executed when the entity's air supply increases.
@@ -1418,7 +1472,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.setHurtSound(context => {
                 // Custom logic to determine the hurt sound for the entity
                 // You can use information from the HurtContext to customize the sound based on the context
-                const { entity, damageSource } = context;
+                let { entity, damageSource } = context;
                 // Determine the hurt sound based on the type of damage source
                 switch (damageSource.getType()) {
                     case "fire":
@@ -2230,7 +2284,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.isCurrentlyGlowing(entity => {
                 // Define the conditions to check if the entity is currently glowing
                 // Use information about the LivingEntity provided by the context.
-                const isGlowing = // Some boolean condition to check if the entity is glowing;
+                let isGlowing = // Some boolean condition to check if the entity is glowing;
                 return isGlowing;
             });
             ```

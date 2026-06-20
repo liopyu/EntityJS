@@ -18,7 +18,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -60,7 +59,7 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
     }
 
     @Info(value = """
-            Creates a new custom entity based on an existing living entity class.
+            Creates a new custom entity based on an existing entity class.
             This allows extending or modifying behavior of vanilla or modded entities dynamically.
             
             The builder provided in the callback can be used to directly access the respective entity's modification builder.
@@ -76,15 +75,15 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
             ```
             """
     )
-    public CustomEntityBuilder entityJs$createCustom(KubeResourceLocation id, Class<? extends LivingEntity> entityClass, Consumer<ModifyEntityBuilder> consumer) {
-        if (!LivingEntity.class.isAssignableFrom(entityClass)) {
-            EntityJSHelperClass.logErrorMessageOnce("Tried to create entity from a class that does not extend LivingEntity. Id: " + id);
+    public CustomEntityBuilder entityJs$createCustom(KubeResourceLocation id, Class<? extends Entity> entityClass, Consumer<ModifyEntityBuilder> consumer) {
+        if (!Entity.class.isAssignableFrom(entityClass)) {
+            EntityJSHelperClass.logErrorMessageOnce("Tried to create entity from a class that does not extend Entity. Id: " + id);
             return null;
         }
         var rl = id.wrapped();
         CustomEntityBuilder b = null;
-        if (LivingEntity.class.isAssignableFrom(entityClass)) {
-            b = new CustomEntityBuilder(rl, (Class<? extends LivingEntity>) entityClass);
+        if (Entity.class.isAssignableFrom(entityClass)) {
+            b = new CustomEntityBuilder(rl, (Class<? extends Entity>) entityClass);
         }
         if (b == null) {
             EntityJSHelperClass.logErrorMessageOnce("CustomEntityBuilder is null for entity id: " + id);

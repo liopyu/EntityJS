@@ -59,8 +59,8 @@ public class SlimeJSBuilder extends MobBuilder<SlimeEntityJS> {
             Example usage:
             ```javascript
             builder.dealDamage(ctx => {
-            	const { entity, target } = ctx
-            	// Determine how the slime deals damage
+                let { entity, target } = ctx
+                // Determine how the slime deals damage
             });
             ```
             """)

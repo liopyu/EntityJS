@@ -1,13 +1,12 @@
 package net.liopyu.entityjs.builders.nonliving.entityjs;
 
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.ReturnsSelf;
-import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Consumer;
@@ -30,6 +29,9 @@ public class PartBuilder<T extends LivingEntity> {
     public transient Predicate<Entity> isFlapping;
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
+    public transient Consumer<ContextUtils.PlayStepSoundContext> playStepSound;
+    public transient Consumer<ContextUtils.PlayMuffledStepSoundContext> playMuffledStepSound;
+    public transient Consumer<ContextUtils.PlayCombinationStepSoundsContext> playCombinationStepSounds;
     public transient Object setSwimSplashSound;
     public transient Consumer<ContextUtils.EEntityFallDamageContext> onFall;
     public transient Consumer<Entity> onSprint;
@@ -83,12 +85,63 @@ public class PartBuilder<T extends LivingEntity> {
                 Example usage:
                 ```javascript
                 entityBuilder.positionRider(context => {
-                    const {entity, passenger, moveFunction} = context
+                    let {entity, passenger, moveFunction} = context
                 });
                 ```
             """)
     public PartBuilder<T> positionRider(Consumer<ContextUtils.PositionRiderContext> builderConsumer) {
         this.positionRider = builderConsumer;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to override the entity part's step sound.
+
+            Example usage:
+            ```javascript
+            partBuilder.playStepSound(context => {
+                let { entity, pos, blockState } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playStepSound", value = "The callback to run instead of the entity part's default step sound behavior")
+    })
+    public PartBuilder<T> playStepSound(Consumer<ContextUtils.PlayStepSoundContext> playStepSound) {
+        this.playStepSound = playStepSound;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to override the entity part's muffled step sound.
+
+            Example usage:
+            ```javascript
+            partBuilder.playMuffledStepSound(context => {
+                let { entity, blockState, pos } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playMuffledStepSound", value = "The callback to run instead of the entity part's default muffled step sound behavior")
+    })
+    public PartBuilder<T> playMuffledStepSound(Consumer<ContextUtils.PlayMuffledStepSoundContext> playMuffledStepSound) {
+        this.playMuffledStepSound = playMuffledStepSound;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to override the entity part's combination step sounds.
+
+            Example usage:
+            ```javascript
+            partBuilder.playCombinationStepSounds(context => {
+                let { entity, primaryStepSound, secondaryStepSound, primaryPos, secondaryPos } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playCombinationStepSounds", value = "The callback to run instead of the entity part's default combination step sound behavior")
+    })
+    public PartBuilder<T> playCombinationStepSounds(Consumer<ContextUtils.PlayCombinationStepSoundsContext> playCombinationStepSounds) {
+        this.playCombinationStepSounds = playCombinationStepSounds;
         return this;
     }
 
@@ -113,7 +166,7 @@ public class PartBuilder<T extends LivingEntity> {
             Example usage:
             ```javascript
             entityBuilder.onPartHurt(context => {
-                const { entity, part, source, amount } = context
+                let { entity, part, source, amount } = context
                 // Custom logic for determining how the parts of the entity should relay damage
                 // For example, hurt the parent entity twice the damage when this part is hit.
                 entity.attack(source, amount * 2)
@@ -676,7 +729,7 @@ public class PartBuilder<T extends LivingEntity> {
             entityBuilder.isCurrentlyGlowing(entity => {
                 // Define the conditions to check if the entity is currently glowing
                 // Use information about the Entity provided by the context.
-                const isGlowing = // Some boolean condition to check if the entity is glowing;
+                let isGlowing = // Some boolean condition to check if the entity is glowing;
                 return isGlowing;
             });
             ```

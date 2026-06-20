@@ -1,12 +1,12 @@
 package net.liopyu.entityjs.builders.misc;
 
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityReflection {
-    private static final ConcurrentHashMap<Class<? extends LivingEntity>, Class<? extends LivingEntity>> subclassCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Class<? extends Entity>, Class<? extends Entity>> subclassCache = new ConcurrentHashMap<>();
 
     /**
      * Creates and stores a subclass of the provided base entity class that implements IAnimatableJSCustom.
@@ -15,7 +15,7 @@ public class EntityReflection {
      * @param baseClass The entity class to extend
      * @return The stored class implementing IAnimatableJSCustom
      */
-    public static Class<? extends LivingEntity> createEntityClass(Class<? extends LivingEntity> baseClass) {
+    public static Class<? extends Entity> createEntityClass(Class<? extends Entity> baseClass) {
         if (IAnimatableJSCustom.class.isAssignableFrom(baseClass)) {
             return baseClass;
         }
@@ -29,7 +29,7 @@ public class EntityReflection {
      * @param baseClass The base entity class
      * @return A dynamically grab the subclass implementing IAnimatableJSCustom
      */
-    public static Class<? extends LivingEntity> getSubclassInstance(Class<? extends LivingEntity> baseClass) {
+    public static Class<? extends Entity> getSubclassInstance(Class<? extends Entity> baseClass) {
         return baseClass;
     }
 }
