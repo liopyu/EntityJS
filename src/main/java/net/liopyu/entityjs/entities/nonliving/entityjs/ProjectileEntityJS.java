@@ -38,11 +38,13 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     public ProjectileEntityJS(ProjectileEntityJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
+        entityjs$setDefaultItem();
     }
 
     public ProjectileEntityJS(ProjectileEntityJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, LivingEntity pShooter, Level pLevel) {
         super(pEntityType, pShooter, pLevel);
         this.builder = builder;
+        entityjs$setDefaultItem();
     }
 
 
@@ -53,7 +55,17 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected @NotNull Item getDefaultItem() {
-        return Items.AIR;
+        if (builder != null && !builder.noItem && builder.item != null) {
+            Item item = builder.item.get();
+            if (item != null) {
+                return item;
+            }
+        }
+        return Items.SNOWBALL;
+    }
+
+    private void entityjs$setDefaultItem() {
+        setItem(new ItemStack(getDefaultItem()));
     }
 
     public String entityName() {

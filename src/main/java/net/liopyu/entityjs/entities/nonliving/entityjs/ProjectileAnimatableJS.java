@@ -51,12 +51,14 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
         super(pEntityType, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+        entityjs$setDefaultItem();
     }
 
     public ProjectileAnimatableJS(ProjectileAnimatableJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, LivingEntity pShooter, Level pLevel) {
         super(pEntityType, pShooter, pLevel);
         this.builder = builder;
         getAnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+        entityjs$setDefaultItem();
     }
 
 
@@ -73,7 +75,17 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
 
     @Override
     protected @NotNull Item getDefaultItem() {
-        return Items.AIR;
+        if (builder != null && !builder.noItem && builder.item != null) {
+            Item item = builder.item.get();
+            if (item != null) {
+                return item;
+            }
+        }
+        return Items.SNOWBALL;
+    }
+
+    private void entityjs$setDefaultItem() {
+        setItem(new ItemStack(getDefaultItem()));
     }
 
    /* private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK = SynchedEntityData.defineId(
