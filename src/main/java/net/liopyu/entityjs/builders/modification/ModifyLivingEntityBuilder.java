@@ -498,7 +498,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             modifyBuilder.setHurtSound(context => {
                 // Custom logic to determine the hurt sound for the entity
                 // You can use information from the HurtContext to customize the sound based on the context
-                const { entity, damageSource } = context;
+                let { entity, damageSource } = context;
                 // Determine the hurt sound based on the type of damage source
                 switch (damageSource.getType()) {
                     case "fire":
@@ -1224,7 +1224,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             ```javascript
             modifyBuilder.lerpTo(context => {
                 // Custom lerping logic for the living entity
-                const { x, y, z, yaw, pitch, posRotationIncrements, teleport, entity } = context;
+                let { x, y, z, yaw, pitch, posRotationIncrements, teleport, entity } = context;
                 // Perform custom lerping operations using the provided context
                 // For example, you can smoothly move the entity from its current position to the target position
                 entity.setPositionAndRotation(x, y, z, yaw, pitch);
@@ -1242,7 +1242,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             Example usage:
             ```javascript
             modifyBuilder.isAlliedTo(context => {
-                const {entity, target} = context
+                let {entity, target} = context
                 return target.type == 'minecraft:blaze'
             });
             ```
@@ -1258,7 +1258,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             Example usage:
             ```javascript
             modifyBuilder.onHurtTarget(context => {
-                const {entity, targetEntity} = context
+                let {entity, targetEntity} = context
                 //Execute code when the target is hurt
             });
             ```
@@ -1304,7 +1304,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             Example usage:
             ```javascript
             modifyBuilder.travel(context => {
-                const {entity, vec3} = context
+                let {entity, vec3} = context
                 // Use the vec3 and entity to determine the travel logic of the entity
             });
             ```
@@ -1373,7 +1373,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
                 Example usage:
                 ```javascript
                 modifyBuilder.positionRider(context => {
-                    const {entity, passenger, moveFunction} = context
+                    let {entity, passenger, moveFunction} = context
                 });
                 ```
             """)

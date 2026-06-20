@@ -206,7 +206,7 @@ public class TestModifyEntityBuilder extends EventJS {
                 Example usage:
                 ```javascript
                 entityBuilder.positionRider(context => {
-                    const {entity, passenger, moveFunction} = context
+                    let {entity, passenger, moveFunction} = context
                 });
                 ```
             """)
@@ -478,7 +478,7 @@ public class TestModifyEntityBuilder extends EventJS {
             entityBuilder.isCurrentlyGlowing(entity => {
                 // Define the conditions to check if the entity is currently glowing
                 // Use information about the Entity provided by the context.
-                const isGlowing = // Some boolean condition to check if the entity is glowing;
+                let isGlowing = // Some boolean condition to check if the entity is glowing;
                 return isGlowing;
             });
             ```

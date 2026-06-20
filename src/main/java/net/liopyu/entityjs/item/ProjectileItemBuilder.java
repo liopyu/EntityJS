@@ -32,7 +32,7 @@ public class ProjectileItemBuilder extends ItemBuilder {
     public ProjectileItemBuilder(ResourceLocation i, BuilderBase<?> parent) {
         super(i);
         this.parent = parent;
-        canThrow = false;
+        canThrow = true;
         projectileZ = 0.0F;
         projectileVelocity = 1.5F;
         projectileInaccuracy = 1.0F;

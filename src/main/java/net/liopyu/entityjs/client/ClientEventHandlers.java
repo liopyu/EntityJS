@@ -59,7 +59,15 @@ public class ClientEventHandlers {
             event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSBoatRenderer<>(renderManager, builder));
         }
         for (CustomEntityJSBuilder builder : CustomEntityBuilder.thisList) {
-            event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new CustomKubeJSEntityRenderer<>(renderManager, builder));
+            if (builder instanceof CustomEntityBuilder customBuilder && customBuilder.usesCustomRenderer()) {
+                event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> UtilsJS.cast(customBuilder.createEntityRenderer(renderManager)));
+            } else if (builder instanceof CustomEntityBuilder customBuilder && customBuilder.usesEntityModelRenderer()) {
+                event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new CustomEntityModelRenderer<>(renderManager, customBuilder));
+            } else if (builder instanceof CustomEntityBuilder customBuilder && !customBuilder.isLivingEntityClass()) {
+                event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new CustomKubeJSNonLivingEntityRenderer<>(renderManager, builder));
+            } else {
+                event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new CustomKubeJSEntityRenderer<>(renderManager, builder));
+            }
         }
     }
 

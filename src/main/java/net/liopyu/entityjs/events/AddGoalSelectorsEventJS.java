@@ -57,7 +57,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             =====================================
             let $PanicGoal = Java.loadClass("net.minecraft.world.entity.ai.goal.PanicGoal")
             e.removeGoals(context => {
-                const { goal, entity } = context
+                let { goal, entity } = context
                 return goal.getClass() == $PanicGoal
             })
             =====================================

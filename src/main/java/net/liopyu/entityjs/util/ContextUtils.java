@@ -3,19 +3,27 @@ package net.liopyu.entityjs.util;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.kubejs.typings.Info;
-import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
+import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
-import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
-import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -286,6 +294,126 @@ public class ContextUtils {
             this.entity = entity;
             this.renderer = renderer;
             this.model = model;
+        }
+    }
+
+    public static class EntityModelFactoryContext {
+        @Info("The renderer context")
+        public final EntityRendererProvider.Context rendererContext;
+        @Info("The custom entity builder")
+        public final CustomEntityBuilder builder;
+        @Info("The entity type id")
+        public final ResourceLocation id;
+
+        public EntityModelFactoryContext(EntityRendererProvider.Context rendererContext, CustomEntityBuilder builder) {
+            this.rendererContext = rendererContext;
+            this.builder = builder;
+            this.id = builder.id;
+        }
+
+        @Info("Bakes a model layer into a ModelPart")
+        public ModelPart bakeLayer(ModelLayerLocation layer) {
+            return rendererContext.bakeLayer(layer);
+        }
+
+        @Info("Returns Minecraft's entity model set")
+        public EntityModelSet getModelSet() {
+            return rendererContext.getModelSet();
+        }
+
+        @Info("Returns Minecraft's item renderer")
+        public ItemRenderer getItemRenderer() {
+            return rendererContext.getItemRenderer();
+        }
+
+        @Info("Returns Minecraft's block render dispatcher")
+        public BlockRenderDispatcher getBlockRenderDispatcher() {
+            return rendererContext.getBlockRenderDispatcher();
+        }
+
+        @Info("Returns Minecraft's item-in-hand renderer")
+        public ItemInHandRenderer getItemInHandRenderer() {
+            return rendererContext.getItemInHandRenderer();
+        }
+
+        @Info("Returns Minecraft's resource manager")
+        public ResourceManager getResourceManager() {
+            return rendererContext.getResourceManager();
+        }
+
+        @Info("Returns Minecraft's model manager")
+        public ModelManager getModelManager() {
+            return rendererContext.getModelManager();
+        }
+
+        @Info("Returns Minecraft's entity render dispatcher")
+        public EntityRenderDispatcher getEntityRenderDispatcher() {
+            return rendererContext.getEntityRenderDispatcher();
+        }
+
+        @Info("Returns Minecraft's font renderer")
+        public Font getFont() {
+            return rendererContext.getFont();
+        }
+    }
+
+    public static class EntityRendererFactoryContext {
+        @Info("The renderer context")
+        public final EntityRendererProvider.Context rendererContext;
+        @Info("The custom entity builder")
+        public final CustomEntityBuilder builder;
+        @Info("The entity type id")
+        public final ResourceLocation id;
+
+        public EntityRendererFactoryContext(EntityRendererProvider.Context rendererContext, CustomEntityBuilder builder) {
+            this.rendererContext = rendererContext;
+            this.builder = builder;
+            this.id = builder.id;
+        }
+
+        @Info("Bakes a model layer into a ModelPart")
+        public ModelPart bakeLayer(ModelLayerLocation layer) {
+            return rendererContext.bakeLayer(layer);
+        }
+
+        @Info("Returns Minecraft's entity model set")
+        public EntityModelSet getModelSet() {
+            return rendererContext.getModelSet();
+        }
+
+        @Info("Returns Minecraft's item renderer")
+        public ItemRenderer getItemRenderer() {
+            return rendererContext.getItemRenderer();
+        }
+
+        @Info("Returns Minecraft's block render dispatcher")
+        public BlockRenderDispatcher getBlockRenderDispatcher() {
+            return rendererContext.getBlockRenderDispatcher();
+        }
+
+        @Info("Returns Minecraft's item-in-hand renderer")
+        public ItemInHandRenderer getItemInHandRenderer() {
+            return rendererContext.getItemInHandRenderer();
+        }
+
+        @Info("Returns Minecraft's resource manager")
+        public ResourceManager getResourceManager() {
+            return rendererContext.getResourceManager();
+        }
+
+        @Info("Returns Minecraft's model manager")
+        public ModelManager getModelManager() {
+            return rendererContext.getModelManager();
+        }
+
+        @Info("Returns Minecraft's entity render dispatcher")
+        public EntityRenderDispatcher getEntityRenderDispatcher() {
+            return rendererContext.getEntityRenderDispatcher();
+        }
+
+        @Info("Returns Minecraft's font renderer")
+        public Font getFont() {
+            return rendererContext.getFont();
         }
     }
 
@@ -1173,6 +1301,78 @@ public class ContextUtils {
             this.moverType = moverType;
             this.position = position;
             this.entity = entity;
+        }
+    }
+
+    public static class PlayStepSoundContext {
+        @Info("The entity playing the step sound")
+        public final Entity entity;
+
+        @Info("The position of the stepped block")
+        public final BlockPos pos;
+
+        @Info("The block state used for the step sound")
+        public final BlockState blockState;
+
+        public PlayStepSoundContext(Entity entity, BlockPos pos, BlockState blockState) {
+            this.entity = entity;
+            this.pos = pos;
+            this.blockState = blockState;
+        }
+    }
+
+    public static class PlaySwimSoundContext {
+        @Info("The entity playing the swim sound")
+        public final Entity entity;
+
+        @Info("The computed swim sound volume")
+        public final float volume;
+
+        public PlaySwimSoundContext(Entity entity, float volume) {
+            this.entity = entity;
+            this.volume = volume;
+        }
+    }
+
+    public static class PlayMuffledStepSoundContext {
+        @Info("The entity playing the muffled step sound")
+        public final Entity entity;
+
+        @Info("The block state used for the muffled step sound")
+        public final BlockState blockState;
+
+        @Info("The position of the muffled step sound block")
+        public final BlockPos pos;
+
+        public PlayMuffledStepSoundContext(Entity entity, BlockState blockState, BlockPos pos) {
+            this.entity = entity;
+            this.blockState = blockState;
+            this.pos = pos;
+        }
+    }
+
+    public static class PlayCombinationStepSoundsContext {
+        @Info("The entity playing the combination step sounds")
+        public final Entity entity;
+
+        @Info("The primary block state used for the step sound")
+        public final BlockState primaryStepSound;
+
+        @Info("The secondary block state used for the muffled step sound")
+        public final BlockState secondaryStepSound;
+
+        @Info("The position of the primary step sound block")
+        public final BlockPos primaryPos;
+
+        @Info("The position of the secondary step sound block")
+        public final BlockPos secondaryPos;
+
+        public PlayCombinationStepSoundsContext(Entity entity, BlockState primaryStepSound, BlockState secondaryStepSound, BlockPos primaryPos, BlockPos secondaryPos) {
+            this.entity = entity;
+            this.primaryStepSound = primaryStepSound;
+            this.secondaryStepSound = secondaryStepSound;
+            this.primaryPos = primaryPos;
+            this.secondaryPos = secondaryPos;
         }
     }
 

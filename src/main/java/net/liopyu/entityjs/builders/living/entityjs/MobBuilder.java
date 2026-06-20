@@ -108,7 +108,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
             Example usage:
             ```javascript
             mobBuilder.createNavigation(context => {
-                const {entity, level} = context
+                let {entity, level} = context
                 return EntityJSUtils.createWallClimberNavigation(entity, level) // Return some path navigation
             });
             ```

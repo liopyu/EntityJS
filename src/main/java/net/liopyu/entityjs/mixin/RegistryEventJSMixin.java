@@ -31,7 +31,7 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
     public List<BuilderBase<? extends T>> created;
 
     @Info(value = """
-            Creates a new custom entity based on an existing living entity class.
+            Creates a new custom entity based on an existing entity class.
             This allows extending or modifying behavior of vanilla or modded entities dynamically.
             
             The builder provided in the callback can be used to directly access the respective entity's modification builder.
@@ -47,14 +47,14 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
             ```
             """
     )
-    public CustomEntityBuilder entityJs$createCustom(String id, Class<? extends LivingEntity> entityClass, Consumer<ModifyEntityBuilder> consumer) {
-        if (!LivingEntity.class.isAssignableFrom(entityClass)) {
-            throw new IllegalArgumentException("Tried to create entity from a class that does not extend LivingEntity. Id: " + id);
+    public CustomEntityBuilder entityJs$createCustom(String id, Class<? extends Entity> entityClass, Consumer<ModifyEntityBuilder> consumer) {
+        if (!Entity.class.isAssignableFrom(entityClass)) {
+            throw new IllegalArgumentException("Tried to create entity from a class that does not extend Entity. Id: " + id);
         }
         var rl = UtilsJS.getMCID(ScriptType.STARTUP.manager.get().context, KubeJS.appendModId(id));
         CustomEntityBuilder b = null;
-        if (LivingEntity.class.isAssignableFrom(entityClass)) {
-            b = new CustomEntityBuilder(rl, (Class<? extends LivingEntity>) entityClass);
+        if (Entity.class.isAssignableFrom(entityClass)) {
+            b = new CustomEntityBuilder(rl, (Class<? extends Entity>) entityClass);
         }
         if (b == null) {
             throw new IllegalArgumentException("CustomEntityBuilder is null for entity id: " + id);

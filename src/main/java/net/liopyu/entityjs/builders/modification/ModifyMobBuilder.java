@@ -96,7 +96,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             Example usage:
             ```javascript
             modifyBuilder.createNavigation(context => {
-                const {entity, level} = context
+                let {entity, level} = context
                 return EntityJSUtils.createWallClimberNavigation(entity, level) // Return some path navigation
             });
             ```

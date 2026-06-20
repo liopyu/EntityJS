@@ -51,7 +51,7 @@ public class HorseJSBuilder extends AnimalEntityBuilder<HorseEntityJS> {
             Example usage:
             ```javascript
             builder.tameOverride(context => {
-                const {entity,player} = context
+                let {entity,player} = context
                 // Mimic the vanilla way of setting the uuid when the entity is tamed.
                 entity.setOwnerUUID(player.getUUID());
             });

@@ -1,14 +1,17 @@
 package net.liopyu.entityjs.mixin;
 
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
+import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.implementation.IEntityJS;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -22,9 +25,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -33,7 +38,10 @@ import java.util.Objects;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = Entity.class, remap = true)
-public class EntityMixin implements IEntityJS {
+public abstract class EntityMixin implements IEntityJS {
+    @Shadow
+    protected abstract void playStepSound(BlockPos pPos, BlockState pState);
+
     @Unique
     private Object entityJs$builder;
 
@@ -67,6 +75,14 @@ public class EntityMixin implements IEntityJS {
         var entityType = entityJs$getLivingEntity().getType();
         var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
         entityJs$builder = eventJS.getBuilder();
+        var customBuilder = EntityJSUtils.getEntityBuilder(pEntityType);
+        if (!(entityJs$getLivingEntity() instanceof LivingEntity) && customBuilder instanceof CustomEntityJSBuilder) {
+            var rl = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
+            var customConsumer = createCustomMap.get(rl);
+            if (customConsumer != null) {
+                customConsumer.accept((ModifyEntityBuilder) entityJs$builder);
+            }
+        }
         if (EventHandlers.modifyEntity.hasListeners()) {
             EventHandlers.modifyEntity.post(eventJS);
         }
@@ -373,6 +389,18 @@ public class EntityMixin implements IEntityJS {
         }
     }
 
+    @Inject(method = "canBeHitByProjectile", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    public void canBeHitByProjectile(CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.canBeHitByProjectile == null) return;
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canBeHitByProjectile.apply(entityJs$getLivingEntity()), "boolean");
+            if (obj != null) {
+                cir.setReturnValue((boolean) obj);
+            } else
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeHitByProjectile from entity: " + entityJs$entityName() + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+        }
+    }
+
     @Inject(method = "push(Lnet/minecraft/world/entity/Entity;)V", at = @At("HEAD"), remap = true, cancellable = true)
     public void push(Entity pEntity, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
@@ -438,6 +466,17 @@ public class EntityMixin implements IEntityJS {
     }
 
 
+    @Inject(method = "processFlappingMovement", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    protected void processFlappingMovement(CallbackInfo ci) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.processFlappingMovement != null) {
+                EntityJSHelperClass.consumerCallback(builder.processFlappingMovement, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: processFlappingMovement.");
+                ci.cancel();
+            }
+        }
+    }
+
+
     @Inject(method = "repositionEntityAfterLoad", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void repositionEntityAfterLoad(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
@@ -456,6 +495,16 @@ public class EntityMixin implements IEntityJS {
         }
     }
 
+    @Inject(method = "doWaterSplashEffect", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    protected void doWaterSplashEffect(CallbackInfo ci) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.doWaterSplashEffect != null) {
+                EntityJSHelperClass.consumerCallback(builder.doWaterSplashEffect, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: doWaterSplashEffect.");
+                ci.cancel();
+            }
+        }
+    }
+
 
     @Inject(method = "getSwimSound", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     protected void getSwimSound(CallbackInfoReturnable<SoundEvent> cir) {
@@ -463,6 +512,17 @@ public class EntityMixin implements IEntityJS {
             if (builder.setSwimSound == null) return;
             cir.setReturnValue(Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) builder.setSwimSound)));
 
+        }
+    }
+
+    @Inject(method = "playSwimSound", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    protected void playSwimSound(float volume, CallbackInfo ci) {
+        if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
+            if (builder.playSwimSound != null) {
+                final ContextUtils.PlaySwimSoundContext context = new ContextUtils.PlaySwimSoundContext(entityJs$getLivingEntity(), volume);
+                EntityJSHelperClass.consumerCallback(builder.playSwimSound, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: playSwimSound.");
+                ci.cancel();
+            }
         }
     }
 
@@ -591,6 +651,36 @@ public class EntityMixin implements IEntityJS {
                 } else
                     EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canTrample from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
             }
+        }
+    }
+
+    @Redirect(method = "walkingStepSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;playStepSound(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"), remap = true)
+    protected void entityJs$playStepSound(Entity entity, BlockPos pos, BlockState blockState) {
+        if (entityJs$builder instanceof ModifyEntityBuilder builder && builder.playStepSound != null) {
+            final ContextUtils.PlayStepSoundContext context = new ContextUtils.PlayStepSoundContext(entityJs$getLivingEntity(), pos, blockState);
+            EntityJSHelperClass.consumerCallback(builder.playStepSound, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: playStepSound.");
+            return;
+        }
+        this.playStepSound(pos, blockState);
+    }
+
+    // Forge patches BlockPos into this vanilla method signature, but MCP mappings only cover the original signature.
+    @Inject(method = "playMuffledStepSound", at = @At("HEAD"), remap = false, cancellable = true)
+    protected void entityJs$playMuffledStepSound(BlockState blockState, BlockPos pos, CallbackInfo ci) {
+        if (entityJs$builder instanceof ModifyEntityBuilder builder && builder.playMuffledStepSound != null) {
+            final ContextUtils.PlayMuffledStepSoundContext context = new ContextUtils.PlayMuffledStepSoundContext(entityJs$getLivingEntity(), blockState, pos);
+            EntityJSHelperClass.consumerCallback(builder.playMuffledStepSound, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: playMuffledStepSound.");
+            ci.cancel();
+        }
+    }
+
+    // Forge patches BlockPos into this vanilla method signature, but MCP mappings only cover the original signature.
+    @Inject(method = "playCombinationStepSounds", at = @At("HEAD"), remap = false, cancellable = true)
+    protected void entityJs$playCombinationStepSounds(BlockState primaryStepSound, BlockState secondaryStepSound, BlockPos primaryPos, BlockPos secondaryPos, CallbackInfo ci) {
+        if (entityJs$builder instanceof ModifyEntityBuilder builder && builder.playCombinationStepSounds != null) {
+            final ContextUtils.PlayCombinationStepSoundsContext context = new ContextUtils.PlayCombinationStepSoundsContext(entityJs$getLivingEntity(), primaryStepSound, secondaryStepSound, primaryPos, secondaryPos);
+            EntityJSHelperClass.consumerCallback(builder.playCombinationStepSounds, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: playCombinationStepSounds.");
+            ci.cancel();
         }
     }
 

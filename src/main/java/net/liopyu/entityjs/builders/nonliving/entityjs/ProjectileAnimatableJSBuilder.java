@@ -92,7 +92,7 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
             Example usage:
             ```javascript
             arrowEntityBuilder.onEntityCollision(context => {
-                const { entity, target } = context
+                let { entity, target } = context
                 console.log(entity)
             });
             ```

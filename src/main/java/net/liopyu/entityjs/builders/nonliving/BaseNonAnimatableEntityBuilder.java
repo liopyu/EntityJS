@@ -3,6 +3,7 @@ package net.liopyu.entityjs.builders.nonliving;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
@@ -46,6 +47,9 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public transient Function<Entity, Object> isFlapping;
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
+    public transient Consumer<ContextUtils.PlayStepSoundContext> playStepSound;
+    public transient Consumer<ContextUtils.PlayMuffledStepSoundContext> playMuffledStepSound;
+    public transient Consumer<ContextUtils.PlayCombinationStepSoundsContext> playCombinationStepSounds;
     public transient Object setSwimSplashSound;
     public transient Consumer<ContextUtils.EEntityFallDamageContext> onFall;
     public transient Consumer<Entity> onSprint;
@@ -303,7 +307,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
                 Example usage:
                 ```javascript
                 entityBuilder.positionRider(context => {
-                    const {entity, passenger, moveFunction} = context
+                    let {entity, passenger, moveFunction} = context
                 });
                 ```
             """)
@@ -467,6 +471,57 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
         return this;
     }
 
+    @Info(value = """
+            Sets a callback function to override the entity's step sound.
+
+            Example usage:
+            ```javascript
+            entityBuilder.playStepSound(context => {
+                let { entity, pos, blockState } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playStepSound", value = "The callback to run instead of the entity's default step sound behavior")
+    })
+    public BaseNonAnimatableEntityBuilder<T> playStepSound(Consumer<ContextUtils.PlayStepSoundContext> playStepSound) {
+        this.playStepSound = playStepSound;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to override the entity's muffled step sound.
+
+            Example usage:
+            ```javascript
+            entityBuilder.playMuffledStepSound(context => {
+                let { entity, blockState, pos } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playMuffledStepSound", value = "The callback to run instead of the entity's default muffled step sound behavior")
+    })
+    public BaseNonAnimatableEntityBuilder<T> playMuffledStepSound(Consumer<ContextUtils.PlayMuffledStepSoundContext> playMuffledStepSound) {
+        this.playMuffledStepSound = playMuffledStepSound;
+        return this;
+    }
+
+    @Info(value = """
+            Sets a callback function to override the entity's combination step sounds.
+
+            Example usage:
+            ```javascript
+            entityBuilder.playCombinationStepSounds(context => {
+                let { entity, primaryStepSound, secondaryStepSound, primaryPos, secondaryPos } = context;
+            });
+            ```
+            """, params = {
+            @Param(name = "playCombinationStepSounds", value = "The callback to run instead of the entity's default combination step sound behavior")
+    })
+    public BaseNonAnimatableEntityBuilder<T> playCombinationStepSounds(Consumer<ContextUtils.PlayCombinationStepSoundsContext> playCombinationStepSounds) {
+        this.playCombinationStepSounds = playCombinationStepSounds;
+        return this;
+    }
+
 
     @Info(value = """
             Sets a callback function to be executed when the entity starts sprinting.
@@ -575,7 +630,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             entityBuilder.isCurrentlyGlowing(entity => {
                 // Define the conditions to check if the entity is currently glowing
                 // Use information about the Entity provided by the context.
-                const isGlowing = // Some boolean condition to check if the entity is glowing;
+                let isGlowing = // Some boolean condition to check if the entity is glowing;
                 return isGlowing;
             });
             ```

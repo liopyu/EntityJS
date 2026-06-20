@@ -384,6 +384,36 @@ public class BoatEntityJS extends Boat implements IAnimatableJSNL {
     }
 
     @Override
+    protected void playCombinationStepSounds(BlockState primaryStepSound, BlockState secondaryStepSound, BlockPos primaryPos, BlockPos secondaryPos) {
+        if (builder.playCombinationStepSounds != null) {
+            final ContextUtils.PlayCombinationStepSoundsContext context = new ContextUtils.PlayCombinationStepSoundsContext(this, primaryStepSound, secondaryStepSound, primaryPos, secondaryPos);
+            EntityJSHelperClass.consumerCallback(builder.playCombinationStepSounds, context, "[EntityJS]: Error in " + entityName() + "builder for field: playCombinationStepSounds.");
+            return;
+        }
+        super.playCombinationStepSounds(primaryStepSound, secondaryStepSound, primaryPos, secondaryPos);
+    }
+
+    @Override
+    protected void playMuffledStepSound(BlockState blockState, BlockPos pos) {
+        if (builder.playMuffledStepSound != null) {
+            final ContextUtils.PlayMuffledStepSoundContext context = new ContextUtils.PlayMuffledStepSoundContext(this, blockState, pos);
+            EntityJSHelperClass.consumerCallback(builder.playMuffledStepSound, context, "[EntityJS]: Error in " + entityName() + "builder for field: playMuffledStepSound.");
+            return;
+        }
+        super.playMuffledStepSound(blockState, pos);
+    }
+
+    @Override
+    protected void playStepSound(BlockPos pos, BlockState blockState) {
+        if (builder.playStepSound != null) {
+            final ContextUtils.PlayStepSoundContext context = new ContextUtils.PlayStepSoundContext(this, pos, blockState);
+            EntityJSHelperClass.consumerCallback(builder.playStepSound, context, "[EntityJS]: Error in " + entityName() + "builder for field: playStepSound.");
+            return;
+        }
+        super.playStepSound(pos, blockState);
+    }
+
+    @Override
     public boolean isPushable() {
         return builder.isPushable;
     }

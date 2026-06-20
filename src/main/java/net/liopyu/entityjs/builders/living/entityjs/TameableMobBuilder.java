@@ -33,7 +33,7 @@ public abstract class TameableMobBuilder<T extends TamableAnimal & IAnimatableJS
             Example usage:
             ```javascript
             mobBuilder.tameOverride(context => {
-                const {entity,player} = context
+                let {entity,player} = context
                 // Mimic the vanilla way of setting the uuid when the entity is tamed.
                 entity.setOwnerUUID(player.getUUID());
             });
@@ -89,7 +89,7 @@ public abstract class TameableMobBuilder<T extends TamableAnimal & IAnimatableJS
             Example usage:
             ```javascript
             mobBuilder.tamableFoodPredicate(context => {
-                const { entity, item } = context
+                let { entity, item } = context
                 return item.id == 'minecraft:diamond' // Return true if the player's current itemstack will tame the mob.
             });
             ```

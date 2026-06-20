@@ -6,13 +6,12 @@ import dev.latvian.mods.kubejs.event.Extra;
 import dev.latvian.mods.kubejs.script.data.VirtualKubeJSDataPack;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
+import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.events.*;
-import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
@@ -48,6 +47,9 @@ public class EventHandlers {
             event.put(builder.get(), builder.getAttributeBuilder().build());
         }
         for (CustomEntityJSBuilder builder : CustomEntityJSBuilder.thisList) {
+            if (builder instanceof CustomEntityBuilder customBuilder && !customBuilder.isLivingEntityClass()) {
+                continue;
+            }
             event.put((EntityType<? extends LivingEntity>) builder.get(), builder.getAttributeBuilder().build());
         }
     }
