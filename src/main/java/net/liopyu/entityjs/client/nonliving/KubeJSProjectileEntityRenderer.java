@@ -36,7 +36,7 @@ public class KubeJSProjectileEntityRenderer<T extends Entity & IProjectileEntity
     public RenderType getRenderType(T entity) {
         if (builder.renderTypeFunction != null) {
             try {
-                return builder.renderTypeFunction.apply(entity);
+                return EntityJSHelperClass.convertToRenderType(builder.renderTypeFunction.apply(entity), RenderType.entityCutoutNoCull(this.getTextureLocation(entity)));
             } catch (RuntimeException e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in renderTypeFunction. Defaulting to RenderType.entityCutoutNoCull()", e);
             }

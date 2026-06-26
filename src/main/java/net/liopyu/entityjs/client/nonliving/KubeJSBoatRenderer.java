@@ -41,11 +41,15 @@ public class KubeJSBoatRenderer<T extends Boat & IAnimatableJSNL> extends GeoEnt
     public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
         if (builder.renderTypeFunction != null) {
             try {
-                return builder.renderTypeFunction.apply(animatable);
+                return EntityJSHelperClass.convertToRenderType(builder.renderTypeFunction.apply(animatable), defaultRenderType(animatable, texture));
             } catch (RuntimeException e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in renderTypeFunction.", e);
             }
         }
+        return defaultRenderType(animatable, texture);
+    }
+
+    private RenderType defaultRenderType(T animatable, ResourceLocation texture) {
         return switch (animatable.getBuilder().renderType) {
             case SOLID -> RenderType.entitySolid(texture);
             case CUTOUT -> RenderType.entityCutout(texture);
@@ -100,7 +104,7 @@ public class KubeJSBoatRenderer<T extends Boat & IAnimatableJSNL> extends GeoEnt
         if (!Mth.equal(f2, 0.0F)) {
             pPoseStack.mulPose((new Quaternionf()).setAngleAxis(pEntity.getBubbleAngle(pPartialTicks) * 0.017453292F, 1.0F, 0.0F, 1.0F));
         }
-        super.render(pEntity, pEntityYaw, pPartialTicks, pPoseStack, pBuffer, pPackedLight);
         pPoseStack.popPose();
+        super.render(pEntity, pEntityYaw, pPartialTicks, pPoseStack, pBuffer, pPackedLight);
     }
 }
