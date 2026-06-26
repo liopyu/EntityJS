@@ -242,7 +242,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
+        return (builder.isFood != null && OverrideUtils.with(() -> false, () -> builder.isFood.test(pStack))) || this.isFoodPredicate(pStack);
     }
 
 
@@ -251,7 +251,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
             return super.isFood(pStack);
         }
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = builder.isFoodPredicate.apply(context);
+        Object obj = OverrideUtils.with(() -> super.isFood(pStack), () -> builder.isFoodPredicate.apply(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -265,7 +265,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
         if (builder.canBreed == null) {
             return super.canBreed();
         }
-        Object obj = builder.canBreed.apply(this);
+        Object obj = OverrideUtils.with(super::canBreed, () -> builder.canBreed.apply(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -280,7 +280,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
             return super.canMate(pOtherAnimal);
         }
         final ContextUtils.EntityAnimalContext context = new ContextUtils.EntityAnimalContext(this, pOtherAnimal);
-        Object obj = builder.canMate.apply(context);
+        Object obj = OverrideUtils.with(() -> super.canMate(pOtherAnimal), () -> builder.canMate.apply(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -410,7 +410,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
     protected PathNavigation createNavigation(Level pLevel) {
         if (builder == null || builder.createNavigation == null) return new GroundPathNavigation(this, pLevel);
         final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
-        Object obj = builder.createNavigation.apply(context);
+        Object obj = OverrideUtils.with(() -> new GroundPathNavigation(this, pLevel), () -> builder.createNavigation.apply(context));
         if (obj instanceof PathNavigation p) return p;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
         return new GroundPathNavigation(this, pLevel);
@@ -420,7 +420,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
     public boolean canBeLeashed(Player pPlayer) {
         if (builder.canBeLeashed != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            Object obj = builder.canBeLeashed.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canBeLeashed(pPlayer), () -> builder.canBeLeashed.apply(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed(pPlayer));
         }
@@ -433,7 +433,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
             return super.removeWhenFarAway(pDistanceToClosestPlayer);
         }
         final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
-        Object obj = builder.removeWhenFarAway.apply(context);
+        Object obj = OverrideUtils.with(() -> super.removeWhenFarAway(pDistanceToClosestPlayer), () -> builder.removeWhenFarAway.apply(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -556,7 +556,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeaponPredicate != null) {
             final ContextUtils.EntityProjectileWeaponContext context = new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this);
-            Object obj = builder.canFireProjectileWeaponPredicate.apply(context);
+            Object obj = OverrideUtils.with(() -> false, () -> builder.canFireProjectileWeaponPredicate.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -596,7 +596,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
     public boolean canHoldItem(ItemStack stack) {
         if (builder.canHoldItem != null) {
             final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(stack, this);
-            Object obj = builder.canHoldItem.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canHoldItem(stack), () -> builder.canHoldItem.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -635,7 +635,7 @@ public class GoatEntityJS extends Goat implements IAnimatableJS {
     public boolean isAlliedTo(Entity pEntity) {
         if (builder.isAlliedTo != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            Object obj = builder.isAlliedTo.apply(context);
+            Object obj = OverrideUtils.with(() -> super.isAlliedTo(pEntity), () -> builder.isAlliedTo.apply(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
         }

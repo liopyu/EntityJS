@@ -224,7 +224,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
     public boolean isAlliedTo(Entity pEntity) {
         if (builder.isAlliedTo != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            Object obj = builder.isAlliedTo.apply(context);
+            Object obj = OverrideUtils.with(() -> super.isAlliedTo(pEntity), () -> builder.isAlliedTo.apply(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
         }
