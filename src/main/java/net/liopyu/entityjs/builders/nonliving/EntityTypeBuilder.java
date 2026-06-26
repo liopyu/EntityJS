@@ -3,6 +3,7 @@ package net.liopyu.entityjs.builders.nonliving;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
@@ -20,6 +21,7 @@ public class EntityTypeBuilder<B extends Entity & IAnimatableJSNL> {
 
     public EntityType<B> get() {
         var js = this.builder;
+        CallbackInvoker.wrapCallbackFields(js);
         var builder = EntityType.Builder.of(js.factory(), js.mobCategory);
         builder
                 .sized(js.width, js.height)
@@ -34,7 +36,7 @@ public class EntityTypeBuilder<B extends Entity & IAnimatableJSNL> {
         if (!js.save) {
             builder.noSave();
         }
-        if (js.immuneTo.length > 0) {
+        if (js.immuneTo != null && js.immuneTo.length > 0) {
             final Block[] blocks = new Block[js.immuneTo.length];
             for (int i = 0; i < js.immuneTo.length; i++) {
                 blocks[i] = ForgeRegistries.BLOCKS.getValue(js.immuneTo[i]);
