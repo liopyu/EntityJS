@@ -91,7 +91,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     private MoveControl createMoveControl() {
         if (builder.setMoveControl != null) {
-            Object obj = builder.setMoveControl.apply(this);
+            Object obj = OverrideUtils.with(() -> new MoveControl(this), () -> builder.setMoveControl.apply(this));
             if (obj instanceof MoveControl) return (MoveControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMoveControl from entity: " + entityName() + ". Value: " + obj + ". Must be a MoveControl object. Defaulting to super method.");
         }
@@ -100,7 +100,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     private LookControl createLookControl() {
         if (builder.setLookControl != null) {
-            Object obj = builder.setLookControl.apply(this);
+            Object obj = OverrideUtils.with(() -> new LookControl(this), () -> builder.setLookControl.apply(this));
             if (obj instanceof LookControl) return (LookControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setLookControl from entity: " + entityName() + ". Value: " + obj + ". Must be a LookControl object. Defaulting to super method.");
         }
@@ -109,7 +109,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     private JumpControl createJumpControl() {
         if (builder.setJumpControl != null) {
-            Object obj = builder.setJumpControl.apply(this);
+            Object obj = OverrideUtils.with(() -> new JumpControl(this), () -> builder.setJumpControl.apply(this));
             if (obj instanceof JumpControl) return (JumpControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setJumpControl from entity: " + entityName() + ". Value: " + obj + ". Must be a JumpControl object. Defaulting to super method.");
         }
@@ -412,7 +412,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     public boolean canFireProjectileWeapons(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeapon != null) {
-            return builder.canFireProjectileWeapon.test(projectileWeapon.getDefaultInstance()) && projectileWeapon instanceof ProjectileWeaponItem;
+            return OverrideUtils.with(() -> false, () -> builder.canFireProjectileWeapon.test(projectileWeapon.getDefaultInstance())) && projectileWeapon instanceof ProjectileWeaponItem;
         }
         return super.canFireProjectileWeapon(projectileWeapon);
     }

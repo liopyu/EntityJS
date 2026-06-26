@@ -110,8 +110,8 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
 
     private MoveControl createMoveControl() {
         if (builder.setMoveControl != null) {
-            Object obj = builder.setMoveControl.apply(this);
-            if (obj != null) return (MoveControl) obj;
+            Object obj = OverrideUtils.with(() -> this.moveControl, () -> builder.setMoveControl.apply(this));
+            if (obj instanceof MoveControl) return (MoveControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMoveControl from entity: " + entityName() + ". Value: " + obj + ". Must be a MoveControl object. Defaulting to super method.");
         }
         return this.moveControl;
@@ -119,8 +119,8 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
 
     private LookControl createLookControl() {
         if (builder.setLookControl != null) {
-            Object obj = builder.setLookControl.apply(this);
-            if (obj != null) return (LookControl) obj;
+            Object obj = OverrideUtils.with(() -> this.lookControl, () -> builder.setLookControl.apply(this));
+            if (obj instanceof LookControl) return (LookControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setLookControl from entity: " + entityName() + ". Value: " + obj + ". Must be a LookControl object. Defaulting to super method.");
         }
         return this.lookControl;
@@ -128,8 +128,8 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
 
     private JumpControl createJumpControl() {
         if (builder.setJumpControl != null) {
-            Object obj = builder.setJumpControl.apply(this);
-            if (obj != null) return (JumpControl) obj;
+            Object obj = OverrideUtils.with(() -> this.jumpControl, () -> builder.setJumpControl.apply(this));
+            if (obj instanceof JumpControl) return (JumpControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setJumpControl from entity: " + entityName() + ". Value: " + obj + ". Must be a JumpControl object. Defaulting to super method.");
         }
         return this.jumpControl;
@@ -555,7 +555,7 @@ public class ChickenEntityJS extends Chicken implements IAnimatableJS {
 
     public boolean canFireProjectileWeapons(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeapon != null) {
-            return builder.canFireProjectileWeapon.test(projectileWeapon.getDefaultInstance()) && projectileWeapon instanceof ProjectileWeaponItem;
+            return OverrideUtils.with(() -> false, () -> builder.canFireProjectileWeapon.test(projectileWeapon.getDefaultInstance())) && projectileWeapon instanceof ProjectileWeaponItem;
         }
         return super.canFireProjectileWeapon(projectileWeapon);
     }
