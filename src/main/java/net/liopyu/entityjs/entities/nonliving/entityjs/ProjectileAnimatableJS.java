@@ -9,6 +9,7 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.NonLivingEntityOverrides;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -134,20 +135,12 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
 
     @Override
     public void playerTouch(Player player) {
-        if (builder != null && builder.playerTouch != null) {
-            final ContextUtils.EntityPlayerContext context = new ContextUtils.EntityPlayerContext(player, this);
-            EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
-        } else {
-            super.playerTouch(player);
-        }
+        NonLivingEntityOverrides.playerTouch(this, builder, player, () -> super.playerTouch(player));
     }
 
     @Override
     public void onRemovedFromWorld() {
-        if (builder != null && builder.onRemovedFromWorld != null) {
-            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
-        }
-        super.onRemovedFromWorld();
+        NonLivingEntityOverrides.onRemovedFromWorld(this, builder, super::onRemovedFromWorld);
     }
 
 
@@ -308,13 +301,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
 
     @Override
     public boolean canCollideWith(Entity pEntity) {
-        if (builder.canCollideWith != null) {
-            final ContextUtils.ECollidingEntityContext context = new ContextUtils.ECollidingEntityContext(this, pEntity);
-            Object obj = builder.canCollideWith.apply(context);
-            if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
-        }
-        return super.canCollideWith(pEntity);
+        return NonLivingEntityOverrides.canCollideWith(this, builder, pEntity, () -> super.canCollideWith(pEntity));
     }
 
 
@@ -444,65 +431,30 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
 
     @Override
     public boolean canFreeze() {
-        if (builder.canFreeze != null) {
-            Object obj = builder.canFreeze.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canFreeze());
-        }
-        return super.canFreeze();
+        return NonLivingEntityOverrides.canFreeze(this, builder, super::canFreeze);
     }
 
 
     @Override
     public boolean isFreezing() {
-        if (builder.isFreezing != null) {
-            Object obj = builder.isFreezing.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFreezing());
-        }
-        return super.isFreezing();
+        return NonLivingEntityOverrides.isFreezing(this, builder, super::isFreezing);
     }
 
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null) {
-            Object obj = builder.isCurrentlyGlowing.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isCurrentlyGlowing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isCurrentlyGlowing());
-        }
-        return super.isCurrentlyGlowing();
+        return NonLivingEntityOverrides.isCurrentlyGlowing(this, builder, super::isCurrentlyGlowing);
     }
 
 
     @Override
     public boolean dampensVibrations() {
-        if (builder.dampensVibrations != null) {
-            Object obj = builder.dampensVibrations.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for dampensVibrations from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.dampensVibrations());
-        }
-        return super.dampensVibrations();
+        return NonLivingEntityOverrides.dampensVibrations(this, builder, super::dampensVibrations);
     }
 
     @Override
     public boolean showVehicleHealth() {
-        if (builder.showVehicleHealth != null) {
-            Object obj = builder.showVehicleHealth.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for showVehicleHealth from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.showVehicleHealth());
-        }
-        return super.showVehicleHealth();
+        return NonLivingEntityOverrides.showVehicleHealth(this, builder, super::showVehicleHealth);
     }
 
 

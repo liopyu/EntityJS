@@ -3,6 +3,7 @@ package net.liopyu.entityjs.entities.nonliving.entityjs;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.NonLivingEntityOverrides;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -223,13 +224,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
     @Override
     public boolean canCollideWith(Entity pEntity) {
-        if (builder.canCollideWith != null) {
-            final ContextUtils.ECollidingEntityContext context = new ContextUtils.ECollidingEntityContext(this, pEntity);
-            Object obj = builder.canCollideWith.apply(context);
-            if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
-        }
-        return super.canCollideWith(pEntity);
+        return NonLivingEntityOverrides.canCollideWith(this, builder, pEntity, () -> super.canCollideWith(pEntity));
     }
 
 
@@ -274,7 +269,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
     @Override
     public boolean isPushable() {
-        return builder.isPushable;
+        return NonLivingEntityOverrides.isPushable(builder);
     }
 
     @Override
@@ -409,40 +404,19 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
     @Override
     public boolean canFreeze() {
-        if (builder.canFreeze != null) {
-            Object obj = builder.canFreeze.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canFreeze());
-        }
-        return super.canFreeze();
+        return NonLivingEntityOverrides.canFreeze(this, builder, super::canFreeze);
     }
 
 
     @Override
     public boolean isFreezing() {
-        if (builder.isFreezing != null) {
-            Object obj = builder.isFreezing.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFreezing());
-        }
-        return super.isFreezing();
+        return NonLivingEntityOverrides.isFreezing(this, builder, super::isFreezing);
     }
 
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null) {
-            Object obj = builder.isCurrentlyGlowing.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isCurrentlyGlowing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isCurrentlyGlowing());
-        }
-        return super.isCurrentlyGlowing();
+        return NonLivingEntityOverrides.isCurrentlyGlowing(this, builder, super::isCurrentlyGlowing);
     }
 
 
@@ -475,26 +449,12 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
     @Override
     public boolean dampensVibrations() {
-        if (builder.dampensVibrations != null) {
-            Object obj = builder.dampensVibrations.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for dampensVibrations from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.dampensVibrations());
-        }
-        return super.dampensVibrations();
+        return NonLivingEntityOverrides.dampensVibrations(this, builder, super::dampensVibrations);
     }
 
     @Override
     public boolean showVehicleHealth() {
-        if (builder.showVehicleHealth != null) {
-            Object obj = builder.showVehicleHealth.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for showVehicleHealth from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.showVehicleHealth());
-        }
-        return super.showVehicleHealth();
+        return NonLivingEntityOverrides.showVehicleHealth(this, builder, super::showVehicleHealth);
     }
 
 
@@ -567,10 +527,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
 
     @Override
     public void onRemovedFromWorld() {
-        if (builder != null && builder.onRemovedFromWorld != null) {
-            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
-        }
-        super.onRemovedFromWorld();
+        NonLivingEntityOverrides.onRemovedFromWorld(this, builder, super::onRemovedFromWorld);
     }
 
     @Override

@@ -2,6 +2,7 @@ package net.liopyu.entityjs.util.overrides;
 
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
+import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.world.entity.Entity;
@@ -23,6 +24,10 @@ public final class NonLivingEntityOverrides {
         tick(entity, builder == null ? null : builder.tick, fallback);
     }
 
+    public static <T extends Entity> void tick(T entity, PartBuilder<?> builder, Runnable fallback) {
+        tick(entity, builder == null ? null : builder.tick, fallback);
+    }
+
     private static <T extends Entity> void tick(T entity, Consumer<Entity> callback, Runnable fallback) {
         fallback.run();
         if (callback == null) {
@@ -40,11 +45,19 @@ public final class NonLivingEntityOverrides {
         afterSuper(entity, builder == null ? null : builder.onAddedToWorld, "onAddedToWorld", fallback);
     }
 
+    public static <T extends Entity> void onAddedToWorld(T entity, PartBuilder<?> builder, Runnable fallback) {
+        afterSuper(entity, builder == null ? null : builder.onAddedToWorld, "onAddedToWorld", fallback);
+    }
+
     public static <T extends Entity> void onRemovedFromWorld(T entity, BaseNonAnimatableEntityBuilder<?> builder, Runnable fallback) {
         beforeSuper(entity, builder == null ? null : builder.onRemovedFromWorld, "onRemovedFromWorld", fallback);
     }
 
     public static <T extends Entity> void onRemovedFromWorld(T entity, BaseEntityBuilder<?> builder, Runnable fallback) {
+        beforeSuper(entity, builder == null ? null : builder.onRemovedFromWorld, "onRemovedFromWorld", fallback);
+    }
+
+    public static <T extends Entity> void onRemovedFromWorld(T entity, PartBuilder<?> builder, Runnable fallback) {
         beforeSuper(entity, builder == null ? null : builder.onRemovedFromWorld, "onRemovedFromWorld", fallback);
     }
 
@@ -56,11 +69,19 @@ public final class NonLivingEntityOverrides {
         beforeSuper(entity, builder == null ? null : builder.onSprint, "onSprint", fallback);
     }
 
+    public static <T extends Entity> void setSprinting(T entity, PartBuilder<?> builder, Runnable fallback) {
+        beforeSuper(entity, builder == null ? null : builder.onSprint, "onSprint", fallback);
+    }
+
     public static <T extends Entity> void rideTick(T entity, BaseNonAnimatableEntityBuilder<?> builder, Runnable fallback) {
         afterSuper(entity, builder == null ? null : builder.rideTick, "rideTick", fallback);
     }
 
     public static <T extends Entity> void rideTick(T entity, BaseEntityBuilder<?> builder, Runnable fallback) {
+        afterSuper(entity, builder == null ? null : builder.rideTick, "rideTick", fallback);
+    }
+
+    public static <T extends Entity> void rideTick(T entity, PartBuilder<?> builder, Runnable fallback) {
         afterSuper(entity, builder == null ? null : builder.rideTick, "rideTick", fallback);
     }
 
@@ -72,6 +93,10 @@ public final class NonLivingEntityOverrides {
         beforeSuper(entity, builder == null ? null : builder.onClientRemoval, "onClientRemoval", fallback);
     }
 
+    public static <T extends Entity> void onClientRemoval(T entity, PartBuilder<?> builder, Runnable fallback) {
+        beforeSuper(entity, builder == null ? null : builder.onClientRemoval, "onClientRemoval", fallback);
+    }
+
     public static <T extends Entity> void lavaHurt(T entity, BaseNonAnimatableEntityBuilder<?> builder, Runnable fallback) {
         beforeSuper(entity, builder == null ? null : builder.lavaHurt, "lavaHurt", fallback);
     }
@@ -80,11 +105,19 @@ public final class NonLivingEntityOverrides {
         beforeSuper(entity, builder == null ? null : builder.lavaHurt, "lavaHurt", fallback);
     }
 
+    public static <T extends Entity> void lavaHurt(T entity, PartBuilder<?> builder, Runnable fallback) {
+        beforeSuper(entity, builder == null ? null : builder.lavaHurt, "lavaHurt", fallback);
+    }
+
     public static <T extends Entity> void playerTouch(T entity, BaseNonAnimatableEntityBuilder<?> builder, Player player, Runnable fallback) {
         playerTouch(entity, builder == null ? null : builder.playerTouch, player, fallback);
     }
 
     public static <T extends Entity> void playerTouch(T entity, BaseEntityBuilder<?> builder, Player player, Runnable fallback) {
+        playerTouch(entity, builder == null ? null : builder.playerTouch, player, fallback);
+    }
+
+    public static <T extends Entity> void playerTouch(T entity, PartBuilder<?> builder, Player player, Runnable fallback) {
         playerTouch(entity, builder == null ? null : builder.playerTouch, player, fallback);
     }
 
@@ -107,6 +140,10 @@ public final class NonLivingEntityOverrides {
         return canCollideWith(entity, builder == null ? null : builder.canCollideWith, other, fallback);
     }
 
+    public static <T extends Entity> boolean canCollideWith(T entity, PartBuilder<?> builder, Entity other, BooleanSupplier fallback) {
+        return canCollideWith(entity, builder == null ? null : builder.canCollideWith, other, fallback);
+    }
+
     private static <T extends Entity> boolean canCollideWith(T entity, Function<ContextUtils.ECollidingEntityContext, Object> callback, Entity other, BooleanSupplier fallback) {
         if (callback == null) {
             return fallback.getAsBoolean();
@@ -124,11 +161,19 @@ public final class NonLivingEntityOverrides {
         return booleanOverride(entity, builder == null ? null : builder.canFreeze, entity, "canFreeze", fallback);
     }
 
+    public static <T extends Entity> boolean canFreeze(T entity, PartBuilder<?> builder, BooleanSupplier fallback) {
+        return booleanOverride(entity, builder == null ? null : builder.canFreeze, entity, "canFreeze", fallback);
+    }
+
     public static <T extends Entity> boolean isFreezing(T entity, BaseNonAnimatableEntityBuilder<?> builder, BooleanSupplier fallback) {
         return booleanOverride(entity, builder == null ? null : builder.isFreezing, entity, "isFreezing", fallback);
     }
 
     public static <T extends Entity> boolean isFreezing(T entity, BaseEntityBuilder<?> builder, BooleanSupplier fallback) {
+        return booleanOverride(entity, builder == null ? null : builder.isFreezing, entity, "isFreezing", fallback);
+    }
+
+    public static <T extends Entity> boolean isFreezing(T entity, PartBuilder<?> builder, BooleanSupplier fallback) {
         return booleanOverride(entity, builder == null ? null : builder.isFreezing, entity, "isFreezing", fallback);
     }
 
@@ -140,11 +185,19 @@ public final class NonLivingEntityOverrides {
         return booleanOverride(entity, builder == null ? null : builder.isCurrentlyGlowing, entity, "isCurrentlyGlowing", fallback);
     }
 
+    public static <T extends Entity> boolean isCurrentlyGlowing(T entity, PartBuilder<?> builder, BooleanSupplier fallback) {
+        return booleanOverride(entity, builder == null ? null : builder.isCurrentlyGlowing, entity, "isCurrentlyGlowing", fallback);
+    }
+
     public static <T extends Entity> boolean dampensVibrations(T entity, BaseNonAnimatableEntityBuilder<?> builder, BooleanSupplier fallback) {
         return booleanOverride(entity, builder == null ? null : builder.dampensVibrations, entity, "dampensVibrations", fallback);
     }
 
     public static <T extends Entity> boolean dampensVibrations(T entity, BaseEntityBuilder<?> builder, BooleanSupplier fallback) {
+        return booleanOverride(entity, builder == null ? null : builder.dampensVibrations, entity, "dampensVibrations", fallback);
+    }
+
+    public static <T extends Entity> boolean dampensVibrations(T entity, PartBuilder<?> builder, BooleanSupplier fallback) {
         return booleanOverride(entity, builder == null ? null : builder.dampensVibrations, entity, "dampensVibrations", fallback);
     }
 
@@ -156,11 +209,19 @@ public final class NonLivingEntityOverrides {
         return booleanOverride(entity, builder == null ? null : builder.showVehicleHealth, entity, "showVehicleHealth", fallback);
     }
 
+    public static <T extends Entity> boolean showVehicleHealth(T entity, PartBuilder<?> builder, BooleanSupplier fallback) {
+        return booleanOverride(entity, builder == null ? null : builder.showVehicleHealth, entity, "showVehicleHealth", fallback);
+    }
+
     public static boolean isPushable(BaseNonAnimatableEntityBuilder<?> builder) {
         return builder != null && builder.isPushable;
     }
 
     public static boolean isPushable(BaseEntityBuilder<?> builder) {
+        return builder != null && builder.isPushable;
+    }
+
+    public static boolean isPushable(PartBuilder<?> builder) {
         return builder != null && builder.isPushable;
     }
 

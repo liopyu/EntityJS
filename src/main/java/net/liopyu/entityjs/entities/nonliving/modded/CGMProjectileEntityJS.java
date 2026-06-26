@@ -12,6 +12,7 @@ import net.liopyu.entityjs.builders.nonliving.modded.CGMProjectileEntityJSBuilde
 import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.NonLivingEntityOverrides;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
@@ -280,20 +281,12 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
 
     @Override
     public void playerTouch(Player player) {
-        if (builder != null && builder.playerTouch != null) {
-            final ContextUtils.EntityPlayerContext context = new ContextUtils.EntityPlayerContext(player, this);
-            EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
-        } else {
-            super.playerTouch(player);
-        }
+        NonLivingEntityOverrides.playerTouch(this, builder, player, () -> super.playerTouch(player));
     }
 
     @Override
     public void onRemovedFromWorld() {
-        if (builder != null && builder.onRemovedFromWorld != null) {
-            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
-        }
-        super.onRemovedFromWorld();
+        NonLivingEntityOverrides.onRemovedFromWorld(this, builder, super::onRemovedFromWorld);
     }
 
     @Override
@@ -393,7 +386,7 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
 
     @Override
     public boolean isPushable() {
-        return builder.isPushable;
+        return NonLivingEntityOverrides.isPushable(builder);
     }
 
     @Override
