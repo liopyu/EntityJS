@@ -399,7 +399,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
     @Override
     public boolean isConverting() {
         if (builder.isConverting != null) {
-            Object obj = builder.isConverting.apply(this);
+            Object obj = OverrideUtils.with(super::isConverting, () -> builder.isConverting.apply(this));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isConverting from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isConverting());
         }

@@ -252,7 +252,7 @@ public class CatEntityJS extends Cat implements IAnimatableJS, RangedAttackMob {
     public boolean tamableFoodPredicate(ItemStack pStack) {
         if (builder.tamableFoodPredicate == null) return false;
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = builder.tamableFoodPredicate.apply(context);
+        Object obj = OverrideUtils.with(() -> false, () -> builder.tamableFoodPredicate.apply(context));
         if (obj instanceof Boolean b) {
             return b;
         }

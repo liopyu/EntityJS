@@ -895,7 +895,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     @Override
     public boolean isFlapping() {
         if (builder.isFlapping != null) {
-            Object obj = builder.isFlapping.apply(this);
+            Object obj = OverrideUtils.with(super::isFlapping, () -> builder.isFlapping.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }

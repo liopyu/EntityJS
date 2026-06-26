@@ -169,7 +169,7 @@ public class AxolotlEntityJS extends Axolotl implements IAnimatableJS {
     @Override
     public ItemStack getBucketItemStack() {
         if (builder.bucketItemStack != null) {
-            Object obj = builder.bucketItemStack.apply(this);
+            Object obj = OverrideUtils.with(super::getBucketItemStack, () -> builder.bucketItemStack.apply(this));
             if (obj instanceof ItemStack i) return i;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for bucketItemStack from entity: " + entityName() + ". Value: " + obj + ". Must be an ItemStack. Defaulting to super: " + super.getBucketItemStack());
         }

@@ -67,7 +67,7 @@ public class EyeOfEnderEntityJS extends EyeOfEnder implements IProjectileEntityJ
     @Override
     public ItemStack getItem() {
         if (builder.getItem != null) {
-            Object obj = builder.getItem.apply(this);
+            Object obj = OverrideUtils.with(super::getItem, () -> builder.getItem.apply(this));
             if (obj instanceof ItemStack i) return i;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getItem in builder: " + obj + ". Must be an ItemStack. Defaulting to super method: " + super.getItem());
         }

@@ -192,7 +192,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public boolean isAttackable() {
         if (builder.isAttackable != null) {
-            Object obj = builder.isAttackable.apply(this);
+            Object obj = OverrideUtils.with(super::isAttackable, () -> builder.isAttackable.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }

@@ -83,7 +83,7 @@ public class TridentEntityJS extends ThrownTrident implements IAnimatableJSNL {
     @Override
     public boolean isChanneling() {
         if (builder != null && builder.isChanneling != null) {
-            Object obj = builder.isChanneling.apply(this);
+            Object obj = OverrideUtils.with(() -> EnchantmentHelper.hasChanneling(this.tridentItem), () -> builder.isChanneling.apply(this));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isChanneling from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isChanneling());
         }

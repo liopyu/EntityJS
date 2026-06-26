@@ -926,7 +926,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     @Override
     public boolean isImmobile() {
         if (builder.isImmobile != null) {
-            Object obj = builder.isImmobile.apply(this);
+            Object obj = OverrideUtils.with(super::isImmobile, () -> builder.isImmobile.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }

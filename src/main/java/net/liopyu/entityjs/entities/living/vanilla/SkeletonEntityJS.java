@@ -187,7 +187,7 @@ public class SkeletonEntityJS extends Skeleton implements IAnimatableJS {
     @Override
     protected boolean isSunBurnTick() {
         if (builder.isSunBurnTick != null) {
-            Object obj = builder.isSunBurnTick.apply(this);
+            Object obj = OverrideUtils.with(super::isSunBurnTick, () -> builder.isSunBurnTick.apply(this));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isSunBurnTick from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isSunBurnTick());
         }

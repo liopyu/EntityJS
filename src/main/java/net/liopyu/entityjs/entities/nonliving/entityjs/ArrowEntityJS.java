@@ -142,7 +142,7 @@ public class ArrowEntityJS extends AbstractArrow implements IArrowEntityJS {
     protected boolean tryPickup(Player player) {
         if (builder.tryPickup == null) return super.tryPickup(player);
         final ContextUtils.ArrowPlayerContext context = new ContextUtils.ArrowPlayerContext(player, this);
-        Object obj = builder.tryPickup.apply(context);
+        Object obj = OverrideUtils.with(() -> super.tryPickup(player), () -> builder.tryPickup.apply(context));
         if (obj instanceof Boolean b) return b;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid value for tryPickup from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.tryPickup(player));
         return super.tryPickup(player);
