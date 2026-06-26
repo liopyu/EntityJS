@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.modification;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -15,7 +16,7 @@ import java.util.function.Function;
 public class ModifyProjectileBuilder extends ModifyEntityBuilder {
     public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
-    public transient Function<Entity, Object> canHitEntity;
+    public transient BooleanCallback<Entity> canHitEntity;
 
     public ModifyProjectileBuilder(EntityType<?> entityType) {
         super(entityType);
@@ -78,7 +79,7 @@ public class ModifyProjectileBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyProjectileBuilder canHitEntity(Function<Entity, Object> function) {
+    public ModifyProjectileBuilder canHitEntity(BooleanCallback<Entity> function) {
         canHitEntity = function;
         return this;
     }

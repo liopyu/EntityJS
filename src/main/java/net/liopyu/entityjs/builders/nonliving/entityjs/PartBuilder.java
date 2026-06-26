@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.nonliving.entityjs;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -16,16 +17,16 @@ public class PartBuilder<T extends LivingEntity> {
     public transient boolean isPickable;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Consumer<ContextUtils.EntityPlayerContext> playerTouch;
-    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
+    public transient BooleanCallback<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
     public transient Consumer<Entity> tick;
     public transient Consumer<ContextUtils.MovementContext> move;
     public transient Function<Entity, Object> isAttackable;
     public transient boolean isPushable;
-    public transient Function<ContextUtils.EPassengerEntityContext, Object> canAddPassenger;
+    public transient BooleanCallback<ContextUtils.EPassengerEntityContext> canAddPassenger;
     public transient Function<Entity, Object> setBlockJumpFactor;
     public transient Function<Entity, Object> blockSpeedFactor;
     public transient Object setSwimSound;
-    public transient Function<Entity, Object> isFlapping;
+    public transient BooleanCallback<Entity> isFlapping;
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
     public transient Consumer<ContextUtils.PlayStepSoundContext> playStepSound;
@@ -36,29 +37,29 @@ public class PartBuilder<T extends LivingEntity> {
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
     public transient Consumer<Entity> rideTick;
-    public transient Function<Entity, Object> canFreeze;
-    public transient Function<Entity, Object> isCurrentlyGlowing;
+    public transient BooleanCallback<Entity> canFreeze;
+    public transient BooleanCallback<Entity> isCurrentlyGlowing;
     public transient Function<Entity, Object> setMaxFallDistance;
     public transient Consumer<Entity> onClientRemoval;
     public transient Consumer<Entity> onAddedToWorld;
     public transient Consumer<Entity> lavaHurt;
     public transient Consumer<Entity> onFlap;
-    public transient Function<Entity, Object> dampensVibrations;
-    public transient Function<Entity, Object> showVehicleHealth;
+    public transient BooleanCallback<Entity> dampensVibrations;
+    public transient BooleanCallback<Entity> showVehicleHealth;
     public transient Consumer<ContextUtils.EThunderHitContext> thunderHit;
-    public transient Function<ContextUtils.EDamageContext, Object> isInvulnerableTo;
-    public transient Function<Entity, Object> canChangeDimensions;
-    public transient Function<ContextUtils.EMayInteractContext, Object> mayInteract;
-    public transient Function<ContextUtils.ECanTrampleContext, Object> canTrample;
+    public transient BooleanCallback<ContextUtils.EDamageContext> isInvulnerableTo;
+    public transient BooleanCallback<Entity> canChangeDimensions;
+    public transient BooleanCallback<ContextUtils.EMayInteractContext> mayInteract;
+    public transient BooleanCallback<ContextUtils.ECanTrampleContext> canTrample;
     public transient Consumer<Entity> onRemovedFromWorld;
-    public transient Function<Entity, Object> isFreezing;
-    public transient Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith;
+    public transient BooleanCallback<Entity> isFreezing;
+    public transient BooleanCallback<ContextUtils.ECollidingEntityContext> canCollideWith;
     public transient Consumer<ContextUtils.PartHurtContext<T>> onPartHurt;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public transient Float width;
     public transient Float height;
     public transient Function<T, Vec2> hitbox;
-    public transient Function<Entity, Object> canBeCollidedWith;
+    public transient BooleanCallback<Entity> canBeCollidedWith;
 
     public PartBuilder() {
         isPickable = true;
@@ -107,7 +108,7 @@ public class PartBuilder<T extends LivingEntity> {
                 });
                 ```
             """)
-    public PartBuilder<T> canBeCollidedWith(Function<Entity, Object> canBeCollidedWith) {
+    public PartBuilder<T> canBeCollidedWith(BooleanCallback<Entity> canBeCollidedWith) {
         this.canBeCollidedWith = canBeCollidedWith;
         return this;
     }
@@ -246,7 +247,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> shouldRenderAtSqrDistance(Function<ContextUtils.EntitySqrDistanceContext, Object> func) {
+    public PartBuilder<T> shouldRenderAtSqrDistance(BooleanCallback<ContextUtils.EntitySqrDistanceContext> func) {
         shouldRenderAtSqrDistance = func;
         return this;
     }
@@ -320,7 +321,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> canCollideWith(Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith) {
+    public PartBuilder<T> canCollideWith(BooleanCallback<ContextUtils.ECollidingEntityContext> canCollideWith) {
         this.canCollideWith = canCollideWith;
         return this;
     }
@@ -336,7 +337,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> isFreezing(Function<Entity, Object> isFreezing) {
+    public PartBuilder<T> isFreezing(BooleanCallback<Entity> isFreezing) {
         this.isFreezing = isFreezing;
         return this;
     }
@@ -481,7 +482,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> canAddPassenger(Function<ContextUtils.EPassengerEntityContext, Object> predicate) {
+    public PartBuilder<T> canAddPassenger(BooleanCallback<ContextUtils.EPassengerEntityContext> predicate) {
         canAddPassenger = predicate;
         return this;
     }
@@ -565,7 +566,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> isFlapping(Function<Entity, Object> b) {
+    public PartBuilder<T> isFlapping(BooleanCallback<Entity> b) {
         this.isFlapping = b;
         return this;
     }
@@ -734,7 +735,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> canFreeze(Function<Entity, Object> predicate) {
+    public PartBuilder<T> canFreeze(BooleanCallback<Entity> predicate) {
         canFreeze = predicate;
         return this;
     }
@@ -755,7 +756,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> isCurrentlyGlowing(Function<Entity, Object> predicate) {
+    public PartBuilder<T> isCurrentlyGlowing(BooleanCallback<Entity> predicate) {
         isCurrentlyGlowing = predicate;
         return this;
     }
@@ -851,7 +852,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> dampensVibrations(Function<Entity, Object> predicate) {
+    public PartBuilder<T> dampensVibrations(BooleanCallback<Entity> predicate) {
         this.dampensVibrations = predicate;
         return this;
     }
@@ -872,7 +873,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> showVehicleHealth(Function<Entity, Object> predicate) {
+    public PartBuilder<T> showVehicleHealth(BooleanCallback<Entity> predicate) {
         this.showVehicleHealth = predicate;
         return this;
     }
@@ -911,7 +912,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> isInvulnerableTo(Function<ContextUtils.EDamageContext, Object> predicate) {
+    public PartBuilder<T> isInvulnerableTo(BooleanCallback<ContextUtils.EDamageContext> predicate) {
         isInvulnerableTo = predicate;
         return this;
     }
@@ -931,7 +932,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> canChangeDimensions(Function<Entity, Object> supplier) {
+    public PartBuilder<T> canChangeDimensions(BooleanCallback<Entity> supplier) {
         canChangeDimensions = supplier;
         return this;
     }
@@ -951,7 +952,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> mayInteract(Function<ContextUtils.EMayInteractContext, Object> predicate) {
+    public PartBuilder<T> mayInteract(BooleanCallback<ContextUtils.EMayInteractContext> predicate) {
         mayInteract = predicate;
         return this;
     }
@@ -971,7 +972,7 @@ public class PartBuilder<T extends LivingEntity> {
             });
             ```
             """)
-    public PartBuilder<T> canTrample(Function<ContextUtils.ECanTrampleContext, Object> predicate) {
+    public PartBuilder<T> canTrample(BooleanCallback<ContextUtils.ECanTrampleContext> predicate) {
         canTrample = predicate;
         return this;
     }

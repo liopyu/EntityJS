@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.living.vanilla;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
@@ -16,7 +17,7 @@ import java.util.function.Function;
 
 public class PiglinJSBuilder extends PathfinderMobBuilder<PiglinEntityJS> {
     public transient Boolean defaultGoals;
-    public transient Function<LivingEntity, Object> isConverting;
+    public transient BooleanCallback<LivingEntity> isConverting;
     public transient Consumer<ContextUtils.EntityServerLevelContext> finishConversion;
 
     public PiglinJSBuilder(ResourceLocation i) {
@@ -55,7 +56,7 @@ public class PiglinJSBuilder extends PathfinderMobBuilder<PiglinEntityJS> {
             });
             ```
             """)
-    public PiglinJSBuilder isConverting(Function<LivingEntity, Object> isConverting) {
+    public PiglinJSBuilder isConverting(BooleanCallback<LivingEntity> isConverting) {
         this.isConverting = isConverting;
         return this;
     }

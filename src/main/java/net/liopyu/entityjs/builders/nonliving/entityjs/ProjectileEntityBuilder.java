@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.nonliving.entityjs;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
@@ -25,7 +26,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
     public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
-    public transient Function<Entity, Object> canHitEntity;
+    public transient BooleanCallback<Entity> canHitEntity;
     public transient Float pX;
     public transient Float pY;
     public transient Float pZ;
@@ -195,7 +196,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
             });
             ```
             """)
-    public ProjectileEntityBuilder<T> canHitEntity(Function<Entity, Object> function) {
+    public ProjectileEntityBuilder<T> canHitEntity(BooleanCallback<Entity> function) {
         canHitEntity = function;
         return this;
     }

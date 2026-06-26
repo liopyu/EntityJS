@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.living.entityjs;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.AnimalEntityBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
@@ -14,7 +15,7 @@ import java.util.function.Function;
 
 public abstract class TameableMobBuilder<T extends TamableAnimal & IAnimatableJS> extends AnimalEntityBuilder<T> {
     public transient Ingredient tamableFood;
-    public transient Function<ContextUtils.EntityItemStackContext, Object> tamableFoodPredicate;
+    public transient BooleanCallback<ContextUtils.EntityItemStackContext> tamableFoodPredicate;
     public transient Consumer<ContextUtils.PlayerEntityContext> onTamed;
     public transient Consumer<ContextUtils.PlayerEntityContext> tameOverride;
 
@@ -94,7 +95,7 @@ public abstract class TameableMobBuilder<T extends TamableAnimal & IAnimatableJS
             });
             ```
             """)
-    public MobBuilder<T> tamableFoodPredicate(Function<ContextUtils.EntityItemStackContext, Object> tamableFoodPredicate) {
+    public MobBuilder<T> tamableFoodPredicate(BooleanCallback<ContextUtils.EntityItemStackContext> tamableFoodPredicate) {
         this.tamableFoodPredicate = tamableFoodPredicate;
         return this;
     }

@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.modification;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
@@ -20,25 +21,25 @@ public class TestModifyEntityBuilder extends EventJS {
     public final EntityType<?> entityType;
     public transient Boolean repositionEntityAfterLoad;
     public transient Object mainArm;
-    public transient Function<ContextUtils.EPassengerEntityContext, Object> canAddPassenger;
+    public transient BooleanCallback<ContextUtils.EPassengerEntityContext> canAddPassenger;
     public transient Function<Entity, Object> setBlockJumpFactor;
     public transient Object setSwimSound;
-    public transient Function<Entity, Object> isFlapping;
+    public transient BooleanCallback<Entity> isFlapping;
     public transient Function<Entity, Object> nextStep;
     public transient Object setSwimSplashSound;
-    public transient Function<ContextUtils.LineOfSightContext, Object> isAlliedTo;
+    public transient BooleanCallback<ContextUtils.LineOfSightContext> isAlliedTo;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
-    public transient Function<Entity, Object> isFreezing;
-    public transient Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith;
-    public transient Function<ContextUtils.EMayInteractContext, Object> mayInteract;
-    public transient Function<ContextUtils.ECanTrampleContext, Object> canTrample;
+    public transient BooleanCallback<Entity> isFreezing;
+    public transient BooleanCallback<ContextUtils.ECollidingEntityContext> canCollideWith;
+    public transient BooleanCallback<ContextUtils.EMayInteractContext> mayInteract;
+    public transient BooleanCallback<ContextUtils.ECanTrampleContext> canTrample;
     public transient Consumer<Entity> onRemovedFromWorld;
     public transient Consumer<Entity> onLivingJump;
     public transient Consumer<ContextUtils.EThunderHitContext> thunderHit;
-    public transient Function<ContextUtils.EDamageContext, Object> isInvulnerableTo;
-    public transient Function<Entity, Object> dampensVibrations;
+    public transient BooleanCallback<ContextUtils.EDamageContext> isInvulnerableTo;
+    public transient BooleanCallback<Entity> dampensVibrations;
     public transient Consumer<ContextUtils.EntityPlayerContext> playerTouch;
-    public transient Function<Entity, Object> showVehicleHealth;
+    public transient BooleanCallback<Entity> showVehicleHealth;
     public transient Consumer<Entity> lavaHurt;
     public transient Consumer<Entity> onFlap;
     public transient Consumer<Entity> onAddedToWorld;
@@ -46,10 +47,10 @@ public class TestModifyEntityBuilder extends EventJS {
     public transient Consumer<ContextUtils.MobInteractContext> onInteract;
     public transient Function<Entity, Object> setMaxFallDistance;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
-    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
+    public transient BooleanCallback<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
     public transient Consumer<ContextUtils.MovementContext> move;
     public transient Boolean isAttackable;
-    public transient Function<Entity, Object> canChangeDimensions;
+    public transient BooleanCallback<Entity> canChangeDimensions;
     public transient Function<Entity, Object> blockSpeedFactor;
     public transient Consumer<Entity> tick;
     public transient boolean isPickable;
@@ -57,8 +58,8 @@ public class TestModifyEntityBuilder extends EventJS {
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
     public transient Consumer<Entity> rideTick;
-    public transient Function<Entity, Object> canFreeze;
-    public transient Function<Entity, Object> isCurrentlyGlowing;
+    public transient BooleanCallback<Entity> canFreeze;
+    public transient BooleanCallback<Entity> isCurrentlyGlowing;
     public transient Boolean isPushable;
     public transient Function<Entity, Object> myRidingOffset;
     public transient Boolean controlledByFirstPassenger;
@@ -149,7 +150,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder canCollideWith(Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith) {
+    public TestModifyEntityBuilder canCollideWith(BooleanCallback<ContextUtils.ECollidingEntityContext> canCollideWith) {
         this.canCollideWith = canCollideWith;
         return this;
     }
@@ -165,7 +166,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder isFreezing(Function<Entity, Object> isFreezing) {
+    public TestModifyEntityBuilder isFreezing(BooleanCallback<Entity> isFreezing) {
         this.isFreezing = isFreezing;
         return this;
     }
@@ -228,7 +229,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder canAddPassenger(Function<ContextUtils.EPassengerEntityContext, Object> predicate) {
+    public TestModifyEntityBuilder canAddPassenger(BooleanCallback<ContextUtils.EPassengerEntityContext> predicate) {
         canAddPassenger = predicate;
         return this;
     }
@@ -312,7 +313,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder isFlapping(Function<Entity, Object> b) {
+    public TestModifyEntityBuilder isFlapping(BooleanCallback<Entity> b) {
         this.isFlapping = b;
         return this;
     }
@@ -462,7 +463,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder canFreeze(Function<Entity, Object> predicate) {
+    public TestModifyEntityBuilder canFreeze(BooleanCallback<Entity> predicate) {
         canFreeze = predicate;
         return this;
     }
@@ -483,7 +484,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder isCurrentlyGlowing(Function<Entity, Object> predicate) {
+    public TestModifyEntityBuilder isCurrentlyGlowing(BooleanCallback<Entity> predicate) {
         isCurrentlyGlowing = predicate;
         return this;
     }
@@ -579,7 +580,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder dampensVibrations(Function<Entity, Object> predicate) {
+    public TestModifyEntityBuilder dampensVibrations(BooleanCallback<Entity> predicate) {
         this.dampensVibrations = predicate;
         return this;
     }
@@ -600,7 +601,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder showVehicleHealth(Function<Entity, Object> predicate) {
+    public TestModifyEntityBuilder showVehicleHealth(BooleanCallback<Entity> predicate) {
         this.showVehicleHealth = predicate;
         return this;
     }
@@ -639,7 +640,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder isInvulnerableTo(Function<ContextUtils.EDamageContext, Object> predicate) {
+    public TestModifyEntityBuilder isInvulnerableTo(BooleanCallback<ContextUtils.EDamageContext> predicate) {
         isInvulnerableTo = predicate;
         return this;
     }
@@ -659,7 +660,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder canChangeDimensions(Function<Entity, Object> supplier) {
+    public TestModifyEntityBuilder canChangeDimensions(BooleanCallback<Entity> supplier) {
         canChangeDimensions = supplier;
         return this;
     }
@@ -679,7 +680,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder mayInteract(Function<ContextUtils.EMayInteractContext, Object> predicate) {
+    public TestModifyEntityBuilder mayInteract(BooleanCallback<ContextUtils.EMayInteractContext> predicate) {
         mayInteract = predicate;
         return this;
     }
@@ -699,7 +700,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder canTrample(Function<ContextUtils.ECanTrampleContext, Object> predicate) {
+    public TestModifyEntityBuilder canTrample(BooleanCallback<ContextUtils.ECanTrampleContext> predicate) {
         canTrample = predicate;
         return this;
     }
@@ -788,7 +789,7 @@ public class TestModifyEntityBuilder extends EventJS {
             });
             ```
             """)
-    public TestModifyEntityBuilder shouldRenderAtSqrDistance(Function<ContextUtils.EntitySqrDistanceContext, Object> func) {
+    public TestModifyEntityBuilder shouldRenderAtSqrDistance(BooleanCallback<ContextUtils.EntitySqrDistanceContext> func) {
         shouldRenderAtSqrDistance = func;
         return this;
     }

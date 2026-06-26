@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.living.entityjs;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -10,7 +11,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import java.util.function.Function;
 
 public abstract class PathfinderMobBuilder<T extends PathfinderMob & IAnimatableJS> extends MobBuilder<T> {
-    public transient Function<Mob, Object> shouldStayCloseToLeashHolder;
+    public transient BooleanCallback<Mob> shouldStayCloseToLeashHolder;
     public transient Double followLeashSpeed;
     public transient Function<ContextUtils.EntityBlockPosLevelContext, Object> walkTargetValue;
 
@@ -32,7 +33,7 @@ public abstract class PathfinderMobBuilder<T extends PathfinderMob & IAnimatable
             });
             ```
             """)
-    public PathfinderMobBuilder<T> shouldStayCloseToLeashHolder(Function<Mob, Object> predicate) {
+    public PathfinderMobBuilder<T> shouldStayCloseToLeashHolder(BooleanCallback<Mob> predicate) {
         this.shouldStayCloseToLeashHolder = predicate;
         return this;
     }

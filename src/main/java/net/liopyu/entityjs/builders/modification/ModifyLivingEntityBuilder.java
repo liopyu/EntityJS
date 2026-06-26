@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.modification;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
@@ -23,10 +24,10 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public transient Boolean isPushable;
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
     public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
-    public transient Function<LivingEntity, Object> shouldDropLoot;
-    public transient Function<LivingEntity, Object> isAffectedByFluids;
+    public transient BooleanCallback<LivingEntity> shouldDropLoot;
+    public transient BooleanCallback<LivingEntity> isAffectedByFluids;
     public transient Boolean isAlwaysExperienceDropper;
-    public transient Function<LivingEntity, Object> isImmobile;
+    public transient BooleanCallback<LivingEntity> isImmobile;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Function<LivingEntity, Object> blockSpeedFactor;
     public transient Float setSoundVolume;
@@ -38,15 +39,15 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public transient Consumer<ContextUtils.LivingEntityContext> onBlockedByShield;
     public transient Consumer<LivingEntity> onIncreaseAirSupply;
     public transient Function<ContextUtils.HurtContext, Object> setHurtSound;
-    public transient Function<ContextUtils.EntityTypeEntityContext, Object> canAttackType;
+    public transient BooleanCallback<ContextUtils.EntityTypeEntityContext> canAttackType;
     public transient Function<LivingEntity, Object> scale;
-    public transient Function<LivingEntity, Object> shouldDropExperience;
+    public transient BooleanCallback<LivingEntity> shouldDropExperience;
     public transient Function<LivingEntity, Object> experienceReward;
     public transient Consumer<ContextUtils.EntityEquipmentContext> onEquipItem;
     public transient Function<ContextUtils.VisualContext, Object> visibilityPercent;
-    public transient Function<ContextUtils.LivingEntityContext, Object> canAttack;
-    public transient Function<ContextUtils.OnEffectContext, Object> canBeAffected;
-    public transient Function<LivingEntity, Object> invertedHealAndHarm;
+    public transient BooleanCallback<ContextUtils.LivingEntityContext> canAttack;
+    public transient BooleanCallback<ContextUtils.OnEffectContext> canBeAffected;
+    public transient BooleanCallback<LivingEntity> invertedHealAndHarm;
     public transient Consumer<ContextUtils.OnEffectContext> onEffectAdded;
     public transient Consumer<ContextUtils.EntityHealContext> onLivingHeal;
     public transient Consumer<ContextUtils.EntityDamageContext> onHurt;
@@ -56,30 +57,30 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
     public transient Object smallFallSound;
     public transient Object largeFallSound;
     public transient Object eatingSound;
-    public transient Function<LivingEntity, Object> onClimbable;
+    public transient BooleanCallback<LivingEntity> onClimbable;
     public transient Boolean canBreatheUnderwater;
     public transient Consumer<ContextUtils.EntityFallDamageContext> onLivingFall;
     public transient Consumer<LivingEntity> onSprint;
     public transient Function<LivingEntity, Object> jumpBoostPower;
-    public transient Function<ContextUtils.EntityFluidStateContext, Object> canStandOnFluid;
-    public transient Function<LivingEntity, Object> isSensitiveToWater;
+    public transient BooleanCallback<ContextUtils.EntityFluidStateContext> canStandOnFluid;
+    public transient BooleanCallback<LivingEntity> isSensitiveToWater;
     public transient Consumer<LivingEntity> onStopRiding;
     public transient Consumer<LivingEntity> rideTick;
     public transient Consumer<ContextUtils.EntityItemEntityContext> onItemPickup;
-    public transient Function<ContextUtils.LineOfSightContext, Object> hasLineOfSight;
+    public transient BooleanCallback<ContextUtils.LineOfSightContext> hasLineOfSight;
     public transient Consumer<LivingEntity> onEnterCombat;
     public transient Consumer<LivingEntity> onLeaveCombat;
-    public transient Function<LivingEntity, Object> isAffectedByPotions;
-    public transient Function<LivingEntity, Object> isAttackableFunction;
-    public transient Function<LivingEntity, Object> isSleeping;
+    public transient BooleanCallback<LivingEntity> isAffectedByPotions;
+    public transient BooleanCallback<LivingEntity> isAttackableFunction;
+    public transient BooleanCallback<LivingEntity> isSleeping;
     public transient Consumer<ContextUtils.EntityBlockPosContext> onStartSleeping;
     public transient Consumer<LivingEntity> onStopSleeping;
     public transient Consumer<ContextUtils.EntityItemLevelContext> eat;
-    public transient Function<ContextUtils.PlayerEntityContext, Object> shouldRiderFaceForward;
-    public transient Function<LivingEntity, Object> canFreeze;
-    public transient Function<LivingEntity, Object> isCurrentlyGlowing;
-    public transient Function<LivingEntity, Object> canDisableShield;
-    public transient Function<LivingEntity, Object> canChangeDimensions;
+    public transient BooleanCallback<ContextUtils.PlayerEntityContext> shouldRiderFaceForward;
+    public transient BooleanCallback<LivingEntity> canFreeze;
+    public transient BooleanCallback<LivingEntity> isCurrentlyGlowing;
+    public transient BooleanCallback<LivingEntity> canDisableShield;
+    public transient BooleanCallback<LivingEntity> canChangeDimensions;
     public transient Function<ContextUtils.CalculateFallDamageContext, Object> calculateFallDamage;
     public transient Consumer<LivingEntity> aiStep;
     public transient Consumer<ContextUtils.Vec3Context> travel;
@@ -172,7 +173,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder shouldDropLoot(Function<LivingEntity, Object> b) {
+    public ModifyLivingEntityBuilder shouldDropLoot(BooleanCallback<LivingEntity> b) {
         this.shouldDropLoot = b;
         return this;
     }
@@ -239,7 +240,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder isAffectedByFluids(Function<LivingEntity, Object> b) {
+    public ModifyLivingEntityBuilder isAffectedByFluids(BooleanCallback<LivingEntity> b) {
         isAffectedByFluids = b;
         return this;
     }
@@ -260,7 +261,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder isImmobile(Function<LivingEntity, Object> b) {
+    public ModifyLivingEntityBuilder isImmobile(BooleanCallback<LivingEntity> b) {
         isImmobile = b;
         return this;
     }
@@ -535,7 +536,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder canAttackType(Function<ContextUtils.EntityTypeEntityContext, Object> canAttackType) {
+    public ModifyLivingEntityBuilder canAttackType(BooleanCallback<ContextUtils.EntityTypeEntityContext> canAttackType) {
         this.canAttackType = canAttackType;
         return this;
     }
@@ -576,7 +577,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder shouldDropExperience(Function<LivingEntity, Object> p) {
+    public ModifyLivingEntityBuilder shouldDropExperience(BooleanCallback<LivingEntity> p) {
         this.shouldDropExperience = p;
         return this;
     }
@@ -658,7 +659,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder canAttack(Function<ContextUtils.LivingEntityContext, Object> customCanAttack) {
+    public ModifyLivingEntityBuilder canAttack(BooleanCallback<ContextUtils.LivingEntityContext> customCanAttack) {
         this.canAttack = customCanAttack;
         return this;
     }
@@ -678,7 +679,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder canBeAffected(Function<ContextUtils.OnEffectContext, Object> predicate) {
+    public ModifyLivingEntityBuilder canBeAffected(BooleanCallback<ContextUtils.OnEffectContext> predicate) {
         canBeAffected = predicate;
         return this;
     }
@@ -697,7 +698,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder invertedHealAndHarm(Function<LivingEntity, Object> invertedHealAndHarm) {
+    public ModifyLivingEntityBuilder invertedHealAndHarm(BooleanCallback<LivingEntity> invertedHealAndHarm) {
         this.invertedHealAndHarm = invertedHealAndHarm;
         return this;
     }
@@ -885,7 +886,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder onClimbable(Function<LivingEntity, Object> predicate) {
+    public ModifyLivingEntityBuilder onClimbable(BooleanCallback<LivingEntity> predicate) {
         onClimbable = predicate;
         return this;
     }
@@ -954,7 +955,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder canStandOnFluid(Function<ContextUtils.EntityFluidStateContext, Object> predicate) {
+    public ModifyLivingEntityBuilder canStandOnFluid(BooleanCallback<ContextUtils.EntityFluidStateContext> predicate) {
         canStandOnFluid = predicate;
         return this;
     }
@@ -974,7 +975,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder isSensitiveToWater(Function<LivingEntity, Object> predicate) {
+    public ModifyLivingEntityBuilder isSensitiveToWater(BooleanCallback<LivingEntity> predicate) {
         isSensitiveToWater = predicate;
         return this;
     }
@@ -1013,7 +1014,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder hasLineOfSight(Function<ContextUtils.LineOfSightContext, Object> f) {
+    public ModifyLivingEntityBuilder hasLineOfSight(BooleanCallback<ContextUtils.LineOfSightContext> f) {
         hasLineOfSight = f;
         return this;
     }
@@ -1071,7 +1072,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder isAffectedByPotions(Function<LivingEntity, Object> predicate) {
+    public ModifyLivingEntityBuilder isAffectedByPotions(BooleanCallback<LivingEntity> predicate) {
         isAffectedByPotions = predicate;
         return this;
     }
@@ -1091,7 +1092,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder isAttackableFunction(Function<LivingEntity, Object> predicate) {
+    public ModifyLivingEntityBuilder isAttackableFunction(BooleanCallback<LivingEntity> predicate) {
         isAttackableFunction = predicate;
         return this;
     }
@@ -1111,7 +1112,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder isSleeping(Function<LivingEntity, Object> supplier) {
+    public ModifyLivingEntityBuilder isSleeping(BooleanCallback<LivingEntity> supplier) {
         isSleeping = supplier;
         return this;
     }
@@ -1188,7 +1189,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder shouldRiderFaceForward(Function<ContextUtils.PlayerEntityContext, Object> predicate) {
+    public ModifyLivingEntityBuilder shouldRiderFaceForward(BooleanCallback<ContextUtils.PlayerEntityContext> predicate) {
         shouldRiderFaceForward = predicate;
         return this;
     }
@@ -1207,7 +1208,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder canDisableShield(Function<LivingEntity, Object> predicate) {
+    public ModifyLivingEntityBuilder canDisableShield(BooleanCallback<LivingEntity> predicate) {
         canDisableShield = predicate;
         return this;
     }
@@ -1247,7 +1248,7 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder isAlliedTo(Function<ContextUtils.LineOfSightContext, Object> isAlliedTo) {
+    public ModifyLivingEntityBuilder isAlliedTo(BooleanCallback<ContextUtils.LineOfSightContext> isAlliedTo) {
         this.isAlliedTo = isAlliedTo;
         return this;
     }

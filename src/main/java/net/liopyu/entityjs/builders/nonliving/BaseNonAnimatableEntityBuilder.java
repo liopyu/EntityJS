@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.nonliving;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Info;
@@ -25,7 +26,7 @@ import java.util.function.Function;
 public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends BuilderBase<EntityType<T>> {
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Consumer<ContextUtils.EntityPlayerContext> playerTouch;
-    public transient Function<ContextUtils.EntitySqrDistanceContext, Object> shouldRenderAtSqrDistance;
+    public transient BooleanCallback<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
     public transient Consumer<Entity> tick;
     public transient Consumer<ContextUtils.MovementContext> move;
     public transient Boolean isAttackable;
@@ -40,11 +41,11 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public transient boolean isPickable;
 
     public transient boolean isPushable;
-    public transient Function<ContextUtils.EPassengerEntityContext, Object> canAddPassenger;
+    public transient BooleanCallback<ContextUtils.EPassengerEntityContext> canAddPassenger;
     public transient Function<Entity, Object> setBlockJumpFactor;
     public transient Function<Entity, Object> blockSpeedFactor;
     public transient Object setSwimSound;
-    public transient Function<Entity, Object> isFlapping;
+    public transient BooleanCallback<Entity> isFlapping;
     public transient Boolean repositionEntityAfterLoad;
     public transient Function<Entity, Object> nextStep;
     public transient Consumer<ContextUtils.PlayStepSoundContext> playStepSound;
@@ -55,23 +56,23 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
     public transient Consumer<Entity> rideTick;
-    public transient Function<Entity, Object> canFreeze;
-    public transient Function<Entity, Object> isCurrentlyGlowing;
+    public transient BooleanCallback<Entity> canFreeze;
+    public transient BooleanCallback<Entity> isCurrentlyGlowing;
     public transient Function<Entity, Object> setMaxFallDistance;
     public transient Consumer<Entity> onClientRemoval;
     public transient Consumer<Entity> onAddedToWorld;
     public transient Consumer<Entity> lavaHurt;
     public transient Consumer<Entity> onFlap;
-    public transient Function<Entity, Object> dampensVibrations;
-    public transient Function<Entity, Object> showVehicleHealth;
+    public transient BooleanCallback<Entity> dampensVibrations;
+    public transient BooleanCallback<Entity> showVehicleHealth;
     public transient Consumer<ContextUtils.EThunderHitContext> thunderHit;
-    public transient Function<ContextUtils.EDamageContext, Object> isInvulnerableTo;
-    public transient Function<Entity, Object> canChangeDimensions;
-    public transient Function<ContextUtils.EMayInteractContext, Object> mayInteract;
-    public transient Function<ContextUtils.ECanTrampleContext, Object> canTrample;
+    public transient BooleanCallback<ContextUtils.EDamageContext> isInvulnerableTo;
+    public transient BooleanCallback<Entity> canChangeDimensions;
+    public transient BooleanCallback<ContextUtils.EMayInteractContext> mayInteract;
+    public transient BooleanCallback<ContextUtils.ECanTrampleContext> canTrample;
     public transient Consumer<Entity> onRemovedFromWorld;
-    public transient Function<Entity, Object> isFreezing;
-    public transient Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith;
+    public transient BooleanCallback<Entity> isFreezing;
+    public transient BooleanCallback<ContextUtils.ECollidingEntityContext> canCollideWith;
     public transient Consumer<ContextUtils.EntityHurtContext> onHurt;
     public transient boolean summonable;
     public transient boolean save;
@@ -79,7 +80,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
     public transient ResourceLocation[] immuneTo;
     public transient boolean spawnFarFromPlayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
-    public transient Function<Entity, Object> canBeCollidedWith;
+    public transient BooleanCallback<Entity> canBeCollidedWith;
 
     public BaseNonAnimatableEntityBuilder(ResourceLocation i) {
         super(i);
@@ -124,7 +125,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
                 });
                 ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> canBeCollidedWith(Function<Entity, Object> canBeCollidedWith) {
+    public BaseNonAnimatableEntityBuilder<T> canBeCollidedWith(BooleanCallback<Entity> canBeCollidedWith) {
         this.canBeCollidedWith = canBeCollidedWith;
         return this;
     }
@@ -154,7 +155,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> canCollideWith(Function<ContextUtils.ECollidingEntityContext, Object> canCollideWith) {
+    public BaseNonAnimatableEntityBuilder<T> canCollideWith(BooleanCallback<ContextUtils.ECollidingEntityContext> canCollideWith) {
         this.canCollideWith = canCollideWith;
         return this;
     }
@@ -170,7 +171,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> isFreezing(Function<Entity, Object> isFreezing) {
+    public BaseNonAnimatableEntityBuilder<T> isFreezing(BooleanCallback<Entity> isFreezing) {
         this.isFreezing = isFreezing;
         return this;
     }
@@ -329,7 +330,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> canAddPassenger(Function<ContextUtils.EPassengerEntityContext, Object> predicate) {
+    public BaseNonAnimatableEntityBuilder<T> canAddPassenger(BooleanCallback<ContextUtils.EPassengerEntityContext> predicate) {
         canAddPassenger = predicate;
         return this;
     }
@@ -413,7 +414,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> isFlapping(Function<Entity, Object> b) {
+    public BaseNonAnimatableEntityBuilder<T> isFlapping(BooleanCallback<Entity> b) {
         this.isFlapping = b;
         return this;
     }
@@ -614,7 +615,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> canFreeze(Function<Entity, Object> predicate) {
+    public BaseNonAnimatableEntityBuilder<T> canFreeze(BooleanCallback<Entity> predicate) {
         canFreeze = predicate;
         return this;
     }
@@ -635,7 +636,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> isCurrentlyGlowing(Function<Entity, Object> predicate) {
+    public BaseNonAnimatableEntityBuilder<T> isCurrentlyGlowing(BooleanCallback<Entity> predicate) {
         isCurrentlyGlowing = predicate;
         return this;
     }
@@ -731,7 +732,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> dampensVibrations(Function<Entity, Object> predicate) {
+    public BaseNonAnimatableEntityBuilder<T> dampensVibrations(BooleanCallback<Entity> predicate) {
         this.dampensVibrations = predicate;
         return this;
     }
@@ -752,7 +753,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> showVehicleHealth(Function<Entity, Object> predicate) {
+    public BaseNonAnimatableEntityBuilder<T> showVehicleHealth(BooleanCallback<Entity> predicate) {
         this.showVehicleHealth = predicate;
         return this;
     }
@@ -791,7 +792,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> isInvulnerableTo(Function<ContextUtils.EDamageContext, Object> predicate) {
+    public BaseNonAnimatableEntityBuilder<T> isInvulnerableTo(BooleanCallback<ContextUtils.EDamageContext> predicate) {
         isInvulnerableTo = predicate;
         return this;
     }
@@ -811,7 +812,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> canChangeDimensions(Function<Entity, Object> supplier) {
+    public BaseNonAnimatableEntityBuilder<T> canChangeDimensions(BooleanCallback<Entity> supplier) {
         canChangeDimensions = supplier;
         return this;
     }
@@ -831,7 +832,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> mayInteract(Function<ContextUtils.EMayInteractContext, Object> predicate) {
+    public BaseNonAnimatableEntityBuilder<T> mayInteract(BooleanCallback<ContextUtils.EMayInteractContext> predicate) {
         mayInteract = predicate;
         return this;
     }
@@ -851,7 +852,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> canTrample(Function<ContextUtils.ECanTrampleContext, Object> predicate) {
+    public BaseNonAnimatableEntityBuilder<T> canTrample(BooleanCallback<ContextUtils.ECanTrampleContext> predicate) {
         canTrample = predicate;
         return this;
     }
@@ -1092,7 +1093,7 @@ public abstract class BaseNonAnimatableEntityBuilder<T extends Entity> extends B
             });
             ```
             """)
-    public BaseNonAnimatableEntityBuilder<T> shouldRenderAtSqrDistance(Function<ContextUtils.EntitySqrDistanceContext, Object> func) {
+    public BaseNonAnimatableEntityBuilder<T> shouldRenderAtSqrDistance(BooleanCallback<ContextUtils.EntitySqrDistanceContext> func) {
         shouldRenderAtSqrDistance = func;
         return this;
     }

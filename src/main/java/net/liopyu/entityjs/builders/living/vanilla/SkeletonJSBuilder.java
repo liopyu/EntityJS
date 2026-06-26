@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.living.vanilla;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
@@ -25,7 +26,7 @@ import java.util.function.Function;
 public class SkeletonJSBuilder extends PathfinderMobBuilder<SkeletonEntityJS> {
     public transient Boolean defaultGoals;
     public transient SoundEvent shootSound;
-    public transient Function<LivingEntity, Object> isSunBurnTick;
+    public transient BooleanCallback<LivingEntity> isSunBurnTick;
     public transient boolean canConvert;
     public transient EntityType<? extends Mob> conversionType;
     public transient ItemStack setArrow;
@@ -103,7 +104,7 @@ public class SkeletonJSBuilder extends PathfinderMobBuilder<SkeletonEntityJS> {
             });
             ```
             """)
-    public SkeletonJSBuilder isSunBurnTick(Function<LivingEntity, Object> isSunBurnTick) {
+    public SkeletonJSBuilder isSunBurnTick(BooleanCallback<LivingEntity> isSunBurnTick) {
         this.isSunBurnTick = isSunBurnTick;
         return this;
     }

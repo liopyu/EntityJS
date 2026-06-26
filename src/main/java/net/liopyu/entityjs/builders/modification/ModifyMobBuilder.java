@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.modification;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
@@ -18,17 +19,17 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Consumer<LivingEntity> ate;
     public transient Object setAmbientSound;
-    public transient Function<ContextUtils.EntityItemStackContext, Object> canHoldItem;
+    public transient BooleanCallback<ContextUtils.EntityItemStackContext> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
-    public transient Function<Mob, Object> canPickUpLoot;
-    public transient Function<ContextUtils.EntityItemLevelContext, Object> canTakeItem;
+    public transient BooleanCallback<Mob> canPickUpLoot;
+    public transient BooleanCallback<ContextUtils.EntityItemLevelContext> canTakeItem;
     public transient Boolean isPersistenceRequired;
     public transient Function<Mob, Object> meleeAttackRangeSqr;
     public transient Object ambientSoundInterval;
-    public transient Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway;
-    public transient Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed;
+    public transient BooleanCallback<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway;
+    public transient BooleanCallback<ContextUtils.PlayerEntityContext> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
-    public transient Function<LivingEntity, Object> isSunBurnTick;
+    public transient BooleanCallback<LivingEntity> isSunBurnTick;
 
     public ModifyMobBuilder(EntityType<?> entity) {
         super(entity);
@@ -48,7 +49,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyLivingEntityBuilder canTakeItem(Function<ContextUtils.EntityItemLevelContext, Object> predicate) {
+    public ModifyLivingEntityBuilder canTakeItem(BooleanCallback<ContextUtils.EntityItemLevelContext> predicate) {
         canTakeItem = predicate;
         return this;
     }
@@ -63,7 +64,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder isSunBurnTick(Function<LivingEntity, Object> isSunBurnTick) {
+    public ModifyMobBuilder isSunBurnTick(BooleanCallback<LivingEntity> isSunBurnTick) {
         this.isSunBurnTick = isSunBurnTick;
         return this;
     }
@@ -118,7 +119,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder canBeLeashed(Function<ContextUtils.PlayerEntityContext, Object> canBeLeashed) {
+    public ModifyMobBuilder canBeLeashed(BooleanCallback<ContextUtils.PlayerEntityContext> canBeLeashed) {
         this.canBeLeashed = canBeLeashed;
         return this;
     }
@@ -137,7 +138,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder removeWhenFarAway(Function<ContextUtils.EntityDistanceToPlayerContext, Object> removeWhenFarAway) {
+    public ModifyMobBuilder removeWhenFarAway(BooleanCallback<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway) {
         this.removeWhenFarAway = removeWhenFarAway;
         return this;
     }
@@ -232,7 +233,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder canHoldItem(Function<ContextUtils.EntityItemStackContext, Object> canHoldItem) {
+    public ModifyMobBuilder canHoldItem(BooleanCallback<ContextUtils.EntityItemStackContext> canHoldItem) {
         this.canHoldItem = canHoldItem;
         return this;
     }
@@ -266,7 +267,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder canPickUpLoot(Function<Mob, Object> canPickUpLoot) {
+    public ModifyMobBuilder canPickUpLoot(BooleanCallback<Mob> canPickUpLoot) {
         this.canPickUpLoot = canPickUpLoot;
         return this;
     }

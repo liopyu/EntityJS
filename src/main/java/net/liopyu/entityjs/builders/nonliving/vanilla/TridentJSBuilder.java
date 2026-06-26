@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.builders.nonliving.vanilla;
 
+import net.liopyu.entityjs.util.BooleanCallback;
 import dev.latvian.mods.kubejs.registry.RegistryInfo;
 import dev.latvian.mods.kubejs.typings.Generics;
 import dev.latvian.mods.kubejs.typings.Info;
@@ -24,7 +25,7 @@ import java.util.function.Function;
 public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
     public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
-    public transient Function<Entity, Object> canHitEntity;
+    public transient BooleanCallback<Entity> canHitEntity;
     public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
     public transient TridentItemBuilder item;
     public transient boolean noItem;
@@ -32,7 +33,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
     public transient SoundEvent defaultTridentHitSound;
     public transient SoundEvent thunderHitSound;
     public transient float thunderHitVolume;
-    public transient Function<TridentEntityJS, Object> isChanneling;
+    public transient BooleanCallback<TridentEntityJS> isChanneling;
     public transient DamageSource damageSource;
     public transient boolean alwaysThunder;
     public boolean canShootFromDispenser = true;
@@ -117,7 +118,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
                 });
                 ```
             """)
-    public TridentJSBuilder setIsChanneling(Function<TridentEntityJS, Object> isChanneling) {
+    public TridentJSBuilder setIsChanneling(BooleanCallback<TridentEntityJS> isChanneling) {
         this.isChanneling = isChanneling;
         return this;
     }
@@ -239,7 +240,7 @@ public class TridentJSBuilder extends BaseEntityBuilder<TridentEntityJS> {
             });
             ```
             """)
-    public TridentJSBuilder canHitEntity(Function<Entity, Object> function) {
+    public TridentJSBuilder canHitEntity(BooleanCallback<Entity> function) {
         canHitEntity = function;
         return this;
     }
