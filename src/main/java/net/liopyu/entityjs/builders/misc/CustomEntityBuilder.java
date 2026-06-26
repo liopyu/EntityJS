@@ -10,9 +10,6 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.liopyu.entityjs.util.overrides.dynamic.DynamicOverrideEntityFactory;
 import net.liopyu.entityjs.util.overrides.dynamic.DynamicOverrideMethodCatalog;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -265,30 +262,30 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
     }
 
     @HideFromJS
-    public EntityRenderer<? extends Entity> createEntityRenderer(EntityRendererProvider.Context rendererContext) {
+    public Object createEntityRenderer(Object rendererContext) {
         if (entityRendererFactory != null) {
-            return (EntityRenderer<? extends Entity>) entityRendererFactory.apply(new ContextUtils.EntityRendererFactoryContext(rendererContext, this));
+            return entityRendererFactory.apply(new ContextUtils.EntityRendererFactoryContext(rendererContext, this));
         }
         if (entityRendererClass == null) {
             return null;
         }
         try {
-            return (EntityRenderer<? extends Entity>) entityRendererClass.getDeclaredConstructor(EntityRendererProvider.Context.class).newInstance(rendererContext);
+            return entityRendererClass.getDeclaredConstructor(rendererContext.getClass()).newInstance(rendererContext);
         } catch (Exception e) {
             throw new RuntimeException("Failed to instantiate custom EntityRenderer for entity: " + id, e);
         }
     }
 
     @HideFromJS
-    public EntityModel<Entity> createEntityModel(EntityRendererProvider.Context rendererContext) {
+    public Object createEntityModel(Object rendererContext) {
         if (entityModelFactory != null) {
-            return (EntityModel<Entity>) entityModelFactory.apply(new ContextUtils.EntityModelFactoryContext(rendererContext, this));
+            return entityModelFactory.apply(new ContextUtils.EntityModelFactoryContext(rendererContext, this));
         }
         if (entityModelClass == null) {
             return null;
         }
         try {
-            return (EntityModel<Entity>) entityModelClass.getDeclaredConstructor().newInstance();
+            return entityModelClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException("Failed to instantiate custom EntityModel for entity: " + id, e);
         }

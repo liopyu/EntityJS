@@ -30,7 +30,7 @@ public class CustomEntityModelRenderer<T extends Entity> extends EntityRenderer<
     public CustomEntityModelRenderer(EntityRendererProvider.Context context, CustomEntityBuilder builder) {
         super(context);
         this.builder = builder;
-        this.model = builder.createEntityModel(context);
+        this.model = (EntityModel<Entity>) builder.createEntityModel(context);
     }
 
     @Override
@@ -100,11 +100,15 @@ public class CustomEntityModelRenderer<T extends Entity> extends EntityRenderer<
     private RenderType getRenderType(Entity entity, ResourceLocation texture) {
         try {
             if (builder.renderTypeFunction != null) {
-                return builder.renderTypeFunction.apply(entity);
+                return EntityJSHelperClass.convertToRenderType(builder.renderTypeFunction.apply(entity), defaultRenderType(texture));
             }
         } catch (Exception e) {
             EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in custom EntityModel renderTypeFunction.", e);
         }
+        return defaultRenderType(texture);
+    }
+
+    private RenderType defaultRenderType(ResourceLocation texture) {
         return switch (builder.renderType) {
             case SOLID -> RenderType.entitySolid(texture);
             case CUTOUT -> RenderType.entityCutout(texture);

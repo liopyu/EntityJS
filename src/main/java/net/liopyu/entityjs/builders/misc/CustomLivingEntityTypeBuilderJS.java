@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.builders.misc;
 
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -14,6 +15,7 @@ public class CustomLivingEntityTypeBuilderJS<B> {
 
     public EntityType<?> get() {
         var js = this.builder;
+        CallbackInvoker.wrapCallbackFields(js);
 
         var builder = EntityType.Builder.of(js.factory(), js.mobCategory);
         builder

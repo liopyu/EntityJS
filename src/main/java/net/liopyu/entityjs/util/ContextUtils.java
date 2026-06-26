@@ -341,6 +341,10 @@ public class ContextUtils {
         @Info("The entity type id")
         public final ResourceLocation id;
 
+        public EntityModelFactoryContext(Object rendererContext, CustomEntityBuilder builder) {
+            this((EntityRendererProvider.Context) rendererContext, builder);
+        }
+
         public EntityModelFactoryContext(EntityRendererProvider.Context rendererContext, CustomEntityBuilder builder) {
             this.rendererContext = rendererContext;
             this.builder = builder;
@@ -400,6 +404,10 @@ public class ContextUtils {
         public final CustomEntityBuilder builder;
         @Info("The entity type id")
         public final ResourceLocation id;
+
+        public EntityRendererFactoryContext(Object rendererContext, CustomEntityBuilder builder) {
+            this((EntityRendererProvider.Context) rendererContext, builder);
+        }
 
         public EntityRendererFactoryContext(EntityRendererProvider.Context rendererContext, CustomEntityBuilder builder) {
             this.rendererContext = rendererContext;
