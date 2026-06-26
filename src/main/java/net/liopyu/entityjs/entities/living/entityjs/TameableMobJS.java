@@ -14,6 +14,7 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
+import net.liopyu.entityjs.util.overrides.OverrideUtils;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -132,7 +133,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     private MoveControl createMoveControl() {
         if (builder.setMoveControl != null) {
-            Object obj = builder.setMoveControl.apply(this);
+            Object obj = OverrideUtils.with(() -> new MoveControl(this), () -> builder.setMoveControl.apply(this));
             if (obj instanceof MoveControl) return (MoveControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMoveControl from entity: " + entityName() + ". Value: " + obj + ". Must be a MoveControl object. Defaulting to super method.");
         }
@@ -141,7 +142,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     private LookControl createLookControl() {
         if (builder.setLookControl != null) {
-            Object obj = builder.setLookControl.apply(this);
+            Object obj = OverrideUtils.with(() -> new LookControl(this), () -> builder.setLookControl.apply(this));
             if (obj instanceof LookControl) return (LookControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setLookControl from entity: " + entityName() + ". Value: " + obj + ". Must be a LookControl object. Defaulting to super method.");
         }
@@ -150,7 +151,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     private JumpControl createJumpControl() {
         if (builder.setJumpControl != null) {
-            Object obj = builder.setJumpControl.apply(this);
+            Object obj = OverrideUtils.with(() -> new JumpControl(this), () -> builder.setJumpControl.apply(this));
             if (obj instanceof JumpControl) return (JumpControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setJumpControl from entity: " + entityName() + ". Value: " + obj + ". Must be a JumpControl object. Defaulting to super method.");
         }
@@ -249,7 +250,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     //Tameable Mob Overrides
     public boolean tamableFood(ItemStack pStack) {
         if (builder.tamableFood == null && builder.tamableFoodPredicate == null) return this.isFood(pStack);
-        boolean isTamableFood = builder.tamableFood != null && builder.tamableFood.test(pStack);
+        boolean isTamableFood = builder.tamableFood != null && OverrideUtils.with(() -> false, () -> builder.tamableFood.test(pStack));
         boolean isTamableFoodPredicate = builder.tamableFoodPredicate != null && this.tamableFoodPredicate(pStack);
         if (isTamableFood || isTamableFoodPredicate) {
             return true;
@@ -260,7 +261,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean tamableFoodPredicate(ItemStack pStack) {
         if (builder.tamableFoodPredicate == null) return false;
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = builder.tamableFoodPredicate.apply(context);
+        Object obj = OverrideUtils.with(() -> false, () -> builder.tamableFoodPredicate.apply(context));
         if (obj instanceof Boolean b) {
             return b;
         }
@@ -273,14 +274,16 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (builder.tameOverride != null) {
             this.setTame(true);
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            EntityJSHelperClass.consumerCallback(builder.tameOverride, context, "[EntityJS]: Error in " + entityName() + "builder for field: tameOverride.");
+            OverrideUtils.replaceFallback(() -> super.tame(pPlayer), () ->
+                    EntityJSHelperClass.consumerCallback(builder.tameOverride, context, "[EntityJS]: Error in " + entityName() + "builder for field: tameOverride."));
             if (pPlayer instanceof ServerPlayer) {
                 CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer) pPlayer, this);
             }
         } else super.tame(pPlayer);
         if (builder.onTamed != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            EntityJSHelperClass.consumerCallback(builder.onTamed, context, "[EntityJS]: Error in " + entityName() + "builder for field: onTamed.");
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.onTamed, context, "[EntityJS]: Error in " + entityName() + "builder for field: onTamed."));
         }
     }
 
@@ -306,7 +309,11 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         if (builder.setBreedOffspring != null) {
             final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
+            Object result = OverrideUtils.with(() -> builder.get().create(serverLevel), () -> builder.setBreedOffspring.apply(context));
+            if (result instanceof AgeableMob mob) {
+                return mob;
+            }
+            Object obj = EntityJSHelperClass.convertObjectToDesired(result, "resourcelocation");
             if (obj instanceof ResourceLocation resourceLocation) {
                 EntityType<?> breedOffspringType = ForgeRegistries.ENTITY_TYPES.getValue(resourceLocation);
                 if (breedOffspringType != null) {
@@ -323,7 +330,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
                     }
                 }
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + builder.setBreedOffspring.apply(context) + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method: " + builder.get());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid resource location or Entity Type for breedOffspring: " + result + ". Must return a TamableAnimal/AgableMob ResourceLocation. Defaulting to super method: " + builder.get());
         }
         return builder.get().create(serverLevel);
     }
@@ -400,7 +407,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
+        return (builder.isFood != null && OverrideUtils.with(() -> false, () -> builder.isFood.test(pStack))) || this.isFoodPredicate(pStack);
     }
 
 
@@ -409,7 +416,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             return super.isFood(pStack);
         }
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = builder.isFoodPredicate.apply(context);
+        Object obj = OverrideUtils.with(() -> super.isFood(pStack), () -> builder.isFoodPredicate.apply(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -423,7 +430,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (builder.canBreed == null) {
             return super.canBreed();
         }
-        Object obj = builder.canBreed.apply(this);
+        Object obj = OverrideUtils.with(super::canBreed, () -> builder.canBreed.apply(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -437,7 +444,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             return super.canMate(pOtherAnimal);
         }
         final ContextUtils.EntityAnimalContext context = new ContextUtils.EntityAnimalContext(this, pOtherAnimal);
-        Object obj = builder.canMate.apply(context);
+        Object obj = OverrideUtils.with(() -> super.canMate(pOtherAnimal), () -> builder.canMate.apply(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -450,9 +457,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public void spawnChildFromBreeding(ServerLevel pLevel, Animal pMate) {
         if (builder.onSpawnChildFromBreeding != null) {
             final ContextUtils.LevelAnimalContext context = new ContextUtils.LevelAnimalContext(pMate, this, pLevel);
-            EntityJSHelperClass.consumerCallback(builder.onSpawnChildFromBreeding, context, "[EntityJS]: Error in " + entityName() + "builder for field: onSpawnChildFromBreeding.");
-
-            super.spawnChildFromBreeding(pLevel, pMate);
+            OverrideUtils.beforeFallback(() -> super.spawnChildFromBreeding(pLevel, pMate), () ->
+                    EntityJSHelperClass.consumerCallback(builder.onSpawnChildFromBreeding, context, "[EntityJS]: Error in " + entityName() + "builder for field: onSpawnChildFromBreeding."));
         } else {
             super.spawnChildFromBreeding(pLevel, pMate);
         }
@@ -529,16 +535,16 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean doHurtTarget(Entity pEntity) {
         if (builder != null && builder.onHurtTarget != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget.");
-
+            return OverrideUtils.resultBeforeFallback(() -> super.doHurtTarget(pEntity), () ->
+                    EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurtTarget."));
         }
         return super.doHurtTarget(pEntity);
     }
 
     public void onJump() {
         if (builder.onLivingJump != null) {
-            EntityJSHelperClass.consumerCallback(builder.onLivingJump, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingJump.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.onLivingJump, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingJump."));
         }
     }
 
@@ -549,17 +555,19 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             jump();
         }
         if (builder.aiStep != null) {
-            EntityJSHelperClass.consumerCallback(builder.aiStep, this, "[EntityJS]: Error in " + entityName() + "builder for field: aiStep.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.aiStep, this, "[EntityJS]: Error in " + entityName() + "builder for field: aiStep."));
         }
     }
 
     @Override
     protected void tickDeath() {
         if (builder.tickDeath != null) {
-            EntityJSHelperClass.consumerCallback(builder.tickDeath, this, "[EntityJS]: Error in " + entityName() + "builder for field: tickDeath.");
-
-        } else super.tickDeath();
+            OverrideUtils.replaceFallback(super::tickDeath, () ->
+                    EntityJSHelperClass.consumerCallback(builder.tickDeath, this, "[EntityJS]: Error in " + entityName() + "builder for field: tickDeath."));
+        } else {
+            super.tickDeath();
+        }
     }
 
 
@@ -569,8 +577,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (builder.tickLeash != null) {
             Player $$0 = (Player) this.getLeashHolder();
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext($$0, this);
-            EntityJSHelperClass.consumerCallback(builder.tickLeash, context, "[EntityJS]: Error in " + entityName() + "builder for field: tickLeash.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.tickLeash, context, "[EntityJS]: Error in " + entityName() + "builder for field: tickLeash."));
         }
     }
 
@@ -579,8 +587,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         super.setTarget(target);
         if (builder.onTargetChanged != null) {
             final ContextUtils.TargetChangeContext context = new ContextUtils.TargetChangeContext(target, this);
-            EntityJSHelperClass.consumerCallback(builder.onTargetChanged, context, "[EntityJS]: Error in " + entityName() + "builder for field: onTargetChanged.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.onTargetChanged, context, "[EntityJS]: Error in " + entityName() + "builder for field: onTargetChanged."));
         }
     }
 
@@ -588,8 +596,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public void ate() {
         super.ate();
         if (builder.ate != null) {
-            EntityJSHelperClass.consumerCallback(builder.ate, this, "[EntityJS]: Error in " + entityName() + "builder for field: ate.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.ate, this, "[EntityJS]: Error in " + entityName() + "builder for field: ate."));
         }
     }
 
@@ -597,7 +605,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     protected PathNavigation createNavigation(Level pLevel) {
         if (builder == null || builder.createNavigation == null) return super.createNavigation(pLevel);
         final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
-        Object obj = builder.createNavigation.apply(context);
+        Object obj = OverrideUtils.with(() -> super.createNavigation(pLevel), () -> builder.createNavigation.apply(context));
         if (obj instanceof PathNavigation p) return p;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
         return super.createNavigation(pLevel);
@@ -607,7 +615,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean canBeLeashed(Player pPlayer) {
         if (builder.canBeLeashed != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            Object obj = builder.canBeLeashed.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canBeLeashed(pPlayer), () -> builder.canBeLeashed.apply(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed(pPlayer));
         }
@@ -620,7 +628,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             return super.removeWhenFarAway(pDistanceToClosestPlayer);
         }
         final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
-        Object obj = builder.removeWhenFarAway.apply(context);
+        Object obj = OverrideUtils.with(() -> super.removeWhenFarAway(pDistanceToClosestPlayer), () -> builder.removeWhenFarAway.apply(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -642,9 +650,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public double getMyRidingOffset() {
         if (builder.myRidingOffset == null) return super.getMyRidingOffset();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.myRidingOffset.apply(this), "double");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getMyRidingOffset, () -> builder.myRidingOffset.apply(this)), "double");
         if (obj != null) return (double) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for myRidingOffset from entity: " + entityName() + ". Value: " + builder.myRidingOffset.apply(this) + ". Must be a double. Defaulting to " + super.getMyRidingOffset());
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for myRidingOffset from entity: " + entityName() + ". Value: " + obj + ". Must be a double. Defaulting to " + super.getMyRidingOffset());
         return super.getMyRidingOffset();
     }
 
@@ -723,9 +731,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public float getWalkTargetValue(BlockPos pos, LevelReader levelReader) {
         if (builder.walkTargetValue == null) return super.getWalkTargetValue(pos, levelReader);
         final ContextUtils.EntityBlockPosLevelContext context = new ContextUtils.EntityBlockPosLevelContext(pos, levelReader, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.walkTargetValue.apply(context), "float");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(() -> super.getWalkTargetValue(pos, levelReader), () -> builder.walkTargetValue.apply(context)), "float");
         if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for walkTargetValue from entity: " + entityName() + ". Value: " + builder.walkTargetValue.apply(context) + ". Must be a float. Defaulting to " + super.getWalkTargetValue(pos, levelReader));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for walkTargetValue from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + super.getWalkTargetValue(pos, levelReader));
         return super.getWalkTargetValue(pos, levelReader);
     }
 
@@ -733,7 +741,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected boolean shouldStayCloseToLeashHolder() {
         if (builder.shouldStayCloseToLeashHolder == null) return super.shouldStayCloseToLeashHolder();
-        Object value = builder.shouldStayCloseToLeashHolder.apply(this);
+        Object value = OverrideUtils.with(super::shouldStayCloseToLeashHolder, () -> builder.shouldStayCloseToLeashHolder.apply(this));
         if (value instanceof Boolean b)
             return b;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.shouldStayCloseToLeashHolder());
@@ -744,7 +752,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeaponPredicate != null) {
             final ContextUtils.EntityProjectileWeaponContext context = new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this);
-            Object obj = builder.canFireProjectileWeaponPredicate.apply(context);
+            Object obj = OverrideUtils.with(() -> false, () -> builder.canFireProjectileWeaponPredicate.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -756,7 +764,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     public boolean canFireProjectileWeapons(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeapon != null) {
-            return builder.canFireProjectileWeapon.test(projectileWeapon.getDefaultInstance()) && projectileWeapon instanceof ProjectileWeaponItem;
+            return OverrideUtils.with(() -> false, () -> builder.canFireProjectileWeapon.test(projectileWeapon.getDefaultInstance())) && projectileWeapon instanceof ProjectileWeaponItem;
         }
         return super.canFireProjectileWeapon(projectileWeapon);
     }
@@ -784,7 +792,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean canHoldItem(ItemStack stack) {
         if (builder.canHoldItem != null) {
             final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(stack, this);
-            Object obj = builder.canHoldItem.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canHoldItem(stack), () -> builder.canHoldItem.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -808,11 +816,11 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public double getMeleeAttackRangeSqr(LivingEntity entity) {
         if (builder.meleeAttackRangeSqr != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.meleeAttackRangeSqr.apply(this), "double");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(() -> super.getMeleeAttackRangeSqr(entity), () -> builder.meleeAttackRangeSqr.apply(this)), "double");
             if (obj != null) {
                 return (double) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityName() + ". Value: " + builder.meleeAttackRangeSqr.apply(this) + ". Must be a double. Defaulting to " + super.getMeleeAttackRangeSqr(entity));
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for meleeAttackRangeSqr from entity: " + entityName() + ". Value: " + obj + ". Must be a double. Defaulting to " + super.getMeleeAttackRangeSqr(entity));
         }
         return super.getMeleeAttackRangeSqr(entity);
     }
@@ -823,7 +831,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean isAlliedTo(Entity pEntity) {
         if (builder.isAlliedTo != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            Object obj = builder.isAlliedTo.apply(context);
+            Object obj = OverrideUtils.with(() -> super.isAlliedTo(pEntity), () -> builder.isAlliedTo.apply(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
         }
@@ -877,8 +885,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
         if (builder.travel != null) {
             final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, this);
-            EntityJSHelperClass.consumerCallback(builder.travel, context, "[EntityJS]: Error in " + entityName() + "builder for field: travel.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.travel, context, "[EntityJS]: Error in " + entityName() + "builder for field: travel."));
         }
     }
 
@@ -886,7 +894,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick."));
         }
     }
 
@@ -896,7 +905,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         super.doAutoAttackOnTouch(target);
         if (builder.doAutoAttackOnTouch != null) {
             final ContextUtils.AutoAttackContext context = new ContextUtils.AutoAttackContext(this, target);
-            EntityJSHelperClass.consumerCallback(builder.doAutoAttackOnTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: doAutoAttackOnTouch.");
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.doAutoAttackOnTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: doAutoAttackOnTouch."));
         }
     }
 
@@ -904,7 +914,10 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected int decreaseAirSupply(int p_21303_) {
         if (builder.onDecreaseAirSupply != null) {
-            EntityJSHelperClass.consumerCallback(builder.onDecreaseAirSupply, this, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
+            int result = super.decreaseAirSupply(p_21303_);
+            OverrideUtils.withAlreadyCalled(result, () ->
+                    EntityJSHelperClass.consumerCallback(builder.onDecreaseAirSupply, this, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply."));
+            return result;
         }
         return super.decreaseAirSupply(p_21303_);
     }
@@ -912,8 +925,10 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected int increaseAirSupply(int p_21307_) {
         if (builder.onIncreaseAirSupply != null) {
-            EntityJSHelperClass.consumerCallback(builder.onIncreaseAirSupply, this, "[EntityJS]: Error in " + entityName() + "builder for field: onIncreaseAirSupply.");
-
+            int result = super.increaseAirSupply(p_21307_);
+            OverrideUtils.withAlreadyCalled(result, () ->
+                    EntityJSHelperClass.consumerCallback(builder.onIncreaseAirSupply, this, "[EntityJS]: Error in " + entityName() + "builder for field: onIncreaseAirSupply."));
+            return result;
         }
         return super.increaseAirSupply(p_21307_);
     }
@@ -923,7 +938,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         super.blockedByShield(p_21246_);
         if (builder.onBlockedByShield != null) {
             var context = new ContextUtils.LivingEntityContext(this, p_21246_);
-            EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply.");
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDecreaseAirSupply."));
         }
     }
 
@@ -932,8 +948,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         super.onEquipItem(slot, previous, current);
         if (builder.onEquipItem != null) {
             final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(slot, previous, current, this);
-            EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEquipItem.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEquipItem."));
         }
     }
 
@@ -941,8 +957,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public void onEffectAdded(@NotNull MobEffectInstance effectInstance, @Nullable Entity entity) {
         if (builder.onEffectAdded != null) {
             final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-            EntityJSHelperClass.consumerCallback(builder.onEffectAdded, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectAdded.");
-
+            OverrideUtils.replaceFallback(() -> super.onEffectAdded(effectInstance, entity), () ->
+                    EntityJSHelperClass.consumerCallback(builder.onEffectAdded, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectAdded."));
         } else {
             super.onEffectAdded(effectInstance, entity);
         }
@@ -954,7 +970,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
         if (builder.onEffectRemoved != null) {
             final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-            EntityJSHelperClass.consumerCallback(builder.onEffectRemoved, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectRemoved.");
+            OverrideUtils.replaceFallback(() -> super.onEffectRemoved(effectInstance), () ->
+                    EntityJSHelperClass.consumerCallback(builder.onEffectRemoved, context, "[EntityJS]: Error in " + entityName() + "builder for field: onEffectRemoved."));
         } else {
             super.onEffectRemoved(effectInstance);
         }
@@ -966,8 +983,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         super.heal(amount);
         if (builder.onLivingHeal != null) {
             final ContextUtils.EntityHealContext context = new ContextUtils.EntityHealContext(this, amount);
-            EntityJSHelperClass.consumerCallback(builder.onLivingHeal, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingHeal.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.onLivingHeal, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingHeal."));
         }
     }
 
@@ -976,8 +993,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         super.die(damageSource);
         if (builder.onDeath != null) {
             final ContextUtils.DeathContext context = new ContextUtils.DeathContext(this, damageSource);
-            EntityJSHelperClass.consumerCallback(builder.onDeath, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDeath.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.onDeath, context, "[EntityJS]: Error in " + entityName() + "builder for field: onDeath."));
         }
     }
 
@@ -985,8 +1002,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     protected void dropCustomDeathLoot(@NotNull DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
         if (builder.dropCustomDeathLoot != null) {
             final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(damageSource, lootingMultiplier, allowDrops, this);
-            EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityName() + "builder for field: dropCustomDeathLoot.");
-
+            OverrideUtils.replaceFallback(() -> super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops), () ->
+                    EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityName() + "builder for field: dropCustomDeathLoot."));
         } else {
             super.dropCustomDeathLoot(damageSource, lootingMultiplier, allowDrops);
         }
@@ -995,8 +1012,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected void onFlap() {
         if (builder.onFlap != null) {
-            EntityJSHelperClass.consumerCallback(builder.onFlap, this, "[EntityJS]: Error in " + entityName() + "builder for field: onFlap.");
-
+            OverrideUtils.beforeFallback(super::onFlap, () ->
+                    EntityJSHelperClass.consumerCallback(builder.onFlap, this, "[EntityJS]: Error in " + entityName() + "builder for field: onFlap."));
+            return;
         }
         super.onFlap();
     }
@@ -1037,7 +1055,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean canCollideWith(Entity pEntity) {
         if (builder.canCollideWith != null) {
             final ContextUtils.CollidingEntityContext context = new ContextUtils.CollidingEntityContext(this, pEntity);
-            Object obj = builder.canCollideWith.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canCollideWith(pEntity), () -> builder.canCollideWith.apply(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
         }
@@ -1058,9 +1076,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected float getBlockJumpFactor() {
         if (builder.setBlockJumpFactor == null) return super.getBlockJumpFactor();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor.apply(this), "float");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getBlockJumpFactor, () -> builder.setBlockJumpFactor.apply(this)), "float");
         if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
         return super.getBlockJumpFactor();
     }
 
@@ -1068,7 +1086,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     protected void playCombinationStepSounds(BlockState primaryStepSound, BlockState secondaryStepSound, BlockPos primaryPos, BlockPos secondaryPos) {
         if (builder.playCombinationStepSounds != null) {
             final ContextUtils.PlayCombinationStepSoundsContext context = new ContextUtils.PlayCombinationStepSoundsContext(this, primaryStepSound, secondaryStepSound, primaryPos, secondaryPos);
-            EntityJSHelperClass.consumerCallback(builder.playCombinationStepSounds, context, "[EntityJS]: Error in " + entityName() + "builder for field: playCombinationStepSounds.");
+            OverrideUtils.replaceFallback(() -> super.playCombinationStepSounds(primaryStepSound, secondaryStepSound, primaryPos, secondaryPos), () ->
+                    EntityJSHelperClass.consumerCallback(builder.playCombinationStepSounds, context, "[EntityJS]: Error in " + entityName() + "builder for field: playCombinationStepSounds."));
             return;
         }
         super.playCombinationStepSounds(primaryStepSound, secondaryStepSound, primaryPos, secondaryPos);
@@ -1078,7 +1097,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     protected void playMuffledStepSound(BlockState blockState, BlockPos pos) {
         if (builder.playMuffledStepSound != null) {
             final ContextUtils.PlayMuffledStepSoundContext context = new ContextUtils.PlayMuffledStepSoundContext(this, blockState, pos);
-            EntityJSHelperClass.consumerCallback(builder.playMuffledStepSound, context, "[EntityJS]: Error in " + entityName() + "builder for field: playMuffledStepSound.");
+            OverrideUtils.replaceFallback(() -> super.playMuffledStepSound(blockState, pos), () ->
+                    EntityJSHelperClass.consumerCallback(builder.playMuffledStepSound, context, "[EntityJS]: Error in " + entityName() + "builder for field: playMuffledStepSound."));
             return;
         }
         super.playMuffledStepSound(blockState, pos);
@@ -1088,7 +1108,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     protected void playStepSound(BlockPos pos, BlockState blockState) {
         if (builder.playStepSound != null) {
             final ContextUtils.PlayStepSoundContext context = new ContextUtils.PlayStepSoundContext(this, pos, blockState);
-            EntityJSHelperClass.consumerCallback(builder.playStepSound, context, "[EntityJS]: Error in " + entityName() + "builder for field: playStepSound.");
+            OverrideUtils.replaceFallback(() -> super.playStepSound(pos, blockState), () ->
+                    EntityJSHelperClass.consumerCallback(builder.playStepSound, context, "[EntityJS]: Error in " + entityName() + "builder for field: playStepSound."));
             return;
         }
         super.playStepSound(pos, blockState);
@@ -1099,9 +1120,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (builder == null || builder.setStandingEyeHeight == null)
             return super.getStandingEyeHeight(pPose, pDimensions);
         final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(() -> super.getStandingEyeHeight(pPose, pDimensions), () -> builder.setStandingEyeHeight.apply(context)), "float");
         if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setStandingEyeHeight from entity: " + entityName() + ". Value: " + builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + super.getStandingEyeHeight(pPose, pDimensions));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setStandingEyeHeight from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + super.getStandingEyeHeight(pPose, pDimensions));
         return super.getStandingEyeHeight(pPose, pDimensions);
     }
 
@@ -1114,12 +1135,12 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected float getBlockSpeedFactor() {
         if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getBlockSpeedFactor, () -> builder.blockSpeedFactor.apply(this)), "float");
         if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
         if (obj != null) {
             return (float) obj;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + builder.get() + ". Value: " + builder.blockSpeedFactor.apply(this) + ". Must be a float, defaulting to " + super.getBlockSpeedFactor());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + builder.get() + ". Value: " + obj + ". Must be a float, defaulting to " + super.getBlockSpeedFactor());
             return super.getBlockSpeedFactor();
         }
     }
@@ -1128,7 +1149,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     protected void positionRider(Entity pPassenger, MoveFunction pCallback) {
         if (builder.positionRider != null) {
             final ContextUtils.PositionRiderContext context = new ContextUtils.PositionRiderContext(this, pPassenger, pCallback);
-            EntityJSHelperClass.consumerCallback(builder.positionRider, context, "[EntityJS]: Error in " + entityName() + "builder for field: positionRider.");
+            OverrideUtils.replaceFallback(() -> super.positionRider(pPassenger, pCallback), () ->
+                    EntityJSHelperClass.consumerCallback(builder.positionRider, context, "[EntityJS]: Error in " + entityName() + "builder for field: positionRider."));
             return;
         }
         super.positionRider(pPassenger, pCallback);
@@ -1140,7 +1162,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             return super.canAddPassenger(entity);
         }
         final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(entity, this);
-        Object obj = builder.canAddPassenger.apply(context);
+        Object obj = OverrideUtils.with(() -> super.canAddPassenger(entity), () -> builder.canAddPassenger.apply(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -1152,7 +1174,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected boolean shouldDropLoot() {
         if (builder.shouldDropLoot != null) {
-            Object obj = builder.shouldDropLoot.apply(this);
+            Object obj = OverrideUtils.with(super::shouldDropLoot, () -> builder.shouldDropLoot.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1165,7 +1187,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected boolean isAffectedByFluids() {
         if (builder.isAffectedByFluids != null) {
-            Object obj = builder.isAffectedByFluids.apply(this);
+            Object obj = OverrideUtils.with(super::isAffectedByFluids, () -> builder.isAffectedByFluids.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1184,7 +1206,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected boolean isImmobile() {
         if (builder.isImmobile != null) {
-            Object obj = builder.isImmobile.apply(this);
+            Object obj = OverrideUtils.with(super::isImmobile, () -> builder.isImmobile.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1197,7 +1219,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected boolean isFlapping() {
         if (builder.isFlapping != null) {
-            Object obj = builder.isFlapping.apply(this);
+            Object obj = OverrideUtils.with(super::isFlapping, () -> builder.isFlapping.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1211,11 +1233,11 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public int calculateFallDamage(float fallDistance, float pDamageMultiplier) {
         if (builder.calculateFallDamage == null) return super.calculateFallDamage(fallDistance, pDamageMultiplier);
         final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(fallDistance, pDamageMultiplier, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.calculateFallDamage.apply(context), "integer");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(() -> super.calculateFallDamage(fallDistance, pDamageMultiplier), () -> builder.calculateFallDamage.apply(context)), "integer");
         if (obj != null) {
             return (int) obj;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for calculateFallDamage from entity: " + entityName() + ". Value: " + builder.calculateFallDamage.apply(context) + ". Must be an int, defaulting to " + super.calculateFallDamage(fallDistance, pDamageMultiplier));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for calculateFallDamage from entity: " + entityName() + ". Value: " + obj + ". Must be an int, defaulting to " + super.calculateFallDamage(fallDistance, pDamageMultiplier));
         return super.calculateFallDamage(fallDistance, pDamageMultiplier);
     }
 
@@ -1228,11 +1250,11 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     protected float nextStep() {
         if (builder.nextStep != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.nextStep.apply(this), "float");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::nextStep, () -> builder.nextStep.apply(this)), "float");
             if (obj != null) {
                 return (float) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityName() + ". Value: " + builder.nextStep.apply(this) + ". Must be a float, defaulting to " + super.nextStep());
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityName() + ". Value: " + obj + ". Must be a float, defaulting to " + super.nextStep());
             }
         }
         return super.nextStep();
@@ -1244,9 +1266,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     protected SoundEvent getHurtSound(@NotNull DamageSource p_21239_) {
         if (builder.setHurtSound == null) return super.getHurtSound(p_21239_);
         final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, p_21239_);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(() -> super.getHurtSound(p_21239_), () -> builder.setHurtSound.apply(context)), "resourcelocation");
         if (obj != null) return Objects.requireNonNull(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + obj + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
         return super.getHurtSound(p_21239_);
     }
 
@@ -1270,7 +1292,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean canAttackType(@NotNull EntityType<?> entityType) {
         if (builder.canAttackType != null) {
             final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(this, entityType);
-            Object obj = builder.canAttackType.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canAttackType(entityType), () -> builder.canAttackType.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1283,11 +1305,11 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public float getScale() {
         if (builder.scale == null) return super.getScale();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.scale.apply(this), "float");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getScale, () -> builder.scale.apply(this)), "float");
         if (obj != null) {
             return (float) obj;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for scale from entity: " + entityName() + ". Value: " + builder.scale.apply(this) + ". Must be a float. Defaulting to " + super.getScale());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for scale from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + super.getScale());
             return super.getScale();
         }
     }
@@ -1302,7 +1324,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public boolean shouldDropExperience() {
         if (builder.shouldDropExperience != null) {
-            Object obj = builder.shouldDropExperience.apply(this);
+            Object obj = OverrideUtils.with(super::shouldDropExperience, () -> builder.shouldDropExperience.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1316,11 +1338,11 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public double getVisibilityPercent(@Nullable Entity p_20969_) {
         if (builder.visibilityPercent != null) {
             final ContextUtils.VisualContext context = new ContextUtils.VisualContext(p_20969_, this);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.visibilityPercent.apply(context), "double");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(() -> super.getVisibilityPercent(p_20969_), () -> builder.visibilityPercent.apply(context)), "double");
             if (obj != null) {
                 return (double) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityName() + ". Value: " + builder.visibilityPercent.apply(context) + ". Must be a double. Defaulting to " + super.getVisibilityPercent(p_20969_));
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityName() + ". Value: " + obj + ". Must be a double. Defaulting to " + super.getVisibilityPercent(p_20969_));
                 return super.getVisibilityPercent(p_20969_);
             }
         } else {
@@ -1333,7 +1355,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean canAttack(@NotNull LivingEntity entity) {
         if (builder.canAttack != null) {
             final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(this, entity);
-            Object obj = builder.canAttack.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canAttack(entity), () -> builder.canAttack.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj && super.canAttack(entity);
             }
@@ -1349,7 +1371,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             return super.canBeAffected(effectInstance);
         }
         final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-        Object result = builder.canBeAffected.apply(context);
+        Object result = OverrideUtils.with(() -> super.canBeAffected(effectInstance), () -> builder.canBeAffected.apply(context));
         if (result instanceof Boolean) {
             return (boolean) result;
         }
@@ -1363,7 +1385,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (builder.invertedHealAndHarm == null) {
             return super.isInvertedHealAndHarm();
         }
-        Object obj = builder.invertedHealAndHarm.apply(this);
+        Object obj = OverrideUtils.with(super::isInvertedHealAndHarm, () -> builder.invertedHealAndHarm.apply(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -1401,7 +1423,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (builder.onClimbable == null) {
             return super.onClimbable();
         }
-        Object obj = builder.onClimbable.apply(this);
+        Object obj = OverrideUtils.with(super::onClimbable, () -> builder.onClimbable.apply(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -1421,8 +1443,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
         if (builder.onLivingFall != null) {
             final ContextUtils.EntityFallDamageContext context = new ContextUtils.EntityFallDamageContext(this, damageMultiplier, distance, damageSource);
-            EntityJSHelperClass.consumerCallback(builder.onLivingFall, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingFall.");
-
+            return OverrideUtils.resultBeforeFallback(() -> super.causeFallDamage(distance, damageMultiplier, damageSource), () ->
+                    EntityJSHelperClass.consumerCallback(builder.onLivingFall, context, "[EntityJS]: Error in " + entityName() + "builder for field: onLivingFall."));
         }
         return super.causeFallDamage(distance, damageMultiplier, damageSource);
     }
@@ -1431,8 +1453,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public void setSprinting(boolean sprinting) {
         if (builder.onSprint != null) {
-            EntityJSHelperClass.consumerCallback(builder.onSprint, this, "[EntityJS]: Error in " + entityName() + "builder for field: onSprint.");
-
+            OverrideUtils.beforeFallback(() -> super.setSprinting(sprinting), () ->
+                    EntityJSHelperClass.consumerCallback(builder.onSprint, this, "[EntityJS]: Error in " + entityName() + "builder for field: onSprint."));
+            return;
         }
         super.setSprinting(sprinting);
     }
@@ -1441,9 +1464,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public float getJumpBoostPower() {
         if (builder.jumpBoostPower == null) return super.getJumpBoostPower();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "float");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getJumpBoostPower, () -> builder.jumpBoostPower.apply(this)), "float");
         if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
         return super.getJumpBoostPower();
     }
 
@@ -1452,7 +1475,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean canStandOnFluid(@NotNull FluidState fluidState) {
         if (builder.canStandOnFluid != null) {
             final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(this, fluidState);
-            Object obj = builder.canStandOnFluid.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canStandOnFluid(fluidState), () -> builder.canStandOnFluid.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1465,7 +1488,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public boolean isSensitiveToWater() {
         if (builder.isSensitiveToWater != null) {
-            Object obj = builder.isSensitiveToWater.apply(this);
+            Object obj = OverrideUtils.with(super::isSensitiveToWater, () -> builder.isSensitiveToWater.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1477,11 +1500,12 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
     @Override
     public void stopRiding() {
-        super.stopRiding();
-        if (builder.onStopRiding != null) {
-            EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding.");
-
+        if (builder.onStopRiding != null && this.isPassenger()) {
+            OverrideUtils.beforeFallback(super::stopRiding, () ->
+                    EntityJSHelperClass.consumerCallback(builder.onStopRiding, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopRiding."));
+            return;
         }
+        super.stopRiding();
     }
 
 
@@ -1489,8 +1513,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public void rideTick() {
         super.rideTick();
         if (builder.rideTick != null) {
-            EntityJSHelperClass.consumerCallback(builder.rideTick, this, "[EntityJS]: Error in " + entityName() + "builder for field: rideTick.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.rideTick, this, "[EntityJS]: Error in " + entityName() + "builder for field: rideTick."));
         }
     }
 
@@ -1500,8 +1524,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         super.onItemPickup(p_21054_);
         if (builder.onItemPickup != null) {
             final ContextUtils.EntityItemEntityContext context = new ContextUtils.EntityItemEntityContext(this, p_21054_);
-            EntityJSHelperClass.consumerCallback(builder.onItemPickup, context, "[EntityJS]: Error in " + entityName() + "builder for field: onItemPickup.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.onItemPickup, context, "[EntityJS]: Error in " + entityName() + "builder for field: onItemPickup."));
         }
     }
 
@@ -1510,7 +1534,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean hasLineOfSight(@NotNull Entity entity) {
         if (builder.hasLineOfSight != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entity, this);
-            Object obj = builder.hasLineOfSight.apply(context);
+            Object obj = OverrideUtils.with(() -> super.hasLineOfSight(entity), () -> builder.hasLineOfSight.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1523,8 +1547,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public void onEnterCombat() {
         if (builder.onEnterCombat != null) {
-            EntityJSHelperClass.consumerCallback(builder.onEnterCombat, this, "[EntityJS]: Error in " + entityName() + "builder for field: onEnterCombat.");
-
+            OverrideUtils.replaceFallback(super::onEnterCombat, () ->
+                    EntityJSHelperClass.consumerCallback(builder.onEnterCombat, this, "[EntityJS]: Error in " + entityName() + "builder for field: onEnterCombat."));
         } else {
             super.onEnterCombat();
         }
@@ -1534,8 +1558,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public void onLeaveCombat() {
         if (builder.onLeaveCombat != null) {
-            EntityJSHelperClass.consumerCallback(builder.onLeaveCombat, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLeaveCombat.");
-
+            OverrideUtils.beforeFallback(super::onLeaveCombat, () ->
+                    EntityJSHelperClass.consumerCallback(builder.onLeaveCombat, this, "[EntityJS]: Error in " + entityName() + "builder for field: onLeaveCombat."));
+            return;
         }
         super.onLeaveCombat();
     }
@@ -1543,7 +1568,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public boolean isAffectedByPotions() {
         if (builder.isAffectedByPotions != null) {
-            Object obj = builder.isAffectedByPotions.apply(this);
+            Object obj = OverrideUtils.with(super::isAffectedByPotions, () -> builder.isAffectedByPotions.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1556,7 +1581,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public boolean attackable() {
         if (builder.isAttackable != null) {
-            Object obj = builder.isAttackable.apply(this);
+            Object obj = OverrideUtils.with(super::attackable, () -> builder.isAttackable.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1570,7 +1595,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
             final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
-            Object obj = builder.canTakeItem.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canTakeItem(itemStack), () -> builder.canTakeItem.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1583,7 +1608,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public boolean isSleeping() {
         if (builder.isSleeping != null) {
-            Object obj = builder.isSleeping.apply(this);
+            Object obj = OverrideUtils.with(super::isSleeping, () -> builder.isSleeping.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1598,8 +1623,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
 
         if (builder.onStartSleeping != null) {
             final ContextUtils.EntityBlockPosContext context = new ContextUtils.EntityBlockPosContext(this, blockPos);
-            EntityJSHelperClass.consumerCallback(builder.onStartSleeping, context, "[EntityJS]: Error in " + entityName() + "builder for field: onStartSleeping.");
-
+            OverrideUtils.beforeFallback(() -> super.startSleeping(blockPos), () ->
+                    EntityJSHelperClass.consumerCallback(builder.onStartSleeping, context, "[EntityJS]: Error in " + entityName() + "builder for field: onStartSleeping."));
+            return;
         }
         super.startSleeping(blockPos);
     }
@@ -1608,7 +1634,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public void stopSleeping() {
         if (builder.onStopSleeping != null) {
-            EntityJSHelperClass.consumerCallback(builder.onStopSleeping, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopSleeping.");
+            OverrideUtils.beforeFallback(super::stopSleeping, () ->
+                    EntityJSHelperClass.consumerCallback(builder.onStopSleeping, this, "[EntityJS]: Error in " + entityName() + "builder for field: onStopSleeping."));
+            return;
         }
         super.stopSleeping();
     }
@@ -1618,8 +1646,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public @NotNull ItemStack eat(@NotNull Level level, @NotNull ItemStack itemStack) {
         if (builder.eat != null) {
             final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, level);
-            EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityName() + "builder for field: eat.");
-            return itemStack;
+            return OverrideUtils.resultReplaceFallback(() -> super.eat(level, itemStack), () ->
+                    EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityName() + "builder for field: eat."), itemStack);
         }
         return super.eat(level, itemStack);
     }
@@ -1629,7 +1657,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean shouldRiderFaceForward(@NotNull Player player) {
         if (builder.shouldRiderFaceForward != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, this);
-            Object obj = builder.shouldRiderFaceForward.apply(context);
+            Object obj = OverrideUtils.with(() -> super.shouldRiderFaceForward(player), () -> builder.shouldRiderFaceForward.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1642,7 +1670,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public boolean canFreeze() {
         if (builder.canFreeze != null) {
-            Object obj = builder.canFreeze.apply(this);
+            Object obj = OverrideUtils.with(super::canFreeze, () -> builder.canFreeze.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1655,7 +1683,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public boolean isFreezing() {
         if (builder.isFreezing != null) {
-            Object obj = builder.isFreezing.apply(this);
+            Object obj = OverrideUtils.with(super::isFreezing, () -> builder.isFreezing.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1668,7 +1696,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public boolean isCurrentlyGlowing() {
         if (builder.isCurrentlyGlowing != null) {
-            Object obj = builder.isCurrentlyGlowing.apply(this);
+            Object obj = OverrideUtils.with(super::isCurrentlyGlowing, () -> builder.isCurrentlyGlowing.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1681,7 +1709,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public boolean canDisableShield() {
         if (builder.canDisableShield != null) {
-            Object obj = builder.canDisableShield.apply(this);
+            Object obj = OverrideUtils.with(super::canDisableShield, () -> builder.canDisableShield.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1694,8 +1722,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public void onClientRemoval() {
         if (builder.onClientRemoval != null) {
-            EntityJSHelperClass.consumerCallback(builder.onClientRemoval, this, "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval.");
-
+            OverrideUtils.beforeFallback(super::onClientRemoval, () ->
+                    EntityJSHelperClass.consumerCallback(builder.onClientRemoval, this, "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval."));
+            return;
         }
         super.onClientRemoval();
     }
@@ -1704,8 +1733,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
         if (builder.onHurt != null) {
             final ContextUtils.EntityDamageContext context = new ContextUtils.EntityDamageContext(pDamageSource, pDamageAmount, this);
-            EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurt.");
-
+            OverrideUtils.beforeFallback(() -> super.actuallyHurt(pDamageSource, pDamageAmount), () ->
+                    EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityName() + "builder for field: onHurt."));
+            return;
         }
         super.actuallyHurt(pDamageSource, pDamageAmount);
     }
@@ -1713,8 +1743,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public void lavaHurt() {
         if (builder.lavaHurt != null) {
-            EntityJSHelperClass.consumerCallback(builder.lavaHurt, this, "[EntityJS]: Error in " + entityName() + "builder for field: lavaHurt.");
-
+            OverrideUtils.beforeFallback(super::lavaHurt, () ->
+                    EntityJSHelperClass.consumerCallback(builder.lavaHurt, this, "[EntityJS]: Error in " + entityName() + "builder for field: lavaHurt."));
+            return;
         }
         super.lavaHurt();
     }
@@ -1723,11 +1754,11 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public int getExperienceReward() {
         if (builder.experienceReward != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.experienceReward.apply(this), "integer");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getExperienceReward, () -> builder.experienceReward.apply(this)), "integer");
             if (obj != null) {
                 return (int) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getExperienceReward());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + obj + ". Must be an integer. Defaulting to " + super.getExperienceReward());
         }
         return super.getExperienceReward();
     }
@@ -1736,7 +1767,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public boolean dampensVibrations() {
         if (builder.dampensVibrations != null) {
-            Object obj = builder.dampensVibrations.apply(this);
+            Object obj = OverrideUtils.with(super::dampensVibrations, () -> builder.dampensVibrations.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1750,15 +1781,18 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public void playerTouch(Player p_20081_) {
         if (builder.playerTouch != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
-            EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
-        } else super.playerTouch(p_20081_);
+            OverrideUtils.replaceFallback(() -> super.playerTouch(p_20081_), () ->
+                    EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch."));
+        } else {
+            super.playerTouch(p_20081_);
+        }
     }
 
 
     @Override
     public boolean showVehicleHealth() {
         if (builder.showVehicleHealth != null) {
-            Object obj = builder.showVehicleHealth.apply(this);
+            Object obj = OverrideUtils.with(super::showVehicleHealth, () -> builder.showVehicleHealth.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1773,8 +1807,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (builder.thunderHit != null) {
             super.thunderHit(p_19927_, p_19928_);
             final ContextUtils.ThunderHitContext context = new ContextUtils.ThunderHitContext(p_19927_, p_19928_, this);
-            EntityJSHelperClass.consumerCallback(builder.thunderHit, context, "[EntityJS]: Error in " + entityName() + "builder for field: thunderHit.");
-
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.thunderHit, context, "[EntityJS]: Error in " + entityName() + "builder for field: thunderHit."));
         }
     }
 
@@ -1783,7 +1817,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
             final ContextUtils.DamageContext context = new ContextUtils.DamageContext(this, p_20122_);
-            Object obj = builder.isInvulnerableTo.apply(context);
+            Object obj = OverrideUtils.with(() -> super.isInvulnerableTo(p_20122_), () -> builder.isInvulnerableTo.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1796,7 +1830,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public boolean canChangeDimensions() {
         if (builder.canChangeDimensions != null) {
-            Object obj = builder.canChangeDimensions.apply(this);
+            Object obj = OverrideUtils.with(super::canChangeDimensions, () -> builder.canChangeDimensions.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1810,7 +1844,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
         if (builder.mayInteract != null) {
             final ContextUtils.MayInteractContext context = new ContextUtils.MayInteractContext(p_146843_, p_146844_, this);
-            Object obj = builder.mayInteract.apply(context);
+            Object obj = OverrideUtils.with(() -> super.mayInteract(p_146843_, p_146844_), () -> builder.mayInteract.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1825,7 +1859,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
             final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
-            Object obj = builder.canTrample.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canTrample(state, pos, fallDistance), () -> builder.canTrample.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1839,7 +1873,9 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public void onRemovedFromWorld() {
         if (builder != null && builder.onRemovedFromWorld != null) {
-            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
+            OverrideUtils.beforeFallback(super::onRemovedFromWorld, () ->
+                    EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld."));
+            return;
         }
         super.onRemovedFromWorld();
     }
@@ -1848,10 +1884,10 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     @Override
     public int getMaxFallDistance() {
         if (builder.setMaxFallDistance == null) return super.getMaxFallDistance();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setMaxFallDistance.apply(this), "integer");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getMaxFallDistance, () -> builder.setMaxFallDistance.apply(this)), "integer");
         if (obj != null)
             return (int) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + obj + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
         return super.getMaxFallDistance();
     }
 
@@ -1861,7 +1897,8 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements, teleport);
         if (builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, teleport, this);
-            EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo.");
+            OverrideUtils.withAlreadyCalled(() ->
+                    EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityName() + "builder for field: lerpTo."));
         }
     }
 
@@ -1869,7 +1906,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-            Object obj = builder.shouldRenderAtSqrDistance.apply(context);
+            Object obj = OverrideUtils.with(() -> super.shouldRenderAtSqrDistance(distance), () -> builder.shouldRenderAtSqrDistance.apply(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
         }
@@ -1881,7 +1918,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object obj = builder.canBeCollidedWith.apply(this);
+        Object obj = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.apply(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -1895,7 +1932,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Range
             return super.canRide(pVehicle);
         }
         var context = new ContextUtils.PassengerVehicleContext(pVehicle, this);
-        Object obj = builder.canRide.test(context);
+        Object obj = OverrideUtils.with(() -> super.canRide(pVehicle), () -> builder.canRide.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
