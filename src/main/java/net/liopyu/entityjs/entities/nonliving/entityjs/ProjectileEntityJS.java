@@ -17,6 +17,7 @@ import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -38,11 +39,13 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
     public ProjectileEntityJS(ProjectileEntityJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.builder = builder;
+        entityjs$setDefaultItem();
     }
 
     public ProjectileEntityJS(ProjectileEntityJSBuilder builder, EntityType<? extends ThrowableItemProjectile> pEntityType, LivingEntity pShooter, Level pLevel) {
         super(pEntityType, pShooter, pLevel);
         this.builder = builder;
+        entityjs$setDefaultItem();
     }
 
     @Override
@@ -52,12 +55,17 @@ public class ProjectileEntityJS extends ThrowableItemProjectile implements IProj
 
     @Override
     protected Item getDefaultItem() {
-        return null;
+        if (builder != null && !builder.noItem && builder.item != null) {
+            Item item = builder.item.get();
+            if (item != null) {
+                return item;
+            }
+        }
+        return Items.SNOWBALL;
     }
 
-    @Override
-    public ItemStack getItem() {
-        return null;
+    private void entityjs$setDefaultItem() {
+        setItem(new ItemStack(getDefaultItem()));
     }
 
     public String entityName() {
