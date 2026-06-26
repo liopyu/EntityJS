@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.builders.nonliving.entityjs;
 
+import net.liopyu.entityjs.util.BooleanCallback;
+
 import dev.latvian.mods.kubejs.registry.AdditionalObjectRegistry;
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
@@ -18,12 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileAnimatableJS> {
     public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
-    public transient Predicate<Entity> canHitEntity;
+    public transient BooleanCallback<Entity> canHitEntity;
     public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
     public transient ProjectileItemBuilder item;
     public transient boolean noItem;
@@ -150,7 +151,7 @@ public class ProjectileAnimatableJSBuilder extends BaseEntityBuilder<ProjectileA
             });
             ```
             """)
-    public ProjectileAnimatableJSBuilder canHitEntity(Predicate<Entity> function) {
+    public ProjectileAnimatableJSBuilder canHitEntity(BooleanCallback<Entity> function) {
         canHitEntity = function;
         return this;
     }

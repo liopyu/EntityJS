@@ -1,1 +1,2 @@
 net.liopyu.entityjs.EntityJSPlugin
+net.liopyu.entityjs.probe.EntityJSProbeJSPlugin probejs

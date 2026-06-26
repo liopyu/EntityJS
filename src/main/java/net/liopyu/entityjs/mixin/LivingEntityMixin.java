@@ -3,6 +3,7 @@ package net.liopyu.entityjs.mixin;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.Cast;
+import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
@@ -11,12 +12,13 @@ import net.liopyu.entityjs.entities.living.entityjs.WrappedAnimatableEntity;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
-import net.liopyu.entityjs.util.data.*;
-import net.liopyu.entityjs.util.implementation.IEntityJS;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
+import net.liopyu.entityjs.util.overrides.ICallbackWrapperCache;
 import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
+import net.liopyu.entityjs.util.overrides.CallbackProfiler;
+import net.liopyu.entityjs.util.overrides.CallbackUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -39,11 +41,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = LivingEntity.class, remap = true)
-public abstract class LivingEntityMixin implements ILivingEntityJS {
+public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWrapperCache {
 
     @Unique
     private Object entityJs$entityObject = this;
@@ -64,24 +67,45 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     }
 
     @Unique
+    private void entityJs$withMixinFallback(String fieldName, Runnable callback) {
+        entityJs$withMixinFallback(fieldName, null, callback);
+    }
+
+    @Unique
+    private void entityJs$withMixinFallback(String fieldName, CallbackInfo ci, Runnable callback) {
+        CallbackUtils.with(fieldName, ci, () -> null, callback);
+    }
+
+    @Unique
+    private Object entityJs$withReturnFallback(String fieldName, CallbackInfoReturnable<?> cir, Supplier<Object> callback) {
+        return CallbackUtils.with(fieldName, cir, cir::getReturnValue, callback);
+    }
+
+    @Unique
     public Object entityJs$builder;
+
+    @Unique
+    private IdentityHashMap<Object, Object> entityJs$callbackWrappers;
 
     @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         var entityType = self.getType();
+        if (EntityJSUtils.handlesOwnEntityJsCallbacks(self)) {
+            entityJs$builder = null;
+            return;
+        }
+
         var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
         entityJs$builder = eventJS.getBuilder();
         var customBuilder = EntityJSUtils.getEntityBuilder(pEntityType);
         if (customBuilder instanceof CustomEntityJSBuilder) {
             var rl = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
-            var customConsumer = createCustomMap.get(rl);
-            if (customConsumer != null) {
-                customConsumer.accept((ModifyEntityBuilder) entityJs$builder);
-            }
+            applyCustomModifierIfNeeded(rl, (ModifyEntityBuilder) entityJs$builder);
             var wrappedEntity = this.ensureIAnimatableJS(self);
             this.entityJs$setAnimatableEntity((WrappedAnimatableEntity) wrappedEntity);
         }
+        CallbackInvoker.initCallbackFields(entityJs$builder, self);
     }
 
 
@@ -100,6 +124,21 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (this.entityJs$getAnimatableEntity() != null) {
             this.entityJs$getAnimatableEntity().triggerAnim(controllerName, animName);
         }
+    }
+
+    @Override
+    @HideFromJS
+    public Object entityJs$getCachedCallbackWrapper(Object key) {
+        return entityJs$callbackWrappers == null ? null : entityJs$callbackWrappers.get(key);
+    }
+
+    @Override
+    @HideFromJS
+    public void entityJs$putCachedCallbackWrapper(Object key, Object wrapper) {
+        if (entityJs$callbackWrappers == null) {
+            entityJs$callbackWrappers = new IdentityHashMap<>();
+        }
+        entityJs$callbackWrappers.put(key, wrapper);
     }
 
 
@@ -144,37 +183,42 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     protected void tickDeath(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.tickDeath != null) {
-                EntityJSHelperClass.consumerCallback(builder.tickDeath, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tickDeath.");
+                entityJs$withMixinFallback("tickDeath", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.tickDeath, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: tickDeath."));
             }
         }
     }
 
-    @Inject(method = "aiStep", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "aiStep", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$aiStep(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.aiStep != null) {
-                builder.aiStep.accept(entityJs$getLivingEntity());
+                entityJs$withMixinFallback("aiStep", ci, () ->
+                        builder.aiStep.accept(entityJs$getLivingEntity()));
             }
         }
+
     }
 
     //(Base LivingEntity/Entity Overrides)
-    @Inject(method = "doHurtTarget", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "doHurtTarget", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$doHurtTarget(Entity pTarget, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.onHurtTarget != null) {
                 final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pTarget, entityJs$getLivingEntity());
-                EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHurtTarget.");
+                entityJs$withMixinFallback("onHurtTarget", cir, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onHurtTarget, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHurtTarget."));
             }
         }
     }
 
-    @Inject(method = "travel", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "travel", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$travel(Vec3 pTravelVector, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.travel != null) {
                 final ContextUtils.Vec3Context context = new ContextUtils.Vec3Context(pTravelVector, entityJs$getLivingEntity());
-                EntityJSHelperClass.consumerCallback(builder.travel, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: travel.");
+                entityJs$withMixinFallback("travel", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.travel, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: travel."));
 
             }
         }
@@ -191,111 +235,121 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }*/
 
-    @Inject(method = "doAutoAttackOnTouch", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "doAutoAttackOnTouch", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$doAutoAttackOnTouch(LivingEntity pTarget, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.doAutoAttackOnTouch != null) {
                 final ContextUtils.AutoAttackContext context = new ContextUtils.AutoAttackContext(entityJs$getLivingEntity(), pTarget);
-                EntityJSHelperClass.consumerCallback(builder.doAutoAttackOnTouch, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: doAutoAttackOnTouch.");
+                entityJs$withMixinFallback("doAutoAttackOnTouch", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.doAutoAttackOnTouch, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: doAutoAttackOnTouch."));
             }
         }
     }
 
-    @Inject(method = "decreaseAirSupply", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "decreaseAirSupply", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$decreaseAirSupply(int pCurrentAir, CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onDecreaseAirSupply != null) {
-                EntityJSHelperClass.consumerCallback(builder.onDecreaseAirSupply, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onDecreaseAirSupply.");
+                entityJs$withMixinFallback("onDecreaseAirSupply", cir, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onDecreaseAirSupply, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onDecreaseAirSupply."));
             }
         }
     }
 
-    @Inject(method = "increaseAirSupply", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "increaseAirSupply", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$increaseAirSupply(int pCurrentAir, CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onIncreaseAirSupply != null) {
-                EntityJSHelperClass.consumerCallback(builder.onIncreaseAirSupply, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onIncreaseAirSupply.");
+                entityJs$withMixinFallback("onIncreaseAirSupply", cir, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onIncreaseAirSupply, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onIncreaseAirSupply."));
 
             }
         }
     }
 
-    @Inject(method = "blockedByShield", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "blockedByShield", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$blockedByShield(LivingEntity pDefender, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onBlockedByShield != null) {
                 var context = new ContextUtils.LivingEntityContext(entityJs$getLivingEntity(), pDefender);
-                EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onDecreaseAirSupply.");
+                entityJs$withMixinFallback("onBlockedByShield", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onBlockedByShield, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onDecreaseAirSupply."));
             }
         }
     }
 
-    @Inject(method = "onEquipItem", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "onEquipItem", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$onEquipItem(EquipmentSlot pSlot, ItemStack pOldItem, ItemStack pNewItem, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onEquipItem != null) {
                 final ContextUtils.EntityEquipmentContext context = new ContextUtils.EntityEquipmentContext(pSlot, pOldItem, pNewItem, entityJs$getLivingEntity());
-                EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEquipItem.");
+                entityJs$withMixinFallback("onEquipItem", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onEquipItem, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEquipItem."));
 
             }
         }
     }
 
-    @Inject(method = "onEffectAdded", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "onEffectAdded", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$onEffectAdded(MobEffectInstance pEffectInstance, Entity pEntity, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onEffectAdded != null) {
                 final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(pEffectInstance, entityJs$getLivingEntity());
-                EntityJSHelperClass.consumerCallback(builder.onEffectAdded, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEffectAdded.");
+                entityJs$withMixinFallback("onEffectAdded", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onEffectAdded, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEffectAdded."));
 
             }
         }
     }
 
-    @Inject(method = "onEffectRemoved", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "onEffectRemoved", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$onEffectRemoved(MobEffectInstance pEffectInstance, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onEffectRemoved != null) {
                 final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(pEffectInstance, entityJs$getLivingEntity());
-                EntityJSHelperClass.consumerCallback(builder.onEffectRemoved, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEffectRemoved.");
+                entityJs$withMixinFallback("onEffectRemoved", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onEffectRemoved, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEffectRemoved."));
             }
         }
     }
 
-    @Inject(method = "heal", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "heal", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$heal(float pHealAmount, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onLivingHeal != null) {
                 final ContextUtils.EntityHealContext context = new ContextUtils.EntityHealContext(entityJs$getLivingEntity(), pHealAmount);
-                EntityJSHelperClass.consumerCallback(builder.onLivingHeal, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onLivingHeal.");
+                entityJs$withMixinFallback("onLivingHeal", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onLivingHeal, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onLivingHeal."));
 
             }
         }
     }
 
-    @Inject(method = "die", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "die", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$die(DamageSource pDamageSource, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onDeath != null) {
                 final ContextUtils.DeathContext context = new ContextUtils.DeathContext(entityJs$getLivingEntity(), pDamageSource);
-                EntityJSHelperClass.consumerCallback(builder.onDeath, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onDeath.");
+                entityJs$withMixinFallback("onDeath", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onDeath, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onDeath."));
             }
         }
     }
 
-    @Inject(method = "dropCustomDeathLoot", at = @At(value = "HEAD", ordinal = 0), remap = true)
+    @Inject(method = "dropCustomDeathLoot", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$dropCustomDeathLoot(ServerLevel serverLevel, DamageSource pDamageSource, boolean pHitByPlayer, CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.dropCustomDeathLoot != null) {
                 final ContextUtils.EntityLootContext context = new ContextUtils.EntityLootContext(serverLevel, pDamageSource, pHitByPlayer, entityJs$getLivingEntity());
-                EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: dropCustomDeathLoot.");
+                entityJs$withMixinFallback("dropCustomDeathLoot", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.dropCustomDeathLoot, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: dropCustomDeathLoot."));
 
             }
         }
     }
 
 
-    @Inject(method = "getSoundVolume", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getSoundVolume", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getSoundVolume(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setSoundVolume != null) {
@@ -304,7 +358,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "getWaterSlowDown", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getWaterSlowDown", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getWaterSlowDown(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setWaterSlowDown != null) {
@@ -314,7 +368,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     }
 
 
-    @Inject(method = "isPushable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isPushable", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isPushable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isPushable != null) {
@@ -323,11 +377,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "getBlockSpeedFactor", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getBlockSpeedFactor", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getBlockSpeedFactor(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.blockSpeedFactor == null) return;
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(entityJs$getLivingEntity()), "float");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("blockSpeedFactor", cir, () -> builder.blockSpeedFactor.apply(entityJs$getLivingEntity())), "float");
             if (obj != null) {
                 cir.setReturnValue((float) obj);
             } else {
@@ -337,11 +391,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     }
 
 
-    @Inject(method = "shouldDropLoot", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "shouldDropLoot", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$shouldDropLoot(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.shouldDropLoot != null) {
-                Object obj = builder.shouldDropLoot.test(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("shouldDropLoot", cir, () -> builder.shouldDropLoot.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -350,12 +404,13 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "isAffectedByFluids", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isAffectedByFluids", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isAffectedByFluids(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAffectedByFluids != null) {
-                Object obj = builder.isAffectedByFluids.test(entityJs$getLivingEntity());
-                if (obj instanceof Boolean) {
+                Object obj = entityJs$withReturnFallback("isAffectedByFluids", cir, () -> builder.isAffectedByFluids.test(entityJs$getLivingEntity()));
+                boolean isBoolean = CallbackProfiler.profileLayer("isAffectedByFluids", "conversion", (java.util.function.BooleanSupplier) () -> obj instanceof Boolean);
+                if (isBoolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
                     EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAffectedByFluids from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
@@ -363,7 +418,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "isAlwaysExperienceDropper", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isAlwaysExperienceDropper", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isAlwaysExperienceDropper(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAlwaysExperienceDropper != null) {
@@ -372,11 +427,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "isImmobile", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isImmobile", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isImmobile(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isImmobile != null) {
-                Object obj = builder.isImmobile.test(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("isImmobile", cir, () -> builder.isImmobile.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -386,12 +441,12 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     }
 
 
-    @Inject(method = "calculateFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "calculateFallDamage", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$calculateFallDamage(float pFallDistance, float pDamageMultiplier, CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.calculateFallDamage == null) return;
             final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(pFallDistance, pDamageMultiplier, entityJs$getLivingEntity());
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.calculateFallDamage.apply(context), "integer");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("calculateFallDamage", cir, () -> builder.calculateFallDamage.apply(context)), "integer");
             if (obj != null) {
                 cir.setReturnValue((int) obj);
             } else
@@ -401,12 +456,12 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     }
 
 
-    @Inject(method = "getHurtSound", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getHurtSound", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getHurtSound(DamageSource pDamageSource, CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setHurtSound == null) return;
             final ContextUtils.HurtContext context = new ContextUtils.HurtContext(entityJs$getLivingEntity(), pDamageSource);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("setHurtSound", cir, () -> builder.setHurtSound.apply(context)), "resourcelocation");
             if (obj != null)
                 cir.setReturnValue(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
             else
@@ -416,12 +471,12 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     }
 
 
-    @Inject(method = "canAttackType", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "canAttackType", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$canAttackType(EntityType<?> pEntityType, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canAttackType != null) {
                 final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(entityJs$getLivingEntity(), pEntityType);
-                Object obj = builder.canAttackType.test(context);
+                Object obj = entityJs$withReturnFallback("canAttackType", cir, () -> builder.canAttackType.test(context));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -430,11 +485,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "getScale", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getScale", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getScale(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.scale == null) return;
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.scale.apply(entityJs$getLivingEntity()), "float");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("scale", cir, () -> builder.scale.apply(entityJs$getLivingEntity())), "float");
             if (obj != null) {
                 cir.setReturnValue((float) obj);
             } else {
@@ -443,11 +498,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "shouldDropExperience", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "shouldDropExperience", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$shouldDropExperience(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.shouldDropExperience != null) {
-                Object obj = builder.shouldDropExperience.test(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("shouldDropExperience", cir, () -> builder.shouldDropExperience.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -456,12 +511,12 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "getVisibilityPercent", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getVisibilityPercent", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getVisibilityPercent(Entity pLookingEntity, CallbackInfoReturnable<Double> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.visibilityPercent != null) {
                 final ContextUtils.VisualContext context = new ContextUtils.VisualContext(pLookingEntity, entityJs$getLivingEntity());
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.visibilityPercent.apply(context), "double");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("visibilityPercent", cir, () -> builder.visibilityPercent.apply(context)), "double");
                 if (obj != null) {
                     cir.setReturnValue((double) obj);
                 } else {
@@ -471,12 +526,12 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "canAttack(Lnet/minecraft/world/entity/LivingEntity;)Z", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "canAttack(Lnet/minecraft/world/entity/LivingEntity;)Z", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$canAttack(LivingEntity pTarget, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canAttack != null) {
                 final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(entityJs$getLivingEntity(), pTarget);
-                Object obj = builder.canAttack.test(context);
+                Object obj = entityJs$withReturnFallback("canAttack", cir, () -> builder.canAttack.test(context));
                 if (obj instanceof Boolean b) {
                     boolean bool = b;
                     cir.setReturnValue(bool);
@@ -486,14 +541,14 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "canBeAffected", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "canBeAffected", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$canBeAffected(MobEffectInstance pEffectInstance, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canBeAffected == null) {
                 return;
             }
             final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(pEffectInstance, entityJs$getLivingEntity());
-            Object result = builder.canBeAffected.test(context);
+            Object result = entityJs$withReturnFallback("canBeAffected", cir, () -> builder.canBeAffected.test(context));
             if (result instanceof Boolean) {
                 cir.setReturnValue((boolean) result);
             } else
@@ -502,13 +557,13 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "isInvertedHealAndHarm", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isInvertedHealAndHarm", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isInvertedHealAndHarm(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.invertedHealAndHarm == null) {
                 return;
             }
-            Object obj = builder.invertedHealAndHarm.test(entityJs$getLivingEntity());
+            Object obj = entityJs$withReturnFallback("invertedHealAndHarm", cir, () -> builder.invertedHealAndHarm.test(entityJs$getLivingEntity()));
             if (obj instanceof Boolean) {
                 cir.setReturnValue((boolean) obj);
             } else
@@ -517,7 +572,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "getDeathSound", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getDeathSound", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getDeathSound(CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setDeathSound == null) return;
@@ -526,7 +581,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "getFallSounds", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getFallSounds", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getFallSounds(CallbackInfoReturnable<LivingEntity.Fallsounds> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.fallSounds != null)
@@ -537,7 +592,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "getEatingSound", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getEatingSound", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getEatingSound(ItemStack pStack, CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.eatingSound != null)
@@ -546,13 +601,13 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "onClimbable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "onClimbable", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$onClimbable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onClimbable == null) {
                 return;
             }
-            Object obj = builder.onClimbable.test(entityJs$getLivingEntity());
+            Object obj = entityJs$withReturnFallback("onClimbable", cir, () -> builder.onClimbable.test(entityJs$getLivingEntity()));
             if (obj instanceof Boolean) {
                 cir.setReturnValue((boolean) obj);
             } else
@@ -562,7 +617,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     }
 
 
-    @Inject(method = "canBreatheUnderwater", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "canBreatheUnderwater", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$canBreatheUnderwater(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canBreatheUnderwater != null) {
@@ -590,11 +645,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }*/
 
-    @Inject(method = "getJumpBoostPower", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getJumpBoostPower", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getJumpBoostPower(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.jumpBoostPower == null) return;
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(entityJs$getLivingEntity()), "float");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("jumpBoostPower", cir, () -> builder.jumpBoostPower.apply(entityJs$getLivingEntity())), "float");
             if (obj != null) cir.setReturnValue((float) obj);
             else
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityJs$entityName() + ". Value: " + builder.jumpBoostPower.apply(entityJs$getLivingEntity()) + ". Must be a float. Defaulting to " + cir.getReturnValue());
@@ -602,26 +657,26 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "canStandOnFluid", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "canStandOnFluid", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$canStandOnFluid(FluidState pFluidState, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canStandOnFluid != null) {
                 final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(entityJs$getLivingEntity(), pFluidState);
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canStandOnFluid.test(context), "boolean");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("canStandOnFluid", cir, () -> builder.canStandOnFluid.test(context)), "boolean");
                 if (obj != null) {
                     cir.setReturnValue((boolean) obj);
+                    return;
                 } else
                     EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canStandOnFluid from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
-                cir.setReturnValue(false);
             }
         }
     }
 
-    @Inject(method = "isSensitiveToWater", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isSensitiveToWater", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isSensitiveToWater(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isSensitiveToWater != null) {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isSensitiveToWater.test(entityJs$getLivingEntity()), "boolean");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("isSensitiveToWater", cir, () -> builder.isSensitiveToWater.test(entityJs$getLivingEntity())), "boolean");
                 if (obj != null) {
                     cir.setReturnValue((boolean) obj);
                     return;
@@ -655,17 +710,18 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onItemPickup != null) {
                 final ContextUtils.EntityItemEntityContext context = new ContextUtils.EntityItemEntityContext(entityJs$getLivingEntity(), pItemEntity);
-                EntityJSHelperClass.consumerCallback(builder.onItemPickup, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onItemPickup.");
+                entityJs$withMixinFallback("onItemPickup", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onItemPickup, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onItemPickup."));
             }
         }
     }
 
-    @Inject(method = "hasLineOfSight", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "hasLineOfSight", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$hasLineOfSight(Entity pEntity, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.hasLineOfSight != null) {
                 final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, entityJs$getLivingEntity());
-                Object obj = builder.hasLineOfSight.test(context);
+                Object obj = entityJs$withReturnFallback("hasLineOfSight", cir, () -> builder.hasLineOfSight.test(context));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -678,7 +734,8 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$onEnterCombat(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onEnterCombat != null) {
-                EntityJSHelperClass.consumerCallback(builder.onEnterCombat, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEnterCombat.");
+                entityJs$withMixinFallback("onEnterCombat", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onEnterCombat, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onEnterCombat."));
             }
         }
     }
@@ -687,17 +744,18 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$onLeaveCombat(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onLeaveCombat != null) {
-                EntityJSHelperClass.consumerCallback(builder.onLeaveCombat, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onLeaveCombat.");
+                entityJs$withMixinFallback("onLeaveCombat", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onLeaveCombat, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onLeaveCombat."));
 
             }
         }
     }
 
-    @Inject(method = "isAffectedByPotions", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isAffectedByPotions", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isAffectedByPotions(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAffectedByPotions != null) {
-                Object obj = builder.isAffectedByPotions.test(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("isAffectedByPotions", cir, () -> builder.isAffectedByPotions.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -706,11 +764,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "attackable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "attackable", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$attackable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAttackableFunction != null) {
-                Object obj = builder.isAttackableFunction.test(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("isAttackableFunction", cir, () -> builder.isAttackableFunction.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -720,11 +778,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     }
 
 
-    @Inject(method = "isSleeping", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isSleeping", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isSleeping(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.isSleeping != null) {
-                Object obj = builder.isSleeping.test(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("isSleeping", cir, () -> builder.isSleeping.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -738,7 +796,8 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onStartSleeping != null) {
                 final ContextUtils.EntityBlockPosContext context = new ContextUtils.EntityBlockPosContext(entityJs$getLivingEntity(), pPos);
-                EntityJSHelperClass.consumerCallback(builder.onStartSleeping, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onStartSleeping.");
+                entityJs$withMixinFallback("onStartSleeping", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onStartSleeping, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onStartSleeping."));
             }
         }
     }
@@ -747,27 +806,34 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$stopSleeping(CallbackInfo ci) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onStopSleeping != null) {
-                EntityJSHelperClass.consumerCallback(builder.onStopSleeping, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onStopSleeping.");
+                entityJs$withMixinFallback("onStopSleeping", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onStopSleeping, entityJs$getLivingEntity(), "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onStopSleeping."));
             }
         }
     }
 
-    @Inject(method = "eat", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "eat", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$eat(Level pLevel, ItemStack pFood, CallbackInfoReturnable<ItemStack> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.eat != null) {
                 final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(entityJs$getLivingEntity(), pFood, pLevel);
-                EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: eat.");
+                Object obj = entityJs$withReturnFallback("eat", cir, () -> {
+                    EntityJSHelperClass.consumerCallback(builder.eat, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: eat.");
+                    return cir.getReturnValue();
+                });
+                if (obj instanceof ItemStack stack) {
+                    cir.setReturnValue(stack);
+                }
             }
         }
     }
 
-    @Inject(method = "shouldRiderFaceForward", at = @At(value = "HEAD", ordinal = 0), remap = false, cancellable = true)
+    @Inject(method = "shouldRiderFaceForward", at = @At("RETURN"), remap = false, cancellable = true)
     private void entityjs$shouldRiderFaceForward(Player player, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.shouldRiderFaceForward != null) {
                 final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, entityJs$getLivingEntity());
-                Object obj = builder.shouldRiderFaceForward.test(context);
+                Object obj = entityJs$withReturnFallback("shouldRiderFaceForward", cir, () -> builder.shouldRiderFaceForward.test(context));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -776,11 +842,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "canFreeze", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "canFreeze", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$canFreeze(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canFreeze != null) {
-                Object obj = builder.canFreeze.test(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("canFreeze", cir, () -> builder.canFreeze.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -790,11 +856,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     }
 
 
-    @Inject(method = "isCurrentlyGlowing", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isCurrentlyGlowing", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.isCurrentlyGlowing != null && !entityJs$getLivingEntity().level().isClientSide()) {
-                Object obj = builder.isCurrentlyGlowing.test(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("isCurrentlyGlowing", cir, () -> builder.isCurrentlyGlowing.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -803,11 +869,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         }
     }
 
-    @Inject(method = "canDisableShield", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "canDisableShield", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$canDisableShield(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canDisableShield != null) {
-                Object obj = builder.canDisableShield.test(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("canDisableShield", cir, () -> builder.canDisableShield.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -821,16 +887,17 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onHurt != null) {
                 final ContextUtils.EntityDamageContext context = new ContextUtils.EntityDamageContext(pDamageSource, pDamageAmount, entityJs$getLivingEntity());
-                EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHurt.");
+                entityJs$withMixinFallback("onHurt", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onHurt, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHurt."));
             }
         }
     }
 
-    @Inject(method = "getExperienceReward", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getExperienceReward", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getExperienceReward(CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.experienceReward != null) {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.experienceReward.apply(entityJs$getLivingEntity()), "integer");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("experienceReward", cir, () -> builder.experienceReward.apply(entityJs$getLivingEntity())), "integer");
                 if (obj != null) {
                     cir.setReturnValue((int) obj);
                 } else
@@ -845,7 +912,8 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.lerpTo != null) {
                 final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(pX, pY, pZ, pYaw, pPitch, pPosRotationIncrements, entityJs$getLivingEntity());
-                EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: lerpTo.");
+                entityJs$withMixinFallback("lerpTo", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.lerpTo, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: lerpTo."));
             }
         }
     }

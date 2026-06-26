@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.builders.living;
 
+import net.liopyu.entityjs.util.BooleanCallback;
+
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
@@ -17,6 +19,7 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.BiomeSpawnsEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.implementation.EventBasedSpawnModifier;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLLoader;
 import software.bernie.geckolib.animation.*;
@@ -72,11 +75,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Function<T, Object> animationResource;
     public transient boolean isPushable;
     public transient final List<AnimationControllerSupplier<T>> animationSuppliers;
-    public transient Predicate<LivingEntity> shouldDropLoot;
-    public transient Predicate<ContextUtils.PassengerEntityContext> canAddPassenger;
-    public transient Predicate<LivingEntity> isAffectedByFluids;
+    public transient BooleanCallback<LivingEntity> shouldDropLoot;
+    public transient BooleanCallback<ContextUtils.PassengerEntityContext> canAddPassenger;
+    public transient BooleanCallback<LivingEntity> isAffectedByFluids;
     public transient boolean isAlwaysExperienceDropper;
-    public transient Predicate<LivingEntity> isImmobile;
+    public transient BooleanCallback<LivingEntity> isImmobile;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
     public transient Function<LivingEntity, Object> setBlockJumpFactor;
     public transient Function<LivingEntity, Object> blockSpeedFactor;
@@ -90,7 +93,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient SoundVolumeFunction setSoundVolume1;*/
     public transient Float setWaterSlowDown;
     public transient Object setSwimSound;
-    public transient Predicate<LivingEntity> isFlapping;
+    public transient BooleanCallback<LivingEntity> isFlapping;
     public transient Object setDeathSound;
     public transient RenderType renderType;
     public transient EntityType<?> getType;
@@ -106,15 +109,15 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> onIncreaseAirSupply;
     public transient Function<ContextUtils.HurtContext, Object> setHurtSound;
     public transient Object setSwimSplashSound;
-    public transient Predicate<ContextUtils.EntityTypeEntityContext> canAttackType;
+    public transient BooleanCallback<ContextUtils.EntityTypeEntityContext> canAttackType;
     public transient Function<LivingEntity, Object> scale;
-    public transient Predicate<LivingEntity> shouldDropExperience;
+    public transient BooleanCallback<LivingEntity> shouldDropExperience;
     public transient Function<LivingEntity, Object> experienceReward;
     public transient Consumer<ContextUtils.EntityEquipmentContext> onEquipItem;
     public transient Function<ContextUtils.VisualContext, Object> visibilityPercent;
-    public transient Predicate<ContextUtils.LivingEntityContext> canAttack;
-    public transient Predicate<ContextUtils.OnEffectContext> canBeAffected;
-    public transient Predicate<LivingEntity> invertedHealAndHarm;
+    public transient BooleanCallback<ContextUtils.LivingEntityContext> canAttack;
+    public transient BooleanCallback<ContextUtils.OnEffectContext> canBeAffected;
+    public transient BooleanCallback<LivingEntity> invertedHealAndHarm;
     public transient Consumer<ContextUtils.OnEffectContext> onEffectAdded;
     public transient Consumer<ContextUtils.OnEffectContext> onEffectRemoved;
     public transient Consumer<ContextUtils.EntityHealContext> onLivingHeal;
@@ -125,46 +128,46 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Object smallFallSound;
     public transient Object largeFallSound;
     public transient Object eatingSound;
-    public transient Predicate<LivingEntity> onClimbable;
+    public transient BooleanCallback<LivingEntity> onClimbable;
     public transient Boolean canBreatheUnderwater;
     public transient Consumer<ContextUtils.EntityFallDamageContext> onLivingFall;
     public transient Consumer<LivingEntity> onSprint;
     public transient Function<LivingEntity, Object> jumpBoostPower;
-    public transient Predicate<ContextUtils.EntityFluidStateContext> canStandOnFluid;
-    public transient Predicate<LivingEntity> isSensitiveToWater;
+    public transient BooleanCallback<ContextUtils.EntityFluidStateContext> canStandOnFluid;
+    public transient BooleanCallback<LivingEntity> isSensitiveToWater;
     public transient Consumer<LivingEntity> onStopRiding;
     public transient Consumer<LivingEntity> onRemovePassenger;
     public transient Consumer<LivingEntity> rideTick;
     public transient Consumer<ContextUtils.EntityItemEntityContext> onItemPickup;
-    public transient Predicate<ContextUtils.LineOfSightContext> hasLineOfSight;
+    public transient BooleanCallback<ContextUtils.LineOfSightContext> hasLineOfSight;
     public transient Consumer<LivingEntity> onEnterCombat;
     public transient Consumer<LivingEntity> onLeaveCombat;
-    public transient Predicate<LivingEntity> isAffectedByPotions;
-    public transient Predicate<LivingEntity> isAttackable;
-    public transient Predicate<ContextUtils.EntityItemLevelContext> canTakeItem;
-    public transient Predicate<LivingEntity> isSleeping;
+    public transient BooleanCallback<LivingEntity> isAffectedByPotions;
+    public transient BooleanCallback<LivingEntity> isAttackable;
+    public transient BooleanCallback<ContextUtils.EntityItemLevelContext> canTakeItem;
+    public transient BooleanCallback<LivingEntity> isSleeping;
     public transient Consumer<ContextUtils.EntityBlockPosContext> onStartSleeping;
     public transient Consumer<LivingEntity> onStopSleeping;
     public transient Consumer<ContextUtils.FoodItemLevelContext> eat;
-    public transient Predicate<ContextUtils.PlayerEntityContext> shouldRiderFaceForward;
-    public transient Predicate<LivingEntity> canFreeze;
-    public transient Predicate<LivingEntity> isCurrentlyGlowing;
-    public transient Predicate<LivingEntity> canDisableShield;
+    public transient BooleanCallback<ContextUtils.PlayerEntityContext> shouldRiderFaceForward;
+    public transient BooleanCallback<LivingEntity> canFreeze;
+    public transient BooleanCallback<LivingEntity> isCurrentlyGlowing;
+    public transient BooleanCallback<LivingEntity> canDisableShield;
     public transient Function<LivingEntity, Object> setMaxFallDistance;
     public transient Consumer<ContextUtils.MobInteractContext> onInteract;
     public transient Consumer<LivingEntity> onClientRemoval;
     public transient Consumer<LivingEntity> onAddedToWorld;
     public transient Consumer<LivingEntity> lavaHurt;
     public transient Consumer<LivingEntity> onFlap;
-    public transient Predicate<LivingEntity> dampensVibrations;
+    public transient BooleanCallback<LivingEntity> dampensVibrations;
     public transient Consumer<ContextUtils.PlayerEntityContext> playerTouch;
-    public transient Predicate<LivingEntity> showVehicleHealth;
+    public transient BooleanCallback<LivingEntity> showVehicleHealth;
     public transient Consumer<ContextUtils.ThunderHitContext> thunderHit;
-    public transient Predicate<ContextUtils.DamageContext> isInvulnerableTo;
-    public transient Predicate<ContextUtils.ChangeDimensionsContext> canChangeDimensions;
+    public transient BooleanCallback<ContextUtils.DamageContext> isInvulnerableTo;
+    public transient BooleanCallback<ContextUtils.ChangeDimensionsContext> canChangeDimensions;
     public transient Function<ContextUtils.CalculateFallDamageContext, Object> calculateFallDamage;
-    public transient Predicate<ContextUtils.MayInteractContext> mayInteract;
-    public transient Predicate<ContextUtils.CanTrampleContext> canTrample;
+    public transient BooleanCallback<ContextUtils.MayInteractContext> mayInteract;
+    public transient BooleanCallback<ContextUtils.CanTrampleContext> canTrample;
     public transient Consumer<LivingEntity> onRemovedFromWorld;
     public transient Consumer<LivingEntity> onLivingJump;
     public transient Consumer<LivingEntity> aiStep;
@@ -175,8 +178,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public static final List<BaseLivingEntityBuilder<?>> spawnList = new ArrayList<>();
     public static final List<EventBasedSpawnModifier.BiomeSpawn> biomeSpawnList = new ArrayList<>();
     public transient Consumer<ContextUtils.RenderContext<T>> render;
-    public transient Predicate<LivingEntity> isFreezing;
-    public transient Predicate<ContextUtils.CollidingEntityContext> canCollideWith;
+    public transient BooleanCallback<LivingEntity> isFreezing;
+    public transient BooleanCallback<ContextUtils.CollidingEntityContext> canCollideWith;
     public transient Boolean defaultDeathPose;
     public transient Function<ContextUtils.Vec3Context, Object> travelVector;
     public transient Consumer<ContextUtils.Vec3Context> travel;
@@ -185,7 +188,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<LivingEntity> tickDeath;
     public final List<ContextUtils.PartEntityParams<T>> partEntityParamsList = new ArrayList<>();
     public transient Consumer<ContextUtils.LineOfSightContext> onHurtTarget;
-    public transient Predicate<ContextUtils.LineOfSightContext> isAlliedTo;
+    public transient BooleanCallback<ContextUtils.LineOfSightContext> isAlliedTo;
     public transient float scaleHeight;
     public transient float scaleWidth;
     public transient Consumer<ContextUtils.ScaleModelRenderContext> scaleModelForRender;
@@ -193,11 +196,11 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     public transient Consumer<GeoLayerJSBuilder<T>> newGeoLayer;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
     public final List<GeoLayerJSBuilder<T>> glowingLayerList = new ArrayList<>();
-    public transient Predicate<LivingEntity> canBeCollidedWith;
+    public transient BooleanCallback<LivingEntity> canBeCollidedWith;
     public transient Consumer<ContextUtils.FinalRenderContext<T>> renderFinal;
     public transient Consumer<? super ContextUtils.ApplyRotationsContext<T>> applyRotations;
-    public transient Predicate<ContextUtils.PassengerVehicleContext> canRide;
-    public transient Predicate<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
+    public transient BooleanCallback<ContextUtils.PassengerVehicleContext> canRide;
+    public transient BooleanCallback<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
     public transient Function<LivingEntity, String> addRenderItemLayer;
     public transient ItemModelJSBuilder<T> itemModelJSBuilder;
     public transient Consumer<ItemArmorJSBuilder<T>> itemArmorJSBuilder;
@@ -293,7 +296,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canRide(Predicate<ContextUtils.PassengerVehicleContext> func) {
+    public BaseLivingEntityBuilder<T> canRide(BooleanCallback<ContextUtils.PassengerVehicleContext> func) {
         canRide = func;
         return this;
     }
@@ -361,7 +364,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> shouldRenderAtSqrDistance(Predicate<ContextUtils.EntitySqrDistanceContext> func) {
+    public BaseLivingEntityBuilder<T> shouldRenderAtSqrDistance(BooleanCallback<ContextUtils.EntitySqrDistanceContext> func) {
         shouldRenderAtSqrDistance = func;
         return this;
     }
@@ -376,7 +379,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
                 });
                 ```
             """)
-    public BaseLivingEntityBuilder<T> canBeCollidedWith(Predicate<LivingEntity> canBeCollidedWith) {
+    public BaseLivingEntityBuilder<T> canBeCollidedWith(BooleanCallback<LivingEntity> canBeCollidedWith) {
         this.canBeCollidedWith = canBeCollidedWith;
         return this;
     }
@@ -513,7 +516,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isAlliedTo(Predicate<ContextUtils.LineOfSightContext> isAlliedTo) {
+    public BaseLivingEntityBuilder<T> isAlliedTo(BooleanCallback<ContextUtils.LineOfSightContext> isAlliedTo) {
         this.isAlliedTo = isAlliedTo;
         return this;
     }
@@ -619,7 +622,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canCollideWith(Predicate<ContextUtils.CollidingEntityContext> canCollideWith) {
+    public BaseLivingEntityBuilder<T> canCollideWith(BooleanCallback<ContextUtils.CollidingEntityContext> canCollideWith) {
         this.canCollideWith = canCollideWith;
         return this;
     }
@@ -634,7 +637,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isFreezing(Predicate<LivingEntity> isFreezing) {
+    public BaseLivingEntityBuilder<T> isFreezing(BooleanCallback<LivingEntity> isFreezing) {
         this.isFreezing = isFreezing;
         return this;
     }
@@ -850,7 +853,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> shouldDropLoot(Predicate<LivingEntity> b) {
+    public BaseLivingEntityBuilder<T> shouldDropLoot(BooleanCallback<LivingEntity> b) {
         this.shouldDropLoot = b;
         return this;
     }
@@ -962,8 +965,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```
             """)
     public BaseLivingEntityBuilder<T> modelResource(Function<T, Object> function) {
+        var wrappedFunction = CallbackInvoker.wrapFunction(function);
         modelResource = entity -> {
-            Object obj = function.apply(entity);
+            Object obj = wrappedFunction.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
@@ -993,8 +997,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```
             """)
     public BaseLivingEntityBuilder<T> textureResource(Function<T, Object> function) {
+        var wrappedFunction = CallbackInvoker.wrapFunction(function);
         textureResource = entity -> {
-            Object obj = function.apply(entity);
+            Object obj = wrappedFunction.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
@@ -1025,8 +1030,9 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             ```
             """)
     public BaseLivingEntityBuilder<T> animationResource(Function<T, Object> function) {
+        var wrappedFunction = CallbackInvoker.wrapFunction(function);
         animationResource = entity -> {
-            Object obj = function.apply(entity);
+            Object obj = wrappedFunction.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
@@ -1067,7 +1073,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canAddPassenger(Predicate<ContextUtils.PassengerEntityContext> predicate) {
+    public BaseLivingEntityBuilder<T> canAddPassenger(BooleanCallback<ContextUtils.PassengerEntityContext> predicate) {
         canAddPassenger = predicate;
         return this;
     }
@@ -1088,7 +1094,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isAffectedByFluids(Predicate<LivingEntity> b) {
+    public BaseLivingEntityBuilder<T> isAffectedByFluids(BooleanCallback<LivingEntity> b) {
         isAffectedByFluids = b;
         return this;
     }
@@ -1123,7 +1129,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isImmobile(Predicate<LivingEntity> b) {
+    public BaseLivingEntityBuilder<T> isImmobile(BooleanCallback<LivingEntity> b) {
         isImmobile = b;
         return this;
     }
@@ -1259,7 +1265,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isFlapping(Predicate<LivingEntity> b) {
+    public BaseLivingEntityBuilder<T> isFlapping(BooleanCallback<LivingEntity> b) {
         this.isFlapping = b;
         return this;
     }
@@ -1509,7 +1515,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canAttackType(Predicate<ContextUtils.EntityTypeEntityContext> canAttackType) {
+    public BaseLivingEntityBuilder<T> canAttackType(BooleanCallback<ContextUtils.EntityTypeEntityContext> canAttackType) {
         this.canAttackType = canAttackType;
         return this;
     }
@@ -1550,7 +1556,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> shouldDropExperience(Predicate<LivingEntity> p) {
+    public BaseLivingEntityBuilder<T> shouldDropExperience(BooleanCallback<LivingEntity> p) {
         this.shouldDropExperience = p;
         return this;
     }
@@ -1631,7 +1637,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canAttack(Predicate<ContextUtils.LivingEntityContext> customCanAttack) {
+    public BaseLivingEntityBuilder<T> canAttack(BooleanCallback<ContextUtils.LivingEntityContext> customCanAttack) {
         this.canAttack = customCanAttack;
         return this;
     }
@@ -1650,7 +1656,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canBeAffected(Predicate<ContextUtils.OnEffectContext> predicate) {
+    public BaseLivingEntityBuilder<T> canBeAffected(BooleanCallback<ContextUtils.OnEffectContext> predicate) {
         canBeAffected = predicate;
         return this;
     }
@@ -1669,7 +1675,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> invertedHealAndHarm(Predicate<LivingEntity> invertedHealAndHarm) {
+    public BaseLivingEntityBuilder<T> invertedHealAndHarm(BooleanCallback<LivingEntity> invertedHealAndHarm) {
         this.invertedHealAndHarm = invertedHealAndHarm;
         return this;
     }
@@ -1857,7 +1863,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> onClimbable(Predicate<LivingEntity> predicate) {
+    public BaseLivingEntityBuilder<T> onClimbable(BooleanCallback<LivingEntity> predicate) {
         onClimbable = predicate;
         return this;
     }
@@ -1945,7 +1951,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canStandOnFluid(Predicate<ContextUtils.EntityFluidStateContext> predicate) {
+    public BaseLivingEntityBuilder<T> canStandOnFluid(BooleanCallback<ContextUtils.EntityFluidStateContext> predicate) {
         canStandOnFluid = predicate;
         return this;
     }
@@ -1965,7 +1971,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isSensitiveToWater(Predicate<LivingEntity> predicate) {
+    public BaseLivingEntityBuilder<T> isSensitiveToWater(BooleanCallback<LivingEntity> predicate) {
         isSensitiveToWater = predicate;
         return this;
     }
@@ -2053,7 +2059,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> hasLineOfSight(Predicate<ContextUtils.LineOfSightContext> f) {
+    public BaseLivingEntityBuilder<T> hasLineOfSight(BooleanCallback<ContextUtils.LineOfSightContext> f) {
         hasLineOfSight = f;
         return this;
     }
@@ -2111,7 +2117,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isAffectedByPotions(Predicate<LivingEntity> predicate) {
+    public BaseLivingEntityBuilder<T> isAffectedByPotions(BooleanCallback<LivingEntity> predicate) {
         isAffectedByPotions = predicate;
         return this;
     }
@@ -2131,7 +2137,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isAttackable(Predicate<LivingEntity> predicate) {
+    public BaseLivingEntityBuilder<T> isAttackable(BooleanCallback<LivingEntity> predicate) {
         isAttackable = predicate;
         return this;
     }
@@ -2151,7 +2157,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canTakeItem(Predicate<ContextUtils.EntityItemLevelContext> predicate) {
+    public BaseLivingEntityBuilder<T> canTakeItem(BooleanCallback<ContextUtils.EntityItemLevelContext> predicate) {
         canTakeItem = predicate;
         return this;
     }
@@ -2171,7 +2177,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isSleeping(Predicate<LivingEntity> supplier) {
+    public BaseLivingEntityBuilder<T> isSleeping(BooleanCallback<LivingEntity> supplier) {
         isSleeping = supplier;
         return this;
     }
@@ -2248,7 +2254,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> shouldRiderFaceForward(Predicate<ContextUtils.PlayerEntityContext> predicate) {
+    public BaseLivingEntityBuilder<T> shouldRiderFaceForward(BooleanCallback<ContextUtils.PlayerEntityContext> predicate) {
         shouldRiderFaceForward = predicate;
         return this;
     }
@@ -2268,7 +2274,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canFreeze(Predicate<LivingEntity> predicate) {
+    public BaseLivingEntityBuilder<T> canFreeze(BooleanCallback<LivingEntity> predicate) {
         canFreeze = predicate;
         return this;
     }
@@ -2289,7 +2295,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isCurrentlyGlowing(Predicate<LivingEntity> predicate) {
+    public BaseLivingEntityBuilder<T> isCurrentlyGlowing(BooleanCallback<LivingEntity> predicate) {
         isCurrentlyGlowing = predicate;
         return this;
     }
@@ -2308,7 +2314,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canDisableShield(Predicate<LivingEntity> predicate) {
+    public BaseLivingEntityBuilder<T> canDisableShield(BooleanCallback<LivingEntity> predicate) {
         canDisableShield = predicate;
         return this;
     }
@@ -2424,7 +2430,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> dampensVibrations(Predicate<LivingEntity> predicate) {
+    public BaseLivingEntityBuilder<T> dampensVibrations(BooleanCallback<LivingEntity> predicate) {
         this.dampensVibrations = predicate;
         return this;
     }
@@ -2464,7 +2470,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> showVehicleHealth(Predicate<LivingEntity> predicate) {
+    public BaseLivingEntityBuilder<T> showVehicleHealth(BooleanCallback<LivingEntity> predicate) {
         this.showVehicleHealth = predicate;
         return this;
     }
@@ -2503,7 +2509,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> isInvulnerableTo(Predicate<ContextUtils.DamageContext> predicate) {
+    public BaseLivingEntityBuilder<T> isInvulnerableTo(BooleanCallback<ContextUtils.DamageContext> predicate) {
         isInvulnerableTo = predicate;
         return this;
     }
@@ -2524,7 +2530,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canChangeDimensions(Predicate<ContextUtils.ChangeDimensionsContext> supplier) {
+    public BaseLivingEntityBuilder<T> canChangeDimensions(BooleanCallback<ContextUtils.ChangeDimensionsContext> supplier) {
         canChangeDimensions = supplier;
         return this;
     }
@@ -2544,7 +2550,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> mayInteract(Predicate<ContextUtils.MayInteractContext> predicate) {
+    public BaseLivingEntityBuilder<T> mayInteract(BooleanCallback<ContextUtils.MayInteractContext> predicate) {
         mayInteract = predicate;
         return this;
     }
@@ -2564,7 +2570,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             });
             ```
             """)
-    public BaseLivingEntityBuilder<T> canTrample(Predicate<ContextUtils.CanTrampleContext> predicate) {
+    public BaseLivingEntityBuilder<T> canTrample(BooleanCallback<ContextUtils.CanTrampleContext> predicate) {
         canTrample = predicate;
         return this;
     }
@@ -2603,7 +2609,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     })
     public BaseLivingEntityBuilder<T> spawnPlacement(SpawnPlacementType placementType, Heightmap.Types heightMap, SpawnPlacements.SpawnPredicate<T> spawnPredicate) {
         spawnList.add(this);
-        this.spawnPredicate = spawnPredicate;
+        this.spawnPredicate = CallbackInvoker.wrapFunctional(spawnPredicate, (Class<SpawnPlacements.SpawnPredicate<T>>) (Class<?>) SpawnPlacements.SpawnPredicate.class);
         this.placementType = placementType;
         this.heightMap = heightMap;
         return this;
@@ -2661,7 +2667,17 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             @Nullable IParticleListenerJS<T> particleListener,
             @Nullable ICustomInstructionListenerJS<T> instructionListener
     ) {
-        animationSuppliers.add(new AnimationControllerSupplier<>(name, translationTicksLength, predicate, null, null, null, soundListener, particleListener, instructionListener));
+        animationSuppliers.add(new AnimationControllerSupplier<>(
+                name,
+                translationTicksLength,
+                CallbackInvoker.wrapFunctional(predicate, (Class<IAnimationPredicateJS<T>>) (Class<?>) IAnimationPredicateJS.class),
+                null,
+                null,
+                null,
+                CallbackInvoker.wrapFunctional(soundListener, (Class<ISoundListenerJS<T>>) (Class<?>) ISoundListenerJS.class),
+                CallbackInvoker.wrapFunctional(particleListener, (Class<IParticleListenerJS<T>>) (Class<?>) IParticleListenerJS.class),
+                CallbackInvoker.wrapFunctional(instructionListener, (Class<ICustomInstructionListenerJS<T>>) (Class<?>) ICustomInstructionListenerJS.class)
+        ));
         return this;
     }
 
@@ -2705,7 +2721,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         return this;
     }
 
-    public transient Function<T, net.minecraft.client.renderer.RenderType> renderTypeFunction;
+    public transient Function<T, Object> renderTypeFunction;
 
     @Info(value = """
             Sets the render type for the entity via a function.
@@ -2715,8 +2731,8 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
             entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
             ```
             """)
-    public BaseLivingEntityBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {
-        renderTypeFunction = type;
+    public BaseLivingEntityBuilder<T> renderType(Function<T, Object> type) {
+        renderTypeFunction = CallbackInvoker.wrapFunction(type);
         return this;
     }
 

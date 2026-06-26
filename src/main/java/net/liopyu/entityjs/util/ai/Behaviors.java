@@ -2,6 +2,7 @@ package net.liopyu.entityjs.util.ai;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
@@ -38,7 +39,7 @@ public enum Behaviors {
             @Param(name = "onPoiAcquisitionEvent", value = "The entity event to be sent to the entity when it acquires the poi, may be null to not send a client bound packet. This value is handled by an entity's implementation of the `handleEntityEvent` method")
     })
     public BehaviorControl<PathfinderMob> acquirePoi(Predicate<Holder<PoiType>> poiType, MemoryModuleType<GlobalPos> memoryKey, MemoryModuleType<GlobalPos> memoryToAcquire, boolean onlyIfAdult, @Nullable Byte onPoiAcquisitionEvent) {
-        return AcquirePoi.create(poiType, memoryKey, memoryToAcquire, onlyIfAdult, Optional.ofNullable(onPoiAcquisitionEvent));
+        return AcquirePoi.create(cachedPredicate(poiType), memoryKey, memoryToAcquire, onlyIfAdult, Optional.ofNullable(onPoiAcquisitionEvent));
     }
 
     @Info(value = "Creates an `AnimalMakeLove` behavior, only applicable to **animal** entities", params = {
@@ -62,7 +63,7 @@ public enum Behaviors {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
     public OneShot<AgeableMob> babyFollowAdult(int minFollowRange, int maxFollowRange, Function<LivingEntity, Float> speedModifier) {
-        return BabyFollowAdult.create(UniformInt.of(minFollowRange, maxFollowRange), speedModifier);
+        return BabyFollowAdult.create(UniformInt.of(minFollowRange, maxFollowRange), cachedFunction(speedModifier));
     }
 
     @Info(value = "Creates a `CountCooldownTicks` behavior", params = {
@@ -77,7 +78,7 @@ public enum Behaviors {
             @Param(name = "dontRideIf", value = "The predicate for when the entity should get off its mount")
     })
     public <E extends LivingEntity> BehaviorControl<E> dismountOrSkipMounting(int maxWalkDistToRideTarget, BiPredicate<E, Entity> dontRideIf) {
-        return DismountOrSkipMounting.create(maxWalkDistToRideTarget, dontRideIf);
+        return DismountOrSkipMounting.create(maxWalkDistToRideTarget, cachedBiPredicate(dontRideIf));
     }
 
     @Info(value = "Creates a `FlyingRandomStroll` behavior, only applicable to **pathfinder** mobs", params = {
@@ -91,7 +92,7 @@ public enum Behaviors {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
     public FollowTemptation followTemptation(Function<LivingEntity, Float> speedModifier) {
-        return new FollowTemptation(speedModifier);
+        return new FollowTemptation(cachedFunction(speedModifier));
     }
 
     @Info(value = "Creates a `ForceUnmount` behavior")
@@ -122,7 +123,7 @@ public enum Behaviors {
             @Param(name = "hasWlkTargetMemoryModuleType", value = "If the entity has the `minecraft:walk_target` memory type")
     })
     public <E extends LivingEntity> BehaviorControl<E> goToWantedItem(Predicate<E> predicate, float speedModifier, int maxDistToWalk, boolean hasWalkTargetMemoryModuleType) {
-        return GoToWantedItem.create(predicate, speedModifier, hasWalkTargetMemoryModuleType, maxDistToWalk);
+        return GoToWantedItem.create(cachedPredicate(predicate), speedModifier, hasWalkTargetMemoryModuleType, maxDistToWalk);
     }
 
     @Info(value = "Creates a `InsideBrownianWalk` behavior, only applicable to **pathfinder** entities", params = {
@@ -153,8 +154,8 @@ public enum Behaviors {
         return InteractWith.of(
                 typeToInteractWith,
                 interactionRange,
-                selfFilter,
-                targetFilter,
+                cachedPredicate(selfFilter),
+                cachedPredicate(targetFilter),
                 memory,
                 speedModifier,
                 maxDistance
@@ -212,7 +213,7 @@ public enum Behaviors {
             @Param(name = "memoryType", value = "The memory type to be erased")
     })
     public <E extends LivingEntity> BehaviorControl<E> eraseMemoryIf(Predicate<E> predicate, MemoryModuleType<?> memoryType) {
-        return EraseMemoryIf.create(predicate, memoryType);
+        return EraseMemoryIf.create(cachedPredicate(predicate), memoryType);
     }
 
     @Info(value = "Creates a `BackUpIfTooClose` behavior, only applicable to **mob** entities", params = {
@@ -250,10 +251,10 @@ public enum Behaviors {
                 maxJumpHeight,
                 maxJumpWidth,
                 maxJumpVelocity,
-                jumpSound,
+                cachedFunction(jumpSound),
                 TagKey.create(BuiltInRegistries.BLOCK.key(), preferredBlockTag),
                 preferredBlockChance,
-                acceptableLandingSpot
+                cachedBiPredicate(acceptableLandingSpot)
         );
     }
 
@@ -280,8 +281,8 @@ public enum Behaviors {
                 maxJumpHeight,
                 maxJumpWidth,
                 maxJumpVelocity,
-                jumpSound,
-                acceptableLandingSpot
+                cachedFunction(jumpSound),
+                cachedBiPredicate(acceptableLandingSpot)
         );
     }
 
@@ -332,7 +333,7 @@ public enum Behaviors {
         conditions.range(range);
         if (ignoreLineOfSight) conditions.ignoreLineOfSight();
         if (ignoreInvisibilityTesting) conditions.ignoreInvisibilityTesting();
-        conditions.selector(selector);
+        conditions.selector(cachedPredicate(selector));
         return conditions;
     }
 
@@ -355,13 +356,13 @@ public enum Behaviors {
             Function<E, SoundEvent> prepareRamSound
     ) {
         return new PrepareRamNearestTarget<>(
-                cooldownOnFall,
+                cachedToIntFunction(cooldownOnFall),
                 minRamDistance,
                 maxRamDistance,
                 walkSpeed,
                 targetingConditions,
                 ramPrepareTime,
-                prepareRamSound
+                cachedFunction(prepareRamSound)
         );
     }
 
@@ -409,7 +410,7 @@ public enum Behaviors {
             @Param(name = "maxDist", value = "The maximum distance a target may be")
     })
     public BehaviorControl<LivingEntity> setEntityLookTarget(Predicate<LivingEntity> predicate, float maxDist) {
-        return SetEntityLookTarget.create(predicate, maxDist);
+        return SetEntityLookTarget.create(cachedPredicate(predicate), maxDist);
     }
 
     @Info(value = "Creates a `SetHiddenState` behavior", params = {
@@ -452,7 +453,7 @@ public enum Behaviors {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
     public BehaviorControl<Mob> setWalkTargetFromAttackTargetIfTargetOutOfReach(Function<LivingEntity, Float> speedModifier) {
-        return SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(speedModifier); // One hell of a name
+        return SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(cachedFunction(speedModifier)); // One hell of a name
     }
 
     @Info(value = "Creates a `SetWalkTargetFromLookTarget` behavior", params = {
@@ -461,7 +462,7 @@ public enum Behaviors {
             @Param(name = "closeEnoughDistance", value = "The distance that is close enough to the target to stop walking")
     })
     public OneShot<LivingEntity> setWalkTargetFromLookTarget(Predicate<LivingEntity> predicate, Function<LivingEntity, Float> speedModifier, int closeEnoughDistance) {
-        return SetWalkTargetFromLookTarget.create(predicate, speedModifier, closeEnoughDistance);
+        return SetWalkTargetFromLookTarget.create(cachedPredicate(predicate), cachedFunction(speedModifier), closeEnoughDistance);
     }
 
     @Info(value = "Creates a `SleepInBed` behavior")
@@ -480,7 +481,8 @@ public enum Behaviors {
             @Param(name = "duration", value = "The number of ticks that the behavior should be active for")
     })
     public <E extends Mob> BehaviorControl<E> startAttacking(Predicate<E> canAttackPredicate, Function<E, @Nullable LivingEntity> targetFinder) {
-        return StartAttacking.create(canAttackPredicate, e -> Optional.ofNullable(targetFinder.apply(e)));
+        Function<E, @Nullable LivingEntity> wrappedTargetFinder = cachedFunction(targetFinder);
+        return StartAttacking.create(cachedPredicate(canAttackPredicate), e -> Optional.ofNullable(wrappedTargetFinder.apply(e)));
     }
 
     @Info(value = "Creates a `StartCelebratingIfTargetDead` behavior", params = {
@@ -488,7 +490,7 @@ public enum Behaviors {
             @Param(name = "dancePredicate", value = "A predicate for if the entity should dance. The first entity provided is the entity that will dance, the second is the target")
     })
     public BehaviorControl<LivingEntity> startCelebratingIfTargetDead(int celebrationDuration, BiPredicate<LivingEntity, LivingEntity> dancePredicate) {
-        return StartCelebratingIfTargetDead.create(celebrationDuration, dancePredicate);
+        return StartCelebratingIfTargetDead.create(celebrationDuration, cachedBiPredicate(dancePredicate));
     }
 
     @Info(value = "Creates a `BlockPosTracker` for use in `.stayCloseToTarget()`", params = {
@@ -514,7 +516,8 @@ public enum Behaviors {
             @Param(name = "speedModifier", value = "The modifier to the mob's speed when this behavior is active")
     })
     public BehaviorControl<LivingEntity> stayCloseToTarget(Function<LivingEntity, @Nullable PositionTracker> targetPositionGetter, Predicate<LivingEntity> pPredicate, int closeEnough, int tooFar, float speedModifier) {
-        return StayCloseToTarget.create(e -> Optional.ofNullable(targetPositionGetter.apply(e)), pPredicate, closeEnough, tooFar, speedModifier);
+        Function<LivingEntity, @Nullable PositionTracker> wrappedTargetPositionGetter = cachedFunction(targetPositionGetter);
+        return StayCloseToTarget.create(e -> Optional.ofNullable(wrappedTargetPositionGetter.apply(e)), cachedPredicate(pPredicate), closeEnough, tooFar, speedModifier);
     }
 
     @Info(value = "Creates a `StopAttackingIfTargetInvalid` behavior, only applicable to **mob** entities", params = {
@@ -523,7 +526,7 @@ public enum Behaviors {
             @Param(name = "canGetTiredOfTryingToReachTarget", value = "If the attacker can get tired of trying to reach its target")
     })
     public <E extends Mob> BehaviorControl<E> stopAttackingIfTargetInvalid(Predicate<LivingEntity> stopAttackingWhen, BiConsumer<E, LivingEntity> onTargetErased, boolean canGetTiredOfTryingToReachTarget) {
-        return StopAttackingIfTargetInvalid.create(stopAttackingWhen, onTargetErased, canGetTiredOfTryingToReachTarget);
+        return StopAttackingIfTargetInvalid.create(cachedPredicate(stopAttackingWhen), cachedBiConsumer(onTargetErased), canGetTiredOfTryingToReachTarget);
     }
 
     @Info(value = "Creates a `StopBeingAngryIfTargetDead` behavior, only applicable to **mob** entities")
@@ -591,7 +594,7 @@ public enum Behaviors {
             @Param(name = "memoryType", value = "The memory that is used for the poi")
     })
     public BehaviorControl<LivingEntity> validateNearbyPoi(Predicate<Holder<PoiType>> poiPredicate, MemoryModuleType<GlobalPos> memoryType) {
-        return ValidateNearbyPoi.create(poiPredicate, memoryType);
+        return ValidateNearbyPoi.create(cachedPredicate(poiPredicate), memoryType);
     }
 
     @Info(value = "Creates a `VillageBoundRandomStroll` behavior, only applicable to **pathfinder** mobs", params = {
@@ -606,5 +609,28 @@ public enum Behaviors {
     @Info(value = "Creates a `WakeUp` behavior")
     public BehaviorControl<LivingEntity> wakeUp() {
         return WakeUp.create();
+    }
+
+    private static <T> Predicate<T> cachedPredicate(Predicate<T> callback) {
+        return CallbackInvoker.wrapPredicate(callback);
+    }
+
+    private static <T, R> Function<T, R> cachedFunction(Function<T, R> callback) {
+        return CallbackInvoker.wrapFunction(callback);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T, U> BiPredicate<T, U> cachedBiPredicate(BiPredicate<T, U> callback) {
+        return CallbackInvoker.wrapFunctional(callback, (Class<BiPredicate<T, U>>) (Class<?>) BiPredicate.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T, U> BiConsumer<T, U> cachedBiConsumer(BiConsumer<T, U> callback) {
+        return CallbackInvoker.wrapFunctional(callback, (Class<BiConsumer<T, U>>) (Class<?>) BiConsumer.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> ToIntFunction<T> cachedToIntFunction(ToIntFunction<T> callback) {
+        return CallbackInvoker.wrapFunctional(callback, (Class<ToIntFunction<T>>) (Class<?>) ToIntFunction.class);
     }
 }

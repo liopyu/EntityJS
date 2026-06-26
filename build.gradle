@@ -71,23 +71,48 @@ neoForge {
 
     runs {
         configureEach {
-            gameDirectory = rootProject.file("runs")
+            [
+                    'entityjs.profileCallbacks',
+                    'entityjs.profileCallbacks.focusMethod',
+                    'entityjs.profileCallbacks.intervalSeconds',
+                    'entityjs.profileCallbacks.minMillis',
+                    'entityjs.profileCallbacks.minMicros',
+                    'entityjs.profileCallbacks.slowStacks',
+                    'entityjs.profileCallbacks.slowStackMillis',
+                    'entityjs.profileCallbacks.slowStackLimit'
+            ].each { key ->
+                def value = System.getProperty(key)
+                if (value != null) {
+                    systemProperty key, value
+                }
+            }
         }
         client {
             client()
+            gameDirectory = project.file("runs/client")
         }
         server {
             server()
+            gameDirectory = project.file("runs/server")
         }
     }
 }
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+configurations {
+    parchmentData {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+}
+
 dependencies {
-    api("curse.maven:probejs-585406:7105159")
+    api("curse.maven:probejs-585406:8304356")
     api("dev.latvian.mods:rhino:$rhino_version")
     api("dev.latvian.mods:kubejs-neoforge:$kubejs_version")
     api("software.bernie.geckolib:geckolib-neoforge-1.21.1:${geckolib_version}")
+    parchmentData("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -107,6 +132,51 @@ tasks.withType(ProcessResources).configureEach {
     inputs.properties replaceProperties
     filesMatching(['META-INF/neoforge.mods.toml']) {
         expand replaceProperties
+    }
+    from({ configurations.parchmentData.collect { zipTree(it) } }) {
+        include 'parchment.json'
+        into 'entityjs/parchment'
+    }
+}
+
+def javaImportCleanupScript = layout.projectDirectory.file("utils/cleanup/cleanup_java_imports.py")
+def javaImportCleanupRoots = [layout.projectDirectory.dir("src/main/java")]
+def javaImportCleanupPython = providers.gradleProperty("pythonExecutable").orElse("python")
+
+tasks.register("cleanupJavaImports") {
+    group = "formatting"
+    description = "Removes unused Java imports and shortens safe inline fully qualified type references."
+    inputs.file(javaImportCleanupScript)
+    inputs.dir(layout.projectDirectory.dir("src/main/java"))
+    outputs.upToDateWhen { false }
+
+    doLast {
+        exec {
+            commandLine(
+                    javaImportCleanupPython.get(),
+                    javaImportCleanupScript.asFile.absolutePath,
+                    *javaImportCleanupRoots.collect { it.asFile.absolutePath }
+            )
+        }
+    }
+}
+
+tasks.register("checkJavaImportCleanup") {
+    group = "verification"
+    description = "Checks whether cleanupJavaImports would change Java sources."
+    inputs.file(javaImportCleanupScript)
+    inputs.dir(layout.projectDirectory.dir("src/main/java"))
+    outputs.upToDateWhen { false }
+
+    doLast {
+        exec {
+            commandLine(
+                    javaImportCleanupPython.get(),
+                    javaImportCleanupScript.asFile.absolutePath,
+                    "--check",
+                    *javaImportCleanupRoots.collect { it.asFile.absolutePath }
+            )
+        }
     }
 }
 

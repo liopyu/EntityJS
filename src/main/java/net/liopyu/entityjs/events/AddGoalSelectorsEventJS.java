@@ -5,6 +5,8 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.util.BooleanCallback;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.ai.CustomGoal;
@@ -65,10 +67,11 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             """, params = {
             @Param(name = "goalFunction", value = "A function to remove goals with entity & available goals as arguments")
     })
-    public void removeGoals(Function<ContextUtils.GoalContext, Boolean> goalFunction) {
+    public void removeGoals(BooleanCallback<ContextUtils.GoalContext> goalFunction) {
+        BooleanCallback<ContextUtils.GoalContext> wrappedGoalFunction = CallbackInvoker.wrapBoolean(goalFunction);
         selector.removeAllGoals(g -> {
             ContextUtils.GoalContext context = new ContextUtils.GoalContext(getEntity(), g);
-            Object remove = EntityJSHelperClass.convertObjectToDesired(goalFunction.apply(context), "boolean");
+            Object remove = EntityJSHelperClass.convertObjectToDesired(wrappedGoalFunction.test(context), "boolean");
             if (remove != null) {
                 return (boolean) remove;
             } else {
@@ -109,7 +112,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "goalSupplier", value = "The goal supplier, a function that takes a Mob and returns a Goal")
     })
     public void arbitraryGoal(int priority, Function<T, Goal> goalSupplier) {
-        selector.addGoal(priority, goalSupplier.apply(mob));
+        selector.addGoal(priority, CallbackInvoker.wrapFunction(goalSupplier).apply(mob));
     }
 
     @Info(value = "Adds a custom goal to the entity", params = {
@@ -126,15 +129,15 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
     public void customGoal(
             String name,
             int priority,
-            Predicate<T> canUse,
-            @Nullable Predicate<T> canContinueToUse,
+            BooleanCallback<T> canUse,
+            @Nullable BooleanCallback<T> canContinueToUse,
             boolean isInterruptable,
             Consumer<T> start,
             Consumer<T> stop,
             boolean requiresUpdateEveryTick,
             Consumer<T> tick
     ) {
-        selector.addGoal(priority, new CustomGoal<>(name, mob, canUse, canContinueToUse, isInterruptable, start, stop, requiresUpdateEveryTick, tick));
+        selector.addGoal(priority, new CustomGoal<>(name, mob, predicate(canUse), nullablePredicate(canContinueToUse), isInterruptable, CallbackInvoker.wrapConsumer(start), CallbackInvoker.wrapConsumer(stop), requiresUpdateEveryTick, CallbackInvoker.wrapConsumer(tick)));
     }
 
     @Info(value = "Adds a `AvoidEntityGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -146,9 +149,9 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "sprintSpeedModifier", value = "Modifies the mob's speed when avoiding an entity at close range"),
             @Param(name = "onAvoidEntityPredicate", value = "An additional predicate for entity avoidance") // Again, maybe? its ANDed with the other one and processed so who knows!
     })
-    public <E extends LivingEntity> void avoidEntity(int priority, Class<E> entityClassToAvoid, Predicate<LivingEntity> avoidPredicate, float maxDist, double walkSpeedModifier, double sprintSpeedModifier, Predicate<LivingEntity> onAvoidEntityPredicate) {
+    public <E extends LivingEntity> void avoidEntity(int priority, Class<E> entityClassToAvoid, BooleanCallback<LivingEntity> avoidPredicate, float maxDist, double walkSpeedModifier, double sprintSpeedModifier, BooleanCallback<LivingEntity> onAvoidEntityPredicate) {
         if (isPathFinder) {
-            selector.addGoal(priority, new AvoidEntityGoal<>((PathfinderMob) mob, entityClassToAvoid, avoidPredicate, maxDist, walkSpeedModifier, sprintSpeedModifier, onAvoidEntityPredicate));
+            selector.addGoal(priority, new AvoidEntityGoal<>((PathfinderMob) mob, entityClassToAvoid, predicate(avoidPredicate), maxDist, walkSpeedModifier, sprintSpeedModifier, predicate(onAvoidEntityPredicate)));
         }
     }
 
@@ -157,8 +160,8 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "doorBreakTime", value = "The time it takes to break a door, limited to 240 ticks"), // I think that's what it is
             @Param(name = "validDifficulties", value = "Determines what difficulties are valid for the goal")
     })
-    public void breakDoor(int priority, int doorBreakTime, Predicate<Difficulty> validDifficulties) {
-        selector.addGoal(priority, new BreakDoorGoal(mob, doorBreakTime, validDifficulties));
+    public void breakDoor(int priority, int doorBreakTime, BooleanCallback<Difficulty> validDifficulties) {
+        selector.addGoal(priority, new BreakDoorGoal(mob, doorBreakTime, predicate(validDifficulties)));
     }
 
     @Info(value = "Adds a `BreathAirGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -343,7 +346,8 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
     })
     public void moveThroughVillage(int priority, double speedModifier, boolean onlyAtNight, int distanceToPoi, Supplier<Boolean> canDealWithDoors) {
         if (isPathFinder) {
-            selector.addGoal(priority, new MoveThroughVillageGoal((PathfinderMob) mob, speedModifier, onlyAtNight, distanceToPoi, canDealWithDoors::get)); // BooleanSupplier is not nice for generalized supplier options (Forge config values / ConfigJS)
+            Supplier<Boolean> wrappedCanDealWithDoors = CallbackInvoker.wrapFunctional(canDealWithDoors, Supplier.class);
+            selector.addGoal(priority, new MoveThroughVillageGoal((PathfinderMob) mob, speedModifier, onlyAtNight, distanceToPoi, wrappedCanDealWithDoors::get)); // BooleanSupplier is not nice for generalized supplier options (Forge config values / ConfigJS)
         }
     }
 
@@ -489,8 +493,8 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "soundEvent", value = "The registry name of a sound event that should play when the item is used, may be null to indicate not sound event should play"),
             @Param(name = "canUseSelector", value = "Determines when the item may be used")
     })
-    public void useItem(int priority, ItemStack itemToUse, @Nullable ResourceLocation soundEvent, Predicate<T> canUseSelector) {
-        selector.addGoal(priority, new UseItemGoal<>(mob, itemToUse, soundEvent == null ? null : BuiltInRegistries.SOUND_EVENT.get(soundEvent), canUseSelector)); // I like this one, interesting function and not stupidly restricted, Mojang please more of these :)
+    public void useItem(int priority, ItemStack itemToUse, @Nullable ResourceLocation soundEvent, BooleanCallback<T> canUseSelector) {
+        selector.addGoal(priority, new UseItemGoal<>(mob, itemToUse, soundEvent == null ? null : BuiltInRegistries.SOUND_EVENT.get(soundEvent), predicate(canUseSelector))); // I like this one, interesting function and not stupidly restricted, Mojang please more of these :)
     }
 
     @Info(value = "Adds a `WaterAvoidingRandomFlyingGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -512,5 +516,22 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
         if (isPathFinder) {
             selector.addGoal(priority, new WaterAvoidingRandomStrollGoal((PathfinderMob) mob, speedModifier, probability));
         }
+    }
+
+    private static <E> Predicate<E> predicate(BooleanCallback<E> callback) {
+        BooleanCallback<E> wrappedCallback = CallbackInvoker.wrapBoolean(callback);
+        return value -> {
+            Object converted = EntityJSHelperClass.convertObjectToDesired(wrappedCallback.test(value), "boolean");
+            if (converted instanceof Boolean bool) {
+                return bool;
+            }
+            ConsoleJS.SERVER.error("[EntityJS]: Goal predicate must return a boolean.");
+            return false;
+        };
+    }
+
+    @Nullable
+    private static <E> Predicate<E> nullablePredicate(@Nullable BooleanCallback<E> callback) {
+        return callback == null ? null : predicate(callback);
     }
 }

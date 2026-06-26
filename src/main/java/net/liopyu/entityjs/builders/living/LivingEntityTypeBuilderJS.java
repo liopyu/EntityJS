@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,6 +19,7 @@ public class LivingEntityTypeBuilderJS<B extends LivingEntity & IAnimatableJS> {
 
     public EntityType<B> get() {
         var js = this.builder;
+        CallbackInvoker.wrapCallbackFields(js);
 
         var builder = EntityType.Builder.of(js.factory(), js.mobCategory);
         builder

@@ -6,6 +6,7 @@ import net.liopyu.entityjs.builders.living.entityjs.PathfinderMobBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.SkeletonEntityJS;
 import net.liopyu.entityjs.entities.living.vanilla.ZombieEntityJS;
+import net.liopyu.entityjs.util.BooleanCallback;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -19,13 +20,10 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-import java.util.function.Function;
-
-
 public class SkeletonJSBuilder extends PathfinderMobBuilder<SkeletonEntityJS> {
     public transient Boolean defaultGoals;
     public transient SoundEvent shootSound;
-    public transient Function<LivingEntity, Object> isSunBurnTick;
+    public transient BooleanCallback<LivingEntity> isSunBurnTick;
     public transient boolean canConvert;
     public transient EntityType<? extends Mob> conversionType;
     public transient ItemStack setArrow;
@@ -103,7 +101,7 @@ public class SkeletonJSBuilder extends PathfinderMobBuilder<SkeletonEntityJS> {
             });
             ```
             """)
-    public SkeletonJSBuilder isSunBurnTick(Function<LivingEntity, Object> isSunBurnTick) {
+    public SkeletonJSBuilder isSunBurnTick(BooleanCallback<LivingEntity> isSunBurnTick) {
         this.isSunBurnTick = isSunBurnTick;
         return this;
     }

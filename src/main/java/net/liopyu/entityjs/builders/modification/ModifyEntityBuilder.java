@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.builders.modification;
 
+import net.liopyu.entityjs.util.BooleanCallback;
+
 import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
@@ -12,36 +14,35 @@ import net.minecraft.world.entity.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class ModifyEntityBuilder implements KubeEvent {
     public final EntityType<?> entityType;
     public transient Boolean repositionEntityAfterLoad;
     public transient Object mainArm;
-    public transient Predicate<ContextUtils.EPassengerEntityContext> canAddPassenger;
+    public transient BooleanCallback<ContextUtils.EPassengerEntityContext> canAddPassenger;
     public transient Function<Entity, Object> setBlockJumpFactor;
     public transient Object setSwimSound;
     public transient Consumer<ContextUtils.PlaySwimSoundContext> playSwimSound;
-    public transient Predicate<Entity> isFlapping;
+    public transient BooleanCallback<Entity> isFlapping;
     public transient Consumer<Entity> processFlappingMovement;
     public transient Object setSwimSplashSound;
     public transient Consumer<Entity> doWaterSplashEffect;
-    public transient Predicate<ContextUtils.LineOfSightContext> isAlliedTo;
+    public transient BooleanCallback<ContextUtils.LineOfSightContext> isAlliedTo;
     public transient Consumer<ContextUtils.PositionRiderContext> positionRider;
-    public transient Predicate<Entity> isFreezing;
-    public transient Predicate<ContextUtils.ECollidingEntityContext> canCollideWith;
-    public transient Predicate<ContextUtils.EMayInteractContext> mayInteract;
-    public transient Predicate<ContextUtils.ECanTrampleContext> canTrample;
+    public transient BooleanCallback<Entity> isFreezing;
+    public transient BooleanCallback<ContextUtils.ECollidingEntityContext> canCollideWith;
+    public transient BooleanCallback<ContextUtils.EMayInteractContext> mayInteract;
+    public transient BooleanCallback<ContextUtils.ECanTrampleContext> canTrample;
     public transient Consumer<ContextUtils.PlayStepSoundContext> playStepSound;
     public transient Consumer<ContextUtils.PlayMuffledStepSoundContext> playMuffledStepSound;
     public transient Consumer<ContextUtils.PlayCombinationStepSoundsContext> playCombinationStepSounds;
     public transient Consumer<Entity> onRemovedFromWorld;
     public transient Consumer<Entity> onLivingJump;
     public transient Consumer<ContextUtils.EThunderHitContext> thunderHit;
-    public transient Predicate<ContextUtils.EDamageContext> isInvulnerableTo;
-    public transient Predicate<Entity> dampensVibrations;
+    public transient BooleanCallback<ContextUtils.EDamageContext> isInvulnerableTo;
+    public transient BooleanCallback<Entity> dampensVibrations;
     public transient Consumer<ContextUtils.EntityPlayerContext> playerTouch;
-    public transient Predicate<Entity> showVehicleHealth;
+    public transient BooleanCallback<Entity> showVehicleHealth;
     public transient Consumer<Entity> lavaHurt;
     public transient Consumer<Entity> onFlap;
     public transient Consumer<Entity> onAddedToWorld;
@@ -49,20 +50,20 @@ public class ModifyEntityBuilder implements KubeEvent {
     public transient Consumer<ContextUtils.EntityInteractContext> onInteract;
     public transient Function<Entity, Object> setMaxFallDistance;
     public transient Consumer<ContextUtils.LerpToContext> lerpTo;
-    public transient Predicate<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
+    public transient BooleanCallback<ContextUtils.EntitySqrDistanceContext> shouldRenderAtSqrDistance;
     public transient Consumer<Entity> tick;
     public transient Consumer<ContextUtils.MovementContext> move;
     public transient Boolean isAttackable;
-    public transient Predicate<Entity> canChangeDimensions;
+    public transient BooleanCallback<Entity> canChangeDimensions;
     public transient Function<Entity, Object> blockSpeedFactor;
-    public transient Predicate<Entity> isPickable;
-    public transient Function<Entity, Object> canBeHitByProjectile;
+    public transient BooleanCallback<Entity> isPickable;
+    public transient BooleanCallback<Entity> canBeHitByProjectile;
     public transient Consumer<ContextUtils.EEntityFallDamageContext> onFall;
     public transient Consumer<Entity> onSprint;
     public transient Consumer<Entity> onStopRiding;
     public transient Consumer<Entity> rideTick;
-    public transient Predicate<Entity> canFreeze;
-    public transient Predicate<Entity> isCurrentlyGlowing;
+    public transient BooleanCallback<Entity> canFreeze;
+    public transient BooleanCallback<Entity> isCurrentlyGlowing;
     public transient Boolean isPushable;
     /*
         public transient Function<Entity, Object> myRidingOffset;
@@ -72,7 +73,7 @@ public class ModifyEntityBuilder implements KubeEvent {
     public transient Consumer<ContextUtils.CollidingProjectileEntityContext> onEntityCollision;
     public transient Function<ContextUtils.RendererModelContext, Object> setTextureLocation;
     public transient Function<ContextUtils.RendererModelContext, Object> setRenderType;
-    public transient Function<Entity, Object> ignoreExplosion;
+    public transient BooleanCallback<Entity> ignoreExplosion;
     /* public transient Consumer<Entity> defineSyncedData;*/
 
     public ModifyEntityBuilder(EntityType<?> entityType) {
@@ -99,7 +100,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder ignoreExplosion(Function<Entity, Object> ignoreExplosion) {
+    public ModifyEntityBuilder ignoreExplosion(BooleanCallback<Entity> ignoreExplosion) {
         this.ignoreExplosion = ignoreExplosion;
         return this;
     }
@@ -253,7 +254,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             })
             ```
             """)
-    public ModifyEntityBuilder isPickable(Predicate<Entity> isPickable) {
+    public ModifyEntityBuilder isPickable(BooleanCallback<Entity> isPickable) {
         this.isPickable = isPickable;
         return this;
     }
@@ -269,7 +270,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             })
             ```
             """)
-    public ModifyEntityBuilder canBeHitByProjectile(Function<Entity, Object> canBeHitByProjectile) {
+    public ModifyEntityBuilder canBeHitByProjectile(BooleanCallback<Entity> canBeHitByProjectile) {
         this.canBeHitByProjectile = canBeHitByProjectile;
         return this;
     }
@@ -286,7 +287,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder canCollideWith(Predicate<ContextUtils.ECollidingEntityContext> canCollideWith) {
+    public ModifyEntityBuilder canCollideWith(BooleanCallback<ContextUtils.ECollidingEntityContext> canCollideWith) {
         this.canCollideWith = canCollideWith;
         return this;
     }
@@ -302,7 +303,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder isFreezing(Predicate<Entity> isFreezing) {
+    public ModifyEntityBuilder isFreezing(BooleanCallback<Entity> isFreezing) {
         this.isFreezing = isFreezing;
         return this;
     }
@@ -365,7 +366,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder canAddPassenger(Predicate<ContextUtils.EPassengerEntityContext> predicate) {
+    public ModifyEntityBuilder canAddPassenger(BooleanCallback<ContextUtils.EPassengerEntityContext> predicate) {
         canAddPassenger = predicate;
         return this;
     }
@@ -485,7 +486,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder isFlapping(Predicate<Entity> b) {
+    public ModifyEntityBuilder isFlapping(BooleanCallback<Entity> b) {
         this.isFlapping = b;
         return this;
     }
@@ -662,7 +663,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder canFreeze(Predicate<Entity> predicate) {
+    public ModifyEntityBuilder canFreeze(BooleanCallback<Entity> predicate) {
         canFreeze = predicate;
         return this;
     }
@@ -683,7 +684,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder isCurrentlyGlowing(Predicate<Entity> predicate) {
+    public ModifyEntityBuilder isCurrentlyGlowing(BooleanCallback<Entity> predicate) {
         isCurrentlyGlowing = predicate;
         return this;
     }
@@ -779,7 +780,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder dampensVibrations(Predicate<Entity> predicate) {
+    public ModifyEntityBuilder dampensVibrations(BooleanCallback<Entity> predicate) {
         this.dampensVibrations = predicate;
         return this;
     }
@@ -800,7 +801,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder showVehicleHealth(Predicate<Entity> predicate) {
+    public ModifyEntityBuilder showVehicleHealth(BooleanCallback<Entity> predicate) {
         this.showVehicleHealth = predicate;
         return this;
     }
@@ -839,7 +840,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder isInvulnerableTo(Predicate<ContextUtils.EDamageContext> predicate) {
+    public ModifyEntityBuilder isInvulnerableTo(BooleanCallback<ContextUtils.EDamageContext> predicate) {
         isInvulnerableTo = predicate;
         return this;
     }
@@ -859,7 +860,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder canChangeDimensions(Predicate<Entity> supplier) {
+    public ModifyEntityBuilder canChangeDimensions(BooleanCallback<Entity> supplier) {
         canChangeDimensions = supplier;
         return this;
     }
@@ -879,7 +880,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder mayInteract(Predicate<ContextUtils.EMayInteractContext> predicate) {
+    public ModifyEntityBuilder mayInteract(BooleanCallback<ContextUtils.EMayInteractContext> predicate) {
         mayInteract = predicate;
         return this;
     }
@@ -899,7 +900,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder canTrample(Predicate<ContextUtils.ECanTrampleContext> predicate) {
+    public ModifyEntityBuilder canTrample(BooleanCallback<ContextUtils.ECanTrampleContext> predicate) {
         canTrample = predicate;
         return this;
     }
@@ -988,7 +989,7 @@ public class ModifyEntityBuilder implements KubeEvent {
             });
             ```
             """)
-    public ModifyEntityBuilder shouldRenderAtSqrDistance(Predicate<ContextUtils.EntitySqrDistanceContext> func) {
+    public ModifyEntityBuilder shouldRenderAtSqrDistance(BooleanCallback<ContextUtils.EntitySqrDistanceContext> func) {
         shouldRenderAtSqrDistance = func;
         return this;
     }

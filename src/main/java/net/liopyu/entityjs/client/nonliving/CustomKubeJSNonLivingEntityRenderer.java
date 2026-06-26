@@ -42,11 +42,15 @@ public class CustomKubeJSNonLivingEntityRenderer<T extends Entity & IAnimatableJ
     public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
         try {
             if (builder.renderTypeFunction != null) {
-                return builder.renderTypeFunction.apply(unwrap(animatable));
+                return EntityJSHelperClass.convertToRenderType(builder.renderTypeFunction.apply(unwrap(animatable)), defaultRenderType(texture));
             }
         } catch (Exception e) {
             EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in " + entityName() + "builder for field: renderTypeFunction.", e);
         }
+        return defaultRenderType(texture);
+    }
+
+    private RenderType defaultRenderType(ResourceLocation texture) {
         return switch (builder.renderType) {
             case SOLID -> RenderType.entitySolid(texture);
             case CUTOUT -> RenderType.entityCutout(texture);

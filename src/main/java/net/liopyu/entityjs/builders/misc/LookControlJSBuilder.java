@@ -1,12 +1,13 @@
 package net.liopyu.entityjs.builders.misc;
 
+import net.liopyu.entityjs.util.BooleanCallback;
+
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.ai.LookControlJS;
 import net.minecraft.world.entity.Mob;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class LookControlJSBuilder {
     public transient Consumer<Mob> setLookAtVec3;
@@ -15,8 +16,8 @@ public class LookControlJSBuilder {
     public transient Consumer<Mob> setLookAtCoords;
     public transient Consumer<Mob> tick;
     public transient Consumer<Mob> clampHeadRotationToBody;
-    public transient Predicate<Mob> resetXRotOnTick;
-    public transient Predicate<Mob> isLookingAtTarget;
+    public transient BooleanCallback<Mob> resetXRotOnTick;
+    public transient BooleanCallback<Mob> isLookingAtTarget;
     public transient Function<Mob, Double> setWantedX;
     public transient Function<Mob, Double> setWantedY;
     public transient Function<Mob, Double> setWantedZ;
@@ -29,7 +30,7 @@ public class LookControlJSBuilder {
         return this;
     }
 
-    public LookControlJSBuilder setIsLookingAtTarget(Predicate<Mob> isLookingAtTarget) {
+    public LookControlJSBuilder setIsLookingAtTarget(BooleanCallback<Mob> isLookingAtTarget) {
         this.isLookingAtTarget = isLookingAtTarget;
         return this;
     }
@@ -89,7 +90,7 @@ public class LookControlJSBuilder {
         return this;
     }
 
-    public LookControlJSBuilder setResetXRotOnTick(Predicate<Mob> resetXRotOnTick) {
+    public LookControlJSBuilder setResetXRotOnTick(BooleanCallback<Mob> resetXRotOnTick) {
         this.resetXRotOnTick = resetXRotOnTick;
         return this;
     }

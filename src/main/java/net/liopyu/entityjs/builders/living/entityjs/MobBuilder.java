@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.builders.living.entityjs;
 
+import net.liopyu.entityjs.util.BooleanCallback;
+
 import dev.latvian.mods.kubejs.registry.AdditionalObjectRegistry;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.rhino.util.HideFromJS;
@@ -31,12 +33,12 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
     public transient SpawnEggItemBuilder eggItem;
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Ingredient canFireProjectileWeapon;
-    public transient Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate;
+    public transient BooleanCallback<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate;
     public transient Consumer<LivingEntity> ate;
     public transient Object setAmbientSound;
-    public transient Predicate<ContextUtils.EntityItemStackContext> canHoldItem;
+    public transient BooleanCallback<ContextUtils.EntityItemStackContext> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
-    public transient Predicate<Mob> canPickUpLoot;
+    public transient BooleanCallback<Mob> canPickUpLoot;
     public transient Boolean isPersistenceRequired;
     public transient Function<Mob, Object> getAttackBoundingBox;
     public transient Boolean canJump;
@@ -44,8 +46,8 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
         public transient Function<LivingEntity, Object> myRidingOffset;
     */
     public transient Object ambientSoundInterval;
-    public transient Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway;
-    public transient Predicate<LivingEntity> canBeLeashed;
+    public transient BooleanCallback<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway;
+    public transient BooleanCallback<LivingEntity> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
     public transient boolean noEggItem = false;
     public transient Function<LivingEntity, Object> setLookControl;
@@ -130,7 +132,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
             });
             ```
             """)
-    public MobBuilder<T> canBeLeashed(Predicate<LivingEntity> canBeLeashed) {
+    public MobBuilder<T> canBeLeashed(BooleanCallback<LivingEntity> canBeLeashed) {
         this.canBeLeashed = canBeLeashed;
         return this;
     }
@@ -149,7 +151,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
             });
             ```
             """)
-    public MobBuilder<T> removeWhenFarAway(Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway) {
+    public MobBuilder<T> removeWhenFarAway(BooleanCallback<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway) {
         this.removeWhenFarAway = removeWhenFarAway;
         return this;
     }
@@ -257,7 +259,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
             });
             ```
             """)
-    public MobBuilder<T> canFireProjectileWeaponPredicate(Predicate<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate) {
+    public MobBuilder<T> canFireProjectileWeaponPredicate(BooleanCallback<ContextUtils.EntityProjectileWeaponContext> canFireProjectileWeaponPredicate) {
         this.canFireProjectileWeaponPredicate = canFireProjectileWeaponPredicate;
         return this;
     }
@@ -315,7 +317,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
             });
             ```
             """)
-    public MobBuilder<T> canHoldItem(Predicate<ContextUtils.EntityItemStackContext> canHoldItem) {
+    public MobBuilder<T> canHoldItem(BooleanCallback<ContextUtils.EntityItemStackContext> canHoldItem) {
         this.canHoldItem = canHoldItem;
         return this;
     }
@@ -349,7 +351,7 @@ public abstract class MobBuilder<T extends Mob & IAnimatableJS> extends BaseLivi
             });
             ```
             """)
-    public MobBuilder<T> canPickUpLoot(Predicate<Mob> canPickUpLoot) {
+    public MobBuilder<T> canPickUpLoot(BooleanCallback<Mob> canPickUpLoot) {
         this.canPickUpLoot = canPickUpLoot;
         return this;
     }

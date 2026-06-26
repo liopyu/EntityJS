@@ -6,6 +6,7 @@ import net.liopyu.entityjs.builders.nonliving.NonAnimatableEntityTypeBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -96,8 +97,9 @@ public abstract class EyeOfEnderEntityBuilder<T extends Entity & IProjectileEnti
             ```
             """)
     public EyeOfEnderEntityBuilder<T> textureLocation(Function<T, Object> function) {
+        var wrappedFunction = CallbackInvoker.wrapFunction(function);
         textureLocation = entity -> {
-            Object obj = function.apply(entity);
+            Object obj = wrappedFunction.apply(entity);
             if (obj instanceof String) {
                 return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {

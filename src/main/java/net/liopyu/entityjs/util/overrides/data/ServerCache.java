@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.util.data;
+package net.liopyu.entityjs.util.overrides.data;
 
 
 import net.liopyu.entityjs.util.EntitySerializerType;
@@ -41,7 +41,7 @@ public final class ServerCache {
 
     public static void ensure(net.minecraft.world.entity.Entity e, String name, net.minecraft.nbt.Tag v, EntitySerializerType type) {
         if (!(e.level() instanceof net.minecraft.server.level.ServerLevel sl)) return;
-        var data = net.liopyu.entityjs.util.data.SavedDataJS.get(sl);
+        var data = net.liopyu.entityjs.util.overrides.data.SavedDataJS.get(sl);
         var id = e.getUUID();
         var prev = data.getType(id, name);
         if (prev.isEmpty()) {
@@ -51,13 +51,13 @@ public final class ServerCache {
             data.putWithType(id, name, v, type);
             Net.sendTypedValueTracking(e, id, name, type.ordinal(), v);
         }
-        net.liopyu.entityjs.util.data.InitDecl.declare(e, name, type);
+        net.liopyu.entityjs.util.overrides.data.InitDecl.declare(e, name, type);
     }
 
 
     public static void migrateIfAbsent(net.minecraft.world.entity.Entity e, String name, net.minecraft.nbt.Tag v, EntitySerializerType type) {
         if (!(e.level() instanceof net.minecraft.server.level.ServerLevel sl)) return;
-        var data = net.liopyu.entityjs.util.data.SavedDataJS.get(sl);
+        var data = net.liopyu.entityjs.util.overrides.data.SavedDataJS.get(sl);
         var id = e.getUUID();
         if (data.getType(id, name).isEmpty()) {
             data.putWithType(id, name, v, type);

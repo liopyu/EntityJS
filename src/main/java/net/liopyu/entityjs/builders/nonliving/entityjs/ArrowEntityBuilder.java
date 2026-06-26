@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.builders.nonliving.entityjs;
 
+import net.liopyu.entityjs.util.BooleanCallback;
+
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
@@ -9,6 +11,7 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IArrowEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -28,8 +31,8 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
     public transient Consumer<ContextUtils.ArrowBlockHitContext> onHitBlock;
     public transient Object defaultHitGroundSoundEvent;
     public transient Consumer<ContextUtils.ArrowLivingEntityContext> doPostHurtEffects;
-    public transient Predicate<Entity> canHitEntity;
-    public transient Predicate<ContextUtils.ArrowPlayerContext> tryPickup;
+    public transient BooleanCallback<Entity> canHitEntity;
+    public transient BooleanCallback<ContextUtils.ArrowPlayerContext> tryPickup;
     public transient double setBaseDamage;
     public transient Function<Entity, Object> setDamageFunction;
     public transient Integer setKnockback;
@@ -90,8 +93,9 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             ```
             """)
     public ArrowEntityBuilder<T> textureLocation(Function<T, Object> function) {
+        var wrappedFunction = CallbackInvoker.wrapFunction(function);
         textureLocation = entity -> {
-            Object obj = function.apply(entity);
+            Object obj = wrappedFunction.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
@@ -118,7 +122,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             });
             ```
             """)
-    public ArrowEntityBuilder<T> tryPickup(Predicate<ContextUtils.ArrowPlayerContext> function) {
+    public ArrowEntityBuilder<T> tryPickup(BooleanCallback<ContextUtils.ArrowPlayerContext> function) {
         tryPickup = function;
         return this;
     }
@@ -293,7 +297,7 @@ public abstract class ArrowEntityBuilder<T extends AbstractArrow & IArrowEntityJ
             });
             ```
             """)
-    public ArrowEntityBuilder<T> canHitEntity(Predicate<Entity> function) {
+    public ArrowEntityBuilder<T> canHitEntity(BooleanCallback<Entity> function) {
         canHitEntity = function;
         return this;
     }

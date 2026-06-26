@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.builders.nonliving.entityjs;
 
+import net.liopyu.entityjs.util.BooleanCallback;
+
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
@@ -9,6 +11,7 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -19,14 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEntityJS> extends BaseNonAnimatableEntityBuilder<T> {
     public transient Function<T, Object> textureLocation;
     public static final List<ProjectileEntityBuilder<?>> thisList = new ArrayList<>();
     public transient Consumer<ContextUtils.ProjectileEntityHitContext> onHitEntity;
     public transient Consumer<ContextUtils.ProjectileBlockHitContext> onHitBlock;
-    public transient Predicate<Entity> canHitEntity;
+    public transient BooleanCallback<Entity> canHitEntity;
     public transient Float pX;
     public transient Float pY;
     public transient Float pZ;
@@ -113,8 +115,9 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
             ```
             """)
     public ProjectileEntityBuilder<T> textureLocation(Function<T, Object> function) {
+        var wrappedFunction = CallbackInvoker.wrapFunction(function);
         textureLocation = entity -> {
-            Object obj = function.apply(entity);
+            Object obj = wrappedFunction.apply(entity);
             if (obj instanceof String) {
                 return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
@@ -196,7 +199,7 @@ public abstract class ProjectileEntityBuilder<T extends Entity & IProjectileEnti
             });
             ```
             """)
-    public ProjectileEntityBuilder<T> canHitEntity(Predicate<Entity> function) {
+    public ProjectileEntityBuilder<T> canHitEntity(BooleanCallback<Entity> function) {
         canHitEntity = function;
         return this;
     }

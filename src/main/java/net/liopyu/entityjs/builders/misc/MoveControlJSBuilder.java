@@ -1,23 +1,24 @@
 package net.liopyu.entityjs.builders.misc;
 
+import net.liopyu.entityjs.util.BooleanCallback;
+
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.world.entity.Mob;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class MoveControlJSBuilder {
 
-    public transient Predicate<Mob> hasWanted;
+    public transient BooleanCallback<Mob> hasWanted;
     public transient Function<Mob, Object> getSpeedModifier;
     public transient Consumer<ContextUtils.SetWantedPositionContext> setWantedPosition;
     public transient Consumer<ContextUtils.StrafeContext> strafe;
     public transient Consumer<Mob> tick;
     public transient Function<ContextUtils.RotLerpContext, Object> rotlerp;
-    public transient Function<ContextUtils.IsWalkableContext, Object> isWalkable;
+    public transient BooleanCallback<ContextUtils.IsWalkableContext> isWalkable;
 
-    public MoveControlJSBuilder setHasWanted(Predicate<Mob> hasWanted) {
+    public MoveControlJSBuilder setHasWanted(BooleanCallback<Mob> hasWanted) {
         this.hasWanted = hasWanted;
         return this;
     }
@@ -47,7 +48,7 @@ public class MoveControlJSBuilder {
         return this;
     }
 
-    public MoveControlJSBuilder setIsWalkable(Function<ContextUtils.IsWalkableContext, Object> isWalkable) {
+    public MoveControlJSBuilder setIsWalkable(BooleanCallback<ContextUtils.IsWalkableContext> isWalkable) {
         this.isWalkable = isWalkable;
         return this;
     }

@@ -1,0 +1,3 @@
+# EntityJS internals
+- net.liopyu.entityjs.util.overrides
+- net.liopyu.entityjs.probe

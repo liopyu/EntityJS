@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.util.data;
+package net.liopyu.entityjs.util.overrides.data;
 
 
 import net.liopyu.entityjs.util.EntitySerializerType;
@@ -28,12 +28,12 @@ public final class InitDecl {
         if (!(e.level() instanceof net.minecraft.server.level.ServerLevel sl)) return;
 
         var id = e.getUUID();
-        var vals = net.liopyu.entityjs.util.data.SavedDataJS.get(sl).getAll(id);
-        var types = net.liopyu.entityjs.util.data.SavedDataJS.get(sl).getTypes(id);
+        var vals = net.liopyu.entityjs.util.overrides.data.SavedDataJS.get(sl).getAll(id);
+        var types = net.liopyu.entityjs.util.overrides.data.SavedDataJS.get(sl).getTypes(id);
 
-        if (s != null && s.used) net.liopyu.entityjs.util.data.Net.sendAllTracking(e, id, vals, types);
+        if (s != null && s.used) net.liopyu.entityjs.util.overrides.data.Net.sendAllTracking(e, id, vals, types);
         if (e instanceof net.minecraft.server.level.ServerPlayer sp) {
-            net.liopyu.entityjs.util.data.Net.sendAllTo(sp, id, vals, types);
+            net.liopyu.entityjs.util.overrides.data.Net.sendAllTo(sp, id, vals, types);
         }
     }
 }

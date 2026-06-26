@@ -4,6 +4,7 @@ import dev.latvian.mods.kubejs.event.KubeEvent;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
@@ -23,7 +24,7 @@ public class RegisterSpawnPlacementsEventJS implements KubeEvent {
             @Param(name = "predicate", value = "The spawn predicate for the entity type's spawning")
     })
     public <T extends Entity> void replace(EntityType<T> entityType, EntityJSHelperClass.SpawnPlacementTypeEnum placementType, Heightmap.Types heightmap, SpawnPlacements.SpawnPredicate<T> predicate) {
-        event.register(entityType, EntityJSHelperClass.getSpawnPlacementType(placementType), heightmap, predicate, RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(entityType, EntityJSHelperClass.getSpawnPlacementType(placementType), heightmap, cachedSpawnPredicate(predicate), RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 
     @Info(value = "ANDs the given spawn predicate with the existing spawn predicates of the given entity type", params = {
@@ -31,7 +32,7 @@ public class RegisterSpawnPlacementsEventJS implements KubeEvent {
             @Param(name = "predicate", value = "The spawn predicate that will be ANDed with the entity type's existing spawn predicates")
     })
     public <T extends Entity> void and(EntityType<T> entityType, SpawnPlacements.SpawnPredicate<T> predicate) {
-        event.register(entityType, predicate, RegisterSpawnPlacementsEvent.Operation.AND);
+        event.register(entityType, cachedSpawnPredicate(predicate), RegisterSpawnPlacementsEvent.Operation.AND);
     }
 
     @Info(value = "ORs the given spawn predicate with the existing spawn predicate of the given entity type", params = {
@@ -39,6 +40,11 @@ public class RegisterSpawnPlacementsEventJS implements KubeEvent {
             @Param(name = "predicate", value = "The spawn predicate that will be ORed with the entity type's existing spawn predicates")
     })
     public <T extends Entity> void or(EntityType<T> entityType, SpawnPlacements.SpawnPredicate<T> predicate) {
-        event.register(entityType, predicate, RegisterSpawnPlacementsEvent.Operation.OR);
+        event.register(entityType, cachedSpawnPredicate(predicate), RegisterSpawnPlacementsEvent.Operation.OR);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Entity> SpawnPlacements.SpawnPredicate<T> cachedSpawnPredicate(SpawnPlacements.SpawnPredicate<T> predicate) {
+        return CallbackInvoker.wrapFunctional(predicate, (Class<SpawnPlacements.SpawnPredicate<T>>) (Class<?>) SpawnPlacements.SpawnPredicate.class);
     }
 }

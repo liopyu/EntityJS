@@ -5,19 +5,25 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.modification.*;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
+import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.projectile.Projectile;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class EntityModificationEventJS implements KubeEvent {
     public static final Map<EntityType<?>, EntityModificationEventJS> eventMap = new HashMap<>();
     private final Object builder;
     private final EntityType<?> entityType;
+    private boolean posted;
     public static final Map<ResourceLocation, Consumer<ModifyEntityBuilder>> createCustomMap = new HashMap<>();
+    private static final Set<ResourceLocation> appliedCustomModifiers = new HashSet<>();
 
     // Must use #getOrCreate
     private EntityModificationEventJS(EntityType<?> entityType, Entity entity) {
@@ -39,6 +45,30 @@ public class EntityModificationEventJS implements KubeEvent {
         return builder;
     }
 
+    @HideFromJS
+    public void postModifyEventIfNeeded() {
+        if (posted || !EventHandlers.modifyEntity.hasListeners()) {
+            return;
+        }
+        posted = true;
+        EventHandlers.modifyEntity.post(this);
+    }
+
+    @HideFromJS
+    public static void resetPostedModifyEvents() {
+        eventMap.values().forEach(event -> event.posted = false);
+        appliedCustomModifiers.clear();
+    }
+
+    @HideFromJS
+    public static void applyCustomModifierIfNeeded(ResourceLocation entityType, ModifyEntityBuilder builder) {
+        Consumer<ModifyEntityBuilder> customConsumer = createCustomMap.get(entityType);
+        if (customConsumer == null || !appliedCustomModifiers.add(entityType)) {
+            return;
+        }
+        customConsumer.accept(builder);
+        CallbackInvoker.wrapCallbackFields(builder);
+    }
 
     @Info(value = """
             Entity type modification event. Allows modification of methods for any existing entity.\s
@@ -67,25 +97,30 @@ public class EntityModificationEventJS implements KubeEvent {
     })
     public void modify(EntityType<?> entityType, Consumer<? extends ModifyEntityBuilder> modifyBuilder) {
         if (entityType != this.entityType) return;
+        Consumer<?> wrappedModifyBuilder = CallbackInvoker.wrapConsumer(modifyBuilder);
         /*if (builder instanceof ModifyTamableAnimalBuilder) {
-            ((Consumer<ModifyTamableAnimalBuilder>) modifyBuilder).accept((ModifyTamableAnimalBuilder) builder);
+            ((Consumer<ModifyTamableAnimalBuilder>) wrappedModifyBuilder).accept((ModifyTamableAnimalBuilder) builder);
         } else if (builder instanceof ModifyAnimalBuilder) {
-            ((Consumer<ModifyAnimalBuilder>) modifyBuilder).accept((ModifyAnimalBuilder) builder);
+            ((Consumer<ModifyAnimalBuilder>) wrappedModifyBuilder).accept((ModifyAnimalBuilder) builder);
         } else if (builder instanceof ModifyAgeableMobBuilder) {
-            ((Consumer<ModifyAgeableMobBuilder>) modifyBuilder).accept((ModifyAgeableMobBuilder) builder);
+            ((Consumer<ModifyAgeableMobBuilder>) wrappedModifyBuilder).accept((ModifyAgeableMobBuilder) builder);
         } else */
-        if (builder instanceof ModifyProjectileBuilder) {
-            ((Consumer<ModifyProjectileBuilder>) modifyBuilder).accept((ModifyProjectileBuilder) builder);
-        } else if (builder instanceof ModifyPathfinderMobBuilder) {
-            ((Consumer<ModifyPathfinderMobBuilder>) modifyBuilder).accept((ModifyPathfinderMobBuilder) builder);
-        } else if (builder instanceof ModifyMobBuilder) {
-            ((Consumer<ModifyMobBuilder>) modifyBuilder).accept((ModifyMobBuilder) builder);
-        } else if (builder instanceof ModifyLivingEntityBuilder) {
-            ((Consumer<ModifyLivingEntityBuilder>) modifyBuilder).accept((ModifyLivingEntityBuilder) builder);
-        } else if (builder instanceof ModifyEntityBuilder) {
-            ((Consumer<ModifyEntityBuilder>) modifyBuilder).accept((ModifyEntityBuilder) builder);
-        } else {
-            throw new IllegalArgumentException("Unsupported builder type or consumer type.");
+        try {
+            if (builder instanceof ModifyProjectileBuilder) {
+                ((Consumer<ModifyProjectileBuilder>) wrappedModifyBuilder).accept((ModifyProjectileBuilder) builder);
+            } else if (builder instanceof ModifyPathfinderMobBuilder) {
+                ((Consumer<ModifyPathfinderMobBuilder>) wrappedModifyBuilder).accept((ModifyPathfinderMobBuilder) builder);
+            } else if (builder instanceof ModifyMobBuilder) {
+                ((Consumer<ModifyMobBuilder>) wrappedModifyBuilder).accept((ModifyMobBuilder) builder);
+            } else if (builder instanceof ModifyLivingEntityBuilder) {
+                ((Consumer<ModifyLivingEntityBuilder>) wrappedModifyBuilder).accept((ModifyLivingEntityBuilder) builder);
+            } else if (builder instanceof ModifyEntityBuilder) {
+                ((Consumer<ModifyEntityBuilder>) wrappedModifyBuilder).accept((ModifyEntityBuilder) builder);
+            } else {
+                throw new IllegalArgumentException("Unsupported builder type or consumer type.");
+            }
+        } finally {
+            CallbackInvoker.wrapCallbackFields(builder);
         }
     }
 

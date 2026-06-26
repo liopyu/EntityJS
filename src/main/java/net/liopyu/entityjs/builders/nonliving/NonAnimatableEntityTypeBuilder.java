@@ -2,6 +2,7 @@ package net.liopyu.entityjs.builders.nonliving;
 
 import dev.latvian.mods.kubejs.util.Cast;
 import dev.latvian.mods.kubejs.util.UtilsJS;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -16,6 +17,7 @@ public class NonAnimatableEntityTypeBuilder<B extends Entity> {
 
     public EntityType<B> get() {
         var js = this.builder;
+        CallbackInvoker.wrapCallbackFields(js);
         var builder = EntityType.Builder.of(js.factory(), js.mobCategory);
         builder
 

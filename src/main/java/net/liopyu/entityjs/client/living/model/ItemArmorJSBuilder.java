@@ -2,6 +2,7 @@ package net.liopyu.entityjs.client.living.model;
 
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.util.BooleanCallback;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -12,7 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ItemArmorJSBuilder<T extends LivingEntity & IAnimatableJS> {
-    public Function<T, Boolean> addArmorItemLayer = null;
+    public BooleanCallback<T> addArmorItemLayer = null;
     public final T entity;
     public Map<String, EquipmentSlot> armorBoneToSlotMap = new HashMap<>();
     public transient Consumer<ContextUtils.RenderBoneContext<T>> renderBone;
@@ -117,7 +118,7 @@ public class ItemArmorJSBuilder<T extends LivingEntity & IAnimatableJS> {
         return this;
     }
 
-    public ItemArmorJSBuilder<T> withArmorItemLayer(Function<T, Boolean> predicate) {
+    public ItemArmorJSBuilder<T> withArmorItemLayer(BooleanCallback<T> predicate) {
         this.addArmorItemLayer = predicate;
         return this;
     }

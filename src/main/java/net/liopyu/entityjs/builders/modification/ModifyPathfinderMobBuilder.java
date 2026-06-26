@@ -1,15 +1,16 @@
 package net.liopyu.entityjs.builders.modification;
 
+import net.liopyu.entityjs.util.BooleanCallback;
+
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class ModifyPathfinderMobBuilder extends ModifyMobBuilder {
-    public transient Predicate<Mob> shouldStayCloseToLeashHolder;
+    public transient BooleanCallback<Mob> shouldStayCloseToLeashHolder;
     public transient Double followLeashSpeed;
     public transient Function<ContextUtils.EntityBlockPosLevelContext, Object> walkTargetValue;
 
@@ -31,7 +32,7 @@ public class ModifyPathfinderMobBuilder extends ModifyMobBuilder {
             });
             ```
             """)
-    public ModifyPathfinderMobBuilder shouldStayCloseToLeashHolder(Predicate<Mob> predicate) {
+    public ModifyPathfinderMobBuilder shouldStayCloseToLeashHolder(BooleanCallback<Mob> predicate) {
         this.shouldStayCloseToLeashHolder = predicate;
         return this;
     }

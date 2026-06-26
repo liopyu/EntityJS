@@ -1,14 +1,15 @@
 package net.liopyu.entityjs.builders.misc;
 
 import dev.latvian.mods.kubejs.registry.AdditionalObjectRegistry;
+import dev.latvian.mods.kubejs.script.ConsoleJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
+import net.liopyu.entityjs.util.overrides.dynamic.DynamicOverrideEntityFactory;
+import net.liopyu.entityjs.util.overrides.dynamic.DynamicOverrideMethodCatalog;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -19,6 +20,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -28,10 +35,12 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
     private final Class<? extends Entity> entityClass;
     public transient SpawnEggItemBuilder eggItem;
     public transient boolean noEggItem = false;
-    public transient Class<? extends EntityModel> entityModelClass;
-    public transient Function<ContextUtils.EntityModelFactoryContext, EntityModel<? extends Entity>> entityModelFactory;
-    public transient Class<? extends EntityRenderer> entityRendererClass;
-    public transient Function<ContextUtils.EntityRendererFactoryContext, EntityRenderer<? extends Entity>> entityRendererFactory;
+    public transient Class<?> entityModelClass;
+    public transient Function<Object, Object> entityModelFactory;
+    public transient Class<?> entityRendererClass;
+    public transient Function<Object, Object> entityRendererFactory;
+    public transient EntityType<?> entityRendererType;
+    private transient final Map<String, Function<ContextUtils.DynamicOverrideContext<Entity>, Object>> dynamicOverrides = new LinkedHashMap<>();
 
     public CustomEntityBuilder(ResourceLocation i, Class<? extends Entity> entityClass) {
         super(i);
@@ -69,11 +78,12 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
             """, params = {
             @Param(name = "entityModelClass", value = "The EntityModel class to instantiate for rendering.")
     })
-    public CustomEntityBuilder setModelClass(Class<? extends EntityModel> entityModelClass) {
+    public CustomEntityBuilder setModelClass(Class<?> entityModelClass) {
         this.entityModelClass = entityModelClass;
         this.entityModelFactory = null;
         this.entityRendererClass = null;
         this.entityRendererFactory = null;
+        this.entityRendererType = null;
         return this;
     }
 
@@ -91,11 +101,12 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
             """, params = {
             @Param(name = "entityModelFactory", value = "Function that returns the EntityModel to use for rendering.")
     })
-    public CustomEntityBuilder setModel(Function<ContextUtils.EntityModelFactoryContext, EntityModel<? extends Entity>> entityModelFactory) {
-        this.entityModelFactory = entityModelFactory;
+    public CustomEntityBuilder setModel(Function<Object, Object> entityModelFactory) {
+        this.entityModelFactory = CallbackInvoker.wrapFunction(entityModelFactory);
         this.entityModelClass = null;
         this.entityRendererClass = null;
         this.entityRendererFactory = null;
+        this.entityRendererType = null;
         return this;
     }
 
@@ -112,11 +123,15 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
             """, params = {
             @Param(name = "entityRendererClass", value = "The EntityRenderer class to instantiate for rendering.")
     })
-    public CustomEntityBuilder setRendererClass(Class<? extends EntityRenderer> entityRendererClass) {
+    public CustomEntityBuilder setRendererClass(Class<?> entityRendererClass) {
+        if (!EntityReflection.validateRendererClassCompatibility(id, entityClass, entityRendererClass)) {
+            return this;
+        }
         this.entityRendererClass = entityRendererClass;
         this.entityRendererFactory = null;
         this.entityModelClass = null;
         this.entityModelFactory = null;
+        this.entityRendererType = null;
         return this;
     }
 
@@ -133,12 +148,93 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
             """, params = {
             @Param(name = "entityRendererFactory", value = "Function that returns the EntityRenderer to use for rendering.")
     })
-    public CustomEntityBuilder setRenderer(Function<ContextUtils.EntityRendererFactoryContext, EntityRenderer<? extends Entity>> entityRendererFactory) {
-        this.entityRendererFactory = entityRendererFactory;
+    public CustomEntityBuilder setRenderer(Function<Object, Object> entityRendererFactory) {
+        this.entityRendererFactory = CallbackInvoker.wrapFunction(entityRendererFactory);
         this.entityRendererClass = null;
         this.entityModelClass = null;
         this.entityModelFactory = null;
+        this.entityRendererType = null;
         return this;
+    }
+
+    @Info(value = """
+            Uses the renderer registered for another entity type to render this custom entity.
+            This is a convenience helper for matching existing vanilla or modded renderer setup without manually loading the renderer class.
+            The custom entity class must be compatible with the renderer used by the provided entity type.
+            Some renderers cast to their original entity class or expect specific model/animation state.
+
+            Example usage:
+            ```javascript
+            entityBuilder.setRendererFromType(EntityType.CREEPER);
+            ```
+            """, params = {
+            @Param(name = "entityType", value = "The entity type whose registered renderer should be reused.")
+    })
+    public CustomEntityBuilder setRendererFromType(EntityType<?> entityType) {
+        EntityType<?> rendererType = Objects.requireNonNull(entityType, "entityType");
+        if (!EntityReflection.validateRendererTypeCompatibility(id, entityClass, rendererType)) {
+            return this;
+        }
+        this.entityRendererType = rendererType;
+        this.entityRendererClass = null;
+        this.entityRendererFactory = null;
+        this.entityModelClass = null;
+        this.entityModelFactory = null;
+        return this;
+    }
+
+    @Info(value = """
+            Overrides an instance method on the custom entity's Java superclass.
+            The method key is the method name plus fully qualified parameter types, for example:
+            `tick()`, `isPushable()`, or `playerTouch(net.minecraft.world.entity.player.Player)`.
+            The callback receives a ContextUtils.DynamicOverrideContext with `entity`, `method`, `args`, `get(name)`, and `super()`.
+            Method arguments are exposed as direct context properties when Java reflection provides useful parameter names.
+            Stable fallback aliases such as `context.arg0` are always available.
+            Startup will fail if the method is final, private, static, intentionally hidden, or not present on the entity class tree.
+            """, params = {
+            @Param(name = "methodKey", value = "The exact method key to override."),
+            @Param(name = "callback", value = "Function invoked when the generated custom entity override runs.")
+    })
+    public CustomEntityBuilder override(String methodKey, Function<ContextUtils.DynamicOverrideContext<Entity>, Object> callback) {
+        DynamicOverrideMethodCatalog.validateOverrideKey(entityClass, methodKey);
+        var methodSpec = DynamicOverrideMethodCatalog.resolve(entityClass, methodKey);
+        if (methodSpec != null && methodSpec.parameterNames().length > 0) {
+            ConsoleJS.STARTUP.info("[EntityJS]: Dynamic override '" + id + "#" + methodKey + "' argument names: " + Arrays.toString(methodSpec.parameterNames()));
+        }
+        dynamicOverrides.put(methodKey, CallbackInvoker.wrapFunction(Objects.requireNonNull(callback, "callback")));
+        return this;
+    }
+
+    @HideFromJS
+    public Function<ContextUtils.DynamicOverrideContext<Entity>, Object> getDynamicOverride(String methodKey) {
+        return dynamicOverrides.get(methodKey);
+    }
+
+    @HideFromJS
+    public List<String> dynamicOverrideKeys() {
+        return List.copyOf(dynamicOverrides.keySet());
+    }
+
+    @HideFromJS
+    public Class<? extends Entity> getEntityClass() {
+        return entityClass;
+    }
+
+    @HideFromJS
+    public boolean hasDynamicOverrides() {
+        return !dynamicOverrides.isEmpty();
+    }
+
+    @HideFromJS
+    public Entity createBaseEntity(EntityType<?> type, Level world) {
+        if (entityClass == null) {
+            throw new IllegalStateException("Entity class not set! Call .set(Class<T>) before using this builder.");
+        }
+        try {
+            return entityClass.getDeclaredConstructor(EntityType.class, Level.class).newInstance(type, world);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to dynamically instantiate entity: " + id, e);
+        }
     }
 
     @HideFromJS
@@ -152,12 +248,22 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
     }
 
     @HideFromJS
+    public boolean usesEntityTypeRenderer() {
+        return entityRendererType != null;
+    }
+
+    @HideFromJS
+    public EntityType<?> getEntityRendererType() {
+        return entityRendererType;
+    }
+
+    @HideFromJS
     public boolean usesCustomRenderer() {
         return entityRendererClass != null || entityRendererFactory != null;
     }
 
     @HideFromJS
-    public EntityRenderer<? extends Entity> createEntityRenderer(EntityRendererProvider.Context rendererContext) {
+    public Object createEntityRenderer(Object rendererContext) {
         if (entityRendererFactory != null) {
             return entityRendererFactory.apply(new ContextUtils.EntityRendererFactoryContext(rendererContext, this));
         }
@@ -165,22 +271,22 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
             return null;
         }
         try {
-            return entityRendererClass.getDeclaredConstructor(EntityRendererProvider.Context.class).newInstance(rendererContext);
+            return entityRendererClass.getDeclaredConstructor(rendererContext.getClass()).newInstance(rendererContext);
         } catch (Exception e) {
             throw new RuntimeException("Failed to instantiate custom EntityRenderer for entity: " + id, e);
         }
     }
 
     @HideFromJS
-    public EntityModel<Entity> createEntityModel(EntityRendererProvider.Context rendererContext) {
+    public Object createEntityModel(Object rendererContext) {
         if (entityModelFactory != null) {
-            return (EntityModel<Entity>) entityModelFactory.apply(new ContextUtils.EntityModelFactoryContext(rendererContext, this));
+            return entityModelFactory.apply(new ContextUtils.EntityModelFactoryContext(rendererContext, this));
         }
         if (entityModelClass == null) {
             return null;
         }
         try {
-            return (EntityModel<Entity>) entityModelClass.getDeclaredConstructor().newInstance();
+            return entityModelClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException("Failed to instantiate custom EntityModel for entity: " + id, e);
         }
@@ -215,14 +321,10 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
     @Override
     public EntityType.EntityFactory<? extends Entity> factory() {
         return (type, world) -> {
-            if (entityClass == null) {
-                throw new IllegalStateException("Entity class not set! Call .set(Class<T>) before using this builder.");
+            if (hasDynamicOverrides() || Modifier.isAbstract(entityClass.getModifiers())) {
+                return DynamicOverrideEntityFactory.create(this, type, world);
             }
-            try {
-                return entityClass.getDeclaredConstructor(EntityType.class, Level.class).newInstance(type, world);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to dynamically instantiate entity: " + id, e);
-            }
+            return createBaseEntity(type, world);
         };
     }
 }

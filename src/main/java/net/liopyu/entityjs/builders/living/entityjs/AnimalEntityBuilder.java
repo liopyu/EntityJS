@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.builders.living.entityjs;
 
+import net.liopyu.entityjs.util.BooleanCallback;
+
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -10,14 +12,13 @@ import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> extends PathfinderMobBuilder<T> {
     public transient Function<ContextUtils.BreedableEntityContext, Object> setBreedOffspring;
     public transient Ingredient isFood;
-    public transient Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate;
-    public transient Predicate<LivingEntity> canBreed;
-    public transient Predicate<ContextUtils.EntityAnimalContext> canMate;
+    public transient BooleanCallback<ContextUtils.EntityItemStackContext> isFoodPredicate;
+    public transient BooleanCallback<LivingEntity> canBreed;
+    public transient BooleanCallback<ContextUtils.EntityAnimalContext> canMate;
     public transient Consumer<ContextUtils.LevelAnimalContext> onSpawnChildFromBreeding;
 
     public AnimalEntityBuilder(ResourceLocation i) {
@@ -59,7 +60,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             });
             ```
             """)
-    public AnimalEntityBuilder<T> canBreed(Predicate<LivingEntity> canBreed) {
+    public AnimalEntityBuilder<T> canBreed(BooleanCallback<LivingEntity> canBreed) {
         this.canBreed = canBreed;
         return this;
     }
@@ -100,7 +101,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             });
             ```
             """)
-    public AnimalEntityBuilder<T> isFoodPredicate(Predicate<ContextUtils.EntityItemStackContext> isFoodPredicate) {
+    public AnimalEntityBuilder<T> isFoodPredicate(BooleanCallback<ContextUtils.EntityItemStackContext> isFoodPredicate) {
         this.isFoodPredicate = isFoodPredicate;
         return this;
     }
@@ -120,7 +121,7 @@ public abstract class AnimalEntityBuilder<T extends Animal & IAnimatableJS> exte
             });
             ```
             """)
-    public AnimalEntityBuilder<T> canMate(Predicate<ContextUtils.EntityAnimalContext> predicate) {
+    public AnimalEntityBuilder<T> canMate(BooleanCallback<ContextUtils.EntityAnimalContext> predicate) {
         this.canMate = predicate;
         return this;
     }

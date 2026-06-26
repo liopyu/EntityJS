@@ -28,3 +28,5 @@ forge*changelog.txt
 run1
 
 pytests
+/utils/
+/docs/

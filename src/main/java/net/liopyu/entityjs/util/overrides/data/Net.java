@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.util.data;
+package net.liopyu.entityjs.util.overrides.data;
 
 import io.netty.buffer.ByteBuf;
 import net.liopyu.entityjs.EntityJSMod;

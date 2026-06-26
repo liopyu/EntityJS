@@ -3,6 +3,7 @@ package net.liopyu.entityjs.entities.nonliving.entityjs;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.OverrideUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -78,7 +79,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         if (pDamage <= 0) return false;
         if (builder.onPartHurt != null) {
             final ContextUtils.PartHurtContext<T> context = new ContextUtils.PartHurtContext<>(partEntity, pSource, pDamage, this.parentMob);
-            builder.onPartHurt.accept(context);
+            OverrideUtils.replaceFallback(() -> parentMob.hurt(pSource, pDamage), () -> builder.onPartHurt.accept(context));
             return true;
         }
         parentMob.hurt(pSource, pDamage);
@@ -114,7 +115,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-            Object obj = builder.shouldRenderAtSqrDistance.test(context);
+            Object obj = OverrideUtils.with(() -> super.shouldRenderAtSqrDistance(distance), () -> builder.shouldRenderAtSqrDistance.test(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
         }
@@ -126,7 +127,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         super.lerpTo(x, y, z, yaw, pitch, posRotationIncrements);
         if (builder.lerpTo != null) {
             final ContextUtils.LerpToContext context = new ContextUtils.LerpToContext(x, y, z, yaw, pitch, posRotationIncrements, this);
-            builder.lerpTo.accept(context);
+            OverrideUtils.withAlreadyCalled(() -> builder.lerpTo.accept(context));
         }
     }
 
@@ -138,7 +139,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public void tick() {
         super.tick();
         if (builder.tick != null) {
-            builder.tick.accept(this);
+            OverrideUtils.withAlreadyCalled(() -> builder.tick.accept(this));
         }
     }
 
@@ -147,7 +148,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         super.move(pType, pPos);
         if (builder.move != null) {
             final ContextUtils.MovementContext context = new ContextUtils.MovementContext(pType, pPos, this);
-            builder.move.accept(context);
+            OverrideUtils.withAlreadyCalled(() -> builder.move.accept(context));
         }
     }
 
@@ -155,7 +156,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public void playerTouch(Player player) {
         if (builder != null && builder.playerTouch != null) {
             final ContextUtils.EntityPlayerContext context = new ContextUtils.EntityPlayerContext(player, this);
-            builder.playerTouch.accept(context);
+            OverrideUtils.replaceFallback(() -> super.playerTouch(player), () -> builder.playerTouch.accept(context));
         } else {
             super.playerTouch(player);
         }
@@ -164,7 +165,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public boolean isAttackable() {
         if (builder.isAttackable != null) {
-            Object obj = builder.isAttackable.test(this);
+            Object obj = OverrideUtils.with(super::isAttackable, () -> builder.isAttackable.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -199,7 +200,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public boolean canCollideWith(Entity pEntity) {
         if (builder.canCollideWith != null) {
             final ContextUtils.ECollidingEntityContext context = new ContextUtils.ECollidingEntityContext(this, pEntity);
-            Object obj = builder.canCollideWith.test(context);
+            Object obj = OverrideUtils.with(() -> super.canCollideWith(pEntity), () -> builder.canCollideWith.test(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
         }
@@ -210,9 +211,9 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     protected float getBlockJumpFactor() {
         if (builder.setBlockJumpFactor == null) return super.getBlockJumpFactor();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor.apply(this), "float");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getBlockJumpFactor, () -> builder.setBlockJumpFactor.apply(this)), "float");
         if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
         return super.getBlockJumpFactor();
     }
 
@@ -254,11 +255,11 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     protected float getBlockSpeedFactor() {
         if (builder.blockSpeedFactor == null) return super.getBlockSpeedFactor();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getBlockSpeedFactor, () -> builder.blockSpeedFactor.apply(this)), "float");
         if (obj != null) {
             return (float) obj;
         } else {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + entityName() + ". Value: " + builder.blockSpeedFactor.apply(this) + ". Must be a float, defaulting to " + super.getBlockSpeedFactor());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + entityName() + ". Value: " + obj + ". Must be a float, defaulting to " + super.getBlockSpeedFactor());
             return super.getBlockSpeedFactor();
         }
     }
@@ -279,7 +280,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
             return super.canAddPassenger(entity);
         }
         final ContextUtils.EPassengerEntityContext context = new ContextUtils.EPassengerEntityContext(entity, this);
-        Object obj = builder.canAddPassenger.test(context);
+        Object obj = OverrideUtils.with(() -> super.canAddPassenger(entity), () -> builder.canAddPassenger.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -291,7 +292,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     protected boolean isFlapping() {
         if (builder.isFlapping != null) {
-            Object obj = builder.isFlapping.test(this);
+            Object obj = OverrideUtils.with(super::isFlapping, () -> builder.isFlapping.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -305,7 +306,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public void onAddedToLevel() {
         super.onAddedToLevel();
         if (builder.onAddedToWorld != null) {
-            builder.onAddedToWorld.accept(this);
+            OverrideUtils.withAlreadyCalled(() -> builder.onAddedToWorld.accept(this));
         }
     }
 
@@ -318,11 +319,11 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     protected float nextStep() {
         if (builder.nextStep != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.nextStep.apply(this), "float");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::nextStep, () -> builder.nextStep.apply(this)), "float");
             if (obj != null) {
                 return (float) obj;
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityName() + ". Value: " + builder.nextStep.apply(this) + ". Must be a float, defaulting to " + super.nextStep());
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityName() + ". Value: " + obj + ". Must be a float, defaulting to " + super.nextStep());
             }
         }
         return super.nextStep();
@@ -348,7 +349,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public boolean causeFallDamage(float distance, float damageMultiplier, @NotNull DamageSource damageSource) {
         if (builder.onFall != null) {
             final ContextUtils.EEntityFallDamageContext context = new ContextUtils.EEntityFallDamageContext(this, damageMultiplier, distance, damageSource);
-            builder.onFall.accept(context);
+            return OverrideUtils.resultBeforeFallback(() -> super.causeFallDamage(distance, damageMultiplier, damageSource), () -> builder.onFall.accept(context));
         }
         return super.causeFallDamage(distance, damageMultiplier, damageSource);
     }
@@ -357,7 +358,8 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public void setSprinting(boolean sprinting) {
         if (builder.onSprint != null) {
-            builder.onSprint.accept(this);
+            OverrideUtils.beforeFallback(() -> super.setSprinting(sprinting), () -> builder.onSprint.accept(this));
+            return;
         }
         super.setSprinting(sprinting);
     }
@@ -384,7 +386,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public void rideTick() {
         super.rideTick();
         if (builder.rideTick != null) {
-            builder.rideTick.accept(this);
+            OverrideUtils.withAlreadyCalled(() -> builder.rideTick.accept(this));
         }
     }
 
@@ -392,7 +394,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public boolean canFreeze() {
         if (builder.canFreeze != null) {
-            Object obj = builder.canFreeze.test(this);
+            Object obj = OverrideUtils.with(super::canFreeze, () -> builder.canFreeze.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -405,7 +407,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public boolean isFreezing() {
         if (builder.isFreezing != null) {
-            Object obj = builder.isFreezing.test(this);
+            Object obj = OverrideUtils.with(super::isFreezing, () -> builder.isFreezing.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -418,7 +420,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public boolean isCurrentlyGlowing() {
         if (builder.isCurrentlyGlowing != null) {
-            Object obj = builder.isCurrentlyGlowing.test(this);
+            Object obj = OverrideUtils.with(super::isCurrentlyGlowing, () -> builder.isCurrentlyGlowing.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -436,7 +438,8 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public void onClientRemoval() {
         if (builder.onClientRemoval != null) {
-            builder.onClientRemoval.accept(this);
+            OverrideUtils.beforeFallback(super::onClientRemoval, () -> builder.onClientRemoval.accept(this));
+            return;
         }
         super.onClientRemoval();
     }
@@ -445,7 +448,8 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public void lavaHurt() {
         if (builder.lavaHurt != null) {
-            builder.lavaHurt.accept(this);
+            OverrideUtils.beforeFallback(super::lavaHurt, () -> builder.lavaHurt.accept(this));
+            return;
         }
         super.lavaHurt();
     }
@@ -454,7 +458,8 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     protected void onFlap() {
         if (builder.onFlap != null) {
-            builder.onFlap.accept(this);
+            OverrideUtils.beforeFallback(super::onFlap, () -> builder.onFlap.accept(this));
+            return;
         }
         super.onFlap();
     }
@@ -463,7 +468,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public boolean dampensVibrations() {
         if (builder.dampensVibrations != null) {
-            Object obj = builder.dampensVibrations.test(this);
+            Object obj = OverrideUtils.with(super::dampensVibrations, () -> builder.dampensVibrations.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -475,7 +480,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public boolean showVehicleHealth() {
         if (builder.showVehicleHealth != null) {
-            Object obj = builder.showVehicleHealth.test(this);
+            Object obj = OverrideUtils.with(super::showVehicleHealth, () -> builder.showVehicleHealth.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -490,7 +495,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         if (builder.thunderHit != null) {
             super.thunderHit(p_19927_, p_19928_);
             final ContextUtils.EThunderHitContext context = new ContextUtils.EThunderHitContext(p_19927_, p_19928_, this);
-            builder.thunderHit.accept(context);
+            OverrideUtils.withAlreadyCalled(() -> builder.thunderHit.accept(context));
         }
     }
 
@@ -499,7 +504,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
             final ContextUtils.EDamageContext context = new ContextUtils.EDamageContext(this, p_20122_);
-            Object obj = builder.isInvulnerableTo.test(context);
+            Object obj = OverrideUtils.with(() -> super.isInvulnerableTo(p_20122_), () -> builder.isInvulnerableTo.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -513,7 +518,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public boolean canChangeDimensions(Level to, Level from) {
         if (builder.canChangeDimensions != null) {
             final ContextUtils.ChangeDimensionsContext context = new ContextUtils.ChangeDimensionsContext(this, to, from);
-            Object obj = builder.canChangeDimensions.test(context);
+            Object obj = OverrideUtils.with(() -> super.canChangeDimensions(to, from), () -> builder.canChangeDimensions.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -527,7 +532,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
         if (builder.mayInteract != null) {
             final ContextUtils.EMayInteractContext context = new ContextUtils.EMayInteractContext(p_146843_, p_146844_, this);
-            Object obj = builder.mayInteract.test(context);
+            Object obj = OverrideUtils.with(() -> super.mayInteract(p_146843_, p_146844_), () -> builder.mayInteract.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -542,7 +547,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
             final ContextUtils.ECanTrampleContext context = new ContextUtils.ECanTrampleContext(state, pos, fallDistance, this);
-            Object obj = builder.canTrample.test(context);
+            Object obj = OverrideUtils.with(() -> super.canTrample(state, pos, fallDistance), () -> builder.canTrample.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -564,10 +569,10 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public int getMaxFallDistance() {
         if (builder.setMaxFallDistance == null) return super.getMaxFallDistance();
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setMaxFallDistance.apply(this), "integer");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getMaxFallDistance, () -> builder.setMaxFallDistance.apply(this)), "integer");
         if (obj != null)
             return (int) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + obj + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
         return super.getMaxFallDistance();
     }
 
@@ -576,7 +581,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object obj = builder.canBeCollidedWith.test(this);
+        Object obj = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.test(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }

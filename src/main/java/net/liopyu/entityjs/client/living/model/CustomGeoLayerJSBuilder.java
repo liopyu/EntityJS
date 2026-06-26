@@ -10,6 +10,7 @@ import net.liopyu.entityjs.entities.living.entityjs.WrappedAnimatableEntity;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -94,9 +95,10 @@ public class CustomGeoLayerJSBuilder<T extends LivingEntity & IAnimatableJSCusto
             ```
             """)
     public CustomGeoLayerJSBuilder<T> textureResource(Function<T, Object> function) {
+        var wrappedFunction = CallbackInvoker.wrapFunction(function);
         textureResource = entity -> {
             entity = ensureIAnimatableJS(entity);
-            Object obj = function.apply(entity);
+            Object obj = wrappedFunction.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {

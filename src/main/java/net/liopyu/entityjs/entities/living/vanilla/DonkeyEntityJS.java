@@ -9,6 +9,7 @@ import net.liopyu.entityjs.builders.living.vanilla.CamelJSBuilder;
 import net.liopyu.entityjs.builders.living.vanilla.DonkeyJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.util.overrides.LivingEntityOverrides;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
 import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
@@ -16,6 +17,7 @@ import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.OverrideUtils;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.ModKeybinds;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -105,7 +107,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     private MoveControl createMoveControl() {
         if (builder.setMoveControl != null) {
-            Object obj = builder.setMoveControl.apply(this);
+            Object obj = OverrideUtils.with(() -> new MoveControl(this), () -> builder.setMoveControl.apply(this));
             if (obj != null) return (MoveControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMoveControl from entity: " + entityName() + ". Value: " + obj + ". Must be a MoveControl object. Defaulting to super method.");
         }
@@ -114,7 +116,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     private LookControl createLookControl() {
         if (builder.setLookControl != null) {
-            Object obj = builder.setLookControl.apply(this);
+            Object obj = OverrideUtils.with(() -> new LookControl(this), () -> builder.setLookControl.apply(this));
             if (obj != null) return (LookControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setLookControl from entity: " + entityName() + ". Value: " + obj + ". Must be a LookControl object. Defaulting to super method.");
         }
@@ -123,7 +125,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     private JumpControl createJumpControl() {
         if (builder.setJumpControl != null) {
-            Object obj = builder.setJumpControl.apply(this);
+            Object obj = OverrideUtils.with(() -> new JumpControl(this), () -> builder.setJumpControl.apply(this));
             if (obj != null) return (JumpControl) obj;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setJumpControl from entity: " + entityName() + ". Value: " + obj + ". Must be a JumpControl object. Defaulting to super method.");
         }
@@ -223,7 +225,11 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         if (builder.setBreedOffspring != null) {
             final ContextUtils.BreedableEntityContext context = new ContextUtils.BreedableEntityContext(this, ageableMob, serverLevel);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBreedOffspring.apply(context), "resourcelocation");
+            Object result = OverrideUtils.with(() -> builder.get().create(serverLevel), () -> builder.setBreedOffspring.apply(context));
+            if (result instanceof AgeableMob mob) {
+                return (AgeableMob) mob;
+            }
+            Object obj = EntityJSHelperClass.convertObjectToDesired(result, "resourcelocation");
             if (obj instanceof ResourceLocation resourceLocation) {
                 EntityType<?> breedOffspringType = BuiltInRegistries.ENTITY_TYPE.get(resourceLocation);
                 if (breedOffspringType != null) {
@@ -241,7 +247,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        return (builder.isFood != null && builder.isFood.test(pStack)) || this.isFoodPredicate(pStack);
+        return (builder.isFood != null && OverrideUtils.with(() -> false, () -> builder.isFood.test(pStack))) || this.isFoodPredicate(pStack);
     }
 
 
@@ -250,7 +256,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
             return super.isFood(pStack);
         }
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = builder.isFoodPredicate.test(context);
+        Object obj = OverrideUtils.with(() -> false, () -> builder.isFoodPredicate.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -264,7 +270,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.canBreed == null) {
             return super.canBreed();
         }
-        Object obj = builder.canBreed.test(this);
+        Object obj = OverrideUtils.with(super::canBreed, () -> builder.canBreed.test(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -279,7 +285,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
             return super.canMate(pOtherAnimal);
         }
         final ContextUtils.EntityAnimalContext context = new ContextUtils.EntityAnimalContext(this, pOtherAnimal);
-        Object obj = builder.canMate.test(context);
+        Object obj = OverrideUtils.with(() -> super.canMate(pOtherAnimal), () -> builder.canMate.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -373,7 +379,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     protected PathNavigation createNavigation(Level pLevel) {
         if (builder == null || builder.createNavigation == null) return super.createNavigation(pLevel);
         final ContextUtils.EntityLevelContext context = new ContextUtils.EntityLevelContext(pLevel, this);
-        Object obj = builder.createNavigation.apply(context);
+        Object obj = OverrideUtils.with(() -> new GroundPathNavigation(this, pLevel), () -> builder.createNavigation.apply(context));
         if (obj instanceof PathNavigation p) return p;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for createNavigation from entity: " + entityName() + ". Value: " + obj + ". Must be PathNavigation. Defaulting to super method.");
         return super.createNavigation(pLevel);
@@ -382,7 +388,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     @Override
     public boolean canBeLeashed() {
         if (builder.canBeLeashed != null) {
-            Object obj = builder.canBeLeashed.test(this);
+            Object obj = OverrideUtils.with(super::canBeLeashed, () -> builder.canBeLeashed.test(this));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed());
         }
@@ -395,7 +401,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
             return super.removeWhenFarAway(pDistanceToClosestPlayer);
         }
         final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
-        Object obj = builder.removeWhenFarAway.test(context);
+        Object obj = OverrideUtils.with(() -> super.removeWhenFarAway(pDistanceToClosestPlayer), () -> builder.removeWhenFarAway.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -459,9 +465,9 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public float getWalkTargetValue(BlockPos pos, LevelReader levelReader) {
         if (builder.walkTargetValue == null) return super.getWalkTargetValue(pos, levelReader);
         final ContextUtils.EntityBlockPosLevelContext context = new ContextUtils.EntityBlockPosLevelContext(pos, levelReader, this);
-        Object obj = EntityJSHelperClass.convertObjectToDesired(builder.walkTargetValue.apply(context), "float");
+        Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(() -> super.getWalkTargetValue(pos, levelReader), () -> builder.walkTargetValue.apply(context)), "float");
         if (obj != null) return (float) obj;
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for walkTargetValue from entity: " + entityName() + ". Value: " + builder.walkTargetValue.apply(context) + ". Must be a float. Defaulting to " + super.getWalkTargetValue(pos, levelReader));
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for walkTargetValue from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + super.getWalkTargetValue(pos, levelReader));
         return super.getWalkTargetValue(pos, levelReader);
     }
 
@@ -469,7 +475,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     @Override
     protected boolean shouldStayCloseToLeashHolder() {
         if (builder.shouldStayCloseToLeashHolder == null) return super.shouldStayCloseToLeashHolder();
-        Object value = builder.shouldStayCloseToLeashHolder.test(this);
+        Object value = OverrideUtils.with(super::shouldStayCloseToLeashHolder, () -> builder.shouldStayCloseToLeashHolder.test(this));
         if (value instanceof Boolean b)
             return b;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.shouldStayCloseToLeashHolder());
@@ -480,7 +486,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeaponPredicate != null) {
             final ContextUtils.EntityProjectileWeaponContext context = new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this);
-            Object obj = builder.canFireProjectileWeaponPredicate.test(context);
+            Object obj = OverrideUtils.with(() -> false, () -> builder.canFireProjectileWeaponPredicate.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -492,7 +498,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     public boolean canFireProjectileWeapons(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeapon != null) {
-            return builder.canFireProjectileWeapon.test(projectileWeapon.getDefaultInstance()) && projectileWeapon instanceof ProjectileWeaponItem;
+            return OverrideUtils.with(() -> super.canFireProjectileWeapon(projectileWeapon), () -> builder.canFireProjectileWeapon.test(projectileWeapon.getDefaultInstance()) && projectileWeapon instanceof ProjectileWeaponItem);
         }
         return super.canFireProjectileWeapon(projectileWeapon);
     }
@@ -520,7 +526,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean canHoldItem(ItemStack stack) {
         if (builder.canHoldItem != null) {
             final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(stack, this);
-            Object obj = builder.canHoldItem.test(context);
+            Object obj = OverrideUtils.with(() -> super.canHoldItem(stack), () -> builder.canHoldItem.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -543,11 +549,11 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     @Override
     public AABB getAttackBoundingBox() {
         if (builder.getAttackBoundingBox != null) {
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.getAttackBoundingBox.apply(this), "aabb");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getAttackBoundingBox, () -> builder.getAttackBoundingBox.apply(this)), "aabb");
             if (obj != null) {
                 return (AABB) obj;
             }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getAttackBoundingBox from entity: " + entityName() + ". Value: " + builder.getAttackBoundingBox.apply(this) + ". Must be an AABB. Defaulting to " + super.getAttackBoundingBox());
+            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for getAttackBoundingBox from entity: " + entityName() + ". Value: " + obj + ". Must be an AABB. Defaulting to " + super.getAttackBoundingBox());
         }
         return super.getAttackBoundingBox();
     }
@@ -558,7 +564,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.isAlliedTo != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
             try {
-                Object obj = builder.isAlliedTo.test(context);
+                Object obj = OverrideUtils.with(() -> super.isAlliedTo(pEntity), () -> builder.isAlliedTo.test(context));
                 if (obj instanceof Boolean b) return b;
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
             } catch (Exception e) {
@@ -582,10 +588,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     @Override
     public void tick() {
-        super.tick();
-        if (builder.tick != null) {
-            EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
-        }
+        LivingEntityOverrides.tick(this, builder, super::tick);
     }
 
     @Override
@@ -737,29 +740,18 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     @Override
     public boolean canCollideWith(Entity pEntity) {
-        if (builder.canCollideWith != null) {
-            final ContextUtils.CollidingEntityContext context = new ContextUtils.CollidingEntityContext(this, pEntity);
-            try {
-                Object obj = builder.canCollideWith.test(context);
-                if (obj instanceof Boolean b) return b;
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
-            } catch (Exception e) {
-                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canCollideWith. Defaulting to " + super.canCollideWith(pEntity), e);
-                return super.canCollideWith(pEntity);
-            }
-        }
-        return super.canCollideWith(pEntity);
+        return LivingEntityOverrides.canCollideWith(this, builder, pEntity, () -> super.canCollideWith(pEntity));
     }
 
     @Override
     protected float getBlockSpeedFactor() {
         if (builder.blockSpeedFactor != null) {
             try {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.blockSpeedFactor.apply(this), "float");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getBlockSpeedFactor, () -> builder.blockSpeedFactor.apply(this)), "float");
                 if (obj != null) {
                     return (float) obj;
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + builder.get() + ". Value: " + builder.blockSpeedFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockSpeedFactor());
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for blockSpeedFactor from entity: " + builder.get() + ". Value: " + obj + ". Must be a float. Defaulting to " + super.getBlockSpeedFactor());
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: blockSpeedFactor. Defaulting to " + super.getBlockSpeedFactor(), e);
@@ -773,11 +765,11 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     protected float getBlockJumpFactor() {
         if (builder.setBlockJumpFactor != null) {
             try {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setBlockJumpFactor.apply(this), "float");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getBlockJumpFactor, () -> builder.setBlockJumpFactor.apply(this)), "float");
                 if (obj != null) {
                     return (float) obj;
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + builder.setBlockJumpFactor.apply(this) + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setBlockJumpFactor from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + super.getBlockJumpFactor());
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: setBlockJumpFactor. Defaulting to " + super.getBlockJumpFactor(), e);
@@ -792,7 +784,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.canAddPassenger != null) {
             final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(entity, this);
             try {
-                Object obj = builder.canAddPassenger.test(context);
+                Object obj = OverrideUtils.with(() -> super.canAddPassenger(entity), () -> builder.canAddPassenger.test(context));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -810,7 +802,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     protected boolean shouldDropLoot() {
         if (builder.shouldDropLoot != null) {
             try {
-                Object obj = builder.shouldDropLoot.test(this);
+                Object obj = OverrideUtils.with(super::shouldDropLoot, () -> builder.shouldDropLoot.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -828,7 +820,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     protected boolean isAffectedByFluids() {
         if (builder.isAffectedByFluids != null) {
             try {
-                Object obj = builder.isAffectedByFluids.test(this);
+                Object obj = OverrideUtils.with(super::isAffectedByFluids, () -> builder.isAffectedByFluids.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -845,7 +837,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean isImmobile() {
         if (builder.isImmobile != null) {
             try {
-                Object obj = builder.isImmobile.test(this);
+                Object obj = OverrideUtils.with(super::isImmobile, () -> builder.isImmobile.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -863,7 +855,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     protected boolean isFlapping() {
         if (builder.isFlapping != null) {
             try {
-                Object obj = builder.isFlapping.test(this);
+                Object obj = OverrideUtils.with(super::isFlapping, () -> builder.isFlapping.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -882,11 +874,11 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.calculateFallDamage != null) {
             final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(fallDistance, pDamageMultiplier, this);
             try {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.calculateFallDamage.apply(context), "integer");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(() -> super.calculateFallDamage(fallDistance, pDamageMultiplier), () -> builder.calculateFallDamage.apply(context)), "integer");
                 if (obj != null) {
                     return (int) obj;
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for calculateFallDamage from entity: " + entityName() + ". Value: " + builder.calculateFallDamage.apply(context) + ". Must be an int, defaulting to " + super.calculateFallDamage(fallDistance, pDamageMultiplier));
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for calculateFallDamage from entity: " + entityName() + ". Value: " + obj + ". Must be an int, defaulting to " + super.calculateFallDamage(fallDistance, pDamageMultiplier));
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: calculateFallDamage. Defaulting to " + super.calculateFallDamage(fallDistance, pDamageMultiplier), e);
@@ -899,11 +891,11 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     protected float nextStep() {
         if (builder.nextStep != null) {
             try {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.nextStep.apply(this), "float");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::nextStep, () -> builder.nextStep.apply(this)), "float");
                 if (obj != null) {
                     return (float) obj;
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityName() + ". Value: " + builder.nextStep.apply(this) + ". Must be a float, defaulting to " + super.nextStep());
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for nextStep from entity: " + entityName() + ". Value: " + obj + ". Must be a float, defaulting to " + super.nextStep());
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: nextStep. Defaulting to " + super.nextStep(), e);
@@ -919,11 +911,15 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.setHurtSound != null) {
             final ContextUtils.HurtContext context = new ContextUtils.HurtContext(this, p_21239_);
             try {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
+                Object result = OverrideUtils.with(() -> super.getHurtSound(p_21239_), () -> builder.setHurtSound.apply(context));
+                if (result instanceof SoundEvent soundEvent) {
+                    return soundEvent;
+                }
+                Object obj = EntityJSHelperClass.convertObjectToDesired(result, "resourcelocation");
                 if (obj != null) {
                     return Objects.requireNonNull(BuiltInRegistries.SOUND_EVENT.get((ResourceLocation) obj));
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityName() + ". Value: " + result + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: setHurtSound. Defaulting to \"minecraft:entity.generic.hurt\"", e);
@@ -937,7 +933,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.canAttackType != null) {
             final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(this, entityType);
             try {
-                Object obj = builder.canAttackType.test(context);
+                Object obj = OverrideUtils.with(() -> super.canAttackType(entityType), () -> builder.canAttackType.test(context));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -954,11 +950,11 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public float getScale() {
         if (builder.scale != null) {
             try {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.scale.apply(this), "float");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getScale, () -> builder.scale.apply(this)), "float");
                 if (obj != null) {
                     return (float) obj;
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for scale from entity: " + entityName() + ". Value: " + builder.scale.apply(this) + ". Must be a float. Defaulting to " + super.getScale());
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for scale from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + super.getScale());
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: scale. Defaulting to " + super.getScale(), e);
@@ -971,7 +967,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean shouldDropExperience() {
         if (builder.shouldDropExperience != null) {
             try {
-                Object obj = builder.shouldDropExperience.test(this);
+                Object obj = OverrideUtils.with(super::shouldDropExperience, () -> builder.shouldDropExperience.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -989,11 +985,11 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.visibilityPercent != null) {
             final ContextUtils.VisualContext context = new ContextUtils.VisualContext(p_20969_, this);
             try {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.visibilityPercent.apply(context), "double");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(() -> super.getVisibilityPercent(p_20969_), () -> builder.visibilityPercent.apply(context)), "double");
                 if (obj != null) {
                     return (double) obj;
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityName() + ". Value: " + builder.visibilityPercent.apply(context) + ". Must be a double. Defaulting to " + super.getVisibilityPercent(p_20969_));
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityName() + ". Value: " + obj + ". Must be a double. Defaulting to " + super.getVisibilityPercent(p_20969_));
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: visibilityPercent. Defaulting to " + super.getVisibilityPercent(p_20969_), e);
@@ -1008,7 +1004,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.canAttack != null) {
             final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(this, entity);
             try {
-                Object obj = builder.canAttack.test(context);
+                Object obj = OverrideUtils.with(() -> super.canAttack(entity), () -> builder.canAttack.test(context));
                 if (obj instanceof Boolean) {
                     return (boolean) obj && super.canAttack(entity);
                 } else {
@@ -1026,7 +1022,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.canBeAffected != null) {
             final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
             try {
-                Object result = builder.canBeAffected.test(context);
+                Object result = OverrideUtils.with(() -> super.canBeAffected(effectInstance), () -> builder.canBeAffected.test(context));
                 if (result instanceof Boolean) {
                     return (boolean) result;
                 } else {
@@ -1044,7 +1040,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean isInvertedHealAndHarm() {
         if (builder.invertedHealAndHarm != null) {
             try {
-                Object obj = builder.invertedHealAndHarm.test(this);
+                Object obj = OverrideUtils.with(super::isInvertedHealAndHarm, () -> builder.invertedHealAndHarm.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1061,7 +1057,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean onClimbable() {
         if (builder.onClimbable != null) {
             try {
-                Object obj = builder.onClimbable.test(this);
+                Object obj = OverrideUtils.with(super::onClimbable, () -> builder.onClimbable.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1079,11 +1075,11 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public float getJumpBoostPower() {
         if (builder.jumpBoostPower != null) {
             try {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(this), "float");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getJumpBoostPower, () -> builder.jumpBoostPower.apply(this)), "float");
                 if (obj != null) {
                     return (float) obj;
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + builder.jumpBoostPower.apply(this) + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + super.getJumpBoostPower());
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: jumpBoostPower. Defaulting to " + super.getJumpBoostPower(), e);
@@ -1097,7 +1093,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.canStandOnFluid != null) {
             final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(this, fluidState);
             try {
-                Object obj = builder.canStandOnFluid.test(context);
+                Object obj = OverrideUtils.with(() -> super.canStandOnFluid(fluidState), () -> builder.canStandOnFluid.test(context));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1114,7 +1110,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean isSensitiveToWater() {
         if (builder.isSensitiveToWater != null) {
             try {
-                Object obj = builder.isSensitiveToWater.test(this);
+                Object obj = OverrideUtils.with(super::isSensitiveToWater, () -> builder.isSensitiveToWater.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1132,7 +1128,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.hasLineOfSight != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entity, this);
             try {
-                Object obj = builder.hasLineOfSight.test(context);
+                Object obj = OverrideUtils.with(() -> super.hasLineOfSight(entity), () -> builder.hasLineOfSight.test(context));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1149,7 +1145,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean isAffectedByPotions() {
         if (builder.isAffectedByPotions != null) {
             try {
-                Object obj = builder.isAffectedByPotions.test(this);
+                Object obj = OverrideUtils.with(super::isAffectedByPotions, () -> builder.isAffectedByPotions.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1166,7 +1162,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean attackable() {
         if (builder.isAttackable != null) {
             try {
-                Object obj = builder.isAttackable.test(this);
+                Object obj = OverrideUtils.with(super::attackable, () -> builder.isAttackable.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1184,7 +1180,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.canTakeItem != null) {
             final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
             try {
-                Object obj = builder.canTakeItem.test(context);
+                Object obj = OverrideUtils.with(() -> super.canTakeItem(itemStack), () -> builder.canTakeItem.test(context));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1201,7 +1197,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean isSleeping() {
         if (builder.isSleeping != null) {
             try {
-                Object obj = builder.isSleeping.test(this);
+                Object obj = OverrideUtils.with(super::isSleeping, () -> builder.isSleeping.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1219,7 +1215,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.shouldRiderFaceForward != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, this);
             try {
-                Object obj = builder.shouldRiderFaceForward.test(context);
+                Object obj = OverrideUtils.with(() -> super.shouldRiderFaceForward(player), () -> builder.shouldRiderFaceForward.test(context));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1234,60 +1230,24 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     @Override
     public boolean canFreeze() {
-        if (builder.canFreeze != null) {
-            try {
-                Object obj = builder.canFreeze.test(this);
-                if (obj instanceof Boolean) {
-                    return (boolean) obj;
-                } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canFreeze());
-                }
-            } catch (Exception e) {
-                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: canFreeze. Defaulting to " + super.canFreeze(), e);
-            }
-        }
-        return super.canFreeze();
+        return LivingEntityOverrides.canFreeze(this, builder, super::canFreeze);
     }
 
     @Override
     public boolean isFreezing() {
-        if (builder.isFreezing != null) {
-            try {
-                Object obj = builder.isFreezing.test(this);
-                if (obj instanceof Boolean) {
-                    return (boolean) obj;
-                } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFreezing());
-                }
-            } catch (Exception e) {
-                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: isFreezing. Defaulting to " + super.isFreezing(), e);
-            }
-        }
-        return super.isFreezing();
+        return LivingEntityOverrides.isFreezing(this, builder, super::isFreezing);
     }
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null) {
-            try {
-                Object obj = builder.isCurrentlyGlowing.test(this);
-                if (obj instanceof Boolean) {
-                    return (boolean) obj;
-                } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isCurrentlyGlowing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isCurrentlyGlowing());
-                }
-            } catch (Exception e) {
-                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: isCurrentlyGlowing. Defaulting to " + super.isCurrentlyGlowing(), e);
-            }
-        }
-        return super.isCurrentlyGlowing();
+        return LivingEntityOverrides.isCurrentlyGlowing(this, builder, super::isCurrentlyGlowing);
     }
 
     @Override
     public boolean canDisableShield() {
         if (builder.canDisableShield != null) {
             try {
-                Object obj = builder.canDisableShield.test(this);
+                Object obj = OverrideUtils.with(super::canDisableShield, () -> builder.canDisableShield.test(this));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1304,11 +1264,11 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     protected int getBaseExperienceReward() {
         if (builder.experienceReward != null) {
             try {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.experienceReward.apply(this), "integer");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getBaseExperienceReward, () -> builder.experienceReward.apply(this)), "integer");
                 if (obj != null) {
                     return (int) obj;
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + builder.experienceReward.apply(this) + ". Must be an integer. Defaulting to " + super.getBaseExperienceReward());
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for experienceReward from entity: " + entityName() + ". Value: " + obj + ". Must be an integer. Defaulting to " + super.getBaseExperienceReward());
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: experienceReward. Defaulting to " + super.getBaseExperienceReward(), e);
@@ -1319,36 +1279,12 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     @Override
     public boolean dampensVibrations() {
-        if (builder.dampensVibrations != null) {
-            try {
-                Object obj = builder.dampensVibrations.test(this);
-                if (obj instanceof Boolean) {
-                    return (boolean) obj;
-                } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for dampensVibrations from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.dampensVibrations());
-                }
-            } catch (Exception e) {
-                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: dampensVibrations. Defaulting to " + super.dampensVibrations(), e);
-            }
-        }
-        return super.dampensVibrations();
+        return LivingEntityOverrides.dampensVibrations(this, builder, super::dampensVibrations);
     }
 
     @Override
     public boolean showVehicleHealth() {
-        if (builder.showVehicleHealth != null) {
-            try {
-                Object obj = builder.showVehicleHealth.test(this);
-                if (obj instanceof Boolean) {
-                    return (boolean) obj;
-                } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for showVehicleHealth from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.showVehicleHealth());
-                }
-            } catch (Exception e) {
-                EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: showVehicleHealth. Defaulting to " + super.showVehicleHealth(), e);
-            }
-        }
-        return super.showVehicleHealth();
+        return LivingEntityOverrides.showVehicleHealth(this, builder, super::showVehicleHealth);
     }
 
     @Override
@@ -1356,7 +1292,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.canChangeDimensions != null) {
             ContextUtils.ChangeDimensionsContext context = new ContextUtils.ChangeDimensionsContext(this, to, from);
             try {
-                Object obj = builder.canChangeDimensions.test(context);
+                Object obj = OverrideUtils.with(() -> super.canChangeDimensions(to, from), () -> builder.canChangeDimensions.test(context));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1374,7 +1310,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.mayInteract != null) {
             final ContextUtils.MayInteractContext context = new ContextUtils.MayInteractContext(p_146843_, p_146844_, this);
             try {
-                Object obj = builder.mayInteract.test(context);
+                Object obj = OverrideUtils.with(() -> super.mayInteract(p_146843_, p_146844_), () -> builder.mayInteract.test(context));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1392,7 +1328,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.canTrample != null) {
             final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
             try {
-                Object obj = builder.canTrample.test(context);
+                Object obj = OverrideUtils.with(() -> super.canTrample(state, pos, fallDistance), () -> builder.canTrample.test(context));
                 if (obj instanceof Boolean) {
                     return (boolean) obj;
                 } else {
@@ -1409,11 +1345,11 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public int getMaxFallDistance() {
         if (builder.setMaxFallDistance != null) {
             try {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setMaxFallDistance.apply(this), "integer");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(OverrideUtils.with(super::getMaxFallDistance, () -> builder.setMaxFallDistance.apply(this)), "integer");
                 if (obj != null) {
                     return (int) obj;
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + builder.setMaxFallDistance.apply(this) + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setMaxFallDistance from entity: " + entityName() + ". Value: " + obj + ". Must be an integer. Defaulting to " + super.getMaxFallDistance());
                 }
             } catch (Exception e) {
                 EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Exception in " + entityName() + " builder for field: setMaxFallDistance. Defaulting to " + super.getMaxFallDistance(), e);
@@ -1464,7 +1400,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     @Override
     public boolean isPushable() {
-        return builder.isPushable;
+        return LivingEntityOverrides.isPushable(builder);
     }
 
 
@@ -1544,11 +1480,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     @Override
     public void setSprinting(boolean sprinting) {
-        if (builder.onSprint != null) {
-            EntityJSHelperClass.consumerCallback(builder.onSprint, this, "[EntityJS]: Error in " + entityName() + "builder for field: onSprint.");
-
-        }
-        super.setSprinting(sprinting);
+        LivingEntityOverrides.setSprinting(this, builder, () -> super.setSprinting(sprinting));
     }
 
 
@@ -1571,11 +1503,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     @Override
     public void rideTick() {
-        super.rideTick();
-        if (builder.rideTick != null) {
-            EntityJSHelperClass.consumerCallback(builder.rideTick, this, "[EntityJS]: Error in " + entityName() + "builder for field: rideTick.");
-
-        }
+        LivingEntityOverrides.rideTick(this, builder, super::rideTick);
     }
 
 
@@ -1644,11 +1572,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     @Override
     public void onClientRemoval() {
-        if (builder.onClientRemoval != null) {
-            EntityJSHelperClass.consumerCallback(builder.onClientRemoval, this, "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval.");
-
-        }
-        super.onClientRemoval();
+        LivingEntityOverrides.onClientRemoval(this, builder, super::onClientRemoval);
     }
 
     @Override
@@ -1663,19 +1587,12 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     @Override
     public void lavaHurt() {
-        if (builder.lavaHurt != null) {
-            EntityJSHelperClass.consumerCallback(builder.lavaHurt, this, "[EntityJS]: Error in " + entityName() + "builder for field: lavaHurt.");
-
-        }
-        super.lavaHurt();
+        LivingEntityOverrides.lavaHurt(this, builder, super::lavaHurt);
     }
 
     @Override
     public void playerTouch(Player p_20081_) {
-        if (builder.playerTouch != null) {
-            final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(p_20081_, this);
-            EntityJSHelperClass.consumerCallback(builder.playerTouch, context, "[EntityJS]: Error in " + entityName() + "builder for field: playerTouch.");
-        } else super.playerTouch(p_20081_);
+        LivingEntityOverrides.playerTouch(this, builder, p_20081_, () -> super.playerTouch(p_20081_));
     }
 
 
@@ -1694,7 +1611,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
             final ContextUtils.DamageContext context = new ContextUtils.DamageContext(this, p_20122_);
-            Object obj = builder.isInvulnerableTo.test(context);
+            Object obj = OverrideUtils.with(() -> super.isInvulnerableTo(p_20122_), () -> builder.isInvulnerableTo.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1706,10 +1623,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
 
     @Override
     public void onRemovedFromLevel() {
-        if (builder != null && builder.onRemovedFromWorld != null) {
-            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
-        }
-        super.onRemovedFromLevel();
+        LivingEntityOverrides.onRemovedFromLevel(this, builder, super::onRemovedFromLevel);
     }
 
 
@@ -1726,7 +1640,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-            Object obj = builder.shouldRenderAtSqrDistance.test(context);
+            Object obj = OverrideUtils.with(() -> super.shouldRenderAtSqrDistance(distance), () -> builder.shouldRenderAtSqrDistance.test(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
         }
@@ -1738,7 +1652,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object obj = builder.canBeCollidedWith.test(this);
+        Object obj = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.test(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -1752,7 +1666,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
             return super.canRide(pVehicle);
         }
         var context = new ContextUtils.PassengerVehicleContext(pVehicle, this);
-        Object obj = builder.canRide.test(context);
+        Object obj = OverrideUtils.with(() -> super.canRide(pVehicle), () -> builder.canRide.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }

@@ -3,6 +3,8 @@ package net.liopyu.entityjs.events;
 import dev.latvian.mods.kubejs.script.ConsoleJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
+import net.liopyu.entityjs.util.BooleanCallback;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.ai.NearestAttackableTargetGoalJS;
@@ -52,10 +54,11 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
             """, params = {
             @Param(name = "goalFunction", value = "A function to remove goals with entity & available goals as arguments")
     })
-    public void removeGoals(Function<ContextUtils.GoalContext, Boolean> goalFunction) {
+    public void removeGoals(BooleanCallback<ContextUtils.GoalContext> goalFunction) {
+        BooleanCallback<ContextUtils.GoalContext> wrappedGoalFunction = CallbackInvoker.wrapBoolean(goalFunction);
         selector.removeAllGoals(g -> {
             ContextUtils.GoalContext context = new ContextUtils.GoalContext(getEntity(), g);
-            Object remove = EntityJSHelperClass.convertObjectToDesired(goalFunction.apply(context), "boolean");
+            Object remove = EntityJSHelperClass.convertObjectToDesired(wrappedGoalFunction.test(context), "boolean");
             if (remove != null) {
                 return (boolean) remove;
             } else {
@@ -96,7 +99,7 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "goalSupplier", value = "The goal supplier, a function that takes a Mob and returns a Goal")
     })
     public void arbitraryTargetGoal(int priority, Function<T, Goal> goalSuppler) {
-        selector.addGoal(priority, goalSuppler.apply(mob));
+        selector.addGoal(priority, CallbackInvoker.wrapFunction(goalSuppler).apply(mob));
     }
 
     @Info(value = "Adds a `NearestAttackableTargetGoalJS` to the entity", params = {
@@ -108,8 +111,8 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "targetConditions", value = "The conditions under which the targeted entity will be targeted, may be null"),
             @Param(name = "radius", value = "The AABB radius to check for a potential target")
     })
-    public <E extends LivingEntity> void nearestAttackableTarget(int priority, Class<E> targetClass, int randomInterval, boolean mustSee, boolean mustReach, @Nullable Predicate<LivingEntity> targetConditions, AABB radius) {
-        selector.addGoal(priority, new NearestAttackableTargetGoalJS<>(mob, targetClass, randomInterval, mustSee, mustReach, targetConditions, radius));
+    public <E extends LivingEntity> void nearestAttackableTarget(int priority, Class<E> targetClass, int randomInterval, boolean mustSee, boolean mustReach, @Nullable BooleanCallback<LivingEntity> targetConditions, AABB radius) {
+        selector.addGoal(priority, new NearestAttackableTargetGoalJS<>(mob, targetClass, randomInterval, mustSee, mustReach, nullablePredicate(targetConditions), radius));
     }
 
     @Info(value = "Adds a `NearestAttackableTargetGoal` to the entity", params = {
@@ -120,8 +123,8 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "mustReach", value = "If the mob must be able to reach the target to attack"),
             @Param(name = "targetConditions", value = "The conditions under which the targeted entity will be targeted, may be null")
     })
-    public <E extends LivingEntity> void nearestAttackableTarget(int priority, Class<E> targetClass, int randomInterval, boolean mustSee, boolean mustReach, @Nullable Predicate<LivingEntity> targetConditions) {
-        selector.addGoal(priority, new NearestAttackableTargetGoal<>(mob, targetClass, randomInterval, mustSee, mustReach, targetConditions));
+    public <E extends LivingEntity> void nearestAttackableTarget(int priority, Class<E> targetClass, int randomInterval, boolean mustSee, boolean mustReach, @Nullable BooleanCallback<LivingEntity> targetConditions) {
+        selector.addGoal(priority, new NearestAttackableTargetGoal<>(mob, targetClass, randomInterval, mustSee, mustReach, nullablePredicate(targetConditions)));
     }
 
     @Info(value = "Adds s `HurtByTargetGoal` to the entity, only applicable to **pathfinder** mobs", params = {
@@ -146,9 +149,9 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "mustSee", value = "If the mob must have line of sight at all times"),
             @Param(name = "targetConditions", value = "The conditions under which the targeted entity will be targeted, may be null")
     })
-    public <E extends LivingEntity> void nonTameRandomTarget(int priority, Class<E> targetClass, boolean mustSee, @Nullable Predicate<LivingEntity> targetCondition) {
+    public <E extends LivingEntity> void nonTameRandomTarget(int priority, Class<E> targetClass, boolean mustSee, @Nullable BooleanCallback<LivingEntity> targetCondition) {
         if (isTamable) {
-            selector.addGoal(priority, new NonTameRandomTargetGoal<>((TamableAnimal) mob, targetClass, mustSee, targetCondition));
+            selector.addGoal(priority, new NonTameRandomTargetGoal<>((TamableAnimal) mob, targetClass, mustSee, nullablePredicate(targetCondition)));
         }
     }
 
@@ -169,5 +172,21 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
         if (isNeutral) {
             selector.addGoal(priority, new ResetUniversalAngerTargetGoal<>((E) mob, alertOthersOfSameType));
         }
+    }
+
+    @Nullable
+    private static <E> Predicate<E> nullablePredicate(@Nullable BooleanCallback<E> callback) {
+        if (callback == null) {
+            return null;
+        }
+        BooleanCallback<E> wrappedCallback = CallbackInvoker.wrapBoolean(callback);
+        return value -> {
+            Object converted = EntityJSHelperClass.convertObjectToDesired(wrappedCallback.test(value), "boolean");
+            if (converted instanceof Boolean bool) {
+                return bool;
+            }
+            ConsoleJS.SERVER.error("[EntityJS]: Goal predicate must return a boolean.");
+            return false;
+        };
     }
 }

@@ -11,6 +11,7 @@ import net.liopyu.entityjs.client.living.model.GeoLayerJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.AnimalEntityJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.liopyu.entityjs.util.*;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLLoader;
 import software.bernie.geckolib.animation.*;
@@ -103,8 +104,9 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             ```
             """)
     public CustomEntityJSBuilder modelResource(Function<Entity, Object> function) {
+        var wrappedFunction = CallbackInvoker.wrapFunction(function);
         modelResource = entity -> {
-            Object obj = function.apply(entity);
+            Object obj = wrappedFunction.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
@@ -134,8 +136,9 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             ```
             """)
     public CustomEntityJSBuilder textureResource(Function<Entity, Object> function) {
+        var wrappedFunction = CallbackInvoker.wrapFunction(function);
         textureResource = entity -> {
-            Object obj = function.apply(entity);
+            Object obj = wrappedFunction.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
@@ -166,8 +169,9 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             ```
             """)
     public CustomEntityJSBuilder animationResource(Function<Entity, Object> function) {
+        var wrappedFunction = CallbackInvoker.wrapFunction(function);
         animationResource = entity -> {
-            Object obj = function.apply(entity);
+            Object obj = wrappedFunction.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return ResourceLocation.parse((String) obj);
             } else if (obj instanceof ResourceLocation) {
@@ -475,11 +479,21 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             @Nullable CustomEntityJSBuilder.IParticleListenerJS particleListener,
             @Nullable CustomEntityJSBuilder.ICustomInstructionListenerJS instructionListener
     ) {
-        animationSuppliers.add(new CustomEntityJSBuilder.AnimationControllerSupplier<>(name, translationTicksLength, predicate, null, null, null, soundListener, particleListener, instructionListener));
+        animationSuppliers.add(new CustomEntityJSBuilder.AnimationControllerSupplier<>(
+                name,
+                translationTicksLength,
+                CallbackInvoker.wrapFunctional(predicate, CustomEntityJSBuilder.IAnimationPredicateJS.class),
+                null,
+                null,
+                null,
+                CallbackInvoker.wrapFunctional(soundListener, CustomEntityJSBuilder.ISoundListenerJS.class),
+                CallbackInvoker.wrapFunctional(particleListener, CustomEntityJSBuilder.IParticleListenerJS.class),
+                CallbackInvoker.wrapFunctional(instructionListener, CustomEntityJSBuilder.ICustomInstructionListenerJS.class)
+        ));
         return this;
     }
 
-    public transient Function<Entity, net.minecraft.client.renderer.RenderType> renderTypeFunction;
+    public transient Function<Entity, Object> renderTypeFunction;
 
     @Info(value = """
             Sets the render type for the entity via a function.
@@ -489,8 +503,8 @@ public abstract class CustomEntityJSBuilder extends BuilderBase<EntityType<?>> {
             entityBuilder.renderType(entity => RenderType.entityCutoutNoCull("kubejs:path/to/texture", outlineEntityBoolean));
             ```
             """)
-    public CustomEntityJSBuilder renderType(Function<Entity, net.minecraft.client.renderer.RenderType> type) {
-        renderTypeFunction = type;
+    public CustomEntityJSBuilder renderType(Function<Entity, Object> type) {
+        renderTypeFunction = CallbackInvoker.wrapFunction(type);
         return this;
     }
 

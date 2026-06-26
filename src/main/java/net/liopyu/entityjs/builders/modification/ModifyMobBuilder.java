@@ -1,5 +1,7 @@
 package net.liopyu.entityjs.builders.modification;
 
+import net.liopyu.entityjs.util.BooleanCallback;
+
 import dev.latvian.mods.kubejs.typings.Info;
 import net.liopyu.entityjs.builders.living.entityjs.MobBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -12,25 +14,24 @@ import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
     public transient Consumer<ContextUtils.PlayerEntityContext> tickLeash;
     public transient Consumer<ContextUtils.TargetChangeContext> onTargetChanged;
     public transient Consumer<LivingEntity> ate;
     public transient Object setAmbientSound;
-    public transient Predicate<ContextUtils.EntityItemStackContext> canHoldItem;
+    public transient BooleanCallback<ContextUtils.EntityItemStackContext> canHoldItem;
     public transient Boolean shouldDespawnInPeaceful;
-    public transient Predicate<Mob> canPickUpLoot;
-    public transient Predicate<ContextUtils.EntityItemLevelContext> canTakeItem;
+    public transient BooleanCallback<Mob> canPickUpLoot;
+    public transient BooleanCallback<ContextUtils.EntityItemLevelContext> canTakeItem;
     public transient Boolean isPersistenceRequired;
     public transient Function<Mob, Object> getAttackBoundingBox;
     public transient Object ambientSoundInterval;
-    public transient Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway;
-    public transient Predicate<Mob> canBeLeashed;
+    public transient BooleanCallback<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway;
+    public transient BooleanCallback<Mob> canBeLeashed;
     public transient Function<ContextUtils.EntityLevelContext, Object> createNavigation;
     public transient Consumer<ContextUtils.MobInteractContext> onMobInteract;
-    public transient Predicate<LivingEntity> isSunBurnTick;
+    public transient BooleanCallback<LivingEntity> isSunBurnTick;
 
     public ModifyMobBuilder(EntityType<?> entity) {
         super(entity);
@@ -50,7 +51,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder canTakeItem(Predicate<ContextUtils.EntityItemLevelContext> predicate) {
+    public ModifyMobBuilder canTakeItem(BooleanCallback<ContextUtils.EntityItemLevelContext> predicate) {
         canTakeItem = predicate;
         return this;
     }
@@ -65,7 +66,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder isSunBurnTick(Predicate<LivingEntity> isSunBurnTick) {
+    public ModifyMobBuilder isSunBurnTick(BooleanCallback<LivingEntity> isSunBurnTick) {
         this.isSunBurnTick = isSunBurnTick;
         return this;
     }
@@ -120,7 +121,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder canBeLeashed(Predicate<Mob> canBeLeashed) {
+    public ModifyMobBuilder canBeLeashed(BooleanCallback<Mob> canBeLeashed) {
         this.canBeLeashed = canBeLeashed;
         return this;
     }
@@ -139,7 +140,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder removeWhenFarAway(Predicate<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway) {
+    public ModifyMobBuilder removeWhenFarAway(BooleanCallback<ContextUtils.EntityDistanceToPlayerContext> removeWhenFarAway) {
         this.removeWhenFarAway = removeWhenFarAway;
         return this;
     }
@@ -234,7 +235,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder canHoldItem(Predicate<ContextUtils.EntityItemStackContext> canHoldItem) {
+    public ModifyMobBuilder canHoldItem(BooleanCallback<ContextUtils.EntityItemStackContext> canHoldItem) {
         this.canHoldItem = canHoldItem;
         return this;
     }
@@ -268,7 +269,7 @@ public class ModifyMobBuilder extends ModifyLivingEntityBuilder {
             });
             ```
             """)
-    public ModifyMobBuilder canPickUpLoot(Predicate<Mob> canPickUpLoot) {
+    public ModifyMobBuilder canPickUpLoot(BooleanCallback<Mob> canPickUpLoot) {
         this.canPickUpLoot = canPickUpLoot;
         return this;
     }

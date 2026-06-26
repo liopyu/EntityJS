@@ -1,4 +1,4 @@
-package net.liopyu.entityjs.util.data;
+package net.liopyu.entityjs.util.overrides.data;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;

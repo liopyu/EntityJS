@@ -6,6 +6,7 @@ import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.implementation.EACAccess;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -46,7 +47,7 @@ public class AttributeCreationEventJS implements KubeEvent {
                 : new AttributeSupplier.Builder(existing);
 
         AttributeCreationHelper helper = new AttributeCreationHelper(builder);
-        attributes.accept(helper);
+        CallbackInvoker.wrapConsumer(attributes).accept(helper);
 
         internalMap.put(entityType, builder.build());
     }
