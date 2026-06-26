@@ -6,6 +6,7 @@ import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -91,8 +92,9 @@ public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
             ```
             """)
     public GeoLayerJSBuilder<T> textureResource(Function<T, Object> function) {
+        var wrappedFunction = CallbackInvoker.wrapFunction(function);
         textureResource = entity -> {
-            Object obj = function.apply(entity);
+            Object obj = wrappedFunction.apply(entity);
             if (obj instanceof String && !obj.toString().equals("undefined")) {
                 return new ResourceLocation((String) obj);
             } else if (obj instanceof ResourceLocation) {
@@ -131,7 +133,7 @@ public class GeoLayerJSBuilder<T extends LivingEntity & IAnimatableJS> {
             ```
             """)
     public GeoLayerJSBuilder<T> renderType(Function<T, net.minecraft.client.renderer.RenderType> type) {
-        renderTypeFunction = type;
+        renderTypeFunction = CallbackInvoker.wrapFunction(type);
         return this;
     }
 }
