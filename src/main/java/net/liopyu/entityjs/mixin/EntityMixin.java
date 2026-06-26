@@ -73,19 +73,20 @@ public abstract class EntityMixin implements IEntityJS {
     @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
+        if (EntityJSUtils.handlesOwnEntityJsCallbacks(entityJs$getLivingEntity())) {
+            entityJs$builder = null;
+            entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+            return;
+        }
+
         var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
         entityJs$builder = eventJS.getBuilder();
         var customBuilder = EntityJSUtils.getEntityBuilder(pEntityType);
         if (!(entityJs$getLivingEntity() instanceof LivingEntity) && customBuilder instanceof CustomEntityJSBuilder) {
             var rl = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
-            var customConsumer = createCustomMap.get(rl);
-            if (customConsumer != null) {
-                customConsumer.accept((ModifyEntityBuilder) entityJs$builder);
-            }
+            applyCustomModifierIfNeeded(rl, (ModifyEntityBuilder) entityJs$builder);
         }
-        if (EventHandlers.modifyEntity.hasListeners()) {
-            EventHandlers.modifyEntity.post(eventJS);
-        }
+        eventJS.postModifyEventIfNeeded();
         entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
     }
 

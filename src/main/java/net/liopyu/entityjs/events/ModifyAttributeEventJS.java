@@ -5,6 +5,7 @@ import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,7 +31,7 @@ public class ModifyAttributeEventJS extends EventJS {
     })
     public void modify(EntityType<? extends LivingEntity> entityType, Consumer<AttributeModificationHelper> attributes) {
         final AttributeModificationHelper helper = new AttributeModificationHelper(entityType, event);
-        attributes.accept(helper);
+        CallbackInvoker.wrapConsumer(attributes).accept(helper);
     }
 
     @Info(value = "Returns a list of all entity types that can have their attributes modified by this event")

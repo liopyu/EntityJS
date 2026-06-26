@@ -6,7 +6,6 @@ import net.liopyu.entityjs.entities.living.entityjs.MobEntityJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
-import net.liopyu.entityjs.util.EventHandlers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.item.ItemStack;
@@ -44,11 +43,9 @@ public abstract class EntityPartMixin extends LivingEntity {
     protected EntityPartMixin(EntityType<? extends LivingEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         var entityType = entityJs$getLivingEntity().getType();
-        if (EventHandlers.modifyEntity.hasListeners()) {
-            var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
-            EventHandlers.modifyEntity.post(eventJS);
-            entityJs$builder = eventJS.getBuilder();
-        }
+        var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
+        eventJS.postModifyEventIfNeeded();
+        entityJs$builder = eventJS.getBuilder();
 
         List<PartEntityJS<?>> tempPartEntities = new ArrayList<>();
         for (ContextUtils.PartEntityParams<?> params : ((ModifyLivingEntityBuilder) entityJs$builder).partEntityParamsList) {
