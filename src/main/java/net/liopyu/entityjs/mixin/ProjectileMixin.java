@@ -3,9 +3,10 @@ package net.liopyu.entityjs.mixin;
 import net.liopyu.entityjs.builders.modification.ModifyProjectileBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EntitySerializerType;
-import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.implementation.IProjectilsJs;
+import net.liopyu.entityjs.util.overrides.CallbackUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializer;
@@ -27,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static net.liopyu.entityjs.events.EntityModificationEventJS.getOrCreate;
 
@@ -49,9 +51,24 @@ public class ProjectileMixin implements IProjectilsJs {
         return entityJs$getLivingEntity().getType().toString();
     }
 
+    @Unique
+    private void entityJs$withMixinFallback(String fieldName, CallbackInfo ci, Runnable callback) {
+        CallbackUtils.with(fieldName, ci, () -> null, callback);
+    }
+
+    @Unique
+    private Object entityJs$withReturnFallback(String fieldName, CallbackInfoReturnable<?> cir, Supplier<Object> callback) {
+        return CallbackUtils.with(fieldName, cir, cir::getReturnValue, callback);
+    }
+
     @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
         var entityType = entityJs$getLivingEntity().getType();
+        if (EntityJSUtils.handlesOwnEntityJsCallbacks(entityJs$getLivingEntity())) {
+            entityJs$builder = null;
+            return;
+        }
+
         var eventJS = getOrCreate(entityType, entityJs$getLivingEntity());
         entityJs$builder = eventJS.getBuilder();
         entityJs$defineSynchedData();
@@ -234,7 +251,8 @@ public class ProjectileMixin implements IProjectilsJs {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyProjectileBuilder builder) {
             if (builder != null && builder.onHitEntity != null) {
                 final ContextUtils.ProjectileEntityHitContext context = new ContextUtils.ProjectileEntityHitContext(pResult, entityJs$getLivingEntity());
-                EntityJSHelperClass.consumerCallback(builder.onHitEntity, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHitEntity.");
+                entityJs$withMixinFallback("onHitEntity", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onHitEntity, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHitEntity."));
             }
         }
 
@@ -245,17 +263,18 @@ public class ProjectileMixin implements IProjectilsJs {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyProjectileBuilder builder) {
             if (builder != null && builder.onHitBlock != null) {
                 final ContextUtils.ProjectileBlockHitContext context = new ContextUtils.ProjectileBlockHitContext(pResult, entityJs$getLivingEntity());
-                EntityJSHelperClass.consumerCallback(builder.onHitBlock, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHitBlock.");
+                entityJs$withMixinFallback("onHitBlock", ci, () ->
+                        EntityJSHelperClass.consumerCallback(builder.onHitBlock, context, "[EntityJS]: Error in " + entityJs$entityName() + "builder for field: onHitBlock."));
             }
         }
 
     }
 
-    @Inject(method = "canHitEntity", at = @At("HEAD"), remap = true, cancellable = true)
+    @Inject(method = "canHitEntity", at = @At("RETURN"), remap = true, cancellable = true)
     protected void canHitEntity(Entity pTarget, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyProjectileBuilder builder) {
             if (builder != null && builder.canHitEntity != null) {
-                Object obj = builder.canHitEntity.apply(pTarget);
+                Object obj = entityJs$withReturnFallback("canHitEntity", cir, () -> builder.canHitEntity.test(pTarget));
                 if (obj instanceof Boolean b) {
                     boolean bool = cir.getReturnValue() && b;
                     cir.setReturnValue(bool);

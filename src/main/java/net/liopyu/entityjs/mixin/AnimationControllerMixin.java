@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.mixin;
 
 import net.liopyu.entityjs.util.implementation.IAnimationControllerJS;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,6 +25,10 @@ public class AnimationControllerMixin<T extends GeoAnimatable> implements IAnima
     private double entityJs$currentAnimationTick = 0;
     @Unique
     private AnimationController<T> entityJs$self = (AnimationController<T>) (Object) this;
+    @Unique
+    private Function<T, Double> entityJs$lastAnimationSpeedModifier;
+    @Unique
+    private Function<T, Double> entityJs$cachedAnimationSpeedModifier;
     @Shadow
     protected boolean shouldResetTick;
     @Shadow
@@ -37,8 +42,17 @@ public class AnimationControllerMixin<T extends GeoAnimatable> implements IAnima
     @Unique
     protected double entityJs$adjustTick(double tick) {
         if (!this.shouldResetTick)
-            return this.animationSpeedModifier.apply(this.animatable) * Math.max(tick - this.tickOffset, 0);
+            return this.entityJs$getAnimationSpeedModifier().apply(this.animatable) * Math.max(tick - this.tickOffset, 0);
         return 0;
+    }
+
+    @Unique
+    private Function<T, Double> entityJs$getAnimationSpeedModifier() {
+        if (this.animationSpeedModifier != this.entityJs$lastAnimationSpeedModifier) {
+            this.entityJs$lastAnimationSpeedModifier = this.animationSpeedModifier;
+            this.entityJs$cachedAnimationSpeedModifier = CallbackInvoker.wrapFunction(this.animationSpeedModifier);
+        }
+        return this.entityJs$cachedAnimationSpeedModifier;
     }
 
     @Inject(method = "process", at = @At(value = "HEAD"))
