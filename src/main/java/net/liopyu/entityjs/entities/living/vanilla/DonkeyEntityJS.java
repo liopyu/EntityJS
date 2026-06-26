@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.entities.living.vanilla;
 
 import net.liopyu.entityjs.util.overrides.LivingEntityOverrides;
+import net.liopyu.entityjs.util.overrides.OverrideUtils;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
@@ -881,7 +882,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
             return super.canAddPassenger(entity);
         }
         final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(entity, this);
-        Object obj = builder.canAddPassenger.apply(context);
+        Object obj = OverrideUtils.with(() -> super.canAddPassenger(entity), () -> builder.canAddPassenger.apply(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -893,7 +894,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     @Override
     protected boolean shouldDropLoot() {
         if (builder.shouldDropLoot != null) {
-            Object obj = builder.shouldDropLoot.apply(this);
+            Object obj = OverrideUtils.with(super::shouldDropLoot, () -> builder.shouldDropLoot.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -906,7 +907,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     @Override
     protected boolean isAffectedByFluids() {
         if (builder.isAffectedByFluids != null) {
-            Object obj = builder.isAffectedByFluids.apply(this);
+            Object obj = OverrideUtils.with(super::isAffectedByFluids, () -> builder.isAffectedByFluids.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -938,7 +939,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     @Override
     protected boolean isFlapping() {
         if (builder.isFlapping != null) {
-            Object obj = builder.isFlapping.apply(this);
+            Object obj = OverrideUtils.with(super::isFlapping, () -> builder.isFlapping.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1011,7 +1012,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean canAttackType(@NotNull EntityType<?> entityType) {
         if (builder.canAttackType != null) {
             final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(this, entityType);
-            Object obj = builder.canAttackType.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canAttackType(entityType), () -> builder.canAttackType.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1043,7 +1044,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     @Override
     public boolean shouldDropExperience() {
         if (builder.shouldDropExperience != null) {
-            Object obj = builder.shouldDropExperience.apply(this);
+            Object obj = OverrideUtils.with(super::shouldDropExperience, () -> builder.shouldDropExperience.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1074,7 +1075,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
     public boolean canAttack(@NotNull LivingEntity entity) {
         if (builder.canAttack != null) {
             final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(this, entity);
-            Object obj = builder.canAttack.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canAttack(entity), () -> builder.canAttack.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj && super.canAttack(entity);
             }
@@ -1090,7 +1091,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
             return super.canBeAffected(effectInstance);
         }
         final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-        Object result = builder.canBeAffected.apply(context);
+        Object result = OverrideUtils.with(() -> super.canBeAffected(effectInstance), () -> builder.canBeAffected.apply(context));
         if (result instanceof Boolean) {
             return (boolean) result;
         }
@@ -1104,7 +1105,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.invertedHealAndHarm == null) {
             return super.isInvertedHealAndHarm();
         }
-        Object obj = builder.invertedHealAndHarm.apply(this);
+        Object obj = OverrideUtils.with(super::isInvertedHealAndHarm, () -> builder.invertedHealAndHarm.apply(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -1142,7 +1143,7 @@ public class DonkeyEntityJS extends Donkey implements IAnimatableJS {
         if (builder.onClimbable == null) {
             return super.onClimbable();
         }
-        Object obj = builder.onClimbable.apply(this);
+        Object obj = OverrideUtils.with(super::onClimbable, () -> builder.onClimbable.apply(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
