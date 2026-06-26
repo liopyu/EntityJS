@@ -69,7 +69,7 @@ public class MoveControlJS extends MoveControl {
     @Override
     public boolean hasWanted() {
         if (builder.hasWanted != null) {
-            Object obj = builder.hasWanted.apply(mob);
+            Object obj = builder.hasWanted.test(mob);
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for hasWanted from entity:" + entityName() + " Move Control builder. Value: " + obj + ". Defaulting to super method.");
         }
@@ -131,7 +131,7 @@ public class MoveControlJS extends MoveControl {
     protected boolean isWalkable(float pRelativeX, float pRelativeZ) {
         if (builder.isWalkable != null) {
             ContextUtils.IsWalkableContext context = new ContextUtils.IsWalkableContext(pRelativeX, pRelativeZ);
-            Object obj = builder.isWalkable.apply(context);
+            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isWalkable.test(context), "boolean");
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isWalkable from entity:" + entityName() + " Move Control builder. Value: " + obj + ". Defaulting to super method.");
         }
