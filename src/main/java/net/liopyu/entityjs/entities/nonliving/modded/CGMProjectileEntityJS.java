@@ -13,6 +13,7 @@ import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.overrides.NonLivingEntityOverrides;
+import net.liopyu.entityjs.util.overrides.OverrideUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
@@ -271,7 +272,7 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
             return super.canAddPassenger(entity);
         }
         final ContextUtils.EPassengerEntityContext context = new ContextUtils.EPassengerEntityContext(entity, this);
-        Object obj = builder.canAddPassenger.apply(context);
+        Object obj = OverrideUtils.with(() -> super.canAddPassenger(entity), () -> builder.canAddPassenger.apply(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -372,7 +373,7 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-            Object obj = builder.shouldRenderAtSqrDistance.apply(context);
+            Object obj = OverrideUtils.with(() -> super.shouldRenderAtSqrDistance(distance), () -> builder.shouldRenderAtSqrDistance.apply(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
         }
@@ -394,7 +395,7 @@ public class CGMProjectileEntityJS extends MissileEntity implements IAnimatableJ
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object obj = builder.canBeCollidedWith.apply(this);
+        Object obj = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.apply(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }

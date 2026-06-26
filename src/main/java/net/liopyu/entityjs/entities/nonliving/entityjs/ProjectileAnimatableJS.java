@@ -10,6 +10,7 @@ import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.overrides.NonLivingEntityOverrides;
+import net.liopyu.entityjs.util.overrides.OverrideUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -227,7 +228,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-            Object obj = builder.shouldRenderAtSqrDistance.apply(context);
+            Object obj = OverrideUtils.with(() -> super.shouldRenderAtSqrDistance(distance), () -> builder.shouldRenderAtSqrDistance.apply(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
         }
@@ -278,7 +279,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
     @Override
     protected boolean canHitEntity(Entity entity) {
         if (builder != null && builder.canHitEntity != null) {
-            Object obj = builder.canHitEntity.apply(entity);
+            Object obj = OverrideUtils.with(() -> super.canHitEntity(entity), () -> builder.canHitEntity.apply(entity));
             if (obj instanceof Boolean b) return super.canHitEntity(entity) && b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid canHitEntity for arrow builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.canHitEntity(entity));
         }
@@ -373,7 +374,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
             return super.canAddPassenger(entity);
         }
         final ContextUtils.EPassengerEntityContext context = new ContextUtils.EPassengerEntityContext(entity, this);
-        Object obj = builder.canAddPassenger.apply(context);
+        Object obj = OverrideUtils.with(() -> super.canAddPassenger(entity), () -> builder.canAddPassenger.apply(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -385,7 +386,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
     @Override
     protected boolean isFlapping() {
         if (builder.isFlapping != null) {
-            Object obj = builder.isFlapping.apply(this);
+            Object obj = OverrideUtils.with(super::isFlapping, () -> builder.isFlapping.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -462,7 +463,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
             final ContextUtils.EDamageContext context = new ContextUtils.EDamageContext(this, p_20122_);
-            Object obj = builder.isInvulnerableTo.apply(context);
+            Object obj = OverrideUtils.with(() -> super.isInvulnerableTo(p_20122_), () -> builder.isInvulnerableTo.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -475,7 +476,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
     @Override
     public boolean canChangeDimensions() {
         if (builder.canChangeDimensions != null) {
-            Object obj = builder.canChangeDimensions.apply(this);
+            Object obj = OverrideUtils.with(super::canChangeDimensions, () -> builder.canChangeDimensions.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -489,7 +490,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
         if (builder.mayInteract != null) {
             final ContextUtils.EMayInteractContext context = new ContextUtils.EMayInteractContext(p_146843_, p_146844_, this);
-            Object obj = builder.mayInteract.apply(context);
+            Object obj = OverrideUtils.with(() -> super.mayInteract(p_146843_, p_146844_), () -> builder.mayInteract.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -504,7 +505,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
             final ContextUtils.ECanTrampleContext context = new ContextUtils.ECanTrampleContext(state, pos, fallDistance, this);
-            Object obj = builder.canTrample.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canTrample(state, pos, fallDistance), () -> builder.canTrample.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -529,7 +530,7 @@ public class ProjectileAnimatableJS extends ThrowableItemProjectile implements I
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object obj = builder.canBeCollidedWith.apply(this);
+        Object obj = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.apply(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
