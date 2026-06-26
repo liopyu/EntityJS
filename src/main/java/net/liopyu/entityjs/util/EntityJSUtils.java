@@ -2,7 +2,7 @@ package net.liopyu.entityjs.util;
 
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.typings.Info;
-import dev.latvian.mods.kubejs.util.UtilsJS;
+import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.misc.*;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
@@ -10,22 +10,43 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ArrowEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderEntityBuilder;
-import net.liopyu.entityjs.client.living.CustomKubeJSEntityRenderer;
-import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
-import net.liopyu.entityjs.client.nonliving.*;
+import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
+import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
+import net.liopyu.entityjs.entities.nonliving.entityjs.IAnimatableJSNL;
+import net.liopyu.entityjs.entities.nonliving.entityjs.IProjectileEntityJS;
 import net.liopyu.entityjs.util.ai.JumpControlJS;
 import net.liopyu.entityjs.util.ai.LookControlJS;
 import net.liopyu.entityjs.util.ai.MoveControlJS;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
+import net.liopyu.entityjs.util.overrides.CallbackUtils;
+import net.liopyu.entityjs.util.overrides.OverrideUtils;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.*;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.function.Consumer;
 
 public interface EntityJSUtils {
+    @Info("Calls the vanilla super method for the currently executing EntityJS override.")
+    static Object superCall() {
+        return OverrideUtils.call();
+    }
+
+    @Info("Returns callback info controls for the currently executing EntityJS builder callback.")
+    static CallbackUtils.CallbackInfoAccess getCallbackInfo() {
+        return CallbackUtils.CALLBACK_INFO;
+    }
+
+    @HideFromJS
+    static boolean handlesOwnEntityJsCallbacks(Entity entity) {
+        return entity instanceof IAnimatableJS
+                || entity instanceof IAnimatableJSCustom
+                || entity instanceof IAnimatableJSNL
+                || entity instanceof IProjectileEntityJS;
+    }
+
     @Info("Helper method to get the entity's builder for the type.")
     static <T extends BuilderBase<?>> T getEntityBuilder(EntityType<?> type) {
         for (ArrowEntityBuilder<?> builder : ArrowEntityBuilder.thisList) {
@@ -37,10 +58,10 @@ public interface EntityJSUtils {
         for (EyeOfEnderEntityBuilder<?> builder : EyeOfEnderEntityBuilder.thisList) {
             if (builder.get() == type) return (T) builder;
         }
-        for (BoatEntityBuilder<?> builder : BoatEntityBuilder.thisList) {
+        for (CustomEntityJSBuilder builder : CustomEntityBuilder.thisList) {
             if (builder.get() == type) return (T) builder;
         }
-        for (CustomEntityJSBuilder builder : CustomEntityBuilder.thisList) {
+        for (BoatEntityBuilder<?> builder : BoatEntityBuilder.thisList) {
             if (builder.get() == type) return (T) builder;
         }
         for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
@@ -52,11 +73,11 @@ public interface EntityJSUtils {
         return null;
     }
 
-
     @Info("Creates a custom Jump Control builder and returns it.")
     static JumpControlJS createJumpControl(Mob pMob, Consumer<JumpControlJSBuilder> consumer) {
         var builder = new JumpControlJSBuilder();
         EntityJSHelperClass.consumerCallback(consumer, builder, "[EntityJS]: Error in " + pMob.getType() + "builder for field: createJumpControl.");
+        CallbackInvoker.wrapCallbackFields(builder);
         return new JumpControlJS(pMob, builder);
     }
 
@@ -64,6 +85,7 @@ public interface EntityJSUtils {
     static MoveControlJS createMoveControl(Mob pMob, Consumer<MoveControlJSBuilder> consumer) {
         var builder = new MoveControlJSBuilder();
         EntityJSHelperClass.consumerCallback(consumer, builder, "[EntityJS]: Error in " + pMob.getType() + "builder for field: createMoveControl.");
+        CallbackInvoker.wrapCallbackFields(builder);
         return new MoveControlJS(pMob, builder);
     }
 
@@ -71,6 +93,7 @@ public interface EntityJSUtils {
     static LookControlJS createLookControl(Mob pMob, Consumer<LookControlJSBuilder> consumer) {
         var builder = new LookControlJSBuilder();
         EntityJSHelperClass.consumerCallback(consumer, builder, "[EntityJS]: Error in " + pMob.getType() + "builder for field: createLookControl.");
+        CallbackInvoker.wrapCallbackFields(builder);
         return new LookControlJS(pMob, builder);
     }
 
@@ -98,5 +121,4 @@ public interface EntityJSUtils {
     static WaterBoundPathNavigation createWaterBoundPathNavigation(Mob pMob, Level pLevel) {
         return new WaterBoundPathNavigation(pMob, pLevel);
     }
-
 }

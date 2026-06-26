@@ -17,6 +17,7 @@
     "ServerScriptManagerMixin"
   ],
   "client": [
+    "EntityRenderersAccessor",
     "EntityRendererMixin",
     "LivingEntityRendererMixin"
   ],

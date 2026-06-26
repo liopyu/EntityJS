@@ -14,13 +14,14 @@ import net.liopyu.entityjs.client.living.CustomKubeJSEntityRenderer;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.client.nonliving.*;
 import net.liopyu.entityjs.util.ModKeybinds;
+import net.liopyu.entityjs.util.EntityRendererTypeHelper;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 
 public class ClientEventHandlers {
 
@@ -34,7 +35,6 @@ public class ClientEventHandlers {
     }
 
     public static void init() {
-
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         modBus.addListener(ClientEventHandlers::registerEntityRenders);
     }
@@ -59,8 +59,10 @@ public class ClientEventHandlers {
             event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new KubeJSBoatRenderer<>(renderManager, builder));
         }
         for (CustomEntityJSBuilder builder : CustomEntityBuilder.thisList) {
-            if (builder instanceof CustomEntityBuilder customBuilder && customBuilder.usesCustomRenderer()) {
-                event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> UtilsJS.cast(customBuilder.createEntityRenderer(renderManager)));
+            if (builder instanceof CustomEntityBuilder customBuilder && customBuilder.usesEntityTypeRenderer()) {
+                event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> EntityRendererTypeHelper.create(renderManager, customBuilder));
+            } else if (builder instanceof CustomEntityBuilder customBuilder && customBuilder.usesCustomRenderer()) {
+                event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> EntityRendererTypeHelper.compatibleRendererOrThrow(customBuilder, customBuilder.createEntityRenderer(renderManager), "custom renderer"));
             } else if (builder instanceof CustomEntityBuilder customBuilder && customBuilder.usesEntityModelRenderer()) {
                 event.registerEntityRenderer(UtilsJS.cast(builder.get()), renderManager -> new CustomEntityModelRenderer<>(renderManager, customBuilder));
             } else if (builder instanceof CustomEntityBuilder customBuilder && !customBuilder.isLivingEntityClass()) {

@@ -51,7 +51,43 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
 import software.bernie.geckolib.renderer.layer.ItemArmorGeoLayer;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Supplier;
+
 public class ContextUtils {
+    public static class DynamicOverrideContext<T extends Entity> {
+        public final T entity;
+        public final String method;
+        public final Map<String, Object> args;
+        private final Supplier<Object> superCall;
+        private boolean superCalled;
+        private Object superValue;
+
+        public DynamicOverrideContext(T entity, String method, Map<String, Object> args, Supplier<Object> superCall) {
+            this.entity = entity;
+            this.method = method;
+            this.args = Collections.unmodifiableMap(args);
+            this.superCall = superCall;
+        }
+
+        public Object get(String name) {
+            return args.get(name);
+        }
+
+        public Object callSuper() {
+            if (!superCalled) {
+                superValue = superCall.get();
+                superCalled = true;
+            }
+            return superValue;
+        }
+
+        public Object superCall() {
+            return callSuper();
+        }
+    }
+
     public static class VanillaArmorRenderContext<T extends LivingEntity & IAnimatableJS> {
         public final ItemArmorGeoLayer<T> renderer;
         public final PoseStack poseStack;
