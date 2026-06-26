@@ -11,6 +11,7 @@ import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
+import net.liopyu.entityjs.util.overrides.LivingEntityOverrides;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -738,10 +739,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public void tick() {
-        super.tick();
-        if (builder.tick != null) {
-            EntityJSHelperClass.consumerCallback(builder.tick, this, "[EntityJS]: Error in " + entityName() + "builder for field: tick.");
-        }
+        LivingEntityOverrides.tick(this, builder, super::tick);
     }
 
     @Override
@@ -898,13 +896,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public boolean canCollideWith(Entity pEntity) {
-        if (builder.canCollideWith != null) {
-            final ContextUtils.CollidingEntityContext context = new ContextUtils.CollidingEntityContext(this, pEntity);
-            Object obj = builder.canCollideWith.apply(context);
-            if (obj instanceof Boolean b) return b;
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canCollideWith from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canCollideWith(pEntity));
-        }
-        return super.canCollideWith(pEntity);
+        return LivingEntityOverrides.canCollideWith(this, builder, pEntity, () -> super.canCollideWith(pEntity));
     }
 
     @Override
@@ -971,7 +963,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public boolean isPushable() {
-        return builder.isPushable;
+        return LivingEntityOverrides.isPushable(builder);
     }
 
     @Override
@@ -1293,11 +1285,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public void setSprinting(boolean sprinting) {
-        if (builder.onSprint != null) {
-            EntityJSHelperClass.consumerCallback(builder.onSprint, this, "[EntityJS]: Error in " + entityName() + "builder for field: onSprint.");
-
-        }
-        super.setSprinting(sprinting);
+        LivingEntityOverrides.setSprinting(this, builder, () -> super.setSprinting(sprinting));
     }
 
 
@@ -1350,11 +1338,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public void rideTick() {
-        super.rideTick();
-        if (builder.rideTick != null) {
-            EntityJSHelperClass.consumerCallback(builder.rideTick, this, "[EntityJS]: Error in " + entityName() + "builder for field: rideTick.");
-
-        }
+        LivingEntityOverrides.rideTick(this, builder, super::rideTick);
     }
 
 
@@ -1504,40 +1488,19 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public boolean canFreeze() {
-        if (builder.canFreeze != null) {
-            Object obj = builder.canFreeze.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canFreeze from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canFreeze());
-        }
-        return super.canFreeze();
+        return LivingEntityOverrides.canFreeze(this, builder, super::canFreeze);
     }
 
 
     @Override
     public boolean isFreezing() {
-        if (builder.isFreezing != null) {
-            Object obj = builder.isFreezing.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFreezing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFreezing());
-        }
-        return super.isFreezing();
+        return LivingEntityOverrides.isFreezing(this, builder, super::isFreezing);
     }
 
 
     @Override
     public boolean isCurrentlyGlowing() {
-        if (builder.isCurrentlyGlowing != null) {
-            Object obj = builder.isCurrentlyGlowing.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isCurrentlyGlowing from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isCurrentlyGlowing());
-        }
-        return super.isCurrentlyGlowing();
+        return LivingEntityOverrides.isCurrentlyGlowing(this, builder, super::isCurrentlyGlowing);
     }
 
 
@@ -1556,11 +1519,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public void onClientRemoval() {
-        if (builder.onClientRemoval != null) {
-            EntityJSHelperClass.consumerCallback(builder.onClientRemoval, this, "[EntityJS]: Error in " + entityName() + "builder for field: onClientRemoval.");
-
-        }
-        super.onClientRemoval();
+        LivingEntityOverrides.onClientRemoval(this, builder, super::onClientRemoval);
     }
 
     @Override
@@ -1575,11 +1534,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public void lavaHurt() {
-        if (builder.lavaHurt != null) {
-            EntityJSHelperClass.consumerCallback(builder.lavaHurt, this, "[EntityJS]: Error in " + entityName() + "builder for field: lavaHurt.");
-
-        }
-        super.lavaHurt();
+        LivingEntityOverrides.lavaHurt(this, builder, super::lavaHurt);
     }
 
 
@@ -1598,14 +1553,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public boolean dampensVibrations() {
-        if (builder.dampensVibrations != null) {
-            Object obj = builder.dampensVibrations.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for dampensVibrations from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.dampensVibrations());
-        }
-        return super.dampensVibrations();
+        return LivingEntityOverrides.dampensVibrations(this, builder, super::dampensVibrations);
     }
 
 
@@ -1627,14 +1575,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public boolean showVehicleHealth() {
-        if (builder.showVehicleHealth != null) {
-            Object obj = builder.showVehicleHealth.apply(this);
-            if (obj instanceof Boolean) {
-                return (boolean) obj;
-            }
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for showVehicleHealth from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.showVehicleHealth());
-        }
-        return super.showVehicleHealth();
+        return LivingEntityOverrides.showVehicleHealth(this, builder, super::showVehicleHealth);
     }
 
 
@@ -1708,10 +1649,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public void onRemovedFromWorld() {
-        if (builder != null && builder.onRemovedFromWorld != null) {
-            EntityJSHelperClass.consumerCallback(builder.onRemovedFromWorld, this, "[EntityJS]: Error in " + entityName() + "builder for field: onRemovedFromWorld.");
-        }
-        super.onRemovedFromWorld();
+        LivingEntityOverrides.onRemovedFromWorld(this, builder, super::onRemovedFromWorld);
     }
 
 
