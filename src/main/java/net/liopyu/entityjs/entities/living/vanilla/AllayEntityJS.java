@@ -1146,7 +1146,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     public boolean canStandOnFluid(@NotNull FluidState fluidState) {
         if (builder.canStandOnFluid != null) {
             final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(this, fluidState);
-            Object obj = builder.canStandOnFluid.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canStandOnFluid(fluidState), () -> builder.canStandOnFluid.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1159,7 +1159,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     @Override
     public boolean isSensitiveToWater() {
         if (builder.isSensitiveToWater != null) {
-            Object obj = builder.isSensitiveToWater.apply(this);
+            Object obj = OverrideUtils.with(super::isSensitiveToWater, () -> builder.isSensitiveToWater.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1200,7 +1200,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     public boolean hasLineOfSight(@NotNull Entity entity) {
         if (builder.hasLineOfSight != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entity, this);
-            Object obj = builder.hasLineOfSight.apply(context);
+            Object obj = OverrideUtils.with(() -> super.hasLineOfSight(entity), () -> builder.hasLineOfSight.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1233,7 +1233,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     @Override
     public boolean isAffectedByPotions() {
         if (builder.isAffectedByPotions != null) {
-            Object obj = builder.isAffectedByPotions.apply(this);
+            Object obj = OverrideUtils.with(super::isAffectedByPotions, () -> builder.isAffectedByPotions.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1246,7 +1246,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     @Override
     public boolean attackable() {
         if (builder.isAttackable != null) {
-            Object obj = builder.isAttackable.apply(this);
+            Object obj = OverrideUtils.with(super::attackable, () -> builder.isAttackable.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1260,7 +1260,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
             final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
-            Object obj = builder.canTakeItem.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canTakeItem(itemStack), () -> builder.canTakeItem.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1273,7 +1273,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     @Override
     public boolean isSleeping() {
         if (builder.isSleeping != null) {
-            Object obj = builder.isSleeping.apply(this);
+            Object obj = OverrideUtils.with(super::isSleeping, () -> builder.isSleeping.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1319,7 +1319,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     public boolean shouldRiderFaceForward(@NotNull Player player) {
         if (builder.shouldRiderFaceForward != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, this);
-            Object obj = builder.shouldRiderFaceForward.apply(context);
+            Object obj = OverrideUtils.with(() -> super.shouldRiderFaceForward(player), () -> builder.shouldRiderFaceForward.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1350,7 +1350,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     @Override
     public boolean canDisableShield() {
         if (builder.canDisableShield != null) {
-            Object obj = builder.canDisableShield.apply(this);
+            Object obj = OverrideUtils.with(super::canDisableShield, () -> builder.canDisableShield.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1427,7 +1427,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
             final ContextUtils.DamageContext context = new ContextUtils.DamageContext(this, p_20122_);
-            Object obj = builder.isInvulnerableTo.apply(context);
+            Object obj = OverrideUtils.with(() -> super.isInvulnerableTo(p_20122_), () -> builder.isInvulnerableTo.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1440,7 +1440,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     @Override
     public boolean canChangeDimensions() {
         if (builder.canChangeDimensions != null) {
-            Object obj = builder.canChangeDimensions.apply(this);
+            Object obj = OverrideUtils.with(super::canChangeDimensions, () -> builder.canChangeDimensions.apply(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1454,7 +1454,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
         if (builder.mayInteract != null) {
             final ContextUtils.MayInteractContext context = new ContextUtils.MayInteractContext(p_146843_, p_146844_, this);
-            Object obj = builder.mayInteract.apply(context);
+            Object obj = OverrideUtils.with(() -> super.mayInteract(p_146843_, p_146844_), () -> builder.mayInteract.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1469,7 +1469,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
             final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
-            Object obj = builder.canTrample.apply(context);
+            Object obj = OverrideUtils.with(() -> super.canTrample(state, pos, fallDistance), () -> builder.canTrample.apply(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1510,7 +1510,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-            Object obj = builder.shouldRenderAtSqrDistance.apply(context);
+            Object obj = OverrideUtils.with(() -> super.shouldRenderAtSqrDistance(distance), () -> builder.shouldRenderAtSqrDistance.apply(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
         }
@@ -1522,7 +1522,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object obj = builder.canBeCollidedWith.apply(this);
+        Object obj = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.apply(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -1536,7 +1536,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
             return super.canRide(pVehicle);
         }
         var context = new ContextUtils.PassengerVehicleContext(pVehicle, this);
-        Object obj = builder.canRide.test(context);
+        Object obj = OverrideUtils.with(() -> super.canRide(pVehicle), () -> builder.canRide.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
