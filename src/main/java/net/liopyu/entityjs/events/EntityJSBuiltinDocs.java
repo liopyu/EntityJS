@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.events;
 
 import com.mojang.datafixers.util.Pair;
+import com.probejs.docs.DocCompiler;
 import com.probejs.features.plugin.DocGenerationEventJS;
 import com.probejs.jdoc.document.DocumentClass;
 import com.probejs.jdoc.document.DocumentMethod;
@@ -53,6 +54,7 @@ public final class EntityJSBuiltinDocs {
         if (!REGISTERED_EVENTS.add(event)) {
             return;
         }
+        captureEntityJSClasses();
         ProbeIndex index = buildProbeIndex();
         event.specialType("EntityJSOverrideMethodKey", quotedUnion(index.overrideMethodKeys()));
         event.specialType("EntityJSEntityClassName", quotedUnion(index.entityClassNames()));
@@ -64,6 +66,18 @@ public final class EntityJSBuiltinDocs {
         event.transformDocument(EntityModificationEventJS.class, EntityJSBuiltinDocs::patchEntityModificationEvent);
         event.transformDocument(RegistryEventJS.class, EntityJSBuiltinDocs::patchRegistryCreateCustom);
         event.transformDocument(IRegistryJS.class, EntityJSBuiltinDocs::patchRegistryCreateCustom);
+    }
+
+    private static void captureEntityJSClasses() {
+        DocCompiler.CapturedClasses.capturedJavaClasses.addAll(List.of(
+                CustomEntityBuilder.class,
+                EntityModificationEventJS.class,
+                ModifyEntityBuilder.class,
+                ModifyLivingEntityBuilder.class,
+                ModifyMobBuilder.class,
+                ModifyPathfinderMobBuilder.class,
+                ModifyProjectileBuilder.class
+        ));
     }
 
     private static void patchCustomEntityBuilder(DocumentClass documentClass) {
