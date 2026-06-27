@@ -41,10 +41,8 @@ minecraft {
     runs {
         configureEach {
             def instanceId = project.hasProperty("instance") ? project.property("instance") : "0"
-            def runDir = "run${instanceId == '0' ? '' : instanceId}"
             def username = "Dev${instanceId == '0' ? '' : instanceId}"
 
-            workingDirectory = project.file(runDir)
             args '--mixin.config=entityjs.mixins.json', '--debug', '--username', username
             property 'forge.client.window.title', username
             property 'geckolib.disable_examples', 'true'
@@ -52,6 +50,22 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', 'entityjs'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            [
+                    'entityjs.profileCallbacks',
+                    'entityjs.profileCallbacks.focusMethod',
+                    'entityjs.profileCallbacks.intervalSeconds',
+                    'entityjs.profileCallbacks.minMillis',
+                    'entityjs.profileCallbacks.minMicros',
+                    'entityjs.profileCallbacks.minNanos',
+                    'entityjs.profileCallbacks.slowStacks',
+                    'entityjs.profileCallbacks.slowStackMillis',
+                    'entityjs.profileCallbacks.slowStackLimit'
+            ].each { key ->
+                def value = System.getProperty(key)
+                if (value != null) {
+                    systemProperty key, value
+                }
+            }
 
             mods {
                 "entityjs" {
@@ -61,20 +75,25 @@ minecraft {
         }
 
         client {
+            def instanceId = project.hasProperty("instance") ? project.property("instance") : "0"
+            def runDir = "runs/client${instanceId == '0' ? '' : instanceId}"
+            workingDirectory = project.file(runDir)
             property 'forge.enabledGameTestNamespaces', mod_id
         }
 
         server {
+            workingDirectory = project.file('runs/server')
             property 'forge.enabledGameTestNamespaces', mod_id
             args '--nogui'
         }
 
         gameTestServer {
+            workingDirectory = project.file('runs/gameTestServer')
             property 'forge.enabledGameTestNamespaces', mod_id
         }
 
         data {
-            workingDirectory project.file('run-data')
+            workingDirectory project.file('runs/data')
 
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
         }
