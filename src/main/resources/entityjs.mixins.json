@@ -12,6 +12,7 @@
     "LivingEntityMixin",
     "MobMixin",
     "PathfinderMobMixin",
+    "ProbeDocCompilerMixin",
     "ProjectileMixin",
     "RegistryEventJSMixin",
     "ServerScriptManagerMixin"

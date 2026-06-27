@@ -2,14 +2,11 @@ package net.liopyu.entityjs.events;
 
 import com.mojang.datafixers.util.Pair;
 import com.probejs.features.plugin.DocGenerationEventJS;
-import com.probejs.features.plugin.ProbeJSEvents;
 import com.probejs.jdoc.document.DocumentClass;
 import com.probejs.jdoc.document.DocumentMethod;
 import com.probejs.jdoc.property.PropertyParam;
 import com.probejs.jdoc.property.PropertyType;
-import dev.latvian.mods.kubejs.event.EventJS;
 import dev.latvian.mods.kubejs.registry.RegistryEventJS;
-import dev.latvian.mods.kubejs.script.ScriptType;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
@@ -48,29 +45,8 @@ public final class EntityJSBuiltinDocs {
     private static final String OVERRIDE_METHOD_KEY = "Special.EntityJSOverrideMethodKey";
     private static final String ENTITY_CLASS_NAME = "Special.EntityJSEntityClassName";
     private static final Set<DocGenerationEventJS> REGISTERED_EVENTS = Collections.newSetFromMap(new WeakHashMap<>());
-    private static boolean installed;
 
     private EntityJSBuiltinDocs() {
-    }
-
-    public static void install() {
-        if (installed) {
-            return;
-        }
-        installed = true;
-        ProbeJSEvents.DOC_GEN.listenJava(ScriptType.SERVER, null, EntityJSBuiltinDocs::onDocGeneration);
-    }
-
-    public static void reinstall() {
-        installed = false;
-        install();
-    }
-
-    private static Object onDocGeneration(EventJS event) {
-        if (event instanceof DocGenerationEventJS docEvent) {
-            register(docEvent);
-        }
-        return null;
     }
 
     public static void register(DocGenerationEventJS event) {
