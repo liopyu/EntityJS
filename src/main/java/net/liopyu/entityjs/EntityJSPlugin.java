@@ -15,6 +15,7 @@ import net.liopyu.entityjs.builders.nonliving.entityjs.ProjectileEntityJSBuilder
 import net.liopyu.entityjs.builders.nonliving.vanilla.BoatJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderJSBuilder;
 import net.liopyu.entityjs.builders.nonliving.vanilla.TridentJSBuilder;
+import net.liopyu.entityjs.events.EntityJSBuiltinDocs;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EventHandlers;
 import org.slf4j.Logger;
@@ -69,6 +70,16 @@ public class EntityJSPlugin extends KubeJSPlugin {
             LOGGER.info("Loading CGM-EntityJS compatibility");
             RegistryInfo.ENTITY_TYPE.addType("cgm:ammo", CGMProjectileEntityJSBuilder.class, CGMProjectileEntityJSBuilder::new);
         }
+    }
+
+    @Override
+    public void afterInit() {
+        EntityJSBuiltinDocs.install();
+    }
+
+    @Override
+    public void onServerReload() {
+        EntityJSBuiltinDocs.reinstall();
     }
 
     @Override
