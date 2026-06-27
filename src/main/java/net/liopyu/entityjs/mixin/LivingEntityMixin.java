@@ -586,16 +586,16 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
     }
 
 
-    @Inject(method = "getStandingEyeHeight", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getStandingEyeHeight", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions, CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setStandingEyeHeight == null) return;
             final ContextUtils.EntityPoseDimensionsContext context = new ContextUtils.EntityPoseDimensionsContext(pPose, pDimensions, entityJs$getLivingEntity());
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setStandingEyeHeight.apply(context), "float");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("setStandingEyeHeight", cir, () -> builder.setStandingEyeHeight.apply(context)), "float");
             if (obj != null) {
                 cir.setReturnValue((float) obj);
             } else
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setStandingEyeHeight from entity: " + entityJs$entityName() + ". Value: " + builder.setStandingEyeHeight.apply(context) + ". Must be a float. Defaulting to " + cir.getReturnValue());
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setStandingEyeHeight from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + cir.getReturnValue());
 
         }
     }
@@ -636,11 +636,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
     }
 
-    @Inject(method = "isAffectedByFluids", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isAffectedByFluids", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isAffectedByFluids(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAffectedByFluids != null) {
-                Object obj = builder.isAffectedByFluids.apply(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("isAffectedByFluids", cir, () -> builder.isAffectedByFluids.test(entityJs$getLivingEntity()));
                 if (obj == null) return;
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
@@ -659,11 +659,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
     }
 
-    @Inject(method = "isImmobile", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isImmobile", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isImmobile(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isImmobile != null) {
-                Object obj = builder.isImmobile.apply(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("isImmobile", cir, () -> builder.isImmobile.test(entityJs$getLivingEntity()));
                 if (obj == null) return;
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
@@ -674,12 +674,12 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
     }
 
 
-    @Inject(method = "calculateFallDamage", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "calculateFallDamage", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$calculateFallDamage(float pFallDistance, float pDamageMultiplier, CallbackInfoReturnable<Integer> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.calculateFallDamage == null) return;
             final ContextUtils.CalculateFallDamageContext context = new ContextUtils.CalculateFallDamageContext(pFallDistance, pDamageMultiplier, entityJs$getLivingEntity());
-            var func = builder.calculateFallDamage.apply(context);
+            var func = entityJs$withReturnFallback("calculateFallDamage", cir, () -> builder.calculateFallDamage.apply(context));
             if (func == null) return;
             Object obj = EntityJSHelperClass.convertObjectToDesired(func, "integer");
             if (obj != null) {
@@ -690,16 +690,16 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
     }
 
 
-    @Inject(method = "getHurtSound", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getHurtSound", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getHurtSound(DamageSource pDamageSource, CallbackInfoReturnable<SoundEvent> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.setHurtSound == null) return;
             final ContextUtils.HurtContext context = new ContextUtils.HurtContext(entityJs$getLivingEntity(), pDamageSource);
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.setHurtSound.apply(context), "resourcelocation");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("setHurtSound", cir, () -> builder.setHurtSound.apply(context)), "resourcelocation");
             if (obj != null)
                 cir.setReturnValue(ForgeRegistries.SOUND_EVENTS.getValue((ResourceLocation) obj));
             else
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityJs$entityName() + ". Value: " + builder.setHurtSound.apply(context) + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for setHurtSound from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a ResourceLocation or String. Defaulting to \"minecraft:entity.generic.hurt\"");
 
         }
     }
@@ -719,15 +719,15 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
     }
 
-    @Inject(method = "getScale", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getScale", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getScale(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.scale == null) return;
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.scale.apply(entityJs$getLivingEntity()), "float");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("scale", cir, () -> builder.scale.apply(entityJs$getLivingEntity())), "float");
             if (obj != null) {
                 cir.setReturnValue((float) obj);
             } else {
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for scale from entity: " + entityJs$entityName() + ". Value: " + builder.scale.apply(entityJs$getLivingEntity()) + ". Must be a float. Defaulting to " + cir.getReturnValue());
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for scale from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + cir.getReturnValue());
             }
         }
     }
@@ -745,16 +745,16 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
     }
 
-    @Inject(method = "getVisibilityPercent", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getVisibilityPercent", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getVisibilityPercent(Entity pLookingEntity, CallbackInfoReturnable<Double> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.visibilityPercent != null) {
                 final ContextUtils.VisualContext context = new ContextUtils.VisualContext(pLookingEntity, entityJs$getLivingEntity());
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.visibilityPercent.apply(context), "double");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("visibilityPercent", cir, () -> builder.visibilityPercent.apply(context)), "double");
                 if (obj != null) {
                     cir.setReturnValue((double) obj);
                 } else {
-                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityJs$entityName() + ". Value: " + builder.visibilityPercent.apply(context) + ". Must be a double. Defaulting to " + cir.getReturnValue());
+                    EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for visibilityPercent from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a double. Defaulting to " + cir.getReturnValue());
                 }
             }
         }
@@ -775,7 +775,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
     }
 
-    @Inject(method = "canBeAffected", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "canBeAffected", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$canBeAffected(MobEffectInstance pEffectInstance, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canBeAffected == null) {
@@ -791,13 +791,13 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
     }
 
-    @Inject(method = "isInvertedHealAndHarm", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isInvertedHealAndHarm", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isInvertedHealAndHarm(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.invertedHealAndHarm == null) {
                 return;
             }
-            Object obj = builder.invertedHealAndHarm.apply(entityJs$getLivingEntity());
+            Object obj = entityJs$withReturnFallback("invertedHealAndHarm", cir, () -> builder.invertedHealAndHarm.test(entityJs$getLivingEntity()));
             if (obj instanceof Boolean) {
                 cir.setReturnValue((boolean) obj);
             } else
@@ -835,13 +835,13 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
     }
 
-    @Inject(method = "onClimbable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "onClimbable", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$onClimbable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.onClimbable == null) {
                 return;
             }
-            Object obj = builder.onClimbable.apply(entityJs$getLivingEntity());
+            Object obj = entityJs$withReturnFallback("onClimbable", cir, () -> builder.onClimbable.test(entityJs$getLivingEntity()));
             if (obj instanceof Boolean) {
                 cir.setReturnValue((boolean) obj);
             } else
@@ -879,38 +879,37 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
     }*/
 
-    @Inject(method = "getJumpBoostPower", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "getJumpBoostPower", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$getJumpBoostPower(CallbackInfoReturnable<Float> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.jumpBoostPower == null) return;
-            Object obj = EntityJSHelperClass.convertObjectToDesired(builder.jumpBoostPower.apply(entityJs$getLivingEntity()), "float");
+            Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("jumpBoostPower", cir, () -> builder.jumpBoostPower.apply(entityJs$getLivingEntity())), "float");
             if (obj != null) cir.setReturnValue((float) obj);
             else
-                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityJs$entityName() + ". Value: " + builder.jumpBoostPower.apply(entityJs$getLivingEntity()) + ". Must be a float. Defaulting to " + cir.getReturnValue());
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for jumpBoostPower from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a float. Defaulting to " + cir.getReturnValue());
 
         }
     }
 
-    @Inject(method = "canStandOnFluid", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "canStandOnFluid", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$canStandOnFluid(FluidState pFluidState, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canStandOnFluid != null) {
                 final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(entityJs$getLivingEntity(), pFluidState);
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.canStandOnFluid.apply(context), "boolean");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("canStandOnFluid", cir, () -> builder.canStandOnFluid.test(context)), "boolean");
                 if (obj != null) {
                     cir.setReturnValue((boolean) obj);
                 } else
                     EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canStandOnFluid from entity: " + entityJs$entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
-                cir.setReturnValue(false);
             }
         }
     }
 
-    @Inject(method = "isSensitiveToWater", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isSensitiveToWater", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isSensitiveToWater(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isSensitiveToWater != null) {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(builder.isSensitiveToWater.apply(entityJs$getLivingEntity()), "boolean");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("isSensitiveToWater", cir, () -> builder.isSensitiveToWater.test(entityJs$getLivingEntity())), "boolean");
                 if (obj != null) {
                     cir.setReturnValue((boolean) obj);
                     return;
@@ -985,11 +984,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
     }
 
-    @Inject(method = "isAffectedByPotions", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isAffectedByPotions", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isAffectedByPotions(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAffectedByPotions != null) {
-                Object obj = builder.isAffectedByPotions.apply(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("isAffectedByPotions", cir, () -> builder.isAffectedByPotions.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -998,11 +997,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
     }
 
-    @Inject(method = "attackable", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "attackable", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$attackable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAttackableFunction != null) {
-                Object obj = builder.isAttackableFunction.apply(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("isAttackableFunction", cir, () -> builder.isAttackableFunction.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -1012,11 +1011,11 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
     }
 
 
-    @Inject(method = "isSleeping", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
+    @Inject(method = "isSleeping", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isSleeping(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.isSleeping != null) {
-                Object obj = builder.isSleeping.apply(entityJs$getLivingEntity());
+                Object obj = entityJs$withReturnFallback("isSleeping", cir, () -> builder.isSleeping.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
