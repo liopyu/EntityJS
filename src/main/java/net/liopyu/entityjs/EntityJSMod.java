@@ -6,6 +6,7 @@ import net.liopyu.entityjs.client.ClientEventHandlers;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.RegistryUtil;
+import net.liopyu.entityjs.util.overrides.data.Net;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.Mod;
@@ -27,6 +28,7 @@ public class EntityJSMod {
         LOGGER.info("Loading EntityJS-Liopyu");
 
         EventHandlers.init();
+        Net.register();
         RegistryUtil.init(FMLJavaModLoadingContext.get().getModEventBus());
 
         if (FMLEnvironment.dist == Dist.CLIENT) {

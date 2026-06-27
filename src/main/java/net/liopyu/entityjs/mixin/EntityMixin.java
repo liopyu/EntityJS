@@ -8,11 +8,14 @@ import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.EntityJSUtils;
+import net.liopyu.entityjs.util.EntitySerializerType;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.util.implementation.IEntityJS;
 import net.liopyu.entityjs.util.overrides.CallbackUtils;
+import net.liopyu.entityjs.util.overrides.data.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -35,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
@@ -105,6 +109,96 @@ public abstract class EntityMixin implements IEntityJS {
         }
         eventJS.postModifyEventIfNeeded();
         entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+    }
+
+    @Unique
+    private boolean entityJs$definedOnce;
+
+    @Unique
+    private static EntitySerializerType entityjs$inferType(Object value) {
+        if (value instanceof Byte) return EntitySerializerType.BYTE;
+        if (value instanceof Integer) return EntitySerializerType.INT;
+        if (value instanceof Long) return EntitySerializerType.LONG;
+        if (value instanceof Float || value instanceof Double) return EntitySerializerType.FLOAT;
+        if (value instanceof UUID) return EntitySerializerType.UUID;
+        if (value instanceof Boolean) return EntitySerializerType.BOOLEAN;
+        if (value instanceof net.minecraft.nbt.CompoundTag) return EntitySerializerType.COMPOUND_TAG;
+        if (value instanceof org.joml.Vector3f || value instanceof org.joml.Vector3d || value instanceof net.minecraft.world.phys.Vec3 || value instanceof net.minecraft.core.Vec3i) {
+            return EntitySerializerType.VECTOR3;
+        }
+        if (value instanceof org.joml.Quaternionf) return EntitySerializerType.QUATERNION;
+        return EntitySerializerType.STRING;
+    }
+
+    @Unique
+    public void entityJs$addSyncedData(EntitySerializerType type, String name, Object initial) {
+        Entity self = (Entity) (Object) this;
+        Tag tag = NbtConvert.toTag(type, initial);
+        if (self.level().isClientSide) {
+            ClientCache.setType(self.getUUID(), name, type.ordinal());
+            ClientCache.set(self.getUUID(), name, tag);
+            Net.sendEnsureToServer(self.getUUID(), name, type, tag);
+        } else {
+            ServerCache.ensure(self, name, tag, type);
+        }
+    }
+
+    @Unique
+    public void entityJs$setSyncedData(String name, Object value) {
+        Entity self = (Entity) (Object) this;
+        UUID id = self.getUUID();
+
+        var optType = self.level().isClientSide
+                ? ClientCache.getType(id, name)
+                : SavedDataJS.get((ServerLevel) self.level()).getType(id, name);
+
+        EntitySerializerType type = optType.orElseGet(() -> entityjs$inferType(value));
+        Tag tag = NbtConvert.toTag(type, value);
+
+        if (self.level().isClientSide) {
+            if (optType.isEmpty()) {
+                ClientCache.setType(id, name, type.ordinal());
+                ClientCache.set(id, name, tag);
+                Net.sendEnsureToServer(id, name, type, tag);
+            } else {
+                ClientCache.set(id, name, tag);
+                Net.sendSetToServer(id, name, tag);
+            }
+        } else {
+            if (optType.isEmpty()) {
+                ServerCache.ensure(self, name, tag, type);
+            } else {
+                ServerCache.set(self, name, tag);
+            }
+        }
+    }
+
+    @Unique
+    public Object entityJs$getSyncedData(String name) {
+        Entity self = (Entity) (Object) this;
+        UUID id = self.getUUID();
+
+        if (self.level().isClientSide) {
+            var opt = ClientCache.getType(id, name);
+            var tag = ClientCache.get(id, name);
+            if (tag == null) return null;
+            if (opt.isEmpty()) return tag;
+            try {
+                return NbtConvert.fromTag(opt.get(), tag);
+            } catch (ClassCastException ex) {
+                return tag;
+            }
+        }
+
+        var opt = SavedDataJS.get((ServerLevel) self.level()).getType(id, name);
+        var tag = ServerCache.get(self, name);
+        if (tag == null) return null;
+        if (opt.isEmpty()) return tag;
+        try {
+            return NbtConvert.fromTag(opt.get(), tag);
+        } catch (ClassCastException ex) {
+            return tag;
+        }
     }
 
     @Override
@@ -272,6 +366,16 @@ public abstract class EntityMixin implements IEntityJS {
                 }
             }
         }
+        Entity self = (Entity) (Object) this;
+        if (entityJs$definedOnce) return;
+        if (self.level().isClientSide) return;
+        if (!(entityJs$builder instanceof ModifyEntityBuilder builder)) return;
+        if (builder.defineSyncedData == null) return;
+
+        InitDecl.begin(self);
+        builder.defineSyncedData.accept(entityJs$getLivingEntity());
+        entityJs$definedOnce = true;
+        ((ServerLevel) self.level()).getServer().execute(() -> InitDecl.finalizeFor(self));
     }
 
     @Unique

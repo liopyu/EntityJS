@@ -72,10 +72,16 @@ public class ModifyEntityBuilder extends EventJS {
     public transient Function<ContextUtils.RendererModelContext, Object> setTextureLocation;
     public transient Function<ContextUtils.RendererModelContext, Object> setRenderType;
     public transient BooleanCallback<Entity> ignoreExplosion;
+    public transient Consumer<Entity> defineSyncedData;
 
     public ModifyEntityBuilder(EntityType<?> entityType) {
         this.entityType = entityType;
 
+    }
+
+    public ModifyEntityBuilder defineSyncedData(Consumer<Entity> consumer) {
+        this.defineSyncedData = consumer;
+        return this;
     }
 
     @Info(value = """

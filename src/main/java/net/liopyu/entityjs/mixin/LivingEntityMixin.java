@@ -1,6 +1,5 @@
 package net.liopyu.entityjs.mixin;
 
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.UtilsJS;
@@ -18,10 +17,6 @@ import net.liopyu.entityjs.util.overrides.ICallbackWrapperCache;
 import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializer;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -35,7 +30,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -103,7 +97,6 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
             var wrappedEntity = this.ensureIAnimatableJS(entityJs$getLivingEntity());
             this.entityJs$setAnimatableEntity((WrappedAnimatableEntity) wrappedEntity);
         }
-        entityJs$defineSynchedData();
         CallbackInvoker.initCallbackFields(entityJs$builder, entityJs$getLivingEntity());
     }
 
@@ -120,214 +113,6 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         entityJs$callbackWrappers.put(key, wrapper);
     }
 
-
-    @Unique
-    private static final Map<Class<?>, Map<String, EntityDataAccessor<?>>> entityJs$classAccessorMap = new HashMap<>();
-    @Unique
-    private final Map<String, EntityDataAccessor<?>> entityJs$accessorMap = new HashMap<>();
-
-    @SuppressWarnings("unchecked")
-    public void entityJs$addSyncedData(EntitySerializerType type, String key, Object value) {
-        try {
-            String castHint = switch (type.toString().toLowerCase()) {
-                case "byte", "int", "float", "long" -> type.toString().toLowerCase();
-                default -> null;
-            };
-            Class<?> entityClass = entityJs$getLivingEntity().getClass();
-            Map<String, EntityDataAccessor<?>> classMap = entityJs$classAccessorMap.computeIfAbsent(entityClass, k -> new HashMap<>());
-            EntityDataAccessor<Object> accessor;
-            if (classMap.containsKey(key)) {
-                accessor = (EntityDataAccessor<Object>) classMap.get(key);
-            } else {
-                EntityDataSerializer<?> serializer = type.getSerializer();
-                accessor = (EntityDataAccessor<Object>) SynchedEntityData.defineId((Class<? extends Entity>) entityClass, serializer);
-                classMap.put(key, accessor);
-            }
-
-            Object finalValue = EntitySerializerType.castValue(value, castHint);
-
-            if (!entityJs$getLivingEntity().getEntityData().hasItem(accessor)) {
-                entityJs$getLivingEntity().getEntityData().define(accessor, finalValue);
-            } else {
-                entityJs$getLivingEntity().getEntityData().set(accessor, finalValue);
-            }
-            entityJs$accessorMap.put(key, accessor);
-        } catch (Exception e) {
-            EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error adding synched data", e);
-        }
-    }
-
-    @Unique
-    public void entityJs$addSyncedData(String identifier, Object value) {
-        try {
-            EntitySerializerType type;
-            if (value instanceof Number num) {
-                double d = num.doubleValue();
-                if (num instanceof Float) {
-                    type = EntitySerializerType.FLOAT;
-                } else if (num instanceof Long || (d % 1 == 0 && d > Integer.MAX_VALUE && d <= Long.MAX_VALUE)) {
-                    type = EntitySerializerType.LONG;
-                } else if (num instanceof Integer || (d % 1 == 0 && d >= Integer.MIN_VALUE && d <= Integer.MAX_VALUE)) {
-                    type = EntitySerializerType.INT;
-                } else {
-                    type = EntitySerializerType.FLOAT;
-                }
-            } else {
-                type = EntitySerializerType.fromObject(value);
-            }
-            entityJs$addSyncedData(type, identifier, value);
-        } catch (Exception e) {
-            EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error adding synched data", e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Unique
-    public void entityJs$setSyncedData(String key, Object value) {
-        EntityDataAccessor<Object> accessor = (EntityDataAccessor<Object>) entityJs$accessorMap.get(key);
-        if (accessor == null) {
-            EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Tried to set undefined synced data key: " + key);
-            return;
-        }
-
-        EntityDataSerializer<?> serializer = accessor.getSerializer();
-        EntitySerializerType type = EntitySerializerType.fromSerializer(serializer);
-        String castHint = switch (type.toString().toLowerCase()) {
-            case "byte", "int", "float", "long" -> type.toString().toLowerCase();
-            default -> null;
-        };
-
-        Object casted = null;
-        casted = EntitySerializerType.castValue(value, castHint);
-
-
-        if (casted == null) {
-            return;
-        }
-
-        entityJs$getLivingEntity().getEntityData().set(accessor, casted);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    public <T> @Nullable T entityJs$getSyncedData(String identifier) {
-        EntityDataAccessor<T> accessor = (EntityDataAccessor<T>) entityJs$accessorMap.get(identifier);
-        if (accessor == null) return null;
-        if (!entityJs$getLivingEntity().getEntityData().hasItem(accessor)) return null;
-        return entityJs$getLivingEntity().getEntityData().get(accessor);
-    }
-
-    public void entityJs$defineSynchedData() {
-        if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
-            if (builder.defineSyncedData != null) {
-                builder.defineSyncedData.accept(entityJs$getLivingEntity());
-            }
-        }
-    }
-
-    @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
-    private void entityjs$writeSyncedData(CompoundTag tag, CallbackInfo ci) {
-        var logger = LogUtils.getLogger();
-        CompoundTag jsData = new CompoundTag();
-
-        for (Map.Entry<String, EntityDataAccessor<?>> entry : entityJs$accessorMap.entrySet()) {
-            String key = entry.getKey();
-            EntityDataAccessor<?> accessor = entry.getValue();
-
-            Object value = entityJs$getLivingEntity().getEntityData().get((EntityDataAccessor<Object>) accessor);
-            if (value == null) continue;
-
-            EntityDataSerializer<?> serializer = accessor.getSerializer();
-            EntitySerializerType type = EntitySerializerType.fromSerializer(serializer);
-
-            try {
-                switch (type) {
-                    case UUID -> {
-                        if (value instanceof java.util.Optional<?> opt && opt.isPresent()) {
-                            jsData.putUUID(key, (UUID) opt.get());
-                        } else if (value instanceof UUID u) {
-                            jsData.putUUID(key, u);
-                        }
-                    }
-                    case BYTE -> jsData.putByte(key, (Byte) value);
-                    case INT -> jsData.putInt(key, (Integer) value);
-                    case LONG -> jsData.putLong(key, (Long) value);
-                    case FLOAT -> jsData.putFloat(key, (Float) value);
-                    case STRING -> jsData.putString(key, (String) value);
-                    case BOOLEAN -> jsData.putBoolean(key, (Boolean) value);
-                    case COMPOUND_TAG -> {
-                        CompoundTag compound = ((CompoundTag) value);
-                        if (compound != null) jsData.put(key, compound.copy());
-                    }
-                    case VECTOR3 -> {
-                        var v = (org.joml.Vector3f) value;
-                        if (v != null) {
-                            CompoundTag vecTag = new CompoundTag();
-                            vecTag.putFloat("x", v.x());
-                            vecTag.putFloat("y", v.y());
-                            vecTag.putFloat("z", v.z());
-                            jsData.put(key, vecTag);
-                        }
-                    }
-                    case QUATERNION -> {
-                        var q = (org.joml.Quaternionf) value;
-                        if (q != null) {
-                            CompoundTag quatTag = new CompoundTag();
-                            quatTag.putFloat("x", q.x());
-                            quatTag.putFloat("y", q.y());
-                            quatTag.putFloat("z", q.z());
-                            quatTag.putFloat("w", q.w());
-                            jsData.put(key, quatTag);
-                        }
-                    }
-                    default -> logger.warn("[EntityJS] Unhandled serializer type '{}' for key '{}'", type, key);
-                }
-            } catch (Exception e) {
-                logger.error("[EntityJS] Failed to write key '{}', type '{}', value '{}'", key, type, value, e);
-            }
-        }
-
-        tag.put("EntityJSData", jsData);
-    }
-
-
-    @Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
-    private void entityjs$readSyncedData(CompoundTag tag, CallbackInfo ci) {
-        if (!tag.contains("EntityJSData", 10)) return;
-        CompoundTag jsData = tag.getCompound("EntityJSData");
-        for (String key : jsData.getAllKeys()) {
-            if (!entityJs$accessorMap.containsKey(key)) continue;
-            EntityDataAccessor<?> accessor = entityJs$accessorMap.get(key);
-            EntityDataSerializer<?> serializer = accessor.getSerializer();
-            EntitySerializerType type = EntitySerializerType.fromSerializer(serializer);
-            Object value = switch (type) {
-                case UUID -> jsData.getUUID(key);
-                case BYTE -> jsData.getByte(key);
-                case INT -> jsData.getInt(key);
-                case LONG -> jsData.getLong(key);
-                case FLOAT -> jsData.getFloat(key);
-                case STRING -> jsData.getString(key);
-                case BOOLEAN -> jsData.getBoolean(key);
-                case COMPOUND_TAG -> jsData.getCompound(key);
-                case VECTOR3 -> {
-                    CompoundTag vecTag = jsData.getCompound(key);
-                    float x = vecTag.getFloat("x");
-                    float y = vecTag.getFloat("y");
-                    float z = vecTag.getFloat("z");
-                    yield new org.joml.Vector3f(x, y, z);
-                }
-                case QUATERNION -> {
-                    CompoundTag quatTag = jsData.getCompound(key);
-                    float x = quatTag.getFloat("x");
-                    float y = quatTag.getFloat("y");
-                    float z = quatTag.getFloat("z");
-                    float w = quatTag.getFloat("w");
-                    yield new org.joml.Quaternionf(x, y, z, w);
-                }
-            };
-            entityJs$setSyncedData(key, value);
-        }
-    }
 
     /**
      * Ensures that the given entity is always an instance of IAnimatableJSCustom.

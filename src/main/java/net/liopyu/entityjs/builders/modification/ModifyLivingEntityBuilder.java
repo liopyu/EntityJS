@@ -95,12 +95,6 @@ public class ModifyLivingEntityBuilder extends ModifyEntityBuilder {
         super(entityType);
     }
 
-    public transient Consumer<LivingEntity> defineSyncedData;
-
-    public ModifyEntityBuilder defineSyncedData(Consumer<LivingEntity> consumer) {
-        this.defineSyncedData = consumer;
-        return this;
-    }
    /* @Info(value = """
             Adds an extra hitbox to the mob. Aka part-entities.
             Vanilla ticks extra hitboxes(for example the ender dragon's) with the

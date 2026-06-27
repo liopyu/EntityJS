@@ -22,13 +22,6 @@ public class ModifyProjectileBuilder extends ModifyEntityBuilder {
         super(entityType);
     }
 
-    public transient Consumer<Entity> defineSyncedData;
-
-    public ModifyEntityBuilder defineSyncedData(Consumer<Entity> consumer) {
-        this.defineSyncedData = consumer;
-        return this;
-    }
-
     @Info(value = """
             Sets a callback function to be executed when the projectile hits an entity.
             The provided Consumer accepts a {@link ContextUtils.ProjectileEntityHitContext} parameter,
