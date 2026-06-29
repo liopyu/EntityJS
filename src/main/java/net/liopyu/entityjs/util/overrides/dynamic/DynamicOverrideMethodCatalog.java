@@ -154,10 +154,11 @@ public final class DynamicOverrideMethodCatalog {
                     abstractMethods.put(key, MethodSpec.from(method, key));
                 }
                 String reason = ineligibleReason(baseClass, method);
+                MethodSpec methodSpec = MethodSpec.from(method, key);
                 if (reason == null) {
-                    methods.put(key, MethodSpec.from(method, key));
+                    addEligibleMethod(methods, method, methodSpec);
                 } else {
-                    ineligibleMethods.put(key, reason);
+                    addIneligibleMethod(ineligibleMethods, method, key, reason);
                 }
             }
             type = type.getSuperclass();
@@ -215,8 +216,7 @@ public final class DynamicOverrideMethodCatalog {
                 String key = key(method);
                 if (isConcreteInterfaceMethod(method)) {
                     seenSignatures.add(key);
-                    methods.remove(key);
-                    ineligibleMethods.remove(key);
+                    removeMethod(methods, ineligibleMethods, method, key);
                     abstractMethods.remove(key);
                     continue;
                 }
@@ -225,14 +225,46 @@ public final class DynamicOverrideMethodCatalog {
                 }
                 abstractMethods.put(key, MethodSpec.from(method, key));
                 String reason = ineligibleReason(baseClass, method);
+                MethodSpec methodSpec = MethodSpec.from(method, key);
                 if (reason == null) {
-                    methods.put(key, MethodSpec.from(method, key));
+                    addEligibleMethod(methods, method, methodSpec);
                 } else {
-                    ineligibleMethods.put(key, reason);
+                    addIneligibleMethod(ineligibleMethods, method, key, reason);
                 }
             }
         }
         addInterfaceAbstractMethods(baseClass, type.getSuperclass(), seenSignatures, methods, ineligibleMethods, abstractMethods);
+    }
+
+    private static void addEligibleMethod(Map<String, MethodSpec> methods, Method method, MethodSpec methodSpec) {
+        methods.put(methodSpec.key(), methodSpec);
+        String alias = keyAlias(method);
+        if (alias != null) {
+            methods.putIfAbsent(alias, methodSpec);
+        }
+    }
+
+    private static void addIneligibleMethod(Map<String, String> ineligibleMethods, Method method, String key, String reason) {
+        ineligibleMethods.put(key, reason);
+        String alias = keyAlias(method);
+        if (alias != null) {
+            ineligibleMethods.putIfAbsent(alias, reason);
+        }
+    }
+
+    private static void removeMethod(Map<String, MethodSpec> methods, Map<String, String> ineligibleMethods, Method method, String key) {
+        methods.remove(key);
+        ineligibleMethods.remove(key);
+        String alias = keyAlias(method);
+        if (alias != null) {
+            methods.remove(alias);
+            ineligibleMethods.remove(alias);
+        }
+    }
+
+    private static String keyAlias(Method method) {
+        String alias = MethodNameAliasIndex.alias(method);
+        return alias == null ? null : key(alias, method.getParameterTypes());
     }
 
     private static boolean isConcreteInterfaceMethod(Method method) {
@@ -330,8 +362,11 @@ public final class DynamicOverrideMethodCatalog {
     }
 
     private static String key(Method method) {
-        StringBuilder builder = new StringBuilder(method.getName()).append('(');
-        Class<?>[] parameterTypes = method.getParameterTypes();
+        return key(method.getName(), method.getParameterTypes());
+    }
+
+    private static String key(String name, Class<?>[] parameterTypes) {
+        StringBuilder builder = new StringBuilder(name).append('(');
         for (int i = 0; i < parameterTypes.length; i++) {
             if (i > 0) {
                 builder.append(',');

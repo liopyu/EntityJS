@@ -201,7 +201,8 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
         if (methodSpec != null && methodSpec.parameterNames().length > 0) {
             ConsoleJS.STARTUP.info("[EntityJS]: Dynamic override '" + id + "#" + methodKey + "' argument names: " + Arrays.toString(methodSpec.parameterNames()));
         }
-        dynamicOverrides.put(methodKey, CallbackInvoker.wrapFunction(Objects.requireNonNull(callback, "callback")));
+        String runtimeKey = methodSpec == null ? methodKey : methodSpec.key();
+        dynamicOverrides.put(runtimeKey, CallbackInvoker.wrapFunction(Objects.requireNonNull(callback, "callback")));
         return this;
     }
 
