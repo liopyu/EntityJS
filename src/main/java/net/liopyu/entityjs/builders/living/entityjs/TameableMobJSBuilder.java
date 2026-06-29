@@ -31,6 +31,7 @@ public class TameableMobJSBuilder extends TameableMobBuilder<TameableMobJS> {
                 .add(Attributes.ARMOR_TOUGHNESS)
                 .add(Attributes.ATTACK_SPEED)
                 .add(Attributes.ATTACK_KNOCKBACK)
-                .add(Attributes.LUCK);
+                .add(Attributes.LUCK)
+                .add(Attributes.MOVEMENT_SPEED, 0.25D);
     }
 }

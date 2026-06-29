@@ -35,6 +35,11 @@ public final class CallbackInvoker {
     private CallbackInvoker() {
     }
 
+    @HideFromJS
+    public static void clearCaches() {
+        INIT_CALLBACKS.clear();
+    }
+
     @SuppressWarnings("unchecked")
     @HideFromJS
     public static <T> BooleanCallback<T> wrapBoolean(BooleanCallback<T> callback) {
@@ -548,8 +553,11 @@ public final class CallbackInvoker {
         private Object wrapArgument(Object value) {
             if (value instanceof ContextUtils.DynamicOverrideContext<?> context) {
                 if (context.getParentScope() == null) {
-                    context.setParentScope(topScope);
-                    context.setPrototype(ScriptableObject.getObjectPrototype(topScope, cx));
+                    context.entityJs$attachScriptScope(
+                            topScope,
+                            ScriptableObject.getObjectPrototype(topScope, cx),
+                            ScriptableObject.getFunctionPrototype(topScope, cx)
+                    );
                 }
                 return context;
             }

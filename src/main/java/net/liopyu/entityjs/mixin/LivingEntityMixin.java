@@ -85,7 +85,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
     public Object entityJs$builder;
 
     @Unique
-    private IdentityHashMap<Object, Object> entityJs$callbackWrappers;
+    private Map<Object, Object> entityJs$callbackWrappers;
 
     @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
@@ -136,7 +136,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
     @HideFromJS
     public void entityJs$putCachedCallbackWrapper(Object key, Object wrapper) {
         if (entityJs$callbackWrappers == null) {
-            entityJs$callbackWrappers = new IdentityHashMap<>();
+            entityJs$callbackWrappers = new WeakHashMap<>();
         }
         entityJs$callbackWrappers.put(key, wrapper);
     }

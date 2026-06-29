@@ -7,6 +7,8 @@ import dev.latvian.mods.rhino.BaseFunction;
 import dev.latvian.mods.rhino.Context;
 import dev.latvian.mods.rhino.Scriptable;
 import dev.latvian.mods.rhino.ScriptableObject;
+import dev.latvian.mods.rhino.Symbol;
+import dev.latvian.mods.rhino.type.TypeInfo;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import dev.latvian.mods.rhino.util.RemapForJS;
 import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
@@ -61,7 +63,6 @@ import software.bernie.geckolib.renderer.layer.ItemArmorGeoLayer;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class ContextUtils {
     public interface EntityJSCallbackControlContext {
@@ -94,14 +95,15 @@ public class ContextUtils {
         public final T entity;
         public final String method;
         public final Map<String, Object> args;
-        private final Supplier<Object> superCall;
+        private final SuperCall superCall;
         private final BaseFunction getFunction;
-        private final BaseFunction superFunction;
+        private final BaseFunction superCallFunction;
         private boolean superCalled;
         private Object superValue;
+        private boolean scriptScopeAttached;
 
         @HideFromJS
-        public DynamicOverrideContext(T entity, String method, Map<String, Object> args, Supplier<Object> superCall) {
+        public DynamicOverrideContext(T entity, String method, Map<String, Object> args, SuperCall superCall) {
             this.entity = entity;
             this.method = method;
             this.args = Collections.unmodifiableMap(args);
@@ -115,10 +117,10 @@ public class ContextUtils {
                     return jsValue(cx, thisObj, DynamicOverrideContext.this.get(String.valueOf(args[0])));
                 }
             };
-            this.superFunction = new BaseFunction() {
+            this.superCallFunction = new BaseFunction() {
                 @Override
                 public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-                    return jsValue(cx, thisObj, callSuper());
+                    return jsValue(cx, thisObj, superCall(javaArgs(cx, args)));
                 }
             };
         }
@@ -140,7 +142,7 @@ public class ContextUtils {
                 case "method" -> method;
                 case "args" -> jsValue(cx, start, args);
                 case "get" -> getFunction;
-                case "super" -> superFunction;
+                case "superCall" -> superCallFunction;
                 default -> args.containsKey(name) ? jsValue(cx, start, args.get(name)) : super.get(cx, name, start);
             };
         }
@@ -153,32 +155,108 @@ public class ContextUtils {
             ids[index++] = "method";
             ids[index++] = "args";
             ids[index++] = "get";
-            ids[index++] = "super";
+            ids[index++] = "superCall";
             for (String key : args.keySet()) {
                 ids[index++] = key;
             }
             return ids;
         }
 
+        @HideFromJS
+        public void entityJs$attachScriptScope(Scriptable parentScope, Scriptable objectPrototype, Scriptable functionPrototype) {
+            if (!scriptScopeAttached) {
+                super.setParentScope(parentScope);
+                super.setPrototype(objectPrototype);
+                getFunction.setParentScope(parentScope);
+                getFunction.setPrototype(functionPrototype);
+                superCallFunction.setParentScope(parentScope);
+                superCallFunction.setPrototype(functionPrototype);
+                scriptScopeAttached = true;
+            }
+        }
+
+        @Override
+        public void put(Context cx, String name, Scriptable start, Object value) {
+        }
+
+        @Override
+        public void put(Context cx, int index, Scriptable start, Object value) {
+        }
+
+        @Override
+        public void put(Context cx, Symbol key, Scriptable start, Object value) {
+        }
+
+        @Override
+        public void delete(Context cx, String name) {
+        }
+
+        @Override
+        public void delete(Context cx, int index) {
+        }
+
+        @Override
+        public void delete(Context cx, Symbol key) {
+        }
+
+        @Override
+        public void setParentScope(Scriptable parentScope) {
+            if (!scriptScopeAttached) {
+                super.setParentScope(parentScope);
+            }
+        }
+
+        @Override
+        public void setPrototype(Scriptable prototype) {
+            if (!scriptScopeAttached) {
+                super.setPrototype(prototype);
+            }
+        }
+
+        @Override
+        protected void defineOwnProperty(Context cx, Object id, ScriptableObject desc, boolean checkValid) {
+        }
+
         public Object get(String name) {
             return args.get(name);
         }
 
-        @RemapForJS("super")
-        public Object callSuper() {
+        public Object superCall() {
             if (!superCalled) {
-                superValue = superCall.get();
+                superValue = superCall.call();
+                superCalled = true;
+            }
+            return superValue;
+        }
+
+        public Object superCall(Object... args) {
+            if (!superCalled) {
+                superValue = superCall.call(args);
                 superCalled = true;
             }
             return superValue;
         }
 
         private boolean isContextProperty(String name) {
-            return name.equals("entity") || name.equals("method") || name.equals("args") || name.equals("get") || name.equals("super");
+            return name.equals("entity") || name.equals("method") || name.equals("args") || name.equals("get") || name.equals("superCall");
         }
 
         private Object jsValue(Context cx, Scriptable scope, Object value) {
             return value == null || value instanceof Scriptable ? value : cx.wrap(ScriptableObject.getTopLevelScope(scope == null ? this : scope), value);
+        }
+
+        private Object[] javaArgs(Context cx, Object[] args) {
+            Object[] values = args == null ? new Object[0] : args;
+            Object[] converted = new Object[values.length];
+            for (int i = 0; i < values.length; i++) {
+                converted[i] = cx.jsToJava(values[i], TypeInfo.OBJECT);
+            }
+            return converted;
+        }
+
+        @FunctionalInterface
+        public interface SuperCall {
+            Object call(Object... args);
         }
     }
 

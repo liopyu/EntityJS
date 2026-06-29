@@ -28,6 +28,6 @@ public class MobEntityJSBuilder extends PathfinderMobBuilder<MobEntityJS> {
                 .add(Attributes.ATTACK_SPEED)
                 .add(Attributes.ATTACK_KNOCKBACK)
                 .add(Attributes.LUCK)
-                .add(Attributes.MOVEMENT_SPEED);
+                .add(Attributes.MOVEMENT_SPEED, 0.25D);
     }
 }

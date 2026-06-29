@@ -60,7 +60,10 @@ public class EntityJSProbeJSPlugin extends ProbeJSPlugin {
     private static final NamespacedType OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS = Types.namespaced(ENTITYJS_TYPES, "OverrideMethodKeyForEntityClass");
     private static final NamespacedType OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS_NAME = Types.namespaced(ENTITYJS_TYPES, "OverrideMethodKeyForEntityClassName");
     private static final NamespacedType OVERRIDE_METHOD_KEY_BY_ENTITY_CLASS_NAME = Types.namespaced(ENTITYJS_TYPES, "OverrideMethodKeyByEntityClassName");
+    private static final NamespacedType ENTITY_FOR_ENTITY_CLASS = Types.namespaced(ENTITYJS_TYPES, "EntityForEntityClass");
+    private static final NamespacedType ENTITY_FOR_ENTITY_CLASS_NAME = Types.namespaced(ENTITYJS_TYPES, "EntityForEntityClassName");
     private static final NamespacedType ENTITY_CLASS_NAME = Types.namespaced(ENTITYJS_TYPES, "EntityClassName");
+    private static final NamespacedType DYNAMIC_OVERRIDE_CONTEXT = Types.namespaced(ENTITYJS_TYPES, "DynamicOverrideContext");
     private static final NamespacedType CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES = Types.namespaced(ENTITYJS_TYPES, "CustomEntityBuilderWithOverrides");
     private static final NamespacedType MODIFY_BUILDER_FOR_ENTITY = Types.namespaced(ENTITYJS_TYPES, "ModifyBuilderForEntity");
     private static final NamespacedType MODIFY_BUILDER_FOR_ENTITY_CLASS = Types.namespaced(ENTITYJS_TYPES, "ModifyBuilderForEntityClass");
@@ -99,10 +102,28 @@ public class EntityJSProbeJSPlugin extends ProbeJSPlugin {
                 overrideMethodKeyByEntityClassName(),
                 false
         ));
+        namespace.member(new TypeDecl(
+                ENTITY_FOR_ENTITY_CLASS.asClassPath(),
+                List.of(Types.variable("T")),
+                entityForEntityClass(),
+                false
+        ));
+        namespace.member(new TypeDecl(
+                ENTITY_FOR_ENTITY_CLASS_NAME.asClassPath(),
+                List.of(Types.variable("T", ENTITY_CLASS_NAME)),
+                entityForEntityClassName(),
+                false
+        ));
         namespace.member(typeDecl(ENTITY_CLASS_NAME, literalUnion(index.entityClassNames)));
         namespace.member(new TypeDecl(
+                DYNAMIC_OVERRIDE_CONTEXT.asClassPath(),
+                List.of(Types.variable("E", Types.clazz(Entity.class))),
+                dynamicOverrideContext(),
+                false
+        ));
+        namespace.member(new TypeDecl(
                 CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES.asClassPath(),
-                List.of(Types.variable("K", Types.STRING)),
+                List.of(Types.variable("K", Types.STRING), Types.variable("E", Types.clazz(Entity.class))),
                 customEntityBuilderWithOverrides(),
                 false
         ));
@@ -176,26 +197,35 @@ public class EntityJSProbeJSPlugin extends ProbeJSPlugin {
         overloads.add(method(
                 "createCustom",
                 List.of(Types.variable("T", ENTITY_CLASS_NAME)),
-                customEntityBuilderWithOverrides(Types.parameterized(OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS_NAME, Types.variable("T"))),
+                customEntityBuilderWithOverrides(
+                        Types.parameterized(OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS_NAME, Types.variable("T")),
+                        Types.parameterized(ENTITY_FOR_ENTITY_CLASS_NAME, Types.variable("T"))
+                ),
                 param("id", input(Types.clazz(KubeResourceLocation.class))),
                 param("entityClass", input(Types.variable("T"))),
                 param("modifyBuilder", builderCallback(Types.parameterized(MODIFY_BUILDER_FOR_ENTITY_CLASS_NAME, Types.variable("T"))))
         ));
         overloads.add(method(
                 "createCustom",
-                List.of(Types.variable("T")),
-                customEntityBuilderWithOverrides(Types.parameterized(OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS, Types.variable("T"))),
-                param("id", input(Types.clazz(KubeResourceLocation.class))),
-                param("entityClass", input(Types.variable("T"))),
-                param("modifyBuilder", builderCallback(Types.parameterized(MODIFY_BUILDER_FOR_ENTITY_CLASS, Types.variable("T"))))
-        ));
-        overloads.add(method(
-                "createCustom",
                 List.of(Types.variable("T", Types.clazz(Entity.class))),
-                customEntityBuilderWithOverrides(Types.parameterized(OVERRIDE_METHOD_KEY_FOR_ENTITY, Types.variable("T"))),
+                customEntityBuilderWithOverrides(Types.parameterized(OVERRIDE_METHOD_KEY_FOR_ENTITY, Types.variable("T")), Types.variable("T")),
                 param("id", input(Types.clazz(KubeResourceLocation.class))),
                 param("entityClass", input(Types.parameterized(Types.clazz(Class.class), Types.variable("T")))),
                 param("modifyBuilder", builderCallback(Types.parameterized(MODIFY_BUILDER_FOR_ENTITY, Types.variable("T"))))
+        ));
+        overloads.add(method(
+                "createCustom",
+                List.of(Types.variable("T")),
+                customEntityBuilderWithOverrides(
+                        Types.parameterized(OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS, Types.variable("T")),
+                        Types.parameterized(ENTITY_FOR_ENTITY_CLASS, Types.variable("T"))
+                ),
+                param("id", input(Types.clazz(KubeResourceLocation.class))),
+                param("entityClass", input(new ImportedRawType(
+                        Set.of(classPath(Class.class)),
+                        symbols -> "T extends " + symbol(symbols, Class.class) + "<any> ? never : T"
+                ))),
+                param("modifyBuilder", builderCallback(Types.parameterized(MODIFY_BUILDER_FOR_ENTITY_CLASS, Types.variable("T"))))
         ));
         classDocument.document().members.addAll(0, overloads);
     }
@@ -264,8 +294,8 @@ public class EntityJSProbeJSPlugin extends ProbeJSPlugin {
         return type;
     }
 
-    private static Type customEntityBuilderWithOverrides(Type overrideKeyType) {
-        return Types.parameterized(CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES, overrideKeyType);
+    private static Type customEntityBuilderWithOverrides(Type overrideKeyType, Type entityType) {
+        return Types.parameterized(CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES, overrideKeyType, entityType);
     }
 
     private static Type customEntityBuilderWithOverrides() {
@@ -275,12 +305,19 @@ public class EntityJSProbeJSPlugin extends ProbeJSPlugin {
                         classPath(CustomEntityJSBuilder.class)
                 ),
                 symbols -> "{ [P in keyof " + symbol(symbols, CustomEntityBuilder.class) + "]: P extends \"override\""
-                        + " ? (methodKey: K, callback: any) => CustomEntityBuilderWithOverrides<K>"
+                        + " ? (methodKey: K, callback: (context: DynamicOverrideContext<E>) => any) => CustomEntityBuilderWithOverrides<K, E>"
                         + " : " + symbol(symbols, CustomEntityBuilder.class) + "[P] extends (...args: infer A) => infer R"
                         + " ? R extends " + symbol(symbols, CustomEntityBuilder.class) + " | " + symbol(symbols, CustomEntityJSBuilder.class)
-                        + " ? (...args: A) => CustomEntityBuilderWithOverrides<K>"
+                        + " ? (...args: A) => CustomEntityBuilderWithOverrides<K, E>"
                         + " : " + symbol(symbols, CustomEntityBuilder.class) + "[P]"
                         + " : " + symbol(symbols, CustomEntityBuilder.class) + "[P] }"
+        );
+    }
+
+    private static Type dynamicOverrideContext() {
+        return new ImportedRawType(
+                Set.of(),
+                symbols -> "{ readonly entity: E; readonly method: string; readonly args: { readonly [key: string]: any }; get(name: string): any; superCall(...args: any[]): any; readonly [key: string]: any }"
         );
     }
 
@@ -336,6 +373,67 @@ public class EntityJSProbeJSPlugin extends ProbeJSPlugin {
                         .append("; ");
             }
             builder.append("}");
+            return builder.toString();
+        });
+    }
+
+    private static Type entityForEntityClass() {
+        ProbeIndex index = index();
+        Set<ClassPath> imports = new LinkedHashSet<>();
+        imports.add(classPath(Class.class));
+        imports.add(classPath(Entity.class));
+        for (Class<? extends Entity> entityClass : index.sortedEntityClasses) {
+            imports.add(classPath(entityClass));
+        }
+        return new ImportedRawType(imports, symbols -> {
+            StringBuilder builder = new StringBuilder();
+            builder.append("T extends ")
+                    .append(symbol(symbols, Class.class))
+                    .append("<infer E> ? E extends ")
+                    .append(symbol(symbols, Entity.class))
+                    .append(" ? E : ")
+                    .append(symbol(symbols, Entity.class))
+                    .append(" : T extends { prototype: infer E } ? E extends ")
+                    .append(symbol(symbols, Entity.class))
+                    .append(" ? E : ")
+                    .append(symbol(symbols, Entity.class))
+                    .append(" : T extends abstract new (...args: any) => infer E ? E extends ")
+                    .append(symbol(symbols, Entity.class))
+                    .append(" ? E : ")
+                    .append(symbol(symbols, Entity.class))
+                    .append(" : ");
+            for (Class<? extends Entity> entityClass : index.sortedEntityClasses) {
+                builder.append("T extends typeof ")
+                        .append(symbol(symbols, entityClass))
+                        .append(" ? ")
+                        .append(symbol(symbols, entityClass))
+                        .append(" : ");
+            }
+            builder.append("T extends ")
+                    .append(symbol(symbols, Entity.class))
+                    .append(" ? T : ")
+                    .append(symbol(symbols, Entity.class));
+            return builder.toString();
+        });
+    }
+
+    private static Type entityForEntityClassName() {
+        ProbeIndex index = index();
+        Set<ClassPath> imports = new LinkedHashSet<>();
+        imports.add(classPath(Entity.class));
+        for (Class<? extends Entity> entityClass : index.sortedEntityClasses) {
+            imports.add(classPath(entityClass));
+        }
+        return new ImportedRawType(imports, symbols -> {
+            StringBuilder builder = new StringBuilder();
+            for (Class<? extends Entity> entityClass : index.sortedEntityClasses) {
+                builder.append("T extends \"")
+                        .append(entityClass.getName())
+                        .append("\" ? ")
+                        .append(symbol(symbols, entityClass))
+                        .append(" : ");
+            }
+            builder.append(symbol(symbols, Entity.class));
             return builder.toString();
         });
     }
