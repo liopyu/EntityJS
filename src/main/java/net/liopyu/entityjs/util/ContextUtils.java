@@ -3,6 +3,12 @@ package net.liopyu.entityjs.util;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.kubejs.typings.Info;
+import dev.latvian.mods.rhino.BaseFunction;
+import dev.latvian.mods.rhino.Context;
+import dev.latvian.mods.rhino.Scriptable;
+import dev.latvian.mods.rhino.ScriptableObject;
+import dev.latvian.mods.rhino.Symbol;
+import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
@@ -53,38 +59,200 @@ import software.bernie.geckolib.renderer.layer.ItemArmorGeoLayer;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class ContextUtils {
-    public static class DynamicOverrideContext<T extends Entity> {
+    public interface EntityJSCallbackControlContext {
+        default Object superCall() {
+            return EntityJSUtils.superCall();
+        }
+
+        default void cancel() {
+            EntityJSUtils.getCallbackInfo().cancel();
+        }
+
+        default void setReturnValue(Object value) {
+            EntityJSUtils.getCallbackInfo().setReturnValue(value);
+        }
+
+        default boolean isCancelled() {
+            return EntityJSUtils.getCallbackInfo().isCancelled();
+        }
+
+        default boolean hasReturnValue() {
+            return EntityJSUtils.getCallbackInfo().hasReturnValue();
+        }
+
+        default Object returnValue() {
+            return EntityJSUtils.getCallbackInfo().returnValue();
+        }
+    }
+
+    public static class DynamicOverrideContext<T extends Entity> extends ScriptableObject {
         public final T entity;
         public final String method;
         public final Map<String, Object> args;
-        private final Supplier<Object> superCall;
+        private final SuperCall superCall;
+        private final BaseFunction getFunction;
+        private final BaseFunction superCallFunction;
         private boolean superCalled;
         private Object superValue;
+        private boolean scriptScopeAttached;
 
-        public DynamicOverrideContext(T entity, String method, Map<String, Object> args, Supplier<Object> superCall) {
+        @HideFromJS
+        public DynamicOverrideContext(T entity, String method, Map<String, Object> args, SuperCall superCall) {
             this.entity = entity;
             this.method = method;
             this.args = Collections.unmodifiableMap(args);
             this.superCall = superCall;
+            this.getFunction = new BaseFunction() {
+                @Override
+                public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+                    if (args.length == 0 || args[0] == null) {
+                        return null;
+                    }
+                    return jsValue(cx, thisObj, DynamicOverrideContext.this.get(String.valueOf(args[0])));
+                }
+            };
+            this.superCallFunction = new BaseFunction() {
+                @Override
+                public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+                    return jsValue(cx, thisObj, superCall(javaArgs(cx, args)));
+                }
+            };
+        }
+
+        @Override
+        public String getClassName() {
+            return "EntityJSDynamicOverrideContext";
+        }
+
+        @Override
+        public boolean has(Context cx, String name, Scriptable start) {
+            return isContextProperty(name) || args.containsKey(name) || super.has(cx, name, start);
+        }
+
+        @Override
+        public Object get(Context cx, String name, Scriptable start) {
+            return switch (name) {
+                case "entity" -> jsValue(cx, start, entity);
+                case "method" -> method;
+                case "args" -> jsValue(cx, start, args);
+                case "get" -> getFunction;
+                case "superCall" -> superCallFunction;
+                default -> args.containsKey(name) ? jsValue(cx, start, args.get(name)) : super.get(cx, name, start);
+            };
+        }
+
+        @Override
+        public Object[] getIds(Context cx) {
+            Object[] ids = new Object[args.size() + 5];
+            int index = 0;
+            ids[index++] = "entity";
+            ids[index++] = "method";
+            ids[index++] = "args";
+            ids[index++] = "get";
+            ids[index++] = "superCall";
+            for (String key : args.keySet()) {
+                ids[index++] = key;
+            }
+            return ids;
+        }
+
+        @HideFromJS
+        public void entityJs$attachScriptScope(Scriptable parentScope, Scriptable objectPrototype, Scriptable functionPrototype) {
+            if (!scriptScopeAttached) {
+                super.setParentScope(parentScope);
+                super.setPrototype(objectPrototype);
+                getFunction.setParentScope(parentScope);
+                getFunction.setPrototype(functionPrototype);
+                superCallFunction.setParentScope(parentScope);
+                superCallFunction.setPrototype(functionPrototype);
+                scriptScopeAttached = true;
+            }
+        }
+
+        @Override
+        public void put(Context cx, String name, Scriptable start, Object value) {
+        }
+
+        @Override
+        public void put(Context cx, int index, Scriptable start, Object value) {
+        }
+
+        @Override
+        public void put(Context cx, Symbol key, Scriptable start, Object value) {
+        }
+
+        @Override
+        public void delete(Context cx, String name) {
+        }
+
+        @Override
+        public void delete(Context cx, int index) {
+        }
+
+        @Override
+        public void delete(Context cx, Symbol key) {
+        }
+
+        @Override
+        public void setParentScope(Scriptable parentScope) {
+            if (!scriptScopeAttached) {
+                super.setParentScope(parentScope);
+            }
+        }
+
+        @Override
+        public void setPrototype(Scriptable prototype) {
+            if (!scriptScopeAttached) {
+                super.setPrototype(prototype);
+            }
+        }
+
+        @Override
+        protected void defineOwnProperty(Context cx, Object id, ScriptableObject desc, boolean checkValid) {
         }
 
         public Object get(String name) {
             return args.get(name);
         }
 
-        public Object callSuper() {
+        public Object superCall() {
             if (!superCalled) {
-                superValue = superCall.get();
+                superValue = superCall.call();
                 superCalled = true;
             }
             return superValue;
         }
 
-        public Object superCall() {
-            return callSuper();
+        public Object superCall(Object... args) {
+            if (!superCalled) {
+                superValue = superCall.call(args);
+                superCalled = true;
+            }
+            return superValue;
+        }
+
+        private boolean isContextProperty(String name) {
+            return name.equals("entity") || name.equals("method") || name.equals("args") || name.equals("get") || name.equals("superCall");
+        }
+
+        private Object jsValue(Context cx, Scriptable scope, Object value) {
+            return value == null || value instanceof Scriptable ? value : Context.javaToJS(cx, value, ScriptableObject.getTopLevelScope(scope == null ? this : scope));
+        }
+
+        private Object[] javaArgs(Context cx, Object[] args) {
+            Object[] values = args == null ? new Object[0] : args;
+            Object[] converted = new Object[values.length];
+            for (int i = 0; i < values.length; i++) {
+                converted[i] = Context.jsToJava(cx, values[i], Object.class);
+            }
+            return converted;
+        }
+
+        @FunctionalInterface
+        public interface SuperCall {
+            Object call(Object... args);
         }
     }
 
@@ -301,7 +469,7 @@ public class ContextUtils {
         }
     }
 
-    public static class EntityInteractContext {
+    public static class EntityInteractContext implements EntityJSCallbackControlContext {
         @Info("The entity being interacted with")
         public final Entity entity;
 
@@ -318,7 +486,7 @@ public class ContextUtils {
         }
     }
 
-    public static class RendererModelContext {
+    public static class RendererModelContext implements EntityJSCallbackControlContext {
         @Info("The entity")
         public final Entity entity;
         @Info("The entity's renderer")
@@ -474,7 +642,7 @@ public class ContextUtils {
     }
 
 
-    public static class PositionRiderContext {
+    public static class PositionRiderContext implements EntityJSCallbackControlContext {
         @Info("The vehicle entity")
         public final Entity entity;
 
@@ -598,7 +766,7 @@ public class ContextUtils {
     }
 
 
-    public static class PlayerEntityContext {
+    public static class PlayerEntityContext implements EntityJSCallbackControlContext {
         @Info("The living entity associated with the player")
         public final LivingEntity entity;
 
@@ -611,7 +779,7 @@ public class ContextUtils {
         }
     }
 
-    public static class EntityLevelContext {
+    public static class EntityLevelContext implements EntityJSCallbackControlContext {
         @Info("The living entity")
         public final LivingEntity entity;
 
@@ -624,7 +792,7 @@ public class ContextUtils {
         }
     }
 
-    public static class CollidingProjectileEntityContext {
+    public static class CollidingProjectileEntityContext implements EntityJSCallbackControlContext {
         @Info("The colliding entity")
         public final Entity entity;
 
@@ -666,7 +834,7 @@ public class ContextUtils {
         }
     }
 
-    public static class EntityBlockPosContext {
+    public static class EntityBlockPosContext implements EntityJSCallbackControlContext {
         @Info("The living entity")
         public final LivingEntity entity;
 
@@ -705,7 +873,7 @@ public class ContextUtils {
         }
     }
 
-    public static class LivingEntityContext {
+    public static class LivingEntityContext implements EntityJSCallbackControlContext {
 
         public final LivingEntity entity;
 
@@ -719,7 +887,7 @@ public class ContextUtils {
     }
 
 
-    public static class EntityItemLevelContext {
+    public static class EntityItemLevelContext implements EntityJSCallbackControlContext {
         @Info("The living entity")
         public final LivingEntity entity;
 
@@ -751,7 +919,7 @@ public class ContextUtils {
     }
 
 
-    public static class DeathContext {
+    public static class DeathContext implements EntityJSCallbackControlContext {
         @Info("The living entity that has died")
         public final LivingEntity entity;
 
@@ -811,7 +979,7 @@ public class ContextUtils {
         }
     }
 
-    public static class EntityDamageContext {
+    public static class EntityDamageContext implements EntityJSCallbackControlContext {
         @Info("The source of the damage")
         public final DamageSource damageSource;
 
@@ -885,7 +1053,7 @@ public class ContextUtils {
         }
     }
 
-    public static class MobInteractContext {
+    public static class MobInteractContext implements EntityJSCallbackControlContext {
         @Info("The living entity being interacted with")
         public final LivingEntity entity;
 
@@ -903,7 +1071,7 @@ public class ContextUtils {
     }
 
 
-    public static class OnEffectContext {
+    public static class OnEffectContext implements EntityJSCallbackControlContext {
         @Info("The living entity affected by the mob effect")
         public final LivingEntity entity;
 
@@ -960,7 +1128,7 @@ public class ContextUtils {
     }
 
 
-    public static class TargetChangeContext {
+    public static class TargetChangeContext implements EntityJSCallbackControlContext {
         @Info("The new target entity")
         public final LivingEntity target;
 
@@ -974,7 +1142,7 @@ public class ContextUtils {
     }
 
 
-    public static class AutoAttackContext {
+    public static class AutoAttackContext implements EntityJSCallbackControlContext {
         @Info("The target entity that is being attacked")
         public final LivingEntity target;
 
@@ -1008,7 +1176,7 @@ public class ContextUtils {
         }
     }*/
 
-    public static class CalculateFallDamageContext {
+    public static class CalculateFallDamageContext implements EntityJSCallbackControlContext {
         @Info("The height from which the entity is falling")
         public final float fallHeight;
 
@@ -1026,7 +1194,7 @@ public class ContextUtils {
     }
 
 
-    public static class EntityItemStackContext {
+    public static class EntityItemStackContext implements EntityJSCallbackControlContext {
         @Info("The item stack")
         public final ItemStack item;
 
@@ -1040,7 +1208,7 @@ public class ContextUtils {
     }
 
 
-    public static class EntityHealContext {
+    public static class EntityHealContext implements EntityJSCallbackControlContext {
         @Info("The living entity being healed")
         public final LivingEntity entity;
 
@@ -1054,7 +1222,7 @@ public class ContextUtils {
     }
 
 
-    public static class EntityItemEntityContext {
+    public static class EntityItemEntityContext implements EntityJSCallbackControlContext {
         @Info("The living entity involved")
         public final LivingEntity entity;
 
@@ -1082,7 +1250,7 @@ public class ContextUtils {
     }
 
 
-    public static class EntityFluidStateContext {
+    public static class EntityFluidStateContext implements EntityJSCallbackControlContext {
         @Info("The living entity")
         public final LivingEntity entity;
 
@@ -1096,7 +1264,7 @@ public class ContextUtils {
     }
 
 
-    public static class EntityFallDamageContext {
+    public static class EntityFallDamageContext implements EntityJSCallbackControlContext {
         @Info("The living entity experiencing fall damage")
         public final LivingEntity entity;
 
@@ -1118,7 +1286,7 @@ public class ContextUtils {
     }
 
 
-    public static class EntityLootContext {
+    public static class EntityLootContext implements EntityJSCallbackControlContext {
         @Info("The source of the damage causing the loot")
         public final DamageSource damageSource;
 
@@ -1140,7 +1308,7 @@ public class ContextUtils {
     }
 
 
-    public static class EntityEquipmentContext {
+    public static class EntityEquipmentContext implements EntityJSCallbackControlContext {
         @Info("The equipment slot being modified")
         public final EquipmentSlot slot;
 
@@ -1220,7 +1388,7 @@ public class ContextUtils {
         }
     }
 
-    public static class LineOfSightContext {
+    public static class LineOfSightContext implements EntityJSCallbackControlContext {
         @Info("The target entity")
         public final Entity targetEntity;
 
@@ -1233,7 +1401,7 @@ public class ContextUtils {
         }
     }
 
-    public static class VisualContext {
+    public static class VisualContext implements EntityJSCallbackControlContext {
         @Info("The looking entity")
         public final Entity lookingEntity;
 
@@ -1247,7 +1415,7 @@ public class ContextUtils {
     }
 
 
-    public static class LerpToContext {
+    public static class LerpToContext implements EntityJSCallbackControlContext {
         @Info("The target x-coordinate for lerping")
         public final double x;
 
@@ -1303,7 +1471,7 @@ public class ContextUtils {
     }
 
 
-    public static class EntityDistanceToPlayerContext {
+    public static class EntityDistanceToPlayerContext implements EntityJSCallbackControlContext {
         @Info("The distance to the closest player")
         public final double distanceToClosestPlayer;
 
@@ -1317,7 +1485,7 @@ public class ContextUtils {
     }
 
 
-    public static class EntitySqrDistanceContext {
+    public static class EntitySqrDistanceContext implements EntityJSCallbackControlContext {
         @Info("The squared distance to the player")
         public final double distanceToPlayer;
 
@@ -1331,7 +1499,7 @@ public class ContextUtils {
     }
 
 
-    public static class MovementContext {
+    public static class MovementContext implements EntityJSCallbackControlContext {
         @Info("The type of mover responsible for the movement")
         public final MoverType moverType;
 
@@ -1348,7 +1516,7 @@ public class ContextUtils {
         }
     }
 
-    public static class PlayStepSoundContext {
+    public static class PlayStepSoundContext implements EntityJSCallbackControlContext {
         @Info("The entity playing the step sound")
         public final Entity entity;
 
@@ -1365,7 +1533,7 @@ public class ContextUtils {
         }
     }
 
-    public static class PlaySwimSoundContext {
+    public static class PlaySwimSoundContext implements EntityJSCallbackControlContext {
         @Info("The entity playing the swim sound")
         public final Entity entity;
 
@@ -1378,7 +1546,7 @@ public class ContextUtils {
         }
     }
 
-    public static class PlayMuffledStepSoundContext {
+    public static class PlayMuffledStepSoundContext implements EntityJSCallbackControlContext {
         @Info("The entity playing the muffled step sound")
         public final Entity entity;
 
@@ -1395,7 +1563,7 @@ public class ContextUtils {
         }
     }
 
-    public static class PlayCombinationStepSoundsContext {
+    public static class PlayCombinationStepSoundsContext implements EntityJSCallbackControlContext {
         @Info("The entity playing the combination step sounds")
         public final Entity entity;
 
@@ -1420,7 +1588,7 @@ public class ContextUtils {
         }
     }
 
-    public static class Vec3Context {
+    public static class Vec3Context implements EntityJSCallbackControlContext {
         @Info("The Travel Vector of the entity.")
         public final Vec3 vec3;
 
@@ -1433,7 +1601,7 @@ public class ContextUtils {
         }
     }
 
-    public static class EntityBlockPosLevelContext {
+    public static class EntityBlockPosLevelContext implements EntityJSCallbackControlContext {
         @Info("The block position")
         public final BlockPos pos;
 
@@ -1451,7 +1619,7 @@ public class ContextUtils {
     }
 
 
-    public static class EntityPlayerContext {
+    public static class EntityPlayerContext implements EntityJSCallbackControlContext {
         @Info("The entity")
         public final Entity entity;
 
@@ -1465,7 +1633,7 @@ public class ContextUtils {
     }
 
 
-    public static class ProjectileEntityHitContext {
+    public static class ProjectileEntityHitContext implements EntityJSCallbackControlContext {
         @Info("The projectile that was thrown")
         public final Projectile entity;
 
@@ -1479,7 +1647,7 @@ public class ContextUtils {
     }
 
 
-    public static class ProjectileBlockHitContext {
+    public static class ProjectileBlockHitContext implements EntityJSCallbackControlContext {
         @Info("The throwable item projectile that hit the block")
         public final Projectile entity;
 
@@ -1628,7 +1796,7 @@ public class ContextUtils {
         }
     }
 
-    public static class EPassengerEntityContext {
+    public static class EPassengerEntityContext implements EntityJSCallbackControlContext {
 
         public final Entity passenger;
 
@@ -1641,7 +1809,7 @@ public class ContextUtils {
         }
     }
 
-    public static class ECollidingEntityContext {
+    public static class ECollidingEntityContext implements EntityJSCallbackControlContext {
         @Info("The entity getting collided with")
         public final Entity entity;
 
@@ -1654,7 +1822,7 @@ public class ContextUtils {
         }
     }
 
-    public static class ECanTrampleContext {
+    public static class ECanTrampleContext implements EntityJSCallbackControlContext {
         @Info("The block state at the position")
         public final BlockState state;
 
@@ -1675,7 +1843,7 @@ public class ContextUtils {
         }
     }
 
-    public static class EDamageContext {
+    public static class EDamageContext implements EntityJSCallbackControlContext {
         @Info("The entity that is the target of the damage")
         public final Entity entity;
 
@@ -1688,7 +1856,7 @@ public class ContextUtils {
         }
     }
 
-    public static class EThunderHitContext {
+    public static class EThunderHitContext implements EntityJSCallbackControlContext {
         @Info("The server level where the lightning strike occurred")
         public final ServerLevel level;
 
@@ -1705,7 +1873,7 @@ public class ContextUtils {
         }
     }
 
-    public static class EEntityFallDamageContext {
+    public static class EEntityFallDamageContext implements EntityJSCallbackControlContext {
         @Info("The entity experiencing fall damage")
         public final Entity entity;
 
@@ -1726,7 +1894,7 @@ public class ContextUtils {
         }
     }
 
-    public static class EMayInteractContext {
+    public static class EMayInteractContext implements EntityJSCallbackControlContext {
         @Info("The level where the interaction may occur")
         public final Level level;
 

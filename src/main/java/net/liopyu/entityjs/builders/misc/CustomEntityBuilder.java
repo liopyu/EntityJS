@@ -186,7 +186,8 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
             Overrides an instance method on the custom entity's Java superclass.
             The method key is the method name plus fully qualified parameter types, for example:
             `tick()`, `isPushable()`, or `playerTouch(net.minecraft.world.entity.player.Player)`.
-            The callback receives a ContextUtils.DynamicOverrideContext with `entity`, `method`, `args`, `get(name)`, and `super()`.
+            The callback receives a ContextUtils.DynamicOverrideContext with `entity`, `method`, `args`, `get(name)`, and `superCall(...args)`.
+            Calling `superCall()` uses the original method arguments; passing arguments replaces them for the super invocation.
             Method arguments are exposed as direct context properties when Java reflection provides useful parameter names.
             Stable fallback aliases such as `context.arg0` are always available.
             Startup will fail if the method is final, private, static, intentionally hidden, or not present on the entity class tree.
@@ -302,7 +303,7 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
     public AttributeSupplier.Builder getAttributeBuilder() {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH)
-                .add(Attributes.MOVEMENT_SPEED)
+                .add(Attributes.MOVEMENT_SPEED, 0.25D)
                 .add(Attributes.ATTACK_DAMAGE)
                 .add(Attributes.FOLLOW_RANGE)
                 .add(Attributes.ARMOR_TOUGHNESS)

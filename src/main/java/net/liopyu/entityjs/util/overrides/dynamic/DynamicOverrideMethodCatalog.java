@@ -153,7 +153,7 @@ public final class DynamicOverrideMethodCatalog {
                 if (isImplementableAbstractMethod(baseClass, method)) {
                     abstractMethods.put(key, MethodSpec.from(method, key));
                 }
-                String reason = ineligibleReason(method);
+                String reason = ineligibleReason(baseClass, method);
                 if (reason == null) {
                     methods.put(key, MethodSpec.from(method, key));
                 } else {
@@ -166,7 +166,7 @@ public final class DynamicOverrideMethodCatalog {
         return new Catalog(methods, ineligibleMethods, abstractMethods);
     }
 
-    private static String ineligibleReason(Method method) {
+    private static String ineligibleReason(Class<?> baseClass, Method method) {
         int modifiers = method.getModifiers();
         if (method.isSynthetic() || method.isBridge()) {
             return "it is a compiler-generated bridge/synthetic method";
@@ -183,7 +183,9 @@ public final class DynamicOverrideMethodCatalog {
         if (isGeneratedMixinName(method.getName())) {
             return methodLabel(method) + " is a generated mixin handler method";
         }
-        if (!Modifier.isPublic(modifiers) && !Modifier.isProtected(modifiers)) {
+        if (!Modifier.isPublic(modifiers)
+                && !Modifier.isProtected(modifiers)
+                && !method.getDeclaringClass().getPackageName().equals(baseClass.getPackageName())) {
             return methodLabel(method) + " is package-private outside the generated subclass package";
         }
         return hiddenReason(method);
@@ -222,7 +224,7 @@ public final class DynamicOverrideMethodCatalog {
                     continue;
                 }
                 abstractMethods.put(key, MethodSpec.from(method, key));
-                String reason = ineligibleReason(method);
+                String reason = ineligibleReason(baseClass, method);
                 if (reason == null) {
                     methods.put(key, MethodSpec.from(method, key));
                 } else {

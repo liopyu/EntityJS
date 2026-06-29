@@ -82,6 +82,9 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
             EntityJSHelperClass.logErrorMessageOnce("Tried to create entity from a blank class name. Id: " + id);
             return null;
         }
+        if (entityClassName.startsWith("class ")) {
+            entityClassName = entityClassName.substring("class ".length());
+        }
         try {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             if (classLoader == null) {

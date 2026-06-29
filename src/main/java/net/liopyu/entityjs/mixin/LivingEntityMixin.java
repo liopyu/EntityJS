@@ -72,7 +72,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
     public Object entityJs$builder;
 
     @Unique
-    private IdentityHashMap<Object, Object> entityJs$callbackWrappers;
+    private Map<Object, Object> entityJs$callbackWrappers;
 
     /*@Override
     public ModifyLivingEntityBuilder entityJs$getBuilder() {
@@ -108,7 +108,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
     @Override
     public void entityJs$putCachedCallbackWrapper(Object key, Object wrapper) {
         if (entityJs$callbackWrappers == null) {
-            entityJs$callbackWrappers = new IdentityHashMap<>();
+            entityJs$callbackWrappers = new WeakHashMap<>();
         }
         entityJs$callbackWrappers.put(key, wrapper);
     }

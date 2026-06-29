@@ -3,6 +3,8 @@ package net.liopyu.entityjs.util.overrides;
 import dev.latvian.mods.rhino.Callable;
 import dev.latvian.mods.rhino.Context;
 import dev.latvian.mods.rhino.Scriptable;
+import dev.latvian.mods.rhino.ScriptableObject;
+import dev.latvian.mods.rhino.WrapFactory;
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.util.BooleanCallback;
 import net.liopyu.entityjs.util.ContextUtils;
@@ -29,6 +31,11 @@ public final class CallbackInvoker {
     private static final Object[] EMPTY_ARGS = new Object[0];
 
     private CallbackInvoker() {
+    }
+
+    @HideFromJS
+    public static void clearCaches() {
+        INIT_CALLBACKS.clear();
     }
 
     @SuppressWarnings("unchecked")
@@ -424,6 +431,7 @@ public final class CallbackInvoker {
         private final Scriptable topScope;
         private final Scriptable thisObj;
         private final Callable callable;
+        private final WrapFactory wrapFactory;
         private final Map<Object, WeakReference<Object>> argumentWrappers = Collections.synchronizedMap(new WeakHashMap<>());
         private final ThreadLocal<Object[]> arguments = ThreadLocal.withInitial(() -> new Object[1]);
 
@@ -432,10 +440,43 @@ public final class CallbackInvoker {
             this.topScope = topScope;
             this.thisObj = thisObj;
             this.callable = callable;
+            this.wrapFactory = cx.getWrapFactory();
         }
 
         private static Direct create(Object callback) {
-            return null;
+            if (callback == null || callback instanceof FastCallback || !Proxy.isProxyClass(callback.getClass())) {
+                return null;
+            }
+
+            InvocationHandler handler = Proxy.getInvocationHandler(callback);
+            Context cx = null;
+            Scriptable topScope = null;
+            Callable callable = null;
+            Class<?> type = handler.getClass();
+            while (type != null && type != Object.class) {
+                for (Field field : type.getDeclaredFields()) {
+                    try {
+                        field.setAccessible(true);
+                        Object value = field.get(handler);
+                        if (value instanceof Context context) {
+                            cx = context;
+                        } else if (value instanceof Callable function) {
+                            callable = function;
+                        } else if (value instanceof Scriptable scriptable) {
+                            topScope = scriptable;
+                        }
+                    } catch (ReflectiveOperationException | RuntimeException ignored) {
+                    }
+                }
+                type = type.getSuperclass();
+            }
+
+            if (cx == null || topScope == null || callable == null) {
+                return null;
+            }
+
+            Scriptable thisObj = cx.getWrapFactory().wrapAsJavaObject(cx, topScope, callback, null);
+            return new Direct(cx, topScope, thisObj, callable);
         }
 
         private void initArgument(Object value) {
@@ -529,6 +570,16 @@ public final class CallbackInvoker {
         }
 
         private Object wrapArgument(Object value) {
+            if (value instanceof ContextUtils.DynamicOverrideContext<?> context) {
+                if (context.getParentScope() == null) {
+                    context.entityJs$attachScriptScope(
+                            topScope,
+                            ScriptableObject.getObjectPrototype(topScope, cx),
+                            ScriptableObject.getFunctionPrototype(topScope, cx)
+                    );
+                }
+                return context;
+            }
             if (value == null || value instanceof String || value instanceof Number || value instanceof Boolean || value instanceof Scriptable) {
                 return value;
             }
@@ -539,7 +590,7 @@ public final class CallbackInvoker {
                     return cached;
                 }
 
-                Object wrapped = Context.javaToJS(cx, value, topScope);
+                Object wrapped = wrapFactory.wrap(cx, topScope, value, null);
                 cache.entityJs$putCachedCallbackWrapper(this, wrapped);
                 return wrapped;
             }
@@ -550,7 +601,7 @@ public final class CallbackInvoker {
                 return cached;
             }
 
-            Object wrapped = Context.javaToJS(cx, value, topScope);
+            Object wrapped = wrapFactory.wrap(cx, topScope, value, null);
             argumentWrappers.put(value, new WeakReference<>(wrapped));
             return wrapped;
         }

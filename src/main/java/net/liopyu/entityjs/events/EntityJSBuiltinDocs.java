@@ -10,6 +10,7 @@ import com.probejs.jdoc.property.PropertyType;
 import dev.latvian.mods.kubejs.registry.RegistryEventJS;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
+import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyMobBuilder;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -44,7 +46,17 @@ import java.util.WeakHashMap;
 
 public final class EntityJSBuiltinDocs {
     private static final String OVERRIDE_METHOD_KEY = "Special.EntityJSOverrideMethodKey";
+    private static final String OVERRIDE_METHOD_KEY_FOR_ENTITY = "Special.EntityJSOverrideMethodKeyForEntity";
+    private static final String OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS = "Special.EntityJSOverrideMethodKeyForEntityClass";
+    private static final String OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS_NAME = "Special.EntityJSOverrideMethodKeyForEntityClassName";
+    private static final String ENTITY_FOR_ENTITY_CLASS = "Special.EntityJSEntityForEntityClass";
+    private static final String ENTITY_FOR_ENTITY_CLASS_NAME = "Special.EntityJSEntityForEntityClassName";
     private static final String ENTITY_CLASS_NAME = "Special.EntityJSEntityClassName";
+    private static final String DYNAMIC_OVERRIDE_CONTEXT = "Special.EntityJSDynamicOverrideContext";
+    private static final String CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES = "Special.EntityJSCustomEntityBuilderWithOverrides";
+    private static final String MODIFY_BUILDER_FOR_ENTITY = "Special.EntityJSModifyBuilderForEntity";
+    private static final String MODIFY_BUILDER_FOR_ENTITY_CLASS = "Special.EntityJSModifyBuilderForEntityClass";
+    private static final String MODIFY_BUILDER_FOR_ENTITY_CLASS_NAME = "Special.EntityJSModifyBuilderForEntityClassName";
     private static final Set<DocGenerationEventJS> REGISTERED_EVENTS = Collections.newSetFromMap(new WeakHashMap<>());
 
     private EntityJSBuiltinDocs() {
@@ -56,10 +68,25 @@ public final class EntityJSBuiltinDocs {
         }
         captureEntityJSClasses();
         ProbeIndex index = buildProbeIndex();
-        event.specialType("EntityJSOverrideMethodKey", quotedUnion(index.overrideMethodKeys()));
-        event.specialType("EntityJSEntityClassName", quotedUnion(index.entityClassNames()));
+        event.specialType("EntityJSOverrideMethodKey", rawUnion(index.overrideMethodKeys()));
+        for (Map.Entry<Class<? extends Entity>, String> entry : index.overrideMethodKeyTypes.entrySet()) {
+            event.specialType(entry.getValue(), List.of(overrideMethodKeyType(entry.getKey(), index)));
+        }
+        event.specialType("EntityJSOverrideMethodKeyForEntity<T>", List.of(overrideMethodKeyForEntity(index)));
+        event.specialType("EntityJSOverrideMethodKeyForEntityClass<T>", List.of(overrideMethodKeyForEntityClass(index)));
+        event.specialType("EntityJSOverrideMethodKeyForEntityClassName<T extends " + ENTITY_CLASS_NAME + ">", List.of("T extends keyof Special.EntityJSOverrideMethodKeyByEntityClassName ? Special.EntityJSOverrideMethodKeyByEntityClassName[T] : " + OVERRIDE_METHOD_KEY));
+        event.specialType("EntityJSOverrideMethodKeyByEntityClassName", List.of(overrideMethodKeyByEntityClassName(index)));
+        event.specialType("EntityJSEntityForEntityClass<T>", List.of(entityForEntityClass(index)));
+        event.specialType("EntityJSEntityForEntityClassName<T extends " + ENTITY_CLASS_NAME + ">", List.of(entityForEntityClassName(index)));
+        event.specialType("EntityJSEntityClassName", rawUnion(index.entityClassNames()));
+        event.specialType("EntityJSDynamicOverrideContext<E extends Internal.Entity = Internal.Entity>", List.of(dynamicOverrideContext()));
+        event.specialType("EntityJSCustomEntityBuilderWithOverrides<K extends string, E extends Internal.Entity = Internal.Entity>", List.of(customEntityBuilderWithOverrides()));
+        event.specialType("EntityJSModifyBuilderForEntity<T>", List.of(modifyBuilderForEntity()));
+        event.specialType("EntityJSModifyBuilderForEntityClass<T>", List.of(modifyBuilderForEntityClass(index)));
+        event.specialType("EntityJSModifyBuilderForEntityClassName<T extends " + ENTITY_CLASS_NAME + ">", List.of(modifyBuilderForEntityClassName()));
         for (ModifyBuilderGroup group : index.modifyBuilderGroups().values()) {
-            event.specialType(group.entityTypeAlias, quotedUnion(group.entityTypeIds));
+            event.specialType(group.entityTypeAlias, rawUnion(group.entityTypeIds));
+            event.specialType(group.entityClassNameAlias, rawUnion(group.entityClassNames));
         }
 
         event.transformDocument(CustomEntityBuilder.class, EntityJSBuiltinDocs::patchCustomEntityBuilder);
@@ -71,12 +98,16 @@ public final class EntityJSBuiltinDocs {
     private static void captureEntityJSClasses() {
         DocCompiler.CapturedClasses.capturedJavaClasses.addAll(List.of(
                 CustomEntityBuilder.class,
+                CustomEntityJSBuilder.class,
                 EntityModificationEventJS.class,
                 ModifyEntityBuilder.class,
                 ModifyLivingEntityBuilder.class,
                 ModifyMobBuilder.class,
                 ModifyPathfinderMobBuilder.class,
-                ModifyProjectileBuilder.class
+                ModifyProjectileBuilder.class,
+                BaseLivingEntityBuilder.class,
+                BaseEntityBuilder.class,
+                BaseNonAnimatableEntityBuilder.class
         ));
     }
 
@@ -89,6 +120,7 @@ public final class EntityJSBuiltinDocs {
     }
 
     private static void patchEntityModificationEvent(DocumentClass documentClass) {
+        removeMethodsNamed(documentClass, "modify");
         for (ModifyBuilderGroup group : buildProbeIndex().modifyBuilderGroups().values()) {
             addMethod(documentClass, method(
                     "modify",
@@ -99,26 +131,48 @@ public final class EntityJSBuiltinDocs {
         }
         addMethod(documentClass, method(
                 "modify",
+                List.of(nativeType("T extends Internal.Entity")),
                 voidType(),
-                param("entityType", parameterized(clazz(EntityType.class), clazz(Entity.class))),
-                param("modifyBuilder", builderCallback(clazz(ModifyEntityBuilder.class)))
+                param("entityType", nativeType("Internal.EntityType<T>")),
+                param("modifyBuilder", builderCallback(nativeType(MODIFY_BUILDER_FOR_ENTITY + "<T>")))
         ));
     }
 
     private static void patchRegistryCreateCustom(DocumentClass documentClass) {
+        removeMethodsNamed(documentClass, "createCustom");
+        for (ModifyBuilderGroup group : buildProbeIndex().modifyBuilderGroups().values()) {
+            addMethod(documentClass, method(
+                    "createCustom",
+                    List.of(nativeType("T extends Special." + group.entityClassNameAlias)),
+                    nativeType(CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<" + OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS_NAME + "<T>, " + ENTITY_FOR_ENTITY_CLASS_NAME + "<T>>"),
+                    param("id", nativeType("string")),
+                    param("entityClass", nativeType("T")),
+                    param("modifyBuilder", builderCallback(clazz(group.builderClass)))
+            ));
+        }
         addMethod(documentClass, method(
                 "createCustom",
-                clazz(CustomEntityBuilder.class),
+                List.of(nativeType("T extends " + ENTITY_CLASS_NAME)),
+                nativeType(CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<" + OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS_NAME + "<T>, " + ENTITY_FOR_ENTITY_CLASS_NAME + "<T>>"),
                 param("id", nativeType("string")),
-                param("entityClass", nativeType(ENTITY_CLASS_NAME)),
-                param("modifyBuilder", builderCallback(clazz(ModifyEntityBuilder.class)))
+                param("entityClass", nativeType("T")),
+                param("modifyBuilder", builderCallback(nativeType(MODIFY_BUILDER_FOR_ENTITY_CLASS_NAME + "<T>")))
         ));
         addMethod(documentClass, method(
                 "createCustom",
-                clazz(CustomEntityBuilder.class),
+                List.of(nativeType("T extends Internal.Entity")),
+                nativeType(CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<" + OVERRIDE_METHOD_KEY_FOR_ENTITY + "<T>, T>"),
                 param("id", nativeType("string")),
-                param("entityClass", parameterized(clazz(Class.class), clazz(Entity.class))),
-                param("modifyBuilder", builderCallback(clazz(ModifyEntityBuilder.class)))
+                param("entityClass", nativeType("Internal.Class<T>")),
+                param("modifyBuilder", builderCallback(nativeType(MODIFY_BUILDER_FOR_ENTITY + "<T>")))
+        ));
+        addMethod(documentClass, method(
+                "createCustom",
+                List.of(nativeType("T")),
+                nativeType(CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<" + OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS + "<T>, " + ENTITY_FOR_ENTITY_CLASS + "<T>>"),
+                param("id", nativeType("string")),
+                param("entityClass", nativeType("T extends string | Internal.Class<any> ? never : T")),
+                param("modifyBuilder", builderCallback(nativeType(MODIFY_BUILDER_FOR_ENTITY_CLASS + "<T>")))
         ));
     }
 
@@ -127,6 +181,12 @@ public final class EntityJSBuiltinDocs {
         method.name = name;
         method.returns = returnType;
         method.params.addAll(List.of(params));
+        return method;
+    }
+
+    private static DocumentMethod method(String name, List<PropertyType<?>> typeParams, PropertyType<?> returnType, PropertyParam... params) {
+        DocumentMethod method = method(name, returnType, params);
+        method.variables.addAll(typeParams);
         return method;
     }
 
@@ -142,6 +202,10 @@ public final class EntityJSBuiltinDocs {
     private static void addMethod(DocumentClass documentClass, DocumentMethod method) {
         documentClass.methods.remove(method);
         documentClass.methods.add(method);
+    }
+
+    private static void removeMethodsNamed(DocumentClass documentClass, String name) {
+        documentClass.methods.removeIf(method -> name.equals(method.name) || method.name.startsWith(name + "("));
     }
 
     private static PropertyType<?> builderCallback(PropertyType<?> builderType) {
@@ -164,7 +228,7 @@ public final class EntityJSBuiltinDocs {
         return new PropertyType.Parameterized(base, List.of(params));
     }
 
-    private static List<Object> quotedUnion(Collection<String> values) {
+    private static List<Object> rawUnion(Collection<String> values) {
         if (values.isEmpty()) {
             return List.of("never");
         }
@@ -177,28 +241,256 @@ public final class EntityJSBuiltinDocs {
                 .toList();
     }
 
+    private static String overrideMethodKeyType(Class<? extends Entity> entityClass, ProbeIndex index) {
+        Set<String> localKeys = index.overrideKeysByClass.getOrDefault(entityClass, Set.of());
+        Class<? extends Entity> parentClass = index.overrideParentByClass.get(entityClass);
+        List<String> types = new ArrayList<>(localKeys.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .map(EntityJSBuiltinDocs::quote)
+                .toList());
+        if (parentClass != null) {
+            types.add("Special." + index.overrideMethodKeyTypes.get(parentClass));
+        }
+        if (types.isEmpty()) {
+            return "never";
+        }
+        return String.join(" | ", types);
+    }
+
+    private static String overrideMethodKeyForEntity(ProbeIndex index) {
+        StringBuilder builder = new StringBuilder();
+        for (Class<? extends Entity> entityClass : index.sortedEntityClasses) {
+            builder.append("T extends ")
+                    .append(internalType(entityClass))
+                    .append(" ? Special.")
+                    .append(overrideMethodKeyTypeName(entityClass))
+                    .append(" : ");
+        }
+        builder.append(OVERRIDE_METHOD_KEY);
+        return builder.toString();
+    }
+
+    private static String overrideMethodKeyForEntityClass(ProbeIndex index) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("T extends Internal.Class<infer E> ? E extends Internal.Entity ? ")
+                .append(OVERRIDE_METHOD_KEY_FOR_ENTITY)
+                .append("<E> : ")
+                .append(OVERRIDE_METHOD_KEY)
+                .append(" : T extends { prototype: infer E } ? E extends Internal.Entity ? ")
+                .append(OVERRIDE_METHOD_KEY_FOR_ENTITY)
+                .append("<E> : ")
+                .append(OVERRIDE_METHOD_KEY)
+                .append(" : T extends abstract new (...args: any) => infer E ? E extends Internal.Entity ? ")
+                .append(OVERRIDE_METHOD_KEY_FOR_ENTITY)
+                .append("<E> : ")
+                .append(OVERRIDE_METHOD_KEY)
+                .append(" : ");
+        for (Class<? extends Entity> entityClass : index.sortedEntityClasses) {
+            builder.append("T extends typeof ")
+                    .append(internalType(entityClass))
+                    .append(" ? Special.")
+                    .append(overrideMethodKeyTypeName(entityClass))
+                    .append(" : ");
+        }
+        builder.append("T extends Internal.Entity ? ")
+                .append(OVERRIDE_METHOD_KEY_FOR_ENTITY)
+                .append("<T> : ")
+                .append(OVERRIDE_METHOD_KEY);
+        return builder.toString();
+    }
+
+    private static String overrideMethodKeyByEntityClassName(ProbeIndex index) {
+        StringBuilder builder = new StringBuilder("{ ");
+        for (Class<? extends Entity> entityClass : index.sortedEntityClasses) {
+            builder.append(quote(entityClass.getName()))
+                    .append(": Special.")
+                    .append(overrideMethodKeyTypeName(entityClass))
+                    .append("; ");
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
+    private static String entityForEntityClass(ProbeIndex index) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("T extends Internal.Class<infer E> ? E extends Internal.Entity ? E : Internal.Entity")
+                .append(" : T extends { prototype: infer E } ? E extends Internal.Entity ? E : Internal.Entity")
+                .append(" : T extends abstract new (...args: any) => infer E ? E extends Internal.Entity ? E : Internal.Entity")
+                .append(" : ");
+        for (Class<? extends Entity> entityClass : index.sortedEntityClasses) {
+            builder.append("T extends typeof ")
+                    .append(internalType(entityClass))
+                    .append(" ? ")
+                    .append(internalType(entityClass))
+                    .append(" : ");
+        }
+        builder.append("T extends Internal.Entity ? T : Internal.Entity");
+        return builder.toString();
+    }
+
+    private static String entityForEntityClassName(ProbeIndex index) {
+        StringBuilder builder = new StringBuilder();
+        for (Class<? extends Entity> entityClass : index.sortedEntityClasses) {
+            builder.append("T extends ")
+                    .append(quote(entityClass.getName()))
+                    .append(" ? ")
+                    .append(internalType(entityClass))
+                    .append(" : ");
+        }
+        builder.append("Internal.Entity");
+        return builder.toString();
+    }
+
+    private static String customEntityBuilderWithOverrides() {
+        return "{ [P in keyof Internal.CustomEntityBuilder]: P extends \"override\""
+                + " ? (methodKey: K, callback: (context: " + DYNAMIC_OVERRIDE_CONTEXT + "<E>) => any) => " + CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<K, E>"
+                + " : Internal.CustomEntityBuilder[P] extends (...args: infer A) => infer R"
+                + " ? R extends Internal.CustomEntityBuilder | Internal.CustomEntityJSBuilder"
+                + " ? (...args: A) => " + CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<K, E>"
+                + " : Internal.CustomEntityBuilder[P]"
+                + " : Internal.CustomEntityBuilder[P] }";
+    }
+
+    private static String dynamicOverrideContext() {
+        return "{ readonly entity: E; readonly method: string; readonly args: { readonly [key: string]: any }; get(name: string): any; superCall(...args: any[]): any; readonly [key: string]: any }";
+    }
+
+    private static String modifyBuilderForEntity() {
+        return "T extends Internal.Projectile ? Internal.ModifyProjectileBuilder"
+                + " : T extends Internal.PathfinderMob ? Internal.ModifyPathfinderMobBuilder"
+                + " : T extends Internal.Mob ? Internal.ModifyMobBuilder"
+                + " : T extends Internal.LivingEntity ? Internal.ModifyLivingEntityBuilder"
+                + " : Internal.ModifyEntityBuilder";
+    }
+
+    private static String modifyBuilderForEntityClass(ProbeIndex index) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("T extends Internal.Class<infer E> ? E extends Internal.Entity ? ")
+                .append(MODIFY_BUILDER_FOR_ENTITY)
+                .append("<E> : Internal.ModifyEntityBuilder")
+                .append(" : T extends { prototype: infer E } ? E extends Internal.Entity ? ")
+                .append(MODIFY_BUILDER_FOR_ENTITY)
+                .append("<E> : Internal.ModifyEntityBuilder")
+                .append(" : T extends abstract new (...args: any) => infer E ? E extends Internal.Entity ? ")
+                .append(MODIFY_BUILDER_FOR_ENTITY)
+                .append("<E> : Internal.ModifyEntityBuilder")
+                .append(" : ");
+        for (Class<? extends Entity> entityClass : index.sortedEntityClasses) {
+            builder.append("T extends typeof ")
+                    .append(internalType(entityClass))
+                    .append(" ? ")
+                    .append(internalType(modifyBuilderClass(entityClass)))
+                    .append(" : ");
+        }
+        builder.append("T extends Internal.Entity ? ")
+                .append(MODIFY_BUILDER_FOR_ENTITY)
+                .append("<T> : Internal.ModifyEntityBuilder");
+        return builder.toString();
+    }
+
+    private static String modifyBuilderForEntityClassName() {
+        return "T extends Special.EntityJSModifyProjectileEntityClassName ? Internal.ModifyProjectileBuilder"
+                + " : T extends Special.EntityJSModifyPathfinderMobEntityClassName ? Internal.ModifyPathfinderMobBuilder"
+                + " : T extends Special.EntityJSModifyMobEntityClassName ? Internal.ModifyMobBuilder"
+                + " : T extends Special.EntityJSModifyLivingEntityClassName ? Internal.ModifyLivingEntityBuilder"
+                + " : Internal.ModifyEntityBuilder";
+    }
+
     private static String quote(String value) {
         return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
     }
 
+    private static String overrideMethodKeyTypeName(Class<?> entityClass) {
+        return "EntityJSOverrideMethodKey_" + entityClass.getName().replaceAll("[^A-Za-z0-9_]", "_");
+    }
+
+    private static String internalType(Class<?> entityClass) {
+        return "Internal." + entityClass.getSimpleName();
+    }
+
+    private static int inheritanceDepth(Class<?> type) {
+        int depth = 0;
+        Class<?> current = type;
+        while (current != null && current != Object.class) {
+            depth++;
+            current = current.getSuperclass();
+        }
+        return depth;
+    }
+
     private static ProbeIndex buildProbeIndex() {
         Set<Class<? extends Entity>> entityClasses = discoverEntityClasses();
+        List<Class<? extends Entity>> sortedEntityClasses = entityClasses.stream()
+                .sorted((left, right) -> {
+                    int depth = Integer.compare(inheritanceDepth(right), inheritanceDepth(left));
+                    if (depth != 0) {
+                        return depth;
+                    }
+                    return left.getName().compareTo(right.getName());
+                })
+                .toList();
         Set<String> entityClassNames = new LinkedHashSet<>();
         Set<String> overrideMethodKeys = new LinkedHashSet<>();
+        Map<Class<? extends Entity>, Set<String>> overrideKeysByClass = new LinkedHashMap<>();
+        Map<Class<? extends Entity>, Set<String>> resolvedOverrideKeysByClass = new LinkedHashMap<>();
+        Map<Class<? extends Entity>, String> overrideMethodKeyTypes = new LinkedHashMap<>();
+        Map<Class<? extends Entity>, Class<? extends Entity>> overrideParentByClass = new LinkedHashMap<>();
         Map<Class<? extends ModifyEntityBuilder>, ModifyBuilderGroup> modifyBuilderGroups = createModifyGroups();
 
-        for (Class<? extends Entity> entityClass : entityClasses) {
+        for (Class<? extends Entity> entityClass : sortedEntityClasses) {
             entityClassNames.add(entityClass.getName());
-            overrideMethodKeys.addAll(DynamicOverrideMethodCatalog.overrideKeys(entityClass));
+            Set<String> resolvedKeys = new LinkedHashSet<>(DynamicOverrideMethodCatalog.overrideKeys(entityClass));
+            resolvedOverrideKeysByClass.put(entityClass, resolvedKeys);
+            overrideMethodKeys.addAll(resolvedKeys);
+            overrideMethodKeyTypes.put(entityClass, overrideMethodKeyTypeName(entityClass));
+        }
+        for (Class<? extends Entity> entityClass : sortedEntityClasses) {
+            Class<? extends Entity> parentClass = nearestIndexedSuperclass(entityClass, entityClasses);
+            Set<String> localKeys = new LinkedHashSet<>(resolvedOverrideKeysByClass.getOrDefault(entityClass, Set.of()));
+            if (parentClass != null) {
+                localKeys.removeAll(resolvedOverrideKeysByClass.getOrDefault(parentClass, Set.of()));
+                overrideParentByClass.put(entityClass, parentClass);
+            }
+            overrideKeysByClass.put(entityClass, localKeys);
         }
         for (Map.Entry<ResourceKey<EntityType<?>>, EntityType<?>> entry : BuiltInRegistries.ENTITY_TYPE.entrySet()) {
             Class<? extends Entity> entityClass = entityClass(entry.getValue());
             ModifyBuilderGroup group = modifyBuilderGroups.get(modifyBuilderClass(entityClass));
             if (group != null) {
                 group.entityTypeIds.add(entry.getKey().location().toString());
+                group.entityClasses.add(entityClass);
             }
         }
-        return new ProbeIndex(entityClassNames, overrideMethodKeys, modifyBuilderGroups);
+        for (Class<? extends Entity> entityClass : entityClasses) {
+            ModifyBuilderGroup group = modifyBuilderGroups.get(modifyBuilderClass(entityClass));
+            if (group != null) {
+                group.entityClassNames.add(entityClass.getName());
+                group.entityClasses.add(entityClass);
+            }
+        }
+        return new ProbeIndex(
+                entityClasses,
+                sortedEntityClasses,
+                entityClassNames,
+                overrideMethodKeys,
+                overrideKeysByClass,
+                overrideMethodKeyTypes,
+                overrideParentByClass,
+                modifyBuilderGroups
+        );
+    }
+
+    private static Class<? extends Entity> nearestIndexedSuperclass(Class<? extends Entity> entityClass, Set<Class<? extends Entity>> entityClasses) {
+        Class<?> current = entityClass.getSuperclass();
+        while (current != null && Entity.class.isAssignableFrom(current)) {
+            if (entityClasses.contains(current)) {
+                return current.asSubclass(Entity.class);
+            }
+            current = current.getSuperclass();
+        }
+        return null;
     }
 
     private static Set<Class<? extends Entity>> discoverEntityClasses() {
@@ -324,19 +616,28 @@ public final class EntityJSBuiltinDocs {
     }
 
     private record ProbeIndex(
+            Set<Class<? extends Entity>> entityClasses,
+            List<Class<? extends Entity>> sortedEntityClasses,
             Set<String> entityClassNames,
             Set<String> overrideMethodKeys,
+            Map<Class<? extends Entity>, Set<String>> overrideKeysByClass,
+            Map<Class<? extends Entity>, String> overrideMethodKeyTypes,
+            Map<Class<? extends Entity>, Class<? extends Entity>> overrideParentByClass,
             Map<Class<? extends ModifyEntityBuilder>, ModifyBuilderGroup> modifyBuilderGroups
     ) {
     }
 
     private static final class ModifyBuilderGroup {
         private final String entityTypeAlias;
+        private final String entityClassNameAlias;
         private final Class<? extends ModifyEntityBuilder> builderClass;
         private final Set<String> entityTypeIds = new LinkedHashSet<>();
+        private final Set<String> entityClassNames = new LinkedHashSet<>();
+        private final Set<Class<? extends Entity>> entityClasses = new LinkedHashSet<>();
 
         private ModifyBuilderGroup(String entityTypeAlias, Class<? extends ModifyEntityBuilder> builderClass) {
             this.entityTypeAlias = entityTypeAlias;
+            this.entityClassNameAlias = entityTypeAlias.replace("EntityType", "EntityClassName");
             this.builderClass = builderClass;
         }
     }

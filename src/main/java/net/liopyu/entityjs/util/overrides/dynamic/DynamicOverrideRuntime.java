@@ -146,7 +146,7 @@ public final class DynamicOverrideRuntime {
     private static InvocationResult invokeResult(Entity entity, String method, String bridgeName, Object[] args) {
         CustomEntityBuilder builder = builderFor(entity);
         if (builder == null) {
-            Supplier<Object> fallback = () -> callSuper(entity, null, method, bridgeName, args);
+            Supplier<Object> fallback = () -> invokeSuperBridge(entity, null, method, bridgeName, args);
             return new InvocationResult(fallback.get(), fallback);
         }
 
@@ -154,25 +154,25 @@ public final class DynamicOverrideRuntime {
         DynamicOverrideMethodCatalog.MethodSpec methodSpec = DynamicOverrideMethodCatalog.resolve(builder.getEntityClass(), method);
         boolean abstractMethod = methodSpec != null && methodSpec.abstractMethod();
         if (callback == null) {
-            Supplier<Object> fallback = () -> abstractMethod ? defaultValue(builder.getEntityClass(), method) : callSuper(entity, builder.getEntityClass(), method, bridgeName, args);
+            Supplier<Object> fallback = () -> abstractMethod ? defaultValue(builder.getEntityClass(), method) : invokeSuperBridge(entity, builder.getEntityClass(), method, bridgeName, args);
             return new InvocationResult(fallback.get(), fallback);
         }
 
-        Supplier<Object> superCall = abstractMethod
-                ? () -> {
+        ContextUtils.DynamicOverrideContext.SuperCall superCall = abstractMethod
+                ? overrideArgs -> {
                     throw new IllegalStateException("[EntityJS]: Dynamic override '" + method + "' is abstract and has no super implementation.");
                 }
-                : () -> callSuper(entity, builder.getEntityClass(), method, bridgeName, args);
+                : overrideArgs -> invokeSuperBridge(entity, builder.getEntityClass(), method, bridgeName, superArgs(args, overrideArgs));
         ContextUtils.DynamicOverrideContext<Entity> context = new ContextUtils.DynamicOverrideContext<>(
                 entity,
                 method,
                 buildArgs(builder.getEntityClass(), method, args),
                 superCall
         );
-        Supplier<Object> fallback = abstractMethod ? () -> defaultValue(builder.getEntityClass(), method) : context::callSuper;
+        Supplier<Object> fallback = abstractMethod ? () -> defaultValue(builder.getEntityClass(), method) : context::superCall;
 
         try {
-            return new InvocationResult(OverrideUtils.with(context::callSuper, () -> callback.apply(context)), fallback);
+            return new InvocationResult(OverrideUtils.with(context::superCall, () -> callback.apply(context)), fallback);
         } catch (Throwable throwable) {
             EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error in dynamic override '" + method + "' for " + safeEntityName(entity) + ".", throwable);
             return new InvocationResult(fallback.get(), fallback);
@@ -213,11 +213,11 @@ public final class DynamicOverrideRuntime {
         return names;
     }
 
-    private static Object callSuper(Entity entity, Class<? extends Entity> baseClass, String method, String bridgeName, Object[] args) {
+    private static Object invokeSuperBridge(Entity entity, Class<? extends Entity> baseClass, String method, String bridgeName, Object[] args) {
         try {
             Class<?>[] parameterTypes = parameterTypes(baseClass, method);
             Method bridge = BRIDGES.computeIfAbsent(new BridgeKey(entity.getClass(), bridgeName), key -> findBridge(key.entityClass(), key.bridgeName(), parameterTypes));
-            return bridge.invoke(entity, args);
+            return bridge.invoke(entity, prepareBridgeArgs(method, parameterTypes, args));
         } catch (InvocationTargetException exception) {
             Throwable cause = exception.getCause() == null ? exception : exception.getCause();
             EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error calling dynamic override super bridge '" + method + "' for " + safeEntityName(entity) + ".", cause);
@@ -225,6 +225,66 @@ public final class DynamicOverrideRuntime {
             EntityJSHelperClass.logErrorMessageOnceCatchable("[EntityJS]: Error finding dynamic override super bridge '" + method + "' for " + safeEntityName(entity) + ".", throwable);
         }
         return defaultValue(baseClass, method);
+    }
+
+    private static Object[] superArgs(Object[] originalArgs, Object[] overrideArgs) {
+        if (overrideArgs == null || overrideArgs.length == 0) {
+            return originalArgs;
+        }
+        return overrideArgs.clone();
+    }
+
+    private static Object[] prepareBridgeArgs(String method, Class<?>[] parameterTypes, Object[] args) {
+        Object[] values = args == null ? new Object[0] : args;
+        if (values.length != parameterTypes.length) {
+            throw new IllegalArgumentException("Dynamic override super bridge '" + method + "' expected " + parameterTypes.length + " argument(s), got " + values.length + ".");
+        }
+        Object[] converted = new Object[values.length];
+        for (int i = 0; i < values.length; i++) {
+            converted[i] = convertArgument(parameterTypes[i], values[i]);
+        }
+        return converted;
+    }
+
+    private static Object convertArgument(Class<?> parameterType, Object value) {
+        if (!parameterType.isPrimitive() || value == null) {
+            return value;
+        }
+        if (parameterType == boolean.class) {
+            return value instanceof Boolean bool ? bool : Boolean.parseBoolean(String.valueOf(value));
+        }
+        if (parameterType == char.class) {
+            if (value instanceof Character character) {
+                return character;
+            }
+            if (value instanceof Number number) {
+                return (char) number.intValue();
+            }
+            String string = String.valueOf(value);
+            return string.isEmpty() ? (char) 0 : string.charAt(0);
+        }
+        if (!(value instanceof Number number)) {
+            return value;
+        }
+        if (parameterType == byte.class) {
+            return number.byteValue();
+        }
+        if (parameterType == short.class) {
+            return number.shortValue();
+        }
+        if (parameterType == int.class) {
+            return number.intValue();
+        }
+        if (parameterType == long.class) {
+            return number.longValue();
+        }
+        if (parameterType == float.class) {
+            return number.floatValue();
+        }
+        if (parameterType == double.class) {
+            return number.doubleValue();
+        }
+        return value;
     }
 
     private static Class<?>[] parameterTypes(Class<? extends Entity> baseClass, String method) {
