@@ -43,7 +43,7 @@ minecraft {
             def instanceId = project.hasProperty("instance") ? project.property("instance") : "0"
             def username = "Dev${instanceId == '0' ? '' : instanceId}"
 
-            args '--mixin.config=entityjs.mixins.json', '--debug', '--username', username
+            args '--mixin.config=entityjs.mixins.json'
             property 'forge.client.window.title', username
             property 'geckolib.disable_examples', 'true'
             property 'forge.logging.console.level', 'debug'
@@ -76,9 +76,11 @@ minecraft {
 
         client {
             def instanceId = project.hasProperty("instance") ? project.property("instance") : "0"
+            def username = "Dev${instanceId == '0' ? '' : instanceId}"
             def runDir = "runs/client${instanceId == '0' ? '' : instanceId}"
             workingDirectory = project.file(runDir)
             property 'forge.enabledGameTestNamespaces', mod_id
+            args '--debug', '--username', username
         }
 
         server {

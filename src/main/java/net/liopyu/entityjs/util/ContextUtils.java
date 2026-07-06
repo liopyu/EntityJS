@@ -87,6 +87,13 @@ public class ContextUtils {
         }
     }
 
+    /**
+     * Rhino object passed to {@code createCustom(...).override(...)} callbacks.
+     * It exposes the entity, method key, named arguments, and a cached {@code superCall}
+     * function as script-visible properties while adapting Java values into Rhino-friendly
+     * values. Argument names come from {@link net.liopyu.entityjs.util.overrides.dynamic.DynamicOverrideMethodCatalog}
+     * and its Parchment-backed parameter lookup.
+     */
     public static class DynamicOverrideContext<T extends Entity> extends ScriptableObject {
         public final T entity;
         public final String method;

@@ -6,6 +6,7 @@ import dev.latvian.mods.kubejs.generator.DataJsonGenerator;
 import dev.latvian.mods.kubejs.script.data.VirtualKubeJSDataPack;
 import dev.latvian.mods.kubejs.server.ServerScriptManager;
 import net.liopyu.entityjs.util.EventHandlers;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -34,6 +35,11 @@ public abstract class ServerScriptManagerMixin {
     private MultiPackResourceManager entityjs$WrappedManager;
     @Unique
     private VirtualKubeJSDataPack entityjs$VirtualDataPack;
+
+    @Inject(method = "wrapResourceManager", at = @At("HEAD"), remap = false)
+    private void entityjs$clearCallbackCaches(CloseableResourceManager original, CallbackInfoReturnable<MultiPackResourceManager> cir) {
+        CallbackInvoker.clearCaches();
+    }
 
     @WrapOperation(method = "wrapResourceManager", at = @At(value = "INVOKE", target = "Ldev/latvian/mods/kubejs/server/ServerScriptManager;reload(Lnet/minecraft/server/packs/resources/ResourceManager;)V"), remap = false)
     private void entityjs$captureMultiManager(ServerScriptManager instance, ResourceManager resourceManager, Operation<Void> original) {

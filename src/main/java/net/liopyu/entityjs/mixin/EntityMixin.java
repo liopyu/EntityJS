@@ -28,6 +28,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -131,45 +133,33 @@ public abstract class EntityMixin implements IEntityJS {
     }
 
     @Unique
+    private static boolean entityjs$isDedicatedServerSyncedDataSide(Entity entity) {
+        return !entity.level().isClientSide && FMLEnvironment.dist == Dist.DEDICATED_SERVER;
+    }
+
+    @Unique
     public void entityJs$addSyncedData(EntitySerializerType type, String name, Object initial) {
         Entity self = (Entity) (Object) this;
+        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
         Tag tag = NbtConvert.toTag(type, initial);
-        if (self.level().isClientSide) {
-            ClientCache.setType(self.getUUID(), name, type.ordinal());
-            ClientCache.set(self.getUUID(), name, tag);
-            Net.sendEnsureToServer(self.getUUID(), name, type, tag);
-        } else {
-            ServerCache.ensure(self, name, tag, type);
-        }
+        ServerCache.ensure(self, name, tag, type);
     }
 
     @Unique
     public void entityJs$setSyncedData(String name, Object value) {
         Entity self = (Entity) (Object) this;
+        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
         UUID id = self.getUUID();
 
-        var optType = self.level().isClientSide
-                ? ClientCache.getType(id, name)
-                : SavedDataJS.get((ServerLevel) self.level()).getType(id, name);
+        var optType = SavedDataJS.get((ServerLevel) self.level()).getType(id, name);
 
         EntitySerializerType type = optType.orElseGet(() -> entityjs$inferType(value));
         Tag tag = NbtConvert.toTag(type, value);
 
-        if (self.level().isClientSide) {
-            if (optType.isEmpty()) {
-                ClientCache.setType(id, name, type.ordinal());
-                ClientCache.set(id, name, tag);
-                Net.sendEnsureToServer(id, name, type, tag);
-            } else {
-                ClientCache.set(id, name, tag);
-                Net.sendSetToServer(id, name, tag);
-            }
+        if (optType.isEmpty()) {
+            ServerCache.ensure(self, name, tag, type);
         } else {
-            if (optType.isEmpty()) {
-                ServerCache.ensure(self, name, tag, type);
-            } else {
-                ServerCache.set(self, name, tag);
-            }
+            ServerCache.set(self, name, tag);
         }
     }
 
@@ -358,17 +348,17 @@ public abstract class EntityMixin implements IEntityJS {
         }
         if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
             if (entityJs$getLivingEntity() instanceof Mob m) {
-                if (EventHandlers.addGoalTargets.hasListeners()) {
+                if (EventHandlers.addGoalTargets.hasListeners(entityJs$getTypeId())) {
                     EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(m, m.targetSelector), entityJs$getTypeId());
                 }
-                if (EventHandlers.addGoalSelectors.hasListeners()) {
+                if (EventHandlers.addGoalSelectors.hasListeners(entityJs$getTypeId())) {
                     EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(m, m.goalSelector), entityJs$getTypeId());
                 }
             }
         }
         Entity self = (Entity) (Object) this;
         if (entityJs$definedOnce) return;
-        if (self.level().isClientSide) return;
+        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
         if (!(entityJs$builder instanceof ModifyEntityBuilder builder)) return;
         if (builder.defineSyncedData == null) return;
 

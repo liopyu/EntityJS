@@ -3,6 +3,7 @@ package net.liopyu.entityjs.mixin;
 import dev.latvian.mods.kubejs.command.KubeJSCommands;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.overrides.CallbackInvoker;
+import net.liopyu.entityjs.util.overrides.dynamic.DynamicOverrideRuntime;
 import net.minecraft.commands.CommandSourceStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,6 +24,7 @@ public abstract class KubeJSCommandsMixin {
         EntityJSHelperClass.errorMessagesLogged.clear();
         EntityJSHelperClass.warningMessagesLogged.clear();
         CallbackInvoker.clearCaches();
+        DynamicOverrideRuntime.clearCaches();
         resetPostedModifyEvents();
     }
 }

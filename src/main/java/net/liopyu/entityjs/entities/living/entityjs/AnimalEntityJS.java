@@ -225,7 +225,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     protected Brain.Provider<?> brainProvider() {
-        if (EventHandlers.buildBrainProvider.hasListeners()) {
+        if (EventHandlers.buildBrainProvider.hasListeners(getTypeId())) {
             final BuildBrainProviderEventJS<AnimalEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
@@ -236,7 +236,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     protected Brain<AnimalEntityJS> makeBrain(Dynamic<?> p_21069_) {
-        if (EventHandlers.buildBrain.hasListeners()) {
+        if (EventHandlers.buildBrain.hasListeners(getTypeId())) {
             final Brain<AnimalEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
@@ -247,10 +247,10 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     protected void registerGoals() {
-        if (EventHandlers.addGoalTargets.hasListeners()) {
+        if (EventHandlers.addGoalTargets.hasListeners(getTypeId())) {
             EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
         }
-        if (EventHandlers.addGoalSelectors.hasListeners()) {
+        if (EventHandlers.addGoalSelectors.hasListeners(getTypeId())) {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }

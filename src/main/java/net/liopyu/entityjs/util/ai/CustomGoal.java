@@ -11,25 +11,25 @@ public class CustomGoal<T extends Mob> extends Goal {
 
     private final String name;
     private final T mob;
-    private final Predicate<T> canUse;
+    private final Predicate<? super T> canUse;
     @Nullable
-    private final Predicate<T> canContinueToUse;
+    private final Predicate<? super T> canContinueToUse;
     private final boolean isInterruptable;
-    private final Consumer<T> start;
-    private final Consumer<T> stop;
+    private final Consumer<? super T> start;
+    private final Consumer<? super T> stop;
     private final boolean requiresUpdateEveryTick;
-    private final Consumer<T> tick;
+    private final Consumer<? super T> tick;
 
     public CustomGoal(
             String name,
             T mob,
-            Predicate<T> canUse,
-            @Nullable Predicate<T> canContinueToUse,
+            Predicate<? super T> canUse,
+            @Nullable Predicate<? super T> canContinueToUse,
             boolean isInterruptable,
-            Consumer<T> start,
-            Consumer<T> stop,
+            Consumer<? super T> start,
+            Consumer<? super T> stop,
             boolean requiresUpdateEveryTick,
-            Consumer<T> tick
+            Consumer<? super T> tick
     ) {
         this.name = name;
         this.mob = mob;

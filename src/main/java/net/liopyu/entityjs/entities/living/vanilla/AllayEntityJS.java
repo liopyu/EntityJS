@@ -181,7 +181,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
     //Some logic overrides up here because there are different implementations in the other builders.
     @Override
     protected Brain.Provider<Allay> brainProvider() {
-        if (EventHandlers.buildBrainProvider.hasListeners()) {
+        if (EventHandlers.buildBrainProvider.hasListeners(getTypeId())) {
             final BuildBrainProviderEventJS<Allay> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
@@ -192,7 +192,7 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
 
     @Override
     protected Brain<AllayEntityJS> makeBrain(Dynamic<?> p_21069_) {
-        if (EventHandlers.buildBrain.hasListeners()) {
+        if (EventHandlers.buildBrain.hasListeners(getTypeId())) {
             final Brain<AllayEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
@@ -203,10 +203,10 @@ public class AllayEntityJS extends Allay implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
-        if (EventHandlers.addGoalTargets.hasListeners()) {
+        if (EventHandlers.addGoalTargets.hasListeners(getTypeId())) {
             EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
         }
-        if (EventHandlers.addGoalSelectors.hasListeners()) {
+        if (EventHandlers.addGoalSelectors.hasListeners(getTypeId())) {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }

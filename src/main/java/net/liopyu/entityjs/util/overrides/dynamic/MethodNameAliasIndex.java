@@ -13,6 +13,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Forge production-name helper for dynamic override method keys.
+ * The bundled alias table maps SRG/runtime method names back to the readable mapped names
+ * shown in development docs, allowing scripts to keep using stable override keys when the
+ * production environment exposes different method names.
+ */
 final class MethodNameAliasIndex {
     private static final String METHOD_ALIASES = "/entityjs/mappings/method_aliases.tsv";
     private static volatile Index index;

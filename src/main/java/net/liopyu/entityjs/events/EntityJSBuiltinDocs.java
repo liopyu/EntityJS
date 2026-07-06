@@ -18,6 +18,8 @@ import net.liopyu.entityjs.builders.modification.ModifyPathfinderMobBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyProjectileBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
+import net.liopyu.entityjs.typings.EntityJSTypingNames;
+import net.liopyu.entityjs.typings.RuntimeClassNameCatalog;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.implementation.IRegistryJS;
 import net.liopyu.entityjs.util.overrides.dynamic.DynamicOverrideMethodCatalog;
@@ -53,10 +55,13 @@ public final class EntityJSBuiltinDocs {
     private static final String ENTITY_FOR_ENTITY_CLASS_NAME = "Special.EntityJSEntityForEntityClassName";
     private static final String ENTITY_CLASS_NAME = "Special.EntityJSEntityClassName";
     private static final String DYNAMIC_OVERRIDE_CONTEXT = "Special.EntityJSDynamicOverrideContext";
+    private static final String DYNAMIC_OVERRIDE_CONTEXT_FOR = "Special.EntityJSDynamicOverrideContextFor";
+    private static final String DYNAMIC_OVERRIDE_ARGS_BY_METHOD_KEY = "Special.EntityJSDynamicOverrideArgsByMethodKey";
     private static final String CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES = "Special.EntityJSCustomEntityBuilderWithOverrides";
     private static final String MODIFY_BUILDER_FOR_ENTITY = "Special.EntityJSModifyBuilderForEntity";
     private static final String MODIFY_BUILDER_FOR_ENTITY_CLASS = "Special.EntityJSModifyBuilderForEntityClass";
     private static final String MODIFY_BUILDER_FOR_ENTITY_CLASS_NAME = "Special.EntityJSModifyBuilderForEntityClassName";
+    private static final String RENDERER_CLASS_NAME = EntityJSTypingNames.SPECIAL_RENDERER_CLASS_NAME;
     private static final Set<DocGenerationEventJS> REGISTERED_EVENTS = Collections.newSetFromMap(new WeakHashMap<>());
 
     private EntityJSBuiltinDocs() {
@@ -79,7 +84,10 @@ public final class EntityJSBuiltinDocs {
         event.specialType("EntityJSEntityForEntityClass<T>", List.of(entityForEntityClass(index)));
         event.specialType("EntityJSEntityForEntityClassName<T extends " + ENTITY_CLASS_NAME + ">", List.of(entityForEntityClassName(index)));
         event.specialType("EntityJSEntityClassName", rawUnion(index.entityClassNames()));
+        event.specialType(EntityJSTypingNames.RENDERER_CLASS_NAME, rawUnion(index.rendererClassNames()));
         event.specialType("EntityJSDynamicOverrideContext<E extends Internal.Entity = Internal.Entity>", List.of(dynamicOverrideContext()));
+        event.specialType("EntityJSDynamicOverrideArgsByMethodKey", List.of(dynamicOverrideArgsByMethodKey(index)));
+        event.specialType("EntityJSDynamicOverrideContextFor<K extends string, E extends Internal.Entity = Internal.Entity>", List.of(dynamicOverrideContextFor()));
         event.specialType("EntityJSCustomEntityBuilderWithOverrides<K extends string, E extends Internal.Entity = Internal.Entity>", List.of(customEntityBuilderWithOverrides()));
         event.specialType("EntityJSModifyBuilderForEntity<T>", List.of(modifyBuilderForEntity()));
         event.specialType("EntityJSModifyBuilderForEntityClass<T>", List.of(modifyBuilderForEntityClass(index)));
@@ -112,6 +120,8 @@ public final class EntityJSBuiltinDocs {
     }
 
     private static void patchCustomEntityBuilder(DocumentClass documentClass) {
+        removeMethodsNamed(documentClass, "setRendererClass");
+        addClientClassNameOverloads(documentClass, "setRendererClass", "entityRendererClassName", "entityRendererClass", RENDERER_CLASS_NAME);
         for (DocumentMethod method : documentClass.methods) {
             if ("override".equals(method.name) && !method.params.isEmpty()) {
                 replaceParam(method, 0, "methodKey", nativeType(OVERRIDE_METHOD_KEY));
@@ -160,11 +170,11 @@ public final class EntityJSBuiltinDocs {
         ));
         addMethod(documentClass, method(
                 "createCustom",
-                List.of(nativeType("T extends Internal.Entity")),
-                nativeType(CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<" + OVERRIDE_METHOD_KEY_FOR_ENTITY + "<T>, T>"),
+                List.of(nativeType("T")),
+                nativeType(CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<" + OVERRIDE_METHOD_KEY_FOR_ENTITY_CLASS + "<T>, " + ENTITY_FOR_ENTITY_CLASS + "<T>>"),
                 param("id", nativeType("string")),
-                param("entityClass", nativeType("Internal.Class<T>")),
-                param("modifyBuilder", builderCallback(nativeType(MODIFY_BUILDER_FOR_ENTITY + "<T>")))
+                param("entityClass", nativeType("T extends Internal.Class<any> ? T : never")),
+                param("modifyBuilder", builderCallback(nativeType(MODIFY_BUILDER_FOR_ENTITY_CLASS + "<T>")))
         ));
         addMethod(documentClass, method(
                 "createCustom",
@@ -202,6 +212,24 @@ public final class EntityJSBuiltinDocs {
     private static void addMethod(DocumentClass documentClass, DocumentMethod method) {
         documentClass.methods.remove(method);
         documentClass.methods.add(method);
+    }
+
+    private static void addClientClassNameOverloads(DocumentClass documentClass, String methodName, String classNameParam, String classParam, String classNameType) {
+        addMethod(documentClass, method(
+                methodName,
+                clazz(CustomEntityBuilder.class),
+                param(classNameParam, nativeType(classNameType))
+        ));
+        addMethod(documentClass, method(
+                methodName,
+                clazz(CustomEntityBuilder.class),
+                param(classNameParam, nativeType("string & {}"))
+        ));
+        addMethod(documentClass, method(
+                methodName,
+                clazz(CustomEntityBuilder.class),
+                param(classParam, nativeType("Internal.Class<any>"))
+        ));
     }
 
     private static void removeMethodsNamed(DocumentClass documentClass, String name) {
@@ -345,7 +373,9 @@ public final class EntityJSBuiltinDocs {
 
     private static String customEntityBuilderWithOverrides() {
         return "{ [P in keyof Internal.CustomEntityBuilder]: P extends \"override\""
-                + " ? (methodKey: K, callback: (context: " + DYNAMIC_OVERRIDE_CONTEXT + "<E>) => any) => " + CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<K, E>"
+                + " ? (methodKey: K, callback: (context: " + DYNAMIC_OVERRIDE_CONTEXT_FOR + "<K, E>) => any) => " + CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<K, E>"
+                + " : P extends \"setRendererClass\""
+                + " ? " + fluentClassNameOverloads("entityRendererClassName", "entityRendererClass", RENDERER_CLASS_NAME)
                 + " : Internal.CustomEntityBuilder[P] extends (...args: infer A) => infer R"
                 + " ? R extends Internal.CustomEntityBuilder | Internal.CustomEntityJSBuilder"
                 + " ? (...args: A) => " + CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<K, E>"
@@ -353,8 +383,60 @@ public final class EntityJSBuiltinDocs {
                 + " : Internal.CustomEntityBuilder[P] }";
     }
 
+    private static String fluentClassNameOverloads(String classNameParam, String classParam, String classNameType) {
+        String returnType = CUSTOM_ENTITY_BUILDER_WITH_OVERRIDES + "<K, E>";
+        return "{ (" + classNameParam + ": " + classNameType + "): " + returnType + ";"
+                + " (" + classNameParam + ": string & {}): " + returnType + ";"
+                + " (" + classParam + ": Internal.Class<any>): " + returnType + " }";
+    }
+
     private static String dynamicOverrideContext() {
         return "{ readonly entity: E; readonly method: string; readonly args: { readonly [key: string]: any }; get(name: string): any; superCall(...args: any[]): any; readonly [key: string]: any }";
+    }
+
+    private static String dynamicOverrideContextFor() {
+        return DYNAMIC_OVERRIDE_CONTEXT + "<E> & (K extends keyof " + DYNAMIC_OVERRIDE_ARGS_BY_METHOD_KEY + " ? " + DYNAMIC_OVERRIDE_ARGS_BY_METHOD_KEY + "[K] : {})";
+    }
+
+    private static String dynamicOverrideArgsByMethodKey(ProbeIndex index) {
+        if (index.overrideMethodsByKey().isEmpty()) {
+            return "{}";
+        }
+        StringBuilder builder = new StringBuilder("{ ");
+        index.overrideMethodsByKey().values().stream()
+                .sorted((left, right) -> left.key().compareTo(right.key()))
+                .forEach(method -> builder.append("readonly ")
+                        .append(quote(method.key()))
+                        .append(": ")
+                        .append(dynamicOverrideArgs(method))
+                        .append("; "));
+        builder.append("}");
+        return builder.toString();
+    }
+
+    private static String dynamicOverrideArgs(DynamicOverrideMethodCatalog.MethodSpec method) {
+        StringBuilder builder = new StringBuilder("{ ");
+        StringBuilder argsBuilder = new StringBuilder("{ ");
+        String[] names = method.parameterNames();
+        Class<?>[] types = method.parameterTypes();
+        for (int i = 0; i < names.length; i++) {
+            String type = typeScriptType(types[i]);
+            appendReadonlyProperty(builder, names[i], type);
+            appendReadonlyProperty(builder, "arg" + i, type);
+            appendReadonlyProperty(argsBuilder, names[i], type);
+            appendReadonlyProperty(argsBuilder, "arg" + i, type);
+        }
+        argsBuilder.append("readonly [key: string]: any }");
+        builder.append("readonly args: ").append(argsBuilder).append(" }");
+        return builder.toString();
+    }
+
+    private static void appendReadonlyProperty(StringBuilder builder, String name, String type) {
+        builder.append("readonly ")
+                .append(quote(name))
+                .append(": ")
+                .append(type)
+                .append("; ");
     }
 
     private static String modifyBuilderForEntity() {
@@ -410,6 +492,26 @@ public final class EntityJSBuiltinDocs {
         return "Internal." + entityClass.getSimpleName();
     }
 
+    private static String typeScriptType(Class<?> type) {
+        if (type == void.class || type == Void.class) {
+            return "void";
+        }
+        if (type == boolean.class || type == Boolean.class) {
+            return "boolean";
+        }
+        if (type == byte.class || type == short.class || type == int.class || type == long.class
+                || type == float.class || type == double.class || Number.class.isAssignableFrom(type)) {
+            return "number";
+        }
+        if (type == char.class || type == Character.class || type == String.class) {
+            return "string";
+        }
+        if (type.isArray()) {
+            return "any";
+        }
+        return internalType(type);
+    }
+
     private static int inheritanceDepth(Class<?> type) {
         int depth = 0;
         Class<?> current = type;
@@ -435,15 +537,23 @@ public final class EntityJSBuiltinDocs {
         Set<String> overrideMethodKeys = new LinkedHashSet<>();
         Map<Class<? extends Entity>, Set<String>> overrideKeysByClass = new LinkedHashMap<>();
         Map<Class<? extends Entity>, Set<String>> resolvedOverrideKeysByClass = new LinkedHashMap<>();
+        Map<String, DynamicOverrideMethodCatalog.MethodSpec> overrideMethodsByKey = new LinkedHashMap<>();
         Map<Class<? extends Entity>, String> overrideMethodKeyTypes = new LinkedHashMap<>();
         Map<Class<? extends Entity>, Class<? extends Entity>> overrideParentByClass = new LinkedHashMap<>();
         Map<Class<? extends ModifyEntityBuilder>, ModifyBuilderGroup> modifyBuilderGroups = createModifyGroups();
+        RuntimeClassNameCatalog runtimeClassNameCatalog = RuntimeClassNameCatalog.get();
 
         for (Class<? extends Entity> entityClass : sortedEntityClasses) {
             entityClassNames.add(entityClass.getName());
             Set<String> resolvedKeys = new LinkedHashSet<>(DynamicOverrideMethodCatalog.overrideKeys(entityClass));
             resolvedOverrideKeysByClass.put(entityClass, resolvedKeys);
             overrideMethodKeys.addAll(resolvedKeys);
+            for (String key : resolvedKeys) {
+                DynamicOverrideMethodCatalog.MethodSpec method = DynamicOverrideMethodCatalog.resolve(entityClass, key);
+                if (method != null) {
+                    overrideMethodsByKey.putIfAbsent(method.key(), method);
+                }
+            }
             overrideMethodKeyTypes.put(entityClass, overrideMethodKeyTypeName(entityClass));
         }
         for (Class<? extends Entity> entityClass : sortedEntityClasses) {
@@ -475,10 +585,12 @@ public final class EntityJSBuiltinDocs {
                 sortedEntityClasses,
                 entityClassNames,
                 overrideMethodKeys,
+                overrideMethodsByKey,
                 overrideKeysByClass,
                 overrideMethodKeyTypes,
                 overrideParentByClass,
-                modifyBuilderGroups
+                modifyBuilderGroups,
+                runtimeClassNameCatalog.rendererClassNames()
         );
     }
 
@@ -620,10 +732,12 @@ public final class EntityJSBuiltinDocs {
             List<Class<? extends Entity>> sortedEntityClasses,
             Set<String> entityClassNames,
             Set<String> overrideMethodKeys,
+            Map<String, DynamicOverrideMethodCatalog.MethodSpec> overrideMethodsByKey,
             Map<Class<? extends Entity>, Set<String>> overrideKeysByClass,
             Map<Class<? extends Entity>, String> overrideMethodKeyTypes,
             Map<Class<? extends Entity>, Class<? extends Entity>> overrideParentByClass,
-            Map<Class<? extends ModifyEntityBuilder>, ModifyBuilderGroup> modifyBuilderGroups
+            Map<Class<? extends ModifyEntityBuilder>, ModifyBuilderGroup> modifyBuilderGroups,
+            Set<String> rendererClassNames
     ) {
     }
 

@@ -38,6 +38,9 @@ public class SavedDataJS extends SavedData {
                 String name = vc.getString("name");
                 Tag v = vc.get("v");
                 int type = vc.contains("t", Tag.TAG_INT) ? vc.getInt("t") : -1;
+                if (type >= 0 && EntitySerializerType.byOrdinal(type).isEmpty()) {
+                    continue;
+                }
                 if (v != null) vmap.put(name, v.copy());
                 if (type >= 0) tmap.put(name, type);
             }
@@ -108,7 +111,7 @@ public class SavedDataJS extends SavedData {
 
     public Optional<EntitySerializerType> getType(UUID id, String name) {
         Integer i = types.getOrDefault(id, Map.of()).get(name);
-        return i == null ? Optional.empty() : Optional.of(EntitySerializerType.values()[i]);
+        return i == null ? Optional.empty() : EntitySerializerType.byOrdinal(i);
     }
 
     public void remove(UUID id, String name) {

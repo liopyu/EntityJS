@@ -110,11 +110,18 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "goalSupplier", value = "The goal supplier, a function that takes a Mob and returns a Goal")
     })
-    public void arbitraryGoal(int priority, Function<T, Goal> goalSupplier) {
+    public void arbitraryGoal(int priority, Function<Mob, Goal> goalSupplier) {
         selector.addGoal(priority, CallbackInvoker.wrapFunction(goalSupplier).apply(mob));
     }
 
-    @Info(value = "Adds a custom goal to the entity", params = {
+    @Info(value = """
+            Adds a custom AI goal backed by script callbacks.
+
+            Example:
+            ```javascript
+            event.customGoal("wave", 1, mob => true, null, true, mob => {}, mob => {}, true, mob => {})
+            ```
+            """, params = {
             @Param(name = "name", value = "The name of the custom goal"),
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "canUse", value = "Determines if the entity can use the goal"),
@@ -128,13 +135,13 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
     public void customGoal(
             String name,
             int priority,
-            BooleanCallback<T> canUse,
-            @Nullable BooleanCallback<T> canContinueToUse,
+            BooleanCallback<Mob> canUse,
+            @Nullable BooleanCallback<Mob> canContinueToUse,
             boolean isInterruptable,
-            Consumer<T> start,
-            Consumer<T> stop,
+            Consumer<Mob> start,
+            Consumer<Mob> stop,
             boolean requiresUpdateEveryTick,
-            Consumer<T> tick
+            Consumer<Mob> tick
     ) {
         selector.addGoal(priority, new CustomGoal<>(name, mob, predicate(canUse), nullablePredicate(canContinueToUse), isInterruptable, CallbackInvoker.wrapConsumer(start), CallbackInvoker.wrapConsumer(stop), requiresUpdateEveryTick, CallbackInvoker.wrapConsumer(tick)));
     }
@@ -493,7 +500,7 @@ public class AddGoalSelectorsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "soundEvent", value = "The registry name of a sound event that should play when the item is used, may be null to indicate not sound event should play"),
             @Param(name = "canUseSelector", value = "Determines when the item may be used")
     })
-    public void useItem(int priority, ItemStack itemToUse, @Nullable ResourceLocation soundEvent, BooleanCallback<T> canUseSelector) {
+    public void useItem(int priority, ItemStack itemToUse, @Nullable ResourceLocation soundEvent, BooleanCallback<Mob> canUseSelector) {
         selector.addGoal(priority, new UseItemGoal<>(mob, itemToUse, soundEvent == null ? null : ForgeRegistries.SOUND_EVENTS.getValue(soundEvent), predicate(canUseSelector))); // I like this one, interesting function and not stupidly restricted, Mojang please more of these :)
     }
 

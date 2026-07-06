@@ -1,11 +1,9 @@
 package net.liopyu.entityjs.util.overrides.data;
 
 import net.liopyu.entityjs.EntityJSMod;
-import net.liopyu.entityjs.util.EntitySerializerType;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkDirection;
@@ -21,6 +19,8 @@ import java.util.function.Supplier;
 
 public final class Net {
     private static final String PROTO = "1";
+    private static final int MAX_NAME_LENGTH = 128;
+    private static final int MAX_MAP_ENTRIES = 1024;
     private static int packetId;
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(EntityJSMod.MOD_ID, "synced_data"),
@@ -58,16 +58,6 @@ public final class Net {
                 .decoder(DeleteValueS2C::decode)
                 .consumerMainThread(DeleteValueS2C::handle)
                 .add();
-        CHANNEL.messageBuilder(SetValueC2S.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
-                .encoder(SetValueC2S::encode)
-                .decoder(SetValueC2S::decode)
-                .consumerMainThread(SetValueC2S::handle)
-                .add();
-        CHANNEL.messageBuilder(EnsureValueC2S.class, nextId(), NetworkDirection.PLAY_TO_SERVER)
-                .encoder(EnsureValueC2S::encode)
-                .decoder(EnsureValueC2S::decode)
-                .consumerMainThread(EnsureValueC2S::handle)
-                .add();
     }
 
     private static int nextId() {
@@ -75,18 +65,25 @@ public final class Net {
     }
 
     private static void writeTagMap(FriendlyByteBuf buf, Map<String, Tag> map) {
-        buf.writeVarInt(map.size());
-        map.forEach((name, tag) -> {
-            buf.writeUtf(name);
-            writeTag(buf, tag);
-        });
+        int size = Math.min(map.size(), MAX_MAP_ENTRIES);
+        buf.writeVarInt(size);
+        int written = 0;
+        for (Map.Entry<String, Tag> entry : map.entrySet()) {
+            if (written++ >= size) break;
+            buf.writeUtf(entry.getKey(), MAX_NAME_LENGTH);
+            writeTag(buf, entry.getValue());
+        }
     }
 
     private static Map<String, Tag> readTagMap(FriendlyByteBuf buf) {
         int size = buf.readVarInt();
         Map<String, Tag> map = new HashMap<>();
         for (int i = 0; i < size; i++) {
-            map.put(buf.readUtf(), readTag(buf));
+            String name = buf.readUtf(MAX_NAME_LENGTH);
+            Tag tag = readTag(buf);
+            if (i < MAX_MAP_ENTRIES) {
+                map.put(name, tag);
+            }
         }
         return map;
     }
@@ -103,18 +100,25 @@ public final class Net {
     }
 
     private static void writeTypeMap(FriendlyByteBuf buf, Map<String, Integer> map) {
-        buf.writeVarInt(map.size());
-        map.forEach((name, type) -> {
-            buf.writeUtf(name);
-            buf.writeVarInt(type);
-        });
+        int size = Math.min(map.size(), MAX_MAP_ENTRIES);
+        buf.writeVarInt(size);
+        int written = 0;
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            if (written++ >= size) break;
+            buf.writeUtf(entry.getKey(), MAX_NAME_LENGTH);
+            buf.writeVarInt(entry.getValue());
+        }
     }
 
     private static Map<String, Integer> readTypeMap(FriendlyByteBuf buf) {
         int size = buf.readVarInt();
         Map<String, Integer> map = new HashMap<>();
         for (int i = 0; i < size; i++) {
-            map.put(buf.readUtf(), buf.readVarInt());
+            String name = buf.readUtf(MAX_NAME_LENGTH);
+            int ordinal = buf.readVarInt();
+            if (i < MAX_MAP_ENTRIES) {
+                map.put(name, ordinal);
+            }
         }
         return map;
     }
@@ -147,14 +151,6 @@ public final class Net {
         CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> e), new DeleteValueS2C(id, name));
     }
 
-    public static void sendSetToServer(UUID id, String name, Tag value) {
-        CHANNEL.sendToServer(new SetValueC2S(id, name, value));
-    }
-
-    public static void sendEnsureToServer(UUID id, String name, EntitySerializerType serType, Tag value) {
-        CHANNEL.sendToServer(new EnsureValueC2S(id, name, serType, value));
-    }
-
     public record SyncAllS2C(UUID entityId, Map<String, Tag> values, Map<String, Integer> types) {
         private static void encode(SyncAllS2C msg, FriendlyByteBuf buf) {
             buf.writeUUID(msg.entityId);
@@ -181,12 +177,13 @@ public final class Net {
         }
 
         private static SetTypedValueS2C decode(FriendlyByteBuf buf) {
-            return new SetTypedValueS2C(buf.readUUID(), buf.readUtf(), buf.readVarInt(), readTag(buf));
+            return new SetTypedValueS2C(buf.readUUID(), buf.readUtf(MAX_NAME_LENGTH), buf.readVarInt(), readTag(buf));
         }
 
         private static void handle(SetTypedValueS2C msg, Supplier<NetworkEvent.Context> ctx) {
-            ClientCache.setType(msg.entityId, msg.name, msg.ord);
-            ClientCache.set(msg.entityId, msg.name, msg.value);
+            if (ClientCache.setType(msg.entityId, msg.name, msg.ord)) {
+                ClientCache.set(msg.entityId, msg.name, msg.value);
+            }
             handled(ctx);
         }
     }
@@ -199,7 +196,7 @@ public final class Net {
         }
 
         private static SetValueS2C decode(FriendlyByteBuf buf) {
-            return new SetValueS2C(buf.readUUID(), buf.readUtf(), readTag(buf));
+            return new SetValueS2C(buf.readUUID(), buf.readUtf(MAX_NAME_LENGTH), readTag(buf));
         }
 
         private static void handle(SetValueS2C msg, Supplier<NetworkEvent.Context> ctx) {
@@ -216,7 +213,7 @@ public final class Net {
         }
 
         private static SetTypeS2C decode(FriendlyByteBuf buf) {
-            return new SetTypeS2C(buf.readUUID(), buf.readUtf(), buf.readVarInt());
+            return new SetTypeS2C(buf.readUUID(), buf.readUtf(MAX_NAME_LENGTH), buf.readVarInt());
         }
 
         private static void handle(SetTypeS2C msg, Supplier<NetworkEvent.Context> ctx) {
@@ -232,7 +229,7 @@ public final class Net {
         }
 
         private static DeleteValueS2C decode(FriendlyByteBuf buf) {
-            return new DeleteValueS2C(buf.readUUID(), buf.readUtf());
+            return new DeleteValueS2C(buf.readUUID(), buf.readUtf(MAX_NAME_LENGTH));
         }
 
         private static void handle(DeleteValueS2C msg, Supplier<NetworkEvent.Context> ctx) {
@@ -241,50 +238,4 @@ public final class Net {
         }
     }
 
-    public record SetValueC2S(UUID entityId, String name, Tag value) {
-        private static void encode(SetValueC2S msg, FriendlyByteBuf buf) {
-            buf.writeUUID(msg.entityId);
-            buf.writeUtf(msg.name);
-            writeTag(buf, msg.value);
-        }
-
-        private static SetValueC2S decode(FriendlyByteBuf buf) {
-            return new SetValueC2S(buf.readUUID(), buf.readUtf(), readTag(buf));
-        }
-
-        private static void handle(SetValueC2S msg, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
-            if (player != null) {
-                Entity entity = ((ServerLevel) player.level()).getEntity(msg.entityId);
-                if (entity != null) {
-                    ServerCache.set(entity, msg.name, msg.value);
-                }
-            }
-            handled(ctx);
-        }
-    }
-
-    public record EnsureValueC2S(UUID entityId, String name, EntitySerializerType serType, Tag value) {
-        private static void encode(EnsureValueC2S msg, FriendlyByteBuf buf) {
-            buf.writeUUID(msg.entityId);
-            buf.writeUtf(msg.name);
-            buf.writeVarInt(msg.serType.ordinal());
-            writeTag(buf, msg.value);
-        }
-
-        private static EnsureValueC2S decode(FriendlyByteBuf buf) {
-            return new EnsureValueC2S(buf.readUUID(), buf.readUtf(), EntitySerializerType.values()[buf.readVarInt()], readTag(buf));
-        }
-
-        private static void handle(EnsureValueC2S msg, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
-            if (player != null) {
-                Entity entity = ((ServerLevel) player.level()).getEntity(msg.entityId);
-                if (entity != null) {
-                    ServerCache.ensure(entity, msg.name, msg.value, msg.serType);
-                }
-            }
-            handled(ctx);
-        }
-    }
 }

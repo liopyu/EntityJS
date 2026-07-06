@@ -78,30 +78,14 @@ public class RegistryEventJSMixin<T> implements IRegistryJS {
 
     @Unique
     private Class<? extends Entity> entityjs$resolveEntityClass(String id, String entityClassName) {
-        if (entityClassName == null || entityClassName.isBlank()) {
-            EntityJSHelperClass.logErrorMessageOnce("Tried to create entity from a blank class name. Id: " + id);
+        Class<?> entityClass = EntityReflection.resolveClassName(id, "entity", entityClassName, true);
+        if (entityClass == null) {
             return null;
         }
-        if (entityClassName.startsWith("class ")) {
-            entityClassName = entityClassName.substring("class ".length());
-        }
-        try {
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            if (classLoader == null) {
-                classLoader = RegistryEventJSMixin.class.getClassLoader();
-            }
-            Class<?> entityClass = Class.forName(entityClassName, false, classLoader);
-            if (!Entity.class.isAssignableFrom(entityClass)) {
-                EntityJSHelperClass.logErrorMessageOnce("Tried to create entity from a class name that does not extend Entity. Id: " + id + ", class: " + entityClassName);
-                return null;
-            }
-            return entityClass.asSubclass(Entity.class);
-        } catch (ClassNotFoundException e) {
-            EntityJSHelperClass.logErrorMessageOnce("Tried to create entity from an unknown class name. Id: " + id + ", class: " + entityClassName);
-            return null;
-        } catch (LinkageError e) {
-            EntityJSHelperClass.logErrorMessageOnceCatchable("Tried to create entity from a class name that could not be loaded. Id: " + id + ", class: " + entityClassName, e);
+        if (!Entity.class.isAssignableFrom(entityClass)) {
+            EntityJSHelperClass.logErrorMessageOnce("Tried to create entity from a class name that does not extend Entity. Id: " + id + ", class: " + entityClass.getName());
             return null;
         }
+        return entityClass.asSubclass(Entity.class);
     }
 }

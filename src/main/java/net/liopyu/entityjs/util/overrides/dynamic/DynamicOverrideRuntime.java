@@ -16,6 +16,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+/**
+ * Runtime dispatcher called by generated dynamic override subclasses.
+ * ASM-generated methods pass the entity instance, override key, optional super-bridge
+ * name, and Java arguments here. The dispatcher finds the registered
+ * {@link CustomEntityBuilder}, creates the script-facing dynamic override context, invokes
+ * the callback, handles lazy super-call fallback, and coerces the script result back to
+ * the Java return type expected by the overridden method.
+ */
 public final class DynamicOverrideRuntime {
     private static final Map<EntityType<?>, CustomEntityBuilder> BUILDERS = new ConcurrentHashMap<>();
     private static final Map<BridgeKey, Method> BRIDGES = new ConcurrentHashMap<>();
@@ -25,7 +33,13 @@ public final class DynamicOverrideRuntime {
 
     @HideFromJS
     public static void register(EntityType<?> type, CustomEntityBuilder builder) {
-        BUILDERS.putIfAbsent(type, builder);
+        BUILDERS.put(type, builder);
+    }
+
+    @HideFromJS
+    public static void clearCaches() {
+        BUILDERS.clear();
+        BRIDGES.clear();
     }
 
     @HideFromJS
@@ -187,7 +201,7 @@ public final class DynamicOverrideRuntime {
 
         Object found = EntityJSUtils.getEntityBuilder(entity.getType());
         if (found instanceof CustomEntityBuilder customBuilder) {
-            BUILDERS.putIfAbsent(entity.getType(), customBuilder);
+            BUILDERS.put(entity.getType(), customBuilder);
             return customBuilder;
         }
         return null;

@@ -21,6 +21,14 @@ public enum EntitySerializerType {
     VECTOR3,
     QUATERNION;
 
+    public static Optional<EntitySerializerType> byOrdinal(int ordinal) {
+        EntitySerializerType[] types = values();
+        if (ordinal < 0 || ordinal >= types.length) {
+            return Optional.empty();
+        }
+        return Optional.of(types[ordinal]);
+    }
+
     public EntityDataSerializer<?> getSerializer() {
         return switch (this) {
             case BYTE -> EntityDataSerializers.BYTE;

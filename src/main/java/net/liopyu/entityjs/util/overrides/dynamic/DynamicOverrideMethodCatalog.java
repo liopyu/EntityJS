@@ -16,6 +16,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Builds the per-entity method catalog used by {@code createCustom(...).override(...)}.
+ * The catalog walks an entity class hierarchy, filters methods that are unsafe or too
+ * internal to expose to scripts, and records stable override keys, descriptors, return
+ * types, bridge names, parameter names, and rejection reasons.
+ *
+ * <p>{@link DynamicOverrideEntityFactory} consumes these method specs when generating
+ * bytecode, while {@link DynamicOverrideRuntime} uses them to build callback contexts and
+ * validate super-call argument handling.</p>
+ */
 public final class DynamicOverrideMethodCatalog {
     private static final String HIDDEN_METHOD_REASON = "Changes to this method may cause stability issues and should not be overridden";
     private static final Set<Class<?>> HIDDEN_DECLARING_CLASSES = Set.of(

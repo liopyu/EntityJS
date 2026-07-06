@@ -12,6 +12,7 @@
     "LivingEntityMixin",
     "MobMixin",
     "PathfinderMobMixin",
+    "ProbeCommandsMixin",
     "ProbeDocCompilerMixin",
     "ProjectileMixin",
     "RegistryEventJSMixin",
