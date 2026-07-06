@@ -29,6 +29,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -130,48 +132,35 @@ public abstract class EntityMixin implements IEntityJS {
         return EntitySerializerType.STRING;
     }
 
+    @Unique
+    private static boolean entityjs$isDedicatedServerSyncedDataSide(Entity entity) {
+        return !entity.level().isClientSide && FMLEnvironment.dist == Dist.DEDICATED_SERVER;
+    }
 
     @Unique
     public void entityJs$addSyncedData(EntitySerializerType type, String name, Object initial) {
-        LivingEntity self = (LivingEntity) (Object) this;
-        Tag t = NbtConvert.toTag(type, initial);
-        if (self.level().isClientSide) {
-            ClientCache.setType(self.getUUID(), name, type.ordinal());
-            ClientCache.set(self.getUUID(), name, t);
-            Net.sendEnsureToServer(self.getUUID(), name, type, t);
-        } else {
-            ServerCache.ensure(self, name, t, type);
-        }
+        Entity self = (Entity) (Object) this;
+        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
+        Tag tag = NbtConvert.toTag(type, initial);
+        ServerCache.ensure(self, name, tag, type);
     }
 
 
     @Unique
     public void entityJs$setSyncedData(String name, Object value) {
-        net.minecraft.world.entity.Entity self = (net.minecraft.world.entity.Entity) (Object) this;
-        java.util.UUID id = self.getUUID();
+        Entity self = (Entity) (Object) this;
+        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
+        UUID id = self.getUUID();
 
-        java.util.Optional<EntitySerializerType> optType = self.level().isClientSide
-                ? ClientCache.getType(id, name)
-                : SavedDataJS.get((net.minecraft.server.level.ServerLevel) self.level()).getType(id, name);
+        var optType = SavedDataJS.get((ServerLevel) self.level()).getType(id, name);
 
         EntitySerializerType type = optType.orElseGet(() -> entityjs$inferType(value));
-        net.minecraft.nbt.Tag tag = NbtConvert.toTag(type, value);
+        Tag tag = NbtConvert.toTag(type, value);
 
-        if (self.level().isClientSide) {
-            if (optType.isEmpty()) {
-                ClientCache.setType(id, name, type.ordinal());
-                ClientCache.set(id, name, tag);
-                Net.sendEnsureToServer(id, name, type, tag);
-            } else {
-                ClientCache.set(id, name, tag);
-                Net.sendSetToServer(id, name, tag);
-            }
+        if (optType.isEmpty()) {
+            ServerCache.ensure(self, name, tag, type);
         } else {
-            if (optType.isEmpty()) {
-                ServerCache.ensure(self, name, tag, type);
-            } else {
-                ServerCache.set(self, name, tag);
-            }
+            ServerCache.set(self, name, tag);
         }
     }
 
@@ -324,17 +313,17 @@ public abstract class EntityMixin implements IEntityJS {
         }
         if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
             if (entityJs$getLivingEntity() instanceof Mob m) {
-                if (EventHandlers.addGoalTargets.hasListeners()) {
-                    EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(m, m.goalSelector), entityJs$getTypeId());
+                if (EventHandlers.addGoalTargets.hasListeners(entityJs$getTypeId())) {
+                    EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(m, m.targetSelector), entityJs$getTypeId());
                 }
-                if (EventHandlers.addGoalSelectors.hasListeners()) {
+                if (EventHandlers.addGoalSelectors.hasListeners(entityJs$getTypeId())) {
                     EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(m, m.goalSelector), entityJs$getTypeId());
                 }
             }
         }
         Entity self = (Entity) (Object) this;
         if (entityJs$definedOnce) return;
-        if (self.level().isClientSide) return;
+        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
         if (!(entityJs$builder instanceof ModifyEntityBuilder b)) return;
         if (b.defineSyncedData == null) return;
 

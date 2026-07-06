@@ -149,7 +149,8 @@ public class KubeJSEntityRenderer<T extends LivingEntity & IAnimatableJS> extend
         if (builder.addRenderItemLayer != null && builder.itemModelJSBuilder != null) {
             this.addRenderLayer(new BlockAndItemGeoLayer<>(this,
                     (bone, entity) -> {
-                        if (builder.addRenderItemLayer.apply(entity).equals(bone.getName())) {
+                        var boneName = builder.addRenderItemLayer.apply(entity);
+                        if (boneName != null && boneName.equals(bone.getName())) {
                             return entity.getMainHandItem();
                         }
                         return null;

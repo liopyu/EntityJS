@@ -98,7 +98,7 @@ public class AddGoalTargetsEventJS<T extends Mob> extends GoalEventJS<T> {
             @Param(name = "priority", value = "The priority of the goal"),
             @Param(name = "goalSupplier", value = "The goal supplier, a function that takes a Mob and returns a Goal")
     })
-    public void arbitraryTargetGoal(int priority, Function<T, Goal> goalSuppler) {
+    public void arbitraryTargetGoal(int priority, Function<Mob, Goal> goalSuppler) {
         selector.addGoal(priority, CallbackInvoker.wrapFunction(goalSuppler).apply(mob));
     }
 

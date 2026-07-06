@@ -8,22 +8,34 @@ public final class ClientCache {
     private static final java.util.Map<java.util.UUID, java.util.Map<String, Integer>> TYPES = new java.util.HashMap<>();
 
     public static void setAll(java.util.UUID id, java.util.Map<String, net.minecraft.nbt.Tag> values, java.util.Map<String, Integer> types) {
+        java.util.Map<String, Integer> validTypes = new java.util.HashMap<>();
+        types.forEach((name, ord) -> EntitySerializerType.byOrdinal(ord).ifPresent(type -> validTypes.put(name, ord)));
+
         java.util.Map<String, net.minecraft.nbt.Tag> vcopy = new java.util.HashMap<>();
-        values.forEach((k, t) -> vcopy.put(k, t.copy()));
+        values.forEach((k, t) -> {
+            if (!types.containsKey(k) || validTypes.containsKey(k)) {
+                vcopy.put(k, t.copy());
+            }
+        });
         DATA.put(id, vcopy);
-        TYPES.put(id, new java.util.HashMap<>(types));
+        TYPES.put(id, validTypes);
     }
 
     public static void set(java.util.UUID id, String name, net.minecraft.nbt.Tag v) {
         DATA.computeIfAbsent(id, k -> new java.util.HashMap<>()).put(name, v.copy());
     }
 
-    public static void setType(java.util.UUID id, String name, int ord) {
+    public static boolean setType(java.util.UUID id, String name, int ord) {
+        if (EntitySerializerType.byOrdinal(ord).isEmpty()) {
+            remove(id, name);
+            return false;
+        }
         Integer old = TYPES.computeIfAbsent(id, k -> new java.util.HashMap<>()).put(name, ord);
         if (old == null || old != ord) {
             var m = DATA.get(id);
             if (m != null) m.remove(name);
         }
+        return true;
     }
 
     public static net.minecraft.nbt.Tag get(java.util.UUID id, String name) {
@@ -35,7 +47,7 @@ public final class ClientCache {
 
     public static java.util.Optional<EntitySerializerType> getType(java.util.UUID id, String name) {
         Integer i = TYPES.getOrDefault(id, java.util.Map.of()).get(name);
-        return i == null ? java.util.Optional.empty() : java.util.Optional.of(EntitySerializerType.values()[i]);
+        return i == null ? java.util.Optional.empty() : EntitySerializerType.byOrdinal(i);
     }
 
     public static void remove(java.util.UUID id, String name) {
@@ -43,5 +55,15 @@ public final class ClientCache {
         if (m != null) m.remove(name);
         var tm = TYPES.get(id);
         if (tm != null) tm.remove(name);
+    }
+
+    public static void remove(java.util.UUID id) {
+        DATA.remove(id);
+        TYPES.remove(id);
+    }
+
+    public static void clear() {
+        DATA.clear();
+        TYPES.clear();
     }
 }

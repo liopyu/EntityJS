@@ -162,7 +162,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
 
     @Inject(method = "brainProvider", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void brainProvider(CallbackInfoReturnable<Brain.Provider<?>> cir) {
-        if (EventHandlers.buildBrainProvider.hasListeners()) {
+        if (EventHandlers.buildBrainProvider.hasListeners(entityJs$getTypeId())) {
             final BuildBrainProviderEventJS<?> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, entityJs$getTypeId());
             cir.setReturnValue(event.provide());
@@ -171,7 +171,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
 
     @Inject(method = "makeBrain", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void makeBrain(Dynamic<?> pDynamic, CallbackInfoReturnable<Brain<?>> cir) {
-        if (EventHandlers.buildBrain.hasListeners()) {
+        if (EventHandlers.buildBrain.hasListeners(entityJs$getTypeId())) {
             final Brain<?> brain = Cast.to(((LivingEntityAccessor) entityJs$getLivingEntity()).entityJs$brainProvider().makeBrain(pDynamic));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), entityJs$getTypeId());
             cir.setReturnValue(brain);

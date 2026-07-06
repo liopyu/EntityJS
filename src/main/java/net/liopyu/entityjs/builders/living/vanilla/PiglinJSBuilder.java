@@ -10,6 +10,7 @@ import net.liopyu.entityjs.util.ContextUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 
 import java.util.function.Consumer;
@@ -18,6 +19,7 @@ public class PiglinJSBuilder extends PathfinderMobBuilder<PiglinEntityJS> {
     public transient Boolean defaultGoals;
     public transient BooleanCallback<LivingEntity> isConverting;
     public transient Consumer<ContextUtils.EntityServerLevelContext> finishConversion;
+    public transient EntityType<? extends Mob> conversionType;
 
     public PiglinJSBuilder(ResourceLocation i) {
         super(i);
@@ -25,21 +27,35 @@ public class PiglinJSBuilder extends PathfinderMobBuilder<PiglinEntityJS> {
     }
 
     @Info(value = """
-            Sets a consumer responsible for spawning an entity after the mob has converted.
+            Overrides the mob's conversion behavior. When set, vanilla conversion is not called automatically.
                         
             @param finishConversion A Function accepting an entity parameter
                         
             Example usage:
             ```javascript
-            mobBuilder.finishConversion(entity => {
+            mobBuilder.finishConversion(context => {
                 //Convert to a ghast instead of a zombified piglin when in the overworld
                 let EntityType = Java.loadClass("net.minecraft.world.entity.EntityType");
-                entity.convertTo(EntityType.GHAST, true);
+                context.entity.convertTo(EntityType.GHAST, true);
             });
             ```
             """)
     public PiglinJSBuilder finishConversion(Consumer<ContextUtils.EntityServerLevelContext> finishConversion) {
         this.finishConversion = finishConversion;
+        return this;
+    }
+
+    @Info(value = """
+            Sets what mob the entity should convert to when zombifying.
+            Defaults to "minecraft:zombified_piglin".
+
+            Example usage:
+            ```javascript
+            builder.setConversionType("minecraft:chicken");
+            ```
+            """)
+    public PiglinJSBuilder setConversionType(EntityType<? extends Mob> conversionType) {
+        this.conversionType = conversionType;
         return this;
     }
 

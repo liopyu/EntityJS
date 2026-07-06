@@ -34,6 +34,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -188,7 +189,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
     @Override
     protected Brain.Provider<Piglin> brainProvider() {
-        if (EventHandlers.buildBrainProvider.hasListeners()) {
+        if (EventHandlers.buildBrainProvider.hasListeners(getTypeId())) {
             final BuildBrainProviderEventJS<Piglin> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
@@ -199,7 +200,7 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
     @Override
     protected Brain<PiglinEntityJS> makeBrain(Dynamic<?> p_21069_) {
-        if (EventHandlers.buildBrain.hasListeners()) {
+        if (EventHandlers.buildBrain.hasListeners(getTypeId())) {
             final Brain<PiglinEntityJS> brain = Cast.to(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
@@ -210,10 +211,10 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
-        if (EventHandlers.addGoalTargets.hasListeners()) {
+        if (EventHandlers.addGoalTargets.hasListeners(getTypeId())) {
             EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
         }
-        if (EventHandlers.addGoalSelectors.hasListeners()) {
+        if (EventHandlers.addGoalSelectors.hasListeners(getTypeId())) {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }
@@ -345,8 +346,19 @@ public class PiglinEntityJS extends Piglin implements IAnimatableJS {
         if (builder.finishConversion != null) {
             ContextUtils.EntityServerLevelContext context = new ContextUtils.EntityServerLevelContext(serverLevel, this);
             EntityJSHelperClass.consumerCallback(builder.finishConversion, context, "[EntityJS]: Error in " + entityName() + "builder for field: finishConversion.");
-        } else {
-            super.finishConversion(serverLevel);
+            return;
+        }
+        if (builder.conversionType != null) {
+            finishCustomConversion(builder.conversionType);
+            return;
+        }
+        super.finishConversion(serverLevel);
+    }
+
+    private void finishCustomConversion(EntityType<? extends Mob> conversionType) {
+        Mob convertedEntity = this.convertTo(conversionType, true);
+        if (convertedEntity != null) {
+            convertedEntity.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
         }
     }
 

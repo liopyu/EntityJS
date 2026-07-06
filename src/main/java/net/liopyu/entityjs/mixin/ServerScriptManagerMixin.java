@@ -5,10 +5,13 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.latvian.mods.kubejs.script.data.GeneratedDataStage;
 import dev.latvian.mods.kubejs.script.data.VirtualDataPack;
 import dev.latvian.mods.kubejs.server.ServerScriptManager;
+import net.liopyu.entityjs.util.overrides.CallbackInvoker;
 import net.minecraft.server.packs.PackResources;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +22,11 @@ import java.util.List;
  */
 @Mixin(value = ServerScriptManager.class, remap = false)
 public abstract class ServerScriptManagerMixin {
+
+    @Inject(method = "reload", at = @At("HEAD"), remap = false)
+    private void entityjs$clearCallbackCaches(CallbackInfo ci) {
+        CallbackInvoker.clearCaches();
+    }
 
     /*@Unique
     private static final ThreadLocal<List<PackResources>> entityjs$CapturedPacks = new ThreadLocal<>();

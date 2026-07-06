@@ -6,6 +6,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
+import java.util.Optional;
+
 
 public enum EntitySerializerType {
     BYTE,
@@ -18,5 +20,13 @@ public enum EntitySerializerType {
     UUID,
     VECTOR3,
     QUATERNION;
+
+    public static Optional<EntitySerializerType> byOrdinal(int ordinal) {
+        EntitySerializerType[] types = values();
+        if (ordinal < 0 || ordinal >= types.length) {
+            return Optional.empty();
+        }
+        return Optional.of(types[ordinal]);
+    }
 
 }

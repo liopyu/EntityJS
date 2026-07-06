@@ -21,6 +21,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Generates runtime subclasses for custom entities that declare dynamic overrides.
+ * This factory emits bytecode for a subclass of the requested base entity, copies the
+ * standard {@code (EntityType, Level)} constructor shape, creates override methods that
+ * delegate into {@link DynamicOverrideRuntime}, and adds super bridges for callbacks that
+ * need to call the original implementation.
+ *
+ * <p>Generated constructors are cached by base class and override set so repeated entity
+ * registrations reuse the same prepared subclass instead of regenerating bytecode.</p>
+ */
 public final class DynamicOverrideEntityFactory implements Opcodes {
     private static final String ENTITY_TYPE_DESCRIPTOR = Type.getDescriptor(EntityType.class);
     private static final String LEVEL_DESCRIPTOR = Type.getDescriptor(Level.class);

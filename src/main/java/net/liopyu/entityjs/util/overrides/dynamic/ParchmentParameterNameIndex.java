@@ -20,6 +20,13 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+/**
+ * Lazy parameter-name lookup used by dynamic override callback contexts.
+ * The index loads Parchment data from an explicit path, the bundled resource, or the local
+ * Gradle cache, then maps method local-variable slots to readable parameter names. When no
+ * mapping is available it deliberately falls back to reflection names or {@code argN}
+ * placeholders so dynamic overrides remain usable.
+ */
 final class ParchmentParameterNameIndex {
     private static final String PATH_PROPERTY = "entityjs.parchment.path";
     private static final String PATH_ENV = "ENTITYJS_PARCHMENT_PATH";

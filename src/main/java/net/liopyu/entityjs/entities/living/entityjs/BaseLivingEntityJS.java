@@ -132,7 +132,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected Brain.Provider<?> brainProvider() {
-        if (EventHandlers.buildBrainProvider.hasListeners()) {
+        if (EventHandlers.buildBrainProvider.hasListeners(getTypeId())) {
             final BuildBrainProviderEventJS<BaseLivingEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
@@ -143,7 +143,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected Brain<BaseLivingEntityJS> makeBrain(Dynamic<?> p_21069_) {
-        if (EventHandlers.buildBrain.hasListeners()) {
+        if (EventHandlers.buildBrain.hasListeners(getTypeId())) {
             final Brain<BaseLivingEntityJS> brain = Cast.to(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
@@ -1350,7 +1350,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
         return switch (p_21467_.getType()) {
             case HAND -> (ItemStack) this.handItems.get(p_21467_.getIndex());
             case HUMANOID_ARMOR -> (ItemStack) this.armorItems.get(p_21467_.getIndex());
-            case ANIMAL_ARMOR -> null;
+            case ANIMAL_ARMOR -> ItemStack.EMPTY;
         };
     }
 

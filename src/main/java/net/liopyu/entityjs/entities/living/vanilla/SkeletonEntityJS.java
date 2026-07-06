@@ -178,7 +178,7 @@ public class SkeletonEntityJS extends Skeleton implements IAnimatableJS {
         double d2 = p_32141_.getZ() - this.getZ();
         double d3 = Math.sqrt(d0 * d0 + d2 * d2);
         abstractarrow.shoot(d0, d1 + d3 * 0.2F, d2, 1.6F, (float) (14 - this.level().getDifficulty().getId() * 4));
-        this.playSound(builder.shootSound, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.playSound(builder.shootSound == null ? SoundEvents.SKELETON_SHOOT : builder.shootSound, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
         this.level().addFreshEntity(abstractarrow);
     }
 
@@ -259,7 +259,7 @@ public class SkeletonEntityJS extends Skeleton implements IAnimatableJS {
     //Some logic overrides up here because there are different implementations in the other builders.
     @Override
     protected Brain.Provider<?> brainProvider() {
-        if (EventHandlers.buildBrainProvider.hasListeners()) {
+        if (EventHandlers.buildBrainProvider.hasListeners(getTypeId())) {
             final BuildBrainProviderEventJS<ZombieEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
@@ -270,7 +270,7 @@ public class SkeletonEntityJS extends Skeleton implements IAnimatableJS {
 
     @Override
     protected Brain<ZombieEntityJS> makeBrain(Dynamic<?> p_21069_) {
-        if (EventHandlers.buildBrain.hasListeners()) {
+        if (EventHandlers.buildBrain.hasListeners(getTypeId())) {
             final Brain<ZombieEntityJS> brain = Cast.to(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
@@ -600,10 +600,10 @@ public class SkeletonEntityJS extends Skeleton implements IAnimatableJS {
         } else {
             this.removeAllGoals(p -> true);
         }
-        if (EventHandlers.addGoalTargets.hasListeners()) {
+        if (EventHandlers.addGoalTargets.hasListeners(getTypeId())) {
             EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
         }
-        if (EventHandlers.addGoalSelectors.hasListeners()) {
+        if (EventHandlers.addGoalSelectors.hasListeners(getTypeId())) {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
         if (builder.onAddedToWorld != null) {

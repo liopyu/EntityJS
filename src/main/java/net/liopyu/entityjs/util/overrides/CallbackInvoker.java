@@ -30,6 +30,7 @@ import java.util.function.Predicate;
 
 public final class CallbackInvoker {
     private static final Map<Object, List<Direct>> INIT_CALLBACKS = Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<Direct, Boolean> DIRECT_CALLBACKS = Collections.synchronizedMap(new WeakHashMap<>());
     private static final Object[] EMPTY_ARGS = new Object[0];
 
     private CallbackInvoker() {
@@ -38,6 +39,9 @@ public final class CallbackInvoker {
     @HideFromJS
     public static void clearCaches() {
         INIT_CALLBACKS.clear();
+        synchronized (DIRECT_CALLBACKS) {
+            DIRECT_CALLBACKS.keySet().forEach(Direct::clearCache);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -456,7 +460,14 @@ public final class CallbackInvoker {
             Context cx = adapter.cx();
             Scriptable topScope = adapter.topScope();
             Scriptable thisObj = cx.wrapAsJavaObject(topScope, callback, TypeInfo.NONE);
-            return new Direct(cx, topScope, thisObj, callable);
+            Direct direct = new Direct(cx, topScope, thisObj, callable);
+            DIRECT_CALLBACKS.put(direct, Boolean.TRUE);
+            return direct;
+        }
+
+        private void clearCache() {
+            argumentWrappers.clear();
+            arguments.remove();
         }
 
         private void initArgument(Object value) {
@@ -523,6 +534,10 @@ public final class CallbackInvoker {
 
         private Object[] args(Object arg) {
             Object[] args = arguments.get();
+            if (args.length != 1) {
+                args = new Object[1];
+                arguments.set(args);
+            }
             args[0] = arg;
             return args;
         }
@@ -540,7 +555,7 @@ public final class CallbackInvoker {
 
         private Object[] args(Object[] values) {
             Object[] args = arguments.get();
-            if (args.length < values.length) {
+            if (args.length != values.length) {
                 args = new Object[values.length];
                 arguments.set(args);
             }

@@ -2,6 +2,7 @@ package net.liopyu.entityjs.util.overrides.data;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 @net.neoforged.fml.common.EventBusSubscriber
@@ -13,6 +14,13 @@ public class SyncEvents {
             var vals = ServerCache.getAll(ent);
             var types = ServerCache.getTypes(ent);
             Net.sendAllTo(sp, ent.getUUID(), vals, types);
+        }
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onEntityLeaveLevel(EntityLeaveLevelEvent e) {
+        if (e.getLevel().isClientSide()) {
+            ClientCache.remove(e.getEntity().getUUID());
         }
     }
 }
