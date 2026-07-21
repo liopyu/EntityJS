@@ -195,7 +195,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
     //Some logic overrides up here because there are different implementations in the other builders.
     @Override
     protected Brain.Provider<?> brainProvider() {
-        if (EventHandlers.buildBrainProvider.hasListeners(getTypeId())) {
+        if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<WaterEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
@@ -206,7 +206,7 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
 
     @Override
     protected Brain<WaterEntityJS> makeBrain(Dynamic<?> p_21069_) {
-        if (EventHandlers.buildBrain.hasListeners(getTypeId())) {
+        if (EventHandlers.buildBrain.hasListeners()) {
             final Brain<WaterEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
@@ -217,10 +217,10 @@ public class WaterEntityJS extends AbstractFish implements IAnimatableJS {
 
     @Override
     protected void registerGoals() {
-        if (EventHandlers.addGoalTargets.hasListeners(getTypeId())) {
+        if (EventHandlers.addGoalTargets.hasListeners()) {
             EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
         }
-        if (EventHandlers.addGoalSelectors.hasListeners(getTypeId())) {
+        if (EventHandlers.addGoalSelectors.hasListeners()) {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }

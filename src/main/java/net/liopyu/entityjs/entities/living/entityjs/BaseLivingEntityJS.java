@@ -135,7 +135,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected Brain.Provider<?> brainProvider() {
-        if (EventHandlers.buildBrainProvider.hasListeners(getTypeId())) {
+        if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<BaseLivingEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
@@ -146,7 +146,7 @@ public class BaseLivingEntityJS extends LivingEntity implements IAnimatableJS {
 
     @Override
     protected Brain<BaseLivingEntityJS> makeBrain(Dynamic<?> p_21069_) {
-        if (EventHandlers.buildBrain.hasListeners(getTypeId())) {
+        if (EventHandlers.buildBrain.hasListeners()) {
             final Brain<BaseLivingEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;

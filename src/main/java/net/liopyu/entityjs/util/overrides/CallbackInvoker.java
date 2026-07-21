@@ -630,7 +630,14 @@ public final class CallbackInvoker {
             }
             description.append(", argClass=").append(value.getClass().getName());
             if (value instanceof Entity entity) {
-                description.append(", entityType=").append(entity.getType());
+                description.append(", entityType=").append(entity.getType())
+                        .append(", entityId=").append(entity.getId())
+                        .append(", entityUuid=").append(entity.getUUID())
+                        .append(", level=").append(entity.level().dimension().location())
+                        .append(", clientSide=").append(entity.level().isClientSide);
+                if (!entity.level().isClientSide && entity.level().getServer() != null) {
+                    description.append(", serverThread=").append(entity.level().getServer().isSameThread());
+                }
             }
             return description.toString();
         }

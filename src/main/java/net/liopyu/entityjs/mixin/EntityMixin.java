@@ -28,8 +28,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -133,14 +131,14 @@ public abstract class EntityMixin implements IEntityJS {
     }
 
     @Unique
-    private static boolean entityjs$isDedicatedServerSyncedDataSide(Entity entity) {
-        return !entity.level().isClientSide && FMLEnvironment.dist == Dist.DEDICATED_SERVER;
+    private static boolean entityjs$isServerSyncedDataSide(Entity entity) {
+        return !entity.level().isClientSide;
     }
 
     @Unique
     public void entityJs$addSyncedData(EntitySerializerType type, String name, Object initial) {
         Entity self = (Entity) (Object) this;
-        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
+        if (!entityjs$isServerSyncedDataSide(self)) return;
         Tag tag = NbtConvert.toTag(type, initial);
         ServerCache.ensure(self, name, tag, type);
     }
@@ -148,7 +146,7 @@ public abstract class EntityMixin implements IEntityJS {
     @Unique
     public void entityJs$setSyncedData(String name, Object value) {
         Entity self = (Entity) (Object) this;
-        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
+        if (!entityjs$isServerSyncedDataSide(self)) return;
         UUID id = self.getUUID();
 
         var optType = SavedDataJS.get((ServerLevel) self.level()).getType(id, name);
@@ -348,17 +346,17 @@ public abstract class EntityMixin implements IEntityJS {
         }
         if (!(entityJs$getLivingEntity() instanceof IAnimatableJS)) {
             if (entityJs$getLivingEntity() instanceof Mob m) {
-                if (EventHandlers.addGoalTargets.hasListeners(entityJs$getTypeId())) {
+                if (EventHandlers.addGoalTargets.hasListeners()) {
                     EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(m, m.targetSelector), entityJs$getTypeId());
                 }
-                if (EventHandlers.addGoalSelectors.hasListeners(entityJs$getTypeId())) {
+                if (EventHandlers.addGoalSelectors.hasListeners()) {
                     EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(m, m.goalSelector), entityJs$getTypeId());
                 }
             }
         }
         Entity self = (Entity) (Object) this;
         if (entityJs$definedOnce) return;
-        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
+        if (!entityjs$isServerSyncedDataSide(self)) return;
         if (!(entityJs$builder instanceof ModifyEntityBuilder builder)) return;
         if (builder.defineSyncedData == null) return;
 

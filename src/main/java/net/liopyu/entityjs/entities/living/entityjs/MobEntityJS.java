@@ -173,7 +173,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     @Override
     protected Brain.Provider<?> brainProvider() {
-        if (EventHandlers.buildBrainProvider.hasListeners(getTypeId())) {
+        if (EventHandlers.buildBrainProvider.hasListeners()) {
             final BuildBrainProviderEventJS<MobEntityJS> event = new BuildBrainProviderEventJS<>();
             EventHandlers.buildBrainProvider.post(event, getTypeId());
             return event.provide();
@@ -184,7 +184,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     @Override
     protected Brain<MobEntityJS> makeBrain(Dynamic<?> p_21069_) {
-        if (EventHandlers.buildBrain.hasListeners(getTypeId())) {
+        if (EventHandlers.buildBrain.hasListeners()) {
             final Brain<MobEntityJS> brain = UtilsJS.cast(brainProvider().makeBrain(p_21069_));
             EventHandlers.buildBrain.post(new BuildBrainEventJS<>(brain), getTypeId());
             return brain;
@@ -195,10 +195,10 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     @Override
     protected void registerGoals() {
-        if (EventHandlers.addGoalTargets.hasListeners(getTypeId())) {
+        if (EventHandlers.addGoalTargets.hasListeners()) {
             EventHandlers.addGoalTargets.post(new AddGoalTargetsEventJS<>(this, targetSelector), getTypeId());
         }
-        if (EventHandlers.addGoalSelectors.hasListeners(getTypeId())) {
+        if (EventHandlers.addGoalSelectors.hasListeners()) {
             EventHandlers.addGoalSelectors.post(new AddGoalSelectorsEventJS<>(this, goalSelector), getTypeId());
         }
     }
