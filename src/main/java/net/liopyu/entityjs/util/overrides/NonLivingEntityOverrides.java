@@ -33,14 +33,8 @@ public final class NonLivingEntityOverrides {
         if (callback == null) {
             return;
         }
-        if (!CallbackProfiler.enabled()) {
-            OverrideUtils.withAlreadyCalled(() ->
-                    EntityJSHelperClass.consumerCallback(callback, entity, "[EntityJS]: Error in " + entityName(entity) + "builder for field: tick."));
-            return;
-        }
-        CallbackProfiler.profile("tick", () ->
-                OverrideUtils.withAlreadyCalled(() ->
-                        EntityJSHelperClass.consumerCallback(callback, entity, "[EntityJS]: Error in " + entityName(entity) + "builder for field: tick.")));
+        OverrideUtils.withAlreadyCalled(() ->
+                EntityJSHelperClass.consumerCallback(callback, entity, "[EntityJS]: Error in " + entityName(entity) + "builder for field: tick."));
     }
 
     public static <T extends Entity> void onAddedToWorld(T entity, BaseNonAnimatableEntityBuilder<?> builder, Runnable fallback) {
