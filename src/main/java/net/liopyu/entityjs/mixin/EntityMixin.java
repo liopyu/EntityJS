@@ -29,8 +29,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -133,14 +131,14 @@ public abstract class EntityMixin implements IEntityJS {
     }
 
     @Unique
-    private static boolean entityjs$isDedicatedServerSyncedDataSide(Entity entity) {
-        return !entity.level().isClientSide && FMLEnvironment.dist == Dist.DEDICATED_SERVER;
+    private static boolean entityjs$isServerSyncedDataSide(Entity entity) {
+        return !entity.level().isClientSide;
     }
 
     @Unique
     public void entityJs$addSyncedData(EntitySerializerType type, String name, Object initial) {
         Entity self = (Entity) (Object) this;
-        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
+        if (!entityjs$isServerSyncedDataSide(self)) return;
         Tag tag = NbtConvert.toTag(type, initial);
         ServerCache.ensure(self, name, tag, type);
     }
@@ -149,7 +147,7 @@ public abstract class EntityMixin implements IEntityJS {
     @Unique
     public void entityJs$setSyncedData(String name, Object value) {
         Entity self = (Entity) (Object) this;
-        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
+        if (!entityjs$isServerSyncedDataSide(self)) return;
         UUID id = self.getUUID();
 
         var optType = SavedDataJS.get((ServerLevel) self.level()).getType(id, name);
@@ -323,7 +321,7 @@ public abstract class EntityMixin implements IEntityJS {
         }
         Entity self = (Entity) (Object) this;
         if (entityJs$definedOnce) return;
-        if (!entityjs$isDedicatedServerSyncedDataSide(self)) return;
+        if (!entityjs$isServerSyncedDataSide(self)) return;
         if (!(entityJs$builder instanceof ModifyEntityBuilder b)) return;
         if (b.defineSyncedData == null) return;
 
