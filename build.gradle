@@ -1,305 +1,115 @@
-import org.gradle.internal.os.OperatingSystem
+import groovy.json.JsonSlurper
+import java.util.zip.ZipFile
 
 plugins {
-    id 'eclipse'
-    id 'idea'
-    id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
-    id 'org.spongepowered.mixin' version '0.7.+'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
-
-
+    id 'dev.architectury.loom' version "${architectury_loom_version}" apply false
+    id 'architectury-plugin' version "${architectury_plugin_version}"
+    id 'com.github.johnrengelman.shadow' version "${shadow_version}" apply false
 }
 
-version = mod_version
-group = mod_group_id
-
-base {
-    archivesName = mod_id
+architectury {
+    minecraft = project.minecraft_version
 }
 
-// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-def findAvailableRunDir(base = "run") {
-    def i = 0
-    while (true) {
-        def dir = file(i == 0 ? base : "${base}${i}")
-        if (!dir.exists() || !file("${dir}/session.lock").exists()) {
-            return dir
-        }
-        i++
-    }
+allprojects {
+    group = rootProject.maven_group
+    version = rootProject.mod_version
 }
 
-println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
-minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-    copyIdeResources = true
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+subprojects {
+    apply plugin: 'dev.architectury.loom'
+    apply plugin: 'architectury-plugin'
+    apply plugin: 'maven-publish'
 
-    runs {
-        configureEach {
-            def instanceId = project.hasProperty("instance") ? project.property("instance") : "0"
-            def username = "Dev${instanceId == '0' ? '' : instanceId}"
-
-            args '--mixin.config=entityjs.mixins.json'
-            property 'forge.client.window.title', username
-            property 'geckolib.disable_examples', 'true'
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', 'entityjs'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            [
-                    'entityjs.profileCallbacks',
-                    'entityjs.profileCallbacks.focusMethod',
-                    'entityjs.profileCallbacks.intervalSeconds',
-                    'entityjs.profileCallbacks.minMillis',
-                    'entityjs.profileCallbacks.minMicros',
-                    'entityjs.profileCallbacks.minNanos',
-                    'entityjs.profileCallbacks.slowStacks',
-                    'entityjs.profileCallbacks.slowStackMillis',
-                    'entityjs.profileCallbacks.slowStackLimit'
-            ].each { key ->
-                def value = System.getProperty(key)
-                if (value != null) {
-                    systemProperty key, value
-                }
-            }
-
-            mods {
-                "entityjs" {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        client {
-            def instanceId = project.hasProperty("instance") ? project.property("instance") : "0"
-            def username = "Dev${instanceId == '0' ? '' : instanceId}"
-            def runDir = "runs/client${instanceId == '0' ? '' : instanceId}"
-            workingDirectory = project.file(runDir)
-            property 'forge.enabledGameTestNamespaces', mod_id
-            args '--debug', '--username', username
-        }
-
-        server {
-            workingDirectory = project.file('runs/server')
-            property 'forge.enabledGameTestNamespaces', mod_id
-            args '--nogui'
-        }
-
-        gameTestServer {
-            workingDirectory = project.file('runs/gameTestServer')
-            property 'forge.enabledGameTestNamespaces', mod_id
-        }
-
-        data {
-            workingDirectory project.file('runs/data')
-
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-        }
-    }
-}
-
-
-def entityJsMethodAliasOutput = layout.buildDirectory.file('generated/entityjsMethodAliases/entityjs/mappings/method_aliases.tsv')
-
-tasks.register('generateEntityJSMethodAliases') {
-    def srgMappings = layout.buildDirectory.file('createSrgToMcp/output.srg')
-    dependsOn 'createSrgToMcp'
-    inputs.file srgMappings
-    outputs.file entityJsMethodAliasOutput
-
-    doLast {
-        def inputFile = srgMappings.get().asFile
-        def outputFile = entityJsMethodAliasOutput.get().asFile
-        outputFile.parentFile.mkdirs()
-        outputFile.withWriter('UTF-8') { writer ->
-            inputFile.eachLine { line ->
-                if (!line.startsWith('MD: ')) {
-                    return
-                }
-                def parts = line.split(' ')
-                if (parts.length < 5) {
-                    return
-                }
-                def srgMethod = parts[1]
-                def descriptor = parts[2]
-                def mappedMethod = parts[3]
-                def srgSeparator = srgMethod.lastIndexOf('/')
-                def mappedSeparator = mappedMethod.lastIndexOf('/')
-                if (srgSeparator <= 0 || mappedSeparator <= 0) {
-                    return
-                }
-                def owner = mappedMethod.substring(0, mappedSeparator)
-                def srgName = srgMethod.substring(srgSeparator + 1)
-                def mappedName = mappedMethod.substring(mappedSeparator + 1)
-                writer.write("${owner}\t${srgName}\t${mappedName}\t${descriptor}\n")
-            }
-        }
-    }
-}
-
-// Include resources generated by data generators and EntityJS build helpers.
-sourceSets.main.resources {
-    srcDir 'src/generated/resources'
-    srcDir layout.buildDirectory.dir('generated/entityjsMethodAliases')
-}
-
-repositories {
-    // Put repositories for dependencies here
-    // ForgeGradle automatically adds the Forge maven and Maven Central for you
-    maven {
-        url = "https://maven.architectury.dev"
-        content {
-            includeGroup "dev.architectury"
-        }
+    base {
+        archivesName = "${rootProject.archives_base_name}-${project.name}"
     }
 
-    maven {
-        url = "https://maven.latvian.dev/releases"
-        content {
-            includeGroup "dev.latvian.mods"
-        }
-    }
-    maven {
-        url "https://cursemaven.com"
-        content {
-            includeGroup "curse.maven"
-        }
-    }
-    maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
-    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
-    // flatDir {
-    //     dir 'libs'
-    // }
-    //maven { url 'https://dl.cloudsmith.io/public/lio/liolib/maven/' }
-}
-
-dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    compileOnly fg.deobf("curse.maven:framework-549225:5180972")
-    compileOnly fg.deobf("curse.maven:mrcrayfishs-gun-mod-unofficial-945471:5212457")
-
-    /*runtimeOnly fg.deobf("curse.maven:additional-attributes-986624:6013214")
-    runtimeOnly fg.deobf("curse.maven:irons-spells-n-spellbooks-855414:6054196")
-    runtimeOnly fg.deobf("curse.maven:curios-309927:6058834")
-    runtimeOnly fg.deobf("curse.maven:playeranimator-658587:4587214")
-    runtimeOnly fg.deobf("curse.maven:caelus-308989:5281700")*/
-    /*implementation fg.deobf("curse.maven:framework-549225:5180972")
-    implementation fg.deobf("curse.maven:mrcrayfishs-gun-mod-unofficial-945471:5212457")*/
-    //implementation fg.deobf("curse.maven:corail-tombstone-243707:5395076")
-    //ProbeJS 6.1
-    implementation fg.deobf("curse.maven:probejs-$probejs_snippet")
-    implementation fg.deobf("dev.latvian.mods:kubejs-forge:$kubejs_version")
-    implementation fg.deobf("dev.latvian.mods:rhino-forge:$rhino_version")
-    implementation fg.deobf("dev.architectury:architectury-forge:$architectury_version")
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-$geckolib_version")
-    // Use kube's jij'd version
-    implementation fg.deobf("io.github.llamalad7:mixinextras-common:0.2.1")
-    //implementation fg.deobf('net.liopyu.liolib:liolib-forge-1.19.2:0.0.2')
-    if (System.getProperty("idea.sync.active") != "true") {
-        annotationProcessor("org.spongepowered:mixin:${mixin_version}:processor")
-    }
-}
-
-tasks.register('runClient1') {
-    group = 'forgegradle runs'
-    description = 'Launch a second client instance in a new terminal window'
-
-    doLast {
-        def command
-        if (OperatingSystem.current().isWindows()) {
-            command = ["cmd", "/c", "start", "cmd", "/k", "gradlew runClient -Pinstance=1"]
-        } else if (OperatingSystem.current().isMacOsX()) {
-            command = ["osascript", "-e", 'tell application "Terminal" to do script "cd ' + projectDir + ' && ./gradlew runClient -Pinstance=1"']
-        } else if (OperatingSystem.current().isLinux()) {
-            command = ["gnome-terminal", "--", "bash", "-c", "cd ${projectDir} && ./gradlew runClient -Pinstance=1; exec bash"]
-        } else {
-            throw new GradleException("Unsupported OS")
-        }
-        exec {
-            commandLine command
-        }
-    }
-}
-tasks.named('processResources', ProcessResources).configure {
-    dependsOn 'generateEntityJSMethodAliases'
-    var replaceProperties = [
-            minecraft_version      : minecraft_version,
-            minecraft_version_range: minecraft_version_range,
-            forge_version          : forge_version,
-            forge_version_range    : forge_version_range,
-            loader_version_range   : loader_version_range,
-            mod_id                 : mod_id,
-            mod_name               : mod_name,
-            mod_license            : mod_license,
-            mod_version            : mod_version,
-            mod_authors            : mod_authors,
-            mod_description        : mod_description,
-    ]
-    inputs.properties replaceProperties
-
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties + [project: project]
-    }
-}
-
-// Example for how to get properties into the manifest for reading at runtime.
-tasks.named('jar', Jar).configure {
-    manifest {
-        attributes([
-                'Specification-Title'     : mod_id,
-                'Specification-Vendor'    : mod_authors,
-                'Specification-Version'   : '1', // We are version 1 of ourselves
-                'Implementation-Title'    : project.name,
-                'Implementation-Version'  : project.jar.archiveVersion,
-                'Implementation-Vendor'   : mod_authors,
-                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'MixinConfigs'            : "entityjs.mixins.json"
-        ])
-    }
-
-    // This is the preferred method to reobfuscate your jar file
-    finalizedBy 'reobfJar'
-}
-
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing:
-// tasks.named('publish').configure {
-//     dependsOn 'reobfJar'
-// }
-
-publishing {
-    publications {
-        register('mavenJava', MavenPublication) {
-            artifact jar
-        }
-    }
     repositories {
-        maven {
-            // Shedaniel's maven (Architectury API)
-            url = "https://maven.architectury.dev"
-            content {
-                includeGroup "dev.architectury"
-            }
-        }
+        maven { url = 'https://maven.fabricmc.net/' }
+        maven { url = 'https://maven.architectury.dev' }
+        maven { url = 'https://maven.latvian.dev/releases' }
+        maven { url = 'https://maven.parchmentmc.org' }
+        maven { url = 'https://cursemaven.com'; content { includeGroup 'curse.maven' } }
+        maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+        mavenCentral()
+    }
 
-        maven {
-            // saps.dev Maven (KubeJS and Rhino)
-            url = "https://maven.saps.dev/releases"
-            content {
-                includeGroup "dev.latvian.mods"
+    dependencies {
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        mappings loom.officialMojangMappings()
+    }
+
+    configurations {
+        entityJsParchment
+    }
+
+    dependencies {
+        entityJsParchment "org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip"
+    }
+
+    java {
+        withSourcesJar()
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    def java17Launcher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+
+    tasks.withType(JavaExec).configureEach {
+        javaLauncher = java17Launcher
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = 17
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifactId = base.archivesName.get()
+                from components.java
             }
         }
     }
 }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-    options.compilerArgs << '-parameters'
+ext.loadEntityJsParchmentParameters = { File archive ->
+    def zipFile = new ZipFile(archive)
+    try {
+        def entry = zipFile.getEntry('parchment.json')
+        if (entry == null) {
+            throw new GradleException("Missing parchment.json in ${archive}")
+        }
+        def root = new JsonSlurper().parse(zipFile.getInputStream(entry), 'UTF-8')
+        def parameters = [:]
+        root.classes.each { mappedClass ->
+            mappedClass.methods.each { mappedMethod ->
+                if (mappedMethod.parameters) {
+                    def slots = mappedMethod.parameters.collectEntries { parameter ->
+                        [(parameter.index as Integer): parameter.name.toString()]
+                    }
+                    parameters["${mappedClass.name}\t${mappedMethod.name}\t${mappedMethod.descriptor}"] = slots
+                }
+            }
+        }
+        return parameters
+    } finally {
+        zipFile.close()
+    }
 }
 
-mixin {
-    add sourceSets.main, "entityjs.refmap.json"
+ext.encodeEntityJsParameterSlots = { Map<Integer, String> slots ->
+    if (slots == null || slots.isEmpty()) {
+        return ''
+    }
+    return slots.entrySet().sort { left, right -> left.key <=> right.key }
+            .collect { entry -> "${entry.key}:${entry.value}" }
+            .join(';')
 }

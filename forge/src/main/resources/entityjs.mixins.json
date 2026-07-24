@@ -1,0 +1,27 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "net.liopyu.entityjs.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "AnimationControllerMixin",
+    "EntityAttributeCreationEventMixin",
+    "EntityMixin",
+    "KubeJSCommandsMixin",
+    "LivingEntityAccessor",
+    "LivingEntityMixin",
+    "MobMixin",
+    "PathfinderMobMixin",
+    "ProjectileMixin",
+    "RegistryEventJSMixin",
+    "ServerScriptManagerMixin"
+  ],
+  "client": [
+    "EntityRenderersAccessor",
+    "EntityRendererMixin",
+    "LivingEntityRendererMixin",
+    "ProbeCommandsMixin",
+    "ProbeDocCompilerMixin"
+  ],
+  "refmap": "entityjs-forge-forge-refmap.json"
+}

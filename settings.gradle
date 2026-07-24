@@ -1,34 +1,11 @@
 pluginManagement {
     repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        maven { url = 'https://maven.architectury.dev/' }
+        maven { url = 'https://maven.minecraftforge.net/' }
         gradlePluginPortal()
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        maven {
-            name = 'MinecraftForge'
-            url = 'https://maven.minecraftforge.net/'
-        }
-        maven {
-            // Shedaniel's maven (Architectury API)
-            url = "https://maven.architectury.dev"
-            content {
-                includeGroup "dev.architectury"
-            }
-        }
-
-        maven {
-            // saps.dev Maven (KubeJS and Rhino)
-            url = "https://maven.saps.dev/releases"
-            content {
-                includeGroup "dev.latvian.mods"
-            }
-        }
-
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-
-        maven { url = 'https://maven.parchmentmc.org' }
     }
-
 }
 
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.7.+'
-}
+rootProject.name = 'entityjs-1.20.1'
+include 'fabric', 'forge'

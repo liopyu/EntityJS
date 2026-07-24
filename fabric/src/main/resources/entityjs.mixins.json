@@ -1,0 +1,26 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "net.liopyu.entityjs.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "AnimationControllerMixin",
+    "AttributeSupplierAccessor",
+    "EntityMixin",
+    "KubeJSCommandsMixin",
+    "LivingEntityMixin",
+    "MobMixin",
+    "PathfinderMobMixin",
+    "RegistryEventJSMixin",
+    "ServerScriptManagerMixin"
+  ],
+  "client": [
+    "EntityRendererMixin",
+    "LivingEntityRendererMixin",
+    "EntityRenderersAccessor",
+    "MinecraftClientMixin",
+    "ProbeCommandsMixin",
+    "ProbeDocCompilerMixin"
+  ],
+  "refmap": "entityjs-fabric-fabric-refmap.json"
+}

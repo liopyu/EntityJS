@@ -1,0 +1,144 @@
+architectury {
+    platformSetupLoomIde()
+    fabric()
+}
+
+sourceSets {
+    main {
+        java.srcDir rootProject.file('common/src/main/java')
+        resources.srcDir rootProject.file('common/src/main/resources')
+        resources.srcDir layout.buildDirectory.dir('generated/entityjsMethodAliases')
+    }
+}
+
+def entityJsMethodAliasOutput = layout.buildDirectory.file('generated/entityjsMethodAliases/entityjs/mappings/method_aliases.tsv')
+def entityJsTinyMappings = providers.provider {
+    loom.mappingConfiguration.tinyMappings.toFile()
+}
+def entityJsParchmentZip = providers.provider {
+    configurations.entityJsParchment.singleFile
+}
+
+tasks.register('generateEntityJSMethodAliases') {
+    group = 'build setup'
+    description = 'Generates Fabric runtime-to-script method metadata and bundled Parchment parameter names.'
+    inputs.file(entityJsTinyMappings)
+    inputs.file(entityJsParchmentZip)
+    outputs.file(entityJsMethodAliasOutput)
+
+    doLast {
+        def inputFile = entityJsTinyMappings.get()
+        def parchmentParameters = rootProject.loadEntityJsParchmentParameters(entityJsParchmentZip.get())
+        def outputFile = entityJsMethodAliasOutput.get().asFile
+        def lines = inputFile.readLines('UTF-8')
+        if (lines.isEmpty()) {
+            throw new GradleException("Mappings file is empty: ${inputFile}")
+        }
+
+        def header = lines.first().split('\t', -1)
+        def namespaces = header.drop(3).toList()
+        int officialIndex = namespaces.indexOf('official')
+        int intermediaryIndex = namespaces.indexOf('intermediary')
+        int namedIndex = namespaces.indexOf('named')
+        if (officialIndex < 0 || intermediaryIndex < 0 || namedIndex < 0) {
+            throw new GradleException("Expected official, intermediary, and named namespaces in ${inputFile}")
+        }
+
+        def officialToIntermediary = [:]
+        def officialToNamed = [:]
+        def methodEntries = []
+        String currentIntermediaryOwner = null
+        String currentNamedOwner = null
+        lines.drop(1).each { line ->
+            def parts = line.split('\t', -1)
+            if (parts.length > 1 && parts[0] == 'c') {
+                def names = parts.drop(1)
+                officialToIntermediary[names[officialIndex]] = names[intermediaryIndex]
+                officialToNamed[names[officialIndex]] = names[namedIndex]
+                currentIntermediaryOwner = names[intermediaryIndex]
+                currentNamedOwner = names[namedIndex]
+            } else if (parts.length > 3 && parts[0].isEmpty() && parts[1] == 'm' && currentIntermediaryOwner != null) {
+                def names = parts.drop(3)
+                methodEntries.add([
+                        runtimeOwner: currentIntermediaryOwner,
+                        scriptOwner: currentNamedOwner,
+                        officialDescriptor: parts[2],
+                        intermediaryName: names[intermediaryIndex],
+                        namedName: names[namedIndex]
+                ])
+            }
+        }
+
+        def intermediaryDescriptor = { String officialDescriptor ->
+            officialDescriptor.replaceAll(/L([^;]+);/) { match, owner ->
+                "L${officialToIntermediary.getOrDefault(owner, owner)};"
+            }
+        }
+        def namedDescriptor = { String officialDescriptor ->
+            officialDescriptor.replaceAll(/L([^;]+);/) { match, owner ->
+                "L${officialToNamed.getOrDefault(owner, owner)};"
+            }
+        }
+
+        outputFile.parentFile.mkdirs()
+        int entryCount = 0
+        outputFile.withWriter('UTF-8') { writer ->
+            methodEntries.each { entry ->
+                def runtimeDescriptor = intermediaryDescriptor(entry.officialDescriptor)
+                def scriptDescriptor = namedDescriptor(entry.officialDescriptor)
+                def parchmentKey = "${entry.scriptOwner}\t${entry.namedName}\t${scriptDescriptor}"
+                def encodedParameters = rootProject.encodeEntityJsParameterSlots(parchmentParameters[parchmentKey])
+                writer.write("${entry.runtimeOwner}\t${entry.intermediaryName}\t${runtimeDescriptor}\t${entry.scriptOwner}\t${entry.namedName}\t${scriptDescriptor}\t${encodedParameters}\n")
+                entryCount++
+            }
+        }
+        if (entryCount == 0) {
+            throw new GradleException("No Fabric method metadata was generated from ${inputFile}")
+        }
+    }
+}
+
+tasks.named('sourcesJar').configure {
+    dependsOn tasks.named('generateEntityJSMethodAliases')
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    modImplementation "dev.architectury:architectury-fabric:${rootProject.architectury_api_version}"
+    modImplementation "dev.latvian.mods:kubejs-fabric:${rootProject.kubejs_fabric_version}"
+    modImplementation "dev.latvian.mods:rhino-fabric:${rootProject.rhino_fabric_version}"
+    modImplementation "software.bernie.geckolib:geckolib-fabric-${rootProject.minecraft_version}:${rootProject.geckolib_fabric_version}"
+    // ProbeJS is a development-client tool. Keep it available for runClient but
+    // remove it from the dedicated-server launch classpath below.
+    modImplementation "curse.maven:probejs-${rootProject.probejs_fabric_snippet}"
+}
+
+processResources {
+    dependsOn tasks.named('generateEntityJSMethodAliases')
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') {
+        expand version: project.version, minecraft_version: rootProject.minecraft_version, loader_version: rootProject.fabric_loader_version, geckolib_version: rootProject.geckolib_fabric_version
+    }
+}
+
+loom {
+    accessWidenerPath = file('src/main/resources/entityjs.aw')
+    runs {
+        client {
+            client()
+            runDir '../runs/fabric/client'
+        }
+        server {
+            server()
+            runDir '../runs/fabric/server'
+            programArgs '--nogui'
+        }
+    }
+}
+
+// Loom 1.6 predates side-specific mod dependency configurations. Restrict the
+// existing development dependency at the actual dedicated-server launch point.
+tasks.named('runServer') {
+    classpath = classpath.filter { file -> !file.name.toLowerCase(Locale.ROOT).startsWith('probejs-') }
+}

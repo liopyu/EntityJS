@@ -1,0 +1,144 @@
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+sourceSets {
+    main {
+        java.srcDir rootProject.file('common/src/main/java')
+        resources.srcDir rootProject.file('common/src/main/resources')
+        resources.srcDir layout.buildDirectory.dir('generated/entityjsMethodAliases')
+    }
+}
+
+def entityJsMethodAliasOutput = layout.buildDirectory.file('generated/entityjsMethodAliases/entityjs/mappings/method_aliases.tsv')
+def entityJsSrgToNamedMappings = providers.provider {
+    loom.mappingConfiguration.srgToNamedSrg.toFile()
+}
+def entityJsParchmentZip = providers.provider {
+    configurations.entityJsParchment.singleFile
+}
+
+tasks.register('generateEntityJSMethodAliases') {
+    group = 'build setup'
+    description = 'Generates Forge runtime-to-script method metadata and bundled Parchment parameter names.'
+    inputs.file(entityJsSrgToNamedMappings)
+    inputs.file(entityJsParchmentZip)
+    outputs.file(entityJsMethodAliasOutput)
+
+    doLast {
+        def inputFile = entityJsSrgToNamedMappings.get()
+        def parchmentParameters = rootProject.loadEntityJsParchmentParameters(entityJsParchmentZip.get())
+        def outputFile = entityJsMethodAliasOutput.get().asFile
+        outputFile.parentFile.mkdirs()
+        int entryCount = 0
+        outputFile.withWriter('UTF-8') { writer ->
+            inputFile.eachLine { line ->
+                if (!line.startsWith('MD: ')) {
+                    return
+                }
+                def parts = line.split(/\s+/)
+                if (parts.length < 5) {
+                    return
+                }
+                def srgMethod = parts[1]
+                def runtimeDescriptor = parts[2]
+                def mappedMethod = parts[3]
+                def scriptDescriptor = parts[4]
+                def srgSeparator = srgMethod.lastIndexOf('/')
+                def mappedSeparator = mappedMethod.lastIndexOf('/')
+                if (srgSeparator <= 0 || mappedSeparator <= 0) {
+                    return
+                }
+                def owner = mappedMethod.substring(0, mappedSeparator)
+                def srgName = srgMethod.substring(srgSeparator + 1)
+                def mappedName = mappedMethod.substring(mappedSeparator + 1)
+                def parchmentKey = "${owner}\t${mappedName}\t${scriptDescriptor}"
+                def encodedParameters = rootProject.encodeEntityJsParameterSlots(parchmentParameters[parchmentKey])
+                writer.write("${owner}\t${srgName}\t${runtimeDescriptor}\t${owner}\t${mappedName}\t${scriptDescriptor}\t${encodedParameters}\n")
+                entryCount++
+            }
+        }
+        if (entryCount == 0) {
+            throw new GradleException("No method aliases were generated from ${inputFile}")
+        }
+    }
+}
+
+tasks.named('sourcesJar').configure {
+    dependsOn tasks.named('generateEntityJSMethodAliases')
+}
+
+dependencies {
+    forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
+    modImplementation "dev.architectury:architectury-forge:${rootProject.architectury_api_version}"
+    // Optional compile-time APIs used by EntityJS's CGM projectile integration.
+    // Architectury Loom remaps these mod inputs without ForgeGradle's fg.deobf wrapper.
+    modCompileOnly "curse.maven:framework-549225:5180972"
+    modCompileOnly "curse.maven:mrcrayfishs-gun-mod-unofficial-945471:5212457"
+    modImplementation "dev.latvian.mods:kubejs-forge:${rootProject.kubejs_forge_version}"
+    modImplementation "dev.latvian.mods:rhino-forge:${rootProject.rhino_forge_version}"
+    modImplementation "software.bernie.geckolib:geckolib-forge-${rootProject.geckolib_forge_version}"
+    // GeckoLib embeds MCLib with Forge JarJar, but Loom's remapped development
+    // classpath does not expose that nested library to runClient/runServer.
+    forgeRuntimeLibrary "com.eliotlash.mclib:mclib:20"
+    // ProbeJS is a development-client tool. Keep it available for runClient but
+    // remove it from the dedicated-server launch classpath below.
+    modImplementation "curse.maven:probejs-${rootProject.probejs_forge_snippet}"
+    // The transformed Forge development classpath exposes an old split
+    // MixinExtras platform without making its bootstrap visible to ModLauncher.
+    // Keep the platform current and put its implementation on Forge's parent
+    // runtime-library layer so the config plugin can see the bootstrap class.
+    modRuntimeOnly "io.github.llamalad7:mixinextras-forge:0.3.5"
+    forgeRuntimeLibrary "io.github.llamalad7:mixinextras-common:0.3.5"
+}
+
+processResources {
+    dependsOn tasks.named('generateEntityJSMethodAliases')
+
+    def replaceProperties = [
+            mod_id: rootProject.mod_id,
+            mod_name: rootProject.mod_name,
+            mod_license: rootProject.mod_license,
+            mod_version: project.version,
+            mod_authors: rootProject.mod_authors,
+            mod_description: rootProject.mod_description,
+            minecraft_version: rootProject.minecraft_version,
+            minecraft_version_range: rootProject.minecraft_version_range,
+            forge_version: rootProject.forge_version,
+            forge_version_range: rootProject.forge_version_range,
+            loader_version_range: rootProject.loader_version_range
+    ]
+    inputs.properties replaceProperties
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties
+    }
+}
+
+tasks.named('jar').configure {
+    manifest {
+        attributes 'MixinConfigs': 'entityjs.mixins.json'
+    }
+}
+
+loom {
+    runs {
+        client {
+            client()
+            runDir '../runs/forge/client'
+            programArgs '--mixin.config=entityjs.mixins.json'
+        }
+        server {
+            server()
+            runDir '../runs/forge/server'
+            programArgs '--mixin.config=entityjs.mixins.json'
+            programArgs '--nogui'
+        }
+    }
+}
+
+// Loom 1.6 predates side-specific mod dependency configurations. Restrict the
+// existing development dependency at the actual dedicated-server launch point.
+tasks.named('runServer') {
+    classpath = classpath.filter { file -> !file.name.toLowerCase(Locale.ROOT).startsWith('probejs-') }
+}
