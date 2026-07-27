@@ -12,6 +12,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.liopyu.entityjs.builders.living.BaseLivingEntityBuilder;
 import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
+import net.liopyu.entityjs.common.util.EntityJSHelperClass;
 import net.liopyu.entityjs.events.*;
 import net.liopyu.entityjs.common.events.*;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -66,7 +67,7 @@ public class EventHandlers {
                 editAttributes.post(new ModifyAttributeEventJS());
             }
             for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
-                EntityType<? extends LivingEntity> type = UtilsJS.cast(EntityJSUtils.getRegisteredEntityType(b, "attribute"));
+                EntityType<? extends LivingEntity> type = UtilsJS.cast(EntityJSHelperClass.getRegisteredEntityType(b, "attribute"));
                 if (type == null) continue;
                 var id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
                 AttributeSupplier.Builder merged = b.getAttributeBuilder();
@@ -90,7 +91,7 @@ public class EventHandlers {
             for (CustomEntityJSBuilder candidate : CustomEntityBuilder.thisList) {
                 if (!(candidate instanceof CustomEntityBuilder builder)) continue;
                 if (!builder.isLivingEntityClass()) continue;
-                EntityType<? extends LivingEntity> type = UtilsJS.cast(EntityJSUtils.getRegisteredEntityType(builder, "attribute"));
+                EntityType<? extends LivingEntity> type = UtilsJS.cast(EntityJSHelperClass.getRegisteredEntityType(builder, "attribute"));
                 if (type == null) continue;
                 AttributeSupplier.Builder merged = builder.getAttributeBuilder();
                 Map<Attribute, Double> adds = ModifyAttributeEventJS.pendingAdds.get(type);

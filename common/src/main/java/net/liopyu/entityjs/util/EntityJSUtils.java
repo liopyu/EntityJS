@@ -75,18 +75,6 @@ public interface EntityJSUtils {
         return null;
     }
 
-    @HideFromJS
-    static EntityType<?> getRegisteredEntityType(BuilderBase<?> builder, String registrationTarget) {
-        Object value = builder.get();
-        if (value instanceof EntityType<?> entityType) {
-            return entityType;
-        }
-        EntityJSHelperClass.logWarningMessageOnce("[EntityJS]: Skipping " + registrationTarget
-                + " registration for unregistered entity builder " + builder.id
-                + ". Check startup script errors such as duplicate registry keys.");
-        return null;
-    }
-
     @Info("Creates a custom Jump Control builder and returns it.")
     static JumpControlJS createJumpControl(Mob pMob, Consumer<JumpControlJSBuilder> consumer) {
         var builder = new JumpControlJSBuilder();

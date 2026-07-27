@@ -289,7 +289,7 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
     }
 
     @Info(value = """
-            Adds or replaces attributes while Fabric creates this entity type's attribute supplier.
+            Adds or replaces attributes while the loader creates this entity type's attribute supplier.
 
             Example usage:
             ```javascript

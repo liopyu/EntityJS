@@ -51,8 +51,7 @@ public final class EntityJSPlatform {
         if (mappedName != null && !mappedName.isBlank()) {
             return mappedName;
         }
-        String canonicalName = runtimeClass.getCanonicalName();
-        return canonicalName == null ? runtimeClass.getName() : canonicalName;
+        return runtimeClass.getName();
     }
 
     public static boolean isAnimalTameCancelled(TamableAnimal animal, Player player) {

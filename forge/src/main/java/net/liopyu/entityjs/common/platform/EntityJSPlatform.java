@@ -44,8 +44,7 @@ public final class EntityJSPlatform {
     }
 
     public static String scriptClassName(Class<?> runtimeClass) {
-        String canonicalName = runtimeClass.getCanonicalName();
-        return canonicalName == null ? runtimeClass.getName() : canonicalName;
+        return runtimeClass.getName();
     }
 
     public static boolean isAnimalTameCancelled(TamableAnimal animal, Player player) {
@@ -75,6 +74,9 @@ public final class EntityJSPlatform {
 
     public static AttributeSupplier.Builder applyAttributeBuilder(BaseLivingEntityBuilder<?> entityBuilder,
                                                                   AttributeSupplier.Builder attributes) {
+        if (entityBuilder.attributes != null) {
+            entityBuilder.attributes.accept(attributes);
+        }
         return attributes;
     }
 

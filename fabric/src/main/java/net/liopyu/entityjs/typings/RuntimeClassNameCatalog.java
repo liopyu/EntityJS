@@ -1,10 +1,10 @@
 package net.liopyu.entityjs.typings;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.liopyu.entityjs.common.EntityJSMod;
+import net.liopyu.entityjs.common.platform.EntityJSPlatform;
 import net.liopyu.entityjs.common.typings.RendererClassNameScanner;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLLoader;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
@@ -12,7 +12,7 @@ import java.util.Set;
 
 /** Loader-specific roots for the shared renderer class-name scanner. */
 public final class RuntimeClassNameCatalog {
-    private static final String ENTITY_RENDERER_CLASS = "net.minecraft.client.renderer.entity.EntityRenderer";
+    private static final String NAMED_ENTITY_RENDERER_CLASS = "net.minecraft.client.renderer.entity.EntityRenderer";
 
     private final Set<String> rendererClassNames;
 
@@ -29,19 +29,20 @@ public final class RuntimeClassNameCatalog {
     }
 
     private static RuntimeClassNameCatalog build() {
-        if (FMLLoader.getDist() != Dist.CLIENT) {
+        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
             return new RuntimeClassNameCatalog(Set.of());
         }
         Set<Path> roots = new LinkedHashSet<>();
         try {
-            ModList.get().forEachModFile(modFile -> roots.add(modFile.getSecureJar().getRootPath()));
+            FabricLoader.getInstance().getAllMods().forEach(mod -> roots.addAll(mod.getRootPaths()));
         } catch (Throwable throwable) {
             if (throwable instanceof VirtualMachineError error) {
                 throw error;
             }
-            EntityJSMod.LOGGER.debug("[EntityJS]: Unable to enumerate all Forge renderer scan roots", throwable);
+            EntityJSMod.LOGGER.debug("[EntityJS]: Unable to enumerate all Fabric renderer scan roots", throwable);
         }
-        return new RuntimeClassNameCatalog(RendererClassNameScanner.scan(ENTITY_RENDERER_CLASS, roots));
+        String rendererRuntimeName = EntityJSPlatform.runtimeClassName(NAMED_ENTITY_RENDERER_CLASS);
+        return new RuntimeClassNameCatalog(RendererClassNameScanner.scan(rendererRuntimeName, roots));
     }
 
     private static final class Holder {
