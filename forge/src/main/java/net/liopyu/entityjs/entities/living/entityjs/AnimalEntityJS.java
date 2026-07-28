@@ -194,7 +194,7 @@ public class AnimalEntityJS extends Animal implements IAnimatableJS, RangedAttac
 
     @Override
     public boolean isMultipartEntity() {
-        return partEntities != null;
+        return partEntities != null && partEntities.length > 0;
     }
 
     @Override

@@ -145,7 +145,7 @@ public class MobEntityJS extends PathfinderMob implements IAnimatableJS, RangedA
 
     @Override
     public boolean isMultipartEntity() {
-        return partEntities != null;
+        return partEntities != null && partEntities.length > 0;
     }
 
     @Override
