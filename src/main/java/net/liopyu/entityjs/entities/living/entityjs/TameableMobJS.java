@@ -180,7 +180,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
 
     @Override
     public boolean isMultipartEntity() {
-        return partEntities != null;
+        return partEntities != null && partEntities.length > 0;
     }
 
     @Override

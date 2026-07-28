@@ -164,7 +164,7 @@ public class ZombieEntityJS extends Zombie implements IAnimatableJS {
 
     @Override
     public boolean isMultipartEntity() {
-        return partEntities != null;
+        return partEntities != null && partEntities.length > 0;
     }
 
     @Override
