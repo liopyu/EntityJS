@@ -125,12 +125,13 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
             EntityReflection.resolveClassName(id, "renderer", resolvedClassName);
             return this;
         }
-        Class<?> entityRendererClass = EntityReflection.resolveClassName(id, "renderer", resolvedClassName);
-        if (entityRendererClass == null && EntityReflection.isClientEnvironment()) {
-            return this;
-        }
-        if (entityRendererClass != null && !EntityReflection.validateRendererClassCompatibility(id, entityClass, entityRendererClass)) {
-            return this;
+        Class<?> entityRendererClass = null;
+        if (EntityReflection.isClientEnvironment()) {
+            entityRendererClass = EntityReflection.resolveClassName(id, "renderer", resolvedClassName);
+            if (entityRendererClass == null
+                    || !EntityReflection.validateRendererClassCompatibility(id, entityClass, entityRendererClass)) {
+                return this;
+            }
         }
         this.entityRendererClass = entityRendererClass;
         this.entityRendererClassName = resolvedClassName;

@@ -13,7 +13,7 @@ import net.liopyu.entityjs.builders.nonliving.vanilla.EyeOfEnderEntityBuilder;
 import net.liopyu.entityjs.client.living.CustomKubeJSEntityRenderer;
 import net.liopyu.entityjs.client.living.KubeJSEntityRenderer;
 import net.liopyu.entityjs.client.nonliving.*;
-import net.liopyu.entityjs.util.EntityJSUtils;
+import net.liopyu.entityjs.common.util.EntityJSHelperClass;
 import net.liopyu.entityjs.util.ModKeybinds;
 import net.liopyu.entityjs.util.EntityRendererTypeHelper;
 import net.minecraftforge.api.distmarker.Dist;
@@ -43,36 +43,36 @@ public class ClientEventHandlers {
 
     private static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSUtils.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
             if (entityType != null) event.registerEntityRenderer(UtilsJS.cast(entityType), renderManager -> new KubeJSEntityRenderer<>(renderManager, builder));
         }
         for (ArrowEntityBuilder<?> builder : ArrowEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSUtils.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
             if (entityType != null) event.registerEntityRenderer(UtilsJS.cast(entityType), renderManager -> new KubeJSArrowEntityRenderer<>(renderManager, builder));
         }
         for (ProjectileEntityBuilder<?> builder : ProjectileEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSUtils.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
             if (entityType != null) event.registerEntityRenderer(UtilsJS.cast(entityType), renderManager -> new KubeJSProjectileEntityRenderer<>(renderManager, builder));
         }
         for (EyeOfEnderEntityBuilder<?> builder : EyeOfEnderEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSUtils.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
             if (entityType != null) event.registerEntityRenderer(UtilsJS.cast(entityType), renderManager -> new KubeJSEnderEyeRenderer<>(renderManager, builder));
         }
         for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSUtils.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
             if (entityType != null) event.registerEntityRenderer(UtilsJS.cast(entityType), renderManager -> new KubeJSNLEntityRenderer<>(renderManager, builder));
         }
         for (BoatEntityBuilder<?> builder : BoatEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSUtils.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
             if (entityType != null) event.registerEntityRenderer(UtilsJS.cast(entityType), renderManager -> new KubeJSBoatRenderer<>(renderManager, builder));
         }
         for (CustomEntityJSBuilder builder : CustomEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSUtils.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
             if (entityType == null) continue;
             if (builder instanceof CustomEntityBuilder customBuilder && customBuilder.usesEntityTypeRenderer()) {
-                event.registerEntityRenderer(UtilsJS.cast(entityType), renderManager -> EntityRendererTypeHelper.create(renderManager, customBuilder));
+                event.registerEntityRenderer(UtilsJS.cast(entityType), renderManager -> UtilsJS.cast(EntityRendererTypeHelper.create(renderManager, customBuilder)));
             } else if (builder instanceof CustomEntityBuilder customBuilder && customBuilder.usesCustomRenderer()) {
-                event.registerEntityRenderer(UtilsJS.cast(entityType), renderManager -> EntityRendererTypeHelper.compatibleRendererOrThrow(customBuilder, customBuilder.createEntityRenderer(renderManager), "custom renderer"));
+                event.registerEntityRenderer(UtilsJS.cast(entityType), renderManager -> UtilsJS.cast(EntityRendererTypeHelper.compatibleRendererOrThrow(customBuilder, customBuilder.createEntityRenderer(renderManager), "custom renderer")));
             } else if (builder instanceof CustomEntityBuilder customBuilder && customBuilder.usesEntityModelRenderer()) {
                 event.registerEntityRenderer(UtilsJS.cast(entityType), renderManager -> new CustomEntityModelRenderer<>(renderManager, customBuilder));
             } else if (builder instanceof CustomEntityBuilder customBuilder && !customBuilder.isLivingEntityClass()) {

@@ -39,11 +39,20 @@ public final class EntityJSPlatform {
     }
 
     public static String runtimeClassName(String namedClassName) {
-        String rhinoRuntimeName = RemappingHelper.getMinecraftRemapper().getUnmappedClass(namedClassName);
-        if (!rhinoRuntimeName.isBlank()) {
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            return namedClassName;
+        }
+
+        String rhinoRuntimeName =
+                RemappingHelper.getMinecraftRemapper().getUnmappedClass(namedClassName);
+
+        if (rhinoRuntimeName != null && !rhinoRuntimeName.isBlank()) {
             return rhinoRuntimeName;
         }
-        return FabricLoader.getInstance().getMappingResolver().mapClassName("named", namedClassName);
+
+        return FabricLoader.getInstance()
+                .getMappingResolver()
+                .mapClassName("named", namedClassName);
     }
 
     public static String scriptClassName(Class<?> runtimeClass) {

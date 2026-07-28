@@ -146,7 +146,7 @@ public class MobMixin implements MobAccessor /*implements IModifyEntityJS*/ {
     }
 
     @Unique
-    public String entityJs$getTypeId() {
+    private String entityJs$getTypeId() {
         return Objects.requireNonNull(EntityType.getKey(entityJs$getLivingEntity().getType())).toString();
     }
 

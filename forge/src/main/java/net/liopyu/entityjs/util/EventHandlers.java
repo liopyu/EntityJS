@@ -14,7 +14,6 @@ import net.liopyu.entityjs.events.*;
 import net.liopyu.entityjs.common.events.*;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
@@ -24,8 +23,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class EventHandlers {
     public static final EventGroup EntityJSEvents = EventGroup.of("EntityJSEvents");
-    // KubeJS 2001 doesn't transform extra IDs in hasListeners(Object). Callers with String type IDs
-    // must use hasListeners() and let post(...) transform and filter the targeted listener instead.
+
     public static final EventHandler addGoalTargets = EntityJSEvents.server("addGoals", () -> AddGoalTargetsEventJS.class).extra(Extra.REQUIRES_ID); // Possibly a modify goals event for editing other entities
     public static final EventHandler addGoalSelectors = EntityJSEvents.server("addGoalSelectors", () -> AddGoalSelectorsEventJS.class).extra(Extra.REQUIRES_ID);
     public static final EventHandler buildBrain = EntityJSEvents.server("buildBrain", () -> BuildBrainEventJS.class).extra(Extra.REQUIRES_ID);
@@ -49,14 +47,14 @@ public class EventHandlers {
 
     private static void attributeCreation(EntityAttributeCreationEvent event) {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSUtils.getRegisteredEntityType(builder, "attribute");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "attribute");
             if (entityType != null) event.put(UtilsJS.cast(entityType), builder.getAttributeBuilder().build());
         }
         for (CustomEntityJSBuilder builder : CustomEntityJSBuilder.thisList) {
             if (builder instanceof CustomEntityBuilder customBuilder && !customBuilder.isLivingEntityClass()) {
                 continue;
             }
-            EntityType<?> entityType = EntityJSUtils.getRegisteredEntityType(builder, "attribute");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "attribute");
             if (entityType != null) event.put(UtilsJS.cast(entityType), builder.getAttributeBuilder().build());
         }
     }

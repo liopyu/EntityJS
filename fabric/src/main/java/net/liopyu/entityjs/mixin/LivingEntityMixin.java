@@ -104,7 +104,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     }
 
     @Unique
-    public String entityJs$getTypeId() {
+    private String entityJs$getTypeId() {
         return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.getKey(entityJs$getLivingEntity().getType())).toString();
     }
 
