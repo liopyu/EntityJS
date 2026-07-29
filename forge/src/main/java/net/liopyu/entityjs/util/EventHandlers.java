@@ -47,14 +47,14 @@ public class EventHandlers {
 
     private static void attributeCreation(EntityAttributeCreationEvent event) {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "attribute");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder);
             if (entityType != null) event.put(UtilsJS.cast(entityType), builder.getAttributeBuilder().build());
         }
         for (CustomEntityJSBuilder builder : CustomEntityJSBuilder.thisList) {
             if (builder instanceof CustomEntityBuilder customBuilder && !customBuilder.isLivingEntityClass()) {
                 continue;
             }
-            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "attribute");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder);
             if (entityType != null) event.put(UtilsJS.cast(entityType), builder.getAttributeBuilder().build());
         }
     }

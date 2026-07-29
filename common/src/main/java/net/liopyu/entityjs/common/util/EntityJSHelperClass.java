@@ -165,14 +165,11 @@ public class EntityJSHelperClass {
     }
 
     @HideFromJS
-    public static EntityType<?> getRegisteredEntityType(BuilderBase<?> builder, String registrationTarget) {
+    public static EntityType<?> getRegisteredEntityType(BuilderBase<?> builder) {
         Object value = builder.get();
         if (value instanceof EntityType<?> entityType) {
             return entityType;
         }
-        logWarningMessageOnce("[EntityJS]: Skipping " + registrationTarget
-                + " registration for unregistered entity builder " + builder.id
-                + ". Check startup script errors such as duplicate registry keys.");
         return null;
     }
 

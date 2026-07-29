@@ -67,7 +67,7 @@ public class EventHandlers {
                 editAttributes.post(new ModifyAttributeEventJS());
             }
             for (BaseLivingEntityBuilder<?> b : BaseLivingEntityBuilder.thisList) {
-                EntityType<? extends LivingEntity> type = UtilsJS.cast(EntityJSHelperClass.getRegisteredEntityType(b, "attribute"));
+                EntityType<? extends LivingEntity> type = UtilsJS.cast(EntityJSHelperClass.getRegisteredEntityType(b));
                 if (type == null) continue;
                 var id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
                 AttributeSupplier.Builder merged = b.getAttributeBuilder();
@@ -91,7 +91,7 @@ public class EventHandlers {
             for (CustomEntityJSBuilder candidate : CustomEntityBuilder.thisList) {
                 if (!(candidate instanceof CustomEntityBuilder builder)) continue;
                 if (!builder.isLivingEntityClass()) continue;
-                EntityType<? extends LivingEntity> type = UtilsJS.cast(EntityJSHelperClass.getRegisteredEntityType(builder, "attribute"));
+                EntityType<? extends LivingEntity> type = UtilsJS.cast(EntityJSHelperClass.getRegisteredEntityType(builder));
                 if (type == null) continue;
                 AttributeSupplier.Builder merged = builder.getAttributeBuilder();
                 Map<Attribute, Double> adds = ModifyAttributeEventJS.pendingAdds.get(type);

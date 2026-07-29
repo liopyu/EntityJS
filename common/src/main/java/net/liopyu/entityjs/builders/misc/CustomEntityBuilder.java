@@ -39,6 +39,7 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
     public transient String entityRendererClassName;
     public transient Function<Object, Object> entityRendererFactory;
     public transient EntityType<?> entityRendererType;
+    public transient Consumer<AttributeSupplier.Builder> attributes;
     private transient final Map<String, Function<ContextUtils.DynamicOverrideContext<Entity>, Object>> dynamicOverrides = new LinkedHashMap<>();
 
     public CustomEntityBuilder(ResourceLocation i, Class<? extends Entity> entityClass) {
@@ -62,6 +63,21 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
         this.eggItem = new SpawnEggItemBuilder(id, this);
         eggItem.accept(this.eggItem);
         this.noEggItem = false;
+        return this;
+    }
+
+    @Info(value = """
+            Adds or replaces attributes while the loader creates this custom living entity type's attribute supplier.
+
+            Example usage:
+            ```javascript
+            entityBuilder.attributes(attributes => {
+                attributes.add("minecraft:generic.attack_damage", 5)
+            })
+            ```
+            """)
+    public CustomEntityBuilder attributes(Consumer<AttributeSupplier.Builder> attributes) {
+        this.attributes = attributes;
         return this;
     }
 
@@ -312,7 +328,7 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return Mob.createMobAttributes()
+        AttributeSupplier.Builder attributeBuilder = Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH)
                 .add(Attributes.MOVEMENT_SPEED, 0.25D)
                 .add(Attributes.ATTACK_DAMAGE)
@@ -326,6 +342,10 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
                 .add(Attributes.ATTACK_SPEED)
                 .add(Attributes.KNOCKBACK_RESISTANCE)
                 .add(Attributes.ARMOR);
+        if (attributes != null) {
+            attributes.accept(attributeBuilder);
+        }
+        return attributeBuilder;
     }
 
 

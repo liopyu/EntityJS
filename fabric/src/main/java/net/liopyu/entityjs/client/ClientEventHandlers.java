@@ -42,31 +42,31 @@ public class ClientEventHandlers implements ClientModInitializer {
 
     public static void registerEntityRenderers() {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder);
             if (entityType != null) EntityRendererRegistry.register(UtilsJS.cast(entityType), (dispatcher) -> new KubeJSEntityRenderer<>(dispatcher, builder));
         }
         for (ArrowEntityBuilder<?> builder : ArrowEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder);
             if (entityType != null) EntityRendererRegistry.register(UtilsJS.cast(entityType), (dispatcher) -> new KubeJSArrowEntityRenderer<>(dispatcher, builder));
         }
         for (ProjectileEntityBuilder<?> builder : ProjectileEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder);
             if (entityType != null) EntityRendererRegistry.register(UtilsJS.cast(entityType), (dispatcher) -> new KubeJSProjectileEntityRenderer<>(dispatcher, builder));
         }
         for (EyeOfEnderEntityBuilder<?> builder : EyeOfEnderEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder);
             if (entityType != null) EntityRendererRegistry.register(UtilsJS.cast(entityType), (dispatcher) -> new KubeJSEnderEyeRenderer<>(dispatcher, builder));
         }
         for (BaseEntityBuilder<?> builder : BaseEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder);
             if (entityType != null) EntityRendererRegistry.register(UtilsJS.cast(entityType), (dispatcher) -> new KubeJSNLEntityRenderer<>(dispatcher, builder));
         }
         for (BoatEntityBuilder<?> builder : BoatEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder);
             if (entityType != null) EntityRendererRegistry.register(UtilsJS.cast(entityType), (dispatcher) -> new KubeJSBoatRenderer<>(dispatcher, builder));
         }
         for (CustomEntityJSBuilder builder : CustomEntityBuilder.thisList) {
-            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder, "renderer");
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder);
             if (entityType == null) continue;
             EntityRendererRegistry.register(UtilsJS.cast(entityType), dispatcher -> UtilsJS.cast(
                     entityjs$createCustomRenderer(dispatcher, builder)));
