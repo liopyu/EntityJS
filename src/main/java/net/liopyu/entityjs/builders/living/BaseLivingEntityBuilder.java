@@ -238,8 +238,22 @@ public abstract class BaseLivingEntityBuilder<T extends LivingEntity & IAnimatab
         scaleWidth = 1F;
     }
 
-    public BaseLivingEntityBuilder<T> addArmorItemLayer(Consumer<ItemArmorJSBuilder<T>> itemArmorJSBuilder) {
+    @Info(value = """
+            Adds or replaces attributes while the loader creates this entity type's attribute supplier.
 
+            Example usage:
+            ```javascript
+            entityBuilder.attributes(attributes => {
+                attributes.add("minecraft:generic.attack_damage", 5)
+            })
+            ```
+            """)
+    public BaseLivingEntityBuilder<T> attributes(Consumer<AttributeSupplier.Builder> attributes) {
+        this.attributes = attributes;
+        return this;
+    }
+
+    public BaseLivingEntityBuilder<T> addArmorItemLayer(Consumer<ItemArmorJSBuilder<T>> itemArmorJSBuilder) {
         this.itemArmorJSBuilder = itemArmorJSBuilder;
         return this;
     }

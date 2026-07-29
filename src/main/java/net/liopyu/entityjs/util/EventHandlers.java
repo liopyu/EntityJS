@@ -95,13 +95,20 @@ public class EventHandlers {
 
     private static void attributeCreation(EntityAttributeCreationEvent event) {
         for (BaseLivingEntityBuilder<?> builder : BaseLivingEntityBuilder.thisList) {
-            event.put(builder.get(), builder.getAttributeBuilder().build());
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder);
+            if (entityType == null) continue;
+            var attributes = builder.getAttributeBuilder();
+            if (builder.attributes != null) {
+                builder.attributes.accept(attributes);
+            }
+            event.put(Cast.to(entityType), attributes.build());
         }
         for (CustomEntityJSBuilder builder : CustomEntityJSBuilder.thisList) {
             if (builder instanceof CustomEntityBuilder customBuilder && !customBuilder.isLivingEntityClass()) {
                 continue;
             }
-            event.put((EntityType<? extends LivingEntity>) builder.get(), builder.getAttributeBuilder().build());
+            EntityType<?> entityType = EntityJSHelperClass.getRegisteredEntityType(builder);
+            if (entityType != null) event.put(Cast.to(entityType), builder.getAttributeBuilder().build());
         }
     }
 

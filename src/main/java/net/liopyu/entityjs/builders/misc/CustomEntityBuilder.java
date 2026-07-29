@@ -5,6 +5,7 @@ import dev.latvian.mods.kubejs.script.ConsoleJS;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.typings.Param;
 import dev.latvian.mods.rhino.util.HideFromJS;
+import dev.latvian.mods.rhino.Wrapper;
 import net.liopyu.entityjs.item.SpawnEggItemBuilder;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.overrides.CallbackInvoker;
@@ -40,6 +41,7 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
     public transient String entityRendererClassName;
     public transient Function<Object, Object> entityRendererFactory;
     public transient EntityType<?> entityRendererType;
+    public transient Consumer<AttributeSupplier.Builder> attributes;
     private transient final Map<String, Function<ContextUtils.DynamicOverrideContext<Entity>, Object>> dynamicOverrides = new LinkedHashMap<>();
 
     public CustomEntityBuilder(ResourceLocation i, Class<? extends Entity> entityClass) {
@@ -66,6 +68,21 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
     }
 
     @Info(value = """
+            Adds or replaces attributes while the loader creates this custom living entity type's attribute supplier.
+
+            Example usage:
+            ```javascript
+            entityBuilder.attributes(attributes => {
+                attributes.add("minecraft:generic.attack_damage", 5)
+            })
+            ```
+            """)
+    public CustomEntityBuilder attributes(Consumer<AttributeSupplier.Builder> attributes) {
+        this.attributes = attributes;
+        return this;
+    }
+
+    @Info(value = """
             Uses a factory to create this entity's EntityModel.
 
             Example:
@@ -87,16 +104,32 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
     }
 
     @Info(value = """
-            Uses an EntityRenderer class for this entity.
+            Uses an EntityRenderer class or fully qualified class name for this entity.
 
             Example:
             ```javascript
             let EvokerFangsRenderer = Java.loadClass("net.minecraft.client.renderer.entity.EvokerFangsRenderer")
             entityBuilder.setRendererClass(EvokerFangsRenderer)
+            entityBuilder.setRendererClass("net.minecraft.client.renderer.entity.CreeperRenderer")
             ```
             """, params = {
-            @Param(name = "entityRendererClass", value = "The EntityRenderer class to instantiate for rendering.")
+            @Param(name = "entityRendererClass", value = "The EntityRenderer class or fully qualified class name to instantiate for rendering.")
     })
+    public CustomEntityBuilder setRendererClass(Object entityRendererClass) {
+        Object unwrapped = Wrapper.unwrapped(entityRendererClass);
+        if (unwrapped instanceof Class<?> rendererClass) {
+            return setRendererClass(rendererClass);
+        }
+        if (unwrapped instanceof String rendererClassName) {
+            return setRendererClass(rendererClassName);
+        }
+        ConsoleJS.STARTUP.error("[EntityJS]: Custom entity " + id
+                + " tried to use an invalid renderer class value: " + entityRendererClass
+                + ". Expected a Java class or fully qualified class name.");
+        return this;
+    }
+
+    @HideFromJS
     public CustomEntityBuilder setRendererClass(Class<?> entityRendererClass) {
         if (!EntityReflection.validateRendererClassCompatibility(id, entityClass, entityRendererClass)) {
             return this;
@@ -119,18 +152,20 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
             """, params = {
             @Param(name = "entityRendererClassName", value = "The fully qualified EntityRenderer class name to instantiate for rendering.")
     })
+    @HideFromJS
     public CustomEntityBuilder setRendererClass(String entityRendererClassName) {
         String resolvedClassName = EntityReflection.normalizeClassName(entityRendererClassName);
         if (resolvedClassName == null || resolvedClassName.isBlank()) {
             EntityReflection.resolveClassName(id, "renderer", resolvedClassName);
             return this;
         }
-        Class<?> entityRendererClass = EntityReflection.resolveClassName(id, "renderer", resolvedClassName);
-        if (entityRendererClass == null && EntityReflection.isClientEnvironment()) {
-            return this;
-        }
-        if (entityRendererClass != null && !EntityReflection.validateRendererClassCompatibility(id, entityClass, entityRendererClass)) {
-            return this;
+        Class<?> entityRendererClass = null;
+        if (EntityReflection.isClientEnvironment()) {
+            entityRendererClass = EntityReflection.resolveClassName(id, "renderer", resolvedClassName);
+            if (entityRendererClass == null
+                    || !EntityReflection.validateRendererClassCompatibility(id, entityClass, entityRendererClass)) {
+                return this;
+            }
         }
         this.entityRendererClass = entityRendererClass;
         this.entityRendererClassName = resolvedClassName;
@@ -311,7 +346,7 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
 
     @Override
     public AttributeSupplier.Builder getAttributeBuilder() {
-        return Mob.createMobAttributes()
+        AttributeSupplier.Builder attributeBuilder = Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH)
                 .add(Attributes.MOVEMENT_SPEED, 0.25D)
                 .add(Attributes.ATTACK_DAMAGE)
@@ -325,6 +360,10 @@ public class CustomEntityBuilder extends CustomEntityJSBuilder {
                 .add(Attributes.ATTACK_SPEED)
                 .add(Attributes.KNOCKBACK_RESISTANCE)
                 .add(Attributes.ARMOR);
+        if (attributes != null) {
+            attributes.accept(attributeBuilder);
+        }
+        return attributeBuilder;
     }
 
 

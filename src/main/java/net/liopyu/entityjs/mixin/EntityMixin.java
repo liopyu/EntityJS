@@ -334,7 +334,7 @@ public abstract class EntityMixin implements IEntityJS {
 
 
     @Unique
-    public ResourceKey<EntityType<?>> entityJs$getTypeId() {
+    private ResourceKey<EntityType<?>> entityJs$getTypeId() {
         return Objects.requireNonNull(BuiltInRegistries.ENTITY_TYPE.getResourceKey(entityJs$getLivingEntity().getType())).get();
     }
 

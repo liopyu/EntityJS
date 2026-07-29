@@ -1,10 +1,13 @@
 package net.liopyu.entityjs.util;
 
 import dev.latvian.mods.kubejs.script.ConsoleJS;
+import dev.latvian.mods.kubejs.registry.BuilderBase;
+import dev.latvian.mods.rhino.util.HideFromJS;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SpawnPlacementType;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.phys.AABB;
@@ -169,6 +172,15 @@ public class EntityJSHelperClass {
         } else {
             return null;
         }
+    }
+
+    @HideFromJS
+    public static EntityType<?> getRegisteredEntityType(BuilderBase<?> builder) {
+        Object value = builder.get();
+        if (value instanceof EntityType<?> entityType) {
+            return entityType;
+        }
+        return null;
     }
 
     public static class EntityMovementTracker {
