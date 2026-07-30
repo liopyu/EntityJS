@@ -418,6 +418,23 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
     }
 
+    @Inject(method = "isAlliedTo(Lnet/minecraft/world/entity/Entity;)Z", at = @At("RETURN"), remap = true, cancellable = true)
+    private void entityjs$isAlliedTo(Entity pEntity, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder instanceof ModifyLivingEntityBuilder builder
+                && builder.isAlliedTo != null) {
+            final ContextUtils.LineOfSightContext context =
+                    new ContextUtils.LineOfSightContext(pEntity, entityJs$getLivingEntity());
+
+            Object result = entityJs$withReturnFallback("isAlliedTo", cir, () -> builder.isAlliedTo.test(context));
+
+            if (result instanceof Boolean value) {
+                cir.setReturnValue(value);
+            } else {
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityJs$entityName() + ". Value: " + result + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+            }
+        }
+    }
+
     @Inject(method = "isAlwaysExperienceDropper", at = @At("RETURN"), remap = true, cancellable = true)
     private void entityjs$isAlwaysExperienceDropper(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {

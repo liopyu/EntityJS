@@ -113,6 +113,7 @@ dependencies {
     api("dev.latvian.mods:kubejs-neoforge:$kubejs_version")
     api("software.bernie.geckolib:geckolib-neoforge-1.21.1:${geckolib_version}")
     parchmentData("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+    annotationProcessor("org.spongepowered:mixin:${mixin_version}:processor")
 }
 
 tasks.withType(ProcessResources).configureEach {
