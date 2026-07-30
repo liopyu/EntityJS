@@ -275,7 +275,7 @@ public class MobMixin implements MobAccessor /*implements IModifyEntityJS*/ {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.canBeLeashed != null) {
                 final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, entityJs$getLivingEntity());
-            Object obj = entityJs$withReturnFallback("canBeLeashed", cir, () -> builder.canBeLeashed.apply(context));
+            Object obj = entityJs$withReturnFallback("canBeLeashed", cir, () -> builder.canBeLeashed.test(context));
                 if (obj instanceof Boolean b) {
                     cir.setReturnValue(b);
                 } else
@@ -307,7 +307,7 @@ public class MobMixin implements MobAccessor /*implements IModifyEntityJS*/ {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyMobBuilder builder) {
             if (builder.canHoldItem != null) {
                 final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, entityJs$getLivingEntity());
-            Object obj = entityJs$withReturnFallback("canHoldItem", cir, () -> builder.canHoldItem.apply(context));
+            Object obj = entityJs$withReturnFallback("canHoldItem", cir, () -> builder.canHoldItem.test(context));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else

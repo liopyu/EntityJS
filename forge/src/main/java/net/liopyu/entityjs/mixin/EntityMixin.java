@@ -1,6 +1,7 @@
 package net.liopyu.entityjs.mixin;
 
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
+import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.events.AddGoalSelectorsEventJS;
@@ -209,20 +210,24 @@ public abstract class EntityMixin implements IEntityJS {
         }
     }
 
-    /* @Inject(method = "isAlliedTo(Lnet/minecraft/world/entity/Entity;)Z", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
-     private void entityjs$isAlliedTo(Entity pTarget, CallbackInfoReturnable<Boolean> cir) {
-         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
-             if (entityJs$builder != null && builder.isAlliedTo != null) {
-                 final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entityJs$getLivingEntity(), entityJs$getLivingEntity());
-                 var b = builder.isAlliedTo.apply(context);
-                 if (b instanceof Boolean bool) {
-                     cir.setReturnValue(bool);
-                 } else
-                     EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityJs$entityName() + ". Value: " + b + ". Must be a boolean. Defaulting to super.");
-             }
-         }
-     }
- */
+    @Inject(method = "isAlliedTo(Lnet/minecraft/world/entity/Entity;)Z", at = @At("RETURN"), remap = true, cancellable = true)
+    private void entityJs$isAlliedTo(Entity target, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder instanceof ModifyLivingEntityBuilder builder
+                && entityJs$getLivingEntity() instanceof LivingEntity livingEntity
+                && builder.isAlliedTo != null) {
+            ContextUtils.LineOfSightContext context =
+                    new ContextUtils.LineOfSightContext(target, livingEntity);
+            Object result = entityJs$withReturnFallback("isAlliedTo", cir,
+                    () -> builder.isAlliedTo.test(context));
+            if (result instanceof Boolean value) {
+                cir.setReturnValue(value);
+            } else {
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: "
+                        + entityJs$entityName() + ". Value: " + result
+                        + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
+            }
+        }
+    }
     @Inject(method = "interact", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     public void onInteract(Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {

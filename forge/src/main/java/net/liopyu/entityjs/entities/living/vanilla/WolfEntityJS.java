@@ -247,7 +247,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean tamableFoodPredicate(ItemStack pStack) {
         if (builder.tamableFoodPredicate == null) return false;
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = OverrideUtils.with(() -> false, () -> builder.tamableFoodPredicate.apply(context));
+        Object obj = OverrideUtils.with(() -> false, () -> builder.tamableFoodPredicate.test(context));
         if (obj instanceof Boolean b) {
             return b;
         }
@@ -369,7 +369,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
             return super.isFood(pStack);
         }
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = OverrideUtils.with(() -> super.isFood(pStack), () -> builder.isFoodPredicate.apply(context));
+        Object obj = OverrideUtils.with(() -> super.isFood(pStack), () -> builder.isFoodPredicate.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -383,7 +383,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
         if (builder.canBreed == null) {
             return super.canBreed();
         }
-        Object obj = OverrideUtils.with(super::canBreed, () -> builder.canBreed.apply(this));
+        Object obj = OverrideUtils.with(super::canBreed, () -> builder.canBreed.test(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -397,7 +397,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
             return super.canMate(pOtherAnimal);
         }
         final ContextUtils.EntityAnimalContext context = new ContextUtils.EntityAnimalContext(this, pOtherAnimal);
-        Object obj = OverrideUtils.with(() -> super.canMate(pOtherAnimal), () -> builder.canMate.apply(context));
+        Object obj = OverrideUtils.with(() -> super.canMate(pOtherAnimal), () -> builder.canMate.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -597,7 +597,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean canBeLeashed(Player pPlayer) {
         if (builder.canBeLeashed != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(pPlayer, this);
-            Object obj = OverrideUtils.with(() -> super.canBeLeashed(pPlayer), () -> builder.canBeLeashed.apply(context));
+            Object obj = OverrideUtils.with(() -> super.canBeLeashed(pPlayer), () -> builder.canBeLeashed.test(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for canBeLeashed from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.canBeLeashed(pPlayer));
         }
@@ -610,7 +610,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
             return super.removeWhenFarAway(pDistanceToClosestPlayer);
         }
         final ContextUtils.EntityDistanceToPlayerContext context = new ContextUtils.EntityDistanceToPlayerContext(pDistanceToClosestPlayer, this);
-        Object obj = OverrideUtils.with(() -> super.removeWhenFarAway(pDistanceToClosestPlayer), () -> builder.removeWhenFarAway.apply(context));
+        Object obj = OverrideUtils.with(() -> super.removeWhenFarAway(pDistanceToClosestPlayer), () -> builder.removeWhenFarAway.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -723,7 +723,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     @Override
     protected boolean shouldStayCloseToLeashHolder() {
         if (builder.shouldStayCloseToLeashHolder == null) return super.shouldStayCloseToLeashHolder();
-        Object value = builder.shouldStayCloseToLeashHolder.apply(this);
+        Object value = builder.shouldStayCloseToLeashHolder.test(this);
         if (value instanceof Boolean b)
             return b;
         EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for shouldStayCloseToLeashHolder from entity: " + entityName() + ". Value: " + value + ". Must be a boolean. Defaulting to " + super.shouldStayCloseToLeashHolder());
@@ -734,7 +734,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean canFireProjectileWeaponPredicate(ProjectileWeaponItem projectileWeapon) {
         if (builder.canFireProjectileWeaponPredicate != null) {
             final ContextUtils.EntityProjectileWeaponContext context = new ContextUtils.EntityProjectileWeaponContext(projectileWeapon, this);
-            Object obj = OverrideUtils.with(() -> false, () -> builder.canFireProjectileWeaponPredicate.apply(context));
+            Object obj = OverrideUtils.with(() -> false, () -> builder.canFireProjectileWeaponPredicate.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -774,7 +774,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean canHoldItem(ItemStack stack) {
         if (builder.canHoldItem != null) {
             final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(stack, this);
-            Object obj = OverrideUtils.with(() -> super.canHoldItem(stack), () -> builder.canHoldItem.apply(context));
+            Object obj = OverrideUtils.with(() -> super.canHoldItem(stack), () -> builder.canHoldItem.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -813,7 +813,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean isAlliedTo(Entity pEntity) {
         if (builder.isAlliedTo != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, this);
-            Object obj = OverrideUtils.with(() -> super.isAlliedTo(pEntity), () -> builder.isAlliedTo.apply(context));
+            Object obj = OverrideUtils.with(() -> super.isAlliedTo(pEntity), () -> builder.isAlliedTo.test(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isAlliedTo(pEntity));
         }
@@ -1133,7 +1133,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
             return super.canAddPassenger(entity);
         }
         final ContextUtils.PassengerEntityContext context = new ContextUtils.PassengerEntityContext(entity, this);
-        Object obj = OverrideUtils.with(() -> super.canAddPassenger(entity), () -> builder.canAddPassenger.apply(context));
+        Object obj = OverrideUtils.with(() -> super.canAddPassenger(entity), () -> builder.canAddPassenger.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -1145,7 +1145,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     @Override
     protected boolean shouldDropLoot() {
         if (builder.shouldDropLoot != null) {
-            Object obj = OverrideUtils.with(super::shouldDropLoot, () -> builder.shouldDropLoot.apply(this));
+            Object obj = OverrideUtils.with(super::shouldDropLoot, () -> builder.shouldDropLoot.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1158,7 +1158,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     @Override
     protected boolean isAffectedByFluids() {
         if (builder.isAffectedByFluids != null) {
-            Object obj = OverrideUtils.with(super::isAffectedByFluids, () -> builder.isAffectedByFluids.apply(this));
+            Object obj = OverrideUtils.with(super::isAffectedByFluids, () -> builder.isAffectedByFluids.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1177,7 +1177,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     @Override
     protected boolean isImmobile() {
         if (builder.isImmobile != null) {
-            Object obj = OverrideUtils.with(super::isImmobile, () -> builder.isImmobile.apply(this));
+            Object obj = OverrideUtils.with(super::isImmobile, () -> builder.isImmobile.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1190,7 +1190,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     @Override
     protected boolean isFlapping() {
         if (builder.isFlapping != null) {
-            Object obj = OverrideUtils.with(super::isFlapping, () -> builder.isFlapping.apply(this));
+            Object obj = OverrideUtils.with(super::isFlapping, () -> builder.isFlapping.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1263,7 +1263,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean canAttackType(@NotNull EntityType<?> entityType) {
         if (builder.canAttackType != null) {
             final ContextUtils.EntityTypeEntityContext context = new ContextUtils.EntityTypeEntityContext(this, entityType);
-            Object obj = OverrideUtils.with(() -> super.canAttackType(entityType), () -> builder.canAttackType.apply(context));
+            Object obj = OverrideUtils.with(() -> super.canAttackType(entityType), () -> builder.canAttackType.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1295,7 +1295,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     @Override
     public boolean shouldDropExperience() {
         if (builder.shouldDropExperience != null) {
-            Object obj = OverrideUtils.with(super::shouldDropExperience, () -> builder.shouldDropExperience.apply(this));
+            Object obj = OverrideUtils.with(super::shouldDropExperience, () -> builder.shouldDropExperience.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1326,7 +1326,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean canAttack(@NotNull LivingEntity entity) {
         if (builder.canAttack != null) {
             final ContextUtils.LivingEntityContext context = new ContextUtils.LivingEntityContext(this, entity);
-            Object obj = OverrideUtils.with(() -> super.canAttack(entity), () -> builder.canAttack.apply(context));
+            Object obj = OverrideUtils.with(() -> super.canAttack(entity), () -> builder.canAttack.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj && super.canAttack(entity);
             }
@@ -1342,7 +1342,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
             return super.canBeAffected(effectInstance);
         }
         final ContextUtils.OnEffectContext context = new ContextUtils.OnEffectContext(effectInstance, this);
-        Object result = OverrideUtils.with(() -> super.canBeAffected(effectInstance), () -> builder.canBeAffected.apply(context));
+        Object result = OverrideUtils.with(() -> super.canBeAffected(effectInstance), () -> builder.canBeAffected.test(context));
         if (result instanceof Boolean) {
             return (boolean) result;
         }
@@ -1356,7 +1356,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
         if (builder.invertedHealAndHarm == null) {
             return super.isInvertedHealAndHarm();
         }
-        Object obj = OverrideUtils.with(super::isInvertedHealAndHarm, () -> builder.invertedHealAndHarm.apply(this));
+        Object obj = OverrideUtils.with(super::isInvertedHealAndHarm, () -> builder.invertedHealAndHarm.test(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -1394,7 +1394,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
         if (builder.onClimbable == null) {
             return super.onClimbable();
         }
-        Object obj = OverrideUtils.with(super::onClimbable, () -> builder.onClimbable.apply(this));
+        Object obj = OverrideUtils.with(super::onClimbable, () -> builder.onClimbable.test(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -1441,7 +1441,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean canStandOnFluid(@NotNull FluidState fluidState) {
         if (builder.canStandOnFluid != null) {
             final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(this, fluidState);
-            Object obj = OverrideUtils.with(() -> super.canStandOnFluid(fluidState), () -> builder.canStandOnFluid.apply(context));
+            Object obj = OverrideUtils.with(() -> super.canStandOnFluid(fluidState), () -> builder.canStandOnFluid.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1454,7 +1454,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     @Override
     public boolean isSensitiveToWater() {
         if (builder.isSensitiveToWater != null) {
-            Object obj = OverrideUtils.with(super::isSensitiveToWater, () -> builder.isSensitiveToWater.apply(this));
+            Object obj = OverrideUtils.with(super::isSensitiveToWater, () -> builder.isSensitiveToWater.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1495,7 +1495,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean hasLineOfSight(@NotNull Entity entity) {
         if (builder.hasLineOfSight != null) {
             final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(entity, this);
-            Object obj = OverrideUtils.with(() -> super.hasLineOfSight(entity), () -> builder.hasLineOfSight.apply(context));
+            Object obj = OverrideUtils.with(() -> super.hasLineOfSight(entity), () -> builder.hasLineOfSight.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1528,7 +1528,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     @Override
     public boolean isAffectedByPotions() {
         if (builder.isAffectedByPotions != null) {
-            Object obj = OverrideUtils.with(super::isAffectedByPotions, () -> builder.isAffectedByPotions.apply(this));
+            Object obj = OverrideUtils.with(super::isAffectedByPotions, () -> builder.isAffectedByPotions.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1555,7 +1555,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean canTakeItem(@NotNull ItemStack itemStack) {
         if (builder.canTakeItem != null) {
             final ContextUtils.EntityItemLevelContext context = new ContextUtils.EntityItemLevelContext(this, itemStack, this.level());
-            Object obj = OverrideUtils.with(() -> super.canTakeItem(itemStack), () -> builder.canTakeItem.apply(context));
+            Object obj = OverrideUtils.with(() -> super.canTakeItem(itemStack), () -> builder.canTakeItem.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1568,7 +1568,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     @Override
     public boolean isSleeping() {
         if (builder.isSleeping != null) {
-            Object obj = OverrideUtils.with(super::isSleeping, () -> builder.isSleeping.apply(this));
+            Object obj = OverrideUtils.with(super::isSleeping, () -> builder.isSleeping.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1614,7 +1614,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean shouldRiderFaceForward(@NotNull Player player) {
         if (builder.shouldRiderFaceForward != null) {
             final ContextUtils.PlayerEntityContext context = new ContextUtils.PlayerEntityContext(player, this);
-            Object obj = OverrideUtils.with(() -> super.shouldRiderFaceForward(player), () -> builder.shouldRiderFaceForward.apply(context));
+            Object obj = OverrideUtils.with(() -> super.shouldRiderFaceForward(player), () -> builder.shouldRiderFaceForward.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1645,7 +1645,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     @Override
     public boolean canDisableShield() {
         if (builder.canDisableShield != null) {
-            Object obj = OverrideUtils.with(super::canDisableShield, () -> builder.canDisableShield.apply(this));
+            Object obj = OverrideUtils.with(super::canDisableShield, () -> builder.canDisableShield.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1722,7 +1722,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
             final ContextUtils.DamageContext context = new ContextUtils.DamageContext(this, p_20122_);
-            Object obj = OverrideUtils.with(() -> super.isInvulnerableTo(p_20122_), () -> builder.isInvulnerableTo.apply(context));
+            Object obj = OverrideUtils.with(() -> super.isInvulnerableTo(p_20122_), () -> builder.isInvulnerableTo.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1735,7 +1735,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     @Override
     public boolean canChangeDimensions() {
         if (builder.canChangeDimensions != null) {
-            Object obj = OverrideUtils.with(super::canChangeDimensions, () -> builder.canChangeDimensions.apply(this));
+            Object obj = OverrideUtils.with(super::canChangeDimensions, () -> builder.canChangeDimensions.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1749,7 +1749,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
         if (builder.mayInteract != null) {
             final ContextUtils.MayInteractContext context = new ContextUtils.MayInteractContext(p_146843_, p_146844_, this);
-            Object obj = OverrideUtils.with(() -> super.mayInteract(p_146843_, p_146844_), () -> builder.mayInteract.apply(context));
+            Object obj = OverrideUtils.with(() -> super.mayInteract(p_146843_, p_146844_), () -> builder.mayInteract.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1764,7 +1764,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
             final ContextUtils.CanTrampleContext context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
-            Object obj = OverrideUtils.with(() -> super.canTrample(state, pos, fallDistance), () -> builder.canTrample.apply(context));
+            Object obj = OverrideUtils.with(() -> super.canTrample(state, pos, fallDistance), () -> builder.canTrample.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -1805,7 +1805,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-            Object obj = OverrideUtils.with(() -> super.shouldRenderAtSqrDistance(distance), () -> builder.shouldRenderAtSqrDistance.apply(context));
+            Object obj = OverrideUtils.with(() -> super.shouldRenderAtSqrDistance(distance), () -> builder.shouldRenderAtSqrDistance.test(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
         }
@@ -1817,7 +1817,7 @@ public class WolfEntityJS extends Wolf implements IAnimatableJS, RangedAttackMob
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object obj = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.apply(this));
+        Object obj = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.test(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }

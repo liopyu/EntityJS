@@ -2,6 +2,7 @@ package net.liopyu.entityjs.mixin;
 
 import dev.latvian.mods.kubejs.util.ConsoleJS;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
+import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntity;
 import net.liopyu.entityjs.entities.nonliving.entityjs.PartEntityJS;
@@ -99,6 +100,25 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
             } else {
                 EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid ignoreExplosion return value: "
                         + result + ". Must be a boolean. Defaulting to " + cir.getReturnValue() + ".");
+            }
+        }
+    }
+
+    @Inject(method = "isAlliedTo(Lnet/minecraft/world/entity/Entity;)Z", at = @At("RETURN"), cancellable = true)
+    private void entityJs$isAlliedTo(Entity target, CallbackInfoReturnable<Boolean> cir) {
+        if (entityJs$builder instanceof ModifyLivingEntityBuilder builder
+                && entityJs$getLivingEntity() instanceof LivingEntity livingEntity
+                && builder.isAlliedTo != null) {
+            ContextUtils.LineOfSightContext context =
+                    new ContextUtils.LineOfSightContext(target, livingEntity);
+            Object result = entityJs$withReturnFallback("isAlliedTo", cir,
+                    () -> builder.isAlliedTo.test(context));
+            if (result instanceof Boolean value) {
+                cir.setReturnValue(value);
+            } else {
+                EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isAlliedTo from entity: "
+                        + entityJs$entityName() + ". Value: " + result
+                        + ". Must be a boolean. Defaulting to " + cir.getReturnValue());
             }
         }
     }
@@ -531,7 +551,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.shouldRenderAtSqrDistance != null) {
                 final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(pDistance, entityJs$getLivingEntity());
-                Object obj = entityJs$withReturnFallback("shouldRenderAtSqrDistance", cir, () -> builder.shouldRenderAtSqrDistance.apply(context));
+                Object obj = entityJs$withReturnFallback("shouldRenderAtSqrDistance", cir, () -> builder.shouldRenderAtSqrDistance.test(context));
                 if (obj instanceof Boolean b) {
                     cir.setReturnValue(b);
                 } else
@@ -572,7 +592,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canCollideWith != null) {
                 final ContextUtils.ECollidingEntityContext context = new ContextUtils.ECollidingEntityContext(entityJs$getLivingEntity(), pEntity);
-                Object obj = entityJs$withReturnFallback("canCollideWith", cir, () -> builder.canCollideWith.apply(context));
+                Object obj = entityJs$withReturnFallback("canCollideWith", cir, () -> builder.canCollideWith.test(context));
                 if (obj instanceof Boolean b) {
                     cir.setReturnValue(b);
                 } else
@@ -636,7 +656,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
                 return;
             }
             final ContextUtils.EPassengerEntityContext context = new ContextUtils.EPassengerEntityContext(pPassenger, entityJs$getLivingEntity());
-            Object obj = entityJs$withReturnFallback("canAddPassenger", cir, () -> builder.canAddPassenger.apply(context));
+            Object obj = entityJs$withReturnFallback("canAddPassenger", cir, () -> builder.canAddPassenger.test(context));
             if (obj instanceof Boolean) {
                 cir.setReturnValue((boolean) obj);
             } else
@@ -650,7 +670,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
     protected void isFlapping(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isFlapping != null) {
-                Object obj = entityJs$withReturnFallback("isFlapping", cir, () -> builder.isFlapping.apply(entityJs$getLivingEntity()));
+                Object obj = entityJs$withReturnFallback("isFlapping", cir, () -> builder.isFlapping.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -693,7 +713,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
     public void canFreeze(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canFreeze != null) {
-                Object obj = entityJs$withReturnFallback("canFreeze", cir, () -> builder.canFreeze.apply(entityJs$getLivingEntity()));
+                Object obj = entityJs$withReturnFallback("canFreeze", cir, () -> builder.canFreeze.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -707,7 +727,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
     public void isFreezing(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isFreezing != null) {
-                Object obj = entityJs$withReturnFallback("isFreezing", cir, () -> builder.isFreezing.apply(entityJs$getLivingEntity()));
+                Object obj = entityJs$withReturnFallback("isFreezing", cir, () -> builder.isFreezing.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -721,7 +741,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
     public void isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (entityJs$builder != null && builder.isCurrentlyGlowing != null && !entityJs$getLivingEntity().level().isClientSide()) {
-                Object obj = entityJs$withReturnFallback("isCurrentlyGlowing", cir, () -> builder.isCurrentlyGlowing.apply(entityJs$getLivingEntity()));
+                Object obj = entityJs$withReturnFallback("isCurrentlyGlowing", cir, () -> builder.isCurrentlyGlowing.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -735,7 +755,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
     public void dampensVibrations(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.dampensVibrations != null) {
-                Object obj = entityJs$withReturnFallback("dampensVibrations", cir, () -> builder.dampensVibrations.apply(entityJs$getLivingEntity()));
+                Object obj = entityJs$withReturnFallback("dampensVibrations", cir, () -> builder.dampensVibrations.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -748,7 +768,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
     public void showVehicleHealth(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.showVehicleHealth != null) {
-                Object obj = entityJs$withReturnFallback("showVehicleHealth", cir, () -> builder.showVehicleHealth.apply(entityJs$getLivingEntity()));
+                Object obj = entityJs$withReturnFallback("showVehicleHealth", cir, () -> builder.showVehicleHealth.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -763,7 +783,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.isInvulnerableTo != null) {
                 final ContextUtils.EDamageContext context = new ContextUtils.EDamageContext(entityJs$getLivingEntity(), pSource);
-                Object obj = entityJs$withReturnFallback("isInvulnerableTo", cir, () -> builder.isInvulnerableTo.apply(context));
+                Object obj = entityJs$withReturnFallback("isInvulnerableTo", cir, () -> builder.isInvulnerableTo.test(context));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -777,7 +797,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
     public void canChangeDimensions(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.canChangeDimensions != null) {
-                Object obj = entityJs$withReturnFallback("canChangeDimensions", cir, () -> builder.canChangeDimensions.apply(entityJs$getLivingEntity()));
+                Object obj = entityJs$withReturnFallback("canChangeDimensions", cir, () -> builder.canChangeDimensions.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -792,7 +812,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyEntityBuilder builder) {
             if (builder.mayInteract != null) {
                 final ContextUtils.EMayInteractContext context = new ContextUtils.EMayInteractContext(pLevel, pPos, entityJs$getLivingEntity());
-                Object obj = entityJs$withReturnFallback("mayInteract", cir, () -> builder.mayInteract.apply(context));
+                Object obj = entityJs$withReturnFallback("mayInteract", cir, () -> builder.mayInteract.test(context));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else

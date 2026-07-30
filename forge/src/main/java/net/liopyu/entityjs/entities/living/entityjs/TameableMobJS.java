@@ -55,7 +55,7 @@ public final class TameableMobJS extends TameableMobJSBase {
     public boolean shouldRiderFaceForward(@NotNull Player player) {
         if (builder.shouldRiderFaceForward != null) {
             var context = new ContextUtils.PlayerEntityContext(player, this);
-            Object result = OverrideUtils.with(() -> super.shouldRiderFaceForward(player), () -> builder.shouldRiderFaceForward.apply(context));
+            Object result = OverrideUtils.with(() -> super.shouldRiderFaceForward(player), () -> builder.shouldRiderFaceForward.test(context));
             if (result instanceof Boolean value) {
                 return value;
             }
@@ -68,7 +68,7 @@ public final class TameableMobJS extends TameableMobJSBase {
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
             var context = new ContextUtils.CanTrampleContext(state, pos, fallDistance, this);
-            Object result = OverrideUtils.with(() -> super.canTrample(state, pos, fallDistance), () -> builder.canTrample.apply(context));
+            Object result = OverrideUtils.with(() -> super.canTrample(state, pos, fallDistance), () -> builder.canTrample.test(context));
             if (result instanceof Boolean value) {
                 return value;
             }
@@ -82,7 +82,7 @@ public final class TameableMobJS extends TameableMobJSBase {
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object result = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.apply(this));
+        Object result = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.test(this));
         if (result instanceof Boolean value) {
             return value;
         }

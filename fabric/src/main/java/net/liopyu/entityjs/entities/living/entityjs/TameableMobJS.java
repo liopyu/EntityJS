@@ -47,7 +47,7 @@ public final class TameableMobJS extends TameableMobJSBase {
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object result = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.apply(this));
+        Object result = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.test(this));
         if (result instanceof Boolean value) {
             return value;
         }

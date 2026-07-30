@@ -4,9 +4,7 @@ import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.util.UtilsJS;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
-import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.liopyu.entityjs.entities.living.entityjs.WrappedAnimatableEntity;
-import net.liopyu.entityjs.entities.living.vanilla.AllayEntityJS;
 import net.liopyu.entityjs.common.events.BuildBrainEventJS;
 import net.liopyu.entityjs.common.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
@@ -21,9 +19,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FluidState;
@@ -156,7 +152,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
 
     //(Base LivingEntity/Entity Overrides)
     @Inject(method = "doHurtTarget", at = @At(value = "HEAD", ordinal = 0), remap = true)
-    private void entityjs$isAlliedTo(Entity pTarget, CallbackInfoReturnable<Boolean> cir) {
+    private void entityjs$doHurtTarget(Entity pTarget, CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.onHurtTarget != null) {
                 final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pTarget, entityJs$getLivingEntity());
@@ -307,7 +303,6 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
             }
         }
     }
-
 
     @Inject(method = "getSoundVolume", at = @At(value = "HEAD", ordinal = 0), remap = true, cancellable = true)
     private void entityjs$getSoundVolume(CallbackInfoReturnable<Float> cir) {
@@ -585,7 +580,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
             if (builder.onClimbable == null) {
                 return;
             }
-            Object obj = entityJs$withReturnFallback("onClimbable", cir, () -> builder.onClimbable.apply(entityJs$getLivingEntity()));
+            Object obj = entityJs$withReturnFallback("onClimbable", cir, () -> builder.onClimbable.test(entityJs$getLivingEntity()));
             if (obj instanceof Boolean) {
                 cir.setReturnValue((boolean) obj);
             } else
@@ -640,7 +635,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canStandOnFluid != null) {
                 final ContextUtils.EntityFluidStateContext context = new ContextUtils.EntityFluidStateContext(entityJs$getLivingEntity(), pFluidState);
-                Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("canStandOnFluid", cir, () -> builder.canStandOnFluid.apply(context)), "boolean");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("canStandOnFluid", cir, () -> builder.canStandOnFluid.test(context)), "boolean");
                 if (obj != null) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -653,7 +648,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$isSensitiveToWater(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isSensitiveToWater != null) {
-                Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("isSensitiveToWater", cir, () -> builder.isSensitiveToWater.apply(entityJs$getLivingEntity())), "boolean");
+                Object obj = EntityJSHelperClass.convertObjectToDesired(entityJs$withReturnFallback("isSensitiveToWater", cir, () -> builder.isSensitiveToWater.test(entityJs$getLivingEntity())), "boolean");
                 if (obj != null) {
                     cir.setReturnValue((boolean) obj);
                     return;
@@ -698,7 +693,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.hasLineOfSight != null) {
                 final ContextUtils.LineOfSightContext context = new ContextUtils.LineOfSightContext(pEntity, entityJs$getLivingEntity());
-                Object obj = entityJs$withReturnFallback("hasLineOfSight", cir, () -> builder.hasLineOfSight.apply(context));
+                Object obj = entityJs$withReturnFallback("hasLineOfSight", cir, () -> builder.hasLineOfSight.test(context));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -732,7 +727,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$isAffectedByPotions(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAffectedByPotions != null) {
-                Object obj = entityJs$withReturnFallback("isAffectedByPotions", cir, () -> builder.isAffectedByPotions.apply(entityJs$getLivingEntity()));
+                Object obj = entityJs$withReturnFallback("isAffectedByPotions", cir, () -> builder.isAffectedByPotions.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -745,7 +740,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$attackable(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.isAttackableFunction != null) {
-                Object obj = entityJs$withReturnFallback("isAttackableFunction", cir, () -> builder.isAttackableFunction.apply(entityJs$getLivingEntity()));
+                Object obj = entityJs$withReturnFallback("isAttackableFunction", cir, () -> builder.isAttackableFunction.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -822,7 +817,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (entityJs$builder != null && builder.isCurrentlyGlowing != null && !entityJs$getLivingEntity().level().isClientSide()) {
-                Object obj = entityJs$withReturnFallback("isCurrentlyGlowing", cir, () -> builder.isCurrentlyGlowing.apply(entityJs$getLivingEntity()));
+                Object obj = entityJs$withReturnFallback("isCurrentlyGlowing", cir, () -> builder.isCurrentlyGlowing.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else
@@ -835,7 +830,7 @@ public abstract class LivingEntityMixin implements ILivingEntityJS {
     private void entityjs$canDisableShield(CallbackInfoReturnable<Boolean> cir) {
         if (entityJs$builder != null && entityJs$builder instanceof ModifyLivingEntityBuilder builder) {
             if (builder.canDisableShield != null) {
-                Object obj = entityJs$withReturnFallback("canDisableShield", cir, () -> builder.canDisableShield.apply(entityJs$getLivingEntity()));
+                Object obj = entityJs$withReturnFallback("canDisableShield", cir, () -> builder.canDisableShield.test(entityJs$getLivingEntity()));
                 if (obj instanceof Boolean) {
                     cir.setReturnValue((boolean) obj);
                 } else

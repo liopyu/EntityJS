@@ -100,7 +100,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public boolean shouldRenderAtSqrDistance(double distance) {
         if (builder.shouldRenderAtSqrDistance != null) {
             final ContextUtils.EntitySqrDistanceContext context = new ContextUtils.EntitySqrDistanceContext(distance, this);
-            Object obj = OverrideUtils.with(() -> super.shouldRenderAtSqrDistance(distance), () -> builder.shouldRenderAtSqrDistance.apply(context));
+            Object obj = OverrideUtils.with(() -> super.shouldRenderAtSqrDistance(distance), () -> builder.shouldRenderAtSqrDistance.test(context));
             if (obj instanceof Boolean b) return b;
             EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid shouldRenderAtSqrDistance for builder: " + obj + ". Must be a boolean. Defaulting to super method: " + super.shouldRenderAtSqrDistance(distance));
         }
@@ -239,7 +239,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
             return super.canAddPassenger(entity);
         }
         final ContextUtils.EPassengerEntityContext context = new ContextUtils.EPassengerEntityContext(entity, this);
-        Object obj = OverrideUtils.with(() -> super.canAddPassenger(entity), () -> builder.canAddPassenger.apply(context));
+        Object obj = OverrideUtils.with(() -> super.canAddPassenger(entity), () -> builder.canAddPassenger.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
@@ -251,7 +251,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     protected boolean isFlapping() {
         if (builder.isFlapping != null) {
-            Object obj = OverrideUtils.with(super::isFlapping, () -> builder.isFlapping.apply(this));
+            Object obj = OverrideUtils.with(super::isFlapping, () -> builder.isFlapping.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -396,7 +396,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public boolean isInvulnerableTo(DamageSource p_20122_) {
         if (builder.isInvulnerableTo != null) {
             final ContextUtils.EDamageContext context = new ContextUtils.EDamageContext(this, p_20122_);
-            Object obj = OverrideUtils.with(() -> super.isInvulnerableTo(p_20122_), () -> builder.isInvulnerableTo.apply(context));
+            Object obj = OverrideUtils.with(() -> super.isInvulnerableTo(p_20122_), () -> builder.isInvulnerableTo.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -409,7 +409,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     @Override
     public boolean canChangeDimensions() {
         if (builder.canChangeDimensions != null) {
-            Object obj = OverrideUtils.with(super::canChangeDimensions, () -> builder.canChangeDimensions.apply(this));
+            Object obj = OverrideUtils.with(super::canChangeDimensions, () -> builder.canChangeDimensions.test(this));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -423,7 +423,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public boolean mayInteract(@NotNull Level p_146843_, @NotNull BlockPos p_146844_) {
         if (builder.mayInteract != null) {
             final ContextUtils.EMayInteractContext context = new ContextUtils.EMayInteractContext(p_146843_, p_146844_, this);
-            Object obj = OverrideUtils.with(() -> super.mayInteract(p_146843_, p_146844_), () -> builder.mayInteract.apply(context));
+            Object obj = OverrideUtils.with(() -> super.mayInteract(p_146843_, p_146844_), () -> builder.mayInteract.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -438,7 +438,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
     public boolean canTrample(@NotNull BlockState state, @NotNull BlockPos pos, float fallDistance) {
         if (builder.canTrample != null) {
             final ContextUtils.ECanTrampleContext context = new ContextUtils.ECanTrampleContext(state, pos, fallDistance, this);
-            Object obj = OverrideUtils.with(() -> super.canTrample(state, pos, fallDistance), () -> builder.canTrample.apply(context));
+            Object obj = OverrideUtils.with(() -> super.canTrample(state, pos, fallDistance), () -> builder.canTrample.test(context));
             if (obj instanceof Boolean) {
                 return (boolean) obj;
             }
@@ -511,7 +511,7 @@ public class PartEntityJS<T extends LivingEntity> extends PartEntity<T> {
         if (builder.canBeCollidedWith == null) {
             return super.canBeCollidedWith();
         }
-        Object obj = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.apply(this));
+        Object obj = OverrideUtils.with(super::canBeCollidedWith, () -> builder.canBeCollidedWith.test(this));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }

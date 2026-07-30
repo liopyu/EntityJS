@@ -5,6 +5,7 @@ import net.liopyu.entityjs.common.util.overrides.*;
 import net.liopyu.entityjs.builders.nonliving.BaseEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.BaseNonAnimatableEntityBuilder;
 import net.liopyu.entityjs.builders.nonliving.entityjs.PartBuilder;
+import net.liopyu.entityjs.common.util.BooleanCallback;
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.common.util.EntityJSHelperClass;
 import net.minecraft.world.entity.Entity;
@@ -12,7 +13,6 @@ import net.minecraft.world.entity.player.Player;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public final class NonLivingEntityOverrides {
     private NonLivingEntityOverrides() {
@@ -146,7 +146,7 @@ public final class NonLivingEntityOverrides {
         return canCollideWith(entity, builder == null ? null : builder.canCollideWith, other, fallback);
     }
 
-    private static <T extends Entity> boolean canCollideWith(T entity, Function<ContextUtils.ECollidingEntityContext, Object> callback, Entity other, BooleanSupplier fallback) {
+    private static <T extends Entity> boolean canCollideWith(T entity, BooleanCallback<ContextUtils.ECollidingEntityContext> callback, Entity other, BooleanSupplier fallback) {
         if (callback == null) {
             return fallback.getAsBoolean();
         }
@@ -251,13 +251,13 @@ public final class NonLivingEntityOverrides {
         }
     }
 
-    private static <T extends Entity, C> boolean booleanOverride(T entity, Function<C, Object> callback, C context, String fieldName, BooleanSupplier fallback) {
+    private static <T extends Entity, C> boolean booleanOverride(T entity, BooleanCallback<C> callback, C context, String fieldName, BooleanSupplier fallback) {
         if (callback == null) {
             return fallback.getAsBoolean();
         }
 
         try {
-            Object result = OverrideUtils.with(fallback::getAsBoolean, () -> callback.apply(context));
+            Object result = OverrideUtils.with(fallback::getAsBoolean, () -> callback.test(context));
             Object converted = EntityJSHelperClass.convertObjectToDesired(result, "boolean");
             return converted instanceof Boolean bool ? bool : fallback.getAsBoolean();
         } catch (Exception e) {
