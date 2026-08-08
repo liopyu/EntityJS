@@ -13,6 +13,7 @@ import net.liopyu.entityjs.common.util.EntitySerializerType;
 import net.liopyu.entityjs.util.EventHandlers;
 import net.liopyu.entityjs.common.util.implementation.IEntityJS;
 import net.liopyu.entityjs.common.util.overrides.CallbackUtils;
+import net.liopyu.entityjs.common.util.overrides.ICallbackWrapperCache;
 import net.liopyu.entityjs.util.overrides.data.*;
 import net.liopyu.entityjs.common.util.overrides.data.*;
 import net.minecraft.core.BlockPos;
@@ -39,19 +40,24 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.function.Supplier;
 
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = Entity.class, remap = true)
-public abstract class EntityMixin implements IEntityJS {
+public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
     @Shadow
     protected abstract void playStepSound(BlockPos pPos, BlockState pState);
 
     @Unique
     private Object entityJs$builder;
+
+    @Unique
+    private Map<Object, Object> entityJs$callbackWrappers;
 
     /*@Override
     public ModifyEntityBuilder entityJs$getBuilder() {
@@ -111,6 +117,19 @@ public abstract class EntityMixin implements IEntityJS {
         }
         eventJS.postModifyEventIfNeeded();
         entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+    }
+
+    @Override
+    public Object entityJs$getCachedCallbackWrapper(Object key) {
+        return entityJs$callbackWrappers == null ? null : entityJs$callbackWrappers.get(key);
+    }
+
+    @Override
+    public void entityJs$putCachedCallbackWrapper(Object key, Object wrapper) {
+        if (entityJs$callbackWrappers == null) {
+            entityJs$callbackWrappers = new WeakHashMap<>();
+        }
+        entityJs$callbackWrappers.put(key, wrapper);
     }
 
     @Unique

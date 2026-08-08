@@ -14,7 +14,6 @@ import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.common.util.*;
 import net.liopyu.entityjs.common.util.overrides.CallbackInvoker;
 import net.liopyu.entityjs.common.util.overrides.CallbackUtils;
-import net.liopyu.entityjs.common.util.overrides.ICallbackWrapperCache;
 import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -44,7 +43,7 @@ import java.util.function.Supplier;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = LivingEntity.class, remap = true)
-public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWrapperCache {
+public abstract class LivingEntityMixin implements ILivingEntityJS {
 
     @Unique
     private Object entityJs$entityObject = this;
@@ -72,9 +71,6 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
     @Unique
     public Object entityJs$builder;
 
-    @Unique
-    private Map<Object, Object> entityJs$callbackWrappers;
-
     /*@Override
     public ModifyLivingEntityBuilder entityJs$getBuilder() {
         return entityJs$builder instanceof ModifyLivingEntityBuilder ? (ModifyLivingEntityBuilder) entityJs$builder : null;//(ModifyEntityBuilder) entityJs$builder;
@@ -100,20 +96,6 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
         }
         CallbackInvoker.initCallbackFields(entityJs$builder, entityJs$getLivingEntity());
     }
-
-    @Override
-    public Object entityJs$getCachedCallbackWrapper(Object key) {
-        return entityJs$callbackWrappers == null ? null : entityJs$callbackWrappers.get(key);
-    }
-
-    @Override
-    public void entityJs$putCachedCallbackWrapper(Object key, Object wrapper) {
-        if (entityJs$callbackWrappers == null) {
-            entityJs$callbackWrappers = new WeakHashMap<>();
-        }
-        entityJs$callbackWrappers.put(key, wrapper);
-    }
-
 
     /**
      * Ensures that the given entity is always an instance of IAnimatableJSCustom.
