@@ -50,7 +50,7 @@ public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
 
     @Unique
     private Object entityJs$builder;
-    // Client and server entity copies can compare equal by runtime ID, so wrappers must be cached per instance.
+
     @Unique
     private Map<Object, Object> entityJs$callbackWrappers;
 
