@@ -3,7 +3,6 @@ package net.liopyu.entityjs.mixin;
 import com.mojang.serialization.Dynamic;
 import dev.latvian.mods.kubejs.typings.Info;
 import dev.latvian.mods.kubejs.util.Cast;
-import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.modification.ModifyLivingEntityBuilder;
@@ -13,7 +12,6 @@ import net.liopyu.entityjs.events.BuildBrainEventJS;
 import net.liopyu.entityjs.events.BuildBrainProviderEventJS;
 import net.liopyu.entityjs.util.*;
 import net.liopyu.entityjs.util.overrides.CallbackInvoker;
-import net.liopyu.entityjs.util.overrides.ICallbackWrapperCache;
 import net.liopyu.entityjs.util.implementation.ILivingEntityJS;
 import net.liopyu.entityjs.util.overrides.CallbackProfiler;
 import net.liopyu.entityjs.util.overrides.CallbackUtils;
@@ -46,7 +44,7 @@ import java.util.function.Supplier;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = LivingEntity.class, remap = true)
-public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWrapperCache {
+public abstract class LivingEntityMixin implements ILivingEntityJS {
 
     @Unique
     private Object entityJs$entityObject = this;
@@ -83,9 +81,6 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
 
     @Unique
     public Object entityJs$builder;
-
-    @Unique
-    private Map<Object, Object> entityJs$callbackWrappers;
 
     @Inject(method = "<init>", at = @At("RETURN"), remap = true)
     private void entityjs$onEntityInit(EntityType<?> pEntityType, Level pLevel, CallbackInfo ci) {
@@ -125,22 +120,6 @@ public abstract class LivingEntityMixin implements ILivingEntityJS, ICallbackWra
             this.entityJs$getAnimatableEntity().triggerAnim(controllerName, animName);
         }
     }
-
-    @Override
-    @HideFromJS
-    public Object entityJs$getCachedCallbackWrapper(Object key) {
-        return entityJs$callbackWrappers == null ? null : entityJs$callbackWrappers.get(key);
-    }
-
-    @Override
-    @HideFromJS
-    public void entityJs$putCachedCallbackWrapper(Object key, Object wrapper) {
-        if (entityJs$callbackWrappers == null) {
-            entityJs$callbackWrappers = new WeakHashMap<>();
-        }
-        entityJs$callbackWrappers.put(key, wrapper);
-    }
-
 
     @Unique
     private WrappedAnimatableEntity entityJs$animatableEntity;

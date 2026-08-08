@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.mixin;
 
+import dev.latvian.mods.rhino.util.HideFromJS;
 import net.liopyu.entityjs.builders.modification.ModifyEntityBuilder;
 import net.liopyu.entityjs.builders.misc.CustomEntityJSBuilder;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJS;
@@ -8,6 +9,7 @@ import net.liopyu.entityjs.events.AddGoalTargetsEventJS;
 
 import net.liopyu.entityjs.util.ContextUtils;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
+import net.liopyu.entityjs.util.overrides.ICallbackWrapperCache;
 import net.liopyu.entityjs.util.overrides.CallbackUtils;
 import net.liopyu.entityjs.util.EntityJSUtils;
 import net.liopyu.entityjs.util.EntitySerializerType;
@@ -42,12 +44,15 @@ import java.util.function.Supplier;
 import static net.liopyu.entityjs.events.EntityModificationEventJS.*;
 
 @Mixin(value = Entity.class, remap = true)
-public abstract class EntityMixin implements IEntityJS {
+public abstract class EntityMixin implements IEntityJS, ICallbackWrapperCache {
     @Shadow
     protected abstract void playStepSound(BlockPos pPos, BlockState pState);
 
     @Unique
     private Object entityJs$builder;
+    // Client and server entity copies can compare equal by runtime ID, so wrappers must be cached per instance.
+    @Unique
+    private Map<Object, Object> entityJs$callbackWrappers;
 
 
     @Unique
@@ -110,6 +115,21 @@ public abstract class EntityMixin implements IEntityJS {
         }
         eventJS.postModifyEventIfNeeded();
         entityJs$movementTracker = new EntityJSHelperClass.EntityMovementTracker();
+    }
+
+    @Override
+    @HideFromJS
+    public Object entityJs$getCachedCallbackWrapper(Object key) {
+        return entityJs$callbackWrappers == null ? null : entityJs$callbackWrappers.get(key);
+    }
+
+    @Override
+    @HideFromJS
+    public void entityJs$putCachedCallbackWrapper(Object key, Object wrapper) {
+        if (entityJs$callbackWrappers == null) {
+            entityJs$callbackWrappers = new WeakHashMap<>();
+        }
+        entityJs$callbackWrappers.put(key, wrapper);
     }
 
     @Unique
