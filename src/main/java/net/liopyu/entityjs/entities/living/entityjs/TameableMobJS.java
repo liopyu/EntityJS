@@ -404,7 +404,7 @@ public class TameableMobJS extends TamableAnimal implements IAnimatableJS, Ownab
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
-            return this.isFood(pStack);
+            return false;
         }
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
         Object obj = OverrideUtils.with(() -> false, () -> builder.isFoodPredicate.test(context));

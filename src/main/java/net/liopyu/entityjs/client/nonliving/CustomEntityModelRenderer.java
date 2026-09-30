@@ -6,6 +6,7 @@ import com.mojang.math.Axis;
 import net.liopyu.entityjs.builders.misc.CustomEntityBuilder;
 import net.liopyu.entityjs.entities.nonliving.entityjs.WrappedNonLivingEntity;
 import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.util.overrides.ICallbackWrapperCache;
 import net.liopyu.entityjs.util.EntityJSHelperClass;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -19,13 +20,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
-import java.util.Map;
-import java.util.WeakHashMap;
 
 public class CustomEntityModelRenderer<T extends Entity> extends EntityRenderer<T> {
     private final CustomEntityBuilder builder;
     private final EntityModel<Entity> model;
-    private final Map<Entity, WrappedNonLivingEntity> wrapperCache = new WeakHashMap<>();
 
     public CustomEntityModelRenderer(EntityRendererProvider.Context context, CustomEntityBuilder builder) {
         super(context);
@@ -123,7 +121,16 @@ public class CustomEntityModelRenderer<T extends Entity> extends EntityRenderer<
         if (entity instanceof WrappedNonLivingEntity) {
             return entity;
         }
-        return wrapperCache.computeIfAbsent(entity, key -> new WrappedNonLivingEntity(key, builder)).syncFromOriginal();
+        if (entity instanceof ICallbackWrapperCache cache) {
+            Object cached = cache.entityJs$getCachedCallbackWrapper(this);
+            if (cached instanceof WrappedNonLivingEntity wrapped) {
+                return wrapped.syncFromOriginal();
+            }
+            WrappedNonLivingEntity wrapped = new WrappedNonLivingEntity(entity, builder);
+            cache.entityJs$putCachedCallbackWrapper(this, wrapped);
+            return wrapped.syncFromOriginal();
+        }
+        return new WrappedNonLivingEntity(entity, builder).syncFromOriginal();
     }
 
     private Entity unwrap(Entity entity) {
