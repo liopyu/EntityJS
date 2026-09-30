@@ -403,15 +403,15 @@ public abstract class TameableMobJSBase extends TamableAnimal implements IAnimat
 
     public boolean isFoodPredicate(ItemStack pStack) {
         if (builder.isFoodPredicate == null) {
-            return super.isFood(pStack);
+            return false;
         }
         final ContextUtils.EntityItemStackContext context = new ContextUtils.EntityItemStackContext(pStack, this);
-        Object obj = OverrideUtils.with(() -> super.isFood(pStack), () -> builder.isFoodPredicate.test(context));
+        Object obj = OverrideUtils.with(() -> false, () -> builder.isFoodPredicate.test(context));
         if (obj instanceof Boolean) {
             return (boolean) obj;
         }
-        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to " + super.isFood(pStack));
-        return super.isFood(pStack);
+        EntityJSHelperClass.logErrorMessageOnce("[EntityJS]: Invalid return value for isFoodPredicate from entity: " + entityName() + ". Value: " + obj + ". Must be a boolean. Defaulting to false.");
+        return false;
     }
 
 

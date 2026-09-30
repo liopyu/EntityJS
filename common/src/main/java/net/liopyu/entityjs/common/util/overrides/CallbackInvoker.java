@@ -1,5 +1,6 @@
 package net.liopyu.entityjs.common.util.overrides;
 
+import com.google.common.collect.MapMaker;
 import dev.latvian.mods.rhino.Callable;
 import dev.latvian.mods.rhino.Context;
 import dev.latvian.mods.rhino.Scriptable;
@@ -435,7 +436,7 @@ public final class CallbackInvoker {
         private final Scriptable thisObj;
         private final Callable callable;
         private final WrapFactory wrapFactory;
-        private final Map<Object, WeakReference<Object>> argumentWrappers = Collections.synchronizedMap(new WeakHashMap<>());
+        private final Map<Object, WeakReference<Object>> argumentWrappers = new MapMaker().weakKeys().makeMap();
         private final ThreadLocal<Object[]> arguments = ThreadLocal.withInitial(() -> new Object[1]);
 
         private Direct(Context cx, Scriptable topScope, Scriptable thisObj, Callable callable) {

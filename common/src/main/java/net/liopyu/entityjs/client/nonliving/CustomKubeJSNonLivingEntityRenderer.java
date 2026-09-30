@@ -6,6 +6,7 @@ import net.liopyu.entityjs.client.nonliving.model.CustomNonLivingGeoModelJS;
 import net.liopyu.entityjs.entities.living.entityjs.IAnimatableJSCustom;
 import net.liopyu.entityjs.entities.nonliving.entityjs.WrappedNonLivingAnimatableEntity;
 import net.liopyu.entityjs.util.ContextUtils;
+import net.liopyu.entityjs.common.util.overrides.ICallbackWrapperCache;
 import net.liopyu.entityjs.common.util.EntityJSHelperClass;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -15,12 +16,9 @@ import net.minecraft.world.entity.Entity;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 import org.jetbrains.annotations.Nullable;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 public class CustomKubeJSNonLivingEntityRenderer<T extends Entity & IAnimatableJSCustom> extends GeoEntityRenderer<T> {
     private final CustomEntityJSBuilder builder;
-    private final Map<Entity, WrappedNonLivingAnimatableEntity> wrapperCache = new WeakHashMap<>();
 
     public CustomKubeJSNonLivingEntityRenderer(EntityRendererProvider.Context renderManager, CustomEntityJSBuilder builder) {
         super(renderManager, new CustomNonLivingGeoModelJS<>(builder));
@@ -80,6 +78,15 @@ public class CustomKubeJSNonLivingEntityRenderer<T extends Entity & IAnimatableJ
         if (entity instanceof IAnimatableJSCustom animatableJS) {
             return (T) animatableJS;
         }
-        return (T) wrapperCache.computeIfAbsent(entity, key -> new WrappedNonLivingAnimatableEntity(key, builder)).syncFromOriginal();
+        if (entity instanceof ICallbackWrapperCache cache) {
+            Object cached = cache.entityJs$getCachedCallbackWrapper(this);
+            if (cached instanceof WrappedNonLivingAnimatableEntity wrapped) {
+                return (T) wrapped.syncFromOriginal();
+            }
+            WrappedNonLivingAnimatableEntity wrapped = new WrappedNonLivingAnimatableEntity(entity, builder);
+            cache.entityJs$putCachedCallbackWrapper(this, wrapped);
+            return (T) wrapped.syncFromOriginal();
+        }
+        return (T) new WrappedNonLivingAnimatableEntity(entity, builder).syncFromOriginal();
     }
 }
